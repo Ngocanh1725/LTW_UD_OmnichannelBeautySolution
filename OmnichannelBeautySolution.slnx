@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Omnichannel.Application/Omnichannel.Application.csproj" />
+  <Project Path="Omnichannel.Domain/Omnichannel.Domain.csproj" />
+  <Project Path="Omnichannel.Infrastructure/Omnichannel.Infrastructure.csproj" />
+  <Project Path="Omnichannel.Web/Omnichannel.Web.csproj" />
+</Solution>

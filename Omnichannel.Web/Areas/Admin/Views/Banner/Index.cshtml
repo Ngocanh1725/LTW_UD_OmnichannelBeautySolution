@@ -1,0 +1,87 @@
+﻿@model IEnumerable<Omnichannel.Application.DTOs.Cms.BannerItemViewModel>
+@{
+    ViewData["Title"] = "Quản lý Banners & Quảng cáo";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold text-dark mb-1">Chiến dịch Banner & Quảng cáo</h4>
+        <p class="text-muted small mb-0">Quản lý slider đầu trang, popup khuyến mại và banner danh mục sản phẩm</p>
+    </div>
+    <a href="/Admin/Banner/Create" class="btn btn-primary-gradient px-3">
+        <i class="fa-solid fa-plus me-1"></i>Tạo Mới Banner
+    </a>
+</div>
+
+<div class="beauty-card overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th class="py-3 px-4" style="width: 140px;">Hình ảnh</th>
+                    <th class="py-3">Chiến dịch & Vị trí</th>
+                    <th class="py-3">Thời gian hiệu lực</th>
+                    <th class="py-3 text-center">Lượt Click</th>
+                    <th class="py-3">Trạng thái</th>
+                    <th class="py-3 px-4 text-end">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var b in Model)
+                {
+                    <tr>
+                        <td class="px-4">
+                            <img src="@b.DesktopImageUrl" alt="@b.Title" class="rounded-3 shadow-sm border" style="width: 110px; height: 50px; object-fit: cover;" onerror="this.src='https://placehold.co/110x50/F5F3FF/7C3AED?text=Banner'" />
+                        </td>
+                        <td>
+                            <div class="fw-bold text-dark">@b.Title</div>
+                            <span class="badge" style="background: var(--primary-purple-light); color: var(--primary-purple); font-size: 11.5px;">@b.PositionName</span>
+                            @if (!string.IsNullOrEmpty(b.LinkUrl))
+                            {
+                                <div class="text-muted" style="font-size: 11px;">URL: <code>@b.LinkUrl</code></div>
+                            }
+                        </td>
+                        <td class="small">
+                            <div>Từ: @b.ValidFrom.ToString("dd/MM/yyyy")</div>
+                            <div class="text-muted">Đến: @b.ValidTo.ToString("dd/MM/yyyy")</div>
+                        </td>
+                        <td class="text-center fw-bold text-dark">@b.TrackingClickCount</td>
+                        <td>
+                            @if (!b.IsActive)
+                            {
+                                <span class="badge-locked">Đã ẩn</span>
+                            }
+                            else if (b.IsExpired)
+                            {
+                                <span class="badge bg-danger-subtle text-danger">Hết hạn</span>
+                            }
+                            else if (b.IsUpcoming)
+                            {
+                                <span class="badge bg-warning-subtle text-warning">Sắp chạy</span>
+                            }
+                            else
+                            {
+                                <span class="badge-active">Đang hiển thị</span>
+                            }
+                        </td>
+                        <td class="px-4 text-end">
+                            <form asp-action="ToggleStatus" asp-route-id="@b.BannerId" method="post" class="d-inline">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-secondary rounded-3" title="@(b.IsActive ? "Ẩn Banner" : "Hiện Banner")">
+                                    <i class="fa-solid @(b.IsActive ? "fa-eye-slash" : "fa-eye")"></i>
+                                </button>
+                            </form>
+                            <form asp-action="Delete" asp-route-id="@b.BannerId" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa banner này?');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-3" title="Xóa banner">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

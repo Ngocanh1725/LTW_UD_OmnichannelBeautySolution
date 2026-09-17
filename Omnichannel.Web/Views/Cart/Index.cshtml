@@ -1,0 +1,141 @@
+﻿@model Omnichannel.Application.DTOs.Sales.CartViewModel
+@{
+    ViewData["Title"] = "Giỏ Hàng Của Bạn";
+}
+
+<div class="container my-5">
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <i class="fa-solid fa-bag-shopping text-pink fs-4" style="color: var(--accent-pink);"></i>
+        <h4 class="fw-bold text-dark mb-0">Giỏ Hàng (@Model.TotalItems sản phẩm)</h4>
+    </div>
+
+    @if (!Model.Items.Any())
+    {
+        <div class="beauty-card p-5 text-center">
+            <i class="fa-solid fa-cart-arrow-down fs-1 text-muted mb-3"></i>
+            <h5 class="fw-bold text-dark">Giỏ hàng của bạn đang trống</h5>
+            <p class="text-muted small">Hãy dạo một vòng để lựa chọn sản phẩm mỹ phẩm phù hợp nhé!</p>
+            <a href="/" class="btn btn-primary-gradient px-4 py-2 mt-2">Khám Phá Mỹ Phẩm Ngay</a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            <!-- Cột Trái: Bảng Sản Phẩm -->
+            <div class="col-lg-8">
+                <div class="beauty-card overflow-hidden">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr class="small text-secondary">
+                                    <th class="py-3 px-4">Sản phẩm</th>
+                                    <th class="py-3">Đơn giá</th>
+                                    <th class="py-3 text-center">Số lượng</th>
+                                    <th class="py-3 text-end">Thành tiền</th>
+                                    <th class="py-3 text-end px-4"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Items)
+                                {
+                                    <tr>
+                                        <td class="px-4">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img src="@item.ThumbnailUrl" alt="@item.ProductName" class="rounded-3 border" style="width: 60px; height: 60px; object-fit: cover;" />
+                                                <div>
+                                                    <div class="fw-bold text-dark small">@item.ProductName</div>
+                                                    <span class="badge bg-purple-subtle text-purple mt-1" style="background: var(--primary-purple-light); color: var(--primary-purple); font-size: 11px;">
+                                                        Lô HSD: @item.NearestExpDateStr
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="font-monospace small">@item.UnitPrice.ToString("N0") đ</td>
+                                        <td class="text-center">
+                                            <div class="d-inline-flex align-items-center border rounded-3 bg-white p-1">
+                                                <button type="button" class="btn btn-sm btn-light border-0 py-0 px-2" onclick="updateQty('@item.ProductId', -1)">-</button>
+                                                <span class="px-3 fw-bold small">@item.Quantity</span>
+                                                <button type="button" class="btn btn-sm btn-light border-0 py-0 px-2" onclick="updateQty('@item.ProductId', 1)">+</button>
+                                            </div>
+                                        </td>
+                                        <td class="text-end font-monospace fw-bold" style="color: var(--accent-pink);">
+                                            @item.LineTotal.ToString("N0") đ
+                                        </td>
+                                        <td class="text-end px-4">
+                                            <button type="button" class="btn btn-sm text-danger border-0" onclick="removeItem('@item.ProductId')">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột Phải: Tổng Kết & Đặt Hàng -->
+            <div class="col-lg-4">
+                <div class="beauty-card p-4">
+                    <h6 class="fw-bold text-dark mb-3">Tóm Tắt Đơn Hàng</h6>
+
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span class="text-muted">Tiền hàng:</span>
+                        <span class="fw-bold font-monospace">@Model.SubTotal.ToString("N0") đ</span>
+                    </div>
+
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span class="text-muted">Phí giao hàng:</span>
+                        <span class="font-monospace">@(Model.ShippingFee == 0 ? "Miễn phí" : Model.ShippingFee.ToString("N0") + " đ")</span>
+                    </div>
+
+                    <hr class="border-soft my-3" />
+
+                    <div class="d-flex justify-content-between align-items-baseline mb-4">
+                        <span class="fw-bold text-dark">Tổng thanh toán:</span>
+                        <span class="fw-bold fs-5 font-monospace" style="color: var(--accent-pink);">@Model.FinalTotal.ToString("N0") đ</span>
+                    </div>
+
+                    <a href="/Checkout" class="btn btn-primary-gradient w-100 py-3 fw-bold">
+                        Tiến Hành Đặt Hàng <i class="fa-solid fa-arrow-right ms-2"></i>
+                    </a>
+
+                    <div class="text-center mt-3">
+                        <a href="/" class="small text-muted text-decoration-none">
+                            <i class="fa-solid fa-arrow-left me-1"></i>Tiếp tục mua hàng
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        async function updateQty(productId, delta) {
+            const res = await fetch('/Cart/UpdateQuantity', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId: productId, delta: delta })
+            });
+
+            if (res.ok) {
+                location.reload();
+            }
+        }
+
+        async function removeItem(productId) {
+            if (!confirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ?')) return;
+            const res = await fetch('/Cart/RemoveItem', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(productId)
+            });
+
+            if (res.ok) {
+                location.reload();
+            }
+        }
+    </script>
+}

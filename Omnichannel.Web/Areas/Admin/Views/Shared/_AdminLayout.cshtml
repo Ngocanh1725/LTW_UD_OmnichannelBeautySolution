@@ -1,0 +1,194 @@
+﻿@using System.Security.Claims
+@inject Omnichannel.Application.Interfaces.Security.IPermissionService PermService
+@{
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+    var currentUserName = User.FindFirstValue(ClaimTypes.GivenName) ?? User.Identity?.Name ?? "Quản trị viên";
+    var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "";
+    bool isSuperAdmin = User.IsInRole("SUPER_ADMIN");
+
+    async Task<bool> HasAccess(string module)
+    {
+        return isSuperAdmin || await PermService.HasPermissionAsync(currentUserId, module, "VIEW");
+    }
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Omnichannel Beauty Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+</head>
+<body>
+
+    <div class="d-flex">
+        <!-- Sidebar Navigation -->
+        <aside class="admin-sidebar d-flex flex-column">
+            <div class="sidebar-brand d-flex align-items-center gap-3">
+                <div class="brand-icon-box">
+                    <i class="fa-solid fa-sparkles"></i>
+                </div>
+                <div>
+                    <h6 class="fw-bold mb-0 text-dark">Omnichannel</h6>
+                    <span class="badge bg-pink-subtle text-pink fw-semibold" style="color: var(--accent-pink); font-size: 11px;">Beauty Core</span>
+                </div>
+            </div>
+
+            <div class="flex-grow-1 overflow-y-auto py-2">
+                <div class="nav-section-title">Tổng quan</div>
+                <a href="/Admin/Dashboard" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">
+                    <i class="fa-solid fa-chart-pie me-2"></i>Dashboard
+                </a>
+
+                @if (await HasAccess("SECURITY"))
+                {
+                    <div class="nav-section-title">Hệ thống & Bảo mật</div>
+                    <a href="/Admin/PermissionManagement" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "PermissionManagement" ? "active" : "")">
+                        <i class="fa-solid fa-shield-halved me-2"></i>Ma trận phân quyền
+                    </a>
+                }
+
+                @if (await HasAccess("HR_USER"))
+                {
+                    <a href="/Admin/User" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "active" : "")">
+                        <i class="fa-solid fa-users-gear me-2"></i>Nhân sự & Tài khoản
+                    </a>
+                }
+
+                @if (await HasAccess("MENU") || await HasAccess("BANNER") || await HasAccess("CMS_CONTENT"))
+                {
+                    <div class="nav-section-title">Giao diện & Nội dung</div>
+                    @if (await HasAccess("MENU"))
+                    {
+                        <a href="/Admin/Menu" class="sidebar-link">
+                            <i class="fa-solid fa-bars-staggered me-2"></i>Quản lý Menu Đa hình
+                        </a>
+                    }
+                    @if (await HasAccess("BANNER"))
+                    {
+                        <a href="/Admin/Banner" class="sidebar-link">
+                            <i class="fa-solid fa-images me-2"></i>Quản lý Banners
+                        </a>
+                    }
+                    @if (await HasAccess("CMS_CONTENT"))
+                    {
+                        <a href="/Admin/Post" class="sidebar-link">
+                            <i class="fa-solid fa-newspaper me-2"></i>Cẩm nang & Bài viết
+                        </a>
+                    }
+                }
+
+                @if (await HasAccess("CATALOG") || await HasAccess("WAREHOUSE"))
+                {
+                    <div class="nav-section-title">Sản phẩm & Kho bãi</div>
+                    @if (await HasAccess("CATALOG"))
+                    {
+                        <a href="/Admin/Product" class="sidebar-link">
+                            <i class="fa-solid fa-boxes-stacked me-2"></i>Danh mục Sản phẩm
+                        </a>
+                    }
+                    @if (await HasAccess("WAREHOUSE"))
+                    {
+                        <a href="/Admin/Warehouse" class="sidebar-link">
+                            <i class="fa-solid fa-warehouse me-2"></i>Kho & Lô Date FEFO
+                        </a>
+                    }
+                }
+
+                @if (await HasAccess("POS") || await HasAccess("ORDER_OPS"))
+                {
+                    <div class="nav-section-title">Bán lẻ & Đơn hàng</div>
+                    @if (await HasAccess("POS"))
+                    {
+                        <a href="/Admin/Pos" class="sidebar-link" target="_blank">
+                            <i class="fa-solid fa-cash-register me-2"></i>Thu ngân POS (Màn hình quầy)
+                        </a>
+                    }
+                    @if (await HasAccess("ORDER_OPS"))
+                    {
+                        <a href="/Admin/Order" class="sidebar-link">
+                            <i class="fa-solid fa-bag-shopping me-2"></i>Đơn hàng Đa kênh
+                        </a>
+                    }
+                }
+            </div>
+
+            <div class="p-3 border-top border-soft">
+                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-soft-pink w-100 d-flex align-items-center justify-content-center gap-2 py-2">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <div class="flex-grow-1 d-flex flex-column min-vh-100">
+            <!-- Topbar -->
+            <header class="admin-topbar d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn btn-light d-md-none border-0" id="sidebarToggle">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="input-group search-bar" style="width: 280px;">
+                        <span class="input-group-text bg-light border-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                        <input type="text" class="form-control bg-light border-0 small" placeholder="Tìm kiếm nhanh..." />
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <a href="/" target="_blank" class="btn btn-soft-purple btn-sm">
+                        <i class="fa-solid fa-globe me-1"></i>Xem Website
+                    </a>
+
+                    <div class="dropdown">
+                        <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown" style="cursor: pointer;">
+                            <div class="user-avatar-badge">
+                                @(currentUserName.Length > 0 ? currentUserName[0].ToString().ToUpper() : "U")
+                            </div>
+                            <div class="d-none d-sm-block text-start">
+                                <div class="fw-bold small text-dark">@currentUserName</div>
+                                <div class="text-muted" style="font-size: 11px;">@(isSuperAdmin ? "Super Admin" : "Nhân sự")</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-grow-1 p-4">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show rounded-4 py-3 px-4 mb-4 border-0 bg-success-subtle text-success">
+                        <i class="fa-solid fa-circle-check me-2"></i>@TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show rounded-4 py-3 px-4 mb-4 border-0 bg-danger-subtle text-danger">
+                        <i class="fa-solid fa-triangle-exclamation me-2"></i>@TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5.3 & Script -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/admin-matrix.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

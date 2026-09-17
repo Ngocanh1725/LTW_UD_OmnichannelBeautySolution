@@ -1,0 +1,287 @@
+﻿@model Omnichannel.Application.DTOs.Cms.MenuManagementViewModel
+@{
+    ViewData["Title"] = "Quản lý Cây Menu Đa hình";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold text-dark mb-1">Cấu trúc Menu Điều hướng Đa hình</h4>
+        <p class="text-muted small mb-0">Hệ thống điều hướng tự động phân giải liên kết tới Danh mục, Sản phẩm, Bài viết hoặc Trang chính sách</p>
+    </div>
+    <div class="d-flex gap-2">
+        <form asp-action="EvictCache" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="menuCode" value="@Model.SelectedMenuCode" />
+            <input type="hidden" name="menuId" value="@Model.SelectedMenuId" />
+            <button type="submit" class="btn btn-soft-purple">
+                <i class="fa-solid fa-rotate me-1"></i>Đồng bộ & Xóa Cache
+            </button>
+        </form>
+        <button class="btn btn-primary-gradient px-3" data-bs-toggle="modal" data-bs-target="#createMenuModal" onclick="prepareCreateRoot()">
+            <i class="fa-solid fa-plus me-1"></i>Thêm Nút Cấp 1
+        </button>
+    </div>
+</div>
+
+<!-- Bộ chọn Vị trí Menu -->
+<div class="beauty-card p-3 mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-4">
+            <label class="form-label small fw-semibold text-secondary">Đang cấu hình Khung Menu:</label>
+            <select class="form-select rounded-3" onchange="location.href='?menuId=' + this.value">
+                @foreach (var m in Model.AvailableMenus)
+                {
+                    if (m.MenuId == Model.SelectedMenuId)
+                    {
+                        <option value="@m.MenuId" selected>@m.MenuName (@m.MenuCode)</option>
+                    }
+                    else
+                    {
+                        <option value="@m.MenuId">@m.MenuName (@m.MenuCode)</option>
+                    }
+                }
+            </select>
+        </div>
+        <div class="col-md-8 text-md-end mt-3 mt-md-0">
+            <span class="badge" style="background: var(--accent-pink-light); color: var(--accent-pink); padding: 8px 14px; border-radius: 10px; font-size: 12.5px;">
+                <i class="fa-solid fa-diagram-project me-1"></i>Cây đa cấp đệ quy - Tự động tạo URL chuẩn SEO
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Danh sách Cây Menu Đa tầng -->
+<div class="beauty-card overflow-hidden p-4">
+    <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-bars-staggered me-2 text-purple" style="color: var(--primary-purple);"></i>Cây phân cấp nút hiển thị</h6>
+
+    @if (!Model.MenuTree.Any())
+    {
+        <div class="text-center py-5 text-muted">
+            <i class="fa-solid fa-folder-open fs-1 text-pink-border mb-2" style="color: var(--accent-pink-border);"></i>
+            <div>Chưa có nút Menu nào trong khung này. Nhấn "Thêm Nút Cấp 1" để bắt đầu thiết lập.</div>
+        </div>
+    }
+    else
+    {
+        <div class="tree-container">
+            @foreach (var node in Model.MenuTree)
+            {
+                <div class="menu-tree-node mb-3">
+                    <div class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light border">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-purple-subtle text-purple" style="background: var(--primary-purple-light); color: var(--primary-purple); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                                <i class="@(node.IconClass ?? "fa-solid fa-circle-dot")"></i>
+                            </span>
+                            <div>
+                                <div class="fw-bold text-dark">@node.Title</div>
+                                <div class="small text-muted">
+                                    <span class="badge bg-secondary-subtle text-secondary me-1">Loại: @GetTargetTypeName(node.TargetType)</span>
+                                    <span>Liên kết: <code>@node.ResolvedUrl</code></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-sm btn-soft-pink" onclick="prepareCreateChild(@node.MenuItemId, '@node.Title')" data-bs-toggle="modal" data-bs-target="#createMenuModal">
+                                <i class="fa-solid fa-plus me-1"></i>Thêm con
+                            </button>
+                            <form asp-action="DeleteItem" method="post" class="d-inline" onsubmit="return confirm('Xóa nút này sẽ xóa luôn toàn bộ nhánh con?');">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="menuItemId" value="@node.MenuItemId" />
+                                <input type="hidden" name="menuId" value="@Model.SelectedMenuId" />
+                                <button type="submit" class="btn btn-sm btn-outline-danger border-0">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Render Nhánh Cấp 2 -->
+                    @if (node.Children.Any())
+                    {
+                        <div class="ms-5 mt-2 ps-2 border-start border-2 border-purple-subtle">
+                            @foreach (var sub in node.Children)
+                            {
+                                <div class="d-flex align-items-center justify-content-between p-2 mb-2 rounded-3 bg-white border">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-turn-up fa-rotate-90 text-muted ms-2 me-1"></i>
+                                        <span class="fw-semibold text-dark small">@sub.Title</span>
+                                        <span class="badge bg-light text-muted" style="font-size: 11px;">@sub.ResolvedUrl</span>
+                                    </div>
+                                    <form asp-action="DeleteItem" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa nút này?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="menuItemId" value="@sub.MenuItemId" />
+                                        <input type="hidden" name="menuId" value="@Model.SelectedMenuId" />
+                                        <button type="submit" class="btn btn-sm text-danger border-0">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Modal Thêm Nút Menu Đa Hình -->
+<div class="modal fade" id="createMenuModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-bottom border-soft">
+                <h5 class="modal-title fw-bold text-dark" id="modalTitle">Thêm Nút Menu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="CreateItem" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="NewItem.MenuId" value="@Model.SelectedMenuId" />
+                <input type="hidden" asp-for="NewItem.ParentId" id="modalParentId" />
+                <input type="hidden" asp-for="NewItem.TargetSlug" id="modalTargetSlug" />
+
+                <div class="modal-body p-4">
+                    <div id="parentBadgeContainer" class="mb-3 d-none">
+                        <span class="badge" style="background: var(--primary-purple-light); color: var(--primary-purple); font-size: 13px;">
+                            <i class="fa-solid fa-turn-down me-1"></i>Thuộc nút cha: <strong id="parentTitleLabel"></strong>
+                        </span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label asp-for="NewItem.Title" class="form-label small fw-semibold"></label>
+                            <input asp-for="NewItem.Title" id="nodeTitleInput" class="form-control rounded-3" placeholder="vd: Serum Phục Hồi Da" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="NewItem.DisplayOrder" class="form-label small fw-semibold"></label>
+                            <input asp-for="NewItem.DisplayOrder" type="number" class="form-control rounded-3" value="0" />
+                        </div>
+
+                        <!-- Selector Loại liên kết Đa hình -->
+                        <div class="col-md-6">
+                            <label asp-for="NewItem.TargetType" class="form-label small fw-semibold"></label>
+                            <select asp-for="NewItem.TargetType" id="targetTypeSelect" class="form-select rounded-3" onchange="onTargetTypeChanged()">
+                                <option value="1">1. Danh mục sản phẩm (Category)</option>
+                                <option value="2">2. Sản phẩm SKU (Product)</option>
+                                <option value="3">3. Bài viết & Cẩm nang (Post)</option>
+                                <option value="4">4. Trang tĩnh & Chính sách (StaticPage)</option>
+                                <option value="5">5. Đường dẫn ngoài tùy chọn (CustomUrl)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6" id="targetPickerCol">
+                            <label class="form-label small fw-semibold">Chọn đối tượng đích:</label>
+                            <select asp-for="NewItem.TargetId" id="targetEntitySelect" class="form-select rounded-3" onchange="onEntityPicked()">
+                                <option value="">-- Đang tải danh sách --</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 d-none" id="customUrlCol">
+                            <label asp-for="NewItem.CustomUrl" class="form-label small fw-semibold"></label>
+                            <input asp-for="NewItem.CustomUrl" class="form-control rounded-3" placeholder="https://facebook.com/..." />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="NewItem.IconClass" class="form-label small fw-semibold"></label>
+                            <input asp-for="NewItem.IconClass" class="form-control rounded-3" placeholder="fa-solid fa-droplet" />
+                        </div>
+
+                        <div class="col-md-6 d-flex align-items-center mt-4">
+                            <div class="form-check">
+                                <input asp-for="NewItem.OpenInNewTab" class="form-check-input" type="checkbox" id="chkNewTab" />
+                                <label class="form-check-label small" for="chkNewTab">Mở liên kết trong tab mới (_blank)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top border-soft">
+                    <button type="button" class="btn btn-light rounded-3 px-3" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary-gradient px-4">Lưu Nút Menu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@functions {
+    public static string GetTargetTypeName(int type) => type switch
+    {
+        1 => "Danh mục",
+        2 => "Sản phẩm",
+        3 => "Bài viết",
+        4 => "Trang tĩnh",
+        5 => "URL Tùy chọn",
+        _ => "Khác"
+    };
+}
+
+@section Scripts {
+    <script>
+        let currentTargetData = [];
+
+        function prepareCreateRoot() {
+            document.getElementById('modalTitle').innerText = 'Thêm Nút Menu Cấp 1';
+            document.getElementById('modalParentId').value = '';
+            document.getElementById('parentBadgeContainer').classList.add('d-none');
+            onTargetTypeChanged();
+        }
+
+        function prepareCreateChild(parentId, parentTitle) {
+            document.getElementById('modalTitle').innerText = 'Thêm Nút Menu Con';
+            document.getElementById('modalParentId').value = parentId;
+            document.getElementById('parentTitleLabel').innerText = parentTitle;
+            document.getElementById('parentBadgeContainer').classList.remove('d-none');
+            onTargetTypeChanged();
+        }
+
+        async function onTargetTypeChanged() {
+            const targetType = document.getElementById('targetTypeSelect').value;
+            const targetPicker = document.getElementById('targetPickerCol');
+            const customUrlCol = document.getElementById('customUrlCol');
+            const entitySelect = document.getElementById('targetEntitySelect');
+
+            if (targetType === '5') {
+                targetPicker.classList.add('d-none');
+                customUrlCol.classList.remove('d-none');
+                document.getElementById('modalTargetSlug').value = '';
+            } else {
+                targetPicker.classList.remove('d-none');
+                customUrlCol.classList.add('d-none');
+
+                entitySelect.innerHTML = '<option>Đang nạp dữ liệu...</option>';
+
+                try {
+                    const res = await fetch(`/Admin/Menu/GetTargetsByType?targetType=${targetType}`);
+                    currentTargetData = await res.json();
+
+                    entitySelect.innerHTML = '<option value="">-- Chọn đối tượng liên kết --</option>';
+                    currentTargetData.forEach(item => {
+                        const opt = document.createElement('option');
+                        opt.value = item.id;
+                        opt.text = item.name;
+                        opt.dataset.slug = item.slug;
+                        entitySelect.appendChild(opt);
+                    });
+                } catch (e) {
+                    console.error(e);
+                    entitySelect.innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
+                }
+            }
+        }
+
+        function onEntityPicked() {
+            const select = document.getElementById('targetEntitySelect');
+            const selectedOpt = select.options[select.selectedIndex];
+            if (selectedOpt && selectedOpt.dataset.slug) {
+                document.getElementById('modalTargetSlug').value = selectedOpt.dataset.slug;
+
+                // Tự động điền tiêu đề nếu đang trống
+                const titleInput = document.getElementById('nodeTitleInput');
+                if (!titleInput.value) {
+                    titleInput.value = selectedOpt.text.split('(')[0].trim();
+                }
+            }
+        }
+    </script>
+}

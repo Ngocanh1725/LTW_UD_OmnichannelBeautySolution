@@ -1,0 +1,213 @@
+﻿@model Omnichannel.Application.DTOs.Reports.RevenueDashboardViewModel
+@{
+    ViewData["Title"] = "Báo Cáo Doanh Thu & Kiểm Toán";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold text-dark mb-1">Báo Cáo Tài Chính & Kiểm Toán Bán Lẻ</h4>
+        <p class="text-muted small mb-0">Theo dõi doanh thu đa kênh, đối soát lợi nhuận gộp và cảnh báo date cận hạn</p>
+    </div>
+</div>
+
+<!-- 4 Thẻ KPI Tài Chính -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="beauty-card p-3 d-flex align-items-center gap-3">
+            <div class="rounded-4 p-3 d-flex align-items-center justify-content-center" style="background: var(--primary-purple-light); color: var(--primary-purple); width: 56px; height: 56px; font-size: 22px;">
+                <i class="fa-solid fa-coins"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Doanh thu hôm nay</div>
+                <h4 class="fw-bold mb-0 text-dark font-monospace">@Model.TodayRevenue.ToString("N0") đ</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="beauty-card p-3 d-flex align-items-center gap-3">
+            <div class="rounded-4 p-3 d-flex align-items-center justify-content-center" style="background: var(--accent-pink-light); color: var(--accent-pink); width: 56px; height: 56px; font-size: 22px;">
+                <i class="fa-solid fa-chart-pie"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Doanh thu tháng này</div>
+                <h4 class="fw-bold mb-0 text-dark font-monospace">@Model.MonthRevenue.ToString("N0") đ</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="beauty-card p-3 d-flex align-items-center gap-3">
+            <div class="rounded-4 p-3 d-flex align-items-center justify-content-center" style="background: #ECFDF5; color: #059669; width: 56px; height: 56px; font-size: 22px;">
+                <i class="fa-solid fa-bag-shopping"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Số đơn chốt hôm nay</div>
+                <h4 class="fw-bold mb-0 text-dark">@Model.TodayOrderCount đơn</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="beauty-card p-3 d-flex align-items-center gap-3">
+            <div class="rounded-4 p-3 d-flex align-items-center justify-content-center" style="background: #FEF9C3; color: #CA8A04; width: 56px; height: 56px; font-size: 22px;">
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Ước tính lãi gộp (35%)</div>
+                <h4 class="fw-bold mb-0 text-dark font-monospace">@Model.TodayProfitEstimate.ToString("N0") đ</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Đồ Thị Doanh Thu & Tỷ Trọng Kênh -->
+<div class="row g-4 mb-4">
+    <!-- Cột Trái: Biểu Đồ 7 Ngày -->
+    <div class="col-lg-8">
+        <div class="beauty-card p-4 h-100">
+            <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-chart-line text-primary me-2"></i>Biến Động Doanh Thu 7 Ngày Gần Nhất</h6>
+            <div style="height: 280px;">
+                <canvas id="revenueLineChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột Phải: Cơ Cấu Kênh POS vs Website -->
+    <div class="col-lg-4">
+        <div class="beauty-card p-4 h-100 d-flex flex-column justify-content-between">
+            <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-arrows-split-up-and-left text-pink me-2" style="color: var(--accent-pink);"></i>Tỷ Trọng Kênh Bán Hàng</h6>
+            <div style="height: 200px;" class="d-flex align-items-center justify-content-center">
+                <canvas id="channelDoughnutChart"></canvas>
+            </div>
+            <div class="d-flex justify-content-around mt-3 small">
+                <span class="text-primary fw-bold"><i class="fa-solid fa-circle me-1"></i>Tại quầy POS: @Model.PosRevenueRatio%</span>
+                <span class="text-pink fw-bold" style="color: var(--accent-pink);"><i class="fa-solid fa-circle me-1"></i>Website: @Model.OnlineRevenueRatio%</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bảng Top Sản Phẩm Bán Chạy & Cảnh Báo Hạn Dùng -->
+<div class="row g-4">
+    <!-- Top Bán Chạy -->
+    <div class="col-lg-6">
+        <div class="beauty-card p-4 h-100">
+            <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-trophy text-warning me-2"></i>Top 5 Mỹ Phẩm Bán Chạy Nhất</h6>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr class="small text-secondary">
+                            <th class="py-2">Tên sản phẩm</th>
+                            <th class="py-2 text-center">Đã bán</th>
+                            <th class="py-2 text-end">Tổng doanh số</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in Model.TopSellingProducts)
+                        {
+                            <tr>
+                                <td class="small fw-bold text-dark">@p.ProductName</td>
+                                <td class="small text-center fw-semibold">@p.SoldQuantity</td>
+                                <td class="small text-end font-monospace fw-bold" style="color: var(--accent-pink);">@p.TotalSales.ToString("N0") đ</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cảnh Báo Lô Cận Date (<60 ngày) Cần Xả Kho -->
+    <div class="col-lg-6">
+        <div class="beauty-card p-4 h-100">
+            <h6 class="fw-bold text-danger mb-3"><i class="fa-solid fa-triangle-exclamation me-2"></i>Cảnh Báo Lô Cận Hạn Sử Dụng (&le;60 ngày)</h6>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr class="small text-secondary">
+                            <th class="py-2">Mỹ phẩm</th>
+                            <th class="py-2">Lô / HSD</th>
+                            <th class="py-2 text-center">Tồn</th>
+                            <th class="py-2 text-end">Hạn còn</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var b in Model.CriticalExpiringBatches)
+                        {
+                            <tr>
+                                <td class="small fw-semibold text-dark">@b.ProductName</td>
+                                <td class="small font-monospace">@b.BatchNumber</td>
+                                <td class="small text-center fw-bold text-danger">@b.RemainingQuantity</td>
+                                <td class="small text-end">
+                                    <span class="badge bg-warning text-dark font-monospace">Còn @b.DaysRemaining ngày</span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Thư Viện Vẽ Biểu Đồ Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 1. Biểu đồ đường Doanh thu 7 ngày
+        const lineCtx = document.getElementById('revenueLineChart').getContext('2d');
+        new Chart(lineCtx, {
+            type: 'line',
+            data: {
+                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueLast7Days.Select(r => r.DateLabel))),
+                datasets: [{
+                    label: 'Doanh thu (VNĐ)',
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueLast7Days.Select(r => r.Revenue))),
+                    borderColor: '#7C3AED',
+                    backgroundColor: 'rgba(124, 58, 237, 0.1)',
+                    fill: true,
+                    tension: 0.35,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#EC4899',
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(val) { return Number(val).toLocaleString() + ' đ'; }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. Biểu đồ tròn Tỷ trọng Kênh
+        const doughnutCtx = document.getElementById('channelDoughnutChart').getContext('2d');
+        new Chart(doughnutCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Tại quầy POS', 'Website Online'],
+                datasets: [{
+                    data: [@Model.PosRevenueRatio, @Model.OnlineRevenueRatio],
+                    backgroundColor: ['#7C3AED', '#EC4899'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    </script>
+}
+

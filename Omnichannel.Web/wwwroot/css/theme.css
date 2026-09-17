@@ -1,0 +1,260 @@
+﻿/* ==========================================================================
+   OMNICHANNEL BEAUTY - THEME HỒNG / TÍM PASTEL (LIGHT THEME)
+   ========================================================================== */
+
+:root {
+    --primary-purple: #7C3AED;
+    --primary-purple-hover: #6D28D9;
+    --primary-purple-light: #F5F3FF;
+    --primary-purple-border: #DDD6FE;
+    --accent-pink: #EC4899;
+    --accent-pink-hover: #DB2777;
+    --accent-pink-light: #FDF2F8;
+    --accent-pink-border: #FBCFE8;
+    --gradient-brand: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
+    --gradient-brand-subtle: linear-gradient(135deg, #FAF5FF 0%, #FDF2F8 100%);
+    --gradient-card: linear-gradient(180deg, #FFFFFF 0%, #FAF5FF 100%);
+    --bg-body: #FAF7FC;
+    --surface-card: #FFFFFF;
+    --text-primary: #1F2937;
+    --text-secondary: #6B7280;
+    --text-muted: #9CA3AF;
+    --border-soft: #F1E8F8;
+    --shadow-sm: 0 2px 8px rgba(124, 58, 237, 0.04);
+    --shadow-md: 0 10px 25px -5px rgba(124, 58, 237, 0.08);
+    --shadow-lg: 0 20px 35px -10px rgba(236, 72, 153, 0.15);
+    --radius-xl: 18px;
+    --radius-2xl: 24px;
+}
+
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+}
+
+/* Sidebar Styling */
+.admin-sidebar {
+    width: 270px;
+    background: #FFFFFF;
+    border-right: 1.5px solid var(--border-soft);
+    min-height: 100vh;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+}
+
+.sidebar-brand {
+    padding: 24px 20px;
+    border-bottom: 1.5px solid var(--border-soft);
+}
+
+.brand-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: var(--gradient-brand);
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 6px 16px -3px rgba(236, 72, 153, 0.4);
+}
+
+.nav-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    padding: 16px 22px 6px 22px;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 11px 18px;
+    margin: 4px 14px;
+    border-radius: 14px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+    .sidebar-link i {
+        font-size: 16px;
+        width: 24px;
+        color: #A78BFA;
+        transition: all 0.2s ease;
+    }
+
+    .sidebar-link:hover {
+        color: var(--primary-purple);
+        background-color: var(--primary-purple-light);
+        transform: translateX(3px);
+    }
+
+        .sidebar-link:hover i {
+            color: var(--primary-purple);
+        }
+
+    .sidebar-link.active {
+        background: var(--gradient-brand);
+        color: #FFFFFF !important;
+        font-weight: 600;
+        box-shadow: 0 6px 18px -4px rgba(124, 58, 237, 0.35);
+    }
+
+        .sidebar-link.active i {
+            color: #FFFFFF !important;
+        }
+
+/* Topbar Styling */
+.admin-topbar {
+    height: 70px;
+    background: #FFFFFF;
+    border-bottom: 1.5px solid var(--border-soft);
+    padding: 0 30px;
+}
+
+.user-avatar-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--gradient-brand);
+    color: #FFFFFF;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Cards & Containers */
+.beauty-card {
+    background: var(--surface-card);
+    border-radius: var(--radius-xl);
+    border: 1.5px solid var(--border-soft);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.25s ease;
+}
+
+    .beauty-card:hover {
+        box-shadow: var(--shadow-md);
+    }
+
+.beauty-card-header {
+    padding: 18px 24px;
+    border-bottom: 1.5px solid var(--border-soft);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Buttons */
+.btn-primary-gradient {
+    background: var(--gradient-brand);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 13.5px;
+    box-shadow: 0 4px 14px -2px rgba(236, 72, 153, 0.35);
+    transition: all 0.2s ease;
+}
+
+    .btn-primary-gradient:hover {
+        color: #FFFFFF;
+        opacity: 0.95;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px -2px rgba(236, 72, 153, 0.45);
+    }
+
+.btn-soft-purple {
+    background-color: var(--primary-purple-light);
+    color: var(--primary-purple);
+    border: 1.5px solid var(--primary-purple-border);
+    border-radius: 12px;
+    padding: 9px 16px;
+    font-weight: 600;
+    font-size: 13.5px;
+    transition: all 0.2s ease;
+}
+
+    .btn-soft-purple:hover {
+        background-color: var(--primary-purple);
+        color: #FFFFFF;
+    }
+
+.btn-soft-pink {
+    background-color: var(--accent-pink-light);
+    color: var(--accent-pink);
+    border: 1.5px solid var(--accent-pink-border);
+    border-radius: 12px;
+    padding: 9px 16px;
+    font-weight: 600;
+    font-size: 13.5px;
+    transition: all 0.2s ease;
+}
+
+    .btn-soft-pink:hover {
+        background-color: var(--accent-pink);
+        color: #FFFFFF;
+    }
+
+/* Checkbox Matrix Switch */
+.matrix-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--accent-pink);
+    border-radius: 6px;
+    transition: transform 0.15s ease;
+}
+
+    .matrix-checkbox:hover {
+        transform: scale(1.15);
+    }
+
+/* Badges */
+.badge-role {
+    background: var(--primary-purple-light);
+    color: var(--primary-purple);
+    border: 1px solid var(--primary-purple-border);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.badge-active {
+    background: #ECFDF5;
+    color: #059669;
+    border: 1px solid #A7F3D0;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 11.5px;
+}
+
+.badge-locked {
+    background: #FEF2F2;
+    color: #DC2626;
+    border: 1px solid #FECACA;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 11.5px;
+}
+
+/* Toast Container */
+.beauty-toast-container {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+}

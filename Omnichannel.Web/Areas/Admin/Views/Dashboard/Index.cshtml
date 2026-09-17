@@ -1,0 +1,60 @@
+﻿@{
+    ViewData["Title"] = "Bảng điều khiển";
+    Layout = "_AdminLayout";
+}
+
+<div class="mb-4">
+    <h4 class="fw-bold text-dark mb-1">Tổng quan hoạt động</h4>
+    <p class="text-muted small">Chào mừng trở lại cổng điều hành đa kênh Omnichannel Beauty!</p>
+</div>
+
+<!-- Stat Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="beauty-card p-3 d-flex align-items-center gap-3">
+            <div class="rounded-4 p-3 d-flex align-items-center justify-content-center" style="background: var(--primary-purple-light); color: var(--primary-purple); width: 56px; height: 56px; font-size: 24px;">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Tổng tài khoản</div>
+                <h4 class="fw-bold mb-0 text-dark">@ViewBag.TotalUsers</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="beauty-card p-3 d-flex align-items-center gap-3">
+            <div class="rounded-4 p-3 d-flex align-items-center justify-content-center" style="background: var(--accent-pink-light); color: var(--accent-pink); width: 56px; height: 56px; font-size: 24px;">
+                <i class="fa-solid fa-boxes-stacked"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Sản phẩm SKU</div>
+                <h4 class="fw-bold mb-0 text-dark">@ViewBag.TotalProducts</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="beauty-card p-3 d-flex align-items-center gap-3">
+            <div class="rounded-4 p-3 d-flex align-items-center justify-content-center" style="background: #FDF4FF; color: #9333EA; width: 56px; height: 56px; font-size: 24px;">
+                <i class="fa-solid fa-bag-shopping"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Đơn hàng đa kênh</div>
+                <h4 class="fw-bold mb-0 text-dark">@ViewBag.TotalOrders</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="beauty-card p-3 d-flex align-items-center gap-3">
+            <div class="rounded-4 p-3 d-flex align-items-center justify-content-center" style="background: #ECFDF5; color: #059669; width: 56px; height: 56px; font-size: 24px;">
+                <i class="fa-solid fa-shop"></i>
+            </div>
+            <div>
+                <div class="text-muted small fw-semibold">Chi nhánh & Kho</div>
+                <h4 class="fw-bold mb-0 text-dark">@ViewBag.TotalStores</h4>
+            </div>
+        </div>
+    </div>
+</div>

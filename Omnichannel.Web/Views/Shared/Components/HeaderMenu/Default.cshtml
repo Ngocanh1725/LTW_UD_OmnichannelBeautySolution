@@ -1,0 +1,56 @@
+﻿@model IEnumerable<Omnichannel.Application.DTOs.Cms.MenuItemDto>
+
+<ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
+    @foreach (var item in Model)
+    {
+        if (!item.Children.Any())
+        {
+            <li class="nav-item">
+                <a class="nav-link px-3 fw-semibold text-dark text-hover-purple" href="@item.ResolvedUrl" target="@(item.OpenInNewTab ? "_blank" : "_self")">
+                    @if (!string.IsNullOrEmpty(item.IconClass))
+                    {
+                        <i class="@item.IconClass me-1" style="color: var(--primary-purple);"></i>
+                    }
+                    @item.Title
+                </a>
+            </li>
+        }
+        else
+        {
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle px-3 fw-semibold text-dark" href="@item.ResolvedUrl" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    @if (!string.IsNullOrEmpty(item.IconClass))
+                    {
+                        <i class="@item.IconClass me-1 text-pink" style="color: var(--accent-pink);"></i>
+                    }
+                    @item.Title
+                </a>
+                <ul class="dropdown-menu rounded-4 shadow border-0 py-2">
+                    @foreach (var sub in item.Children)
+                    {
+                        <li>
+                            <a class="dropdown-item py-2 px-3 small fw-medium" href="@sub.ResolvedUrl" target="@(sub.OpenInNewTab ? "_blank" : "_self")">
+                                @if (!string.IsNullOrEmpty(sub.IconClass))
+                                {
+                                    <i class="@sub.IconClass me-2 text-muted"></i>
+                                }
+                                @sub.Title
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </li>
+        }
+    }
+</ul>
+
+<style>
+    .text-hover-purple:hover {
+        color: var(--primary-purple) !important;
+    }
+
+    .dropdown-menu .dropdown-item:hover {
+        background-color: var(--accent-pink-light);
+        color: var(--accent-pink);
+    }
+</style>

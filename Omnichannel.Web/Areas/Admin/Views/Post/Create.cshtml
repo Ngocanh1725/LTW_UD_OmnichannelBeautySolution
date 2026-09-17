@@ -1,0 +1,135 @@
+﻿@model Omnichannel.Application.DTOs.Cms.CreatePostViewModel
+@{
+    ViewData["Title"] = "Soạn Bài Viết Mới";
+    Layout = "_AdminLayout";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">Soạn Bài Viết Cẩm Nang Làm Đẹp</h4>
+                <p class="text-muted small mb-0">Viết bài tư vấn chăm sóc da, tối ưu thẻ SEO Google</p>
+            </div>
+            <a href="/Admin/Post" class="btn btn-outline-secondary btn-sm rounded-3">
+                <i class="fa-solid fa-arrow-left me-1"></i>Quay lại danh sách
+            </a>
+        </div>
+
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="row g-4">
+                <!-- Cột trái: Nội dung chính bài viết -->
+                <div class="col-lg-8">
+                    <div class="beauty-card p-4">
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label small fw-semibold"></label>
+                            <input asp-for="Title" id="postTitle" class="form-control rounded-3" placeholder="vd: Top 5 Bước Skincare Phục Hồi Hàng Rào Bảo Vệ Da" autofocus onkeyup="generateSlug(this.value)" />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Slug" class="form-label small fw-semibold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted small">/tin-tuc/</span>
+                                <input asp-for="Slug" id="postSlug" class="form-control" placeholder="top-5-buoc-skincare-phuc-hoi" />
+                            </div>
+                            <span asp-validation-for="Slug" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Summary" class="form-label small fw-semibold"></label>
+                            <textarea asp-for="Summary" rows="3" class="form-control rounded-3" placeholder="Tóm tắt ngắn 1-2 câu hiển thị ở danh sách bài viết..."></textarea>
+                            <span asp-validation-for="Summary" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ContentHtml" class="form-label small fw-semibold"></label>
+                            <textarea asp-for="ContentHtml" rows="12" class="form-control rounded-3 font-monospace" placeholder="<p>Nhập nội dung bài viết định dạng HTML hoặc sử dụng các thẻ đoạn văn...</p>"></textarea>
+                            <span asp-validation-for="ContentHtml" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải: Phân loại & Cấu hình SEO -->
+                <div class="col-lg-4">
+                    <!-- Card Phân loại & Xuất bản -->
+                    <div class="beauty-card p-4 mb-4">
+                        <h6 class="fw-bold text-dark mb-3">Xuất bản & Phân loại</h6>
+
+                        <div class="mb-3">
+                            <label asp-for="CategoryId" class="form-label small fw-semibold"></label>
+                            <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-select rounded-3">
+                                <option value="">-- Chọn chuyên mục --</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Status" class="form-label small fw-semibold"></label>
+                            <select asp-for="Status" class="form-select rounded-3">
+                                <option value="3">Xuất bản ngay</option>
+                                <option value="1">Lưu bản nháp</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ThumbnailUrl" class="form-label small fw-semibold"></label>
+                            <input asp-for="ThumbnailUrl" class="form-control rounded-3" placeholder="https://domain.com/skincare.jpg" />
+                            <span asp-validation-for="ThumbnailUrl" class="text-danger small"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary-gradient w-100 py-2">
+                            <i class="fa-solid fa-check me-1"></i>Đăng Bài Viết
+                        </button>
+                    </div>
+
+                    <!-- Card Cấu hình SEO -->
+                    <div class="beauty-card p-4">
+                        <h6 class="fw-bold text-dark mb-3">Tối ưu hóa SEO</h6>
+                        <div class="mb-2">
+                            <label asp-for="MetaTitle" class="form-label small fw-semibold"></label>
+                            <input asp-for="MetaTitle" class="form-control rounded-3" placeholder="Meta Title" />
+                        </div>
+                        <div class="mb-2">
+                            <label asp-for="MetaKeywords" class="form-label small fw-semibold"></label>
+                            <input asp-for="MetaKeywords" class="form-control rounded-3" placeholder="skincare, phục hồi da, b5" />
+                        </div>
+                        <div class="mb-2">
+                            <label asp-for="MetaDescription" class="form-label small fw-semibold"></label>
+                            <textarea asp-for="MetaDescription" rows="3" class="form-control rounded-3" placeholder="Meta Description..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function generateSlug(text) {
+            if (!text) {
+                document.getElementById('postSlug').value = '';
+                return;
+            }
+
+            let slug = text.toLowerCase().trim();
+
+            // Chuyển ký tự tiếng Việt có dấu thành không dấu
+            slug = slug.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            slug = slug.replace(/[đĐ]/g, 'd');
+
+            // Xóa ký tự đặc biệt
+            slug = slug.replace(/[^a-z0-9\s-]/g, '');
+
+            // Thay khoảng trắng liên tiếp bằng gạch nối
+            slug = slug.replace(/\s+/g, '-');
+            slug = slug.replace(/-+/g, '-');
+            slug = slug.replace(/^-+|-+$/g, '');
+
+            document.getElementById('postSlug').value = slug;
+        }
+    </script>
+}

@@ -1,0 +1,65 @@
+﻿@model Omnichannel.Application.DTOs.Sales.CartViewModel
+
+<div class="offcanvas offcanvas-end rounded-start-4 border-0 shadow-lg" tabindex="-1" id="miniCartDrawer" style="width: 380px;">
+    <div class="offcanvas-header border-bottom border-soft py-3">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-bag-shopping text-pink fs-5" style="color: var(--accent-pink);"></i>
+            <h6 class="offcanvas-title fw-bold text-dark">Giỏ Hàng Của Bạn (<span id="drawerTotalCount">@Model.TotalItems</span>)</h6>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+
+    <div class="offcanvas-body p-3 overflow-y-auto">
+        @if (!Model.Items.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="fa-solid fa-basket-shopping fs-1 mb-3 text-pink-border" style="color: var(--accent-pink-border);"></i>
+                <div class="small">Chưa có sản phẩm nào trong giỏ hàng.</div>
+                <button class="btn btn-soft-purple btn-sm mt-3 px-3" data-bs-dismiss="offcanvas">Tiếp tục mua sắm</button>
+            </div>
+        }
+        else
+        {
+            <div class="d-flex flex-column gap-3">
+                @foreach (var item in Model.Items)
+                {
+                    <div class="d-flex gap-3 align-items-center p-2 rounded-3 bg-light border">
+                        <img src="@item.ThumbnailUrl" alt="@item.ProductName" class="rounded-3" style="width: 55px; height: 55px; object-fit: cover;" />
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold text-dark small text-truncate" style="max-width: 180px;">@item.ProductName</div>
+                            <div class="text-muted" style="font-size: 11px;">
+                                <span class="badge bg-purple-subtle text-purple" style="background: var(--primary-purple-light); color: var(--primary-purple); font-size: 10px;">
+                                    HSD: @item.NearestExpDateStr
+                                </span>
+                            </div>
+                            <div class="fw-bold small mt-1" style="color: var(--accent-pink);">@item.UnitPrice.ToString("N0") đ</div>
+                        </div>
+                        <div class="text-end">
+                            <div class="fw-semibold small text-secondary">x@item.Quantity</div>
+                            <button type="button" class="btn btn-sm text-danger p-0 mt-1" onclick="removeDrawerItem('@item.ProductId')">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    @if (Model.Items.Any())
+    {
+        <div class="offcanvas-footer p-3 border-top border-soft bg-white">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="text-muted small">Tạm tính:</span>
+                <span class="fw-bold text-dark font-monospace fs-6">@Model.SubTotal.ToString("N0") đ</span>
+            </div>
+            <div class="alert alert-info py-2 px-3 small rounded-3 mb-3 border-0 bg-pink-light" style="background: var(--accent-pink-light); color: var(--accent-pink); font-size: 11.5px;">
+                <i class="fa-solid fa-truck-fast me-1"></i>Đơn hàng trên 500k được <strong>Freeship toàn quốc</strong>!
+            </div>
+            <div class="d-flex gap-2">
+                <a href="/Cart" class="btn btn-soft-purple w-50 py-2">Xem Giỏ Hàng</a>
+                <a href="/Checkout" class="btn btn-primary-gradient w-50 py-2">Thanh Toán</a>
+            </div>
+        </div>
+    }
+</div>

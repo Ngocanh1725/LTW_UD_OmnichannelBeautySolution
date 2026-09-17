@@ -1,0 +1,118 @@
+﻿@model Omnichannel.Application.DTOs.Security.PermissionMatrixViewModel
+@{
+    ViewData["Title"] = "Ma trận Phân quyền Hệ thống";
+    Layout = "_AdminLayout";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold text-dark mb-1">Cấu hình Ma trận Phân quyền Động</h4>
+        <p class="text-muted small mb-0">Quản lý phân rã quyền hạn theo từng Module và Hành vi chi tiết (Dynamic PBAC)</p>
+    </div>
+    <button id="btnSaveMatrix" class="btn btn-primary-gradient px-4" onclick="saveRoleMatrix('@Model.SelectedRoleId')">
+        <i class="fa-solid fa-floppy-disk me-2"></i>Lưu Thay Đổi Ma Trận
+    </button>
+</div>
+
+<!-- Bộ chọn Vai trò -->
+<div class="beauty-card p-3 mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-5">
+            <label class="form-label fw-semibold small text-secondary">Đang cấu hình cho Vai trò (Role):</label>
+            <div class="d-flex gap-2">
+                <select class="form-select rounded-3" onchange="location.href='?roleId=' + this.value">
+                    @foreach (var r in Model.Roles)
+                    {
+                        if (r.RoleId == Model.SelectedRoleId)
+                        {
+                            <option value="@r.RoleId" selected>@r.RoleName (@r.RoleId)</option>
+                        }
+                        else
+                        {
+                            <option value="@r.RoleId">@r.RoleName (@r.RoleId)</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="col-md-7 text-md-end mt-3 mt-md-0">
+            <span class="badge bg-purple-subtle text-purple border border-purple-subtle px-3 py-2 rounded-pill small" style="background: var(--primary-purple-light); color: var(--primary-purple);">
+                <i class="fa-solid fa-circle-info me-1"></i>Thay đổi sẽ tự động Invalidate Cache của mọi User thuộc vai trò này
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Bảng Ma Trận Phân Quyền -->
+<div class="beauty-card overflow-hidden">
+    <div class="beauty-card-header bg-white">
+        <div class="fw-bold text-dark"><i class="fa-solid fa-list-check me-2 text-pink" style="color: var(--accent-pink);"></i>Chi tiết danh mục 50 quyền hạt nhân</div>
+        <span class="small text-muted">Đã chọn: <span id="selectedCount" class="fw-bold text-primary">@Model.GrantedPermissionIds.Count</span> quyền</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+                <tr>
+                    <th style="width: 250px;" class="py-3 px-4">Phân hệ (Module)</th>
+                    <th style="width: 140px;" class="py-3">Mã quyền</th>
+                    <th class="py-3">Tên quyền & Mô tả chi tiết</th>
+                    <th style="width: 120px;" class="text-center py-3 px-4">Cho phép</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var group in Model.ModuleGroups)
+                {
+                    <tr class="table-light border-top border-bottom">
+                        <td colspan="3" class="py-2 px-4 fw-bold small text-purple" style="color: var(--primary-purple);">
+                            <i class="@group.IconClass me-2"></i>@group.ModuleDisplayName (@group.ModuleCode)
+                        </td>
+                        <td class="text-center py-2 px-4">
+                            <button type="button" class="btn btn-sm btn-link text-decoration-none small p-0 text-pink"
+                                    onclick="toggleModuleCheckboxes('@group.ModuleCode', true)">
+                                Tất cả
+                            </button>
+                            <span class="text-muted">/</span>
+                            <button type="button" class="btn btn-sm btn-link text-decoration-none small p-0 text-muted"
+                                    onclick="toggleModuleCheckboxes('@group.ModuleCode', false)">
+                                Bỏ
+                            </button>
+                        </td>
+                    </tr>
+
+                    @foreach (var p in group.Permissions)
+                    {
+                        bool isChecked = Model.GrantedPermissionIds.Contains(p.PermissionId);
+                        <tr>
+                            <td class="px-4 text-muted small">@group.ModuleDisplayName</td>
+                            <td><code>@p.ActionCode</code></td>
+                            <td>
+                                <div class="fw-semibold text-dark small">@p.PermissionName</div>
+                                <div class="text-muted" style="font-size: 11.5px;">@p.Description</div>
+                            </td>
+                            <td class="text-center px-4">
+                                <input type="checkbox"
+                                       class="matrix-checkbox perm-checkbox"
+                                       data-module="@group.ModuleCode"
+                                       value="@p.PermissionId"
+                                       @(isChecked ? "checked" : "")
+                                       onchange="updateCount()" />
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function updateCount() {
+            const count = document.querySelectorAll('.perm-checkbox:checked').length;
+            document.getElementById('selectedCount').innerText = count;
+        }
+    </script>
+}

@@ -1,0 +1,146 @@
+﻿@model Omnichannel.Application.DTOs.Sales.PosReceiptPrintViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>In Hóa Đơn - @Model.OrderId</title>
+    <style>
+        @@page {
+            size: 80mm auto;
+            margin: 0;
+        }
+
+        body {
+            font-family: 'Courier New', Courier, monospace, sans-serif;
+            width: 76mm;
+            margin: 0 auto;
+            padding: 8px 2px;
+            color: #000;
+            font-size: 12px;
+            line-height: 1.25;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-end {
+            text-align: right;
+        }
+
+        .fw-bold {
+            font-weight: bold;
+        }
+
+        .fs-lg {
+            font-size: 15px;
+        }
+
+        .fs-sm {
+            font-size: 11px;
+        }
+
+        .divider {
+            border-top: 1px dashed #000;
+            margin: 6px 0;
+        }
+
+        .table-items {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 6px 0;
+        }
+
+            .table-items th, .table-items td {
+                padding: 3px 0;
+            }
+    </style>
+</head>
+<body>
+    <div class="text-center">
+        <div class="fw-bold fs-lg">OMNICHANNEL BEAUTY</div>
+        <div class="fs-sm">@Model.StoreName</div>
+        <div class="fs-sm">Đ/c: @Model.StoreAddress</div>
+        <div class="fs-sm">Hotline: @Model.StorePhone</div>
+        <div class="divider"></div>
+        <div class="fw-bold fs-lg">PHIẾU THANH TOÁN & HĐĐT</div>
+        <div class="fs-sm">Mã đơn: <strong>@Model.OrderId</strong></div>
+        <div class="fs-sm">Ký hiệu: @Model.InvoiceSeries - Số HĐ: @Model.InvoiceNumber</div>
+        <div class="fs-sm">Ngày: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="fs-sm">Thu ngân: @Model.CashierName</div>
+    <div class="fs-sm">Khách hàng: @Model.CustomerName (@Model.CustomerPhone)</div>
+
+    <table class="table-items fs-sm">
+        <thead>
+            <tr style="border-bottom: 1px dashed #000;">
+                <th style="text-align: left;">Mặt hàng</th>
+                <th class="text-center" style="width: 30px;">SL</th>
+                <th class="text-end" style="width: 70px;">T.Tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td colspan="3" class="fw-bold" style="padding-top: 4px;">@item.ProductName</td>
+                </tr>
+                <tr>
+                    <td class="fs-sm" style="font-size: 10px; color: #333;">Lô: @item.BatchNumber (HSD: @item.ExpDateStr)</td>
+                    <td class="text-center">x@item.Quantity</td>
+                    <td class="text-end fw-bold">@item.LineTotal.ToString("N0")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="divider"></div>
+
+    <table style="width: 100%; font-size: 12px;">
+        <tr>
+            <td>Tiền hàng:</td>
+            <td class="text-end font-monospace">@Model.SubTotal.ToString("N0") đ</td>
+        </tr>
+        @if (Model.DiscountAmount > 0)
+        {
+            <tr>
+                <td>Chiết khấu:</td>
+                <td class="text-end font-monospace">-@Model.DiscountAmount.ToString("N0") đ</td>
+            </tr>
+        }
+        <tr>
+            <td>VAT (10%):</td>
+            <td class="text-end font-monospace">@Model.VatAmount.ToString("N0") đ</td>
+        </tr>
+        <tr class="fw-bold fs-lg">
+            <td style="padding-top: 4px;">TỔNG CỘNG:</td>
+            <td class="text-end font-monospace" style="padding-top: 4px;">@Model.FinalTotal.ToString("N0") đ</td>
+        </tr>
+        <tr>
+            <td>Phương thức:</td>
+            <td class="text-end">@Model.PaymentMethodName</td>
+        </tr>
+        <tr>
+            <td>Tiền khách đưa:</td>
+            <td class="text-end font-monospace">@Model.CashGiven.ToString("N0") đ</td>
+        </tr>
+        <tr>
+            <td>Tiền thối lại:</td>
+            <td class="text-end font-monospace">@Model.ChangeAmount.ToString("N0") đ</td>
+        </tr>
+    </table>
+
+    <div class="divider"></div>
+
+    <div class="text-center fs-sm">
+        <div>Mã tra cứu HĐĐT: <strong>@Model.TaxLookupCode</strong></div>
+        <div>Tra cứu tại: <em>https://hoadon.beautyomnichannel.vn</em></div>
+        <div style="margin-top: 8px;">Cảm ơn quý khách & Hẹn gặp lại!</div>
+    </div>
+</body>
+</html>
