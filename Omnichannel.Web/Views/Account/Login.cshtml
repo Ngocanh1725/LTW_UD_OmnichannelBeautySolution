@@ -1,9 +1,8 @@
 ﻿@model Omnichannel.Application.DTOs.Account.LoginViewModel
 @{
     ViewData["Title"] = "Đăng nhập Hệ thống";
-    Layout = null; // Màn hình đăng nhập độc lập không dùng master layout mặc định
+    Layout = null;
 }
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -11,21 +10,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Omnichannel Beauty</title>
 
-    <!-- Google Fonts & FontAwesome 6 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
-    <!-- Bootstrap 5.3 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
 
     <style>
         :root {
             --primary-purple: #7C3AED;
-            --primary-purple-hover: #6D28D9;
             --accent-pink: #EC4899;
-            --accent-pink-hover: #DB2777;
             --bg-gradient: linear-gradient(135deg, #FAF5FF 0%, #FDF2F8 50%, #F5F3FF 100%);
             --card-shadow: 0 20px 40px -15px rgba(124, 58, 237, 0.15);
         }
@@ -46,23 +40,22 @@
             border-radius: 24px;
             box-shadow: var(--card-shadow);
             border: 1px solid rgba(236, 72, 153, 0.15);
-            max-width: 440px;
+            max-width: 450px;
             width: 100%;
-            padding: 40px 36px;
-            transition: all 0.3s ease;
+            padding: 38px 34px;
         }
 
         .brand-badge {
-            width: 68px;
-            height: 68px;
+            width: 64px;
+            height: 64px;
             border-radius: 20px;
             background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
             color: #FFFFFF;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
-            margin: 0 auto 20px auto;
+            font-size: 26px;
+            margin: 0 auto 16px auto;
             box-shadow: 0 10px 20px -5px rgba(236, 72, 153, 0.4);
         }
 
@@ -71,13 +64,12 @@
             padding: 12px 16px;
             border: 1.5px solid #F1E8F8;
             font-size: 14px;
-            transition: all 0.2s ease;
         }
 
-        .form-control:focus {
-            border-color: var(--primary-purple);
-            box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
-        }
+            .form-control:focus {
+                border-color: var(--primary-purple);
+                box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+            }
 
         .input-group-text {
             background: #FDF4FF;
@@ -105,37 +97,31 @@
             transition: all 0.3s ease;
         }
 
-        .btn-gradient:hover {
-            opacity: 0.95;
-            transform: translateY(-1px);
-            color: #FFFFFF;
-            box-shadow: 0 12px 24px -4px rgba(236, 72, 153, 0.45);
-        }
-
-        .form-check-input:checked {
-            background-color: var(--accent-pink);
-            border-color: var(--accent-pink);
-        }
+            .btn-gradient:hover {
+                opacity: 0.95;
+                transform: translateY(-1px);
+                color: #FFFFFF;
+                box-shadow: 0 12px 24px -4px rgba(236, 72, 153, 0.45);
+            }
 
         .demo-credential-box {
             background: #FAF5FF;
             border-radius: 14px;
-            padding: 12px;
-            border: 1px dashed #D8B4FE;
-            font-size: 12.5px;
+            padding: 14px;
+            border: 1.5px dashed #D8B4FE;
+            font-size: 13px;
             color: #6B21A8;
         }
     </style>
 </head>
 <body>
-
     <div class="login-card">
         <div class="text-center">
             <div class="brand-badge">
                 <i class="fa-solid fa-sparkles"></i>
             </div>
             <h4 class="fw-bold text-dark mb-1">Omnichannel Beauty</h4>
-            <p class="text-muted small mb-4">Đăng nhập vào cổng quản trị & bán lẻ đa kênh</p>
+            <p class="text-muted small mb-4">Cổng quản trị & bán lẻ mỹ phẩm đa kênh</p>
         </div>
 
         @if (!ViewData.ModelState.IsValid)
@@ -152,7 +138,7 @@
                 <label asp-for="Username" class="form-label small fw-semibold text-secondary"></label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fa-regular fa-user"></i></span>
-                    <input asp-for="Username" class="form-control" placeholder="Tên đăng nhập hoặc Email" autofocus />
+                    <input asp-for="Username" id="UsernameInput" class="form-control" placeholder="Tên đăng nhập hoặc Email" autofocus />
                 </div>
                 <span asp-validation-for="Username" class="text-danger small"></span>
             </div>
@@ -161,31 +147,44 @@
                 <label asp-for="Password" class="form-label small fw-semibold text-secondary"></label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                    <input asp-for="Password" class="form-control" placeholder="••••••••" />
+                    <input asp-for="Password" id="PasswordInput" class="form-control" placeholder="••••••••" />
                 </div>
                 <span asp-validation-for="Password" class="text-danger small"></span>
             </div>
 
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div class="form-check">
-                    <input asp-for="RememberMe" class="form-check-input" type="checkbox" id="rememberMeCheck" />
+                    <input asp-for="RememberMe" class="form-check-input" type="checkbox" id="rememberMeCheck" checked />
                     <label class="form-check-label small text-secondary" for="rememberMeCheck">Ghi nhớ phiên</label>
                 </div>
-                <a href="javascript:void(0)" class="text-decoration-none small" style="color: var(--accent-pink);">Quên mật khẩu?</a>
+                <a href="/" class="text-decoration-none small text-muted">
+                    <i class="fa-solid fa-house me-1"></i>Về trang chủ
+                </a>
             </div>
 
             <button type="submit" class="btn btn-gradient mb-3">
                 <i class="fa-solid fa-arrow-right-to-bracket me-2"></i>Đăng nhập ngay
             </button>
 
-            <!-- Ghi chú tài khoản Demo khởi tạo từ Phiên 1 -->
-            <div class="demo-credential-box text-start mt-3">
-                <div class="fw-bold mb-1"><i class="fa-solid fa-shield-halved me-1"></i>Tài khoản Quản trị Tối cao mặc định:</div>
-                <div>Tài khoản: <code>admin</code></div>
-                <div>Mật khẩu: <code>Admin@123456</code></div>
+            <!-- Hộp tài khoản Admin mẫu kèm nút tự động điền -->
+            <div class="demo-credential-box mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <strong class="text-dark"><i class="fa-solid fa-shield-halved text-primary me-1"></i>Tài khoản SuperAdmin:</strong>
+                    <button type="button" class="btn btn-sm btn-outline-primary py-0 px-2 rounded-pill" style="font-size: 11px;" onclick="fillAdminCredentials()">
+                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Điền nhanh
+                    </button>
+                </div>
+                <div>Tài khoản: <code class="fw-bold">admin</code></div>
+                <div>Mật khẩu: <code class="fw-bold">Admin@123456</code></div>
             </div>
         </form>
     </div>
 
+    <script>
+        function fillAdminCredentials() {
+            document.getElementById('UsernameInput').value = 'admin';
+            document.getElementById('PasswordInput').value = 'Admin@123456';
+        }
+    </script>
 </body>
 </html>
