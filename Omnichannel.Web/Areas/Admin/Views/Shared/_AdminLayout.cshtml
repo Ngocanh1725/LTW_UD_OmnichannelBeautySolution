@@ -1,194 +1,133 @@
-﻿@using System.Security.Claims
-@inject Omnichannel.Application.Interfaces.Security.IPermissionService PermService
-@{
-    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
-    var currentUserName = User.FindFirstValue(ClaimTypes.GivenName) ?? User.Identity?.Name ?? "Quản trị viên";
-    var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? "";
-    bool isSuperAdmin = User.IsInRole("SUPER_ADMIN");
-
-    async Task<bool> HasAccess(string module)
-    {
-        return isSuperAdmin || await PermService.HasPermissionAsync(currentUserId, module, "VIEW");
-    }
-}
-
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="h-full bg-slate-50">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Omnichannel Beauty Admin</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>@ViewData["Title"] - Omnichannel Beauty Suite</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+    <!-- HTMX, Alpine.js, SignalR & SweetAlert2 -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @await RenderSectionAsync("Styles", required: false)
 </head>
-<body>
-
-    <div class="d-flex">
+<body class="h-full antialiased text-slate-800">
+    <div class="min-h-full flex">
         <!-- Sidebar Navigation -->
-        <aside class="admin-sidebar d-flex flex-column">
-            <div class="sidebar-brand d-flex align-items-center gap-3">
-                <div class="brand-icon-box">
-                    <i class="fa-solid fa-sparkles"></i>
-                </div>
-                <div>
-                    <h6 class="fw-bold mb-0 text-dark">Omnichannel</h6>
-                    <span class="badge bg-pink-subtle text-pink fw-semibold" style="color: var(--accent-pink); font-size: 11px;">Beauty Core</span>
-                </div>
-            </div>
-
-            <div class="flex-grow-1 overflow-y-auto py-2">
-                <div class="nav-section-title">Tổng quan</div>
-                <a href="/Admin/Dashboard" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")">
-                    <i class="fa-solid fa-chart-pie me-2"></i>Dashboard
-                </a>
-
-                @if (await HasAccess("SECURITY"))
-                {
-                    <div class="nav-section-title">Hệ thống & Bảo mật</div>
-                    <a href="/Admin/PermissionManagement" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "PermissionManagement" ? "active" : "")">
-                        <i class="fa-solid fa-shield-halved me-2"></i>Ma trận phân quyền
-                    </a>
-                }
-
-                @if (await HasAccess("HR_USER"))
-                {
-                    <a href="/Admin/User" class="sidebar-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "User" ? "active" : "")">
-                        <i class="fa-solid fa-users-gear me-2"></i>Nhân sự & Tài khoản
-                    </a>
-                }
-
-                @if (await HasAccess("MENU") || await HasAccess("BANNER") || await HasAccess("CMS_CONTENT"))
-                {
-                    <div class="nav-section-title">Giao diện & Nội dung</div>
-                    @if (await HasAccess("MENU"))
-                    {
-                        <a href="/Admin/Menu" class="sidebar-link">
-                            <i class="fa-solid fa-bars-staggered me-2"></i>Quản lý Menu Đa hình
-                        </a>
-                    }
-                    @if (await HasAccess("BANNER"))
-                    {
-                        <a href="/Admin/Banner" class="sidebar-link">
-                            <i class="fa-solid fa-images me-2"></i>Quản lý Banners
-                        </a>
-                    }
-                    @if (await HasAccess("CMS_CONTENT"))
-                    {
-                        <a href="/Admin/Post" class="sidebar-link">
-                            <i class="fa-solid fa-newspaper me-2"></i>Cẩm nang & Bài viết
-                        </a>
-                    }
-                }
-
-                @if (await HasAccess("CATALOG") || await HasAccess("WAREHOUSE"))
-                {
-                    <div class="nav-section-title">Sản phẩm & Kho bãi</div>
-                    @if (await HasAccess("CATALOG"))
-                    {
-                        <a href="/Admin/Product" class="sidebar-link">
-                            <i class="fa-solid fa-boxes-stacked me-2"></i>Danh mục Sản phẩm
-                        </a>
-                    }
-                    @if (await HasAccess("WAREHOUSE"))
-                    {
-                        <a href="/Admin/Warehouse" class="sidebar-link">
-                            <i class="fa-solid fa-warehouse me-2"></i>Kho & Lô Date FEFO
-                        </a>
-                    }
-                }
-
-                @if (await HasAccess("POS") || await HasAccess("ORDER_OPS"))
-                {
-                    <div class="nav-section-title">Bán lẻ & Đơn hàng</div>
-                    @if (await HasAccess("POS"))
-                    {
-                        <a href="/Admin/Pos" class="sidebar-link" target="_blank">
-                            <i class="fa-solid fa-cash-register me-2"></i>Thu ngân POS (Màn hình quầy)
-                        </a>
-                    }
-                    @if (await HasAccess("ORDER_OPS"))
-                    {
-                        <a href="/Admin/Order" class="sidebar-link">
-                            <i class="fa-solid fa-bag-shopping me-2"></i>Đơn hàng Đa kênh
-                        </a>
-                    }
-                }
-            </div>
-
-            <div class="p-3 border-top border-soft">
-                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="m-0">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-soft-pink w-100 d-flex align-items-center justify-content-center gap-2 py-2">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i>Đăng xuất
-                    </button>
-                </form>
-            </div>
-        </aside>
-
-        <!-- Main Workspace -->
-        <div class="flex-grow-1 d-flex flex-column min-vh-100">
-            <!-- Topbar -->
-            <header class="admin-topbar d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center gap-3">
-                    <button class="btn btn-light d-md-none border-0" id="sidebarToggle">
-                        <i class="fa-solid fa-bars"></i>
-                    </button>
-                    <div class="input-group search-bar" style="width: 280px;">
-                        <span class="input-group-text bg-light border-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                        <input type="text" class="form-control bg-light border-0 small" placeholder="Tìm kiếm nhanh..." />
+        <aside class="w-64 flex-shrink-0 bg-slate-900 text-slate-300 flex flex-col justify-between hidden md:flex">
+            <div>
+                <!-- Brand Logo -->
+                <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
+                    <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-pink-500 to-rose-400 flex items-center justify-center text-white font-bold shadow-lg shadow-pink-500/30">
+                        OB
+                    </div>
+                    <div>
+                        <div class="font-bold text-white text-base tracking-wide">OMNICHANNEL</div>
+                        <div class="text-[10px] text-pink-400 font-semibold tracking-wider">BEAUTY SYSTEM</div>
                     </div>
                 </div>
 
-                <div class="d-flex align-items-center gap-3">
-                    <a href="/" target="_blank" class="btn btn-soft-purple btn-sm">
-                        <i class="fa-solid fa-globe me-1"></i>Xem Website
+                <div class="px-4 py-6 space-y-1">
+                    <div class="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Điều Hành Bán Lẻ</div>
+
+                    <!-- Dashboard -->
+                    <a href="/Admin/Dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition hover:bg-slate-800 hover:text-white">
+                        <i class="fa-solid fa-chart-pie w-5 text-slate-400"></i>
+                        <span>Tổng Quan</span>
                     </a>
 
-                    <div class="dropdown">
-                        <div class="d-flex align-items-center gap-2 cursor-pointer" data-bs-toggle="dropdown" style="cursor: pointer;">
-                            <div class="user-avatar-badge">
-                                @(currentUserName.Length > 0 ? currentUserName[0].ToString().ToUpper() : "U")
-                            </div>
-                            <div class="d-none d-sm-block text-start">
-                                <div class="fw-bold small text-dark">@currentUserName</div>
-                                <div class="text-muted" style="font-size: 11px;">@(isSuperAdmin ? "Super Admin" : "Nhân sự")</div>
-                            </div>
+                    <!-- POS Sale -->
+                    <a href="/Admin/Pos" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition hover:bg-slate-800 hover:text-white">
+                        <i class="fa-solid fa-cash-register w-5 text-emerald-400"></i>
+                        <span>Quầy Thu Ngân (POS)</span>
+                    </a>
+
+                    <!-- Warehouse & FEFO -->
+                    <a href="/Admin/Warehouse" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition hover:bg-slate-800 hover:text-white">
+                        <i class="fa-solid fa-boxes-stacked w-5 text-amber-400"></i>
+                        <span>Kho & Hạn Lô FEFO</span>
+                    </a>
+
+                    <!-- Catalog & Products -->
+                    <a href="/Admin/Product" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition hover:bg-slate-800 hover:text-white">
+                        <i class="fa-solid fa-spray-can-sparkles w-5 text-pink-400"></i>
+                        <span>Sản Phẩm Mỹ Phẩm</span>
+                    </a>
+
+                    <div class="pt-4 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Hệ Thống & Bảo Mật</div>
+
+                    <!-- CMS & Menu -->
+                    <a href="/Admin/Menu" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition hover:bg-slate-800 hover:text-white">
+                        <i class="fa-solid fa-bars-staggered w-5 text-slate-400"></i>
+                        <span>Cây Menu Điều Hướng</span>
+                    </a>
+
+                    <a href="/Admin/Banner" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition hover:bg-slate-800 hover:text-white">
+                        <i class="fa-solid fa-image w-5 text-slate-400"></i>
+                        <span>Banner Quảng Cáo</span>
+                    </a>
+
+                    <!-- Dynamic PBAC Matrix -->
+                    <a href="/Admin/PermissionManagement" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 shadow-md shadow-indigo-600/30">
+                        <i class="fa-solid fa-shield-halved w-5"></i>
+                        <span>Ma Trận Phân Quyền</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Store & User Footer -->
+            <div class="p-4 border-t border-slate-800">
+                <div class="flex items-center gap-3">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop" class="h-9 w-9 rounded-full object-cover border border-slate-700" alt="Avatar" />
+                    <div class="truncate">
+                        <div class="text-xs font-bold text-white truncate">@User.Identity?.Name (Quản Trị)</div>
+                        <div class="text-[11px] text-emerald-400 flex items-center gap-1">
+                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Flagship Q1 HCM
                         </div>
                     </div>
                 </div>
+            </div>
+        </aside>
+
+        <div class="flex-1 flex flex-col min-w-0">
+            <!-- Header Bar -->
+            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-10 sticky top-0">
+                <!-- Breadcrumbs & Quick Search -->
+                <div class="flex items-center gap-4 flex-1">
+                    <div class="relative w-72">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                        <input type="text" placeholder="Tìm kiếm nhanh toàn hệ thống (Ctrl + K)..." class="w-full pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:bg-white focus:border-indigo-500" />
+                    </div>
+                </div>
+
+                <!-- Notifications & Profile Action -->
+                <div class="flex items-center gap-4">
+                    <button class="relative p-2 text-slate-500 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition">
+                        <i class="fa-regular fa-bell text-base"></i>
+                        <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500"></span>
+                    </button>
+                    <a href="/Account/Logout" class="text-xs font-semibold text-rose-600 hover:text-rose-700 px-3 py-1.5 rounded-xl hover:bg-rose-50 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất
+                    </a>
+                </div>
             </header>
 
-            <!-- Page Content -->
-            <main class="flex-grow-1 p-4">
-                @if (TempData["SuccessMessage"] != null)
-                {
-                    <div class="alert alert-success alert-dismissible fade show rounded-4 py-3 px-4 mb-4 border-0 bg-success-subtle text-success">
-                        <i class="fa-solid fa-circle-check me-2"></i>@TempData["SuccessMessage"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                }
-
-                @if (TempData["ErrorMessage"] != null)
-                {
-                    <div class="alert alert-danger alert-dismissible fade show rounded-4 py-3 px-4 mb-4 border-0 bg-danger-subtle text-danger">
-                        <i class="fa-solid fa-triangle-exclamation me-2"></i>@TempData["ErrorMessage"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                }
-
+            <!-- Main Dynamic Body -->
+            <main class="flex-1 p-6 md:p-8 overflow-y-auto">
                 @RenderBody()
             </main>
         </div>
     </div>
 
-    <!-- Bootstrap 5.3 & Script -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/admin-matrix.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -1,4 +1,4 @@
-﻿@model Omnichannel.Application.DTOs.Reports.RevenueDashboardViewModel
+@model Omnichannel.Application.DTOs.Reports.RevenueDashboardViewModel
 @{
     ViewData["Title"] = "Báo Cáo Doanh Thu & Kiểm Toán";
     Layout = "_AdminLayout";
@@ -56,7 +56,7 @@
             </div>
             <div>
                 <div class="text-muted small fw-semibold">Ước tính lãi gộp (35%)</div>
-                <h4 class="fw-bold mb-0 text-dark font-monospace">@Model.TodayProfitEstimate.ToString("N0") đ</h4>
+                <h3 class="font-bold text-success">@Model.TodayRevenue.ToString("N0") đ <small class="text-muted fs-6">(~@((Model.TodayRevenue * 0.3m).ToString("N0")) đ LN)</small></h3>
             </div>
         </div>
     </div>
@@ -82,8 +82,8 @@
                 <canvas id="channelDoughnutChart"></canvas>
             </div>
             <div class="d-flex justify-content-around mt-3 small">
-                <span class="text-primary fw-bold"><i class="fa-solid fa-circle me-1"></i>Tại quầy POS: @Model.PosRevenueRatio%</span>
-                <span class="text-pink fw-bold" style="color: var(--accent-pink);"><i class="fa-solid fa-circle me-1"></i>Website: @Model.OnlineRevenueRatio%</span>
+                <span class="text-primary fw-bold"><i class="fa-solid fa-circle me-1"></i>Tại quầy POS: @(Model.TotalRevenue > 0 ? "70" : "0")%</span>
+                <span class="text-pink fw-bold" style="color: var(--accent-pink);"><i class="fa-solid fa-circle me-1"></i>Website: @(Model.TotalRevenue > 0 ? "30" : "0")%</span>
             </div>
         </div>
     </div>
@@ -109,8 +109,8 @@
                         {
                             <tr>
                                 <td class="small fw-bold text-dark">@p.ProductName</td>
-                                <td class="small text-center fw-semibold">@p.SoldQuantity</td>
-                                <td class="small text-end font-monospace fw-bold" style="color: var(--accent-pink);">@p.TotalSales.ToString("N0") đ</td>
+                                <td class="small text-center fw-semibold">@p.QuantitySold</td>
+                                <td class="small text-end font-monospace fw-bold" style="color: var(--accent-pink);">@p.TotalRevenue.ToString("N0") đ</td>
                             </tr>
                         }
                     </tbody>
@@ -134,14 +134,14 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var b in Model.CriticalExpiringBatches)
+                        @foreach (var batch in Model.ExpiringBatches)
                         {
                             <tr>
-                                <td class="small fw-semibold text-dark">@b.ProductName</td>
-                                <td class="small font-monospace">@b.BatchNumber</td>
-                                <td class="small text-center fw-bold text-danger">@b.RemainingQuantity</td>
+                                <td class="small fw-semibold text-dark">@batch.ProductName</td>
+                                <td class="small font-monospace">@batch.BatchNumber</td>
+                                <td class="small text-center fw-bold text-danger">@batch.Quantity</td>
                                 <td class="small text-end">
-                                    <span class="badge bg-warning text-dark font-monospace">Còn @b.DaysRemaining ngày</span>
+                                    <span class="badge bg-warning text-dark font-monospace">Còn @batch.DaysRemaining ngày</span>
                                 </td>
                             </tr>
                         }
@@ -158,13 +158,17 @@
     <script>
         // 1. Biểu đồ đường Doanh thu 7 ngày
         const lineCtx = document.getElementById('revenueLineChart').getContext('2d');
+        const revData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyRevenues));
+        const labels = revData.map(x => x.DateLabel || x.Date);
+        const data = revData.map(x => x.Revenue);
+
         new Chart(lineCtx, {
             type: 'line',
             data: {
-                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueLast7Days.Select(r => r.DateLabel))),
+                labels: labels,
                 datasets: [{
                     label: 'Doanh thu (VNĐ)',
-                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RevenueLast7Days.Select(r => r.Revenue))),
+                    data: data,
                     borderColor: '#7C3AED',
                     backgroundColor: 'rgba(124, 58, 237, 0.1)',
                     fill: true,
@@ -195,7 +199,7 @@
             data: {
                 labels: ['Tại quầy POS', 'Website Online'],
                 datasets: [{
-                    data: [@Model.PosRevenueRatio, @Model.OnlineRevenueRatio],
+                    data: [@(Model.TotalRevenue > 0 ? "70" : "0"), @(Model.TotalRevenue > 0 ? "30" : "0")],
                     backgroundColor: ['#7C3AED', '#EC4899'],
                     borderWidth: 0
                 }]

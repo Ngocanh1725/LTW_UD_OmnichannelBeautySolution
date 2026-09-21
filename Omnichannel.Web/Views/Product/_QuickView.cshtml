@@ -1,0 +1,51 @@
+@model Omnichannel.Domain.Entities.Product
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
+    <div class="relative rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center">
+        <img src="@(string.IsNullOrEmpty(Model.ThumbnailUrl) ? "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&h=600&fit=crop" : Model.ThumbnailUrl)" class="w-full h-auto object-cover max-h-[500px]" alt="@Model.Name" />
+    </div>
+    
+    <div class="flex flex-col justify-center">
+        <div class="text-xs uppercase tracking-widest font-bold text-pink-600 mb-2">@Model.Category?.Name</div>
+        <h2 class="font-serif-luxury text-2xl font-bold text-slate-900 mb-2">@Model.Name</h2>
+        
+        <div class="flex items-center gap-2 mb-4">
+            <div class="flex text-amber-400 text-sm">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+            </div>
+            <span class="text-xs text-slate-500">(150 đánh giá)</span>
+        </div>
+        
+        <div class="flex items-end gap-3 mb-6">
+            <span class="text-3xl font-bold text-slate-900 font-mono-numeric">@Model.SellingPrice.ToString("N0") ₫</span>
+            @if(Model.SellingPrice > 0)
+            {
+                <span class="text-lg text-slate-400 line-through font-mono-numeric mb-1">@((Model.SellingPrice * 1.2m).ToString("N0")) ₫</span>
+            }
+        </div>
+        
+        <div class="bg-pink-50 rounded-xl p-4 mb-6 border border-pink-100">
+            <div class="text-sm font-bold text-pink-800 mb-1"><i class="fa-solid fa-shield-halved mr-1"></i> Thông tin Lô hàng & HSD</div>
+            <p class="text-xs text-pink-700 leading-relaxed">Sản phẩm áp dụng thuật toán xuất kho FEFO độc quyền. Cam kết lô hàng giao đến bạn có hạn sử dụng tốt nhất. Đổi trả miễn phí 100% nếu phát hiện hàng cận date không báo trước.</p>
+        </div>
+        
+        <div class="flex items-center gap-4 mt-auto">
+            <div x-data="{ qty: 1 }" class="flex items-center bg-slate-50 rounded-full border border-slate-200">
+                <button type="button" @@click="qty > 1 ? qty-- : null" class="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-pink-600 transition"><i class="fa-solid fa-minus text-xs"></i></button>
+                <input type="text" x-model="qty" readonly class="w-10 h-10 bg-transparent text-center font-bold text-slate-800 text-sm border-none focus:ring-0 p-0" />
+                <button type="button" @@click="qty++" class="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-pink-600 transition"><i class="fa-solid fa-plus text-xs"></i></button>
+            </div>
+            
+            <button type="button" 
+                    hx-post="/Cart/Add" 
+                    hx-ext="json-enc" 
+                    hx-vals='js:{productId: "@Model.Id", quantity: parseInt($el.previousElementSibling.querySelector("input").value) || 1}'
+                    hx-trigger="click"
+                    @@click="quickViewOpen = false"
+                    hx-on::after-request="if(event.detail.successful) htmx.trigger('body', 'reloadMiniCart')"
+                    class="flex-1 py-3 px-6 rounded-full bg-pink-600 text-white font-bold text-sm uppercase tracking-wider hover:bg-pink-700 hover:shadow-lg transition flex items-center justify-center gap-2">
+                <i class="fa-solid fa-cart-plus"></i> Thêm Vào Giỏ
+            </button>
+        </div>
+    </div>
+</div>

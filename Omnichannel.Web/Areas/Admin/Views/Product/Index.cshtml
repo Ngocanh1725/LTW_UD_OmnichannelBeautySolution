@@ -1,101 +1,139 @@
-﻿@model IEnumerable<Omnichannel.Application.DTOs.Inventory.ProductItemViewModel>
+@model IEnumerable<Omnichannel.Application.DTOs.Inventory.ProductItemViewModel>
 @{
     ViewData["Title"] = "Danh mục Sản phẩm SKU";
     Layout = "_AdminLayout";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h4 class="fw-bold text-dark mb-1">Danh mục Mỹ phẩm & SKU</h4>
-        <p class="text-muted small mb-0">Quản lý mã vạch EAN-13, giá bán lẻ niêm yết và thông số định mức an toàn</p>
-    </div>
-    <a href="/Admin/Product/Create" class="btn btn-primary-gradient px-3">
-        <i class="fa-solid fa-plus me-1"></i>Thêm Mới Sản Phẩm
-    </a>
-</div>
+@Html.AntiForgeryToken()
 
-<!-- Bộ lọc tìm kiếm -->
-<div class="beauty-card p-3 mb-4">
-    <form method="get" class="row g-2 align-items-center">
-        <div class="col-md-5">
-            <div class="input-group">
-                <span class="input-group-text bg-light border-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
-                <input type="text" name="keyword" class="form-control bg-light border-0 small" placeholder="Tìm theo tên sản phẩm, mã SKU hoặc Barcode..." value="@ViewBag.Keyword" />
+<div x-data="{ createModalOpen: false }" 
+     @@htmx:after-swap.window="if($event.detail.target.id === 'createModalBody') { createModalOpen = true }"
+     @@reloadproducttable.window="htmx.trigger('#productTableContainer', 'reload')"
+     class="space-y-6">
+
+    <!-- Header Section -->
+    <div class="md:flex md:items-center md:justify-between">
+        <div class="min-w-0 flex-1">
+            <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Danh mục Mỹ phẩm & SKU</h2>
+            <p class="mt-1 text-sm text-gray-500">Quản lý mã vạch EAN-13, giá bán lẻ niêm yết và thông số định mức an toàn.</p>
+        </div>
+        <div class="mt-4 flex md:ml-4 md:mt-0">
+            <button type="button" 
+                    hx-get="/Admin/Product/Create" 
+                    hx-target="#createModalBody"
+                    class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                <i class="fa-solid fa-plus mr-2"></i>Thêm Mới Sản Phẩm
+            </button>
+        </div>
+    </div>
+
+    <!-- Filter Section (HTMX driven) -->
+    <div class="bg-white p-4 shadow sm:rounded-lg">
+        <form hx-get="/Admin/Product" 
+              hx-target="#productTableContainer" 
+              hx-trigger="submit, keyup delay:500ms from:input[name=keyword], change from:select[name=categoryId]"
+              class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div>
+                <label for="keyword" class="sr-only">Tìm kiếm</label>
+                <div class="relative rounded-md shadow-sm">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                        <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+                    </div>
+                    <input type="text" name="keyword" id="keyword" class="block w-full rounded-md border-0 py-1.5 pl-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="Tìm theo tên, mã SKU hoặc Barcode...">
+                </div>
+            </div>
+            <div>
+                <label for="categoryId" class="sr-only">Danh mục</label>
+                <select name="categoryId" id="categoryId" asp-items="ViewBag.Categories" class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                    <option value="">-- Tất cả danh mục ngành hàng --</option>
+                </select>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button type="button" onclick="document.getElementById('keyword').value=''; document.getElementById('categoryId').value=''; htmx.trigger(this.closest('form'), 'submit');" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                    <i class="fa-solid fa-rotate-left mr-2"></i> Làm mới
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table Container -->
+    <div id="productTableContainer" 
+         hx-get="/Admin/Product" 
+         hx-trigger="reload from:body" 
+         class="transition-opacity duration-300">
+        <partial name="_ProductList" model="Model" />
+    </div>
+
+    <!-- Alpine Modal for Create/Edit -->
+    <div x-show="createModalOpen" style="display: none;" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div x-show="createModalOpen" 
+             x-transition:enter="ease-out duration-300" 
+             x-transition:enter-start="opacity-0" 
+             x-transition:enter-end="opacity-100" 
+             x-transition:leave="ease-in duration-200" 
+             x-transition:leave-start="opacity-100" 
+             x-transition:leave-end="opacity-0" 
+             class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div x-show="createModalOpen" 
+                     @@click.outside="createModalOpen = false"
+                     x-transition:enter="ease-out duration-300" 
+                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                     x-transition:leave="ease-in duration-200" 
+                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
+                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                     class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:p-6">
+                    
+                    <div class="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
+                        <button type="button" @@click="createModalOpen = false" class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none">
+                            <span class="sr-only">Close</span>
+                            <i class="fa-solid fa-xmark h-6 w-6 text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="createModalBody">
+                        <!-- Content loaded via HTMX -->
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <select name="categoryId" asp-items="ViewBag.Categories" class="form-select rounded-3">
-                <option value="">-- Tất cả danh mục ngành hàng --</option>
-            </select>
-        </div>
-        <div class="col-md-3 d-flex gap-2">
-            <button type="submit" class="btn btn-soft-purple px-3 w-100">
-                <i class="fa-solid fa-filter me-1"></i>Lọc Dữ Liệu
-            </button>
-            <a href="/Admin/Product" class="btn btn-light rounded-3 px-3">
-                <i class="fa-solid fa-rotate-left"></i>
-            </a>
-        </div>
-    </form>
-</div>
-
-<!-- Bảng danh sách sản phẩm -->
-<div class="beauty-card overflow-hidden">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="bg-light">
-                <tr>
-                    <th class="py-3 px-4">Mã SKU / Barcode</th>
-                    <th class="py-3">Tên sản phẩm</th>
-                    <th class="py-3">Ngành hàng</th>
-                    <th class="py-3">Nhà cung cấp</th>
-                    <th class="py-3 text-end">Giá vốn</th>
-                    <th class="py-3 text-end">Giá bán niêm yết</th>
-                    <th class="py-3 text-center">Tồn an toàn</th>
-                    <th class="py-3">Trạng thái</th>
-                    <th class="py-3 px-4 text-end">Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var p in Model)
-                {
-                    <tr>
-                        <td class="px-4">
-                            <div class="fw-bold text-dark">@p.ProductId</div>
-                            <div class="text-muted font-monospace" style="font-size: 11px;"><i class="fa-solid fa-barcode me-1"></i>@p.Barcode</div>
-                        </td>
-                        <td>
-                            <div class="fw-semibold text-dark">@p.ProductName</div>
-                            <div class="text-muted" style="font-size: 11px;">ĐVT: @p.Unit</div>
-                        </td>
-                        <td>
-                            <span class="badge" style="background: var(--primary-purple-light); color: var(--primary-purple);">@p.CategoryName</span>
-                        </td>
-                        <td class="small text-secondary">@p.SupplierName</td>
-                        <td class="text-end small font-monospace">@p.CostPrice.ToString("N0") đ</td>
-                        <td class="text-end fw-bold font-monospace" style="color: var(--accent-pink);">@p.SellingPrice.ToString("N0") đ</td>
-                        <td class="text-center small fw-semibold">@p.SafetyStock</td>
-                        <td>
-                            @if (p.Status == 1)
-                            {
-                                <span class="badge-active">Đang mở bán</span>
-                            }
-                            else
-                            {
-                                <span class="badge-locked">Tạm ngưng</span>
-                            }
-                        </td>
-                        <td class="px-4 text-end">
-                            <form asp-action="ToggleStatus" asp-route-id="@p.ProductId" method="post" class="d-inline">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-outline-secondary rounded-3" title="@(p.Status == 1 ? "Tạm ngưng bán" : "Mở bán lại")">
-                                    <i class="fa-solid @(p.Status == 1 ? "fa-ban" : "fa-check")"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        document.body.addEventListener("htmx:afterRequest", function (evt) {
+            if (evt.detail.successful && evt.detail.elt.hasAttribute('hx-post') && !evt.detail.target) {
+                // Thao tác ToggleStatus hoặc submit Create nếu thành công có trả về HTTP 200 mà không cần target
+                if(evt.detail.xhr.response === "") {
+                    // Modal should be closed if the response is empty and has HX-Trigger
+                    document.dispatchEvent(new CustomEvent('reloadproducttable'));
+                }
+            }
+        });
+        
+        // SignalR Toast Notification
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/systemHub")
+            .build();
+
+        connection.on("ReceiveNotification", function (message, type) {
+            Swal.fire({
+                toast: true,
+                position: 'bottom-end',
+                icon: type,
+                title: message,
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
+        });
+
+        connection.start().catch(function (err) {
+            return console.error(err.toString());
+        });
+    </script>
+}

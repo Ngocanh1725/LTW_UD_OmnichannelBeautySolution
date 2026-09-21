@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -34,15 +34,30 @@ namespace Omnichannel.Web.Controllers
                 return RedirectToAction("Index", "Cart");
             }
 
-            var cart = await _cartService.GetCartAsync(cartId);
-            if (!cart.Items.Any())
+            var cartDto = await _cartService.GetCartAsync(cartId, null);
+            if (!cartDto.Items.Any())
             {
                 return RedirectToAction("Index", "Cart");
             }
 
+            var cartVm = new CartViewModel
+            {
+                Id = cartDto.Id,
+                SessionId = cartDto.SessionId,
+                UserId = cartDto.UserId,
+                SubTotal = cartDto.SubTotal,
+                DiscountAmount = cartDto.DiscountAmount,
+                TotalAmount = cartDto.TotalAmount,
+                TotalItems = cartDto.TotalItems,
+                Items = cartDto.Items,
+                CartItems = cartDto.CartItems,
+                ShippingFee = cartDto.TotalAmount >= 500000 ? 0 : 30000,
+                FinalTotal = cartDto.TotalAmount + (cartDto.TotalAmount >= 500000 ? 0 : 30000)
+            };
+
             var vm = new CheckoutViewModel
             {
-                Cart = cart,
+                Cart = cartVm,
                 RecipientName = User.FindFirstValue(ClaimTypes.GivenName) ?? "",
                 RecipientPhone = ""
             };
@@ -61,7 +76,16 @@ namespace Omnichannel.Web.Controllers
 
             if (!ModelState.IsValid)
             {
-                model.Cart = await _cartService.GetCartAsync(cartId);
+                var cDto = await _cartService.GetCartAsync(cartId, null);
+                model.Cart = new CartViewModel
+                {
+                    Id = cDto.Id, SessionId = cDto.SessionId, UserId = cDto.UserId,
+                    SubTotal = cDto.SubTotal, DiscountAmount = cDto.DiscountAmount,
+                    TotalAmount = cDto.TotalAmount, TotalItems = cDto.TotalItems,
+                    Items = cDto.Items, CartItems = cDto.CartItems,
+                    ShippingFee = cDto.TotalAmount >= 500000 ? 0 : 30000,
+                    FinalTotal = cDto.TotalAmount + (cDto.TotalAmount >= 500000 ? 0 : 30000)
+                };
                 return View("Index", model);
             }
 
@@ -71,7 +95,16 @@ namespace Omnichannel.Web.Controllers
             if (!success || result == null)
             {
                 TempData["ErrorMessage"] = message;
-                model.Cart = await _cartService.GetCartAsync(cartId);
+                var cDto2 = await _cartService.GetCartAsync(cartId, null);
+                model.Cart = new CartViewModel
+                {
+                    Id = cDto2.Id, SessionId = cDto2.SessionId, UserId = cDto2.UserId,
+                    SubTotal = cDto2.SubTotal, DiscountAmount = cDto2.DiscountAmount,
+                    TotalAmount = cDto2.TotalAmount, TotalItems = cDto2.TotalItems,
+                    Items = cDto2.Items, CartItems = cDto2.CartItems,
+                    ShippingFee = cDto2.TotalAmount >= 500000 ? 0 : 30000,
+                    FinalTotal = cDto2.TotalAmount + (cDto2.TotalAmount >= 500000 ? 0 : 30000)
+                };
                 return View("Index", model);
             }
 
@@ -84,26 +117,26 @@ namespace Omnichannel.Web.Controllers
             var order = await _context.Orders
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
-                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+                .FirstOrDefaultAsync(o => o.OrderCode == orderId);
 
             if (order == null) return NotFound();
 
             // Sinh mã QR nếu chọn VietQR
             VietQrPaymentDto? vietQr = null;
-            if (order.PaymentMethod == 2)
+            if (order.PaymentMethod == "VNPAY" || order.PaymentMethod == "VIETQR")
             {
                 string bankId = "MB";
                 string accountNo = "0909999888";
                 string accountName = "OMNICHANNEL BEAUTY";
-                string qrUrl = $"https://img.vietqr.io/image/{bankId}-{accountNo}-compact2.png?amount={(long)order.FinalTotal}&addInfo={order.OrderId}&accountName={accountName}";
+                string qrUrl = $"https://img.vietqr.io/image/{bankId}-{accountNo}-compact2.png?amount={(long)order.TotalAmount}&addInfo={order.OrderCode}&accountName={accountName}";
 
                 vietQr = new VietQrPaymentDto
                 {
                     BankName = "MBBank (Ngân Hàng Quân Đội)",
                     BankAccountNo = accountNo,
                     AccountName = "CÔNG TY TNHH OMNICHANNEL BEAUTY",
-                    Amount = order.FinalTotal,
-                    OrderInfo = order.OrderId,
+                    Amount = order.TotalAmount,
+                    OrderInfo = order.OrderCode,
                     QrImageUrl = qrUrl,
                     ExpireSeconds = 900
                 };
@@ -111,11 +144,11 @@ namespace Omnichannel.Web.Controllers
 
             var vm = new OrderSuccessViewModel
             {
-                OrderId = order.OrderId,
-                RecipientName = order.RecipientName,
-                RecipientPhone = order.RecipientPhone,
+                OrderId = order.OrderCode,
+                RecipientName = order.CustomerName,
+                RecipientPhone = order.CustomerPhone,
                 ShippingAddress = order.ShippingAddress,
-                FinalTotal = order.FinalTotal,
+                FinalTotal = order.TotalAmount,
                 PaymentMethod = order.PaymentMethod,
                 PaymentStatus = order.PaymentStatus,
                 OrderStatus = order.OrderStatus,
@@ -140,16 +173,16 @@ namespace Omnichannel.Web.Controllers
         {
             var order = await _context.Orders
                 .AsNoTracking()
-                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+                .FirstOrDefaultAsync(o => o.OrderCode == orderId);
 
             if (order == null) return NotFound();
 
             return Json(new
             {
-                orderId = order.OrderId,
+                orderId = order.OrderCode,
                 paymentStatus = order.PaymentStatus,
                 orderStatus = order.OrderStatus,
-                isPaid = order.PaymentStatus == 2
+                isPaid = order.PaymentStatus == "PAID"
             });
         }
     }

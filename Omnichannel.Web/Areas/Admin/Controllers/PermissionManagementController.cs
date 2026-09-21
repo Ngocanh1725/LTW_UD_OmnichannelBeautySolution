@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Omnichannel.Application.DTOs.Security;
 using Omnichannel.Application.Interfaces.Security;
 using Omnichannel.Domain.Entities;
@@ -16,181 +13,212 @@ using Omnichannel.Infrastructure.Security;
 namespace Omnichannel.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize]
+    [HasPermission("SECURITY", "MANAGE")]
     public class PermissionManagementController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IPermissionService _permissionService;
-        private readonly ILogger<PermissionManagementController> _logger;
 
-        public PermissionManagementController(
-            ApplicationDbContext context,
-            IPermissionService permissionService,
-            ILogger<PermissionManagementController> logger)
+        public PermissionManagementController(ApplicationDbContext context, IPermissionService permissionService)
         {
             _context = context;
             _permissionService = permissionService;
-            _logger = logger;
         }
 
         [HttpGet]
-        [HasPermission("SECURITY", "VIEW")]
-        public async Task<IActionResult> Index(string? roleId = null)
+        public async Task<IActionResult> Index(int? roleId)
         {
             var roles = await _context.Roles
                 .AsNoTracking()
-                .OrderBy(r => r.RoleName)
-                .Select(r => new RoleDto
+                .Select(r => new RoleDto { Id = r.Id, Name = r.Name, Description = r.Description })
+                .ToListAsync();
+
+            var users = await _context.Users
+                .AsNoTracking()
+                .Where(u => u.IsActive)
+                .Select(u => new UserSummaryDto
                 {
-                    RoleId = r.RoleId,
-                    RoleName = r.RoleName,
-                    Description = r.Description
+                    Id = u.Id,
+                    Username = u.Username,
+                    FullName = u.FullName,
+                    Email = u.Email,
+                    StoreName = u.Store != null ? u.Store.Name : "Toàn hệ thống"
                 })
                 .ToListAsync();
 
-            var currentRoleId = string.IsNullOrEmpty(roleId)
-                ? (roles.FirstOrDefault()?.RoleId ?? "SUPER_ADMIN")
-                : roleId;
+            var selectedRoleId = roleId ?? roles.FirstOrDefault()?.Id ?? 0;
 
-            var currentRole = roles.FirstOrDefault(r => r.RoleId == currentRoleId);
-
-            var allPermissions = await _context.Permissions
+            var permissions = await _context.Permissions
                 .AsNoTracking()
-                .OrderBy(p => p.ModuleCode)
-                .ThenBy(p => p.PermissionId)
+                .OrderBy(p => p.Module)
+                .ThenBy(p => p.Code)
                 .ToListAsync();
 
-            // Nhóm permissions theo Module
-            var moduleGroups = allPermissions
-                .GroupBy(p => p.ModuleCode)
+            var moduleGroups = permissions
+                .GroupBy(p => p.Module)
                 .Select(g => new ModulePermissionGroupDto
                 {
                     ModuleCode = g.Key,
-                    ModuleDisplayName = GetModuleDisplayName(g.Key),
-                    IconClass = GetModuleIcon(g.Key),
-                    Permissions = g.Select(p => new PermissionDetailDto
+                    ModuleName = GetModuleDisplayName(g.Key),
+                    Permissions = g.Select(p => new PermissionItemDto
                     {
-                        PermissionId = p.PermissionId,
-                        ActionCode = p.ActionCode,
-                        PermissionName = p.PermissionName,
+                        Id = p.Id,
+                        Code = p.Code,
+                        Name = p.Name,
+                        Action = ExtractAction(p.Code),
                         Description = p.Description
                     }).ToList()
                 })
                 .ToList();
 
-            var grantedIds = await _context.RolePermissions
+            var activeRolePermIds = await _context.RolePermissions
                 .AsNoTracking()
-                .Where(rp => rp.RoleId == currentRoleId && rp.IsGranted)
+                .Where(rp => rp.RoleId == selectedRoleId)
                 .Select(rp => rp.PermissionId)
                 .ToListAsync();
 
-            var viewModel = new PermissionMatrixViewModel
+            var vm = new PermissionMatrixViewModel
             {
-                SelectedRoleId = currentRoleId,
-                SelectedRoleName = currentRole?.RoleName ?? currentRoleId,
                 Roles = roles,
+                Users = users,
                 ModuleGroups = moduleGroups,
-                GrantedPermissionIds = new HashSet<int>(grantedIds)
+                SelectedRoleId = selectedRoleId,
+                ActivePermissionIdsForRole = activeRolePermIds
             };
 
-            return View(viewModel);
+            return View(vm);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetRolePermissions(int roleId)
+        {
+            var permissionIds = await _context.RolePermissions
+                .AsNoTracking()
+                .Where(rp => rp.RoleId == roleId)
+                .Select(rp => rp.PermissionId)
+                .ToListAsync();
+
+            return Json(new { success = true, roleId, permissionIds });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [HasPermission("SECURITY", "EDIT_MATRIX")]
-        public async Task<IActionResult> SaveRoleMatrix([FromBody] UpdateRolePermissionsRequest request)
+        public async Task<IActionResult> SaveRoleMatrix([FromBody] RolePermissionUpdateDto dto)
         {
-            if (string.IsNullOrWhiteSpace(request.RoleId))
+            if (dto == null || dto.RoleId <= 0)
             {
-                return BadRequest(new { success = false, message = "Mã vai trò không hợp lệ." });
+                return Json(new { success = false, message = "Dữ liệu yêu cầu không hợp lệ." });
             }
 
-            var currentAdminId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "SYSTEM";
+            var role = await _context.Roles.FindAsync(dto.RoleId);
+            if (role == null)
+            {
+                return Json(new { success = false, message = "Vai trò không tồn tại trong hệ thống." });
+            }
 
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // Xóa cấu hình quyền cũ của vai trò
-                var oldPerms = await _context.RolePermissions
-                    .Where(rp => rp.RoleId == request.RoleId)
-                    .ToListAsync();
-                _context.RolePermissions.RemoveRange(oldPerms);
+                // Xóa toàn bộ mapping quyền hiện tại của Role
+                var existing = await _context.RolePermissions.Where(rp => rp.RoleId == dto.RoleId).ToListAsync();
+                _context.RolePermissions.RemoveRange(existing);
 
-                // Thêm danh sách quyền mới
-                var newPerms = request.PermissionIds.Distinct().Select(permId => new RolePermission
+                // Thêm danh sách quyền mới được tick
+                if (dto.PermissionIds != null && dto.PermissionIds.Any())
                 {
-                    RoleId = request.RoleId,
-                    PermissionId = permId,
-                    IsGranted = true,
-                    GrantedBy = currentAdminId,
-                    GrantedAt = DateTime.UtcNow
-                });
-
-                await _context.RolePermissions.AddRangeAsync(newPerms);
-                await _context.SaveChangesAsync();
-
-                await transaction.CommitAsync();
-
-                // Lấy danh sách tất cả người dùng thuộc vai trò này để xóa Cache tức thì
-                var affectedUserIds = await _context.UserRoles
-                    .AsNoTracking()
-                    .Where(ur => ur.RoleId == request.RoleId)
-                    .Select(ur => ur.UserId)
-                    .ToListAsync();
-
-                foreach (var userId in affectedUserIds)
-                {
-                    await _permissionService.InvalidateUserPermissionCacheAsync(userId);
+                    var newMappings = dto.PermissionIds.Distinct().Select(pid => new RolePermission
+                    {
+                        RoleId = dto.RoleId,
+                        PermissionId = pid
+                    });
+                    await _context.RolePermissions.AddRangeAsync(newMappings);
                 }
 
-                _logger.LogInformation("SuperAdmin {AdminId} đã cập nhật ma trận quyền cho vai trò {RoleId}. Đã xóa Cache cho {Count} người dùng.",
-                    currentAdminId, request.RoleId, affectedUserIds.Count);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
 
-                return Ok(new
-                {
-                    success = true,
-                    message = $"Đã cập nhật thành công ma trận phân quyền cho vai trò '{request.RoleId}' và đồng bộ Cache hệ thống!"
-                });
+                // Evict Cache tức thì của toàn bộ người dùng thuộc Role này
+                await _permissionService.InvalidateRolePermissionCacheAsync(dto.RoleId);
+
+                return Json(new { success = true, message = $"Cập nhật ma trận phân quyền cho vai trò '{role.Name}' thành công!" });
             }
             catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                _logger.LogError(ex, "Lỗi xảy ra trong quá trình lưu ma trận phân quyền.");
-                return StatusCode(500, new { success = false, message = "Đã xảy ra lỗi hệ thống khi lưu ma trận." });
+                return Json(new { success = false, message = $"Lỗi khi lưu phân quyền: {ex.Message}" });
             }
         }
 
-        private static string GetModuleDisplayName(string moduleCode) => moduleCode switch
+        [HttpGet]
+        public async Task<IActionResult> GetUserOverrides(int userId)
         {
-            "SECURITY" => "Bảo Mật & Phân Quyền",
-            "HR_USER" => "Hồ Sơ Nhân Sự & Tài Khoản",
-            "MENU" => "Cấu Trúc Menu Đa Hình",
-            "BANNER" => "Chiến Dịch Banner & Ads",
-            "CMS_CONTENT" => "Nội Dung Bài Viết & CMS",
-            "CATALOG" => "Danh Mục & Sản Phẩm SKU",
-            "POS" => "Quầy Thu Ngân Bán Lẻ (POS)",
-            "ORDER_OPS" => "Vận Hành Đơn Hàng Đa Kênh",
-            "WAREHOUSE" => "Quản Trị Kho Vận & Lô Date FEFO",
-            "PROMO_PARTNER" => "Khuyến Mại & Nhà Cung Cấp",
-            "REPORT_AUDIT" => "Báo Cáo Doanh Thu & Kiểm Toán",
+            var breakdown = await _permissionService.GetUserPermissionBreakdownAsync(userId);
+            return Json(new { success = true, userId, breakdown });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveUserOverride([FromBody] UserOverrideDto dto)
+        {
+            if (dto == null || dto.UserId <= 0 || dto.PermissionId <= 0)
+            {
+                return Json(new { success = false, message = "Tham số đặc cách phân quyền không hợp lệ." });
+            }
+
+            var existingOverride = await _context.UserPermissions
+                .FirstOrDefaultAsync(up => up.UserId == dto.UserId && up.PermissionId == dto.PermissionId);
+
+            if (!dto.OverrideStatus.HasValue)
+            {
+                // Xóa đặc cách (trả về thừa kế từ Role)
+                if (existingOverride != null)
+                {
+                    _context.UserPermissions.Remove(existingOverride);
+                }
+            }
+            else
+            {
+                // Đặt cờ Granted hoặc Revoked
+                if (existingOverride != null)
+                {
+                    existingOverride.IsGranted = dto.OverrideStatus.Value;
+                }
+                else
+                {
+                    await _context.UserPermissions.AddAsync(new UserPermission
+                    {
+                        UserId = dto.UserId,
+                        PermissionId = dto.PermissionId,
+                        IsGranted = dto.OverrideStatus.Value
+                    });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            await _permissionService.InvalidateUserPermissionCacheAsync(dto.UserId);
+
+            return Json(new { success = true, message = "Cập nhật đặc cách quyền cá nhân thành công!" });
+        }
+
+        #region Helpers
+        private static string ExtractAction(string code)
+        {
+            var parts = code.Split(new[] { '_', ':' }, StringSplitOptions.RemoveEmptyEntries);
+            return parts.Length > 1 ? parts[^1].ToUpperInvariant() : "ACCESS";
+        }
+
+        private static string GetModuleDisplayName(string moduleCode) => moduleCode.ToUpperInvariant() switch
+        {
+            "DASHBOARD" => "Tổng Quan Hệ Thống",
+            "CATALOG" or "PRODUCT" => "Danh Mục & Sản Phẩm",
+            "INVENTORY" => "Quản Lý Kho & Lô Hàng FEFO",
+            "POS" => "Bán Lẻ Điểm Bán (POS)",
+            "ORDER" => "Quản Lý Đơn Hàng Đa Kênh",
+            "CMS" => "Biên Tập Nội Dung & Banner",
+            "REPORT" => "Báo Cáo & Thống Kê Doanh Thu",
+            "SECURITY" => "Định Danh & Phân Quyền Bảo Mật",
             _ => moduleCode
         };
-
-        private static string GetModuleIcon(string moduleCode) => moduleCode switch
-        {
-            "SECURITY" => "fa-solid fa-shield-halved text-purple",
-            "HR_USER" => "fa-solid fa-users text-pink",
-            "MENU" => "fa-solid fa-bars text-purple",
-            "BANNER" => "fa-solid fa-images text-pink",
-            "CMS_CONTENT" => "fa-solid fa-newspaper text-purple",
-            "CATALOG" => "fa-solid fa-boxes-stacked text-pink",
-            "POS" => "fa-solid fa-cash-register text-purple",
-            "ORDER_OPS" => "fa-solid fa-truck-fast text-pink",
-            "WAREHOUSE" => "fa-solid fa-warehouse text-purple",
-            "PROMO_PARTNER" => "fa-solid fa-tags text-pink",
-            "REPORT_AUDIT" => "fa-solid fa-chart-line text-purple",
-            _ => "fa-solid fa-cube"
-        };
+        #endregion
     }
 }

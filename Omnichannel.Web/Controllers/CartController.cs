@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -39,7 +39,7 @@ namespace Omnichannel.Web.Controllers
         public async Task<IActionResult> Index()
         {
             string cartId = GetOrCreateCartId();
-            var cart = await _cartService.GetCartAsync(cartId);
+            var cart = await _cartService.GetCartAsync(cartId, null);
             return View(cart);
         }
 
@@ -52,11 +52,13 @@ namespace Omnichannel.Web.Controllers
             }
 
             string cartId = GetOrCreateCartId();
-            bool success = await _cartService.AddToCartAsync(cartId, req.ProductId, req.Quantity);
+            int pId = int.TryParse(req.ProductId, out var id) ? id : 0;
+            var c = await _cartService.AddToCartAsync(cartId, null, pId, null, req.Quantity);
+            bool success = c != null;
 
             if (success)
             {
-                var cart = await _cartService.GetCartAsync(cartId);
+                var cart = await _cartService.GetCartAsync(cartId, null);
                 return Json(new
                 {
                     success = true,
@@ -73,16 +75,22 @@ namespace Omnichannel.Web.Controllers
         public async Task<IActionResult> UpdateQuantity([FromBody] UpdateCartItemRequest req)
         {
             string cartId = GetOrCreateCartId();
-            await _cartService.UpdateQuantityAsync(cartId, req.ProductId, req.Delta);
-            var cart = await _cartService.GetCartAsync(cartId);
+            int pId = int.TryParse(req.ProductId, out var id) ? id : 0;
+            var cart = await _cartService.GetCartAsync(cartId, null);
+            var item = cart?.Items.FirstOrDefault(i => i.ProductId == pId);
+            if (item != null)
+            {
+                await _cartService.UpdateQuantityAsync(cartId, null, item.Id, req.Delta);
+                cart = await _cartService.GetCartAsync(cartId, null);
+            }
 
             return Json(new
             {
                 success = true,
-                totalItems = cart.TotalItems,
-                subTotal = cart.SubTotal.ToString("N0") + " đ",
-                shippingFee = cart.ShippingFee.ToString("N0") + " đ",
-                finalTotal = cart.FinalTotal.ToString("N0") + " đ"
+                totalItems = cart?.TotalItems ?? 0,
+                subTotal = (cart?.SubTotal ?? 0).ToString("N0") + " đ",
+                shippingFee = 0.ToString("N0") + " đ",
+                finalTotal = (cart?.TotalAmount ?? 0).ToString("N0") + " đ"
             });
         }
 
@@ -90,7 +98,13 @@ namespace Omnichannel.Web.Controllers
         public async Task<IActionResult> RemoveItem([FromBody] string productId)
         {
             string cartId = GetOrCreateCartId();
-            await _cartService.RemoveItemAsync(cartId, productId);
+            int pId = int.TryParse(productId, out var id) ? id : 0;
+            var cart = await _cartService.GetCartAsync(cartId, null);
+            var item = cart?.Items.FirstOrDefault(i => i.ProductId == pId);
+            if (item != null)
+            {
+                await _cartService.RemoveFromCartAsync(cartId, null, item.Id);
+            }
             return Json(new { success = true });
         }
 

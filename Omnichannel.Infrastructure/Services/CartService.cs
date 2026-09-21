@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,139 +11,281 @@ using Omnichannel.Infrastructure.Data;
 
 namespace Omnichannel.Infrastructure.Services
 {
+    /// <summary>
+    /// Dịch vụ xử lý giỏ hàng đa kênh (Khách vãng lai theo Session và Thành viên theo UserId)
+    /// </summary>
     public class CartService : ICartService
     {
         private readonly ApplicationDbContext _context;
 
         public CartService(ApplicationDbContext context)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<CartViewModel> GetCartAsync(string cartId, CancellationToken cancellationToken = default)
+        public async Task<CartDto> GetOrCreateCartAsync(string? sessionId, string? userId, CancellationToken cancellationToken = default)
         {
-            var cart = await _context.Carts
-                .AsNoTracking()
-                .Include(c => c.CartItems)
-                    .ThenInclude(ci => ci.Product)
-                        .ThenInclude(p => p.ProductBatches)
-                .FirstOrDefaultAsync(c => c.CartId == cartId, cancellationToken);
+            var cart = await FindActiveCartEntityAsync(sessionId, userId, cancellationToken);
 
             if (cart == null)
             {
-                return new CartViewModel { CartId = cartId };
-            }
-
-            var today = DateTime.Today;
-
-            var items = cart.CartItems.Select(ci =>
-            {
-                var nearestBatch = ci.Product.ProductBatches
-                    .Where(b => b.ExpDate > today)
-                    .OrderBy(b => b.ExpDate)
-                    .FirstOrDefault();
-
-                return new CartItemViewModel
+                int? parsedUserId = null;
+                if (!string.IsNullOrWhiteSpace(userId) && int.TryParse(userId, out var uid))
                 {
-                    CartItemId = ci.CartItemId,
-                    ProductId = ci.ProductId,
-                    ProductName = ci.Product.ProductName,
-                    Barcode = ci.Product.Barcode,
-                    Slug = ci.Product.Slug,
-                    UnitPrice = ci.Product.SellingPrice,
-                    Quantity = ci.Quantity,
-                    NearestExpDateStr = nearestBatch != null ? nearestBatch.ExpDate.ToString("MM/yyyy") : "Đang cập nhật",
-                    ThumbnailUrl = "https://placehold.co/100x100/FDF2F8/7C3AED?text=Beauty"
-                };
-            }).ToList();
+                    parsedUserId = uid;
+                }
 
-            return new CartViewModel
-            {
-                CartId = cartId,
-                Items = items
-            };
-        }
-
-        public async Task<bool> AddToCartAsync(string cartId, string productId, int quantity, CancellationToken cancellationToken = default)
-        {
-            if (quantity <= 0) return false;
-
-            var product = await _context.Products.FindAsync(new object[] { productId }, cancellationToken);
-            if (product == null || product.Status != 1) return false;
-
-            var cart = await _context.Carts
-                .Include(c => c.CartItems)
-                .FirstOrDefaultAsync(c => c.CartId == cartId, cancellationToken);
-
-            if (cart == null)
-            {
                 cart = new Cart
                 {
-                    CartId = cartId,
-                    LastActive = DateTime.UtcNow
+                    CartSessionId = string.IsNullOrWhiteSpace(sessionId) ? Guid.NewGuid().ToString() : sessionId,
+                    UserId = parsedUserId,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 };
-                await _context.Carts.AddAsync(cart, cancellationToken);
+
+                _context.Carts.Add(cart);
                 await _context.SaveChangesAsync(cancellationToken);
             }
 
+            return MapToDto(cart);
+        }
+
+        public async Task<CartDto?> GetCartAsync(string? sessionId, string? userId, CancellationToken cancellationToken = default)
+        {
+            var cart = await FindActiveCartEntityAsync(sessionId, userId, cancellationToken);
+            return cart != null ? MapToDto(cart) : null;
+        }
+
+        public async Task<CartDto> AddToCartAsync(string? sessionId, string? userId, int productId, int? batchId, int quantity, CancellationToken cancellationToken = default)
+        {
+            if (quantity <= 0) quantity = 1;
+
+            var cart = await FindActiveCartEntityAsync(sessionId, userId, cancellationToken);
+            if (cart == null)
+            {
+                var newDto = await GetOrCreateCartAsync(sessionId, userId, cancellationToken);
+                cart = await _context.Carts
+                    .Include(c => c.CartItems)
+                    .FirstOrDefaultAsync(c => c.Id == newDto.Id, cancellationToken);
+            }
+
+            if (cart == null)
+            {
+                throw new InvalidOperationException("Không thể khởi tạo giỏ hàng.");
+            }
+
+            var product = await _context.Products.FindAsync(new object[] { productId }, cancellationToken);
+            if (product == null)
+            {
+                throw new KeyNotFoundException($"Không tìm thấy sản phẩm có ID: {productId}");
+            }
+
+            // Kiểm tra xem sản phẩm cùng Lô (ProductBatch) đã có trong giỏ chưa
             var existingItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == productId);
+
             if (existingItem != null)
             {
                 existingItem.Quantity += quantity;
+                existingItem.UnitPrice = product.SellingPrice;
             }
             else
             {
-                cart.CartItems.Add(new CartItem
+                var newItem = new CartItem
                 {
-                    CartId = cartId,
+                    CartId = cart.Id,
                     ProductId = productId,
                     Quantity = quantity,
-                    AddedAt = DateTime.UtcNow
-                });
+                    UnitPrice = product.SellingPrice
+                };
+                cart.CartItems.Add(newItem);
             }
 
-            cart.LastActive = DateTime.UtcNow;
+            cart.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync(cancellationToken);
-            return true;
+
+            return MapToDto(cart);
         }
 
-        public async Task<bool> UpdateQuantityAsync(string cartId, string productId, int delta, CancellationToken cancellationToken = default)
+        public async Task<CartDto> UpdateQuantityAsync(string? sessionId, string? userId, int cartItemId, int quantity, CancellationToken cancellationToken = default)
         {
-            var item = await _context.CartItems
-                .FirstOrDefaultAsync(ci => ci.CartId == cartId && ci.ProductId == productId, cancellationToken);
-
-            if (item == null) return false;
-
-            item.Quantity += delta;
-            if (item.Quantity <= 0)
+            var cart = await FindActiveCartEntityAsync(sessionId, userId, cancellationToken);
+            if (cart == null)
             {
-                _context.CartItems.Remove(item);
+                throw new InvalidOperationException("Không tìm thấy giỏ hàng.");
             }
 
-            await _context.SaveChangesAsync(cancellationToken);
-            return true;
-        }
-
-        public async Task<bool> RemoveItemAsync(string cartId, string productId, CancellationToken cancellationToken = default)
-        {
-            var item = await _context.CartItems
-                .FirstOrDefaultAsync(ci => ci.CartId == cartId && ci.ProductId == productId, cancellationToken);
-
-            if (item == null) return false;
-
-            _context.CartItems.Remove(item);
-            await _context.SaveChangesAsync(cancellationToken);
-            return true;
-        }
-
-        public async Task ClearCartAsync(string cartId, CancellationToken cancellationToken = default)
-        {
-            var items = await _context.CartItems.Where(ci => ci.CartId == cartId).ToListAsync(cancellationToken);
-            if (items.Any())
+            var item = cart.CartItems.FirstOrDefault(ci => ci.Id == cartItemId);
+            if (item != null)
             {
-                _context.CartItems.RemoveRange(items);
+                if (quantity <= 0)
+                {
+                    cart.CartItems.Remove(item);
+                    _context.CartItems.Remove(item);
+                }
+                else
+                {
+                    item.Quantity = quantity;
+                }
+
+                cart.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync(cancellationToken);
             }
+
+            return MapToDto(cart);
+        }
+
+        public async Task<CartDto> RemoveFromCartAsync(string? sessionId, string? userId, int cartItemId, CancellationToken cancellationToken = default)
+        {
+            var cart = await FindActiveCartEntityAsync(sessionId, userId, cancellationToken);
+            if (cart == null)
+            {
+                throw new InvalidOperationException("Không tìm thấy giỏ hàng.");
+            }
+
+            var item = cart.CartItems.FirstOrDefault(ci => ci.Id == cartItemId);
+            if (item != null)
+            {
+                cart.CartItems.Remove(item);
+                _context.CartItems.Remove(item);
+                cart.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+
+            return MapToDto(cart);
+        }
+
+        public async Task ClearCartAsync(string? sessionId, string? userId, CancellationToken cancellationToken = default)
+        {
+            var cart = await FindActiveCartEntityAsync(sessionId, userId, cancellationToken);
+            if (cart != null && cart.CartItems.Any())
+            {
+                _context.CartItems.RemoveRange(cart.CartItems);
+                cart.CartItems.Clear();
+                cart.UpdatedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+        }
+
+        public async Task MergeCartsAsync(string sessionId, string userId, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(sessionId) || string.IsNullOrWhiteSpace(userId))
+            {
+                return;
+            }
+
+            int? parsedUserId = int.TryParse(userId, out var uid) ? uid : null;
+            if (!parsedUserId.HasValue) return;
+
+            var guestCart = await _context.Carts
+                .Include(c => c.CartItems)
+                .FirstOrDefaultAsync(c => c.CartSessionId == sessionId && c.UserId == null, cancellationToken);
+
+            if (guestCart == null || !guestCart.CartItems.Any())
+            {
+                return;
+            }
+
+            var userCart = await _context.Carts
+                .Include(c => c.CartItems)
+                .FirstOrDefaultAsync(c => c.UserId == parsedUserId.Value, cancellationToken);
+
+            if (userCart == null)
+            {
+                // Sửa lỗi dòng 321: Ép kiểu an toàn parsedUserId (int?) thay vì chuỗi userId (string)
+                guestCart.UserId = parsedUserId.Value;
+                guestCart.UpdatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                foreach (var guestItem in guestCart.CartItems)
+                {
+                    var existingItem = userCart.CartItems.FirstOrDefault(ci =>
+                        ci.ProductId == guestItem.ProductId);
+
+                    if (existingItem != null)
+                    {
+                        existingItem.Quantity += guestItem.Quantity;
+                    }
+                    else
+                    {
+                        userCart.CartItems.Add(new CartItem
+                        {
+                            CartId = userCart.Id,
+                            ProductId = guestItem.ProductId,
+                            Quantity = guestItem.Quantity,
+                            UnitPrice = guestItem.UnitPrice
+                        });
+                    }
+                }
+
+                _context.CartItems.RemoveRange(guestCart.CartItems);
+                _context.Carts.Remove(guestCart);
+                userCart.UpdatedAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        // ================= HELPER METHODS =================
+        private async Task<Cart?> FindActiveCartEntityAsync(string? sessionId, string? userId, CancellationToken cancellationToken)
+        {
+            int? parsedUserId = null;
+            if (!string.IsNullOrWhiteSpace(userId) && int.TryParse(userId, out var uid))
+            {
+                parsedUserId = uid;
+            }
+
+            IQueryable<Cart> query = _context.Carts
+                .Include(c => c.CartItems)
+                    .ThenInclude(ci => ci.Product);
+
+            if (parsedUserId.HasValue)
+            {
+                return await query.FirstOrDefaultAsync(c => c.UserId == parsedUserId.Value, cancellationToken);
+            }
+
+            if (!string.IsNullOrWhiteSpace(sessionId))
+            {
+                return await query.FirstOrDefaultAsync(c => c.CartSessionId == sessionId, cancellationToken);
+            }
+
+            return null;
+        }
+
+        private CartDto MapToDto(Cart cart)
+        {
+            var items = cart.CartItems.Select(ci => new CartItemDto
+            {
+                Id = ci.Id,
+                CartId = ci.CartId,
+                ProductId = ci.ProductId,
+                ProductName = ci.Product?.Name ?? "Sản phẩm",
+                ProductSku = ci.Product?.Sku,
+                ProductImageUrl = ci.Product?.ThumbnailUrl,
+                ProductBatchId = null,
+                BatchNumber = null,
+                ExpDate = null,
+                Quantity = ci.Quantity,
+                UnitPrice = ci.UnitPrice,
+                DiscountAmount = 0,
+                LineTotal = ci.UnitPrice * ci.Quantity
+            }).ToList();
+
+            var subTotal = items.Sum(i => i.UnitPrice * i.Quantity);
+            var discountAmount = 0m;
+
+            return new CartDto
+            {
+                Id = cart.Id,
+                SessionId = cart.CartSessionId,
+                UserId = cart.UserId,
+                SubTotal = subTotal,
+                DiscountAmount = discountAmount,
+                TotalAmount = subTotal - discountAmount,
+                TotalItems = items.Sum(i => i.Quantity),
+                Items = items,
+                CartItems = items
+            };
         }
     }
 }

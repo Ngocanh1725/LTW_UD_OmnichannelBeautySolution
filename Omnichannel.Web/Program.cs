@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -8,7 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Omnichannel.Application.Interfaces.Cms;
-using Omnichannel.Application.Interfaces.Inventory;
+using Omnichannel.Application.DTOs.Inventory;
+
 using Omnichannel.Application.Interfaces.Reports;
 using Omnichannel.Application.Interfaces.Sales;
 using Omnichannel.Application.Interfaces.Security;
@@ -60,6 +61,10 @@ builder.Services.AddScoped<IOrderWorkflowService, OrderWorkflowService>();
 // Đăng ký Services POS & Báo Cáo Tài Chính:
 builder.Services.AddScoped<IPosService, PosService>();
 builder.Services.AddScoped<IReportService, ReportService>();
+builder.Services.AddScoped<Omnichannel.Application.Interfaces.Catalog.IProductService, Omnichannel.Infrastructure.Services.Catalog.ProductService>();
+
+// Cấu hình AutoMapper
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // 4. Cấu hình Xác thực bằng Cookie (Cookie Authentication)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -79,7 +84,13 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization();
 
 // 6. Đăng ký MVC Controllers & Views
-builder.Services.AddControllersWithViews();
+var mvcBuilder = builder.Services.AddControllersWithViews();
+
+if (builder.Environment.IsDevelopment())
+{
+    mvcBuilder.AddRazorRuntimeCompilation();
+}
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -122,5 +133,7 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapHub<Omnichannel.Web.Hubs.SystemHub>("/systemHub");
 
 app.Run();

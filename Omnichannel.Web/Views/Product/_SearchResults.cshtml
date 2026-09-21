@@ -1,0 +1,24 @@
+@model IEnumerable<Omnichannel.Domain.Entities.Product>
+
+@if (!Model.Any())
+{
+    <div class="px-3 py-2 text-xs text-slate-500">Không tìm thấy sản phẩm nào phù hợp.</div>
+}
+else
+{
+    @foreach (var p in Model)
+    {
+        <a href="/product/@p.Slug" class="flex items-center gap-3 p-2 rounded-xl hover:bg-pink-50 transition group">
+            <img src="@(string.IsNullOrEmpty(p.ThumbnailUrl) ? "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=100&h=100&fit=crop" : p.ThumbnailUrl)" class="w-12 h-12 rounded-lg object-cover border border-slate-100 group-hover:border-pink-200 transition" alt="@p.Name" />
+            <div class="flex-1 min-w-0">
+                <div class="text-[10px] font-bold text-pink-600 uppercase">@p.Category?.Name</div>
+                <h4 class="text-xs font-bold text-slate-900 truncate group-hover:text-pink-700 transition">@p.Name</h4>
+                <div class="text-xs font-bold text-slate-900 font-mono-numeric mt-0.5">@p.SellingPrice.ToString("N0") ₫ <span class="text-[9px] text-slate-400 line-through font-mono-numeric">@((p.SellingPrice * 1.2m).ToString("N0")) ₫</span></div>
+            </div>
+        </a>
+    }
+    
+    <a href="#" onclick="document.getElementById('storefrontSearchInput').closest('form')?.submit(); return false;" class="block mt-2 text-center text-xs font-bold text-pink-600 hover:text-pink-700 py-2 border-t border-slate-100">
+        Xem tất cả kết quả <i class="fa-solid fa-arrow-right ml-1"></i>
+    </a>
+}

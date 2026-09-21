@@ -1,0 +1,97 @@
+﻿<!DOCTYPE html>
+<html lang="vi" class="h-full bg-slate-50">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Biên Tập Nội Dung & SEO Inspector - Omnichannel Beauty</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .google-font {
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="h-full flex flex-col text-slate-800 antialiased overflow-hidden">
+    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 flex-shrink-0 z-10">
+        <div class="flex items-center gap-3">
+            <a href="/Admin/Dashboard" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-nib text-pink-500"></i>
+                    Biên Tập Bài Viết & Giám Sát SEO Realtime (Split View)
+                </h1>
+                <p class="text-xs text-slate-500">Đồng bộ tự động xem trước kết quả Google Tìm Kiếm & Thẻ Chia Sẻ Mạng Xã Hội</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button type="button" onclick="document.getElementById('cmsMainForm').submit();" class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-pink-600 text-white font-semibold text-sm hover:bg-pink-700 shadow-md shadow-pink-600/30 transition">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Xuất Bản Nội Dung
+            </button>
+        </div>
+    </header>
+
+    <div class="flex-1 flex overflow-hidden">
+        <!-- Cột Trái (55%): Khu vực soạn thảo CKEditor & Nhập liệu -->
+        <div class="w-7/12 border-r border-slate-200 overflow-y-auto p-6 bg-white">
+            @RenderBody()
+        </div>
+
+        <!-- Cột Phải (45%): Live Google SERP & Social Share Inspector -->
+        <div class="w-5/12 overflow-y-auto p-6 bg-slate-50 space-y-6">
+            <!-- Google SERP Live Preview Card -->
+            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                        <i class="fa-brands fa-google text-blue-500"></i> Google Search Result Preview
+                    </span>
+                    <span class="text-[11px] text-slate-400">Desktop & Mobile Snippet</span>
+                </div>
+
+                <div class="google-font space-y-1">
+                    <div class="text-[12px] text-slate-600 truncate flex items-center gap-1">
+                        <span class="text-slate-800 font-semibold">omnichannelbeauty.vn</span>
+                        <span class="text-slate-400">›</span>
+                        <span id="previewUrlSlug" class="text-slate-500">bai-viet/tieu-de-mau</span>
+                    </div>
+                    <div id="previewGoogleTitle" class="text-lg font-medium text-[#1a0dab] hover:underline cursor-pointer line-clamp-1 leading-snug">
+                        Tiêu Đề Bài Viết Chuẩn SEO Sẽ Hiển Thị Tại Đây
+                    </div>
+                    <div id="previewGoogleSnippet" class="text-xs text-[#4d5156] line-clamp-2 leading-relaxed">
+                        Đoạn mô tả tóm tắt nội dung meta description sẽ tự động hiển thị để tối ưu hóa tỷ lệ nhấp chuột CTR từ khách hàng tìm kiếm mỹ phẩm...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media OpenGraph Card -->
+            <div class="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+                <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                        <i class="fa-brands fa-facebook text-blue-600"></i> Social Share Card (OG Preview)
+                    </span>
+                </div>
+
+                <div class="border-b border-slate-100 bg-slate-100 h-44 overflow-hidden relative flex items-center justify-center">
+                    <img id="previewOgImage" src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&h=400&fit=crop" class="w-full h-full object-cover" alt="Og Image" />
+                </div>
+                <div class="p-4 space-y-1 bg-slate-50">
+                    <div class="text-[11px] uppercase font-bold text-slate-400">OMNICHANNELBEAUTY.VN</div>
+                    <div id="previewOgTitle" class="text-sm font-bold text-slate-800 line-clamp-1">Khám phá xu hướng Skincare 2026 cùng Omnichannel</div>
+                    <div id="previewOgDesc" class="text-xs text-slate-500 line-clamp-2">Bật mí các bước chăm sóc da mướt mịn chuẩn Hàn Quốc với hoạt chất cấp ẩm chuyên sâu...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

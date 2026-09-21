@@ -1,4 +1,4 @@
-﻿@model Omnichannel.Application.DTOs.Sales.CartViewModel
+@model Omnichannel.Application.DTOs.Sales.CartViewModel
 @{
     ViewData["Title"] = "Giỏ Hàng Của Bạn";
 }
@@ -41,7 +41,7 @@
                                     <tr>
                                         <td class="px-4">
                                             <div class="d-flex align-items-center gap-3">
-                                                <img src="@item.ThumbnailUrl" alt="@item.ProductName" class="rounded-3 border" style="width: 60px; height: 60px; object-fit: cover;" />
+                                                <img src="@(string.IsNullOrEmpty(item.ProductImageUrl) ? "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=100&h=100&fit=crop" : item.ProductImageUrl)" alt="@item.ProductName" class="rounded-3 border" style="width: 60px; height: 60px; object-fit: cover;" />
                                                 <div>
                                                     <div class="fw-bold text-dark small">@item.ProductName</div>
                                                     <span class="badge bg-purple-subtle text-purple mt-1" style="background: var(--primary-purple-light); color: var(--primary-purple); font-size: 11px;">

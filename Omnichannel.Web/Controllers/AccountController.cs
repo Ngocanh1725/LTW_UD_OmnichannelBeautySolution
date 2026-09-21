@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -65,76 +65,10 @@ namespace Omnichannel.Web.Controllers
             string normalized = cleanInput.ToUpperInvariant();
             string cleanPassword = model.Password ?? "";
 
-            // 1. Tìm tài khoản trong cơ sở dữ liệu
             var user = await _dbContext.Users
                 .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.NormalizedUsername == normalized || u.Email.ToUpper() == normalized);
-
-            // 2. Cơ chế tự phục hồi (Self-Healing) cho tài khoản Admin
-            if (normalized == "ADMIN" && cleanPassword == "Admin@123456")
-            {
-                if (user == null)
-                {
-                    user = new User
-                    {
-                        UserId = "USR-SUPERADMIN-0001",
-                        Username = "admin",
-                        NormalizedUsername = "ADMIN",
-                        Email = "admin@beautyomnichannel.vn",
-                        PhoneNumber = "0909999888",
-                        FullName = "Quản Trị Viên Tối Cao",
-                        PasswordHash = _passwordHasher.HashPassword("Admin@123456"),
-                        SecurityStamp = Guid.NewGuid().ToString("D"),
-                        UserType = 5,
-                        IsActive = true,
-                        CreatedAt = DateTime.UtcNow
-                    };
-                    await _dbContext.Users.AddAsync(user);
-                    await _dbContext.SaveChangesAsync();
-                }
-                else
-                {
-                    user.PasswordHash = _passwordHasher.HashPassword("Admin@123456");
-                    user.IsActive = true;
-                    user.UserType = 5;
-                    user.NormalizedUsername = "ADMIN";
-                    await _dbContext.SaveChangesAsync();
-                }
-
-                // Đảm bảo Role SUPER_ADMIN luôn liên kết với tài khoản admin
-                var hasSuperAdminRole = user.UserRoles.Any(ur => ur.RoleId == "SUPER_ADMIN");
-                if (!hasSuperAdminRole)
-                {
-                    var superRole = await _dbContext.Roles.FirstOrDefaultAsync(r => r.RoleId == "SUPER_ADMIN");
-                    if (superRole == null)
-                    {
-                        superRole = new Role
-                        {
-                            RoleId = "SUPER_ADMIN",
-                            RoleName = "Quản trị viên Tối cao",
-                            IsSystemRole = true,
-                            CreatedAt = DateTime.UtcNow
-                        };
-                        await _dbContext.Roles.AddAsync(superRole);
-                        await _dbContext.SaveChangesAsync();
-                    }
-
-                    var ur = await _dbContext.UserRoles.FirstOrDefaultAsync(x => x.UserId == user.UserId && x.RoleId == "SUPER_ADMIN");
-                    if (ur == null)
-                    {
-                        await _dbContext.UserRoles.AddAsync(new UserRole
-                        {
-                            UserId = user.UserId,
-                            RoleId = "SUPER_ADMIN",
-                            AssignedAt = DateTime.UtcNow
-                        });
-                        await _dbContext.SaveChangesAsync();
-                    }
-
-                    await _dbContext.Entry(user).Collection(u => u.UserRoles).Query().Include(r => r.Role).LoadAsync();
-                }
-            }
+                .FirstOrDefaultAsync(u => u.Username.ToUpper() == normalized || u.Email.ToUpper() == normalized);
 
             if (user == null)
             {
@@ -142,9 +76,7 @@ namespace Omnichannel.Web.Controllers
                 return View(model);
             }
 
-            // 3. Xác thực mật khẩu
-            bool isPasswordValid = (normalized == "ADMIN" && cleanPassword == "Admin@123456")
-                                || _passwordHasher.VerifyPassword(user.PasswordHash, cleanPassword);
+            bool isPasswordValid = _passwordHasher.VerifyPassword(user.PasswordHash, cleanPassword);
 
             if (!isPasswordValid)
             {
@@ -152,31 +84,23 @@ namespace Omnichannel.Web.Controllers
                 return View(model);
             }
 
-            // 4. Kiểm tra trạng thái hoạt động
             if (!user.IsActive)
             {
-                ModelState.AddModelError(string.Empty, "Tài khoản của bạn đang bị tạm khóa. Vui lòng liên hệ quản trị viên.");
+                ModelState.AddModelError(string.Empty, "Tài khoản của bạn đang bị tạm khóa.");
                 return View(model);
             }
 
-            // 5. Khởi tạo Claims và Cookie
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.UserId),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.GivenName, user.FullName),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim("UserType", user.UserType.ToString())
+                new Claim(ClaimTypes.Email, user.Email)
             };
 
             foreach (var userRole in user.UserRoles)
             {
-                claims.Add(new Claim(ClaimTypes.Role, userRole.RoleId));
-            }
-
-            if (user.UserType == 5 && !claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "SUPER_ADMIN"))
-            {
-                claims.Add(new Claim(ClaimTypes.Role, "SUPER_ADMIN"));
+                claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
             }
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -192,7 +116,7 @@ namespace Omnichannel.Web.Controllers
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties);
 
-            _logger.LogInformation("Người dùng {Username} ({UserId}) đã đăng nhập thành công.", user.Username, user.UserId);
+            _logger.LogInformation("Người dùng {Username} ({UserId}) đã đăng nhập thành công.", user.Username, user.Id);
 
             // 6. Điều hướng sau khi đăng nhập thành công
             if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
@@ -200,7 +124,7 @@ namespace Omnichannel.Web.Controllers
                 return Redirect(model.ReturnUrl);
             }
 
-            if (user.UserType >= 2 || user.UserRoles.Any(r => r.RoleId == "SUPER_ADMIN"))
+            if (user.UserType >= 2 || user.UserRoles.Any(r => r.Role.Name == "SUPER_ADMIN"))
             {
                 return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
             }

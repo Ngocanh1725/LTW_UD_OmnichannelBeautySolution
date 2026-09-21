@@ -1,271 +1,291 @@
-﻿@using Microsoft.AspNetCore.Http
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" class="h-full">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Omnichannel Beauty Store</title>
+    <title>@ViewData["Title"] - Omnichannel Beauty Suite | Haute Parfumerie & Skincare</title>
 
-    <!-- Google Fonts: Plus Jakarta Sans -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Bootstrap 5.3 & FontAwesome 6 CDN -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- FontAwesome 6.5.1 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-    <style>
-        :root {
-            --primary-purple: #7C3AED;
-            --primary-purple-hover: #6D28D9;
-            --primary-purple-light: #F5F3FF;
-            --primary-purple-border: #DDD6FE;
-            --accent-pink: #EC4899;
-            --accent-pink-hover: #DB2777;
-            --accent-pink-light: #FDF2F8;
-            --accent-pink-border: #FBCFE8;
-            --gradient-brand: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
-            --text-main: #1F2937;
-            --text-muted: #6B7280;
-            --bg-body: #FAF7FC;
-            --border-color: #F1E8F8;
-        }
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .topbar-strip {
-            background: var(--gradient-brand);
-            color: #ffffff;
-            font-size: 0.82rem;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-        }
-
-        .main-header {
-            background: #ffffff;
-            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.05);
-            border-bottom: 1.5px solid var(--border-color);
-        }
-
-        .brand-logo-text {
-            font-size: 1.55rem;
-            font-weight: 800;
-            background: var(--gradient-brand);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-decoration: none;
-        }
-
-        .btn-primary-gradient {
-            background: var(--gradient-brand);
-            color: #ffffff !important;
-            border: none;
-            border-radius: 50rem;
-            font-weight: 600;
-            transition: all 0.25s ease;
-            box-shadow: 0 4px 14px rgba(236, 72, 153, 0.3);
-        }
-
-            .btn-primary-gradient:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 6px 20px rgba(236, 72, 153, 0.45);
-                color: #ffffff !important;
-            }
-
-        .btn-outline-purple {
-            border: 1.5px solid var(--primary-purple);
-            color: var(--primary-purple) !important;
-            border-radius: 50rem;
-            font-weight: 600;
-            background: transparent;
-            transition: all 0.2s ease;
-        }
-
-            .btn-outline-purple:hover {
-                background: var(--primary-purple-light);
-                color: var(--primary-purple) !important;
-            }
-
-        .beauty-card {
-            background: #ffffff;
-            border: 1.5px solid var(--border-color);
-            border-radius: 1.25rem;
-            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.04);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-            .beauty-card:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 14px 30px rgba(124, 58, 237, 0.1);
-                border-color: var(--primary-purple-border);
-            }
-
-        .hover-lift {
-            transition: all 0.25s ease;
-        }
-
-            .hover-lift:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 8px 20px rgba(124, 58, 237, 0.08);
-            }
-
-        .text-truncate-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .footer-main {
-            background: #ffffff;
-            border-top: 1.5px solid var(--border-color);
-            margin-top: auto;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-    </style>
+    <!-- Theme Custom CSS & Tailwind -->
+    <link rel="stylesheet" href="~/css/tailwind.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/theme.css" asp-append-version="true" />
+    <!-- HTMX, Alpine.js, SignalR & SweetAlert2 -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @await RenderSectionAsync("Styles", required: false)
 </head>
-<body>
-    <!-- 1. Dải thông báo ưu đãi -->
-    <div class="topbar-strip py-2 px-3 text-center">
-        <i class="fa-solid fa-sparkles me-2"></i>
-        <span>ĐẠI TIỆC MỸ PHẨM CHÍNH HÃNG - CAM KẾT HẠN DÙNG XA NHẤT THEO TIÊU CHUẨN FEFO - FREESHIP ĐƠN TỪ 500K</span>
+<body x-data="{ cartOpen: false, quickViewOpen: false, mobileMenuOpen: false }" class="min-h-full flex flex-col antialiased selection:bg-pink-100 selection:text-pink-600">
+
+    <div class="bg-charcoal text-white flex items-center justify-between px-4 py-2 text-xs">
+        <div class="hidden md:flex items-center gap-4 text-slate-300">
+            <span class="inline-flex items-center gap-1.5"><i class="fa-solid fa-gem text-rose-gold"></i> Premium Cosmetics</span>
+            <span class="text-slate-600">•</span>
+            <span><i class="fa-solid fa-clock-rotate-left text-amber-400"></i> Chuẩn FEFO minh bạch</span>
+        </div>
+
+        <div class="mx-auto md:mx-0 text-center font-medium tracking-wide">
+            ✨ <span class="font-bold text-magenta-accent">FREESHIP</span> Đơn từ 500K • Tặng quà độc quyền cho thành viên VIP ✨
+        </div>
+
+        <div class="hidden lg:flex items-center gap-4 text-[11px] font-semibold text-slate-300">
+            <a href="tel:19008899" class="hover:text-magenta-accent transition flex items-center gap-1"><i class="fa-solid fa-headset"></i> 1900 8899</a>
+            <a href="/stores" class="hover:text-magenta-accent transition flex items-center gap-1"><i class="fa-solid fa-location-dot"></i> Hệ thống Showroom</a>
+            <span class="text-slate-600">|</span>
+            <span class="text-white font-bold">VNĐ (₫)</span>
+        </div>
     </div>
 
-    <!-- 2. Header chính -->
-    <header class="main-header sticky-top">
-        <div class="container py-3">
-            <div class="row align-items-center">
-                <div class="col-lg-3 col-6">
-                    <a asp-controller="Home" asp-action="Index" class="brand-logo-text d-flex align-items-center gap-2">
-                        <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--primary-purple);"></i>
-                        <span>Omnichannel</span>
-                    </a>
-                </div>
+    <header class="header-glass sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="h-20 flex items-center justify-between gap-4">
 
-                <div class="col-lg-5 d-none d-lg-block">
-                    <div class="input-group">
-                        <input type="text" class="form-control rounded-start-pill border-end-0 ps-4 py-2 border-secondary-subtle" placeholder="Tìm kiếm kem dưỡng, son môi, serum..." />
-                        <button class="btn btn-primary-gradient rounded-end-pill px-4" type="button">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                        </button>
+                <!-- Mobile Menu Button -->
+                <button type="button" class="lg:hidden p-2 text-slate-700 hover:text-pink-600" @@click="mobileMenuOpen = true">
+                    <i class="fa-solid fa-bars-staggered text-xl"></i>
+                </button>
+
+                <!-- Brand Logo (Minimalist Haute Parfumerie) -->
+                <a href="/" class="flex flex-col items-start leading-none group">
+                    <span class="brand-logo-text text-xl sm:text-2xl text-slate-900 tracking-[0.18em] transition group-hover:text-pink-600">
+                        OMNICHANNEL
+                    </span>
+                    <span class="text-[10px] font-bold tracking-[0.35em] text-pink-500 uppercase mt-0.5">
+                        BEAUTY SUITE
+                    </span>
+                </a>
+
+                <!-- Live AJAX Search Bar -->
+                <div class="search-input-wrapper hidden md:block relative z-50">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" name="q" id="storefrontSearchInput" 
+                           hx-get="/Product/Search" 
+                           hx-trigger="keyup changed delay:500ms" 
+                           hx-target="#searchResultsList" 
+                           placeholder="Tìm son lì, nước tẩy trang, serum HA & B5..." 
+                           class="search-input-beauty w-full pl-10 pr-10 py-2.5 rounded-full border border-slate-200 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 text-sm outline-none transition" autocomplete="off" />
+
+                    <!-- AJAX Results Popover -->
+                    <div id="liveSearchResults" class="search-results-dropdown absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-100 p-3 hidden group-focus-within:block">
+                        <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 py-1">Gợi ý sản phẩm nổi bật</div>
+                        <div id="searchResultsList" class="space-y-1 mt-1">
+                            <!-- Populated via HTMX -->
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-lg-4 col-6 d-flex justify-content-end align-items-center gap-3">
-                    @if (User.Identity?.IsAuthenticated == true)
-                    {
-                        <div class="dropdown">
-                            <button class="btn btn-outline-purple px-3 py-2 btn-sm dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fa-solid fa-circle-user" style="color: var(--primary-purple);"></i>
-                                <span class="d-none d-sm-inline">@(User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value ?? User.Identity.Name)</span>
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow-sm rounded-4 border-0 py-2 mt-2">
-                                @if (User.IsInRole("SUPER_ADMIN") || User.HasClaim("UserType", "5") || User.HasClaim("UserType", "4") || User.HasClaim("UserType", "3") || User.HasClaim("UserType", "2"))
-                                {
-                                    <li>
-                                        <a class="dropdown-item py-2 small fw-semibold" href="/Admin/Dashboard">
-                                            <i class="fa-solid fa-gauge me-2 text-primary"></i>Trang Quản Trị
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item py-2 small fw-semibold" href="/Admin/Pos" target="_blank">
-                                            <i class="fa-solid fa-cash-register me-2 text-danger"></i>Màn Hình Thu Ngân POS
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider"></li>
-                                }
-                                <li>
-                                    <a class="dropdown-item py-2 small text-danger fw-semibold" href="/Account/Logout">
-                                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i>Đăng xuất
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    }
-                    else
-                    {
-                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-purple px-3 py-2 btn-sm d-flex align-items-center gap-2">
-                            <i class="fa-regular fa-circle-user"></i>
-                            <span class="d-none d-sm-inline">Đăng nhập</span>
-                        </a>
-                    }
-
-                    <a asp-controller="Cart" asp-action="Index" class="btn btn-primary-gradient px-3 py-2 btn-sm d-flex align-items-center gap-2 position-relative">
-                        <i class="fa-solid fa-bag-shopping"></i>
-                        <span class="d-none d-sm-inline">Giỏ hàng</span>
+                <!-- Utilities: Wishlist, Account, Mini-Cart Drawer Trigger -->
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <!-- Wishlist Counter -->
+                    <a href="/wishlist" class="relative p-2.5 text-slate-700 hover:text-pink-600 transition rounded-full hover:bg-pink-50">
+                        <i class="fa-regular fa-heart text-lg"></i>
+                        <span id="wishlistCountBadge" class="absolute top-1 right-1 h-4 w-4 rounded-full bg-pink-500 text-white text-[10px] font-bold flex items-center justify-center">0</span>
                     </a>
+
+                    <!-- Account Menu -->
+                    <div class="relative group">
+                        <a href="/Account/Login" class="p-2.5 text-slate-700 hover:text-pink-600 transition rounded-full hover:bg-pink-50 flex items-center gap-1.5">
+                            <i class="fa-regular fa-user text-lg"></i>
+                            <span class="hidden xl:inline text-xs font-semibold">Tài Khoản</span>
+                        </a>
+                        <div class="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 hidden group-hover:block transition animate-in fade-in z-50">
+                            <a href="/Account/Login" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pink-50 hover:text-pink-600 rounded-xl">Đăng Nhập / Đăng Ký</a>
+                            <a href="/orders/tracking" class="block px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 rounded-xl">Tra cứu đơn hàng</a>
+                            <div class="border-t border-slate-100 my-1"></div>
+                            <a href="/Admin/Dashboard" class="block px-3 py-2 text-xs font-bold text-pink-600 hover:bg-pink-50 rounded-xl flex items-center gap-2">
+                                <i class="fa-solid fa-shield-halved"></i> Quản Trị Hệ Thống
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Mini Cart Trigger Button -->
+                    <button type="button" @@click="cartOpen = true" id="btnOpenMiniCart" class="relative inline-flex items-center gap-2.5 px-5 py-2.5 rounded-3xl bg-charcoal text-white hover:bg-charcoal/90 shadow-pink-glow transition-all">
+                        <i class="fa-solid fa-bag-shopping text-sm text-rose-gold"></i>
+                        <span class="text-xs font-bold font-mono-numeric" id="miniCartHeaderTotal">0 ₫</span>
+                        <span id="miniCartCountBadge" class="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-magenta-accent text-white text-[10px] font-bold flex items-center justify-center border-2 border-white shadow-sm">0</span>
+                    </button>
                 </div>
             </div>
         </div>
-
-        <nav class="navbar navbar-expand-lg border-top py-0 bg-white">
-            <div class="container">
-                @await Component.InvokeAsync("HeaderMenu")
-            </div>
-        </nav>
     </header>
 
-    <!-- 3. Nội dung trang chủ -->
-    <main class="flex-grow-1">
+    <nav class="nav-mega-wrapper hidden lg:block sticky top-20 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+            <div class="flex items-center">
+                <!-- All Departments Button (Ekommart style) -->
+                <div class="relative group">
+                    <button class="bg-magenta-accent text-white px-6 py-3.5 text-xs font-bold uppercase tracking-wider flex items-center gap-3 rounded-t-2xl hover:bg-[#b0276a] transition-colors shadow-inner">
+                        <i class="fa-solid fa-bars text-base"></i>
+                        <span>Danh Mục Mỹ Phẩm</span>
+                    </button>
+                </div>
+
+                <!-- Navigation Links with Mega Menu from Database -->
+                @await Component.InvokeAsync("HeaderMenu")
+            </div>
+
+            <div class="text-xs font-bold text-slate-500 flex items-center gap-2">
+                <span class="text-amber-500">★</span> Đánh giá hài lòng 4.9/5 từ 25.000+ tín đồ làm đẹp
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1">
         @RenderBody()
     </main>
 
-    <!-- 4. Mini-Cart Drawer -->
-    <div id="miniCartContainer">
-        @await Component.InvokeAsync("MiniCart")
-    </div>
+    <footer class="bg-[#141215] text-slate-300 pt-16 pb-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="rounded-3xl bg-charcoal border border-slate-800 p-8 sm:p-12 mb-16 flex flex-col md:flex-row items-center justify-between gap-8 shadow-pink-glow">
+                <div class="max-w-md">
+                    <span class="text-xs font-bold uppercase tracking-widest text-rose-gold">Đặc Quyền Thành Viên</span>
+                    <h3 class="font-serif text-3xl sm:text-4xl font-bold text-white mt-2">Đăng ký nhận ưu đãi 10%</h3>
+                    <p class="text-sm text-slate-400 mt-3 font-sans leading-relaxed">Cập nhật xu hướng làm đẹp mới nhất và danh sách các sản phẩm phiên bản giới hạn độc quyền mỗi tuần.</p>
+                </div>
+                <form class="w-full md:w-auto flex-1 max-w-md flex flex-col sm:flex-row gap-3" onsubmit="event.preventDefault(); showStorefrontToast('Cảm ơn bạn đã đăng ký nhận ưu đãi!', 'success');">
+                    <input type="email" required placeholder="Nhập địa chỉ email của bạn..." class="w-full px-5 py-3.5 rounded-full bg-white/5 border border-slate-700 text-white placeholder-slate-500 text-sm focus:outline-none focus:border-magenta-accent focus:ring-1 focus:ring-magenta-accent transition-all" />
+                    <button type="submit" class="px-8 py-3.5 rounded-full bg-magenta-accent text-white font-bold text-sm hover:bg-[#b0276a] shadow-pink-glow transition-all flex-shrink-0">
+                        Đăng Ký
+                    </button>
+                </form>
+            </div>
 
-    <!-- 5. Chân trang Footer -->
-    <footer class="footer-main py-5 mt-5">
-        <div class="container">
-            <div class="row g-4">
-                <div class="col-lg-4">
-                    <h5 class="fw-bold mb-3" style="color: var(--primary-purple);">
-                        <i class="fa-solid fa-heart me-2 text-danger"></i>Omnichannel Retail
-                    </h5>
-                    <p class="text-secondary small">Hệ thống phân phối mỹ phẩm chính hãng đa kênh hàng đầu. Tích hợp giải thuật quản trị kho FEFO thông minh giúp khách hàng luôn nhận được sản phẩm có date mới nhất.</p>
+            <!-- Footer Columns -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-slate-800 text-xs">
+                <!-- Col 1: About & Mission -->
+                <div class="space-y-4">
+                    <span class="brand-logo-text text-lg text-white tracking-widest">OMNICHANNEL</span>
+                    <p class="text-slate-400 leading-relaxed">
+                        Hệ thống phân phối mỹ phẩm cao cấp đa kênh tiên phong áp dụng công nghệ kiểm soát hạn sử dụng FEFO. Chúng tôi cam kết 100% minh bạch xuất xứ và độ tươi mới của từng sản phẩm.
+                    </p>
+                    <div class="flex items-center gap-3 text-sm text-slate-400">
+                        <a href="#" class="h-8 w-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-pink-600 hover:text-white transition"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#" class="h-8 w-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-pink-600 hover:text-white transition"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" class="h-8 w-8 rounded-full bg-slate-800 flex items-center justify-center hover:bg-pink-600 hover:text-white transition"><i class="fa-brands fa-tiktok"></i></a>
+                    </div>
                 </div>
-                <div class="col-lg-2 col-6">
-                    <h6 class="fw-bold text-dark mb-3">Về chúng tôi</h6>
-                    <ul class="list-unstyled small d-flex flex-column gap-2">
-                        <li><a href="#" class="text-decoration-none text-muted">Giới thiệu</a></li>
-                        <li><a href="#" class="text-decoration-none text-muted">Showroom</a></li>
-                        <li><a href="#" class="text-decoration-none text-muted">Chính sách giao nhận</a></li>
+
+                <!-- Col 2: Showroom Flagship -->
+                <div class="space-y-3">
+                    <h4 class="font-serif-luxury text-sm font-bold text-white uppercase tracking-wider">Hệ Thống Cửa Hàng</h4>
+                    <ul class="space-y-3 text-slate-400">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-location-dot text-pink-500 mt-1"></i>
+                            <div>
+                                <strong class="text-slate-200 block">Flagship Quận 1:</strong>
+                                128 Hai Bà Trưng, Phường Bến Nghé, Quận 1, TP.HCM
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-location-dot text-pink-500 mt-1"></i>
+                            <div>
+                                <strong class="text-slate-200 block">Showroom Cầu Giấy:</strong>
+                                245 Cầu Giấy, Phường Dịch Vọng, Quận Cầu Giấy, Hà Nội
+                            </div>
+                        </li>
                     </ul>
                 </div>
-                <div class="col-lg-2 col-6">
-                    <h6 class="fw-bold text-dark mb-3">Hỗ trợ khách hàng</h6>
-                    <ul class="list-unstyled small d-flex flex-column gap-2">
-                        <li><a href="#" class="text-decoration-none text-muted">Tra cứu đơn hàng</a></li>
-                        <li><a href="#" class="text-decoration-none text-muted">Đổi trả & Hoàn tiền</a></li>
-                        <li><a href="#" class="text-decoration-none text-muted">Bảo mật thông tin</a></li>
+
+                <!-- Col 3: Customer Care -->
+                <div class="space-y-3">
+                    <h4 class="font-serif-luxury text-sm font-bold text-white uppercase tracking-wider">Chăm Sóc Khách Hàng</h4>
+                    <ul class="space-y-2 text-slate-400">
+                        <li><a href="/page/chinh-sach-giao-hang" class="hover:text-pink-400 transition">Chính sách vận chuyển & Giao hàng 2H</a></li>
+                        <li><a href="/page/chinh-sach-doi-tra" class="hover:text-pink-400 transition">Chính sách đổi trả & Hoàn tiền 100%</a></li>
+                        <li><a href="/page/chinh-sach-fefo" class="hover:text-pink-400 transition">Quy chuẩn hạn sử dụng minh bạch FEFO</a></li>
+                        <li><a href="/page/bao-mat-thong-tin" class="hover:text-pink-400 transition">Chính sách bảo mật thanh toán</a></li>
                     </ul>
                 </div>
-                <div class="col-lg-4">
-                    <h6 class="fw-bold text-dark mb-3">Tổng đài CSKH</h6>
-                    <p class="h5 fw-bold mb-1 font-monospace" style="color: var(--primary-purple);">1900-8888</p>
-                    <small class="text-muted">Hỗ trợ từ 08:00 - 22:00 hàng ngày (kể cả CN và Lễ)</small>
+
+                <!-- Col 4: Trust & Certifications -->
+                <div class="space-y-3">
+                    <h4 class="font-serif-luxury text-sm font-bold text-white uppercase tracking-wider">Chứng Nhận & Thanh Toán</h4>
+                    <p class="text-slate-400">Đã đăng ký thông báo với Bộ Công Thương Việt Nam.</p>
+                    <div class="flex items-center gap-2 pt-2">
+                        <span class="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 font-mono-numeric font-bold text-[10px] text-emerald-400">VietQR Pro</span>
+                        <span class="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 font-mono-numeric font-bold text-[10px] text-blue-400">VNPAY-QR</span>
+                        <span class="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 font-mono-numeric font-bold text-[10px] text-pink-400">MoMo</span>
+                    </div>
                 </div>
             </div>
-            <div class="text-center pt-4 mt-4 border-top text-muted small">
-                &copy; 2026 Omnichannel Beauty System. Thiết kế trên nền tảng C# ASP.NET Core 8.0 & SQL Server.
+
+            <!-- Bottom Copyright Bar -->
+            <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500 text-[11px]">
+                <div>© 2026 Omnichannel Beauty Suite. All rights reserved. Nền tảng Clean Architecture ASP.NET Core 9.</div>
+                <div class="flex items-center gap-4">
+                    <span>Phiên bản: 2.6-RELEASE</span>
+                    <span>Tốc độ phản hồi: &lt; 25ms</span>
+                </div>
             </div>
         </div>
     </footer>
 
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <div x-show="cartOpen" style="display: none;" class="relative z-50">
+        <div x-show="cartOpen" x-transition.opacity class="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm" @@click="cartOpen = false"></div>
+        <aside x-show="cartOpen" 
+               x-transition:enter="transform transition ease-in-out duration-300"
+               x-transition:enter-start="translate-x-full"
+               x-transition:enter-end="translate-x-0"
+               x-transition:leave="transform transition ease-in-out duration-300"
+               x-transition:leave-start="translate-x-0"
+               x-transition:leave-end="translate-x-full"
+               class="fixed inset-y-0 right-0 flex max-w-md flex-col bg-white shadow-xl pointer-events-auto w-full">
+            <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-bag-shopping text-pink-600"></i>
+                    <h3 class="font-bold text-slate-900 text-sm">Giỏ Hàng Của Bạn</h3>
+                </div>
+                <button type="button" @@click="cartOpen = false" class="h-8 w-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-slate-700 transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div id="miniCartContent" hx-get="/Cart/MiniCart" hx-trigger="load, reloadMiniCart from:body" class="flex-1 overflow-y-auto flex flex-col">
+                <!-- Loaded via HTMX -->
+                <div class="p-5 text-center text-sm text-slate-500">Đang tải giỏ hàng...</div>
+            </div>
+        </aside>
+    </div>
 
-    <!-- Nạp site.js xử lý ngầm (đếm ngược Flash Sale & giỏ hàng) -->
+    <!-- Quick View Modal (Alpine) -->
+    <div x-show="quickViewOpen" style="display: none;" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div x-show="quickViewOpen" x-transition.opacity class="fixed inset-0 bg-gray-500 bg-opacity-75 backdrop-blur-sm transition-opacity" @@click="quickViewOpen = false"></div>
+
+        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div x-show="quickViewOpen" 
+                     x-transition:enter="ease-out duration-300" 
+                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
+                     x-transition:leave="ease-in duration-200" 
+                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
+                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
+                     class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+                    
+                    <button type="button" @@click="quickViewOpen = false" class="absolute right-4 top-4 z-20 h-10 w-10 rounded-full bg-white text-slate-400 hover:text-slate-700 shadow-md flex items-center justify-center transition">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                    
+                    <div id="quickViewModalBody">
+                        <!-- Content loaded via HTMX -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="storefrontToastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm"></div>
+
+    <!-- Site Scripts -->
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

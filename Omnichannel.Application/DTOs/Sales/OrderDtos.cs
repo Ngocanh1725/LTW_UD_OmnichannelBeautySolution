@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Omnichannel.Application.DTOs.Sales
@@ -35,9 +35,9 @@ namespace Omnichannel.Application.DTOs.Sales
         public string RecipientPhone { get; set; } = string.Empty;
         public string ShippingAddress { get; set; } = string.Empty;
         public decimal FinalTotal { get; set; }
-        public int PaymentMethod { get; set; }
-        public int PaymentStatus { get; set; }
-        public int OrderStatus { get; set; }
+        public string PaymentMethod { get; set; } = string.Empty;
+        public string PaymentStatus { get; set; } = string.Empty;
+        public string OrderStatus { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public VietQrPaymentDto? VietQr { get; set; }
     }

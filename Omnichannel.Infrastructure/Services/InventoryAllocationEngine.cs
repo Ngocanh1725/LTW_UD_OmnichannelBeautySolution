@@ -1,12 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Omnichannel.Application.DTOs.Inventory;
-using Omnichannel.Application.Interfaces.Inventory;
 using Omnichannel.Domain.Entities;
 using Omnichannel.Infrastructure.Data;
 
@@ -15,215 +13,199 @@ namespace Omnichannel.Infrastructure.Services
     public class InventoryAllocationEngine : IInventoryAllocationEngine
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger<InventoryAllocationEngine> _logger;
 
-        public InventoryAllocationEngine(ApplicationDbContext context, ILogger<InventoryAllocationEngine> logger)
+        public InventoryAllocationEngine(ApplicationDbContext context)
         {
-            _context = context;
-            _logger = logger;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         public async Task<bool> CheckAvailabilityAsync(string storeId, string sku, int quantity, CancellationToken cancellationToken = default)
         {
-            if (quantity <= 0) return false;
+            if (quantity <= 0 || !int.TryParse(storeId, out var parsedStoreId) || parsedStoreId <= 0)
+            {
+                return false;
+            }
 
             var today = DateTime.Today;
+            int.TryParse(sku, out var parsedProductId);
 
-            // Tính tổng tồn khả dụng của các lô chưa hết hạn
-            var availableTotal = await _context.StoreInventories
+            // Sửa si.Batch -> si.ProductBatch
+            var query = _context.StoreInventories
                 .AsNoTracking()
-                .Where(si => si.StoreId == storeId
-                          && si.Batch.ProductId == sku
-                          && si.Batch.ExpDate > today)
-                .SumAsync(si => (int?)(si.PhysicalQuantity - si.ReservedQuantity), cancellationToken) ?? 0;
+                .Include(si => si.ProductBatch)
+                    .ThenInclude(b => b.Product)
+                .Where(si => si.StoreId == parsedStoreId && si.ProductBatch.ExpDate > today);
+
+            if (parsedProductId > 0)
+            {
+                query = query.Where(si => si.ProductBatch.ProductId == parsedProductId
+                                       || si.ProductBatch.Product.Sku == sku
+                                       || si.ProductBatch.Product.Barcode == sku);
+            }
+            else
+            {
+                query = query.Where(si => si.ProductBatch.Product.Sku == sku
+                                       || si.ProductBatch.Product.Barcode == sku);
+            }
+
+            var availableTotal = await query.SumAsync(
+                si => (int?)(si.PhysicalQuantity - si.ReservedQuantity),
+                cancellationToken) ?? 0;
 
             return availableTotal >= quantity;
         }
 
         public async Task<List<AllocatedBatchDto>> AllocateBatchesFEFOAsync(string storeId, string sku, int quantity, CancellationToken cancellationToken = default)
         {
-            if (quantity <= 0) return new List<AllocatedBatchDto>();
+            if (quantity <= 0 || !int.TryParse(storeId, out var parsedStoreId) || parsedStoreId <= 0)
+            {
+                return new List<AllocatedBatchDto>();
+            }
 
             var today = DateTime.Today;
+            int.TryParse(sku, out var parsedProductId);
 
-            // Lấy các lô hàng còn tồn khả dụng, ưu tiên hạn dùng gần nhất (ExpDate ASC)
-            var availableBatches = await _context.StoreInventories
-                .Include(si => si.Batch)
-                .Where(si => si.StoreId == storeId
-                          && si.Batch.ProductId == sku
-                          && si.Batch.ExpDate > today
-                          && (si.PhysicalQuantity - si.ReservedQuantity) > 0)
-                .OrderBy(si => si.Batch.ExpDate)
+            // Sửa si.Batch -> si.ProductBatch
+            var query = _context.StoreInventories
+                .Include(si => si.ProductBatch)
+                    .ThenInclude(b => b.Product)
+                .Where(si => si.StoreId == parsedStoreId && si.ProductBatch.ExpDate > today);
+
+            if (parsedProductId > 0)
+            {
+                query = query.Where(si => si.ProductBatch.ProductId == parsedProductId
+                                       || si.ProductBatch.Product.Sku == sku
+                                       || si.ProductBatch.Product.Barcode == sku);
+            }
+            else
+            {
+                query = query.Where(si => si.ProductBatch.Product.Sku == sku
+                                       || si.ProductBatch.Product.Barcode == sku);
+            }
+
+            // FEFO: Ưu tiên lấy từ các lô có ngày hết hạn gần nhất trước
+            var candidateBatches = await query
+                .OrderBy(si => si.ProductBatch.ExpDate)
                 .ToListAsync(cancellationToken);
 
-            int remainingToAllocate = quantity;
-            var allocatedList = new List<AllocatedBatchDto>();
+            var allocations = new List<AllocatedBatchDto>();
+            var remainingNeeded = quantity;
 
-            foreach (var inventory in availableBatches)
+            foreach (var inv in candidateBatches)
             {
-                int batchAvailable = inventory.PhysicalQuantity - inventory.ReservedQuantity;
-                int takeQty = Math.Min(batchAvailable, remainingToAllocate);
+                var availableInBatch = inv.PhysicalQuantity - inv.ReservedQuantity;
+                if (availableInBatch <= 0) continue;
 
-                if (takeQty > 0)
+                var take = Math.Min(remainingNeeded, availableInBatch);
+
+                allocations.Add(new AllocatedBatchDto
                 {
-                    allocatedList.Add(new AllocatedBatchDto
-                    {
-                        BatchId = inventory.BatchId,
-                        BatchNumber = inventory.Batch.BatchNumber,
-                        ExpDate = inventory.Batch.ExpDate,
-                        AllocatedQuantity = takeQty,
-                        AvailableQuantity = batchAvailable
-                    });
+                    BatchId = inv.ProductBatch.Id,
+                    BatchCode = inv.ProductBatch.BatchNumber,
+                    BatchNumber = inv.ProductBatch.BatchNumber,
+                    ProductId = inv.ProductBatch.ProductId,
+                    ProductName = inv.ProductBatch.Product?.Name ?? "Mỹ phẩm",
+                    Sku = inv.ProductBatch.Product?.Sku ?? sku,
+                    ExpDate = inv.ProductBatch.ExpDate,
+                    AllocatedQuantity = take,
+                    UnitPrice = inv.ProductBatch.Product?.SellingPrice ?? 0
+                });
 
-                    remainingToAllocate -= takeQty;
-                }
-
-                if (remainingToAllocate == 0)
-                    break;
+                remainingNeeded -= take;
+                if (remainingNeeded <= 0) break;
             }
 
-            if (remainingToAllocate > 0)
-            {
-                _logger.LogWarning("Không đủ tồn kho khả dụng theo FEFO cho SKU {Sku} tại Kho {StoreId}. Còn thiếu: {MissingQty}",
-                    sku, storeId, remainingToAllocate);
-                return new List<AllocatedBatchDto>(); // Không thể phân bổ trọn vẹn
-            }
-
-            return allocatedList;
+            return allocations;
         }
 
-        public async Task<bool> ImportBatchAsync(ImportBatchViewModel model, string staffUserId, CancellationToken cancellationToken = default)
+        public async Task<bool> ReserveStockAsync(string storeId, string sku, int quantity, CancellationToken cancellationToken = default)
         {
-            if (model.ExpDate <= model.ManufacturingDate)
+            var allocations = await AllocateBatchesFEFOAsync(storeId, sku, quantity, cancellationToken);
+            if (!allocations.Any() || allocations.Sum(a => a.AllocatedQuantity) < quantity)
             {
-                _logger.LogWarning("Ngày hết hạn phải lớn hơn ngày sản xuất.");
                 return false;
             }
 
-            using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-            try
+            return await ReserveStockAsync(storeId, allocations, cancellationToken);
+        }
+
+        public async Task<bool> ReserveStockAsync(string storeId, List<AllocatedBatchDto> allocations, CancellationToken cancellationToken = default)
+        {
+            if (!int.TryParse(storeId, out var parsedStoreId) || allocations == null || !allocations.Any())
             {
-                string cleanBatchNumber = model.BatchNumber.Trim().ToUpperInvariant();
+                return false;
+            }
 
-                // 1. Tìm hoặc tạo mới Lô hàng (ProductBatch)
-                var batch = await _context.ProductBatches
-                    .FirstOrDefaultAsync(b => b.ProductId == model.ProductId && b.BatchNumber == cleanBatchNumber, cancellationToken);
+            foreach (var alloc in allocations)
+            {
+                var inv = await _context.StoreInventories
+                    .FirstOrDefaultAsync(si => si.StoreId == parsedStoreId && si.ProductBatchId == alloc.BatchId, cancellationToken);
 
-                if (batch == null)
+                if (inv != null)
                 {
-                    batch = new ProductBatch
+                    inv.ReservedQuantity += alloc.AllocatedQuantity;
+                }
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> ReleaseReservedStockAsync(string storeId, List<AllocatedBatchDto> allocations, CancellationToken cancellationToken = default)
+        {
+            if (!int.TryParse(storeId, out var parsedStoreId) || allocations == null || !allocations.Any())
+            {
+                return false;
+            }
+
+            foreach (var alloc in allocations)
+            {
+                var inv = await _context.StoreInventories
+                    .FirstOrDefaultAsync(si => si.StoreId == parsedStoreId && si.ProductBatchId == alloc.BatchId, cancellationToken);
+
+                if (inv != null)
+                {
+                    inv.ReservedQuantity = Math.Max(0, inv.ReservedQuantity - alloc.AllocatedQuantity);
+                }
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> DeductStockAsync(string storeId, List<AllocatedBatchDto> allocations, string reason = "SALE", CancellationToken cancellationToken = default)
+        {
+            if (!int.TryParse(storeId, out var parsedStoreId) || allocations == null || !allocations.Any())
+            {
+                return false;
+            }
+
+            foreach (var alloc in allocations)
+            {
+                var inv = await _context.StoreInventories
+                    .FirstOrDefaultAsync(si => si.StoreId == parsedStoreId && si.ProductBatchId == alloc.BatchId, cancellationToken);
+
+                if (inv != null)
+                {
+                    inv.PhysicalQuantity = Math.Max(0, inv.PhysicalQuantity - alloc.AllocatedQuantity);
+                    inv.ReservedQuantity = Math.Max(0, inv.ReservedQuantity - alloc.AllocatedQuantity);
+
+                    _context.InventoryLogs.Add(new InventoryLog
                     {
-                        ProductId = model.ProductId,
-                        BatchNumber = cleanBatchNumber,
-                        ManufacturingDate = model.ManufacturingDate.Date,
-                        ExpDate = model.ExpDate.Date,
+                        StoreId = parsedStoreId,
+                        ProductBatchId = alloc.BatchId,
+                        TransactionType = "ADJUSTMENT",
+                        QuantityChanged = -alloc.AllocatedQuantity,
+                        QuantityBefore = inv.PhysicalQuantity + alloc.AllocatedQuantity,
+                        QuantityAfter = inv.PhysicalQuantity,
+                        Note = reason,
                         CreatedAt = DateTime.UtcNow
-                    };
-                    await _context.ProductBatches.AddAsync(batch, cancellationToken);
-                    await _context.SaveChangesAsync(cancellationToken);
+                    });
                 }
-
-                // 2. Cập nhật hoặc tạo mới bản ghi tồn kho tại chi nhánh (StoreInventory)
-                var inventory = await _context.StoreInventories
-                    .FirstOrDefaultAsync(si => si.StoreId == model.StoreId && si.BatchId == batch.BatchId, cancellationToken);
-
-                if (inventory == null)
-                {
-                    inventory = new StoreInventory
-                    {
-                        StoreId = model.StoreId,
-                        BatchId = batch.BatchId,
-                        PhysicalQuantity = model.Quantity,
-                        ReservedQuantity = 0,
-                        UpdatedAt = DateTime.UtcNow
-                    };
-                    await _context.StoreInventories.AddAsync(inventory, cancellationToken);
-                }
-                else
-                {
-                    inventory.PhysicalQuantity += model.Quantity;
-                    inventory.UpdatedAt = DateTime.UtcNow;
-                }
-                await _context.SaveChangesAsync(cancellationToken);
-
-                // 3. Ghi sổ cái nhật ký kho bất biến (InventoryLogs)
-                var log = new InventoryLog
-                {
-                    StoreId = model.StoreId,
-                    BatchId = batch.BatchId,
-                    TransactionType = 1, // 1: Nhập NCC
-                    ReferenceDocNo = !string.IsNullOrWhiteSpace(model.ReferenceDocNo) ? model.ReferenceDocNo.Trim() : $"PO-{DateTime.UtcNow:yyyyMMddHHmmss}",
-                    QuantityChange = model.Quantity,
-                    RemainingQuantity = inventory.PhysicalQuantity,
-                    CreatedBy = staffUserId,
-                    CreatedAt = DateTime.UtcNow,
-                    Notes = model.Notes?.Trim() ?? "Nhập kho theo Lô sản xuất"
-                };
-
-                await _context.InventoryLogs.AddAsync(log, cancellationToken);
-                await _context.SaveChangesAsync(cancellationToken);
-
-                await transaction.CommitAsync(cancellationToken);
-                _logger.LogInformation("Đã nhập kho thành công {Qty} sp SKU {Sku}, Lô {Batch} vào Kho {StoreId}.",
-                    model.Quantity, model.ProductId, cleanBatchNumber, model.StoreId);
-
-                return true;
             }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync(cancellationToken);
-                _logger.LogError(ex, "Lỗi xảy ra khi thực hiện nhập kho theo Lô.");
-                return false;
-            }
-        }
 
-        public async Task<bool> AdjustStockAsync(StockAdjustmentViewModel model, string staffUserId, CancellationToken cancellationToken = default)
-        {
-            using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-            try
-            {
-                var inventory = await _context.StoreInventories
-                    .FirstOrDefaultAsync(si => si.StoreId == model.StoreId && si.BatchId == model.BatchId, cancellationToken);
-
-                if (inventory == null) return false;
-
-                // Kiểm tra tránh âm kho
-                if (inventory.PhysicalQuantity + model.QuantityChange < inventory.ReservedQuantity)
-                {
-                    _logger.LogWarning("Không thể điều chỉnh vì tồn vật lý sẽ nhỏ hơn tồn đã đặt cọc (ReservedQuantity).");
-                    return false;
-                }
-
-                inventory.PhysicalQuantity += model.QuantityChange;
-                inventory.UpdatedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync(cancellationToken);
-
-                // Ghi sổ cái bất biến
-                var log = new InventoryLog
-                {
-                    StoreId = model.StoreId,
-                    BatchId = model.BatchId,
-                    TransactionType = model.TransactionType,
-                    ReferenceDocNo = $"ADJ-{DateTime.UtcNow:yyyyMMddHHmmss}",
-                    QuantityChange = model.QuantityChange,
-                    RemainingQuantity = inventory.PhysicalQuantity,
-                    CreatedBy = staffUserId,
-                    CreatedAt = DateTime.UtcNow,
-                    Notes = model.Notes.Trim()
-                };
-
-                await _context.InventoryLogs.AddAsync(log, cancellationToken);
-                await _context.SaveChangesAsync(cancellationToken);
-
-                await transaction.CommitAsync(cancellationToken);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync(cancellationToken);
-                _logger.LogError(ex, "Lỗi xảy ra khi điều chỉnh tồn kho.");
-                return false;
-            }
+            await _context.SaveChangesAsync(cancellationToken);
+            return true;
         }
     }
 }

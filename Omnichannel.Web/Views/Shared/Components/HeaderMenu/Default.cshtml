@@ -1,56 +1,76 @@
-﻿@model IEnumerable<Omnichannel.Application.DTOs.Cms.MenuItemDto>
+@model IEnumerable<Omnichannel.Application.DTOs.Cms.MenuItemDto>
 
-<ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
-    @foreach (var item in Model)
+@foreach (var item in Model)
+{
+    if (!item.Children.Any())
     {
-        if (!item.Children.Any())
-        {
-            <li class="nav-item">
-                <a class="nav-link px-3 fw-semibold text-dark text-hover-purple" href="@item.ResolvedUrl" target="@(item.OpenInNewTab ? "_blank" : "_self")">
-                    @if (!string.IsNullOrEmpty(item.IconClass))
+        <a href="@item.ResolvedUrl" class="nav-link-beauty" target="@(item.OpenInNewTab ? "_blank" : "_self")">
+            @if (!string.IsNullOrEmpty(item.IconClass))
+            {
+                <i class="@item.IconClass mr-1"></i>
+            }
+            @item.Title
+        </a>
+    }
+    else
+    {
+        <div class="has-mega-menu relative group" x-data="{ open: false }" @@mouseenter="open = true" @@mouseleave="open = false">
+            <a href="@item.ResolvedUrl" class="nav-link-beauty flex items-center gap-1.5" target="@(item.OpenInNewTab ? "_blank" : "_self")">
+                @if (!string.IsNullOrEmpty(item.IconClass))
+                {
+                    <i class="@item.IconClass text-rose-gold text-[10px]"></i>
+                }
+                @item.Title 
+                <i class="fa-solid fa-angle-down text-[10px] text-slate-400 transition-transform duration-300" :class="open ? 'rotate-180 text-magenta-accent' : ''"></i>
+            </a>
+            
+            <!-- Mega Menu Dropdown -->
+            <div x-show="open" 
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-3"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 translate-y-3"
+                 class="mega-menu-content absolute top-[calc(100%+1px)] left-0 w-[800px] bg-white shadow-xl rounded-b-3xl rounded-tr-3xl border border-blush p-10 z-50 hidden group-hover:block" style="display: none;">
+                
+                <div class="grid grid-cols-4 gap-10">
+                    @foreach (var group in item.Children)
                     {
-                        <i class="@item.IconClass me-1" style="color: var(--primary-purple);"></i>
-                    }
-                    @item.Title
-                </a>
-            </li>
-        }
-        else
-        {
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle px-3 fw-semibold text-dark" href="@item.ResolvedUrl" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    @if (!string.IsNullOrEmpty(item.IconClass))
-                    {
-                        <i class="@item.IconClass me-1 text-pink" style="color: var(--accent-pink);"></i>
-                    }
-                    @item.Title
-                </a>
-                <ul class="dropdown-menu rounded-4 shadow border-0 py-2">
-                    @foreach (var sub in item.Children)
-                    {
-                        <li>
-                            <a class="dropdown-item py-2 px-3 small fw-medium" href="@sub.ResolvedUrl" target="@(sub.OpenInNewTab ? "_blank" : "_self")">
-                                @if (!string.IsNullOrEmpty(sub.IconClass))
+                        <div>
+                            <h4 class="font-serif font-bold text-charcoal text-base mb-4 border-b border-blush pb-2 inline-block">
+                                @if (!string.IsNullOrEmpty(group.IconClass))
                                 {
-                                    <i class="@sub.IconClass me-2 text-muted"></i>
+                                    <i class="@group.IconClass text-rose-gold mr-1.5"></i>
                                 }
-                                @sub.Title
-                            </a>
-                        </li>
+                                @group.Title
+                            </h4>
+                            <ul class="space-y-3 text-sm text-slate-600 font-sans">
+                                @foreach (var sub in group.Children)
+                                {
+                                    <li>
+                                        <a href="@sub.ResolvedUrl" class="hover:text-magenta-accent hover:pl-2 transition-all duration-300 block py-1" target="@(sub.OpenInNewTab ? "_blank" : "_self")">
+                                            @sub.Title
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
                     }
-                </ul>
-            </li>
-        }
-    }
-</ul>
 
-<style>
-    .text-hover-purple:hover {
-        color: var(--primary-purple) !important;
+                    <!-- Thêm Banner mini tĩnh cho Mega Menu -->
+                    <div class="rounded-3xl overflow-hidden relative bg-gradient-to-br from-pastel-pink to-white p-6 border border-blush flex flex-col justify-between shadow-sm">
+                        <div>
+                            <span class="text-[10px] font-bold text-rose-gold uppercase tracking-widest">Bộ Sưu Tập</span>
+                            <h5 class="font-serif font-bold text-charcoal text-xl mt-2 leading-tight">Sản phẩm mới</h5>
+                            <p class="text-xs text-slate-500 mt-2 font-sans">Khám phá xu hướng K-Beauty hot nhất.</p>
+                        </div>
+                        <a href="/category/new-arrivals" class="inline-flex items-center gap-1.5 text-xs font-bold text-magenta-accent hover:text-charcoal mt-6 transition-colors">
+                            Khám Phá Ngay <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     }
-
-    .dropdown-menu .dropdown-item:hover {
-        background-color: var(--accent-pink-light);
-        color: var(--accent-pink);
-    }
-</style>
+}

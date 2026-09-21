@@ -1,0 +1,50 @@
+@model IEnumerable<Omnichannel.Domain.Entities.Product>
+
+@if (!Model.Any())
+{
+    <div class="col-span-full py-12 text-center text-slate-500">
+        <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-3"></i>
+        <p>Đang cập nhật sản phẩm cho danh mục này...</p>
+    </div>
+}
+else
+{
+    @foreach (var p in Model)
+    {
+        <div class="product-card-luxury group relative bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-pink-glow transition-all duration-300 border border-blush flex flex-col h-full">
+            <div class="product-thumb-container relative aspect-[4/5] bg-pastel-pink overflow-hidden">
+                <img src="@(string.IsNullOrEmpty(p.ThumbnailUrl) ? "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&h=600&fit=crop" : p.ThumbnailUrl)" class="product-thumb-img w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="@p.Name" />
+                <div class="product-badges-stack absolute top-3 left-3 flex flex-col gap-1 z-10">
+                    <span class="badge-fefo-fresh bg-white/90 backdrop-blur text-[10px] font-bold px-2 py-0.5 rounded border border-blush text-charcoal shadow-sm">Date mới (Xa)</span>
+                    <span class="bg-magenta-accent text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase shadow-sm">Hot</span>
+                </div>
+                <div class="product-action-overlay absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2 z-20">
+                    <button type="button" hx-get="/Product/QuickView/@p.Id" hx-target="#quickViewModalBody" @@click="quickViewOpen = true" title="Xem nhanh" class="btn-card-action h-10 w-10 rounded-full bg-white text-charcoal hover:text-magenta-accent hover:scale-110 shadow-sm transition-all flex items-center justify-center"><i class="fa-regular fa-eye"></i></button>
+                    <button type="button" hx-post="/Cart/Add/@p.Id" hx-trigger="click" title="Thêm Giỏ Hàng" class="btn-card-action btn-cart-primary h-10 px-4 rounded-full bg-magenta-accent text-white font-bold text-xs hover:bg-[#b0276a] hover:scale-105 shadow-pink-glow transition-all flex items-center"><i class="fa-solid fa-plus mr-1"></i> Thêm Giỏ</button>
+                    <button type="button" hx-post="/Account/Wishlist/@p.Id" hx-trigger="click" title="Yêu thích" class="btn-card-action h-10 w-10 rounded-full bg-white text-charcoal hover:text-magenta-accent hover:scale-110 shadow-sm transition-all flex items-center justify-center"><i class="fa-regular fa-heart"></i></button>
+                </div>
+            </div>
+            <div class="p-5 flex flex-col flex-1 justify-between gap-3">
+                <div>
+                    <span class="text-[10px] uppercase tracking-widest font-semibold text-rose-gold">@p.Category?.Name • @p.Unit</span>
+                    <h3 class="text-sm font-bold text-charcoal line-clamp-2 hover:text-magenta-accent transition-colors mt-1 leading-snug">
+                        <a href="/product/@p.Slug">@p.Name</a>
+                    </h3>
+                </div>
+                <div>
+                    <div class="flex items-center gap-1 text-[10px] text-amber-400 mb-1">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                        <span class="text-slate-400 ml-1">(5)</span>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-base font-bold text-charcoal font-mono-numeric">@p.SellingPrice.ToString("N0") ₫</span>
+                        @if(p.SellingPrice > 0)
+                        {
+                            <span class="text-xs text-slate-400 line-through font-mono-numeric font-light">@((p.SellingPrice * 1.2m).ToString("N0")) ₫</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}

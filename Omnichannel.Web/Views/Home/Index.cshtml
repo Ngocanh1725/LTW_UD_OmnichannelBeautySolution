@@ -1,504 +1,410 @@
-﻿@model Omnichannel.Application.DTOs.Sales.HomeIndexViewModel
 @{
-    ViewData["Title"] = "Thế Giới Mỹ Phẩm Chính Hãng & Skincare";
+    ViewData["Title"] = "Trang Chủ - Thế Giới Nhan Sắc & Mỹ Phẩm Thuần Khiết";
 }
 
-<!-- 1. HERO SLIDER BANNER -->
-<section class="container my-3">
-    <div id="heroCarousel" class="carousel slide shadow-sm rounded-4 overflow-hidden" data-bs-ride="carousel">
-        <div class="carousel-indicators">
-            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active" aria-current="true"></button>
-            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
-        </div>
-        <div class="carousel-inner">
-            @if (Model?.HeroBanners != null && Model.HeroBanners.Any())
-            {
-                int idx = 0;
-                foreach (var banner in Model.HeroBanners)
-                {
-                    <div class="carousel-item @(idx == 0 ? "active" : "")" data-bs-interval="4000">
-                        <a href="@(banner.LinkUrl ?? "#")">
-                            <img src="@banner.DesktopImageUrl" class="d-block w-100" style="height: 380px; object-fit: cover;" alt="@banner.Title" onerror="this.src='https://placehold.co/1200x380/7C3AED/FFFFFF?text=Omnichannel+Beauty+Mega+Sale'" />
-                        </a>
-                    </div>
-                    idx++;
-                }
-            }
-            else
-            {
-                <!-- Slide 1 -->
-                <div class="carousel-item active" data-bs-interval="4000">
-                    <div class="p-5 text-center text-white d-flex flex-column align-items-center justify-content-center" style="background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%); min-height: 360px;">
-                        <span class="badge bg-white text-dark rounded-pill px-3 py-2 mb-3 fw-bold shadow-sm">
-                            <i class="fa-solid fa-sparkles text-warning me-1"></i> BỘ SƯU TẬP XUÂN HÈ 2026
-                        </span>
-                        <h1 class="fw-bold display-5 mb-2">Đại Tiệc Sắc Đẹp & Skincare</h1>
-                        <p class="fs-6 mb-4 text-white-50" style="max-width: 600px;">
-                            Cam kết 100% mỹ phẩm chính hãng. Áp dụng chuẩn kiểm soát hạn dùng FEFO xa nhất trên từng sản phẩm.
-                        </p>
-                        <a href="#flashSaleSection" class="btn btn-light rounded-pill px-4 py-2 fw-bold" style="color: #7C3AED;">
-                            Săn Flash Sale Ngay <i class="fa-solid fa-bolt ms-1 text-danger"></i>
-                        </a>
-                    </div>
+<section class="relative bg-gradient-to-b from-pastel-pink via-blush/30 to-white py-12 md:py-24 overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+
+            <!-- Hero Content (Left 7 Cols) -->
+            <div class="lg:col-span-7 space-y-6 text-center lg:text-left z-10">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/80 border border-blush shadow-sm text-xs font-semibold text-magenta-accent">
+                    <span class="h-2 w-2 rounded-full bg-magenta-accent animate-ping"></span>
+                    K-Beauty & Haute Parfumerie Trend 2026
                 </div>
 
-                <!-- Slide 2 -->
-                <div class="carousel-item" data-bs-interval="4000">
-                    <div class="p-5 text-center text-white d-flex flex-column align-items-center justify-content-center" style="background: linear-gradient(135deg, #5B21B6 0%, #DB2777 100%); min-height: 360px;">
-                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 mb-3 fw-bold shadow-sm">
-                            <i class="fa-solid fa-bolt me-1"></i> FLASH SALE TRONG NGÀY
-                        </span>
-                        <h1 class="fw-bold display-5 mb-2">Săn Deal Mỹ Phẩm Tới 50%</h1>
-                        <p class="fs-6 mb-4 text-white-50" style="max-width: 600px;">
-                            Ưu đãi dưỡng da chuyên sâu, phục hồi hàng rào ẩm và combo trang điểm độc quyền.
-                        </p>
-                        <a href="#flashSaleSection" class="btn btn-warning rounded-pill px-4 py-2 fw-bold text-dark">
-                            Khám Phá Ngay <i class="fa-solid fa-arrow-right ms-1"></i>
-                        </a>
-                    </div>
-                </div>
-            }
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon"></span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon"></span>
-        </button>
-    </div>
-</section>
+                <h1 class="font-serif text-5xl sm:text-6xl lg:text-7xl font-bold text-charcoal leading-tight">
+                    Đắm Chìm Trong <br />
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-magenta-accent to-rose-gold">
+                        Nhan Sắc Thuần Khiết
+                    </span>
+                </h1>
 
-<!-- 2. THANH THÔNG BÁO FLASH SALE & ĐỒNG HỒ ĐẾM NGƯỢC -->
-<section class="container my-3">
-    <div class="p-3 rounded-4 shadow-sm d-flex flex-wrap justify-content-between align-items-center gap-3"
-         style="background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%); color: #ffffff;">
-        <div class="d-flex align-items-center gap-3">
-            <div class="rounded-circle bg-white text-danger d-flex align-items-center justify-content-center shadow-sm" style="width: 44px; height: 44px; font-size: 20px;">
-                <i class="fa-solid fa-bolt"></i>
-            </div>
-            <div>
-                <h6 class="fw-bold mb-0 text-white fs-5">SIÊU DEAL FLASH SALE ĐANG DIỄN RA</h6>
-                <small class="text-white-50">Giảm sốc đến 50% - Cam kết Date xa nhất theo thuật toán FEFO</small>
-            </div>
-        </div>
+                <p class="text-sm sm:text-base text-slate-600 max-w-xl mx-auto lg:mx-0 leading-relaxed font-sans font-light">
+                    Khám phá chu trình chăm sóc da khoa học chuẩn spa và các dòng mỹ phẩm cao cấp được kiểm soát nghiêm ngặt theo thuật toán hạn dùng FEFO độc quyền.
+                </p>
 
-        <div class="d-flex align-items-center gap-2 bg-white bg-opacity-20 px-3 py-2 rounded-pill border border-white border-opacity-25 shadow-sm">
-            <span class="small fw-semibold text-white"><i class="fa-regular fa-clock me-1"></i>Kết thúc sau:</span>
-            <span class="badge bg-dark text-white font-monospace fs-6 px-2 py-1 shadow-sm" id="bannerHours">08</span>
-            <span class="fw-bold text-white">:</span>
-            <span class="badge bg-dark text-white font-monospace fs-6 px-2 py-1 shadow-sm" id="bannerMinutes">45</span>
-            <span class="fw-bold text-white">:</span>
-            <span class="badge bg-danger text-white font-monospace fs-6 px-2 py-1 shadow-sm" id="bannerSeconds">12</span>
-        </div>
-    </div>
-</section>
-
-<!-- 3. KHỐI SẢN PHẨM FLASH SALE -->
-<section class="container my-4" id="flashSaleSection">
-    <div class="p-4 rounded-4 shadow-sm" style="background: linear-gradient(135deg, #FDF2F8 0%, #FAF5FF 100%); border: 1.5px solid #FBCFE8;">
-        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2 border-bottom pb-3" style="border-color: #FBCFE8 !important;">
-            <div class="d-flex align-items-center gap-3">
-                <span class="badge px-3 py-2 rounded-pill fw-bold text-white fs-6 shadow-sm" style="background: #EC4899;">
-                    <i class="fa-solid fa-bolt me-1"></i>GIỜ VÀNG DEAL SỐC
-                </span>
-                <h5 class="fw-bold text-dark mb-0 d-none d-sm-block">Ưu Đãi Đặc Biệt Trong Ngày</h5>
-            </div>
-            <div class="d-flex align-items-center gap-2 small fw-bold text-secondary">
-                <span>Đóng cổng sau:</span>
-                <span class="badge bg-dark text-white px-2 py-1 font-monospace" id="timerHours">08</span> :
-                <span class="badge bg-dark text-white px-2 py-1 font-monospace" id="timerMinutes">45</span> :
-                <span class="badge bg-danger text-white px-2 py-1 font-monospace" id="timerSeconds">12</span>
-            </div>
-        </div>
-
-        <div class="row g-3">
-            @if (Model?.FlashSaleProducts != null && Model.FlashSaleProducts.Any())
-            {
-                foreach (var p in Model.FlashSaleProducts)
-                {
-                    <div class="col-12 col-sm-6 col-lg-3">
-                        <div class="beauty-card h-100 p-3 d-flex flex-column justify-content-between position-relative bg-white shadow-sm">
-                            <span class="position-absolute top-0 start-0 m-3 badge rounded-pill text-white" style="background: #EC4899; font-size: 11px;">
-                                -25%
-                            </span>
-
-                            <div class="text-center my-2">
-                                <img src="https://placehold.co/240x200/FDF2F8/7C3AED?text=@Uri.EscapeDataString(p.ProductName)" alt="@p.ProductName" class="img-fluid rounded-3" style="max-height: 160px; object-fit: cover;" />
-                            </div>
-
-                            <div>
-                                <span class="badge mb-1" style="background: #F5F3FF; color: #7C3AED; font-size: 10.5px;">
-                                    @p.CategoryName
-                                </span>
-                                <h6 class="fw-bold text-dark mb-1 text-truncate-2" style="font-size: 14px; min-height: 40px;">
-                                    <a href="/san-pham/@p.Slug" class="text-dark text-decoration-none">@p.ProductName</a>
-                                </h6>
-
-                                <div class="mb-2">
-                                    <span class="badge border bg-light text-muted fw-normal" style="font-size: 11px;">
-                                        <i class="fa-regular fa-calendar-check text-success me-1"></i>HSD: <strong class="text-dark">@p.EarliestExpDateStr</strong>
-                                    </span>
-                                </div>
-
-                                <div class="d-flex align-items-baseline gap-2 mb-3">
-                                    <span class="fw-bold fs-6 font-monospace" style="color: #EC4899;">@p.SellingPrice.ToString("N0") đ</span>
-                                    <span class="text-muted small text-decoration-line-through font-monospace">@p.OriginalPrice.ToString("N0") đ</span>
-                                </div>
-
-                                <button type="button" class="btn btn-primary-gradient w-100 py-2 small" onclick="quickAddToCart('@p.ProductId')">
-                                    <i class="fa-solid fa-cart-plus me-1"></i>Thêm vào giỏ
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                }
-            }
-            else
-            {
-                <!-- 4 Sản phẩm Flash Sale Mẫu Sẵn Sàng -->
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <div class="beauty-card h-100 p-3 d-flex flex-column justify-content-between position-relative bg-white shadow-sm">
-                        <span class="position-absolute top-0 start-0 m-3 badge rounded-pill text-white" style="background: #EC4899; font-size: 11px;">-35%</span>
-                        <div class="text-center my-2">
-                            <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300&h=300&fit=crop" class="img-fluid rounded-3" style="max-height: 160px; object-fit: cover;" alt="Serum B5" />
-                        </div>
-                        <div>
-                            <span class="badge mb-1" style="background: #F5F3FF; color: #7C3AED; font-size: 10.5px;">Chăm Sóc Da</span>
-                            <h6 class="fw-bold text-dark mb-1 text-truncate-2" style="font-size: 14px; min-height: 40px;">Tinh Chất Phục Hồi Rau Má & Hyaluronic B5 30ml</h6>
-                            <div class="mb-2">
-                                <span class="badge border bg-light text-muted fw-normal" style="font-size: 11px;">
-                                    <i class="fa-regular fa-calendar-check text-success me-1"></i>HSD: <strong class="text-dark">11/2027</strong>
-                                </span>
-                            </div>
-                            <div class="d-flex align-items-baseline gap-2 mb-3">
-                                <span class="fw-bold fs-6 font-monospace" style="color: #EC4899;">320,000 đ</span>
-                                <span class="text-muted small text-decoration-line-through font-monospace">490,000 đ</span>
-                            </div>
-                            <button type="button" class="btn btn-primary-gradient w-100 py-2 small" onclick="alert('Đã thêm Tinh chất B5 vào giỏ hàng!')">
-                                <i class="fa-solid fa-cart-plus me-1"></i>Thêm vào giỏ
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <div class="beauty-card h-100 p-3 d-flex flex-column justify-content-between position-relative bg-white shadow-sm">
-                        <span class="position-absolute top-0 start-0 m-3 badge rounded-pill text-white" style="background: #EC4899; font-size: 11px;">-20%</span>
-                        <div class="text-center my-2">
-                            <img src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300&h=300&fit=crop" class="img-fluid rounded-3" style="max-height: 160px; object-fit: cover;" alt="Son kem" />
-                        </div>
-                        <div>
-                            <span class="badge mb-1" style="background: #F5F3FF; color: #7C3AED; font-size: 10.5px;">Trang Điểm</span>
-                            <h6 class="fw-bold text-dark mb-1 text-truncate-2" style="font-size: 14px; min-height: 40px;">Son Thỏi Lì Velvet Siêu Mịn Nhẹ Môi #04 Đỏ Cherry</h6>
-                            <div class="mb-2">
-                                <span class="badge border bg-light text-muted fw-normal" style="font-size: 11px;">
-                                    <i class="fa-regular fa-calendar-check text-success me-1"></i>HSD: <strong class="text-dark">09/2027</strong>
-                                </span>
-                            </div>
-                            <div class="d-flex align-items-baseline gap-2 mb-3">
-                                <span class="fw-bold fs-6 font-monospace" style="color: #EC4899;">245,000 đ</span>
-                                <span class="text-muted small text-decoration-line-through font-monospace">310,000 đ</span>
-                            </div>
-                            <button type="button" class="btn btn-primary-gradient w-100 py-2 small" onclick="alert('Đã thêm Son môi vào giỏ hàng!')">
-                                <i class="fa-solid fa-cart-plus me-1"></i>Thêm vào giỏ
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <div class="beauty-card h-100 p-3 d-flex flex-column justify-content-between position-relative bg-white shadow-sm">
-                        <span class="position-absolute top-0 start-0 m-3 badge rounded-pill text-white" style="background: #EC4899; font-size: 11px;">-40%</span>
-                        <div class="text-center my-2">
-                            <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop" class="img-fluid rounded-3" style="max-height: 160px; object-fit: cover;" alt="Kem dưỡng" />
-                        </div>
-                        <div>
-                            <span class="badge mb-1" style="background: #F5F3FF; color: #7C3AED; font-size: 10.5px;">Chăm Sóc Da</span>
-                            <h6 class="fw-bold text-dark mb-1 text-truncate-2" style="font-size: 14px; min-height: 40px;">Kem Dưỡng Khóa Ẩm Ceramide Phục Hồi Hàng Rào 50ml</h6>
-                            <div class="mb-2">
-                                <span class="badge border bg-light text-muted fw-normal" style="font-size: 11px;">
-                                    <i class="fa-regular fa-calendar-check text-success me-1"></i>HSD: <strong class="text-dark">03/2028</strong>
-                                </span>
-                            </div>
-                            <div class="d-flex align-items-baseline gap-2 mb-3">
-                                <span class="fw-bold fs-6 font-monospace" style="color: #EC4899;">410,000 đ</span>
-                                <span class="text-muted small text-decoration-line-through font-monospace">680,000 đ</span>
-                            </div>
-                            <button type="button" class="btn btn-primary-gradient w-100 py-2 small" onclick="alert('Đã thêm Kem dưỡng vào giỏ hàng!')">
-                                <i class="fa-solid fa-cart-plus me-1"></i>Thêm vào giỏ
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <div class="beauty-card h-100 p-3 d-flex flex-column justify-content-between position-relative bg-white shadow-sm">
-                        <span class="position-absolute top-0 start-0 m-3 badge rounded-pill text-white" style="background: #EC4899; font-size: 11px;">-15%</span>
-                        <div class="text-center my-2">
-                            <img src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=300&h=300&fit=crop" class="img-fluid rounded-3" style="max-height: 160px; object-fit: cover;" alt="Toner" />
-                        </div>
-                        <div>
-                            <span class="badge mb-1" style="background: #F5F3FF; color: #7C3AED; font-size: 10.5px;">Chăm Sóc Da</span>
-                            <h6 class="fw-bold text-dark mb-1 text-truncate-2" style="font-size: 14px; min-height: 40px;">Nước Hoa Hồng Cân Bằng Độ pH & Cấp Ẩm Dịu Da 200ml</h6>
-                            <div class="mb-2">
-                                <span class="badge border bg-light text-muted fw-normal" style="font-size: 11px;">
-                                    <i class="fa-regular fa-calendar-check text-success me-1"></i>HSD: <strong class="text-dark">12/2027</strong>
-                                </span>
-                            </div>
-                            <div class="d-flex align-items-baseline gap-2 mb-3">
-                                <span class="fw-bold fs-6 font-monospace" style="color: #EC4899;">195,000 đ</span>
-                                <span class="text-muted small text-decoration-line-through font-monospace">230,000 đ</span>
-                            </div>
-                            <button type="button" class="btn btn-primary-gradient w-100 py-2 small" onclick="alert('Đã thêm Toner vào giỏ hàng!')">
-                                <i class="fa-solid fa-cart-plus me-1"></i>Thêm vào giỏ
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
-</section>
-
-<!-- 4. DANH MỤC NỔI BẬT -->
-<section class="container my-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold text-dark mb-1">Danh Mục Nổi Bật</h4>
-            <p class="text-muted small mb-0">Lựa chọn giải pháp chăm sóc phù hợp với làn da của bạn</p>
-        </div>
-    </div>
-
-    <div class="row g-3">
-        @if (Model?.FeaturedCategories != null && Model.FeaturedCategories.Any())
-        {
-            foreach (var cat in Model.FeaturedCategories)
-            {
-                <div class="col-6 col-md-4 col-lg-2">
-                    <a href="/danh-muc/@cat.Slug" class="text-decoration-none">
-                        <div class="beauty-card p-3 text-center h-100 hover-lift">
-                            <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 shadow-sm" style="width: 58px; height: 58px; background: #F5F3FF; color: #7C3AED; font-size: 22px;">
-                                <i class="@(string.IsNullOrEmpty(cat.IconUrl) ? "fa-solid fa-wand-magic-sparkles" : cat.IconUrl)"></i>
-                            </div>
-                            <div class="fw-bold text-dark small text-truncate">@cat.CategoryName</div>
-                            <div class="text-muted" style="font-size: 11px;">@cat.ProductCount sản phẩm</div>
-                        </div>
+                <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-4">
+                    <a href="#featuredProducts" class="w-full sm:w-auto px-8 py-4 rounded-full bg-charcoal text-white font-bold text-xs uppercase tracking-widest hover:bg-magenta-accent shadow-pink-glow transition-all duration-300">
+                        Khám Phá Bộ Sưu Tập <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="/clearance-fefo" class="w-full sm:w-auto px-8 py-4 rounded-full bg-white text-charcoal font-bold text-xs uppercase tracking-widest border border-blush hover:border-magenta-accent hover:text-magenta-accent hover:bg-pastel-pink transition-all duration-300">
+                        Săn Deal Cận Date -50%
                     </a>
                 </div>
-            }
-        }
-        else
-        {
-            <div class="col-6 col-md-4 col-lg-2">
-                <a href="#" class="text-decoration-none">
-                    <div class="beauty-card p-3 text-center h-100 hover-lift">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 shadow-sm" style="width: 58px; height: 58px; background: #F5F3FF; color: #7C3AED; font-size: 22px;">
-                            <i class="fa-solid fa-spa"></i>
-                        </div>
-                        <div class="fw-bold text-dark small text-truncate">Chăm Sóc Da</div>
-                        <div class="text-muted" style="font-size: 11px;">Serum & Dưỡng ẩm</div>
+
+                <!-- Trust Badges Under Hero -->
+                <div class="pt-8 grid grid-cols-3 gap-6 border-t border-blush max-w-md mx-auto lg:mx-0 text-left">
+                    <div>
+                        <div class="font-serif font-bold text-magenta-accent text-xl">100%</div>
+                        <div class="text-[11px] font-sans text-slate-500 uppercase tracking-wider mt-1">Chính Ngạch</div>
                     </div>
-                </a>
-            </div>
-            <div class="col-6 col-md-4 col-lg-2">
-                <a href="#" class="text-decoration-none">
-                    <div class="beauty-card p-3 text-center h-100 hover-lift">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 shadow-sm" style="width: 58px; height: 58px; background: #FDF2F8; color: #EC4899; font-size: 22px;">
-                            <i class="fa-solid fa-heart"></i>
-                        </div>
-                        <div class="fw-bold text-dark small text-truncate">Trang Điểm</div>
-                        <div class="text-muted" style="font-size: 11px;">Son môi & Phấn</div>
+                    <div>
+                        <div class="font-serif font-bold text-magenta-accent text-xl">FEFO</div>
+                        <div class="text-[11px] font-sans text-slate-500 uppercase tracking-wider mt-1">Minh Bạch Hạn Dùng</div>
                     </div>
-                </a>
-            </div>
-            <div class="col-6 col-md-4 col-lg-2">
-                <a href="#" class="text-decoration-none">
-                    <div class="beauty-card p-3 text-center h-100 hover-lift">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 shadow-sm" style="width: 58px; height: 58px; background: #F5F3FF; color: #7C3AED; font-size: 22px;">
-                            <i class="fa-solid fa-sun"></i>
-                        </div>
-                        <div class="fw-bold text-dark small text-truncate">Chống Nắng</div>
-                        <div class="text-muted" style="font-size: 11px;">Phổ rộng SPF50+</div>
+                    <div>
+                        <div class="font-serif font-bold text-magenta-accent text-xl">2 Giờ</div>
+                        <div class="text-[11px] font-sans text-slate-500 uppercase tracking-wider mt-1">Giao Nhanh</div>
                     </div>
-                </a>
+                </div>
             </div>
-            <div class="col-6 col-md-4 col-lg-2">
-                <a href="#" class="text-decoration-none">
-                    <div class="beauty-card p-3 text-center h-100 hover-lift">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 shadow-sm" style="width: 58px; height: 58px; background: #FDF2F8; color: #EC4899; font-size: 22px;">
-                            <i class="fa-solid fa-pump-soap"></i>
+
+            <!-- Hero Visual Render (Right 5 Cols - Rhode / Ekommart Inspired) -->
+            <div class="lg:col-span-5 relative flex items-center justify-center">
+                <div class="relative w-full max-w-md aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
+                    <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&h=1000&fit=crop" class="w-full h-full object-cover transform hover:scale-105 transition duration-700" alt="Luxury Beauty Hero" />
+                    <div class="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-white/85 backdrop-blur-md border border-white shadow-xl flex items-center gap-4">
+                        <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=100&h=100&fit=crop" class="h-14 w-14 rounded-xl object-cover shadow-sm" alt="Thumb" />
+                        <div class="truncate flex-1">
+                            <span class="text-[10px] font-bold text-magenta-accent uppercase tracking-wider">Top 1 Thịnh Hành</span>
+                            <h4 class="text-sm font-bold text-charcoal truncate mt-0.5">Serum La Roche-Posay Hyalu B5</h4>
+                            <div class="text-xs font-bold text-charcoal font-mono-numeric mt-0.5">890.000 ₫ <span class="text-[10px] text-slate-400 line-through ml-1 font-normal">985.000 ₫</span></div>
                         </div>
-                        <div class="fw-bold text-dark small text-truncate">Làm Sạch Da</div>
-                        <div class="text-muted" style="font-size: 11px;">Dịu nhẹ nhạy cảm</div>
                     </div>
-                </a>
+                </div>
             </div>
-            <div class="col-6 col-md-4 col-lg-2">
-                <a href="#" class="text-decoration-none">
-                    <div class="beauty-card p-3 text-center h-100 hover-lift">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 shadow-sm" style="width: 58px; height: 58px; background: #F5F3FF; color: #7C3AED; font-size: 22px;">
-                            <i class="fa-solid fa-shield-heart"></i>
-                        </div>
-                        <div class="fw-bold text-dark small text-truncate">Dược Mỹ Phẩm</div>
-                        <div class="text-muted" style="font-size: 11px;">Phục hồi B5 & K</div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-6 col-md-4 col-lg-2">
-                <a href="#" class="text-decoration-none">
-                    <div class="beauty-card p-3 text-center h-100 hover-lift">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-2 shadow-sm" style="width: 58px; height: 58px; background: #FDF2F8; color: #EC4899; font-size: 22px;">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i>
-                        </div>
-                        <div class="fw-bold text-dark small text-truncate">Bộ Quà Tặng</div>
-                        <div class="text-muted" style="font-size: 11px;">Combo làm đẹp</div>
-                    </div>
-                </a>
-            </div>
-        }
+
+        </div>
     </div>
 </section>
 
-<!-- 5. SẢN PHẨM MỚI NHẤT & CHUẨN KHO FEFO -->
-<section class="container my-5" id="featuredSection">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="fw-bold text-dark mb-1">Sản Phẩm Mới Về</h4>
-            <p class="text-muted small mb-0">Hệ thống kho vận cam kết xuất lô date xa nhất theo thuật toán FEFO</p>
+<section class="py-16 bg-white border-b border-pastel-pink">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-xl mx-auto mb-12">
+            <span class="text-xs font-bold uppercase tracking-widest text-rose-gold">Danh Mục Chọn Lọc</span>
+            <h2 class="font-serif text-3xl sm:text-4xl font-bold text-charcoal mt-2">Khám Phá Theo Nhu Cầu</h2>
+        </div>
+
+        <div class="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-8 gap-4 sm:gap-6 justify-items-center">
+            <!-- Cat 1 -->
+            <a href="/category/nuoc-tay-trang" class="category-avatar-card">
+                <div class="category-avatar-frame">
+                    <img src="https://images.unsplash.com/photo-1556228720-195a672e8a03?w=200&h=200&fit=crop" class="category-avatar-img" alt="Nước Tẩy Trang" />
+                </div>
+                <span class="text-xs font-bold text-slate-800 mt-2.5 text-center">Tẩy Trang</span>
+            </a>
+
+            <!-- Cat 2 -->
+            <a href="/category/sua-rua-mat" class="category-avatar-card">
+                <div class="category-avatar-frame">
+                    <img src="https://images.unsplash.com/photo-1556228722-d0b5be7490bf?w=200&h=200&fit=crop" class="category-avatar-img" alt="Sữa Rửa Mặt" />
+                </div>
+                <span class="text-xs font-bold text-slate-800 mt-2.5 text-center">Rửa Mặt</span>
+            </a>
+
+            <!-- Cat 3 -->
+            <a href="/category/serum-phuc-hoi" class="category-avatar-card">
+                <div class="category-avatar-frame">
+                    <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=200&h=200&fit=crop" class="category-avatar-img" alt="Serum Tinh Chất" />
+                </div>
+                <span class="text-xs font-bold text-slate-800 mt-2.5 text-center">Serum B5</span>
+            </a>
+
+            <!-- Cat 4 -->
+            <a href="/category/kem-chong-nang" class="category-avatar-card">
+                <div class="category-avatar-frame">
+                    <img src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=200&h=200&fit=crop" class="category-avatar-img" alt="Kem Chống Nắng" />
+                </div>
+                <span class="text-xs font-bold text-slate-800 mt-2.5 text-center">Chống Nắng</span>
+            </a>
+
+            <!-- Cat 5 -->
+            <a href="/category/son-moi-li" class="category-avatar-card">
+                <div class="category-avatar-frame">
+                    <img src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=200&h=200&fit=crop" class="category-avatar-img" alt="Son Môi Lì" />
+                </div>
+                <span class="text-xs font-bold text-slate-800 mt-2.5 text-center">Son Môi</span>
+            </a>
+
+            <!-- Cat 6 -->
+            <a href="/category/cushion-kiem-dau" class="category-avatar-card">
+                <div class="category-avatar-frame">
+                    <img src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=200&h=200&fit=crop" class="category-avatar-img" alt="Cushion Nền" />
+                </div>
+                <span class="text-xs font-bold text-slate-800 mt-2.5 text-center">Cushion</span>
+            </a>
+
+            <!-- Cat 7 -->
+            <a href="/category/tinh-dau-duong-toc" class="category-avatar-card">
+                <div class="category-avatar-frame">
+                    <img src="https://images.unsplash.com/photo-1608248597359-269201991823?w=200&h=200&fit=crop" class="category-avatar-img" alt="Dưỡng Tóc" />
+                </div>
+                <span class="text-xs font-bold text-slate-800 mt-2.5 text-center">Dưỡng Tóc</span>
+            </a>
+
+            <!-- Cat 8 (FEFO Clearance) -->
+            <a href="/clearance-fefo" class="category-avatar-card">
+                <div class="category-avatar-frame border-2 border-rose-500">
+                    <img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=200&h=200&fit=crop" class="category-avatar-img" alt="FEFO Deal" />
+                </div>
+                <span class="text-xs font-bold text-rose-600 mt-2.5 text-center">Deal Cận Date</span>
+            </a>
         </div>
     </div>
+</section>
 
-    <div class="row g-3">
-        @if (Model?.LatestProducts != null && Model.LatestProducts.Any())
-        {
-            foreach (var p in Model.LatestProducts)
-            {
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <div class="beauty-card h-100 p-3 d-flex flex-column justify-content-between bg-white shadow-sm">
-                        <div class="text-center my-2">
-                            <img src="https://placehold.co/240x200/FDF2F8/7C3AED?text=@Uri.EscapeDataString(p.ProductName)" alt="@p.ProductName" class="img-fluid rounded-3" style="max-height: 160px; object-fit: cover;" />
-                        </div>
+<section class="py-14 bg-stone-900 text-white relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Flash Sale Header with Countdown Timer (Alpine) -->
+        <div x-data="{
+                endTime: new Date().getTime() + 8 * 60 * 60 * 1000 + 45 * 60 * 1000,
+                hours: '08',
+                minutes: '45',
+                seconds: '20',
+                init() {
+                    setInterval(() => {
+                        let now = new Date().getTime();
+                        let distance = this.endTime - now;
+                        if (distance < 0) {
+                            this.hours = '00';
+                            this.minutes = '00';
+                            this.seconds = '00';
+                            return;
+                        }
+                        this.hours = String(Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))).padStart(2, '0');
+                        this.minutes = String(Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))).padStart(2, '0');
+                        this.seconds = String(Math.floor((distance % (1000 * 60)) / 1000)).padStart(2, '0');
+                    }, 1000);
+                }
+             }" class="flex flex-col md:flex-row items-center justify-between gap-6 mb-10 pb-6 border-b border-stone-800">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="h-3 w-3 rounded-full bg-magenta-accent animate-ping"></span>
+                    <span class="text-xs font-bold uppercase tracking-widest text-magenta-accent">Giờ Vàng Xả Kho Minh Bạch</span>
+                </div>
+                <h2 class="font-serif text-3xl sm:text-4xl font-bold text-white mt-2">FEFO Smart Clearance Sale -50%</h2>
+                <p class="text-sm text-slate-400 mt-2 font-sans">Lô hàng cận date dưới 60 ngày - Cam kết hiệu quả chất lượng tuyệt đối.</p>
+            </div>
 
-                        <div>
-                            <span class="badge mb-1" style="background: #F5F3FF; color: #7C3AED; font-size: 10.5px;">
-                                @p.CategoryName
-                            </span>
-                            <h6 class="fw-bold text-dark mb-1 text-truncate-2" style="font-size: 14px; min-height: 40px;">
-                                <a href="/san-pham/@p.Slug" class="text-dark text-decoration-none">@p.ProductName</a>
-                            </h6>
+            <!-- Countdown Timer Blocks -->
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-medium text-stone-400 mr-2">Kết thúc trong:</span>
+                <div class="countdown-segment">
+                    <span x-text="hours" class="font-mono-numeric text-xl font-bold text-pink-400">08</span>
+                    <span class="block text-[9px] uppercase tracking-wider text-stone-400">Giờ</span>
+                </div>
+                <span class="font-bold text-stone-500">:</span>
+                <div class="countdown-segment">
+                    <span x-text="minutes" class="font-mono-numeric text-xl font-bold text-pink-400">45</span>
+                    <span class="block text-[9px] uppercase tracking-wider text-stone-400">Phút</span>
+                </div>
+                <span class="font-bold text-stone-500">:</span>
+                <div class="countdown-segment">
+                    <span x-text="seconds" class="font-mono-numeric text-xl font-bold text-pink-400">20</span>
+                    <span class="block text-[9px] uppercase tracking-wider text-stone-400">Giây</span>
+                </div>
+            </div>
+        </div>
 
-                            <div class="mb-2">
-                                <span class="badge border bg-light text-muted fw-normal" style="font-size: 11px;">
-                                    <i class="fa-solid fa-shield-halved text-success me-1"></i>HSD: <strong class="text-dark">@p.EarliestExpDateStr</strong>
-                                </span>
-                            </div>
-
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <div>
-                                    <span class="fw-bold fs-6 font-monospace" style="color: #EC4899;">@p.SellingPrice.ToString("N0") đ</span>
-                                </div>
-                                <button type="button" class="btn btn-outline-purple btn-sm rounded-pill px-3" onclick="quickAddToCart('@p.ProductId')">
-                                    <i class="fa-solid fa-cart-plus me-1"></i>Thêm
-                                </button>
-                            </div>
-                        </div>
+        <!-- Flash Sale 4 Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Flash Item 1: Son Rom&nd -->
+            <div class="bg-charcoal/50 rounded-3xl border border-slate-800 p-5 flex flex-col justify-between hover:border-magenta-accent/50 transition-all duration-300">
+                <div>
+                    <div class="relative aspect-square rounded-2xl overflow-hidden bg-charcoal mb-4">
+                        <img src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop" class="w-full h-full object-cover" alt="Romand Tint" />
+                        <span class="absolute top-3 left-3 bg-magenta-accent text-white text-[10px] font-bold px-2 py-1 rounded-full">-40% FEFO</span>
+                    </div>
+                    <div class="text-[11px] text-magenta-accent font-semibold mb-1.5 uppercase tracking-wider">Lô: LOT-ROM-24I01 • Date: 38 ngày nữa</div>
+                    <h4 class="text-sm font-bold text-white line-clamp-1">Son Kem Lì Rom&nd Zero Velvet #02</h4>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <span class="text-lg font-bold text-white font-mono-numeric">107.400 ₫</span>
+                        <span class="text-xs text-slate-500 line-through font-mono-numeric">179.000 ₫</span>
                     </div>
                 </div>
-            }
-        }
-        else
-        {
-            <div class="col-12 col-sm-6 col-lg-3">
-                <div class="beauty-card h-100 p-3 d-flex flex-column justify-content-between bg-white shadow-sm">
-                    <div class="text-center my-2">
-                        <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=300&h=300&fit=crop" class="img-fluid rounded-3" style="max-height: 160px; object-fit: cover;" alt="Kem chống nắng" />
+                <div class="mt-5 space-y-2.5">
+                    <div class="flex justify-between text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
+                        <span>Đã bán: 22/25</span>
+                        <span class="text-magenta-accent">Sắp hết hàng</span>
                     </div>
-                    <div>
-                        <span class="badge mb-1" style="background: #F5F3FF; color: #7C3AED; font-size: 10.5px;">Chống Nắng</span>
-                        <h6 class="fw-bold text-dark mb-1 text-truncate-2" style="font-size: 14px; min-height: 40px;">Kem Chống Nắng Phổ Rộng Kiềm Dầu SPF50+ PA++++ 50ml</h6>
-                        <div class="mb-2">
-                            <span class="badge border bg-light text-muted fw-normal" style="font-size: 11px;">
-                                <i class="fa-solid fa-shield-halved text-success me-1"></i>HSD: <strong class="text-dark">12/2027</strong>
-                            </span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="fw-bold fs-6 font-monospace" style="color: #EC4899;">385,000 đ</span>
-                            <button type="button" class="btn btn-outline-purple btn-sm rounded-pill px-3" onclick="alert('Đã thêm Kem chống nắng!')">
-                                <i class="fa-solid fa-cart-plus me-1"></i>Thêm
-                            </button>
-                        </div>
+                    <div class="h-1.5 w-full rounded-full bg-slate-800 overflow-hidden">
+                        <div class="h-full bg-magenta-accent" style="width: 88%;"></div>
                     </div>
+                    <button type="button" onclick="addToCart(5, 'Son Kem Lì Rom&nd Zero Velvet #02', 107400, 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop')" class="w-full py-3 rounded-full bg-white text-charcoal font-bold text-xs hover:bg-magenta-accent hover:text-white shadow-sm transition-all flex items-center justify-center gap-2 mt-2">
+                        <i class="fa-solid fa-cart-shopping"></i> Thêm Giỏ Hàng
+                    </button>
                 </div>
             </div>
 
-            <div class="col-12 col-sm-6 col-lg-3">
-                <div class="beauty-card h-100 p-3 d-flex flex-column justify-content-between bg-white shadow-sm">
-                    <div class="text-center my-2">
-                        <img src="https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=300&h=300&fit=crop" class="img-fluid rounded-3" style="max-height: 160px; object-fit: cover;" alt="Nước tẩy trang" />
+            <!-- Flash Item 2: Hada Labo -->
+            <div class="bg-stone-800/80 rounded-2xl border border-stone-700 p-4 flex flex-col justify-between hover:border-rose-500/50 transition">
+                <div>
+                    <div class="relative aspect-square rounded-xl overflow-hidden bg-stone-900 mb-3">
+                        <img src="https://images.unsplash.com/photo-1556228722-d0b5be7490bf?w=400&h=400&fit=crop" class="w-full h-full object-cover" alt="Hada Labo" />
+                        <span class="badge-fefo-clearance absolute top-2 left-2">-35% FEFO</span>
                     </div>
-                    <div>
-                        <span class="badge mb-1" style="background: #F5F3FF; color: #7C3AED; font-size: 10.5px;">Làm Sạch</span>
-                        <h6 class="fw-bold text-dark mb-1 text-truncate-2" style="font-size: 14px; min-height: 40px;">Nước Tẩy Trang Micellar Water Dịu Nhẹ Không Cồn 400ml</h6>
-                        <div class="mb-2">
-                            <span class="badge border bg-light text-muted fw-normal" style="font-size: 11px;">
-                                <i class="fa-solid fa-shield-halved text-success me-1"></i>HSD: <strong class="text-dark">08/2027</strong>
-                            </span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="fw-bold fs-6 font-monospace" style="color: #EC4899;">230,000 đ</span>
-                            <button type="button" class="btn btn-outline-purple btn-sm rounded-pill px-3" onclick="alert('Đã thêm Nước tẩy trang!')">
-                                <i class="fa-solid fa-cart-plus me-1"></i>Thêm
-                            </button>
-                        </div>
+                    <div class="text-[11px] text-rose-400 font-semibold mb-1">Lô: LOT-ROH-24F10 • Date: 38 ngày nữa</div>
+                    <h4 class="text-sm font-bold text-white line-clamp-1">Kem Rửa Mặt Dưỡng Ẩm Hada Labo 80g</h4>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <span class="text-base font-bold text-white font-mono-numeric">64.350 ₫</span>
+                        <span class="text-xs text-stone-500 line-through font-mono-numeric">99.000 ₫</span>
                     </div>
+                </div>
+                <div class="mt-4 space-y-2">
+                    <div class="flex justify-between text-[10px] text-stone-400 font-semibold">
+                        <span>Đã bán: 18/25</span>
+                        <span class="text-amber-400">Đang bán chạy</span>
+                    </div>
+                    <div class="progress-fefo-container bg-stone-700">
+                        <div class="progress-fefo-bar" style="width: 72%;"></div>
+                    </div>
+                    <button type="button" onclick="addToCart(2, 'Kem Rửa Mặt Dưỡng Ẩm Hada Labo 80g', 64350, 'https://images.unsplash.com/photo-1556228722-d0b5be7490bf?w=400&h=400&fit=crop')" class="w-full py-2.5 rounded-xl bg-rose-600 text-white font-bold text-xs hover:bg-rose-700 transition flex items-center justify-center gap-1.5 mt-2">
+                        <i class="fa-solid fa-cart-shopping"></i> Mua Ngay
+                    </button>
                 </div>
             </div>
 
-            <div class="col-12 col-sm-6 col-lg-3">
-                <div class="beauty-card h-100 p-3 d-flex flex-column justify-content-between bg-white shadow-sm">
-                    <div class="text-center my-2">
-                        <img src="https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=300&h=300&fit=crop" class="img-fluid rounded-3" style="max-height: 160px; object-fit: cover;" alt="Sữa rửa mặt" />
+            <!-- Flash Item 3: Skin Aqua Sunscreen -->
+            <div class="bg-stone-800/80 rounded-2xl border border-stone-700 p-4 flex flex-col justify-between hover:border-rose-500/50 transition">
+                <div>
+                    <div class="relative aspect-square rounded-xl overflow-hidden bg-stone-900 mb-3">
+                        <img src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400&h=400&fit=crop" class="w-full h-full object-cover" alt="Skin Aqua" />
+                        <span class="badge-fefo-clearance absolute top-2 left-2">-30% FEFO</span>
                     </div>
-                    <div>
-                        <span class="badge mb-1" style="background: #F5F3FF; color: #7C3AED; font-size: 10.5px;">Làm Sạch</span>
-                        <h6 class="fw-bold text-dark mb-1 text-truncate-2" style="font-size: 14px; min-height: 40px;">Gel Rửa Mặt Tạo Bọt Chiết Xuất Tràm Trà Ngừa Mụn 150ml</h6>
-                        <div class="mb-2">
-                            <span class="badge border bg-light text-muted fw-normal" style="font-size: 11px;">
-                                <i class="fa-solid fa-shield-halved text-success me-1"></i>HSD: <strong class="text-dark">10/2027</strong>
-                            </span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="fw-bold fs-6 font-monospace" style="color: #EC4899;">185,000 đ</span>
-                            <button type="button" class="btn btn-outline-purple btn-sm rounded-pill px-3" onclick="alert('Đã thêm Sữa rửa mặt!')">
-                                <i class="fa-solid fa-cart-plus me-1"></i>Thêm
-                            </button>
-                        </div>
+                    <div class="text-[11px] text-rose-400 font-semibold mb-1">Lô: LOT-AQU-24H12 • Date: 38 ngày nữa</div>
+                    <h4 class="text-sm font-bold text-white line-clamp-1">Sữa Chống Nắng Skin Aqua Tone Up 50g</h4>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <span class="text-base font-bold text-white font-mono-numeric">129.500 ₫</span>
+                        <span class="text-xs text-stone-500 line-through font-mono-numeric">185.000 ₫</span>
                     </div>
+                </div>
+                <div class="mt-4 space-y-2">
+                    <div class="flex justify-between text-[10px] text-stone-400 font-semibold">
+                        <span>Đã bán: 20/25</span>
+                        <span class="text-rose-400">Còn 5 món</span>
+                    </div>
+                    <div class="progress-fefo-container bg-stone-700">
+                        <div class="progress-fefo-bar" style="width: 80%;"></div>
+                    </div>
+                    <button type="button" onclick="addToCart(4, 'Sữa Chống Nắng Skin Aqua Tone Up 50g', 129500, 'https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400&h=400&fit=crop')" class="w-full py-2.5 rounded-xl bg-rose-600 text-white font-bold text-xs hover:bg-rose-700 transition flex items-center justify-center gap-1.5 mt-2">
+                        <i class="fa-solid fa-cart-shopping"></i> Mua Ngay
+                    </button>
                 </div>
             </div>
 
-            <div class="col-12 col-sm-6 col-lg-3">
-                <div class="beauty-card h-100 p-3 d-flex flex-column justify-content-between bg-white shadow-sm">
-                    <div class="text-center my-2">
-                        <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&h=300&fit=crop" class="img-fluid rounded-3" style="max-height: 160px; object-fit: cover;" alt="Mặt nạ" />
+            <!-- Flash Item 4: Laneige Cushion -->
+            <div class="bg-stone-800/80 rounded-2xl border border-stone-700 p-4 flex flex-col justify-between hover:border-rose-500/50 transition">
+                <div>
+                    <div class="relative aspect-square rounded-xl overflow-hidden bg-stone-900 mb-3">
+                        <img src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=400&h=400&fit=crop" class="w-full h-full object-cover" alt="Laneige Cushion" />
+                        <span class="badge-fefo-clearance absolute top-2 left-2">-25% FEFO</span>
                     </div>
-                    <div>
-                        <span class="badge mb-1" style="background: #F5F3FF; color: #7C3AED; font-size: 10.5px;">Mặt Nạ</span>
-                        <h6 class="fw-bold text-dark mb-1 text-truncate-2" style="font-size: 14px; min-height: 40px;">Hộp Mặt Nạ Sinh Học Cấp Ẩm Tức Thì & Trắng Sáng (10 Miếng)</h6>
-                        <div class="mb-2">
-                            <span class="badge border bg-light text-muted fw-normal" style="font-size: 11px;">
-                                <i class="fa-solid fa-shield-halved text-success me-1"></i>HSD: <strong class="text-dark">05/2028</strong>
-                            </span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="fw-bold fs-6 font-monospace" style="color: #EC4899;">270,000 đ</span>
-                            <button type="button" class="btn btn-outline-purple btn-sm rounded-pill px-3" onclick="alert('Đã thêm Mặt nạ vào giỏ!')">
-                                <i class="fa-solid fa-cart-plus me-1"></i>Thêm
-                            </button>
-                        </div>
+                    <div class="text-[11px] text-rose-400 font-semibold mb-1">Lô: LOT-LAN-24J02 • Date: 38 ngày nữa</div>
+                    <h4 class="text-sm font-bold text-white line-clamp-1">Phấn Nước Laneige Neo Cushion Matte #21N</h4>
+                    <div class="flex items-baseline gap-2 mt-2">
+                        <span class="text-base font-bold text-white font-mono-numeric">487.500 ₫</span>
+                        <span class="text-xs text-stone-500 line-through font-mono-numeric">650.000 ₫</span>
                     </div>
                 </div>
+                <div class="mt-4 space-y-2">
+                    <div class="flex justify-between text-[10px] text-stone-400 font-semibold">
+                        <span>Đã bán: 23/25</span>
+                        <span class="text-rose-400">Sắp cháy hàng</span>
+                    </div>
+                    <div class="progress-fefo-container bg-stone-700">
+                        <div class="progress-fefo-bar" style="width: 92%;"></div>
+                    </div>
+                    <button type="button" onclick="addToCart(6, 'Phấn Nước Laneige Neo Cushion Matte #21N', 487500, 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=400&h=400&fit=crop')" class="w-full py-2.5 rounded-xl bg-rose-600 text-white font-bold text-xs hover:bg-rose-700 transition flex items-center justify-center gap-1.5 mt-2">
+                        <i class="fa-solid fa-cart-shopping"></i> Mua Ngay
+                    </button>
+                </div>
             </div>
-        }
+        </div>
+    </div>
+</section>
+
+<section id="featuredProducts" class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Tab Navigation Filters (Zyora & Ekommart style) -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-6 mb-12 pb-4 border-b border-blush">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-rose-gold">Mỹ Phẩm Tuyển Lựa</span>
+                <h2 class="font-serif text-3xl sm:text-4xl font-bold text-charcoal mt-2">Sản Phẩm Được Yêu Thích Nhất</h2>
+            </div>
+
+            <!-- Tab Buttons (Alpine & HTMX) -->
+            <div x-data="{ activeTab: 'all' }" class="flex items-center gap-2 p-1.5 rounded-full bg-pastel-pink border border-blush">
+                <button type="button" @@click="activeTab = 'all'" hx-get="/Home/GetProductTab?category=all" hx-target="#productCardsGrid" :class="activeTab === 'all' ? 'bg-white text-charcoal shadow-sm' : 'text-slate-500 hover:text-charcoal'" class="px-6 py-2.5 rounded-full text-xs font-bold transition-all">Tất Cả</button>
+                <button type="button" @@click="activeTab = 'skincare'" hx-get="/Home/GetProductTab?category=skincare" hx-target="#productCardsGrid" :class="activeTab === 'skincare' ? 'bg-white text-charcoal shadow-sm' : 'text-slate-500 hover:text-charcoal'" class="px-6 py-2.5 rounded-full text-xs font-bold transition-all">Chăm Sóc Da</button>
+                <button type="button" @@click="activeTab = 'makeup'" hx-get="/Home/GetProductTab?category=makeup" hx-target="#productCardsGrid" :class="activeTab === 'makeup' ? 'bg-white text-charcoal shadow-sm' : 'text-slate-500 hover:text-charcoal'" class="px-6 py-2.5 rounded-full text-xs font-bold transition-all">Trang Điểm</button>
+            </div>
+        </div>
+
+        <!-- Product Grid (Loaded via HTMX) -->
+        <div id="productCardsGrid" hx-get="/Home/GetProductTab?category=all" hx-trigger="load" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative min-h-[400px]">
+            <!-- Loading indicator -->
+            <div class="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+                <div class="flex flex-col items-center">
+                    <span class="flex h-10 w-10 relative mb-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-10 w-10 bg-pink-500 items-center justify-center text-white text-xs"><i class="fa-solid fa-spinner fa-spin"></i></span>
+                    </span>
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-widest animate-pulse">Đang tải bộ sưu tập...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-10 bg-slate-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Promo 1: Clean Foundation -->
+            <div class="relative rounded-3xl overflow-hidden min-h-[260px] bg-gradient-to-r from-rose-100 to-pink-50 p-8 flex flex-col justify-between border border-pink-200/60 shadow-sm group">
+                <div class="max-w-xs z-10">
+                    <span class="text-xs font-bold uppercase tracking-widest text-pink-600">Bộ Sưu Tập Nền Mịn Lì</span>
+                    <h3 class="font-serif-luxury text-2xl font-bold text-slate-900 mt-1">Clean Matte Liquid Foundation</h3>
+                    <p class="text-xs text-slate-600 mt-2">Mỏng nhẹ như không, kháng nước và giữ màu đến 24 giờ cho khí hậu nhiệt đới.</p>
+                </div>
+                <div class="z-10 mt-6">
+                    <a href="/category/cushion-kiem-dau" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-900 text-white font-bold text-xs hover:bg-pink-600 transition">
+                        Khám Phá Cushion <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </a>
+                </div>
+                <img src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=400&h=400&fit=crop" class="absolute -right-8 -bottom-8 w-56 h-56 object-cover rounded-full opacity-80 group-hover:scale-110 transition duration-500" alt="Foundation Promo" />
+            </div>
+
+            <!-- Promo 2: Deep Hydration Serum -->
+            <div class="relative rounded-3xl overflow-hidden min-h-[260px] bg-gradient-to-r from-amber-50 to-rose-100 p-8 flex flex-col justify-between border border-amber-200/60 shadow-sm group">
+                <div class="max-w-xs z-10">
+                    <span class="text-xs font-bold uppercase tracking-widest text-amber-700">Liệu Trình Chuyên Sâu</span>
+                    <h3 class="font-serif-luxury text-2xl font-bold text-slate-900 mt-1">Hydrated Skin Perfectly</h3>
+                    <p class="text-xs text-slate-600 mt-2">Cấp ẩm tức thì với Hyaluronic Acid phân tử siêu nhỏ thấm sâu tới 10 tầng biểu bì.</p>
+                </div>
+                <div class="z-10 mt-6">
+                    <a href="/category/serum-phuc-hoi" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-slate-900 text-white font-bold text-xs hover:bg-pink-600 transition">
+                        Xem Dòng Serum <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </a>
+                </div>
+                <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop" class="absolute -right-8 -bottom-8 w-56 h-56 object-cover rounded-full opacity-80 group-hover:scale-110 transition duration-500" alt="Hydration Promo" />
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-xl mx-auto mb-12">
+            <span class="text-xs font-bold uppercase tracking-widest text-pink-500">Triết Lý Làm Đẹp</span>
+            <h2 class="font-serif-luxury text-3xl font-bold text-slate-900 mt-1">Làn Da Thật • Vẻ Đẹp Thật</h2>
+            <p class="text-xs text-slate-500 mt-2">Chúng tôi tin rằng nét quyến rũ vĩnh cửu bắt đầu từ một làn da khỏe mạnh, đủ ẩm và được bảo vệ cẩn trọng.</p>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="aspect-[3/4] rounded-2xl overflow-hidden shadow-sm">
+                <img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=500&h=700&fit=crop" class="w-full h-full object-cover hover:scale-105 transition duration-500" alt="Glow 1" />
+            </div>
+            <div class="aspect-[3/4] rounded-2xl overflow-hidden shadow-sm">
+                <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&h=700&fit=crop" class="w-full h-full object-cover hover:scale-105 transition duration-500" alt="Glow 2" />
+            </div>
+            <div class="aspect-[3/4] rounded-2xl overflow-hidden shadow-sm">
+                <img src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=500&h=700&fit=crop" class="w-full h-full object-cover hover:scale-105 transition duration-500" alt="Glow 3" />
+            </div>
+            <div class="aspect-[3/4] rounded-2xl overflow-hidden shadow-sm">
+                <img src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=500&h=700&fit=crop" class="w-full h-full object-cover hover:scale-105 transition duration-500" alt="Glow 4" />
+            </div>
+        </div>
     </div>
 </section>

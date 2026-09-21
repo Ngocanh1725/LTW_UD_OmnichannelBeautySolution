@@ -5,39 +5,40 @@ using Microsoft.Extensions.Options;
 
 namespace Omnichannel.Infrastructure.Security
 {
-    public class DynamicPermissionPolicyProvider : IAuthorizationPolicyProvider
+    public class DynamicPermissionPolicyProvider : DefaultAuthorizationPolicyProvider
     {
-        public DefaultAuthorizationPolicyProvider FallbackPolicyProvider { get; }
+        private readonly AuthorizationOptions _options;
 
         public DynamicPermissionPolicyProvider(IOptions<AuthorizationOptions> options)
+            : base(options)
         {
-            FallbackPolicyProvider = new DefaultAuthorizationPolicyProvider(options);
+            _options = options.Value;
         }
 
-        public Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
+        public override async Task<AuthorizationPolicy?> GetPolicyAsync(string policyName)
         {
-            if (policyName.StartsWith(HasPermissionAttribute.PolicyPrefix, StringComparison.OrdinalIgnoreCase))
+            // Kiểm tra xem policy đã được đăng ký tĩnh chưa
+            var policy = await base.GetPolicyAsync(policyName);
+            if (policy != null)
             {
-                var tokens = policyName.Split(HasPermissionAttribute.Separator);
-                if (tokens.Length == 3)
-                {
-                    string module = tokens[1];
-                    string action = tokens[2];
-
-                    var policy = new AuthorizationPolicyBuilder();
-                    policy.RequireAuthenticatedUser();
-                    policy.AddRequirements(new PermissionRequirement(module, action));
-                    return Task.FromResult<AuthorizationPolicy?>(policy.Build());
-                }
+                return policy;
             }
 
-            return FallbackPolicyProvider.GetPolicyAsync(policyName);
+            // Nếu policy bắt đầu với tiền tố động "PERM:"
+            if (policyName.StartsWith(HasPermissionAttribute.PolicyPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                var requirement = new PermissionRequirement(policyName);
+                var dynamicPolicy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .AddRequirements(requirement)
+                    .Build();
+
+                // Lưu tạm vào cache của options để tái sử dụng
+                _options.AddPolicy(policyName, dynamicPolicy);
+                return dynamicPolicy;
+            }
+
+            return null;
         }
-
-        public Task<AuthorizationPolicy> GetDefaultPolicyAsync() =>
-            FallbackPolicyProvider.GetDefaultPolicyAsync();
-
-        public Task<AuthorizationPolicy?> GetFallbackPolicyAsync() =>
-            FallbackPolicyProvider.GetFallbackPolicyAsync();
     }
 }

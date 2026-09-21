@@ -6,10 +6,12 @@ namespace Omnichannel.Application.Interfaces.Sales
 {
     public interface ICartService
     {
-        Task<CartViewModel> GetCartAsync(string cartId, CancellationToken cancellationToken = default);
-        Task<bool> AddToCartAsync(string cartId, string productId, int quantity, CancellationToken cancellationToken = default);
-        Task<bool> UpdateQuantityAsync(string cartId, string productId, int delta, CancellationToken cancellationToken = default);
-        Task<bool> RemoveItemAsync(string cartId, string productId, CancellationToken cancellationToken = default);
-        Task ClearCartAsync(string cartId, CancellationToken cancellationToken = default);
+        Task<CartDto> GetOrCreateCartAsync(string? sessionId, string? userId, CancellationToken cancellationToken = default);
+        Task<CartDto?> GetCartAsync(string? sessionId, string? userId, CancellationToken cancellationToken = default);
+        Task<CartDto> AddToCartAsync(string? sessionId, string? userId, int productId, int? batchId, int quantity, CancellationToken cancellationToken = default);
+        Task<CartDto> UpdateQuantityAsync(string? sessionId, string? userId, int cartItemId, int quantity, CancellationToken cancellationToken = default);
+        Task<CartDto> RemoveFromCartAsync(string? sessionId, string? userId, int cartItemId, CancellationToken cancellationToken = default);
+        Task ClearCartAsync(string? sessionId, string? userId, CancellationToken cancellationToken = default);
+        Task MergeCartsAsync(string sessionId, string userId, CancellationToken cancellationToken = default);
     }
 }

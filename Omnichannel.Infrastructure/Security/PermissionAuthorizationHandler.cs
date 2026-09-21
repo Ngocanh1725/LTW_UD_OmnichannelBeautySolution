@@ -1,7 +1,7 @@
-﻿using System.Security.Claims;
+﻿using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Logging;
 using Omnichannel.Application.Interfaces.Security;
 
 namespace Omnichannel.Infrastructure.Security
@@ -9,44 +9,56 @@ namespace Omnichannel.Infrastructure.Security
     public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionRequirement>
     {
         private readonly IPermissionService _permissionService;
-        private readonly ILogger<PermissionAuthorizationHandler> _logger;
 
-        public PermissionAuthorizationHandler(
-            IPermissionService permissionService,
-            ILogger<PermissionAuthorizationHandler> logger)
+        public PermissionAuthorizationHandler(IPermissionService permissionService)
         {
             _permissionService = permissionService;
-            _logger = logger;
         }
 
         protected override async Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
             PermissionRequirement requirement)
         {
-            if (context.User.Identity?.IsAuthenticated != true)
+            if (context.User?.Identity == null || !context.User.Identity.IsAuthenticated)
+            {
                 return;
+            }
 
-            // Tài khoản có vai trò SUPER_ADMIN được bỏ qua kiểm tra và cấp quyền ngay
-            if (context.User.IsInRole("SUPER_ADMIN"))
+            // =========================================================================
+            // TẦNG 1: KIỂM TRA QUYỀN SUPERADMIN TỐI CAO (GOD MODE BYPASS)
+            // =========================================================================
+            if (context.User.IsInRole("SuperAdmin") ||
+                context.User.IsInRole("SUPER_ADMIN") ||
+                context.User.HasClaim(ClaimTypes.Role, "SuperAdmin"))
             {
                 context.Succeed(requirement);
                 return;
             }
 
+            // =========================================================================
+            // TẦNG 2: LẤY USER ID VÀ ĐỐI SOÁT TẬP QUYỀN HỮU HIỆU (EFFECTIVE PERMISSIONS)
+            // =========================================================================
             var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim))
+            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
                 return;
+            }
 
-            var effectivePermissions = await _permissionService.GetEffectivePermissionsAsync(userIdClaim);
+            var effectivePermissions = await _permissionService.GetEffectivePermissionsAsync(userId);
 
-            if (effectivePermissions.Contains(requirement.PermissionKey))
+            // =========================================================================
+            // TẦNG 3: SO KHỚP ĐA ĐỊNH DẠNG (PERM:MODULE:ACTION HOẶC MODULE_ACTION)
+            // =========================================================================
+            var normalizedCode = requirement.PermissionCode;
+            var alternativeCode = requirement.Module != null && requirement.Action != null
+                ? $"{requirement.Module}_{requirement.Action}"
+                : normalizedCode;
+
+            if (effectivePermissions.Contains(normalizedCode) ||
+                effectivePermissions.Contains(alternativeCode) ||
+                effectivePermissions.Contains(requirement.PolicyName))
             {
                 context.Succeed(requirement);
-            }
-            else
-            {
-                _logger.LogWarning("Truy cập bị từ chối: User {UserId} không có quyền yêu cầu {RequiredKey}.",
-                    userIdClaim, requirement.PermissionKey);
             }
         }
     }

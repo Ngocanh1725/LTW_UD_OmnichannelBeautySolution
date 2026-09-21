@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -6,9 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Omnichannel.Application.DTOs.Inventory;
-using Omnichannel.Domain.Entities;
+using Omnichannel.Application.Interfaces.Catalog;
 using Omnichannel.Infrastructure.Data;
 using Omnichannel.Infrastructure.Security;
+using Omnichannel.Web.Extensions;
+using Microsoft.AspNetCore.SignalR;
+using Omnichannel.Web.Hubs;
 
 namespace Omnichannel.Web.Areas.Admin.Controllers
 {
@@ -16,57 +19,30 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
     [Authorize]
     public class ProductController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IProductService _productService;
+        private readonly ApplicationDbContext _context; // For simple dropdowns, usually this should also be in a service
+        private readonly IHubContext<SystemHub> _hubContext;
 
-        public ProductController(ApplicationDbContext context)
+        public ProductController(IProductService productService, ApplicationDbContext context, IHubContext<SystemHub> hubContext)
         {
+            _productService = productService;
             _context = context;
+            _hubContext = hubContext;
         }
 
         [HttpGet]
         [HasPermission("CATALOG", "VIEW")]
         public async Task<IActionResult> Index(string? keyword = null, int? categoryId = null)
         {
-            var query = _context.Products
-                .AsNoTracking()
-                .Include(p => p.Category)
-                .Include(p => p.Supplier)
-                .AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(keyword))
-            {
-                string cleanKeyword = keyword.Trim().ToLower();
-                query = query.Where(p => p.ProductName.ToLower().Contains(cleanKeyword)
-                                      || p.ProductId.ToLower().Contains(cleanKeyword)
-                                      || p.Barcode.Contains(cleanKeyword));
-            }
-
-            if (categoryId.HasValue)
-            {
-                query = query.Where(p => p.CategoryId == categoryId.Value);
-            }
-
-            var products = await query
-                .OrderByDescending(p => p.CreatedAt)
-                .Select(p => new ProductItemViewModel
-                {
-                    ProductId = p.ProductId,
-                    Barcode = p.Barcode,
-                    ProductName = p.ProductName,
-                    Slug = p.Slug,
-                    CategoryName = p.Category.CategoryName,
-                    SupplierName = p.Supplier.SupplierName,
-                    SellingPrice = p.SellingPrice,
-                    CostPrice = p.CostPrice,
-                    SafetyStock = p.SafetyStock,
-                    Unit = p.Unit,
-                    Status = p.Status,
-                    CreatedAt = p.CreatedAt
-                })
-                .ToListAsync();
+            var products = await _productService.GetProductsAsync(keyword, categoryId);
 
             ViewBag.Categories = new SelectList(await _context.Categories.Where(c => c.IsActive).ToListAsync(), "CategoryId", "CategoryName", categoryId);
             ViewBag.Keyword = keyword;
+
+            if (Request.IsHtmx())
+            {
+                return PartialView("_ProductList", products);
+            }
 
             return View(products);
         }
@@ -76,6 +52,12 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         public async Task<IActionResult> Create()
         {
             await PopulateDropdownsAsync();
+            
+            if (Request.IsHtmx())
+            {
+                return PartialView("_CreateProductModal", new CreateProductViewModel());
+            }
+            
             return View(new CreateProductViewModel());
         }
 
@@ -87,27 +69,21 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             if (!ModelState.IsValid)
             {
                 await PopulateDropdownsAsync();
+                if (Request.IsHtmx()) return PartialView("_CreateProductModal", model);
                 return View(model);
             }
 
-            string cleanSku = model.ProductId.Trim().ToUpperInvariant();
-            string cleanBarcode = model.Barcode.Trim();
-            string cleanSlug = model.Slug.Trim().ToLowerInvariant();
-
-            // Kiểm tra trùng mã SKU
-            if (await _context.Products.AnyAsync(p => p.ProductId == cleanSku))
+            if (await _productService.IsSkuExistsAsync(model.ProductId.Trim().ToUpperInvariant()))
             {
                 ModelState.AddModelError("ProductId", "Mã SKU này đã tồn tại trong danh mục.");
             }
 
-            // Kiểm tra trùng Barcode
-            if (await _context.Products.AnyAsync(p => p.Barcode == cleanBarcode))
+            if (await _productService.IsBarcodeExistsAsync(model.Barcode.Trim()))
             {
                 ModelState.AddModelError("Barcode", "Mã Barcode này đã được sử dụng.");
             }
 
-            // Kiểm tra trùng Slug
-            if (await _context.Products.AnyAsync(p => p.Slug == cleanSlug))
+            if (await _productService.IsSlugExistsAsync(model.Slug.Trim().ToLowerInvariant()))
             {
                 ModelState.AddModelError("Slug", "Đường dẫn Slug này đã tồn tại.");
             }
@@ -115,30 +91,29 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             if (!ModelState.IsValid)
             {
                 await PopulateDropdownsAsync();
+                if (Request.IsHtmx()) return PartialView("_CreateProductModal", model);
                 return View(model);
             }
 
-            var product = new Product
+            var success = await _productService.CreateProductAsync(model);
+            
+            if (success)
             {
-                ProductId = cleanSku,
-                CategoryId = model.CategoryId,
-                SupplierId = model.SupplierId,
-                Barcode = cleanBarcode,
-                ProductName = model.ProductName.Trim(),
-                Slug = cleanSlug,
-                SellingPrice = model.SellingPrice,
-                CostPrice = model.CostPrice,
-                SafetyStock = model.SafetyStock,
-                Unit = model.Unit.Trim(),
-                Status = model.Status,
-                CreatedAt = DateTime.UtcNow
-            };
+                await _hubContext.Clients.All.SendAsync("ReceiveNotification", $"Đã thêm mới mỹ phẩm '{model.ProductName}' thành công!", "success");
+                
+                if (Request.IsHtmx())
+                {
+                    Response.Headers.Append("HX-Trigger", "reloadProductTable");
+                    return Content(""); // Return empty to close modal or trigger reloads
+                }
 
-            await _context.Products.AddAsync(product);
-            await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = $"Đã thêm mới mỹ phẩm '{model.ProductName}' thành công!";
+                return RedirectToAction(nameof(Index));
+            }
 
-            TempData["SuccessMessage"] = $"Đã thêm mới mỹ phẩm '{product.ProductName}' (SKU: {product.ProductId}) thành công!";
-            return RedirectToAction(nameof(Index));
+            await PopulateDropdownsAsync();
+            if (Request.IsHtmx()) return PartialView("_CreateProductModal", model);
+            return View(model);
         }
 
         [HttpPost]
@@ -146,27 +121,33 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HasPermission("CATALOG", "EDIT")]
         public async Task<IActionResult> ToggleStatus(string id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product == null) return NotFound();
+            var result = await _productService.ToggleProductStatusAsync(id);
+            
+            if (!result.Success) return NotFound();
 
-            product.Status = product.Status == 1 ? 0 : 1;
-            product.UpdatedAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
+            var message = result.NewStatus == 1
+                ? $"Đã mở bán lại sản phẩm {result.ProductName}."
+                : $"Đã tạm ngừng kinh doanh sản phẩm {result.ProductName}.";
 
-            TempData["SuccessMessage"] = product.Status == 1
-                ? $"Đã mở bán lại sản phẩm {product.ProductName}."
-                : $"Đã tạm ngừng kinh doanh sản phẩm {product.ProductName}.";
+            await _hubContext.Clients.All.SendAsync("ReceiveNotification", message, "success");
 
+            if (Request.IsHtmx())
+            {
+                Response.Headers.Append("HX-Trigger", "reloadProductTable");
+                return Content(""); // Trả về content rỗng, sự kiện reload sẽ gọi lại bảng
+            }
+
+            TempData["SuccessMessage"] = message;
             return RedirectToAction(nameof(Index));
         }
 
         private async Task PopulateDropdownsAsync()
         {
-            var categories = await _context.Categories.Where(c => c.IsActive).OrderBy(c => c.CategoryName).ToListAsync();
-            var suppliers = await _context.Suppliers.Where(s => s.Status).OrderBy(s => s.SupplierName).ToListAsync();
+            var categories = await _context.Categories.Where(c => c.IsActive).OrderBy(c => c.Name).ToListAsync();
+            var suppliers = await _context.Suppliers.Where(s => s.IsActive).OrderBy(s => s.Name).ToListAsync();
 
-            ViewBag.Categories = new SelectList(categories, "CategoryId", "CategoryName");
-            ViewBag.Suppliers = new SelectList(suppliers, "SupplierId", "SupplierName");
+            ViewBag.Categories = new SelectList(categories, "Id", "Name");
+            ViewBag.Suppliers = new SelectList(suppliers, "Id", "Name");
         }
     }
 }

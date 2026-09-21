@@ -1,0 +1,62 @@
+@model IEnumerable<Omnichannel.Application.DTOs.Inventory.ProductItemViewModel>
+
+<div class="overflow-hidden bg-white shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+    <table class="min-w-full divide-y divide-gray-300">
+        <thead class="bg-gray-50">
+            <tr>
+                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Mã SKU / Barcode</th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Tên sản phẩm</th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Ngành hàng</th>
+                <th scope="col" class="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">Giá vốn</th>
+                <th scope="col" class="px-3 py-3.5 text-right text-sm font-semibold text-gray-900">Giá bán</th>
+                <th scope="col" class="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">Trạng thái</th>
+                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6"><span class="sr-only">Hành động</span></th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 bg-white">
+            @if(!Model.Any()) {
+                <tr><td colspan="7" class="text-center py-4 text-sm text-gray-500">Không tìm thấy sản phẩm nào.</td></tr>
+            }
+            @foreach (var p in Model)
+            {
+                <tr>
+                    <td class="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">
+                        <div class="text-sm font-medium text-gray-900">@p.ProductId</div>
+                        <div class="text-xs text-gray-500 font-mono"><i class="fa-solid fa-barcode mr-1"></i>@p.Barcode</div>
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4">
+                        <div class="text-sm text-gray-900">@p.ProductName</div>
+                        <div class="text-xs text-gray-500">ĐVT: @p.Unit</div>
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        <span class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">@p.CategoryName</span>
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500 text-right font-mono">
+                        @p.CostPrice.ToString("N0") đ
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-pink-600 font-bold text-right font-mono">
+                        @p.SellingPrice.ToString("N0") đ
+                    </td>
+                    <td class="whitespace-nowrap px-3 py-4 text-sm text-center">
+                        @if (p.Status == 1)
+                        {
+                            <span class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Đang bán</span>
+                        }
+                        else
+                        {
+                            <span class="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">Tạm ngưng</span>
+                        }
+                    </td>
+                    <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                        <button type="button" 
+                                hx-post="/Admin/Product/ToggleStatus/@p.ProductId" 
+                                hx-headers='{"RequestVerificationToken": document.querySelector("input[name=__RequestVerificationToken]").value}'
+                                class="text-indigo-600 hover:text-indigo-900" title="@(p.Status == 1 ? "Tạm ngưng bán" : "Mở bán lại")">
+                            <i class="fa-solid @(p.Status == 1 ? "fa-ban" : "fa-check")"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

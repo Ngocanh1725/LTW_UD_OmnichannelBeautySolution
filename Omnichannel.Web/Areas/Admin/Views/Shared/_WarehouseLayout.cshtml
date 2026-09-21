@@ -1,0 +1,81 @@
+﻿<!DOCTYPE html>
+<html lang="vi" class="h-full bg-slate-100">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kiểm Soát Kho Hàng & Lô FEFO - Omnichannel Beauty</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .font-mono-num {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* High density FEFO rules */
+        .fefo-expired {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border-color: #fca5a5;
+            font-weight: 700;
+        }
+
+        .fefo-near {
+            background-color: #ffedd5;
+            color: #9a3412;
+            border-color: #fdba74;
+            font-weight: 700;
+        }
+
+        .fefo-safe {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border-color: #a7f3d0;
+        }
+
+        .fefo-low-stock {
+            background-color: #fef9c3;
+            color: #854d0e;
+        }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="h-full flex flex-col text-slate-800 antialiased overflow-hidden">
+    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <a href="/Admin/Dashboard" class="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-boxes-stacked text-amber-500"></i>
+                    Bảng Tính Kiểm Soát Tồn Kho & Hạn Lô (FEFO Matrix)
+                </h1>
+                <p class="text-xs text-slate-500">Nguyên tắc First Expired, First Out - Tự động ưu tiên xuất lô cận date</p>
+            </div>
+        </div>
+
+        <!-- FEFO Color-Code Legend Badges -->
+        <div class="flex items-center gap-3 text-xs">
+            <span class="px-2.5 py-1 rounded-lg border fefo-expired flex items-center gap-1.5 shadow-sm">
+                <span class="h-2 w-2 rounded-full bg-rose-600"></span> Đã Quá Hạn (Tiêu hủy)
+            </span>
+            <span class="px-2.5 py-1 rounded-lg border fefo-near flex items-center gap-1.5 shadow-sm">
+                <span class="h-2 w-2 rounded-full bg-amber-500"></span> Cận Date &lt; 60 Ngày (Clearance Sale)
+            </span>
+            <span class="px-2.5 py-1 rounded-lg border fefo-safe flex items-center gap-1.5 shadow-sm">
+                <span class="h-2 w-2 rounded-full bg-emerald-500"></span> Date An Toàn (&gt; 2 năm)
+            </span>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-auto p-4">
+        @RenderBody()
+    </main>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

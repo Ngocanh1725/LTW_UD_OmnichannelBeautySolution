@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+using Omnichannel.Application.DTOs.Inventory;
 using Omnichannel.Application.DTOs.Sales;
 using Omnichannel.Application.Interfaces.Sales;
 using Omnichannel.Domain.Entities;
@@ -15,285 +15,250 @@ namespace Omnichannel.Infrastructure.Services
     public class PosService : IPosService
     {
         private readonly ApplicationDbContext _context;
-        private readonly ILogger<PosService> _logger;
+        private readonly IInventoryAllocationEngine _allocationEngine;
 
-        public PosService(ApplicationDbContext context, ILogger<PosService> logger)
+        public PosService(ApplicationDbContext context, IInventoryAllocationEngine allocationEngine)
         {
-            _context = context;
-            _logger = logger;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _allocationEngine = allocationEngine ?? throw new ArgumentNullException(nameof(allocationEngine));
         }
 
-        public async Task<List<PosProductSearchDto>> SearchProductsAsync(string storeId, string keyword, CancellationToken cancellationToken = default)
+        public async Task<List<PosProductDto>> SearchProductsAsync(string keyword, string? storeId = null, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrWhiteSpace(keyword)) return new List<PosProductSearchDto>();
-
-            var cleanKeyword = keyword.Trim().ToLowerInvariant();
-            var today = DateTime.Today;
-
-            var inventories = await _context.StoreInventories
-                .AsNoTracking()
-                .Include(si => si.Batch)
-                    .ThenInclude(b => b.Product)
-                .Where(si => si.StoreId == storeId
-                          && si.Batch.ExpDate > today
-                          && (si.PhysicalQuantity - si.ReservedQuantity) > 0
-                          && (si.Batch.Product.ProductName.ToLower().Contains(cleanKeyword)
-                              || si.Batch.Product.ProductId.ToLower().Contains(cleanKeyword)
-                              || si.Batch.Product.Barcode.Contains(cleanKeyword)))
-                .OrderBy(si => si.Batch.ExpDate) // Luôn ưu tiên theo tiêu chuẩn FEFO
-                .Take(20)
-                .ToListAsync(cancellationToken);
-
-            return inventories.Select(si => new PosProductSearchDto
+            if (string.IsNullOrWhiteSpace(keyword))
             {
-                ProductId = si.Batch.ProductId,
-                Barcode = si.Batch.Product.Barcode,
-                ProductName = si.Batch.Product.ProductName,
-                SellingPrice = si.Batch.Product.SellingPrice,
-                Unit = si.Batch.Product.Unit,
-                AvailableQuantity = si.PhysicalQuantity - si.ReservedQuantity,
-                BatchId = si.BatchId,
-                BatchNumber = si.Batch.BatchNumber,
-                ExpDateStr = si.Batch.ExpDate.ToString("dd/MM/yyyy")
+                return new List<PosProductDto>();
+            }
+
+            int.TryParse(keyword.Trim(), out var parsedProductId);
+            int.TryParse(storeId, out var parsedStoreId);
+
+            var query = _context.Products
+                .AsNoTracking()
+                .Include(p => p.Category)
+                .Include(p => p.Batches)
+                    .ThenInclude(b => b.StoreInventories)
+                .Where(p => p.IsActive);
+
+            if (parsedProductId > 0)
+            {
+                query = query.Where(p => p.Id == parsedProductId || p.Barcode == keyword || p.Sku == keyword || p.Name.Contains(keyword));
+            }
+            else
+            {
+                query = query.Where(p => p.Barcode == keyword || p.Sku == keyword || p.Name.Contains(keyword));
+            }
+
+            var products = await query.Take(25).ToListAsync(cancellationToken);
+            var result = new List<PosProductDto>();
+
+            foreach (var p in products)
+            {
+                int availableStock = 0;
+                if (parsedStoreId > 0)
+                {
+                    availableStock = p.Batches
+                        .Where(b => b.ExpDate > DateTime.Today)
+                        .SelectMany(b => b.StoreInventories.Where(si => si.StoreId == parsedStoreId))
+                        .Sum(si => Math.Max(0, si.PhysicalQuantity - si.ReservedQuantity));
+                }
+                else
+                {
+                    availableStock = p.Batches
+                        .Where(b => b.ExpDate > DateTime.Today)
+                        .SelectMany(b => b.StoreInventories)
+                        .Sum(si => Math.Max(0, si.PhysicalQuantity - si.ReservedQuantity));
+                }
+
+                result.Add(new PosProductDto
+                {
+                    ProductId = p.Id,
+                    Barcode = p.Barcode,
+                    Sku = p.Sku,
+                    Name = p.Name,
+                    SellingPrice = p.SellingPrice,
+                    DiscountPrice = p.DiscountPrice ?? 0m,
+                    FinalPrice = (p.DiscountPrice ?? 0m) > 0 ? p.DiscountPrice.Value : p.SellingPrice,
+                    ImageUrl = p.ThumbnailUrl,
+                    CategoryName = p.Category?.Name ?? "Mỹ phẩm",
+                    AvailableQuantity = availableStock
+                });
+            }
+
+            return result;
+        }
+
+        public async Task<PosReceiptDto> CheckoutAsync(PosCheckoutDto dto, string cashierUserId, CancellationToken cancellationToken = default)
+        {
+            if (dto.Items == null || !dto.Items.Any())
+            {
+                throw new InvalidOperationException("Hóa đơn thanh toán không có sản phẩm.");
+            }
+
+            int.TryParse(dto.StoreId, out var parsedStoreId);
+            int.TryParse(cashierUserId, out var parsedCashierId);
+
+            var store = await _context.Stores.FirstOrDefaultAsync(s => s.Id == parsedStoreId, cancellationToken);
+            if (store == null)
+            {
+                throw new InvalidOperationException($"Không tìm thấy chi nhánh với ID: {dto.StoreId}");
+            }
+
+            var cashier = await _context.Users.FirstOrDefaultAsync(u => u.Id == parsedCashierId, cancellationToken);
+            var cashierName = cashier?.FullName ?? "Thu ngân";
+
+            decimal subTotal = 0;
+            var orderDetails = new List<OrderDetail>();
+            var allAllocations = new List<AllocatedBatchDto>();
+
+            foreach (var item in dto.Items)
+            {
+                var product = await _context.Products.FindAsync(new object[] { item.ProductId }, cancellationToken);
+                if (product == null) continue;
+
+                var allocations = await _allocationEngine.AllocateBatchesFEFOAsync(dto.StoreId, product.Sku, item.Quantity, cancellationToken);
+                if (allocations.Sum(a => a.AllocatedQuantity) < item.Quantity)
+                {
+                    throw new InvalidOperationException($"Sản phẩm '{product.Name}' không đủ tồn kho khả dụng tại chi nhánh.");
+                }
+
+                allAllocations.AddRange(allocations);
+
+                foreach (var alloc in allocations)
+                {
+                    var unitPrice = product.SellingPrice;
+                    var discount = item.DiscountAmount > 0 ? (item.DiscountAmount / item.Quantity) : 0;
+                    var lineTotal = (unitPrice - discount) * alloc.AllocatedQuantity;
+                    subTotal += lineTotal;
+
+                    orderDetails.Add(new OrderDetail
+                    {
+                        ProductId = product.Id,
+                        ProductBatchId = alloc.BatchId,
+                        Quantity = alloc.AllocatedQuantity,
+                        UnitPrice = unitPrice,
+                        DiscountRate = unitPrice > 0 ? (discount / unitPrice) * 100m : 0,
+                        LineTotal = lineTotal
+                    });
+                }
+            }
+
+            var totalAmount = Math.Max(0, subTotal - dto.DiscountAmount);
+            var orderCode = $"POS{DateTime.Now:yyyyMMddHHmmss}{new Random().Next(100, 999)}";
+
+            var order = new Order
+            {
+                OrderCode = orderCode,
+                StoreId = parsedStoreId,
+                UserId = parsedCashierId > 0 ? parsedCashierId : null,
+                CustomerName = dto.CustomerName ?? "Khách lẻ tại quầy",
+                CustomerPhone = dto.CustomerPhone ?? string.Empty,
+                SubTotal = subTotal,
+                DiscountAmount = dto.DiscountAmount,
+                TotalAmount = totalAmount,
+                OrderStatus = "COMPLETED",
+                PaymentStatus = "PAID",
+                PaymentMethod = dto.PaymentMethod ?? "CASH",
+                OrderSource = "POS",
+                CreatedAt = DateTime.UtcNow,
+                OrderDetails = orderDetails
+            };
+
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            await _allocationEngine.DeductStockAsync(dto.StoreId, allAllocations, $"Bán hàng POS: {orderCode}", cancellationToken);
+
+            var receiptItems = orderDetails.Select(od =>
+            {
+                var alloc = allAllocations.FirstOrDefault(a => a.BatchId == od.ProductBatchId);
+                return new PosReceiptItemDto
+                {
+                    ProductName = alloc?.ProductName ?? "Sản phẩm",
+                    BatchCode = alloc?.BatchNumber,
+                    Quantity = od.Quantity,
+                    UnitPrice = od.UnitPrice,
+                    DiscountAmount = 0,
+                    LineTotal = od.LineTotal
+                };
             }).ToList();
-        }
 
-        public async Task<PosProductSearchDto?> GetProductByBarcodeAsync(string storeId, string barcode, CancellationToken cancellationToken = default)
-        {
-            var cleanBarcode = barcode.Trim();
-            var today = DateTime.Today;
-
-            // Tìm lô hàng còn hạn và date gần nhất của sản phẩm theo Barcode
-            var inventory = await _context.StoreInventories
-                .AsNoTracking()
-                .Include(si => si.Batch)
-                    .ThenInclude(b => b.Product)
-                .Where(si => si.StoreId == storeId
-                          && si.Batch.Product.Barcode == cleanBarcode
-                          && si.Batch.ExpDate > today
-                          && (si.PhysicalQuantity - si.ReservedQuantity) > 0)
-                .OrderBy(si => si.Batch.ExpDate)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (inventory == null) return null;
-
-            return new PosProductSearchDto
+            return new PosReceiptDto
             {
-                ProductId = inventory.Batch.ProductId,
-                Barcode = inventory.Batch.Product.Barcode,
-                ProductName = inventory.Batch.Product.ProductName,
-                SellingPrice = inventory.Batch.Product.SellingPrice,
-                Unit = inventory.Batch.Product.Unit,
-                AvailableQuantity = inventory.PhysicalQuantity - inventory.ReservedQuantity,
-                BatchId = inventory.BatchId,
-                BatchNumber = inventory.Batch.BatchNumber,
-                ExpDateStr = inventory.Batch.ExpDate.ToString("dd/MM/yyyy")
+                OrderId = order.Id,
+                OrderCode = order.OrderCode,
+                StoreName = store.Name,
+                CashierName = cashierName,
+                CustomerName = order.CustomerName,
+                CustomerPhone = order.CustomerPhone,
+                CreatedAt = order.CreatedAt,
+                SubTotal = order.SubTotal,
+                DiscountAmount = order.DiscountAmount,
+                TotalAmount = order.TotalAmount,
+                AmountReceived = dto.AmountReceived,
+                ChangeAmount = Math.Max(0, dto.AmountReceived - totalAmount),
+                PaymentMethod = order.PaymentMethod,
+                Items = receiptItems
             };
         }
 
-        public async Task<PosCheckoutResultDto> ProcessPosCheckoutAsync(PosCheckoutRequest request, string cashierUserId, CancellationToken cancellationToken = default)
-        {
-            if (!request.Items.Any())
-            {
-                return new PosCheckoutResultDto { Success = false, Message = "Hóa đơn chưa có sản phẩm nào." };
-            }
-
-            using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-            try
-            {
-                // 1. Kiểm tra tồn kho khả dụng tức thời cho từng dòng
-                foreach (var item in request.Items)
-                {
-                    var inventory = await _context.StoreInventories
-                        .FirstOrDefaultAsync(si => si.StoreId == request.StoreId && si.BatchId == item.BatchId, cancellationToken);
-
-                    if (inventory == null || (inventory.PhysicalQuantity - inventory.ReservedQuantity) < item.Quantity)
-                    {
-                        await transaction.RollbackAsync(cancellationToken);
-                        return new PosCheckoutResultDto
-                        {
-                            Success = false,
-                            Message = $"Sản phẩm '{item.ProductName}' (Lô {item.BatchNumber}) không đủ số lượng tồn tại quầy."
-                        };
-                    }
-                }
-
-                // 2. Tính toán tài chính
-                decimal subTotal = request.Items.Sum(i => i.LineTotal);
-                decimal finalTotal = Math.Max(0, subTotal - request.OrderDiscountAmount);
-
-                if (request.PaymentMethod == 1 && request.CashGiven < finalTotal)
-                {
-                    await transaction.RollbackAsync(cancellationToken);
-                    return new PosCheckoutResultDto { Success = false, Message = "Số tiền khách đưa không đủ để thanh toán." };
-                }
-
-                // 3. Tạo Đơn Hàng Bán Lẻ POS (Kênh 1)
-                string orderId = $"POS-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
-
-                var order = new Order
-                {
-                    OrderId = orderId,
-                    OrderChannel = 1, // 1: POS Tại quầy
-                    StoreId = request.StoreId,
-                    CustomerId = null,
-                    CreatedByStaffId = cashierUserId,
-                    RecipientName = !string.IsNullOrWhiteSpace(request.CustomerName) ? request.CustomerName.Trim() : "Khách Lẻ Mua Tại Quầy",
-                    RecipientPhone = !string.IsNullOrWhiteSpace(request.CustomerPhone) ? request.CustomerPhone.Trim() : "0900000000",
-                    ShippingAddress = "Mua trực tiếp tại quầy thu ngân",
-                    SubTotal = subTotal,
-                    DiscountAmount = request.OrderDiscountAmount,
-                    ShippingFee = 0,
-                    FinalTotal = finalTotal,
-                    PaymentMethod = request.PaymentMethod,
-                    PaymentStatus = 2, // 2: Đã thanh toán ngay
-                    OrderStatus = 5,   // 5: Hoàn tất ngay
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                await _context.Orders.AddAsync(order, cancellationToken);
-                await _context.SaveChangesAsync(cancellationToken);
-
-                // 4. Trừ tồn kho vật lý và ghi sổ cái bất biến InventoryLogs
-                foreach (var item in request.Items)
-                {
-                    var inventory = await _context.StoreInventories
-                        .FirstAsync(si => si.StoreId == request.StoreId && si.BatchId == item.BatchId, cancellationToken);
-
-                    inventory.PhysicalQuantity -= item.Quantity;
-                    inventory.UpdatedAt = DateTime.UtcNow;
-
-                    var orderDetail = new OrderDetail
-                    {
-                        OrderId = orderId,
-                        ProductId = item.ProductId,
-                        BatchId = item.BatchId,
-                        Quantity = item.Quantity,
-                        UnitPrice = item.UnitPrice,
-                        DiscountRate = item.DiscountRate,
-                        LineTotal = item.LineTotal
-                    };
-                    await _context.OrderDetails.AddAsync(orderDetail, cancellationToken);
-
-                    var log = new InventoryLog
-                    {
-                        StoreId = request.StoreId,
-                        BatchId = item.BatchId,
-                        TransactionType = 2, // 2: Bán POS tại quầy
-                        ReferenceDocNo = orderId,
-                        QuantityChange = -item.Quantity,
-                        RemainingQuantity = inventory.PhysicalQuantity,
-                        CreatedBy = cashierUserId,
-                        CreatedAt = DateTime.UtcNow,
-                        Notes = $"Xuất bán tại quầy POS hóa đơn {orderId}"
-                    };
-                    await _context.InventoryLogs.AddAsync(log, cancellationToken);
-                }
-
-                // 5. Phát hành Hóa đơn VAT điện tử (Invoices)
-                decimal totalBeforeTax = Math.Round(finalTotal / 1.1m, 2);
-                decimal vatAmount = finalTotal - totalBeforeTax;
-                string invoiceId = $"INV-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
-                long invoiceNumber = DateTime.UtcNow.Ticks % 10000000;
-                string taxLookupCode = Guid.NewGuid().ToString("N")[..12].ToUpperInvariant();
-
-                var invoice = new Invoice
-                {
-                    InvoiceId = invoiceId,
-                    OrderId = orderId,
-                    InvoiceSeries = "1C26TAA",
-                    InvoiceNumber = invoiceNumber,
-                    TaxLookupCode = taxLookupCode,
-                    TotalBeforeTax = totalBeforeTax,
-                    VatRate = 10.00m,
-                    VatAmount = vatAmount,
-                    TotalAfterTax = finalTotal,
-                    CustomerTaxCode = null,
-                    CompanyBillingName = null,
-                    IssuedAt = DateTime.UtcNow,
-                    IssuedByStaffId = cashierUserId,
-                    IsCancelled = false
-                };
-
-                await _context.Invoices.AddAsync(invoice, cancellationToken);
-                await _context.SaveChangesAsync(cancellationToken);
-
-                await transaction.CommitAsync(cancellationToken);
-                _logger.LogInformation("Thu ngân {UserId} thanh toán thành công hóa đơn POS {OrderId}.", cashierUserId, orderId);
-
-                return new PosCheckoutResultDto
-                {
-                    Success = true,
-                    Message = "Thanh toán thành công!",
-                    OrderId = orderId,
-                    InvoiceId = invoiceId,
-                    InvoiceSeries = invoice.InvoiceSeries,
-                    InvoiceNumber = invoiceNumber,
-                    TaxLookupCode = taxLookupCode,
-                    FinalTotal = finalTotal,
-                    CashGiven = request.PaymentMethod == 1 ? request.CashGiven : finalTotal,
-                    CreatedAt = order.CreatedAt
-                };
-            }
-            catch (Exception ex)
-            {
-                await transaction.RollbackAsync(cancellationToken);
-                _logger.LogError(ex, "Lỗi xảy ra trong quá trình thanh toán quầy POS.");
-                return new PosCheckoutResultDto { Success = false, Message = "Lỗi hệ thống khi chốt đơn thu ngân." };
-            }
-        }
-
-        public async Task<PosReceiptPrintViewModel?> GetReceiptForPrintAsync(string orderId, CancellationToken cancellationToken = default)
+        public async Task<PosReceiptDto?> GetReceiptAsync(int orderId, CancellationToken cancellationToken = default)
         {
             var order = await _context.Orders
                 .AsNoTracking()
                 .Include(o => o.Store)
-                .Include(o => o.Staff)
-                .Include(o => o.Invoice)
+                .Include(o => o.User)
                 .Include(o => o.OrderDetails)
                     .ThenInclude(od => od.Product)
                 .Include(o => o.OrderDetails)
-                    .ThenInclude(od => od.Batch)
-                .FirstOrDefaultAsync(o => o.OrderId == orderId, cancellationToken);
+                    .ThenInclude(od => od.ProductBatch)
+                .FirstOrDefaultAsync(o => o.Id == orderId, cancellationToken);
 
-            if (order == null) return null;
+            return order != null ? MapToReceiptDto(order) : null;
+        }
 
-            var items = order.OrderDetails.Select(od => new PosCartItemDto
+        public async Task<PosReceiptDto?> GetReceiptByCodeAsync(string orderCode, CancellationToken cancellationToken = default)
+        {
+            var order = await _context.Orders
+                .AsNoTracking()
+                .Include(o => o.Store)
+                .Include(o => o.User)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.ProductBatch)
+                .FirstOrDefaultAsync(o => o.OrderCode == orderCode, cancellationToken);
+
+            return order != null ? MapToReceiptDto(order) : null;
+        }
+
+        private static PosReceiptDto MapToReceiptDto(Order order)
+        {
+            return new PosReceiptDto
             {
-                ProductId = od.ProductId,
-                ProductName = od.Product.ProductName,
-                Barcode = od.Product.Barcode,
-                BatchId = od.BatchId,
-                BatchNumber = od.Batch.BatchNumber,
-                ExpDateStr = od.Batch.ExpDate.ToString("MM/yyyy"),
-                UnitPrice = od.UnitPrice,
-                Quantity = od.Quantity,
-                DiscountRate = od.DiscountRate
-            }).ToList();
-
-            return new PosReceiptPrintViewModel
-            {
-                StoreName = order.Store.StoreName,
-                StoreAddress = order.Store.Address,
-                StorePhone = order.Store.Phone,
-                OrderId = order.OrderId,
-                InvoiceId = order.Invoice?.InvoiceId ?? "N/A",
-                InvoiceSeries = order.Invoice?.InvoiceSeries ?? "1C26TAA",
-                InvoiceNumber = order.Invoice?.InvoiceNumber ?? 0,
-                TaxLookupCode = order.Invoice?.TaxLookupCode ?? "N/A",
-                CashierName = order.Staff?.FullName ?? "Thu Ngân Quầy",
-                CustomerName = order.RecipientName,
-                CustomerPhone = order.RecipientPhone,
+                OrderId = order.Id,
+                OrderCode = order.OrderCode,
+                StoreName = order.Store?.Name ?? "Chi nhánh",
+                CashierName = order.User?.FullName ?? "Thu ngân",
+                CustomerName = order.CustomerName,
+                CustomerPhone = order.CustomerPhone,
                 CreatedAt = order.CreatedAt,
-                Items = items,
                 SubTotal = order.SubTotal,
                 DiscountAmount = order.DiscountAmount,
-                VatRate = 10.00m,
-                VatAmount = order.Invoice?.VatAmount ?? Math.Round(order.FinalTotal - (order.FinalTotal / 1.1m), 2),
-                FinalTotal = order.FinalTotal,
+                TotalAmount = order.TotalAmount,
+                AmountReceived = order.TotalAmount,
+                ChangeAmount = 0,
                 PaymentMethod = order.PaymentMethod,
-                CashGiven = order.FinalTotal,
-                ChangeAmount = 0
+                // Sửa lỗi dòng 259: Lấy BatchNumber thay vì BatchCode
+                Items = order.OrderDetails.Select(od => new PosReceiptItemDto
+                {
+                    ProductName = od.Product?.Name ?? "Sản phẩm",
+                    BatchCode = od.ProductBatch?.BatchNumber,
+                    Quantity = od.Quantity,
+                    UnitPrice = od.UnitPrice,
+                    DiscountAmount = 0,
+                    LineTotal = od.LineTotal
+                }).ToList()
             };
         }
     }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -42,7 +42,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 .OrderByDescending(u => u.CreatedAt)
                 .Select(u => new UserItemViewModel
                 {
-                    UserId = u.UserId,
+                    UserId = u.Id.ToString(),
                     Username = u.Username,
                     FullName = u.FullName,
                     Email = u.Email,
@@ -50,7 +50,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                     UserType = u.UserType,
                     IsActive = u.IsActive,
                     CreatedAt = u.CreatedAt,
-                    AssignedRoles = u.UserRoles.Select(ur => ur.Role.RoleName).ToList()
+                    AssignedRoles = u.UserRoles.Select(ur => ur.Role.Name).ToList()
                 })
                 .ToListAsync();
 
@@ -81,11 +81,11 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             string normalized = model.Username.Trim().ToUpperInvariant();
 
             // Kiểm tra trùng username hoặc email
-            if (await _context.Users.AnyAsync(u => u.NormalizedUsername == normalized))
+            if (await _context.Users.AnyAsync(u => u.Username.ToUpper() == normalized))
             {
                 ModelState.AddModelError("Username", "Tên đăng nhập này đã tồn tại.");
                 var roles = await _context.Roles.AsNoTracking().ToListAsync();
-                ViewBag.Roles = new SelectList(roles, "RoleId", "RoleName");
+                ViewBag.Roles = new SelectList(roles, "Id", "Name");
                 return View(model);
             }
 
@@ -93,21 +93,17 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             {
                 ModelState.AddModelError("Email", "Địa chỉ Email này đã được sử dụng.");
                 var roles = await _context.Roles.AsNoTracking().ToListAsync();
-                ViewBag.Roles = new SelectList(roles, "RoleId", "RoleName");
+                ViewBag.Roles = new SelectList(roles, "Id", "Name");
                 return View(model);
             }
 
             var newUser = new User
             {
-                UserId = "USR-" + Guid.NewGuid().ToString("N")[..12].ToUpperInvariant(),
                 Username = model.Username.Trim(),
-                NormalizedUsername = normalized,
                 FullName = model.FullName.Trim(),
                 Email = model.Email.Trim().ToLowerInvariant(),
                 PhoneNumber = model.PhoneNumber?.Trim(),
                 PasswordHash = _passwordHasher.HashPassword(model.Password),
-                SecurityStamp = Guid.NewGuid().ToString("D"),
-                UserType = model.UserType,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             };
@@ -115,12 +111,12 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             await _context.Users.AddAsync(newUser);
 
             // Gán vai trò ban đầu
-            if (!string.IsNullOrEmpty(model.RoleId))
+            if (!string.IsNullOrEmpty(model.RoleId) && int.TryParse(model.RoleId, out var roleIdInt))
             {
                 await _context.UserRoles.AddAsync(new UserRole
                 {
-                    UserId = newUser.UserId,
-                    RoleId = model.RoleId,
+                    UserId = newUser.Id,
+                    RoleId = roleIdInt,
                     AssignedAt = DateTime.UtcNow
                 });
             }
@@ -133,7 +129,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [HasPermission("HR_USER", "LOCK_ACCOUNT")]
-        public async Task<IActionResult> ToggleStatus(string userId)
+        public async Task<IActionResult> ToggleStatus(int userId)
         {
             var user = await _context.Users.FindAsync(userId);
             if (user == null)
@@ -143,7 +139,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             // Không cho phép tự khóa tài khoản của chính mình
             var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (user.UserId == currentUserId)
+            if (user.Id.ToString() == currentUserId)
             {
                 TempData["ErrorMessage"] = "Bạn không thể tự khóa tài khoản đang đăng nhập!";
                 return RedirectToAction(nameof(Index));
@@ -153,7 +149,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             user.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
-            await _permissionService.InvalidateUserPermissionCacheAsync(user.UserId);
+            await _permissionService.InvalidateUserPermissionCacheAsync(user.Id);
 
             TempData["SuccessMessage"] = user.IsActive
                 ? $"Đã mở khóa tài khoản {user.Username}."

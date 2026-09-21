@@ -1,118 +1,416 @@
 ﻿@model Omnichannel.Application.DTOs.Security.PermissionMatrixViewModel
 @{
-    ViewData["Title"] = "Ma trận Phân quyền Hệ thống";
     Layout = "_AdminLayout";
+    ViewData["Title"] = "Ma Trận Phân Quyền Hạt Mịn (Granular Dynamic PBAC)";
 }
 
-@Html.AntiForgeryToken()
-
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
     <div>
-        <h4 class="fw-bold text-dark mb-1">Cấu hình Ma trận Phân quyền Động</h4>
-        <p class="text-muted small mb-0">Quản lý phân rã quyền hạn theo từng Module và Hành vi chi tiết (Dynamic PBAC)</p>
+        <div class="flex items-center gap-2">
+            <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
+                <i class="fa-solid fa-shield-halved"></i>
+            </span>
+            <h1 class="text-2xl font-bold text-slate-800">Ma Trận Phân Quyền Bảo Mật (PBAC)</h1>
+        </div>
+        <p class="mt-1 text-sm text-slate-500">Thiết lập quyền truy cập hạt mịn theo Vai trò (Role) và Đặc cách Nhân viên (User Overrides) với cơ chế Cache-Aside 30 phút.</p>
     </div>
-    <button id="btnSaveMatrix" class="btn btn-primary-gradient px-4" onclick="saveRoleMatrix('@Model.SelectedRoleId')">
-        <i class="fa-solid fa-floppy-disk me-2"></i>Lưu Thay Đổi Ma Trận
-    </button>
+
+    <div class="flex items-center gap-3">
+        <button id="btnSaveRoleMatrix" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Lưu Thay Đổi Ma Trận</span>
+        </button>
+    </div>
 </div>
 
-<!-- Bộ chọn Vai trò -->
-<div class="beauty-card p-3 mb-4">
-    <div class="row align-items-center">
-        <div class="col-md-5">
-            <label class="form-label fw-semibold small text-secondary">Đang cấu hình cho Vai trò (Role):</label>
-            <div class="d-flex gap-2">
-                <select class="form-select rounded-3" onchange="location.href='?roleId=' + this.value">
-                    @foreach (var r in Model.Roles)
+<div class="mb-6 border-b border-slate-200">
+    <nav class="-mb-px flex space-x-8">
+        <button id="tabRoleBtn" onclick="switchTab('role')" class="border-b-2 border-indigo-600 pb-3 text-sm font-semibold text-indigo-600">
+            <i class="fa-solid fa-users-gear mr-1.5"></i> Phân Quyền Theo Vai Trò (Roles)
+        </button>
+        <button id="tabUserBtn" onclick="switchTab('user')" class="border-b-2 border-transparent pb-3 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700">
+            <i class="fa-solid fa-user-shield mr-1.5"></i> Đặc Cách Cá Nhân (User Overrides)
+        </button>
+    </nav>
+</div>
+
+<div id="tabRoleContent" class="space-y-6">
+    <!-- Role Selector Card -->
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-4">
+                <label for="roleSelector" class="text-sm font-medium text-slate-700">Chọn vai trò cấu hình:</label>
+                <select id="roleSelector" class="rounded-xl border border-slate-300 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm focus:border-indigo-500 focus:outline-none">
+                    @foreach (var role in Model.Roles)
                     {
-                        if (r.RoleId == Model.SelectedRoleId)
-                        {
-                            <option value="@r.RoleId" selected>@r.RoleName (@r.RoleId)</option>
-                        }
-                        else
-                        {
-                            <option value="@r.RoleId">@r.RoleName (@r.RoleId)</option>
-                        }
+                        <!option value="@role.Id" @(role.Id == Model.SelectedRoleId ? "selected" : "")>
+                        @role.Name - @role.Description
+                        </!option>
                     }
                 </select>
             </div>
-        </div>
-        <div class="col-md-7 text-md-end mt-3 mt-md-0">
-            <span class="badge bg-purple-subtle text-purple border border-purple-subtle px-3 py-2 rounded-pill small" style="background: var(--primary-purple-light); color: var(--primary-purple);">
-                <i class="fa-solid fa-circle-info me-1"></i>Thay đổi sẽ tự động Invalidate Cache của mọi User thuộc vai trò này
-            </span>
+
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="toggleAllCheckboxes(true)" class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50">
+                    <i class="fa-solid fa-check-double mr-1 text-emerald-600"></i> Chọn Tất Cả
+                </button>
+                <button type="button" onclick="toggleAllCheckboxes(false)" class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50">
+                    <i class="fa-solid fa-xmark mr-1 text-rose-500"></i> Bỏ Chọn Tất Cả
+                </button>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- Bảng Ma Trận Phân Quyền -->
-<div class="beauty-card overflow-hidden">
-    <div class="beauty-card-header bg-white">
-        <div class="fw-bold text-dark"><i class="fa-solid fa-list-check me-2 text-pink" style="color: var(--accent-pink);"></i>Chi tiết danh mục 50 quyền hạt nhân</div>
-        <span class="small text-muted">Đã chọn: <span id="selectedCount" class="fw-bold text-primary">@Model.GrantedPermissionIds.Count</span> quyền</span>
-    </div>
-
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="bg-light">
-                <tr>
-                    <th style="width: 250px;" class="py-3 px-4">Phân hệ (Module)</th>
-                    <th style="width: 140px;" class="py-3">Mã quyền</th>
-                    <th class="py-3">Tên quyền & Mô tả chi tiết</th>
-                    <th style="width: 120px;" class="text-center py-3 px-4">Cho phép</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var group in Model.ModuleGroups)
-                {
-                    <tr class="table-light border-top border-bottom">
-                        <td colspan="3" class="py-2 px-4 fw-bold small text-purple" style="color: var(--primary-purple);">
-                            <i class="@group.IconClass me-2"></i>@group.ModuleDisplayName (@group.ModuleCode)
-                        </td>
-                        <td class="text-center py-2 px-4">
-                            <button type="button" class="btn btn-sm btn-link text-decoration-none small p-0 text-pink"
-                                    onclick="toggleModuleCheckboxes('@group.ModuleCode', true)">
-                                Tất cả
-                            </button>
-                            <span class="text-muted">/</span>
-                            <button type="button" class="btn btn-sm btn-link text-decoration-none small p-0 text-muted"
-                                    onclick="toggleModuleCheckboxes('@group.ModuleCode', false)">
-                                Bỏ
-                            </button>
-                        </td>
+    <!-- 2D Checkbox Grid Matrix -->
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-600">
+                <thead class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase text-slate-500">
+                    <tr>
+                        <th class="w-1/3 px-6 py-4">Phân Hệ Nghiệp Vụ (Module)</th>
+                        <th class="px-4 py-4 text-center">Xem (VIEW)</th>
+                        <th class="px-4 py-4 text-center">Tạo Mới (CREATE)</th>
+                        <th class="px-4 py-4 text-center">Cập Nhật (EDIT)</th>
+                        <th class="px-4 py-4 text-center">Xóa Bỏ (DELETE)</th>
+                        <th class="px-4 py-4 text-center">Duyệt / Xử Lý (PROCESS)</th>
+                        <th class="px-4 py-4 text-center">Thao Tác Nhanh</th>
                     </tr>
-
-                    @foreach (var p in group.Permissions)
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach (var group in Model.ModuleGroups)
                     {
-                        bool isChecked = Model.GrantedPermissionIds.Contains(p.PermissionId);
-                        <tr>
-                            <td class="px-4 text-muted small">@group.ModuleDisplayName</td>
-                            <td><code>@p.ActionCode</code></td>
-                            <td>
-                                <div class="fw-semibold text-dark small">@p.PermissionName</div>
-                                <div class="text-muted" style="font-size: 11.5px;">@p.Description</div>
+                        <tr class="transition hover:bg-slate-50/70" data-module="@group.ModuleCode">
+                            <td class="px-6 py-4">
+                                <div class="font-semibold text-slate-800">@group.ModuleName</div>
+                                <span class="inline-block rounded bg-slate-100 px-2 py-0.5 font-mono text-[11px] text-slate-500">@group.ModuleCode</span>
                             </td>
-                            <td class="text-center px-4">
-                                <input type="checkbox"
-                                       class="matrix-checkbox perm-checkbox"
-                                       data-module="@group.ModuleCode"
-                                       value="@p.PermissionId"
-                                       @(isChecked ? "checked" : "")
-                                       onchange="updateCount()" />
+
+                            <!-- VIEW -->
+                            <td class="px-4 py-4 text-center">
+                                @{
+                                    var pView = group.Permissions.FirstOrDefault(p => p.Action.Contains("VIEW") || p.Action.Contains("ACCESS"));
+                                }
+                                @if (pView != null)
+                                {
+                                    <input type="checkbox" value="@pView.Id" class="perm-checkbox h-4 w-4 rounded border-slate-300 text-indigo-600 transition focus:ring-indigo-500"
+                                           @(Model.ActivePermissionIdsForRole.Contains(pView.Id) ? "checked" : "") />
+                                }
+                                else
+                                {
+
+                                    <span class="text-slate-300">-</span>
+                                }
+                            </td>
+
+                            <!-- CREATE / IMPORT -->
+                            <td class="px-4 py-4 text-center">
+                                @{
+                                    var pCreate = group.Permissions.FirstOrDefault(p => p.Action.Contains("CREATE") || p.Action.Contains("IMPORT"));
+                                }
+                                @if (pCreate != null)
+                                {
+                                    <input type="checkbox" value="@pCreate.Id" class="perm-checkbox h-4 w-4 rounded border-slate-300 text-indigo-600 transition focus:ring-indigo-500"
+                                           @(Model.ActivePermissionIdsForRole.Contains(pCreate.Id) ? "checked" : "") />
+                                }
+                                else
+                                {
+
+                                    <span class="text-slate-300">-</span>
+                                }
+                            </td>
+
+                            <!-- EDIT / ADJUST -->
+                            <td class="px-4 py-4 text-center">
+                                @{
+                                    var pEdit = group.Permissions.FirstOrDefault(p => p.Action.Contains("EDIT") || p.Action.Contains("ADJUST") || p.Action.Contains("MANAGE"));
+                                }
+                                @if (pEdit != null)
+                                {
+                                    <input type="checkbox" value="@pEdit.Id" class="perm-checkbox h-4 w-4 rounded border-slate-300 text-indigo-600 transition focus:ring-indigo-500"
+                                           @(Model.ActivePermissionIdsForRole.Contains(pEdit.Id) ? "checked" : "") />
+                                }
+                                else
+                                {
+
+                                    <span class="text-slate-300">-</span>
+                                }
+                            </td>
+
+                            <!-- DELETE -->
+                            <td class="px-4 py-4 text-center">
+                                @{
+                                    var pDel = group.Permissions.FirstOrDefault(p => p.Action.Contains("DELETE"));
+                                }
+                                @if (pDel != null)
+                                {
+                                    <input type="checkbox" value="@pDel.Id" class="perm-checkbox h-4 w-4 rounded border-slate-300 text-rose-600 transition focus:ring-rose-500"
+                                           @(Model.ActivePermissionIdsForRole.Contains(pDel.Id) ? "checked" : "") />
+                                }
+                                else
+                                {
+
+                                    <span class="text-slate-300">-</span>
+                                }
+                            </td>
+
+                            <!-- PROCESS / CHECKOUT -->
+                            <td class="px-4 py-4 text-center">
+                                @{
+                                    var pProc = group.Permissions.FirstOrDefault(p => p.Action.Contains("PROCESS") || p.Action.Contains("CHECKOUT"));
+                                }
+                                @if (pProc != null)
+                                {
+                                    <input type="checkbox" value="@pProc.Id" class="perm-checkbox h-4 w-4 rounded border-slate-300 text-indigo-600 transition focus:ring-indigo-500"
+                                           @(Model.ActivePermissionIdsForRole.Contains(pProc.Id) ? "checked" : "") />
+                                }
+                                else
+                                {
+
+                                    <span class="text-slate-300">-</span>
+                                }
+                            </td>
+
+                            <!-- MODULE FAST TOGGLE -->
+                            <td class="px-4 py-4 text-center">
+                                <button type="button" onclick="toggleModuleRow('@group.ModuleCode')" class="rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-200">
+                                    Đảo Chọn
+                                </button>
                             </td>
                         </tr>
                     }
-                }
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
+<div id="tabUserContent" class="hidden space-y-6">
+    <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <label for="userSelect" class="text-sm font-medium text-slate-700">Chọn nhân viên kiểm tra đặc cách:</label>
+            <select id="userSelect" onchange="loadUserOverrides()" class="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-2 text-sm font-semibold text-slate-800 shadow-sm sm:w-80 focus:border-indigo-500 focus:outline-none">
+                <option value="">-- Chọn nhân viên --</option>
+                @foreach (var user in Model.Users)
+                {
+                    <option value="@user.Id">@user.FullName (@user.Username) - @user.StoreName</option>
+                }
+            </select>
+            <span class="text-xs text-slate-400">* Ghi đè cá nhân ưu tiên cao hơn quyền kế thừa từ Vai trò.</span>
+        </div>
+    </div>
+
+    <!-- User Overrides Matrix Table -->
+    <div id="userOverridePanel" class="hidden overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+            <h3 class="font-bold text-slate-800">Danh Sách Phân Giải Quyền Hữu Hiệu (Effective Breakdown)</h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-600">
+                <thead class="border-b border-slate-200 bg-slate-100/70 text-xs font-semibold uppercase text-slate-500">
+                    <tr>
+                        <th class="px-6 py-3">Mã & Tên Quyền</th>
+                        <th class="px-6 py-3">Phân Hệ</th>
+                        <th class="px-6 py-3 text-center">Kế Thừa Từ Vai Trò</th>
+                        <th class="px-6 py-3 text-center">Đặc Cách Cá Nhân</th>
+                        <th class="px-6 py-3 text-center">Quyền Hữu Hiệu</th>
+                        <th class="px-6 py-3 text-center">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody id="userOverrideTbody" class="divide-y divide-slate-100">
+                    <!-- Populated via AJAX -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Antiforgery Token for AJAX -->
+@Html.AntiForgeryToken()
+
 @section Scripts {
     <script>
-        function updateCount() {
-            const count = document.querySelectorAll('.perm-checkbox:checked').length;
-            document.getElementById('selectedCount').innerText = count;
+        function switchTab(tab) {
+            const roleContent = document.getElementById('tabRoleContent');
+            const userContent = document.getElementById('tabUserContent');
+            const tabRoleBtn = document.getElementById('tabRoleBtn');
+            const tabUserBtn = document.getElementById('tabUserBtn');
+            const btnSave = document.getElementById('btnSaveRoleMatrix');
+
+            if (tab === 'role') {
+                roleContent.classList.remove('hidden');
+                userContent.classList.add('hidden');
+                tabRoleBtn.className = "border-b-2 border-indigo-600 pb-3 text-sm font-semibold text-indigo-600";
+                tabUserBtn.className = "border-b-2 border-transparent pb-3 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700";
+                btnSave.classList.remove('hidden');
+            } else {
+                roleContent.classList.add('hidden');
+                userContent.classList.remove('hidden');
+                tabUserBtn.className = "border-b-2 border-indigo-600 pb-3 text-sm font-semibold text-indigo-600";
+                tabRoleBtn.className = "border-b-2 border-transparent pb-3 text-sm font-medium text-slate-500 hover:border-slate-300 hover:text-slate-700";
+                btnSave.classList.add('hidden');
+            }
+        }
+
+        function toggleAllCheckboxes(checked) {
+            document.querySelectorAll('.perm-checkbox').forEach(cb => cb.checked = checked);
+        }
+
+        function toggleModuleRow(moduleCode) {
+            const row = document.querySelector(`tr[data-module='${moduleCode}']`);
+            if (row) {
+                const boxes = row.querySelectorAll('.perm-checkbox');
+                boxes.forEach(b => b.checked = !b.checked);
+            }
+        }
+
+        // Role selector change
+        document.getElementById('roleSelector').addEventListener('change', async function () {
+            const roleId = this.value;
+            try {
+                const res = await fetch(`/Admin/PermissionManagement/GetRolePermissions?roleId=${roleId}`);
+                const data = await res.json();
+                if (data.success) {
+                    toggleAllCheckboxes(false);
+                    data.permissionIds.forEach(id => {
+                        const cb = document.querySelector(`.perm-checkbox[value='${id}']`);
+                        if (cb) cb.checked = true;
+                    });
+                }
+            } catch (err) {
+                showToast('Lỗi khi tải dữ liệu vai trò: ' + err, 'error');
+            }
+        });
+
+        // Save Role Matrix via Fetch API
+        document.getElementById('btnSaveRoleMatrix').addEventListener('click', async function () {
+            const roleId = parseInt(document.getElementById('roleSelector').value);
+            const selectedIds = Array.from(document.querySelectorAll('.perm-checkbox:checked')).map(cb => parseInt(cb.value));
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            const btn = this;
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-2"></i> Đang ghi DB...`;
+
+            try {
+                const response = await fetch('/Admin/PermissionManagement/SaveRoleMatrix', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify({ roleId: roleId, permissionIds: selectedIds })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showToast(result.message, 'success');
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                showToast('Lỗi kết nối máy chủ: ' + error, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-floppy-disk mr-2"></i> Lưu Thay Đổi Ma Trận`;
+            }
+        });
+
+        // Load User Overrides Breakdown
+        async function loadUserOverrides() {
+            const userId = document.getElementById('userSelect').value;
+            const panel = document.getElementById('userOverridePanel');
+            const tbody = document.getElementById('userOverrideTbody');
+
+            if (!userId) {
+                panel.classList.add('hidden');
+                return;
+            }
+
+            try {
+                const res = await fetch(`/Admin/PermissionManagement/GetUserOverrides?userId=${userId}`);
+                const data = await res.json();
+                if (data.success) {
+                    panel.classList.remove('hidden');
+                    tbody.innerHTML = '';
+
+                    data.breakdown.forEach(item => {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-slate-50 transition";
+                        tr.innerHTML = `
+                            <td class="px-6 py-3 font-medium text-slate-800">
+                                ${item.permissionName}
+                                <div class="text-xs font-mono text-slate-400">${item.permissionCode}</div>
+                            </td>
+                            <td class="px-6 py-3"><span class="px-2 py-0.5 rounded bg-slate-100 text-xs text-slate-600">${item.module}</span></td>
+                            <td class="px-6 py-3 text-center">
+                                ${item.inheritedFromRole ? '<span class="text-emerald-600 font-semibold"><i class="fa-solid fa-check"></i> Có</span>' : '<span class="text-slate-400">Không</span>'}
+                            </td>
+                            <td class="px-6 py-3 text-center">
+                                ${item.directOverride === true ? '<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 text-xs font-bold">Cấp thêm</span>' :
+                                  item.directOverride === false ? '<span class="px-2 py-0.5 rounded bg-rose-100 text-rose-700 text-xs font-bold">Tước bỏ</span>' :
+                                  '<span class="text-slate-400 text-xs">Mặc định</span>'}
+                            </td>
+                            <td class="px-6 py-3 text-center">
+                                ${item.isEffective ? '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500 text-white">Khả dụng</span>' :
+                                  '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-200 text-slate-600">Bị chặn</span>'}
+                            </td>
+                            <td class="px-6 py-3 text-center space-x-1">
+                                <button onclick="setUserOverride(${userId}, ${item.permissionId}, true)" title="Cấp thêm" class="p-1 rounded hover:bg-emerald-50 text-emerald-600"><i class="fa-solid fa-plus-circle"></i></button>
+                                <button onclick="setUserOverride(${userId}, ${item.permissionId}, false)" title="Tước quyền" class="p-1 rounded hover:bg-rose-50 text-rose-600"><i class="fa-solid fa-ban"></i></button>
+                                <button onclick="setUserOverride(${userId}, ${item.permissionId}, null)" title="Gỡ đặc cách" class="p-1 rounded hover:bg-slate-100 text-slate-500"><i class="fa-solid fa-rotate-left"></i></button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+            } catch (err) {
+                showToast('Lỗi khi tải dữ liệu người dùng: ' + err, 'error');
+            }
+        }
+
+        async function setUserOverride(userId, permissionId, status) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            try {
+                const res = await fetch('/Admin/PermissionManagement/SaveUserOverride', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify({ userId, permissionId, overrideStatus: status })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    loadUserOverrides();
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (err) {
+                showToast('Lỗi khi cập nhật đặc cách: ' + err, 'error');
+            }
+        }
+
+        // Modern Toast Notification
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `fixed bottom-5 right-5 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl shadow-xl border text-sm font-medium transition-all duration-300 transform translate-y-3 opacity-0 ${
+                type === 'success' ? 'bg-slate-900 border-emerald-500/50 text-white' : 'bg-rose-900 border-rose-500 text-white'
+            }`;
+            toast.innerHTML = `
+                <i class="${type === 'success' ? 'fa-solid fa-circle-check text-emerald-400' : 'fa-solid fa-circle-xmark text-rose-400'}"></i>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-3', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-3', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
         }
     </script>
 }

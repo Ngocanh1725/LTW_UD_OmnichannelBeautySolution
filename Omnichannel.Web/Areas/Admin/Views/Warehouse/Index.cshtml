@@ -1,4 +1,4 @@
-﻿@model Omnichannel.Application.DTOs.Inventory.WarehouseOverviewViewModel
+@model Omnichannel.Application.DTOs.Inventory.WarehouseOverviewViewModel
 @{
     ViewData["Title"] = "Quản Trị Kho & Lô Date FEFO";
     Layout = "_AdminLayout";
@@ -141,10 +141,10 @@
                             <td>
                                 <span class="badge bg-light text-dark border font-monospace px-2 py-1">@item.BatchNumber</span>
                             </td>
-                            <td class="small text-secondary">@item.ManufacturingDate.ToString("dd/MM/yyyy")</td>
+                            <td class="small text-secondary">@item.ManufacturingDate?.ToString("dd/MM/yyyy")</td>
                             <td>
                                 <div class="fw-bold @(item.IsExpired ? "text-danger" : (item.IsNearExpiry ? "text-warning-emphasis" : "text-dark"))">
-                                    @item.ExpDate.ToString("dd/MM/yyyy")
+                                    @item.ExpDate?.ToString("dd/MM/yyyy")
                                 </div>
                                 <div class="small text-muted" style="font-size: 11px;">
                                     @(item.IsExpired ? "Đã quá hạn " + Math.Abs(item.DaysRemaining) + " ngày" : "Còn " + item.DaysRemaining + " ngày")

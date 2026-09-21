@@ -7,9 +7,9 @@ namespace Omnichannel.Application.Interfaces.Sales
 {
     public interface IPosService
     {
-        Task<List<PosProductSearchDto>> SearchProductsAsync(string storeId, string keyword, CancellationToken cancellationToken = default);
-        Task<PosProductSearchDto?> GetProductByBarcodeAsync(string storeId, string barcode, CancellationToken cancellationToken = default);
-        Task<PosCheckoutResultDto> ProcessPosCheckoutAsync(PosCheckoutRequest request, string cashierUserId, CancellationToken cancellationToken = default);
-        Task<PosReceiptPrintViewModel?> GetReceiptForPrintAsync(string orderId, CancellationToken cancellationToken = default);
+        Task<List<PosProductDto>> SearchProductsAsync(string keyword, string? storeId = null, CancellationToken cancellationToken = default);
+        Task<PosReceiptDto> CheckoutAsync(PosCheckoutDto dto, string cashierUserId, CancellationToken cancellationToken = default);
+        Task<PosReceiptDto?> GetReceiptAsync(int orderId, CancellationToken cancellationToken = default);
+        Task<PosReceiptDto?> GetReceiptByCodeAsync(string orderCode, CancellationToken cancellationToken = default);
     }
 }

@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+using Omnichannel.Application.DTOs.Security;
 using Omnichannel.Application.Interfaces.Security;
 using Omnichannel.Infrastructure.Data;
 
@@ -16,138 +12,155 @@ namespace Omnichannel.Infrastructure.Security
 {
     public class PermissionService : IPermissionService
     {
-        private readonly IServiceScopeFactory _scopeFactory;
-        private readonly IDistributedCache? _distributedCache;
-        private readonly IMemoryCache _memoryCache;
-        private readonly ILogger<PermissionService> _logger;
-
-        private const string CacheKeyPrefix = "UserPerms:";
+        private readonly ApplicationDbContext _context;
+        private readonly IMemoryCache _cache;
         private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(30);
 
-        public PermissionService(
-            IServiceScopeFactory scopeFactory,
-            IMemoryCache memoryCache,
-            ILogger<PermissionService> logger,
-            IServiceProvider serviceProvider)
+        public PermissionService(ApplicationDbContext context, IMemoryCache cache)
         {
-            _scopeFactory = scopeFactory;
-            _memoryCache = memoryCache;
-            _logger = logger;
-            _distributedCache = serviceProvider.GetService<IDistributedCache>();
+            _context = context;
+            _cache = cache;
         }
 
-        public async Task<HashSet<string>> GetEffectivePermissionsAsync(string userId, CancellationToken cancellationToken = default)
+        public async Task<HashSet<string>> GetEffectivePermissionsAsync(int userId)
         {
-            string cacheKey = $"{CacheKeyPrefix}{userId}";
+            var cacheKey = $"UserPerms:{userId}";
 
-            // 1. Kiểm tra trong DistributedCache (Redis) nếu có cấu hình
-            if (_distributedCache != null)
+            if (_cache.TryGetValue(cacheKey, out HashSet<string>? cachedPerms) && cachedPerms != null)
             {
-                try
-                {
-                    var cachedJson = await _distributedCache.GetStringAsync(cacheKey, cancellationToken);
-                    if (!string.IsNullOrEmpty(cachedJson))
-                    {
-                        var perms = JsonSerializer.Deserialize<HashSet<string>>(cachedJson);
-                        if (perms != null) return perms;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Không thể đọc Redis cache cho User {UserId}. Đang kiểm tra MemoryCache.", userId);
-                }
+                return cachedPerms;
             }
 
-            // 2. Kiểm tra trong IMemoryCache (Local Fallback)
-            if (_memoryCache.TryGetValue(cacheKey, out HashSet<string>? memoryPerms) && memoryPerms != null)
+            var effectivePerms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            // 1. Lấy toàn bộ quyền từ các Roles đang Active gán cho User
+            var rolePermissions = await _context.UserRoles
+                .AsNoTracking()
+                .Where(ur => ur.UserId == userId && ur.Role.IsActive)
+                .SelectMany(ur => ur.Role.RolePermissions.Select(rp => rp.Permission.Code))
+                .ToListAsync();
+
+            foreach (var code in rolePermissions)
             {
-                return memoryPerms;
+                effectivePerms.Add(code);
+                effectivePerms.Add(code.Replace("_", ":"));
             }
 
-            // 3. Tính toán từ CSDL (3-Tier PBAC Resolution)
-            using var scope = _scopeFactory.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-            // 3.1. Lấy danh sách RoleIds của User
-            var roleIds = await dbContext.UserRoles
-                .AsNoTracking()
-                .Where(ur => ur.UserId == userId)
-                .Select(ur => ur.RoleId)
-                .ToListAsync(cancellationToken);
-
-            // 3.2. Lấy toàn bộ quyền được cấp từ các Role
-            var rolePermissions = await dbContext.RolePermissions
-                .AsNoTracking()
-                .Where(rp => roleIds.Contains(rp.RoleId) && rp.IsGranted)
-                .Select(rp => $"{rp.Permission.ModuleCode.ToUpper()}:{rp.Permission.ActionCode.ToUpper()}")
-                .ToListAsync(cancellationToken);
-
-            var effectivePermissions = new HashSet<string>(rolePermissions, StringComparer.OrdinalIgnoreCase);
-
-            // 3.3. Áp dụng đặc cách trực tiếp từ bảng UserPermissions (Overrides)
-            var userOverrides = await dbContext.UserPermissions
+            // 2. Lấy danh sách ghi đè cá nhân (User Overrides: Granted & Revoked)
+            var userOverrides = await _context.UserPermissions
                 .AsNoTracking()
                 .Where(up => up.UserId == userId)
-                .Select(up => new
-                {
-                    PermissionKey = $"{up.Permission.ModuleCode.ToUpper()}:{up.Permission.ActionCode.ToUpper()}",
-                    up.IsGranted
-                })
-                .ToListAsync(cancellationToken);
+                .Select(up => new { up.Permission.Code, up.IsGranted })
+                .ToListAsync();
 
-            foreach (var ov in userOverrides)
+            foreach (var ovr in userOverrides)
             {
-                if (ov.IsGranted)
-                    effectivePermissions.Add(ov.PermissionKey);
+                var codeNorm = ovr.Code;
+                var codeAlt = ovr.Code.Replace("_", ":");
+
+                if (ovr.IsGranted)
+                {
+                    // Granted Override -> Cộng thêm quyền riêng biệt
+                    effectivePerms.Add(codeNorm);
+                    effectivePerms.Add(codeAlt);
+                }
                 else
-                    effectivePermissions.Remove(ov.PermissionKey);
+                {
+                    // Revoked Override -> Tước bỏ quyền kể cả khi Role có sở hữu
+                    effectivePerms.Remove(codeNorm);
+                    effectivePerms.Remove(codeAlt);
+                }
             }
 
-            // 4. Cập nhật bộ nhớ đệm
-            _memoryCache.Set(cacheKey, effectivePermissions, CacheTtl);
-
-            if (_distributedCache != null)
+            // 3. Cache-Aside với thời hạn TTL 30 phút
+            _cache.Set(cacheKey, effectivePerms, new MemoryCacheEntryOptions
             {
-                try
-                {
-                    var serialized = JsonSerializer.Serialize(effectivePermissions);
-                    var options = new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = CacheTtl };
-                    await _distributedCache.SetStringAsync(cacheKey, serialized, options, cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Lỗi ghi DistributedCache cho User {UserId}.", userId);
-                }
-            }
+                AbsoluteExpirationRelativeToNow = CacheTtl,
+                Priority = CacheItemPriority.High
+            });
 
-            return effectivePermissions;
+            return effectivePerms;
         }
 
-        public async Task InvalidateUserPermissionCacheAsync(string userId, CancellationToken cancellationToken = default)
+        public async Task<bool> HasPermissionAsync(int userId, string permissionCode)
         {
-            string cacheKey = $"{CacheKeyPrefix}{userId}";
-            _memoryCache.Remove(cacheKey);
+            if (string.IsNullOrWhiteSpace(permissionCode)) return false;
 
-            if (_distributedCache != null)
-            {
-                try
-                {
-                    await _distributedCache.RemoveAsync(cacheKey, cancellationToken);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Lỗi xóa DistributedCache cho User {UserId}.", userId);
-                }
-            }
+            var permissions = await GetEffectivePermissionsAsync(userId);
+            var normalized = permissionCode.Trim().ToUpperInvariant();
 
-            _logger.LogInformation("Đã Invalidate bộ nhớ đệm quyền cho User {UserId}.", userId);
+            return permissions.Contains(normalized) ||
+                   permissions.Contains(normalized.Replace(":", "_")) ||
+                   permissions.Contains(normalized.Replace("_", ":"));
         }
 
-        public async Task<bool> HasPermissionAsync(string userId, string module, string action, CancellationToken cancellationToken = default)
+        public Task InvalidateUserPermissionCacheAsync(int userId)
         {
-            var perms = await GetEffectivePermissionsAsync(userId, cancellationToken);
-            string key = $"{module.Trim().ToUpperInvariant()}:{action.Trim().ToUpperInvariant()}";
-            return perms.Contains(key);
+            var cacheKey = $"UserPerms:{userId}";
+            _cache.Remove(cacheKey);
+            return Task.CompletedTask;
+        }
+
+        public async Task InvalidateRolePermissionCacheAsync(int roleId)
+        {
+            var userIds = await _context.UserRoles
+                .AsNoTracking()
+                .Where(ur => ur.RoleId == roleId)
+                .Select(ur => ur.UserId)
+                .ToListAsync();
+
+            foreach (var uid in userIds)
+            {
+                _cache.Remove($"UserPerms:{uid}");
+            }
+        }
+
+        public async Task<List<UserPermissionDetailDto>> GetUserPermissionBreakdownAsync(int userId)
+        {
+            var allPermissions = await _context.Permissions.AsNoTracking().ToListAsync();
+
+            var rolePermissionIds = await _context.UserRoles
+                .AsNoTracking()
+                .Where(ur => ur.UserId == userId && ur.Role.IsActive)
+                .SelectMany(ur => ur.Role.RolePermissions.Select(rp => rp.PermissionId))
+                .Distinct()
+                .ToListAsync();
+
+            var userOverrides = await _context.UserPermissions
+                .AsNoTracking()
+                .Where(up => up.UserId == userId)
+                .ToDictionaryAsync(up => up.PermissionId, up => up.IsGranted);
+
+            var result = new List<UserPermissionDetailDto>();
+
+            foreach (var perm in allPermissions)
+            {
+                var inherited = rolePermissionIds.Contains(perm.Id);
+                bool? directOverride = userOverrides.ContainsKey(perm.Id) ? userOverrides[perm.Id] : null;
+
+                bool isEffective;
+                if (directOverride.HasValue)
+                {
+                    isEffective = directOverride.Value;
+                }
+                else
+                {
+                    isEffective = inherited;
+                }
+
+                result.Add(new UserPermissionDetailDto
+                {
+                    PermissionId = perm.Id,
+                    PermissionCode = perm.Code,
+                    PermissionName = perm.Name,
+                    Module = perm.Module,
+                    InheritedFromRole = inherited,
+                    DirectOverride = directOverride,
+                    IsEffective = isEffective
+                });
+            }
+
+            return result;
         }
     }
 }

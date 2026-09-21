@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -44,7 +44,7 @@ namespace Omnichannel.Infrastructure.Services
             var menu = await _context.Menus
                 .AsNoTracking()
                 .Include(m => m.MenuItems)
-                .FirstOrDefaultAsync(m => m.MenuCode == menuCode, cancellationToken);
+                .FirstOrDefaultAsync(m => m.Code == menuCode, cancellationToken);
 
             if (menu == null)
             {
@@ -57,7 +57,7 @@ namespace Omnichannel.Infrastructure.Services
                 query = query.Where(item => item.IsActive);
             }
 
-            var flatItems = query.OrderBy(item => item.DisplayOrder).ToList();
+            var flatItems = query.OrderBy(item => item.SortOrder).ToList();
 
             // Biên dịch cấu trúc phẳng thành cây đệ quy và giải quyết liên kết URL động
             var rootNodes = flatItems
@@ -71,15 +71,7 @@ namespace Omnichannel.Infrastructure.Services
 
         public string ResolveUrl(MenuItem item)
         {
-            return item.TargetType switch
-            {
-                1 => !string.IsNullOrEmpty(item.TargetSlug) ? $"/danh-muc/{item.TargetSlug}" : "/danh-muc",
-                2 => !string.IsNullOrEmpty(item.TargetSlug) ? $"/san-pham/{item.TargetSlug}" : "/san-pham",
-                3 => !string.IsNullOrEmpty(item.TargetSlug) ? $"/tin-tuc/{item.TargetSlug}" : "/tin-tuc",
-                4 => !string.IsNullOrEmpty(item.TargetSlug) ? $"/trang/{item.TargetSlug}" : "/trang",
-                5 => !string.IsNullOrEmpty(item.CustomUrl) ? item.CustomUrl : "#",
-                _ => "#"
-            };
+            return item.Url ?? "#";
         }
 
         public Task InvalidateMenuCacheAsync(string menuCode, CancellationToken cancellationToken = default)
@@ -102,26 +94,39 @@ namespace Omnichannel.Infrastructure.Services
                 slug = await ResolveEntitySlugAsync(model.TargetType, model.TargetId, cancellationToken);
             }
 
+            string url = "#";
+            if (!string.IsNullOrEmpty(model.CustomUrl))
+            {
+                url = model.CustomUrl;
+            }
+            else if (!string.IsNullOrEmpty(model.TargetSlug))
+            {
+                url = model.TargetType switch
+                {
+                    1 => $"/danh-muc/{model.TargetSlug}",
+                    2 => $"/san-pham/{model.TargetSlug}",
+                    3 => $"/tin-tuc/{model.TargetSlug}",
+                    4 => $"/trang/{model.TargetSlug}",
+                    _ => "#"
+                };
+            }
+
             var newItem = new MenuItem
             {
                 MenuId = model.MenuId,
                 ParentId = model.ParentId,
                 Title = model.Title.Trim(),
-                TargetType = model.TargetType,
-                TargetId = model.TargetId,
-                TargetSlug = slug,
-                CustomUrl = model.CustomUrl?.Trim(),
-                DisplayOrder = model.DisplayOrder,
-                OpenInNewTab = model.OpenInNewTab,
-                IconClass = model.IconClass?.Trim(),
-                CssClass = model.CssClass?.Trim(),
+                Url = url,
+                SortOrder = model.DisplayOrder,
+                Target = model.OpenInNewTab ? "_blank" : "_self",
+                Icon = model.IconClass?.Trim(),
                 IsActive = true
             };
 
             await _context.MenuItems.AddAsync(newItem, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 
-            await InvalidateMenuCacheAsync(menu.MenuCode, cancellationToken);
+            await InvalidateMenuCacheAsync(menu.Code, cancellationToken);
             return true;
         }
 
@@ -129,16 +134,16 @@ namespace Omnichannel.Infrastructure.Services
         {
             var item = await _context.MenuItems
                 .Include(i => i.Menu)
-                .FirstOrDefaultAsync(i => i.MenuItemId == menuItemId, cancellationToken);
+                .FirstOrDefaultAsync(i => i.Id == menuItemId, cancellationToken);
 
             if (item == null) return false;
 
-            string menuCode = item.Menu.MenuCode;
+            string menuCode = item.Menu.Code;
 
             // Xóa đệ quy các nút con phụ thuộc
             var childIds = await _context.MenuItems
                 .Where(i => i.ParentId == menuItemId)
-                .Select(i => i.MenuItemId)
+                .Select(i => i.Id)
                 .ToListAsync(cancellationToken);
 
             foreach (var cid in childIds)
@@ -157,23 +162,19 @@ namespace Omnichannel.Infrastructure.Services
         {
             var dto = new MenuItemDto
             {
-                MenuItemId = entity.MenuItemId,
+                MenuItemId = entity.Id,
                 MenuId = entity.MenuId,
                 ParentId = entity.ParentId,
                 Title = entity.Title,
-                TargetType = entity.TargetType,
-                TargetId = entity.TargetId,
-                TargetSlug = entity.TargetSlug,
-                CustomUrl = entity.CustomUrl,
+                CustomUrl = entity.Url,
                 ResolvedUrl = ResolveUrl(entity),
-                DisplayOrder = entity.DisplayOrder,
-                OpenInNewTab = entity.OpenInNewTab,
-                IconClass = entity.IconClass,
-                CssClass = entity.CssClass,
+                DisplayOrder = entity.SortOrder,
+                OpenInNewTab = entity.Target == "_blank",
+                IconClass = entity.Icon,
                 IsActive = entity.IsActive,
                 Children = allItems
-                    .Where(child => child.ParentId == entity.MenuItemId)
-                    .OrderBy(child => child.DisplayOrder)
+                    .Where(child => child.ParentId == entity.Id)
+                    .OrderBy(child => child.SortOrder)
                     .Select(child => MapToDto(child, allItems))
                     .ToList()
             };

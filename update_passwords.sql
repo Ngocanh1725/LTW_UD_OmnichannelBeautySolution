@@ -1,0 +1,3 @@
+UPDATE Users SET PasswordHash = 'AQAAAAIAAYagAAAAEGlCLw5GtMCnc3V0yYzrEOTXVWDGJx96YiVytx68Hq0BBgzpW1hMYP6rtwkDUKTkmQ==' WHERE Username = 'admin';
+UPDATE Users SET PasswordHash = 'AQAAAAIAAYagAAAAEFlOrMI1g5nEOD0noZ+6TO232BRnwGQWYZIs7bu9p17rm0SnAa1ygxq9VtVTEkY4sQ==' WHERE Username = 'manager';
+UPDATE Users SET PasswordHash = 'AQAAAAIAAYagAAAAELZ/vVI22dusM0BldAAX6XMHKM+p5l29kX+MmLHPFUwXu+gUuPLf2DaImjPKkBS1WQ==' WHERE Username = 'cashier';

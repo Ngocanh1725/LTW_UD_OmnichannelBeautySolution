@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Omnichannel.Application.DTOs.Cms;
 
@@ -33,5 +33,17 @@ namespace Omnichannel.Application.DTOs.Sales
         public string? EarliestExpDateStr { get; set; }
         public int TotalAvailableQuantity { get; set; }
         public bool IsInStock => TotalAvailableQuantity > 0;
+    }
+
+    public class AddToCartRequest
+    {
+        public string ProductId { get; set; } = string.Empty;
+        public int Quantity { get; set; }
+    }
+
+    public class UpdateCartItemRequest
+    {
+        public string ProductId { get; set; } = string.Empty;
+        public int Delta { get; set; }
     }
 }
