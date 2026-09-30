@@ -15,15 +15,24 @@ namespace Omnichannel.Application.DTOs.Sales
         public string RecipientPhone { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Vui lòng nhập địa chỉ nhận hàng")]
-        [Display(Name = "Địa chỉ giao hàng")]
+        [Display(Name = "Địa chỉ giao hàng (Số nhà, Tên đường)")]
         public string ShippingAddress { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Vui lòng chọn Tỉnh/Thành phố")]
+        public string ProvinceId { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Vui lòng chọn Quận/Huyện")]
+        public string DistrictId { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Vui lòng chọn Phường/Xã")]
+        public string WardCode { get; set; } = string.Empty;
 
         [Display(Name = "Ghi chú đơn hàng")]
         public string? Notes { get; set; }
 
         [Required(ErrorMessage = "Vui lòng chọn phương thức thanh toán")]
         [Display(Name = "Phương thức thanh toán")]
-        public int PaymentMethod { get; set; } = 2; // 1: Tiền mặt, 2: VietQR, 3: Thẻ, 4: COD
+        public int PaymentMethod { get; set; } = 4; // 1: Tiền mặt, 2: VietQR, 3: VNPay, 4: COD
 
         public CartViewModel Cart { get; set; } = new();
     }

@@ -544,3 +544,9 @@ body {
         opacity: 1;
     }
 }
+
+/* STREAMING_CHUNK: Mobile Bottom Nav */
+.mobile-bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-top: 1px solid rgba(241, 216, 221, 0.7); display: flex; justify-content: space-around; align-items: center; padding: 0.5rem 0; z-index: 1040; box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05); }
+.mobile-bottom-nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.65rem; color: var(--color-dark-muted); gap: 0.25rem; transition: color 0.2s ease; }
+.mobile-bottom-nav a:hover, .mobile-bottom-nav a.active { color: var(--color-primary); }
+.mobile-bottom-nav a i { font-size: 1.2rem; }

@@ -1,0 +1,64 @@
+@* 
+    @model Omnichannel.Domain.Entities.Product
+*@
+<div class="bg-white rounded-2xl overflow-hidden flex flex-col md:flex-row">
+    <!-- Image Section -->
+    <div class="md:w-1/2 relative bg-[#FDF8F9] flex items-center justify-center p-8">
+        <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&h=600&fit=crop" class="w-full max-w-sm object-cover rounded-xl shadow-soft" alt="Quick View Product" />
+        <span class="absolute top-6 left-6 bg-champagne-gold text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full shadow-sm">Hot Trend</span>
+    </div>
+
+    <!-- Details Section -->
+    <div class="md:w-1/2 p-8 md:p-10 flex flex-col">
+        <div class="mb-2 flex items-center justify-between">
+            <span class="text-xs font-bold text-nude-gold uppercase tracking-widest">Kérastase</span>
+            <div class="text-xs text-champagne-gold flex gap-1">
+                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+                <span class="text-slate-400 font-sans ml-1">(128)</span>
+            </div>
+        </div>
+
+        <h2 class="text-2xl font-serif font-bold text-charcoal mb-4">Dầu Dưỡng Tóc Phục Hồi Kérastase Elixir Ultime L'Huile Originale 100ml</h2>
+        
+        <div class="flex items-baseline gap-3 mb-6">
+            <span class="text-3xl font-bold text-magenta-accent font-mono-numeric">875.000 ₫</span>
+            <span class="text-base text-slate-400 line-through font-mono-numeric">1.250.000 ₫</span>
+        </div>
+
+        <p class="text-sm text-slate-600 mb-6 leading-relaxed">
+            Huyền thoại dầu dưỡng tóc Kérastase nay được làm mới với chiết xuất hoa trà quý hiếm Pháp, mang lại độ bóng mượt vượt trội và khả năng bảo vệ tóc khỏi nhiệt độ cao.
+        </p>
+
+        <!-- Variants / Colors -->
+        <div class="mb-8">
+            <h4 class="text-xs font-bold text-charcoal uppercase tracking-wider mb-3">Tùy chọn dung tích / Màu sắc</h4>
+            <div class="flex items-center gap-3">
+                <button class="px-4 py-2 border-2 border-charcoal rounded-xl text-sm font-bold text-charcoal bg-pastel-rose transition">100ml</button>
+                <button class="px-4 py-2 border border-soft-border rounded-xl text-sm font-medium text-slate-500 hover:border-charcoal hover:text-charcoal transition">50ml</button>
+                <button class="px-4 py-2 border border-soft-border rounded-xl text-sm font-medium text-slate-500 hover:border-charcoal hover:text-charcoal transition">30ml (Mini size)</button>
+            </div>
+        </div>
+
+        <!-- Add to Cart Action -->
+        <div class="flex gap-4 mt-auto">
+            <div class="flex items-center border border-soft-border rounded-full p-1 bg-white">
+                <button type="button" class="h-10 w-10 rounded-full text-slate-500 hover:bg-slate-100 transition flex items-center justify-center">
+                    <i class="fa-solid fa-minus"></i>
+                </button>
+                <input type="text" value="1" class="w-12 text-center text-sm font-bold font-mono-numeric bg-transparent border-none focus:ring-0" readonly />
+                <button type="button" class="h-10 w-10 rounded-full text-slate-500 hover:bg-slate-100 transition flex items-center justify-center">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+            <button type="button" onclick="addToCart(1, 'Kérastase Elixir Ultime', 875000, 'url'); quickViewOpen = false;" class="flex-1 bg-charcoal text-white rounded-full font-bold text-sm hover:bg-magenta-accent shadow-pink-glow transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-bag-shopping"></i> Thêm Vào Giỏ
+            </button>
+        </div>
+
+        <!-- Meta -->
+        <div class="mt-6 pt-6 border-t border-soft-border flex items-center justify-between text-xs text-slate-500">
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-check text-emerald-500"></i> Còn hàng (32 sản phẩm)</span>
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-truck-fast text-magenta-accent"></i> Giao siêu tốc 2H</span>
+        </div>
+    </div>
+</div>

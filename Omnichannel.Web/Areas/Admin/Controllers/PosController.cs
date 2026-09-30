@@ -31,11 +31,11 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             var stores = await _context.Stores
                 .AsNoTracking()
                 .Where(s => s.IsActive)
-                .OrderBy(s => s.StoreName)
+                .OrderBy(s => s.Name)
                 .ToListAsync();
 
             var currentStore = !string.IsNullOrEmpty(storeId)
-                ? stores.Find(s => s.StoreId == storeId)
+                ? stores.Find(s => s.Id.ToString() == storeId)
                 : stores.FirstOrDefault() ?? stores[0];
 
             ViewBag.Stores = stores;

@@ -63,8 +63,8 @@ namespace Omnichannel.Web.Controllers
                 {
                     success = true,
                     message = "Đã thêm sản phẩm vào giỏ hàng!",
-                    totalItems = cart.TotalItems,
-                    subTotal = cart.SubTotal.ToString("N0") + " đ"
+                    totalItems = cart?.TotalItems ?? 0,
+                    subTotal = (cart?.SubTotal ?? 0).ToString("N0") + " đ"
                 });
             }
 
@@ -109,7 +109,7 @@ namespace Omnichannel.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetMiniCart()
+        public IActionResult MiniCart()
         {
             return ViewComponent("MiniCart");
         }

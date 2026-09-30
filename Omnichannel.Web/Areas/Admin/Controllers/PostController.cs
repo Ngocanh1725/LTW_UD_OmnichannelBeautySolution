@@ -35,13 +35,13 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 .OrderByDescending(p => p.CreatedAt)
                 .Select(p => new PostItemViewModel
                 {
-                    PostId = p.PostId,
-                    CategoryName = p.Category.CategoryName,
+                    PostId = p.Id,
+                    CategoryName = p.PostCategory.Name,
                     Title = p.Title,
                     Slug = p.Slug,
-                    ThumbnailUrl = p.ThumbnailUrl,
-                    AuthorName = p.Author.FullName,
-                    Status = p.Status,
+                    ThumbnailUrl = p.ThumbnailUrl ?? "",
+                    AuthorName = p.Author != null ? p.Author.FullName : "Admin",
+                    Status = p.IsPublished ? 1 : 0,
                     ViewCount = p.ViewCount,
                     PublishedAt = p.PublishedAt,
                     CreatedAt = p.CreatedAt

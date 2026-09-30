@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore;
 using Omnichannel.Domain.Entities;
 
@@ -344,6 +344,84 @@ namespace Omnichannel.Infrastructure.Data
                       .HasForeignKey(i => i.CashierId)
                       .OnDelete(DeleteBehavior.SetNull);
             });
+
+            // =========================================================================
+            // 5. 3NF SCHEMA ADAPTATION (LEGACY C# -> 3NF DB)
+            // =========================================================================
+            var intToStringConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<int, string>(
+                v => v.ToString(),
+                v => int.Parse(v)
+            );
+            var nullableIntToStringConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<int?, string?>(
+                v => v.HasValue ? v.Value.ToString() : null,
+                v => string.IsNullOrEmpty(v) ? (int?)null : int.Parse(v)
+            );
+
+            // Identity
+            modelBuilder.Entity<Role>().Property(x => x.Id).HasColumnName("RoleId").HasColumnType("varchar(50)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<Role>().Property(x => x.Name).HasColumnName("RoleName");
+            modelBuilder.Entity<Permission>().Property(x => x.Id).HasColumnName("PermissionId");
+            modelBuilder.Entity<Permission>().Property(x => x.Name).HasColumnName("PermissionName");
+            modelBuilder.Entity<User>().Property(x => x.Id).HasColumnName("UserId").HasColumnType("varchar(450)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<User>().Property(x => x.StoreId).HasColumnType("varchar(50)").HasConversion(nullableIntToStringConverter);
+            modelBuilder.Entity<UserRole>().Property(x => x.UserId).HasColumnType("varchar(450)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<UserRole>().Property(x => x.RoleId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<RolePermission>().Property(x => x.RoleId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<RolePermission>().Property(x => x.PermissionId).HasColumnName("PermissionId");
+            modelBuilder.Entity<UserPermission>().Property(x => x.UserId).HasColumnType("varchar(450)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<UserPermission>().Property(x => x.PermissionId).HasColumnName("PermissionId");
+
+            // CMS
+            modelBuilder.Entity<Menu>().Property(x => x.Id).HasColumnName("MenuId");
+            modelBuilder.Entity<Menu>().Property(x => x.Title).HasColumnName("MenuName");
+            modelBuilder.Entity<Menu>().Property(x => x.Code).HasColumnName("MenuCode");
+            modelBuilder.Entity<MenuItem>().Property(x => x.Id).HasColumnName("MenuItemId");
+            modelBuilder.Entity<MenuItem>().Property(x => x.Url).HasColumnName("CustomUrl");
+            modelBuilder.Entity<MenuItem>().Property(x => x.SortOrder).HasColumnName("DisplayOrder");
+            modelBuilder.Entity<MenuItem>().Property(x => x.Target).HasColumnName("TargetType");
+            modelBuilder.Entity<MenuItem>().Property(x => x.Icon).HasColumnName("IconClass");
+
+            // Inventory
+            modelBuilder.Entity<Category>().Property(x => x.Id).HasColumnName("CategoryId");
+            modelBuilder.Entity<Category>().Property(x => x.Name).HasColumnName("CategoryName");
+            modelBuilder.Entity<Category>().Property(x => x.ImageUrl).HasColumnName("IconUrl");
+            modelBuilder.Entity<Category>().Property(x => x.SortOrder).HasColumnName("DisplayOrder");
+            modelBuilder.Entity<Supplier>().Property(x => x.Id).HasColumnName("SupplierId").HasColumnType("varchar(50)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<Supplier>().Property(x => x.Name).HasColumnName("SupplierName");
+            modelBuilder.Entity<Product>().Property(x => x.Id).HasColumnName("ProductId").HasColumnType("varchar(50)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<Product>().Property(x => x.Name).HasColumnName("ProductName");
+            modelBuilder.Entity<Product>().Property(x => x.Sku).HasColumnName("Barcode");
+            modelBuilder.Entity<Product>().Property(x => x.SupplierId).HasColumnType("varchar(50)").HasConversion(nullableIntToStringConverter);
+            modelBuilder.Entity<ProductBatch>().Property(x => x.Id).HasColumnName("BatchId");
+            modelBuilder.Entity<ProductBatch>().Property(x => x.ProductId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<ProductBatch>().Property(x => x.Status).HasColumnName("BatchNumber");
+            modelBuilder.Entity<ProductBatch>().Property(x => x.CurrentQuantity).HasColumnName("Quantity");
+            modelBuilder.Entity<Store>().Property(x => x.Id).HasColumnName("StoreId").HasColumnType("varchar(50)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<Store>().Property(x => x.Name).HasColumnName("StoreName");
+            modelBuilder.Entity<StoreInventory>().Property(x => x.Id).HasColumnName("InventoryId");
+            modelBuilder.Entity<StoreInventory>().Property(x => x.StoreId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<InventoryLog>().Property(x => x.Id).HasColumnName("LogId");
+            modelBuilder.Entity<InventoryLog>().Property(x => x.StoreId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<InventoryLog>().Property(x => x.UserId).HasColumnType("varchar(450)").HasConversion(nullableIntToStringConverter);
+
+            // Sales
+            modelBuilder.Entity<Cart>().Property(x => x.Id).HasColumnName("CartId");
+            modelBuilder.Entity<CartItem>().Property(x => x.Id).HasColumnName("CartItemId");
+            modelBuilder.Entity<CartItem>().Property(x => x.ProductId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<CartItem>().Property(x => x.CreatedAt).HasColumnName("AddedAt");
+            modelBuilder.Entity<Order>().Property(x => x.Id).HasColumnName("OrderId").HasColumnType("varchar(50)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<Order>().Property(x => x.StoreId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<Order>().Property(x => x.UserId).HasColumnName("CustomerId").HasColumnType("varchar(450)").HasConversion(nullableIntToStringConverter);
+            modelBuilder.Entity<Order>().Property(x => x.OrderSource).HasColumnName("OrderChannel");
+            modelBuilder.Entity<Order>().Property(x => x.CustomerName).HasColumnName("RecipientName");
+            modelBuilder.Entity<Order>().Property(x => x.CustomerPhone).HasColumnName("RecipientPhone");
+            modelBuilder.Entity<Order>().Property(x => x.TotalAmount).HasColumnName("FinalTotal");
+            modelBuilder.Entity<OrderDetail>().Property(x => x.Id).HasColumnName("OrderDetailId");
+            modelBuilder.Entity<OrderDetail>().Property(x => x.OrderId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<OrderDetail>().Property(x => x.ProductId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<Invoice>().Property(x => x.Id).HasColumnName("InvoiceId").HasColumnType("varchar(50)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<Invoice>().Property(x => x.OrderId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
+            modelBuilder.Entity<Invoice>().Property(x => x.CashierId).HasColumnType("varchar(450)").HasConversion(nullableIntToStringConverter);
         }
     }
 }

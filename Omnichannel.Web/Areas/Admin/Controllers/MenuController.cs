@@ -36,7 +36,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                     MenuId = m.Id,
                     MenuCode = m.Code,
                     MenuName = m.Title,
-                    Position = m.Position
+                    Position = m.Position == "TOP" ? 1 : 2
                 })
                 .ToListAsync();
 

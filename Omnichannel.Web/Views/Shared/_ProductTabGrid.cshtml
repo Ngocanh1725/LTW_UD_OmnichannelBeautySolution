@@ -1,0 +1,81 @@
+@* 
+    @model IEnumerable<Omnichannel.Domain.Entities.Product> 
+*@
+@* Dữ liệu mẫu (Mock data) do chưa rõ DTO chính xác, sẽ dùng placeholder cho giao diện *@
+
+@for (int i = 1; i <= 8; i++)
+{
+    var isNew = i == 1 || i == 3;
+    var isHot = i == 2;
+    var discount = i == 4 ? "-30%" : null;
+
+    <div class="group bg-white rounded-3xl border border-soft-border overflow-hidden relative shadow-sm hover:shadow-pink-glow hover:border-blush transition-all duration-300 transform hover:-translate-y-1">
+        
+        <!-- Badges -->
+        <div class="absolute top-3 left-3 z-10 flex flex-col gap-1.5">
+            @if(isNew) { <span class="bg-magenta-accent text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">Mới</span> }
+            @if(isHot) { <span class="bg-champagne-gold text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">Hot</span> }
+            @if(discount != null) { <span class="bg-charcoal text-white text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full shadow-sm">@discount</span> }
+        </div>
+
+        <!-- Wishlist Button -->
+        <button type="button" class="absolute top-3 right-3 z-10 h-8 w-8 rounded-full bg-white/80 backdrop-blur-sm border border-soft-border text-slate-400 hover:text-magenta-accent hover:border-magenta-accent flex items-center justify-center transition shadow-sm">
+            <i class="fa-regular fa-heart text-xs"></i>
+        </button>
+
+        <!-- Thumbnail Image -->
+        <a href="/product/detail-placeholder" class="block relative aspect-square bg-[#FDF8F9] overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop" class="w-full h-full object-cover transition duration-700 group-hover:scale-105" alt="Product Image" />
+            
+            <!-- Quick View Overlay Button -->
+            <div class="absolute inset-0 bg-charcoal/20 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center backdrop-blur-[2px]">
+                <button type="button" @@click="quickViewOpen = true" hx-get="/Home/QuickView/@i" hx-target="#quickViewModalBody" class="px-5 py-2.5 rounded-full bg-white/95 text-charcoal text-[11px] font-bold tracking-wider hover:bg-magenta-accent hover:text-white transition shadow-lg transform translate-y-4 group-hover:translate-y-0">
+                    <i class="fa-regular fa-eye mr-1.5"></i> XEM NHANH
+                </button>
+            </div>
+        </a>
+
+        <!-- Content Info -->
+        <div class="p-5 flex flex-col h-[160px] justify-between">
+            <div>
+                <!-- Brand / Category -->
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-[10px] font-bold text-nude-gold uppercase tracking-widest">Kérastase</span>
+                    <!-- 5 Star -->
+                    <div class="text-[9px] text-champagne-gold flex gap-0.5">
+                        <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+                    </div>
+                </div>
+
+                <!-- Product Name -->
+                <a href="/product/detail-placeholder" class="text-sm font-bold text-charcoal line-clamp-2 hover:text-magenta-accent transition leading-snug">
+                    Dầu Dưỡng Tóc Phục Hồi Kérastase Elixir Ultime @i
+                </a>
+
+                <!-- Color Swatches (if applicable) -->
+                @if(i % 3 == 0) {
+                <div class="flex items-center gap-1.5 mt-2.5">
+                    <button class="w-4 h-4 rounded-full bg-[#E57B7B] ring-1 ring-offset-1 ring-soft-border hover:ring-charcoal transition"></button>
+                    <button class="w-4 h-4 rounded-full bg-[#B63342] ring-1 ring-offset-1 ring-soft-border hover:ring-charcoal transition"></button>
+                    <button class="w-4 h-4 rounded-full bg-[#5E2B2B] ring-1 ring-offset-1 ring-soft-border hover:ring-charcoal transition"></button>
+                </div>
+                }
+            </div>
+
+            <!-- Price & Add to Cart -->
+            <div class="flex items-end justify-between mt-4">
+                <div>
+                    @if (discount != null)
+                    {
+                        <div class="text-[10px] text-slate-400 line-through font-mono-numeric mb-0.5">1.250.000 ₫</div>
+                    }
+                    <div class="text-base font-bold text-magenta-accent font-mono-numeric">875.000 ₫</div>
+                </div>
+                
+                <button type="button" onclick="addToCart(@i, 'Kérastase Elixir Ultime', 875000, 'url')" class="h-9 w-9 rounded-full bg-charcoal text-white flex items-center justify-center hover:bg-magenta-accent shadow-sm transition transform active:scale-95">
+                    <i class="fa-solid fa-bag-shopping text-xs"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+}

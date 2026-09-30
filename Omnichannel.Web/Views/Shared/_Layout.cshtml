@@ -8,7 +8,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- FontAwesome 6.5.1 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -283,7 +283,28 @@
         </div>
     </div>
 
-    <div id="storefrontToastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm"></div>
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobile-bottom-nav lg:hidden pb-safe">
+        <a href="/" class="active">
+            <i class="fa-solid fa-house"></i>
+            <span>Trang chủ</span>
+        </a>
+        <a href="javascript:void(0)" @@click="mobileMenuOpen = true">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Danh mục</span>
+        </a>
+        <a href="javascript:void(0)" @@click="cartOpen = true" class="relative">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span class="absolute -top-1 -right-2 bg-pink-500 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-bold">2</span>
+            <span>Giỏ hàng</span>
+        </a>
+        <a href="/Account/Login">
+            <i class="fa-regular fa-user"></i>
+            <span>Tài khoản</span>
+        </a>
+    </div>
+
+    <div id="storefrontToastContainer" class="fixed bottom-20 lg:bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm"></div>
 
     <!-- Site Scripts -->
     <script src="~/js/site.js" asp-append-version="true"></script>

@@ -58,6 +58,8 @@ builder.Services.AddSession(options =>
 // Đăng ký Services Bán lẻ & Đơn hàng
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderWorkflowService, OrderWorkflowService>();
+builder.Services.AddScoped<IPaymentGatewayService, VnPayService>();
+builder.Services.AddHttpClient<IShippingService, GhnShippingService>();
 // Đăng ký Services POS & Báo Cáo Tài Chính:
 builder.Services.AddScoped<IPosService, PosService>();
 builder.Services.AddScoped<IReportService, ReportService>();

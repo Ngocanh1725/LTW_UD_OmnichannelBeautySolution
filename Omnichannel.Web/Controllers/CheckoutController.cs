@@ -12,6 +12,7 @@ namespace Omnichannel.Web.Controllers
     {
         private readonly ICartService _cartService;
         private readonly IOrderWorkflowService _orderWorkflow;
+        private readonly IPaymentGatewayService _paymentGateway;
         private readonly ApplicationDbContext _context;
 
         private const string CartCookieKey = "OmnichannelBeauty_CartId";
@@ -19,10 +20,12 @@ namespace Omnichannel.Web.Controllers
         public CheckoutController(
             ICartService cartService,
             IOrderWorkflowService orderWorkflow,
+            IPaymentGatewayService paymentGateway,
             ApplicationDbContext context)
         {
             _cartService = cartService;
             _orderWorkflow = orderWorkflow;
+            _paymentGateway = paymentGateway;
             _context = context;
         }
 
@@ -35,7 +38,7 @@ namespace Omnichannel.Web.Controllers
             }
 
             var cartDto = await _cartService.GetCartAsync(cartId, null);
-            if (!cartDto.Items.Any())
+            if (cartDto == null || !cartDto.Items.Any())
             {
                 return RedirectToAction("Index", "Cart");
             }
@@ -77,6 +80,7 @@ namespace Omnichannel.Web.Controllers
             if (!ModelState.IsValid)
             {
                 var cDto = await _cartService.GetCartAsync(cartId, null);
+                if (cDto == null) return RedirectToAction("Index", "Cart");
                 model.Cart = new CartViewModel
                 {
                     Id = cDto.Id, SessionId = cDto.SessionId, UserId = cDto.UserId,
@@ -96,6 +100,7 @@ namespace Omnichannel.Web.Controllers
             {
                 TempData["ErrorMessage"] = message;
                 var cDto2 = await _cartService.GetCartAsync(cartId, null);
+                if (cDto2 == null) return RedirectToAction("Index", "Cart");
                 model.Cart = new CartViewModel
                 {
                     Id = cDto2.Id, SessionId = cDto2.SessionId, UserId = cDto2.UserId,
@@ -108,7 +113,49 @@ namespace Omnichannel.Web.Controllers
                 return View("Index", model);
             }
 
+            // Redirect to VNPay if PaymentMethod == 3 (VNPay)
+            if (model.PaymentMethod == 3)
+            {
+                var order = await _context.Orders.FirstOrDefaultAsync(o => o.OrderCode == result.OrderId);
+                if (order != null)
+                {
+                    string ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+                    string vnpayUrl = _paymentGateway.CreatePaymentUrl(order, ipAddress);
+                    return Redirect(vnpayUrl);
+                }
+            }
+
             return RedirectToAction(nameof(Success), new { orderId = result.OrderId });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> VnPayCallback()
+        {
+            var dict = new Dictionary<string, string>();
+            foreach (var key in Request.Query.Keys)
+            {
+                dict[key] = Request.Query[key].ToString();
+            }
+
+            var (success, orderCode, amount) = await _paymentGateway.ProcessCallbackAsync(dict);
+
+            if (success)
+            {
+                // Call workflow to confirm payment
+                var callbackDto = new BankCallbackDto
+                {
+                    OrderId = orderCode ?? "",
+                    Amount = amount,
+                    TransactionRef = Request.Query["vnp_TransactionNo"].ToString() ?? "",
+                    Status = "SUCCESS"
+                };
+                await _orderWorkflow.ConfirmPaymentAndDeductPhysicalStockAsync(callbackDto);
+                
+                return RedirectToAction(nameof(Success), new { orderId = orderCode });
+            }
+
+            TempData["ErrorMessage"] = "Thanh toán VNPay thất bại hoặc chữ ký không hợp lệ.";
+            return RedirectToAction("Index", "Cart");
         }
 
         [HttpGet]
@@ -144,10 +191,10 @@ namespace Omnichannel.Web.Controllers
 
             var vm = new OrderSuccessViewModel
             {
-                OrderId = order.OrderCode,
-                RecipientName = order.CustomerName,
-                RecipientPhone = order.CustomerPhone,
-                ShippingAddress = order.ShippingAddress,
+                OrderId = order.OrderCode ?? "",
+                RecipientName = order.CustomerName ?? "",
+                RecipientPhone = order.CustomerPhone ?? "",
+                ShippingAddress = order.ShippingAddress ?? "",
                 FinalTotal = order.TotalAmount,
                 PaymentMethod = order.PaymentMethod,
                 PaymentStatus = order.PaymentStatus,

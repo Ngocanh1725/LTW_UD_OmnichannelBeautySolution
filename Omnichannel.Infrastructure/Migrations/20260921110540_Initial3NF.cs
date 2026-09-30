@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Omnichannel.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class SyncIntIdSchema : Migration
+    public partial class Initial3NF : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -43,24 +43,24 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "Categories",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    CategoryId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ParentId = table.Column<int>(type: "int", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    CategoryName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Slug = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    ImageUrl = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true),
-                    SortOrder = table.Column<int>(type: "int", nullable: false),
+                    IconUrl = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: true),
+                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Categories", x => x.Id);
+                    table.PrimaryKey("PK_Categories", x => x.CategoryId);
                     table.ForeignKey(
                         name: "FK_Categories_Categories_ParentId",
                         column: x => x.ParentId,
                         principalTable: "Categories",
-                        principalColumn: "Id",
+                        principalColumn: "CategoryId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -68,32 +68,32 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "Menus",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    MenuId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Code = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    MenuCode = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    MenuName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Position = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Menus", x => x.Id);
+                    table.PrimaryKey("PK_Menus", x => x.MenuId);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Permissions",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    PermissionId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Code = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    PermissionName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Module = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Permissions", x => x.Id);
+                    table.PrimaryKey("PK_Permissions", x => x.PermissionId);
                 });
 
             migrationBuilder.CreateTable(
@@ -117,16 +117,15 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "Roles",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    RoleId = table.Column<string>(type: "varchar(50)", nullable: false),
+                    RoleName = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2(7)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Roles", x => x.Id);
+                    table.PrimaryKey("PK_Roles", x => x.RoleId);
                 });
 
             migrationBuilder.CreateTable(
@@ -153,10 +152,9 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "Stores",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    StoreId = table.Column<string>(type: "varchar(50)", nullable: false),
                     Code = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    StoreName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     Address = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     PhoneNumber = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
                     Email = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
@@ -165,17 +163,16 @@ namespace Omnichannel.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Stores", x => x.Id);
+                    table.PrimaryKey("PK_Stores", x => x.StoreId);
                 });
 
             migrationBuilder.CreateTable(
                 name: "Suppliers",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SupplierId = table.Column<string>(type: "varchar(50)", nullable: false),
                     Code = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    SupplierName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     ContactPerson = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     PhoneNumber = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: true),
                     Email = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
@@ -184,38 +181,38 @@ namespace Omnichannel.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Suppliers", x => x.Id);
+                    table.PrimaryKey("PK_Suppliers", x => x.SupplierId);
                 });
 
             migrationBuilder.CreateTable(
                 name: "MenuItems",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    MenuItemId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     MenuId = table.Column<int>(type: "int", nullable: false),
                     ParentId = table.Column<int>(type: "int", nullable: true),
                     Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Url = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
-                    Icon = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
-                    SortOrder = table.Column<int>(type: "int", nullable: false),
-                    Target = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    CustomUrl = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
+                    IconClass = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
+                    DisplayOrder = table.Column<int>(type: "int", nullable: false),
+                    TargetType = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MenuItems", x => x.Id);
+                    table.PrimaryKey("PK_MenuItems", x => x.MenuItemId);
                     table.ForeignKey(
                         name: "FK_MenuItems_MenuItems_ParentId",
                         column: x => x.ParentId,
                         principalTable: "MenuItems",
-                        principalColumn: "Id",
+                        principalColumn: "MenuItemId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_MenuItems_Menus_MenuId",
                         column: x => x.MenuId,
                         principalTable: "Menus",
-                        principalColumn: "Id",
+                        principalColumn: "MenuId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -223,7 +220,7 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "RolePermissions",
                 columns: table => new
                 {
-                    RoleId = table.Column<int>(type: "int", nullable: false),
+                    RoleId = table.Column<string>(type: "varchar(50)", nullable: false),
                     PermissionId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -233,13 +230,13 @@ namespace Omnichannel.Infrastructure.Migrations
                         name: "FK_RolePermissions_Permissions_PermissionId",
                         column: x => x.PermissionId,
                         principalTable: "Permissions",
-                        principalColumn: "Id",
+                        principalColumn: "PermissionId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_RolePermissions_Roles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "Roles",
-                        principalColumn: "Id",
+                        principalColumn: "RoleId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -247,8 +244,7 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "varchar(450)", nullable: false),
                     Username = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     Email = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: false),
                     PasswordHash = table.Column<string>(type: "varchar(500)", maxLength: 500, nullable: false),
@@ -259,18 +255,18 @@ namespace Omnichannel.Infrastructure.Migrations
                     SecurityStamp = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     UserType = table.Column<int>(type: "int", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    StoreId = table.Column<int>(type: "int", nullable: true),
+                    StoreId = table.Column<string>(type: "varchar(50)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2(7)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2(7)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_Users", x => x.UserId);
                     table.ForeignKey(
                         name: "FK_Users_Stores_StoreId",
                         column: x => x.StoreId,
                         principalTable: "Stores",
-                        principalColumn: "Id",
+                        principalColumn: "StoreId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -278,13 +274,12 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "Products",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductId = table.Column<string>(type: "varchar(50)", nullable: false),
                     CategoryId = table.Column<int>(type: "int", nullable: false),
-                    SupplierId = table.Column<int>(type: "int", nullable: true),
-                    Sku = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    SupplierId = table.Column<string>(type: "varchar(50)", nullable: true),
                     Barcode = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Barcode1 = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    ProductName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
                     Slug = table.Column<string>(type: "varchar(250)", maxLength: 250, nullable: false),
                     ShortDescription = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -301,19 +296,19 @@ namespace Omnichannel.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Products", x => x.Id);
+                    table.PrimaryKey("PK_Products", x => x.ProductId);
                     table.CheckConstraint("CK_Products_SellingPrice_NonNegative", "[SellingPrice] >= 0");
                     table.ForeignKey(
                         name: "FK_Products_Categories_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categories",
-                        principalColumn: "Id",
+                        principalColumn: "CategoryId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Products_Suppliers_SupplierId",
                         column: x => x.SupplierId,
                         principalTable: "Suppliers",
-                        principalColumn: "Id",
+                        principalColumn: "SupplierId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -321,21 +316,21 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "Carts",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    CartId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: true),
+                    UserId = table.Column<string>(type: "varchar(450)", nullable: true),
                     CartSessionId = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2(7)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2(7)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Carts", x => x.Id);
+                    table.PrimaryKey("PK_Carts", x => x.CartId);
                     table.ForeignKey(
                         name: "FK_Carts_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -343,21 +338,20 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "Orders",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    OrderId = table.Column<string>(type: "varchar(50)", nullable: false),
                     OrderCode = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: true),
-                    StoreId = table.Column<int>(type: "int", nullable: false),
-                    OrderSource = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
+                    CustomerId = table.Column<string>(type: "varchar(450)", nullable: true),
+                    StoreId = table.Column<string>(type: "varchar(50)", nullable: false),
+                    OrderChannel = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
                     OrderStatus = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
                     PaymentStatus = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
                     PaymentMethod = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     SubTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     DiscountAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     ShippingFee = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CustomerName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    CustomerPhone = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
+                    FinalTotal = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    RecipientName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    RecipientPhone = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false),
                     CustomerEmail = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: true),
                     ShippingAddress = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
                     Note = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
@@ -366,18 +360,18 @@ namespace Omnichannel.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Orders", x => x.Id);
+                    table.PrimaryKey("PK_Orders", x => x.OrderId);
                     table.ForeignKey(
                         name: "FK_Orders_Stores_StoreId",
                         column: x => x.StoreId,
                         principalTable: "Stores",
-                        principalColumn: "Id",
+                        principalColumn: "StoreId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Orders_Users_UserId",
-                        column: x => x.UserId,
+                        name: "FK_Orders_Users_CustomerId",
+                        column: x => x.CustomerId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -388,7 +382,7 @@ namespace Omnichannel.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     PostCategoryId = table.Column<int>(type: "int", nullable: false),
-                    AuthorId = table.Column<int>(type: "int", nullable: true),
+                    AuthorId = table.Column<string>(type: "varchar(450)", nullable: true),
                     Title = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     Slug = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false),
                     Summary = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
@@ -412,7 +406,7 @@ namespace Omnichannel.Infrastructure.Migrations
                         name: "FK_Posts_Users_AuthorId",
                         column: x => x.AuthorId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.SetNull);
                 });
 
@@ -420,7 +414,7 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "UserPermissions",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "varchar(450)", nullable: false),
                     PermissionId = table.Column<int>(type: "int", nullable: false),
                     IsGranted = table.Column<bool>(type: "bit", nullable: false)
                 },
@@ -431,13 +425,13 @@ namespace Omnichannel.Infrastructure.Migrations
                         name: "FK_UserPermissions_Permissions_PermissionId",
                         column: x => x.PermissionId,
                         principalTable: "Permissions",
-                        principalColumn: "Id",
+                        principalColumn: "PermissionId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserPermissions_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -445,8 +439,8 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "UserRoles",
                 columns: table => new
                 {
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    RoleId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<string>(type: "varchar(450)", nullable: false),
+                    RoleId = table.Column<string>(type: "varchar(50)", nullable: false),
                     AssignedAt = table.Column<DateTime>(type: "datetime2(7)", nullable: false)
                 },
                 constraints: table =>
@@ -456,13 +450,13 @@ namespace Omnichannel.Infrastructure.Migrations
                         name: "FK_UserRoles_Roles_RoleId",
                         column: x => x.RoleId,
                         principalTable: "Roles",
-                        principalColumn: "Id",
+                        principalColumn: "RoleId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserRoles_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -470,27 +464,27 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "ProductBatches",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    BatchId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
-                    BatchNumber = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
+                    ProductId = table.Column<string>(type: "varchar(50)", nullable: false),
+                    BatchNumber1 = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     ManufacturingDate = table.Column<DateTime>(type: "datetime2(7)", nullable: false),
                     ExpDate = table.Column<DateTime>(type: "datetime2(7)", nullable: false),
                     ImportCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     InitialQuantity = table.Column<int>(type: "int", nullable: false),
-                    CurrentQuantity = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    BatchNumber = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2(7)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductBatches", x => x.Id);
+                    table.PrimaryKey("PK_ProductBatches", x => x.BatchId);
                     table.CheckConstraint("CK_ProductBatches_ExpDate_ManufacturingDate", "[ExpDate] > [ManufacturingDate]");
                     table.ForeignKey(
                         name: "FK_ProductBatches_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
-                        principalColumn: "Id",
+                        principalColumn: "ProductId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -498,28 +492,28 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "CartItems",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    CartItemId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CartId = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<string>(type: "varchar(50)", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     UnitPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2(7)", nullable: false)
+                    AddedAt = table.Column<DateTime>(type: "datetime2(7)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CartItems", x => x.Id);
+                    table.PrimaryKey("PK_CartItems", x => x.CartItemId);
                     table.ForeignKey(
                         name: "FK_CartItems_Carts_CartId",
                         column: x => x.CartId,
                         principalTable: "Carts",
-                        principalColumn: "Id",
+                        principalColumn: "CartId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_CartItems_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
-                        principalColumn: "Id",
+                        principalColumn: "ProductId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -527,16 +521,15 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "Invoices",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    InvoiceId = table.Column<string>(type: "varchar(50)", nullable: false),
                     InvoiceCode = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
-                    OrderId = table.Column<int>(type: "int", nullable: false),
+                    OrderId = table.Column<string>(type: "varchar(50)", nullable: false),
                     InvoiceDate = table.Column<DateTime>(type: "datetime2(7)", nullable: false),
                     PaymentMethod = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     TaxRate = table.Column<decimal>(type: "decimal(5,2)", nullable: false),
                     TaxAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CashierId = table.Column<int>(type: "int", nullable: true),
+                    CashierId = table.Column<string>(type: "varchar(450)", nullable: true),
                     CustomerTaxCode = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: true),
                     CompanyName = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
                     Status = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false),
@@ -544,18 +537,18 @@ namespace Omnichannel.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Invoices", x => x.Id);
+                    table.PrimaryKey("PK_Invoices", x => x.InvoiceId);
                     table.ForeignKey(
                         name: "FK_Invoices_Orders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Orders",
-                        principalColumn: "Id",
+                        principalColumn: "OrderId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Invoices_Users_CashierId",
                         column: x => x.CashierId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.SetNull);
                 });
 
@@ -563,11 +556,11 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "InventoryLogs",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    LogId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    StoreId = table.Column<int>(type: "int", nullable: false),
+                    StoreId = table.Column<string>(type: "varchar(50)", nullable: false),
                     ProductBatchId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: true),
+                    UserId = table.Column<string>(type: "varchar(450)", nullable: true),
                     TransactionType = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     QuantityChanged = table.Column<int>(type: "int", nullable: false),
                     QuantityBefore = table.Column<int>(type: "int", nullable: false),
@@ -577,24 +570,24 @@ namespace Omnichannel.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_InventoryLogs", x => x.Id);
+                    table.PrimaryKey("PK_InventoryLogs", x => x.LogId);
                     table.ForeignKey(
                         name: "FK_InventoryLogs_ProductBatches_ProductBatchId",
                         column: x => x.ProductBatchId,
                         principalTable: "ProductBatches",
-                        principalColumn: "Id",
+                        principalColumn: "BatchId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_InventoryLogs_Stores_StoreId",
                         column: x => x.StoreId,
                         principalTable: "Stores",
-                        principalColumn: "Id",
+                        principalColumn: "StoreId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_InventoryLogs_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id",
+                        principalColumn: "UserId",
                         onDelete: ReferentialAction.SetNull);
                 });
 
@@ -602,10 +595,10 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "OrderDetails",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    OrderDetailId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    OrderId = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    OrderId = table.Column<string>(type: "varchar(50)", nullable: false),
+                    ProductId = table.Column<string>(type: "varchar(50)", nullable: false),
                     ProductBatchId = table.Column<int>(type: "int", nullable: true),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     UnitPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
@@ -614,24 +607,24 @@ namespace Omnichannel.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrderDetails", x => x.Id);
+                    table.PrimaryKey("PK_OrderDetails", x => x.OrderDetailId);
                     table.ForeignKey(
                         name: "FK_OrderDetails_Orders_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Orders",
-                        principalColumn: "Id",
+                        principalColumn: "OrderId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_OrderDetails_ProductBatches_ProductBatchId",
                         column: x => x.ProductBatchId,
                         principalTable: "ProductBatches",
-                        principalColumn: "Id",
+                        principalColumn: "BatchId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_OrderDetails_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
-                        principalColumn: "Id",
+                        principalColumn: "ProductId",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -639,9 +632,9 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "StoreInventories",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
+                    InventoryId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    StoreId = table.Column<int>(type: "int", nullable: false),
+                    StoreId = table.Column<string>(type: "varchar(50)", nullable: false),
                     ProductBatchId = table.Column<int>(type: "int", nullable: false),
                     PhysicalQuantity = table.Column<int>(type: "int", nullable: false),
                     ReservedQuantity = table.Column<int>(type: "int", nullable: false),
@@ -649,19 +642,19 @@ namespace Omnichannel.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_StoreInventories", x => x.Id);
+                    table.PrimaryKey("PK_StoreInventories", x => x.InventoryId);
                     table.CheckConstraint("CK_StoreInventories_Physical_Reserved", "[PhysicalQuantity] >= [ReservedQuantity]");
                     table.ForeignKey(
                         name: "FK_StoreInventories_ProductBatches_ProductBatchId",
                         column: x => x.ProductBatchId,
                         principalTable: "ProductBatches",
-                        principalColumn: "Id",
+                        principalColumn: "BatchId",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_StoreInventories_Stores_StoreId",
                         column: x => x.StoreId,
                         principalTable: "Stores",
-                        principalColumn: "Id",
+                        principalColumn: "StoreId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -741,7 +734,7 @@ namespace Omnichannel.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Menus_Code",
                 table: "Menus",
-                column: "Code",
+                column: "MenuCode",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -760,6 +753,11 @@ namespace Omnichannel.Infrastructure.Migrations
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Orders_CustomerId",
+                table: "Orders",
+                column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Orders_OrderCode",
                 table: "Orders",
                 column: "OrderCode",
@@ -774,11 +772,6 @@ namespace Omnichannel.Infrastructure.Migrations
                 name: "IX_Orders_Store_Created",
                 table: "Orders",
                 columns: new[] { "StoreId", "CreatedAt" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Orders_UserId",
-                table: "Orders",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Permissions_Code",
@@ -811,17 +804,17 @@ namespace Omnichannel.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_ProductBatches_BatchNumber",
                 table: "ProductBatches",
-                column: "BatchNumber");
+                column: "BatchNumber1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductBatches_FEFO_Lookup",
                 table: "ProductBatches",
-                columns: new[] { "ProductId", "ExpDate", "Status" });
+                columns: new[] { "ProductId", "ExpDate", "BatchNumber" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_Barcode",
                 table: "Products",
-                column: "Barcode",
+                column: "Barcode1",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -832,7 +825,7 @@ namespace Omnichannel.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Products_Sku",
                 table: "Products",
-                column: "Sku",
+                column: "Barcode",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -854,7 +847,7 @@ namespace Omnichannel.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Roles_Name",
                 table: "Roles",
-                column: "Name",
+                column: "RoleName",
                 unique: true);
 
             migrationBuilder.CreateIndex(

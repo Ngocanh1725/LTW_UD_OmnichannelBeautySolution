@@ -34,7 +34,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             {
                 SelectedStoreId = storeId ?? "S01",
                 SelectedStoreName = "Mock Store",
-                FilterStatus = filterStatus,
+                FilterStatus = filterStatus ?? "",
                 AvailableStores = new List<StoreLookupDto> { new StoreLookupDto { StoreId = "S01", StoreName = "Mock Store" } },
                 BatchStockItems = new List<BatchStockItemViewModel>(),
                 TotalSKUs = 0,

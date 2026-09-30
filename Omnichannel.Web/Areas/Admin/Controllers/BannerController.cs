@@ -32,10 +32,10 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 .ThenBy(b => b.DisplayOrder)
                 .Select(b => new BannerItemViewModel
                 {
-                    BannerId = b.Id.ToString(),
+                    BannerId = b.Id,
                     Title = b.Title,
                     Position = 1, // Mock Position
-                    DesktopImageUrl = b.DesktopImageUrl,
+                    DesktopImageUrl = b.DesktopImageUrl ?? "",
                     MobileImageUrl = b.MobileImageUrl,
                     LinkUrl = b.LinkUrl,
                     DisplayOrder = b.DisplayOrder,
@@ -74,7 +74,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             var banner = new Banner
             {
                 Title = model.Title.Trim(),
-                Position = model.Position,
+                Position = model.Position.ToString(),
                 DesktopImageUrl = model.DesktopImageUrl.Trim(),
                 MobileImageUrl = model.MobileImageUrl?.Trim(),
                 LinkUrl = model.LinkUrl?.Trim(),

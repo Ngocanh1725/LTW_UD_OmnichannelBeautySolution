@@ -1,117 +1,226 @@
-﻿@model Omnichannel.Application.DTOs.Sales.CheckoutViewModel
+@model Omnichannel.Application.DTOs.Sales.CheckoutViewModel
 @{
     ViewData["Title"] = "Thanh Toán Đơn Hàng";
 }
 
-<div class="container my-5">
-    <div class="d-flex align-items-center gap-2 mb-4">
-        <i class="fa-solid fa-credit-card text-pink fs-4" style="color: var(--accent-pink);"></i>
-        <h4 class="fw-bold text-dark mb-0">Thông Tin Thanh Toán & Giao Hàng</h4>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" x-data="checkoutForm()">
+    <div class="flex items-center gap-3 mb-8">
+        <i class="fa-solid fa-credit-card text-magenta-accent text-2xl"></i>
+        <h1 class="font-serif text-3xl font-bold text-charcoal m-0">Thanh Toán & Giao Hàng</h1>
     </div>
 
-    <form asp-action="PlaceOrder" method="post">
+    <form asp-action="PlaceOrder" method="post" id="checkoutForm">
         @Html.AntiForgeryToken()
 
-        <div class="row g-4">
-            <!-- Cột Trái: Nhập Thông Tin Giao Nhận & Phương Thức -->
-            <div class="col-lg-7">
-                <div class="beauty-card p-4 mb-4">
-                    <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-location-dot me-2 text-purple" style="color: var(--primary-purple);"></i>Địa Chỉ Nhận Hàng</h6>
-
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label asp-for="RecipientName" class="form-label small fw-semibold"></label>
-                            <input asp-for="RecipientName" class="form-control rounded-3" placeholder="vd: Nguyễn Thu Phương" required />
-                            <span asp-validation-for="RecipientName" class="text-danger small"></span>
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Cột Trái: Thông Tin -->
+            <div class="w-full lg:w-7/12 space-y-6">
+                
+                <!-- Giao nhận -->
+                <div class="bg-white p-6 rounded-3xl border border-soft-border shadow-sm">
+                    <h3 class="text-sm font-bold text-charcoal mb-5 flex items-center"><i class="fa-solid fa-location-dot text-magenta-accent mr-2"></i> Thông Tin Giao Nhận</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label asp-for="RecipientName" class="block text-xs font-bold text-slate-600 mb-1.5"></label>
+                            <input asp-for="RecipientName" class="w-full rounded-xl border-soft-border text-sm focus:ring-magenta-accent focus:border-magenta-accent" placeholder="Họ và tên" required />
+                            <span asp-validation-for="RecipientName" class="text-red-500 text-xs mt-1 block"></span>
                         </div>
-
-                        <div class="col-md-6">
-                            <label asp-for="RecipientPhone" class="form-label small fw-semibold"></label>
-                            <input asp-for="RecipientPhone" class="form-control rounded-3" placeholder="vd: 0901234567" required />
-                            <span asp-validation-for="RecipientPhone" class="text-danger small"></span>
+                        <div>
+                            <label asp-for="RecipientPhone" class="block text-xs font-bold text-slate-600 mb-1.5"></label>
+                            <input asp-for="RecipientPhone" class="w-full rounded-xl border-soft-border text-sm focus:ring-magenta-accent focus:border-magenta-accent" placeholder="Số điện thoại" required />
+                            <span asp-validation-for="RecipientPhone" class="text-red-500 text-xs mt-1 block"></span>
                         </div>
+                    </div>
 
-                        <div class="col-12">
-                            <label asp-for="ShippingAddress" class="form-label small fw-semibold"></label>
-                            <input asp-for="ShippingAddress" class="form-control rounded-3" placeholder="Số nhà, ngõ ngách, tên đường, phường/xã, quận/huyện..." required />
-                            <span asp-validation-for="ShippingAddress" class="text-danger small"></span>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label asp-for="ProvinceId" class="block text-xs font-bold text-slate-600 mb-1.5">Tỉnh/Thành Phố</label>
+                            <select asp-for="ProvinceId" x-model="selectedProvince" @@change="loadDistricts()" class="w-full rounded-xl border-soft-border text-sm focus:ring-magenta-accent focus:border-magenta-accent" required>
+                                <option value="">-- Chọn Tỉnh --</option>
+                                <template x-for="p in provinces" :key="p.provinceID">
+                                    <option :value="p.provinceID" x-text="p.provinceName"></option>
+                                </template>
+                            </select>
                         </div>
+                        <div>
+                            <label asp-for="DistrictId" class="block text-xs font-bold text-slate-600 mb-1.5">Quận/Huyện</label>
+                            <select asp-for="DistrictId" x-model="selectedDistrict" @@change="loadWards()" class="w-full rounded-xl border-soft-border text-sm focus:ring-magenta-accent focus:border-magenta-accent" required :disabled="!selectedProvince">
+                                <option value="">-- Chọn Huyện --</option>
+                                <template x-for="d in districts" :key="d.districtID">
+                                    <option :value="d.districtID" x-text="d.districtName"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <div>
+                            <label asp-for="WardCode" class="block text-xs font-bold text-slate-600 mb-1.5">Phường/Xã</label>
+                            <select asp-for="WardCode" x-model="selectedWard" @@change="calculateFee()" class="w-full rounded-xl border-soft-border text-sm focus:ring-magenta-accent focus:border-magenta-accent" required :disabled="!selectedDistrict">
+                                <option value="">-- Chọn Xã --</option>
+                                <template x-for="w in wards" :key="w.wardCode">
+                                    <option :value="w.wardCode" x-text="w.wardName"></option>
+                                </template>
+                            </select>
+                        </div>
+                    </div>
 
-                        <div class="col-12">
-                            <label asp-for="Notes" class="form-label small fw-semibold"></label>
-                            <textarea asp-for="Notes" rows="2" class="form-control rounded-3" placeholder="Ghi chú giao hàng giờ hành chính..."></textarea>
-                        </div>
+                    <div class="mb-4">
+                        <label asp-for="ShippingAddress" class="block text-xs font-bold text-slate-600 mb-1.5"></label>
+                        <input asp-for="ShippingAddress" class="w-full rounded-xl border-soft-border text-sm focus:ring-magenta-accent focus:border-magenta-accent" placeholder="Số nhà, đường..." required />
+                        <span asp-validation-for="ShippingAddress" class="text-red-500 text-xs mt-1 block"></span>
+                    </div>
+
+                    <div>
+                        <label asp-for="Notes" class="block text-xs font-bold text-slate-600 mb-1.5"></label>
+                        <textarea asp-for="Notes" rows="2" class="w-full rounded-xl border-soft-border text-sm focus:ring-magenta-accent focus:border-magenta-accent" placeholder="Ghi chú thêm..."></textarea>
                     </div>
                 </div>
 
-                <div class="beauty-card p-4">
-                    <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-wallet me-2 text-purple" style="color: var(--primary-purple);"></i>Phương Thức Thanh Toán</h6>
-
-                    <div class="d-flex flex-column gap-2">
-                        <label class="d-flex align-items-center gap-3 p-3 rounded-3 border cursor-pointer">
-                            <input type="radio" asp-for="PaymentMethod" value="2" class="form-check-input mt-0" checked />
+                <!-- Phương Thức Thanh Toán -->
+                <div class="bg-white p-6 rounded-3xl border border-soft-border shadow-sm">
+                    <h3 class="text-sm font-bold text-charcoal mb-5 flex items-center"><i class="fa-solid fa-wallet text-magenta-accent mr-2"></i> Phương Thức Thanh Toán</h3>
+                    
+                    <div class="space-y-3">
+                        <label class="flex items-start gap-4 p-4 rounded-2xl border border-soft-border cursor-pointer hover:border-magenta-accent hover:bg-pastel-rose transition" :class="{'border-magenta-accent bg-pastel-rose': paymentMethod == 3}">
+                            <input type="radio" asp-for="PaymentMethod" value="3" x-model="paymentMethod" class="mt-1 text-magenta-accent focus:ring-magenta-accent" />
                             <div>
-                                <div class="fw-bold text-dark small"><i class="fa-solid fa-qrcode text-pink me-2" style="color: var(--accent-pink);"></i>Chuyển khoản Ngân hàng (VietQR Động)</div>
-                                <div class="text-muted" style="font-size: 11.5px;">Quét mã QR tự động điền số tiền và nội dung, xác nhận đơn tức thì</div>
+                                <div class="text-sm font-bold text-charcoal"><img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/9/06ncktiwd6dc1694418123690.png" class="h-4 inline mr-2" alt="VNPay"/> Thanh toán qua VNPAY</div>
+                                <div class="text-xs text-slate-500 mt-1">Hỗ trợ ATM nội địa, QR Code, Visa, Master, JCB</div>
+                            </div>
+                        </label>
+                        
+                        <label class="flex items-start gap-4 p-4 rounded-2xl border border-soft-border cursor-pointer hover:border-magenta-accent hover:bg-pastel-rose transition" :class="{'border-magenta-accent bg-pastel-rose': paymentMethod == 5}">
+                            <input type="radio" asp-for="PaymentMethod" value="5" x-model="paymentMethod" class="mt-1 text-magenta-accent focus:ring-magenta-accent" />
+                            <div>
+                                <div class="text-sm font-bold text-charcoal"><img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" class="h-4 inline mr-2" alt="MoMo"/> Thanh toán qua Ví MoMo</div>
+                                <div class="text-xs text-slate-500 mt-1">Quét mã QR từ ứng dụng MoMo</div>
                             </div>
                         </label>
 
-                        <label class="d-flex align-items-center gap-3 p-3 rounded-3 border cursor-pointer">
-                            <input type="radio" asp-for="PaymentMethod" value="4" class="form-check-input mt-0" />
+                        <label class="flex items-start gap-4 p-4 rounded-2xl border border-soft-border cursor-pointer hover:border-magenta-accent hover:bg-pastel-rose transition" :class="{'border-magenta-accent bg-pastel-rose': paymentMethod == 2}">
+                            <input type="radio" asp-for="PaymentMethod" value="2" x-model="paymentMethod" class="mt-1 text-magenta-accent focus:ring-magenta-accent" />
                             <div>
-                                <div class="fw-bold text-dark small"><i class="fa-solid fa-truck-ramp-box me-2 text-secondary"></i>Thanh toán khi nhận hàng (COD)</div>
-                                <div class="text-muted" style="font-size: 11.5px;">Thanh toán tiền mặt trực tiếp cho nhân viên giao vận</div>
+                                <div class="text-sm font-bold text-charcoal"><i class="fa-solid fa-qrcode text-charcoal mr-2"></i> Chuyển khoản VietQR</div>
+                                <div class="text-xs text-slate-500 mt-1">Quét mã QR tự động điền thông tin và xác nhận đơn ngay</div>
+                            </div>
+                        </label>
+
+                        <label class="flex items-start gap-4 p-4 rounded-2xl border border-soft-border cursor-pointer hover:border-magenta-accent hover:bg-pastel-rose transition" :class="{'border-magenta-accent bg-pastel-rose': paymentMethod == 4}">
+                            <input type="radio" asp-for="PaymentMethod" value="4" x-model="paymentMethod" class="mt-1 text-magenta-accent focus:ring-magenta-accent" />
+                            <div>
+                                <div class="text-sm font-bold text-charcoal"><i class="fa-solid fa-truck-fast text-charcoal mr-2"></i> Thanh toán khi nhận hàng (COD)</div>
+                                <div class="text-xs text-slate-500 mt-1">Thanh toán bằng tiền mặt khi nhận được hàng</div>
                             </div>
                         </label>
                     </div>
                 </div>
+
             </div>
 
-            <!-- Cột Phải: Tóm Tắt & Cơ Chế Khóa Tồn Kho 15 Phút -->
-            <div class="col-lg-5">
-                <div class="beauty-card p-4">
-                    <h6 class="fw-bold text-dark mb-3">Chi Tiết Đơn Hàng</h6>
+            <!-- Cột Phải: Tóm Tắt Đơn -->
+            <div class="w-full lg:w-5/12">
+                <div class="bg-white p-6 rounded-3xl border border-soft-border shadow-sm sticky top-24">
+                    <h3 class="text-sm font-bold text-charcoal mb-5">Chi Tiết Đơn Hàng</h3>
 
-                    <div class="d-flex flex-column gap-3 mb-3">
-                        @foreach (var item in Model.Cart.Items)
+                    <div class="space-y-4 mb-6">
+                        @foreach(var item in Model.Cart.Items)
                         {
-                            <div class="d-flex justify-content-between align-items-center small">
+                            <div class="flex justify-between items-start text-sm">
                                 <div>
-                                    <div class="fw-bold text-dark">@item.ProductName</div>
-                                    <span class="badge bg-light text-muted border" style="font-size: 10px;">Lô HSD: @item.NearestExpDateStr</span>
-                                    <span class="text-muted ms-1">x@item.Quantity</span>
+                                    <div class="font-bold text-charcoal line-clamp-2">@item.ProductName</div>
+                                    <div class="text-[10px] text-slate-500 mt-1 border inline-block px-1.5 py-0.5 rounded bg-slate-50">Lô: @item.NearestExpDateStr</div>
+                                    <span class="text-xs text-slate-400 ml-1">x @item.Quantity</span>
                                 </div>
-                                <div class="font-monospace fw-semibold">@item.LineTotal.ToString("N0") đ</div>
+                                <div class="font-mono-numeric font-bold whitespace-nowrap ml-4">@item.LineTotal.ToString("N0") ₫</div>
                             </div>
                         }
                     </div>
 
-                    <hr class="border-soft" />
-
-                    <div class="d-flex justify-content-between small mb-2">
-                        <span class="text-muted">Tổng tiền hàng:</span>
-                        <span class="font-monospace">@Model.Cart.SubTotal.ToString("N0") đ</span>
+                    <div class="border-t border-soft-border pt-4 space-y-3">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-500">Tổng tiền hàng:</span>
+                            <span class="font-mono-numeric font-bold">@Model.Cart.SubTotal.ToString("N0") ₫</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-slate-500">Phí giao hàng:</span>
+                            <span class="font-mono-numeric font-bold text-slate-500" x-text="shippingFee === 0 ? 'Miễn phí' : shippingFee.toLocaleString('vi-VN') + ' ₫'">@Model.Cart.ShippingFee.ToString("N0") ₫</span>
+                        </div>
+                        <div class="flex justify-between text-sm text-green-600" x-show="shippingFee === 0 && @Model.Cart.ShippingFee == 0">
+                            <span class="font-bold"><i class="fa-solid fa-gift mr-1"></i> Ưu đãi:</span>
+                            <span>Freeship toàn quốc</span>
+                        </div>
                     </div>
 
-                    <div class="d-flex justify-content-between small mb-2">
-                        <span class="text-muted">Phí giao hàng:</span>
-                        <span class="font-monospace">@(Model.Cart.ShippingFee == 0 ? "Miễn phí" : Model.Cart.ShippingFee.ToString("N0") + " đ")</span>
+                    <div class="border-t border-soft-border mt-4 pt-4 flex justify-between items-end">
+                        <span class="font-bold text-charcoal text-sm">Tổng thanh toán:</span>
+                        <span class="font-mono-numeric font-bold text-2xl text-magenta-accent" x-text="finalTotal.toLocaleString('vi-VN') + ' ₫'">@Model.Cart.FinalTotal.ToString("N0") ₫</span>
                     </div>
 
-                    <div class="d-flex justify-content-between align-items-baseline my-3">
-                        <span class="fw-bold text-dark">Tổng thanh toán:</span>
-                        <span class="fw-bold fs-5 font-monospace" style="color: var(--accent-pink);">@Model.Cart.FinalTotal.ToString("N0") đ</span>
+                    <div class="mt-6 bg-amber-50 text-amber-800 text-[11px] p-3 rounded-xl border border-amber-200">
+                        <i class="fa-solid fa-clock mr-1"></i> Hệ thống tự động <strong>khoá tạm tồn kho FEFO trong 15 phút</strong> khi bắt đầu thanh toán để đảm bảo hàng hóa.
                     </div>
 
-                    <div class="alert alert-warning py-2 px-3 small rounded-3 mb-3 border-0 bg-warning-subtle text-warning-emphasis" style="font-size: 11.5px;">
-                        <i class="fa-solid fa-shield-halved me-1"></i>Hệ thống sẽ <strong>khóa tạm tồn kho trong 15 phút</strong> (Soft Reservation) theo thuật toán FEFO để đảm bảo sản phẩm không bị bán trùng lặp cho khách hàng khác!
-                    </div>
-
-                    <button type="submit" class="btn btn-primary-gradient w-100 py-3 fw-bold">
-                        <i class="fa-solid fa-lock me-2"></i>Xác Nhận Đặt Hàng
+                    <button type="submit" class="w-full mt-5 py-4 rounded-full bg-charcoal text-white font-bold text-sm hover:bg-magenta-accent shadow-pink-glow transition-all duration-300 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-lock"></i> Đặt Hàng Ngay
                     </button>
                 </div>
             </div>
         </div>
     </form>
 </div>
+
+@section Scripts {
+    <script>
+        function checkoutForm() {
+            return {
+                paymentMethod: @Model.PaymentMethod,
+                provinces: [],
+                districts: [],
+                wards: [],
+                selectedProvince: '',
+                selectedDistrict: '',
+                selectedWard: '',
+                subTotal: @Model.Cart.SubTotal,
+                shippingFee: @Model.Cart.ShippingFee,
+                get finalTotal() {
+                    return this.subTotal + this.shippingFee;
+                },
+                init() {
+                    this.loadProvinces();
+                },
+                async loadProvinces() {
+                    const res = await fetch('/api/location/provinces');
+                    this.provinces = await res.json();
+                },
+                async loadDistricts() {
+                    this.selectedDistrict = '';
+                    this.selectedWard = '';
+                    this.wards = [];
+                    if(!this.selectedProvince) return;
+                    const res = await fetch('/api/location/districts/' + this.selectedProvince);
+                    this.districts = await res.json();
+                    this.calculateFee();
+                },
+                async loadWards() {
+                    this.selectedWard = '';
+                    if(!this.selectedDistrict) return;
+                    const res = await fetch('/api/location/wards/' + this.selectedDistrict);
+                    this.wards = await res.json();
+                    this.calculateFee();
+                },
+                async calculateFee() {
+                    if(!this.selectedDistrict) {
+                        this.shippingFee = @Model.Cart.TotalAmount >= 500000 ? 0 : 30000;
+                        return;
+                    }
+                    if(this.subTotal >= 500000) {
+                        this.shippingFee = 0;
+                        return;
+                    }
+                    const res = await fetch(`/api/location/fee?districtId=${this.selectedDistrict}&wardCode=${this.selectedWard}`);
+                    const data = await res.json();
+                    this.shippingFee = data.fee;
+                }
+            }
+        }
+    </script>
+}

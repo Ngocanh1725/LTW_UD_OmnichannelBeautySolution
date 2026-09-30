@@ -95,6 +95,7 @@ namespace Omnichannel.Web.Controllers
             var query = _context.Products
                 .AsNoTracking()
                 .Include(p => p.Category)
+                .Include(p => p.Batches)
                 .Where(p => p.IsActive);
 
             if (category != "all")
@@ -106,6 +107,20 @@ namespace Omnichannel.Web.Controllers
 
             var products = await query.Take(8).ToListAsync();
             return PartialView("_ProductTabGrid", products);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> QuickView(int id)
+        {
+            var product = await _context.Products
+                .AsNoTracking()
+                .Include(p => p.Category)
+                .Include(p => p.Batches)
+                .FirstOrDefaultAsync(p => p.Id == id);
+                
+            if (product == null) return NotFound();
+                
+            return PartialView("_QuickView", product);
         }
 
         public IActionResult Privacy()

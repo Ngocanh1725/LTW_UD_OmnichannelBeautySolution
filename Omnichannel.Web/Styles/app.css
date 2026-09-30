@@ -4,23 +4,35 @@
 @source "../wwwroot/**/*.js";
 
 @theme {
-  --color-pastel-pink: #FDF2F4;
-  --color-blush: #F8D7DA;
+  /* Pastel Rose & Soft Tones */
+  --color-pastel-rose: #FFF5F5;
+  --color-blush: #FFE4E6;
   --color-magenta-accent: #D63384;
+  
+  /* Champagne & Nude Gold */
+  --color-champagne-gold: #D4AF37;
+  --color-nude-gold: #C5A880;
   --color-rose-gold: #B76E79;
+  
+  /* Dark Text & Borders */
   --color-charcoal: #1A1A1A;
+  --color-soft-border: #F3E8E8;
 
+  /* Fonts */
   --font-serif: "Playfair Display", "Cormorant Garamond", serif;
-  --font-sans: "Inter", "Outfit", sans-serif;
+  --font-sans: "Inter", "Montserrat", "Outfit", sans-serif;
 
+  /* Shadows */
   --shadow-pink-glow: 0 4px 15px -3px rgba(214, 51, 132, 0.3), 0 4px 6px -4px rgba(214, 51, 132, 0.2);
+  --shadow-gold-glow: 0 4px 15px -3px rgba(212, 175, 55, 0.3), 0 4px 6px -4px rgba(212, 175, 55, 0.2);
+  --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
   
   --radius-3xl: 1.5rem;
 }
 
 @layer base {
   body {
-    @apply font-sans bg-pastel-pink text-charcoal;
+    @apply font-sans bg-pastel-rose text-charcoal;
   }
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;

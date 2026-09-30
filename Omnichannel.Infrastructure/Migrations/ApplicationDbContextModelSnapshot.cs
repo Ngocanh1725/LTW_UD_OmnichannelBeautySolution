@@ -96,7 +96,8 @@ namespace Omnichannel.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("CartId");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
@@ -110,8 +111,8 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2(7)");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(450)");
 
                     b.HasKey("Id");
 
@@ -127,7 +128,8 @@ namespace Omnichannel.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("CartItemId");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
@@ -135,10 +137,12 @@ namespace Omnichannel.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2(7)");
+                        .HasColumnType("datetime2(7)")
+                        .HasColumnName("AddedAt");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<string>("ProductId")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
@@ -159,7 +163,8 @@ namespace Omnichannel.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("CategoryId");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
@@ -169,7 +174,8 @@ namespace Omnichannel.Infrastructure.Migrations
 
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(500)
-                        .HasColumnType("varchar(500)");
+                        .HasColumnType("varchar(500)")
+                        .HasColumnName("IconUrl");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -177,7 +183,8 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("CategoryName");
 
                     b.Property<int?>("ParentId")
                         .HasColumnType("int");
@@ -188,7 +195,8 @@ namespace Omnichannel.Infrastructure.Migrations
                         .HasColumnType("varchar(150)");
 
                     b.Property<int>("SortOrder")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("DisplayOrder");
 
                     b.HasKey("Id");
 
@@ -205,7 +213,8 @@ namespace Omnichannel.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("LogId");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
@@ -228,16 +237,17 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<int>("QuantityChanged")
                         .HasColumnType("int");
 
-                    b.Property<int>("StoreId")
-                        .HasColumnType("int");
+                    b.Property<string>("StoreId")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("TransactionType")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(450)");
 
                     b.HasKey("Id");
 
@@ -254,14 +264,13 @@ namespace Omnichannel.Infrastructure.Migrations
 
             modelBuilder.Entity("Omnichannel.Domain.Entities.Invoice", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("InvoiceId");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("CashierId")
-                        .HasColumnType("int");
+                    b.Property<string>("CashierId")
+                        .HasColumnType("varchar(450)");
 
                     b.Property<string>("CompanyName")
                         .HasMaxLength(200)
@@ -282,8 +291,9 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<DateTime>("InvoiceDate")
                         .HasColumnType("datetime2(7)");
 
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
+                    b.Property<string>("OrderId")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
@@ -322,14 +332,16 @@ namespace Omnichannel.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("MenuId");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("MenuCode");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -342,7 +354,8 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("MenuName");
 
                     b.HasKey("Id");
 
@@ -357,13 +370,15 @@ namespace Omnichannel.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("MenuItemId");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Icon")
                         .HasMaxLength(100)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("IconClass");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -375,12 +390,14 @@ namespace Omnichannel.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("SortOrder")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("DisplayOrder");
 
                     b.Property<string>("Target")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("TargetType");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -390,7 +407,8 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("CustomUrl");
 
                     b.HasKey("Id");
 
@@ -403,11 +421,10 @@ namespace Omnichannel.Infrastructure.Migrations
 
             modelBuilder.Entity("Omnichannel.Domain.Entities.Order", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("OrderId");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2(7)");
@@ -419,12 +436,14 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<string>("CustomerName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("RecipientName");
 
                     b.Property<string>("CustomerPhone")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("varchar(20)");
+                        .HasColumnType("varchar(20)")
+                        .HasColumnName("RecipientPhone");
 
                     b.Property<decimal>("DiscountAmount")
                         .HasColumnType("decimal(18,2)");
@@ -441,7 +460,8 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<string>("OrderSource")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("varchar(30)");
+                        .HasColumnType("varchar(30)")
+                        .HasColumnName("OrderChannel");
 
                     b.Property<string>("OrderStatus")
                         .IsRequired()
@@ -465,20 +485,23 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<decimal>("ShippingFee")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("StoreId")
-                        .HasColumnType("int");
+                    b.Property<string>("StoreId")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
 
                     b.Property<decimal>("SubTotal")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("FinalTotal");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2(7)");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(450)")
+                        .HasColumnName("CustomerId");
 
                     b.HasKey("Id");
 
@@ -501,7 +524,8 @@ namespace Omnichannel.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("OrderDetailId");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
@@ -511,14 +535,16 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<decimal>("LineTotal")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
+                    b.Property<string>("OrderId")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
 
                     b.Property<int?>("ProductBatchId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<string>("ProductId")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
@@ -541,7 +567,8 @@ namespace Omnichannel.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("PermissionId");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
@@ -562,7 +589,8 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("PermissionName");
 
                     b.HasKey("Id");
 
@@ -581,8 +609,8 @@ namespace Omnichannel.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("AuthorId")
-                        .HasColumnType("int");
+                    b.Property<string>("AuthorId")
+                        .HasColumnType("varchar(450)");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -673,11 +701,10 @@ namespace Omnichannel.Infrastructure.Migrations
 
             modelBuilder.Entity("Omnichannel.Domain.Entities.Product", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("ProductId");
 
                     b.Property<string>("Barcode")
                         .IsRequired()
@@ -711,7 +738,8 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("ProductName");
 
                     b.Property<decimal>("SellingPrice")
                         .HasColumnType("decimal(18,2)");
@@ -723,15 +751,16 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<string>("Sku")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("Barcode");
 
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("varchar(250)");
 
-                    b.Property<int?>("SupplierId")
-                        .HasColumnType("int");
+                    b.Property<string>("SupplierId")
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("ThumbnailUrl")
                         .HasMaxLength(500)
@@ -767,6 +796,9 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.ToTable("Products", t =>
                         {
                             t.HasCheckConstraint("CK_Products_SellingPrice_NonNegative", "[SellingPrice] >= 0");
+
+                            t.Property("Barcode")
+                                .HasColumnName("Barcode1");
                         });
                 });
 
@@ -774,7 +806,8 @@ namespace Omnichannel.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("BatchId");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
@@ -787,7 +820,8 @@ namespace Omnichannel.Infrastructure.Migrations
                         .HasColumnType("datetime2(7)");
 
                     b.Property<int>("CurrentQuantity")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("Quantity");
 
                     b.Property<DateTime>("ExpDate")
                         .HasColumnType("datetime2(7)");
@@ -801,13 +835,15 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<DateTime>("ManufacturingDate")
                         .HasColumnType("datetime2(7)");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
+                    b.Property<string>("ProductId")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
 
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("varchar(30)");
+                        .HasColumnType("varchar(30)")
+                        .HasColumnName("BatchNumber");
 
                     b.HasKey("Id");
 
@@ -820,16 +856,18 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.ToTable("ProductBatches", t =>
                         {
                             t.HasCheckConstraint("CK_ProductBatches_ExpDate_ManufacturingDate", "[ExpDate] > [ManufacturingDate]");
+
+                            t.Property("BatchNumber")
+                                .HasColumnName("BatchNumber1");
                         });
                 });
 
             modelBuilder.Entity("Omnichannel.Domain.Entities.Role", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("RoleId");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2(7)");
@@ -844,7 +882,8 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("RoleName");
 
                     b.HasKey("Id");
 
@@ -857,11 +896,12 @@ namespace Omnichannel.Infrastructure.Migrations
 
             modelBuilder.Entity("Omnichannel.Domain.Entities.RolePermission", b =>
                 {
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
+                    b.Property<string>("RoleId")
+                        .HasColumnType("varchar(50)");
 
                     b.Property<int>("PermissionId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("PermissionId");
 
                     b.HasKey("RoleId", "PermissionId");
 
@@ -920,11 +960,10 @@ namespace Omnichannel.Infrastructure.Migrations
 
             modelBuilder.Entity("Omnichannel.Domain.Entities.Store", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("StoreId");
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -949,7 +988,8 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("StoreName");
 
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(20)
@@ -968,7 +1008,8 @@ namespace Omnichannel.Infrastructure.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("InventoryId");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
@@ -984,8 +1025,9 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<int>("ReservedQuantity")
                         .HasColumnType("int");
 
-                    b.Property<int>("StoreId")
-                        .HasColumnType("int");
+                    b.Property<string>("StoreId")
+                        .IsRequired()
+                        .HasColumnType("varchar(50)");
 
                     b.HasKey("Id");
 
@@ -1003,11 +1045,10 @@ namespace Omnichannel.Infrastructure.Migrations
 
             modelBuilder.Entity("Omnichannel.Domain.Entities.Supplier", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("varchar(50)")
+                        .HasColumnName("SupplierId");
 
                     b.Property<string>("Address")
                         .HasMaxLength(255)
@@ -1032,7 +1073,8 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("SupplierName");
 
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(20)
@@ -1049,11 +1091,10 @@ namespace Omnichannel.Infrastructure.Migrations
 
             modelBuilder.Entity("Omnichannel.Domain.Entities.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("varchar(450)")
+                        .HasColumnName("UserId");
 
                     b.Property<string>("AvatarUrl")
                         .HasMaxLength(500)
@@ -1092,8 +1133,8 @@ namespace Omnichannel.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<int?>("StoreId")
-                        .HasColumnType("int");
+                    b.Property<string>("StoreId")
+                        .HasColumnType("varchar(50)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2(7)");
@@ -1123,11 +1164,12 @@ namespace Omnichannel.Infrastructure.Migrations
 
             modelBuilder.Entity("Omnichannel.Domain.Entities.UserPermission", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(450)");
 
                     b.Property<int>("PermissionId")
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("PermissionId");
 
                     b.Property<bool>("IsGranted")
                         .HasColumnType("bit");
@@ -1141,11 +1183,11 @@ namespace Omnichannel.Infrastructure.Migrations
 
             modelBuilder.Entity("Omnichannel.Domain.Entities.UserRole", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<string>("UserId")
+                        .HasColumnType("varchar(450)");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
+                    b.Property<string>("RoleId")
+                        .HasColumnType("varchar(50)");
 
                     b.Property<DateTime>("AssignedAt")
                         .HasColumnType("datetime2(7)");
