@@ -1,0 +1,22 @@
+@model Omnichannel.Application.DTOs.Cms.ThemeConfigDto
+
+<style id="dynamic-theme-style">
+    :root {
+        --color-primary: @Model.PrimaryColor;
+        --color-secondary: @Model.SecondaryColor;
+        --color-accent: @Model.AccentColor;
+        --color-announcement-bg: @Model.AnnouncementBarBgColor;
+        --font-main: @Html.Raw(Model.FontFamily);
+    }
+    body {
+        font-family: var(--font-main);
+    }
+    .bg-theme-primary { background-color: var(--color-primary) !important; }
+    .text-theme-primary { color: var(--color-primary) !important; }
+    .border-theme-primary { border-color: var(--color-primary) !important; }
+    
+    @if (!string.IsNullOrWhiteSpace(Model.CustomCss))
+    {
+        @Html.Raw(Model.CustomCss)
+    }
+</style>

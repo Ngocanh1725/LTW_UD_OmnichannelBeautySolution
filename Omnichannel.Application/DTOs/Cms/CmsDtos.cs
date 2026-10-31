@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Omnichannel.Application.DTOs.Cms
@@ -63,5 +63,10 @@ namespace Omnichannel.Application.DTOs.Cms
 
         [Display(Name = "Mô tả SEO (Meta Description)")]
         public string? MetaDescription { get; set; }
+    }
+
+    public class EditPostViewModel : CreatePostViewModel
+    {
+        public int PostId { get; set; }
     }
 }

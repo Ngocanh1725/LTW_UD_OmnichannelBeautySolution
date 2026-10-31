@@ -1,0 +1,339 @@
+@model Omnichannel.Application.DTOs.Sales.OrderSuccessViewModel
+@{
+    ViewData["Title"] = "Đặt Hàng Thành Công - OMNI BEAUTY";
+    bool isPaid = Model.PaymentStatus == "PAID" || Model.PaymentStatus == "2";
+}
+
+<div class="bg-gradient-to-b from-[#fffbfb] via-white to-pink-50/20 min-h-screen py-10 sm:py-16">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Thông Báo Chớp Toast từ TempData -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm flex items-center gap-3 shadow-sm animate-fade-in">
+                <i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>
+                <span class="font-medium">@TempData["SuccessMessage"]</span>
+            </div>
+        }
+
+        <!-- Card Chính Thượng Lưu Haute Parfumerie -->
+        <div class="bg-white rounded-3xl border border-soft-border p-6 sm:p-10 shadow-xl shadow-pink-500/5 text-center space-y-7 relative overflow-hidden">
+            
+            <!-- Họa tiết dải lụa mạ vàng trang trí thượng lưu -->
+            <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-amber-300 via-rose-gold to-magenta-accent"></div>
+
+            <!-- Huy hiệu vương miện & checkmark Haute Parfumerie -->
+            <div class="relative inline-block mx-auto">
+                <div class="w-20 h-20 rounded-full @(isPaid ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-gradient-to-tr from-pink-50 to-amber-50 text-magenta-accent border-rose-100") flex items-center justify-center text-3xl mx-auto border-4 shadow-sm">
+                    @if (isPaid)
+                    {
+                        <i class="fa-solid fa-circle-check"></i>
+                    }
+                    else
+                    {
+                        <i class="fa-solid fa-crown text-amber-500 animate-pulse"></i>
+                    }
+                </div>
+            </div>
+
+            <!-- Thư Tri Ân Haute Parfumerie OMNI BEAUTY -->
+            <div class="space-y-2 max-w-xl mx-auto">
+                <div class="flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-widest text-rose-gold">
+                    <span>OMNI BEAUTY</span>
+                    <span>•</span>
+                    <span>HAUTE PARFUMERIE & LUXURY COSMETICS</span>
+                </div>
+                <h1 class="font-serif text-2xl sm:text-4xl font-bold text-charcoal tracking-tight mt-1">
+                    Cảm Ơn Quý Khách Đã Lựa Chọn Omni Beauty
+                </h1>
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-serif italic pt-1">
+                    "Chúng tôi vô cùng vinh hạnh được đồng hành cùng vẻ đẹp rạng ngời và phong cách thượng lưu của Bạn. 
+                    Từng sản phẩm trong đơn hàng đang được các chuyên viên cẩn trọng chuẩn bị theo quy chuẩn bảo quản & đóng gói cao cấp nhất."
+                </p>
+                <div class="pt-2 flex items-center justify-center gap-2">
+                    <span class="text-xs text-slate-500 font-medium">Mã đơn hàng chính hãng:</span>
+                    <div class="inline-flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-3 py-1 rounded-xl">
+                        <strong class="font-mono text-magenta-accent text-sm sm:text-base font-bold select-all" id="orderIdText">@Model.OrderId</strong>
+                        <button type="button" onclick="copyToClipboard('@Model.OrderId', 'Đã sao chép mã đơn hàng!')" class="text-slate-400 hover:text-charcoal transition text-xs" title="Sao chép">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Huy Hiệu Trạng Thái Thanh Toán & Thời Gian Giữ Tồn Kho -->
+            <div class="flex flex-wrap items-center justify-center gap-3">
+                <div id="orderStatusBadge"
+                     class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold shadow-xs @(isPaid ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-amber-50 text-amber-800 border border-amber-200")">
+                    <span class="h-2.5 w-2.5 rounded-full @(isPaid ? "bg-emerald-500" : "bg-amber-500 animate-ping")"></span>
+                    <span id="orderStatusLabel">
+                        @(isPaid ? "Trạng thái: Đã thanh toán thành công • Bảo mật SSL 256-bit" : "Trạng thái: Đã khóa tạm giữ tồn kho FEFO (Chờ thanh toán)")
+                    </span>
+                </div>
+
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-50 text-slate-700 border border-slate-200">
+                    <i class="fa-solid fa-truck-fast text-magenta-accent"></i>
+                    <span>@Model.EstimatedDeliveryTime</span>
+                </div>
+            </div>
+
+            <!-- KHỐI 1: VIETQR CHUYỂN KHOẢN TỨC THÌ (Chuẩn Napas 247) -->
+            @if (Model.VietQr != null && !isPaid)
+            {
+                <div class="p-6 sm:p-7 rounded-3xl bg-gradient-to-br from-pastel-rose/40 via-white to-pink-50/50 border border-pink-200 max-w-lg mx-auto text-center space-y-4 shadow-sm" id="vietQrSection">
+                    <div class="space-y-1">
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-magenta-accent/10 text-magenta-accent text-[11px] font-bold">
+                            <i class="fa-solid fa-qrcode"></i> Chuẩn VietQR Napas 247 Tức Thì
+                        </div>
+                        <h3 class="font-serif font-bold text-base text-charcoal">
+                            Quét Mã QR Bằng App Ngân Hàng
+                        </h3>
+                        <p class="text-[11px] text-slate-500">
+                            Mở ứng dụng Mobile Banking (Vietcombank, MB, Techcombank, VPBank, BIDV, ACB...) để quét mã thanh toán tự động
+                        </p>
+                    </div>
+
+                    <!-- Khung ảnh QR Code sắc nét -->
+                    <div class="bg-white p-3.5 rounded-2xl border-2 border-magenta-accent/30 inline-block shadow-md hover:scale-[1.02] transition-transform">
+                        <img src="@Model.VietQr.QrImageUrl" alt="VietQR Napas 247" class="w-60 h-60 object-contain mx-auto rounded-xl" id="vietQrImg" />
+                    </div>
+
+                    <!-- Bảng Thông Tin Chuyển Khoản Chi Tiết -->
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 text-left text-xs space-y-2.5 font-sans shadow-xs">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500">Ngân hàng:</span>
+                            <strong class="text-charcoal font-semibold">@Model.VietQr.BankName</strong>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500">Số tài khoản:</span>
+                            <div class="flex items-center gap-2">
+                                <strong class="font-mono text-magenta-accent font-bold text-sm">@Model.VietQr.BankAccountNo</strong>
+                                <button type="button" onclick="copyToClipboard('@Model.VietQr.BankAccountNo', 'Đã chép số tài khoản!')" class="text-slate-400 hover:text-charcoal text-xs" title="Sao chép">
+                                    <i class="fa-regular fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500">Chủ tài khoản:</span>
+                            <strong class="text-charcoal uppercase font-semibold">@Model.VietQr.AccountName</strong>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500">Số tiền cần thanh toán:</span>
+                            <div class="flex items-center gap-2">
+                                <strong class="font-mono text-rose-600 font-bold text-base">@Model.FinalTotal.ToString("N0") ₫</strong>
+                                <button type="button" onclick="copyToClipboard('@((long)Model.FinalTotal)', 'Đã chép số tiền!')" class="text-slate-400 hover:text-charcoal text-xs" title="Sao chép">
+                                    <i class="fa-regular fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-100 bg-amber-50/50 p-2 rounded-xl">
+                            <span class="text-slate-600 font-medium">Nội dung chuyển khoản:</span>
+                            <div class="flex items-center gap-2">
+                                <strong class="font-mono text-charcoal font-bold bg-white px-2 py-1 rounded border border-amber-200 text-xs">@Model.VietQr.OrderInfo</strong>
+                                <button type="button" onclick="copyToClipboard('@Model.VietQr.OrderInfo', 'Đã chép nội dung chuyển khoản!')" class="text-magenta-accent hover:text-charcoal text-xs font-bold" title="Sao chép">
+                                    <i class="fa-regular fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Countdown Giữ Hàng FEFO 15 Phút -->
+                    <div class="text-xs font-semibold text-rose-600 flex items-center justify-center gap-1.5 pt-1">
+                        <i class="fa-solid fa-stopwatch text-amber-500 animate-spin"></i>
+                        <span>Thời gian khóa giữ lô tồn kho FEFO:</span>
+                        <span id="countdownTimer" class="font-mono font-bold text-sm bg-rose-50 text-rose-700 px-2 py-0.5 rounded-lg border border-rose-200">15:00</span>
+                    </div>
+
+                    <!-- Demo Sandbox Test Button -->
+                    <div class="pt-2">
+                        <button type="button" 
+                                onclick="simulateBankPayment('@Model.OrderId', @Model.FinalTotal)"
+                                class="px-5 py-2.5 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-magenta-accent text-xs font-bold transition flex items-center gap-2 mx-auto bg-white shadow-xs">
+                            <i class="fa-solid fa-vial text-rose-gold"></i>
+                            <span>[Demo Test] Giả Lập Ngân Hàng Xác Nhận Tức Thì</span>
+                        </button>
+                    </div>
+                </div>
+            }
+
+            <!-- KHỐI 2: THÔNG BÁO GIAO HÀNG COD (Nếu chọn COD) -->
+            @if (Model.PaymentMethod.Contains("COD") || Model.PaymentMethod.Contains("Thu hộ"))
+            {
+                <div class="p-5 rounded-2xl bg-emerald-50/80 border border-emerald-200 max-w-lg mx-auto text-left text-xs space-y-2">
+                    <div class="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+                        <i class="fa-solid fa-hand-holding-dollar text-emerald-600 text-base"></i>
+                        <span>Thanh Toán Bằng Tiền Mặt Khi Nhận Hàng (COD)</span>
+                    </div>
+                    <p class="text-emerald-900 leading-relaxed text-[11px]">
+                        Đơn hàng của quý khách sẽ được nhân viên giao hàng thu tiền tận nơi. 
+                        Quý khách được quyền đồng kiểm tra tem niêm phong và bao bì sản phẩm trước khi thanh toán.
+                    </p>
+                </div>
+            }
+
+            <!-- Thông Tin Người Nhận & Đơn Hàng Tóm Tắt -->
+            <div class="bg-slate-50 p-5 sm:p-6 rounded-2xl border border-slate-200 text-left text-xs max-w-lg mx-auto space-y-3 font-sans">
+                <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] border-b border-slate-200 pb-2 flex items-center justify-between">
+                    <span>Thông Tin Nhận Hàng</span>
+                    <span class="text-slate-400 font-normal normal-case">Dự kiến: @Model.EstimatedDeliveryTime</span>
+                </h4>
+                
+                <div class="space-y-1.5 text-slate-600">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Người nhận:</span>
+                        <strong class="text-charcoal font-semibold">@Model.RecipientName</strong>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Số điện thoại:</span>
+                        <strong class="text-charcoal font-mono">@Model.RecipientPhone</strong>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.CustomerEmail))
+                    {
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Email xác nhận:</span>
+                            <span class="text-charcoal">@Model.CustomerEmail</span>
+                        </div>
+                    }
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Địa chỉ giao:</span>
+                        <span class="text-charcoal text-right max-w-xs font-medium">@Model.ShippingAddress</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400">Phương thức thanh toán:</span>
+                        <span class="font-semibold text-charcoal">@Model.PaymentMethod</span>
+                    </div>
+                    <div class="flex justify-between pt-2 border-t border-slate-200">
+                        <span class="text-slate-600 font-bold">Tổng thanh toán:</span>
+                        <strong class="font-mono text-magenta-accent font-bold text-sm">@Model.FinalTotal.ToString("N0") ₫</strong>
+                    </div>
+                </div>
+
+                <!-- Danh sách sản phẩm rút gọn -->
+                @if (Model.Items.Any())
+                {
+                    <div class="pt-3 border-t border-dashed border-slate-200 space-y-1.5">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Sản Phẩm Trong Đơn (@Model.Items.Count)</span>
+                        @foreach(var item in Model.Items)
+                        {
+                            <div class="flex justify-between text-[11px] text-slate-600">
+                                <span class="line-clamp-1 pr-2">@item.ProductName x<strong class="font-mono">@item.Quantity</strong></span>
+                                <span class="font-mono font-medium text-slate-800">@item.LineTotal.ToString("N0")₫</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Cam kết chất lượng Haute Parfumerie -->
+            <div class="flex items-center justify-center gap-6 text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-emerald-600"></i> 100% Chính Hãng</span>
+                <span>•</span>
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-boxes-packing text-amber-500"></i> Chuẩn Lô Hạn FEFO</span>
+                <span>•</span>
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-headset text-magenta-accent"></i> Hotline: 1800 6868</span>
+            </div>
+
+            <!-- Bộ Nút Điều Hướng Chuyển Đổi Cao -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                <a href="/Customer/Orders" class="w-full sm:w-auto px-8 py-3.5 rounded-full bg-charcoal text-white font-bold text-xs uppercase tracking-wider hover:bg-magenta-accent shadow-md shadow-slate-900/10 transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-receipt"></i> Theo Dõi Đơn Hàng
+                </a>
+                <a href="/" class="w-full sm:w-auto px-8 py-3.5 rounded-full bg-white text-charcoal font-bold text-xs uppercase tracking-wider border border-slate-300 hover:border-magenta-accent hover:text-magenta-accent transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-bag-shopping"></i> Tiếp Tục Mua Sắm
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // 1. 15-Minute Countdown Timer
+        let timeLeft = 900;
+        const timerEl = document.getElementById('countdownTimer');
+        if (timerEl) {
+            const timer = setInterval(() => {
+                timeLeft--;
+                const min = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+                const sec = (timeLeft % 60).toString().padStart(2, '0');
+                timerEl.innerText = `${min}:${sec}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    timerEl.innerText = 'Đã hết hạn giữ hàng!';
+                }
+            }, 1000);
+        }
+
+        // 2. Polling Order Payment Status Real-time
+        const poll = setInterval(async () => {
+            try {
+                const res = await fetch('/Checkout/CheckOrderStatus?orderId=@Model.OrderId');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.isPaid || data.paymentStatus === 'PAID') {
+                        clearInterval(poll);
+                        const badge = document.getElementById('orderStatusBadge');
+                        const label = document.getElementById('orderStatusLabel');
+                        const qrBox = document.getElementById('vietQrSection');
+                        if (badge) {
+                            badge.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+                            badge.innerHTML = '<span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span><span>Trạng thái: Đã thanh toán thành công • Bảo mật SSL 256-bit</span>';
+                        }
+                        if (qrBox) {
+                            qrBox.style.display = 'none';
+                        }
+                        if (typeof showStorefrontToast === 'function') {
+                            showStorefrontToast('Đơn hàng đã được xác nhận thanh toán thành công!', 'success');
+                        }
+                    }
+                }
+            } catch (e) { }
+        }, 3000);
+
+        // 3. Sao chép vào bộ nhớ tạm
+        function copyToClipboard(text, successMsg) {
+            navigator.clipboard.writeText(text).then(() => {
+                if (typeof showStorefrontToast === 'function') {
+                    showStorefrontToast(successMsg || 'Đã sao chép!', 'success');
+                } else {
+                    alert(successMsg || 'Đã sao chép!');
+                }
+            }).catch(() => {
+                alert('Không thể sao chép văn bản.');
+            });
+        }
+
+        // 4. Giả lập xác nhận thanh toán ngân hàng (Sandbox test)
+        async function simulateBankPayment(orderId, amount) {
+            try {
+                const res = await fetch('/Checkout/MockBankWebhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderId: orderId,
+                        amount: amount,
+                        transactionRef: 'DEMO-' + Date.now(),
+                        status: 'SUCCESS'
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    if (typeof showStorefrontToast === 'function') {
+                        showStorefrontToast('Mô phỏng thanh toán thành công!', 'success');
+                    }
+                    setTimeout(() => window.location.reload(), 600);
+                } else {
+                    alert(data.message || 'Mô phỏng thanh toán thất bại.');
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    </script>
+}

@@ -137,7 +137,13 @@ function initScrollAnimations() {
         });
     }, { threshold: 0.1 });
 
-    document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+    const observeAll = () => {
+        document.querySelectorAll('.animate-on-scroll:not(.animate-fade-in-up)').forEach(el => observer.observe(el));
+    };
+
+    observeAll();
+    document.body.addEventListener('htmx:afterSwap', observeAll);
+    document.body.addEventListener('htmx:load', observeAll);
 }
 
 function initLiveSearch() {
@@ -151,22 +157,24 @@ function initLiveSearch() {
     searchInput.addEventListener('input', (e) => {
         const query = e.target.value.trim().toLowerCase();
         if (query.length > 0) {
-            btnClear.classList.remove('hidden');
+            if (btnClear) btnClear.classList.remove('hidden');
             const matched = mockProducts.filter(p => p.name.toLowerCase().includes(query) || p.brand.toLowerCase().includes(query));
             renderSearchResults(matched);
             dropdown.classList.add('is-active');
         } else {
-            btnClear.classList.add('hidden');
+            if (btnClear) btnClear.classList.add('hidden');
             dropdown.classList.remove('is-active');
         }
     });
 
-    btnClear.addEventListener('click', () => {
-        searchInput.value = '';
-        btnClear.classList.add('hidden');
-        dropdown.classList.remove('is-active');
-        searchInput.focus();
-    });
+    if (btnClear) {
+        btnClear.addEventListener('click', () => {
+            searchInput.value = '';
+            btnClear.classList.add('hidden');
+            dropdown.classList.remove('is-active');
+            searchInput.focus();
+        });
+    }
 
     document.addEventListener('click', (e) => {
         if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
@@ -204,34 +212,96 @@ function initMiniCartEvents() {
 }
 
 function openMiniCart() {
-    document.getElementById('miniCartDrawer')?.classList.add('is-open');
-    document.getElementById('miniCartOverlay')?.classList.add('is-active');
-    document.body.style.overflow = 'hidden';
-    renderMiniCartItems();
+    if (window.Alpine) {
+        const bodyEl = document.querySelector('body');
+        if (bodyEl && bodyEl.__x && bodyEl.__x.$data) {
+            bodyEl.__x.$data.cartOpen = true;
+        }
+    }
+    if (window.htmx) {
+        htmx.trigger('body', 'reloadMiniCart');
+    }
 }
 
 function closeMiniCart() {
-    document.getElementById('miniCartDrawer')?.classList.remove('is-open');
-    document.getElementById('miniCartOverlay')?.classList.remove('is-active');
-    document.body.style.overflow = '';
+    if (window.Alpine) {
+        const bodyEl = document.querySelector('body');
+        if (bodyEl && bodyEl.__x && bodyEl.__x.$data) {
+            bodyEl.__x.$data.cartOpen = false;
+        }
+    }
 }
 
-function addToCart(productId, title, price, imageUrl) {
-    const existing = cartItems.find(i => i.id === productId);
-    if (existing) {
-        existing.quantity += 1;
+async function addToCart(arg1, arg2, arg3, arg4, arg5) {
+    let productId = null;
+    let title = 'Sản phẩm';
+    let price = 0;
+    let imageUrl = '';
+    let quantity = 1;
+
+    // Support multiple signatures: (event, productId, quantity) or (productId, title, price, imageUrl, quantity) or (productId, quantity)
+    if (typeof arg1 === 'object' && arg1 !== null && ('preventDefault' in arg1 || 'target' in arg1)) {
+        arg1.preventDefault?.();
+        arg1.stopPropagation?.();
+        productId = arg2;
+        quantity = arg3 || 1;
     } else {
-        cartItems.push({
-            id: productId,
-            title: title,
-            price: price,
-            imageUrl: imageUrl,
-            quantity: 1
-        });
+        productId = arg1;
+        if (typeof arg2 === 'string') {
+            title = arg2;
+            price = typeof arg3 === 'number' ? arg3 : 0;
+            imageUrl = arg4 || '';
+            quantity = typeof arg5 === 'number' ? arg5 : 1;
+        } else if (typeof arg2 === 'number') {
+            quantity = arg2;
+        }
     }
 
-    updateCartBadges();
-    showStorefrontToast(`Đã thêm "${title}" vào giỏ hàng!`, 'success');
+    if (!productId) return;
+
+    try {
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+        const response = await fetch('/Cart/AddToCart', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': token
+            },
+            body: JSON.stringify({ productId: productId.toString(), quantity: quantity })
+        });
+        const result = await response.json();
+        if (result.success) {
+            if (window.htmx) {
+                htmx.trigger('body', 'reloadMiniCart');
+            }
+            if (result.totalItems !== undefined) {
+                const badge = document.getElementById('miniCartCountBadge');
+                if (badge) badge.innerText = result.totalItems;
+            }
+            if (result.subTotal !== undefined) {
+                const total = document.getElementById('miniCartHeaderTotal');
+                if (total) total.innerText = result.subTotal;
+            }
+            showStorefrontToast(result.message || `Đã thêm "${title}" vào giỏ hàng!`, 'success');
+            
+            // Trượt mở MiniCart Drawer mượt mà
+            setTimeout(() => {
+                openMiniCart();
+            }, 250);
+        } else {
+            showStorefrontToast(result.message || 'Không thể thêm vào giỏ hàng.', 'error');
+        }
+    } catch (e) {
+        console.warn('Lỗi kết nối Cart API, dùng giỏ hàng client:', e);
+        const existing = cartItems.find(i => i.id === productId);
+        if (existing) {
+            existing.quantity += quantity;
+        } else {
+            cartItems.push({ id: productId, title: title, price: price, imageUrl: imageUrl, quantity: quantity });
+        }
+        updateCartBadges();
+        showStorefrontToast(`Đã thêm "${title}" vào giỏ hàng!`, 'success');
+    }
 }
 
 function updateCartBadges() {
@@ -429,17 +499,59 @@ function capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
+function initWishlistBadge() {
+    try {
+        const stored = JSON.parse(localStorage.getItem('omni_wishlist_ids') || '[]');
+        if (Array.isArray(stored)) {
+            stored.forEach(id => wishlistItems.add(Number(id)));
+            const badge = document.getElementById('wishlistCountBadge');
+            if (badge) badge.innerText = wishlistItems.size;
+        }
+    } catch (e) {}
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initWishlistBadge();
+});
+
 function toggleWishlist(productId) {
+    const id = Number(productId);
     const badge = document.getElementById('wishlistCountBadge');
-    if (wishlistItems.has(productId)) {
-        wishlistItems.delete(productId);
+    let inWishlist = false;
+
+    if (wishlistItems.has(id)) {
+        wishlistItems.delete(id);
+        inWishlist = false;
         showStorefrontToast("Đã xóa khỏi danh sách yêu thích.", "info");
     } else {
-        wishlistItems.add(productId);
+        wishlistItems.add(id);
+        inWishlist = true;
         showStorefrontToast("Đã thêm vào danh sách yêu thích!", "success");
     }
 
+    // Cập nhật LocalStorage
+    try {
+        localStorage.setItem('omni_wishlist_ids', JSON.stringify([...wishlistItems]));
+    } catch (e) {}
+
+    // Cập nhật badge
     if (badge) badge.innerText = wishlistItems.size;
+
+    // Cập nhật trạng thái active của các nút heart tương ứng
+    document.querySelectorAll(`[data-product-id="${id}"] .btn-wishlist-heart, button.btn-wishlist-heart[onclick*="${id}"]`).forEach(btn => {
+        if (inWishlist) {
+            btn.classList.add('is-active', 'text-rose-500');
+        } else {
+            btn.classList.remove('is-active', 'text-rose-500');
+        }
+    });
+
+    // Đồng bộ lên server (nếu đã đăng nhập)
+    fetch('/Wishlist/Toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: id })
+    }).catch(() => {});
 }
 
 function showStorefrontToast(message, type = 'success') {

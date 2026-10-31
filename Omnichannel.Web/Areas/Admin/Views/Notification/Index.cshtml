@@ -1,0 +1,253 @@
+@model Omnichannel.Application.DTOs.Notifications.PagedNotificationResultDto
+@{
+    ViewData["Title"] = "Trung Tâm Thông Báo";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var filter = ViewBag.Filter as Omnichannel.Application.DTOs.Notifications.NotificationFilterDto ?? new Omnichannel.Application.DTOs.Notifications.NotificationFilterDto();
+    var currentTab = (filter.Tab ?? "ALL").ToUpperInvariant();
+}
+
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/20">
+                    <i class="fa-solid fa-bell text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        Trung Tâm Thông Báo
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            SignalR Live
+                        </span>
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Luồng thông báo thời gian thực về đơn hàng, kho vận, cảnh báo AI và vận hành
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <form asp-action="MarkAllAsRead" asp-controller="Notification" asp-area="Admin" method="post" class="inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                <button type="submit" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-2 transition">
+                    <i class="fa-solid fa-check-double text-emerald-500"></i>
+                    Đọc Tất Cả
+                </button>
+            </form>
+
+            <form asp-action="ClearAllRead" asp-controller="Notification" asp-area="Admin" method="post" class="inline" onsubmit="return confirm('Bạn có chắc chắn muốn dọn dẹp các thông báo đã đọc?')">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                <button type="submit" class="px-3 py-2 text-xs font-semibold rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition" title="Xóa các thông báo đã đọc">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-sm flex items-center gap-3">
+            <i class="fa-solid fa-circle-check text-emerald-500 text-base"></i>
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+    }
+
+    <!-- Tabs Navigation -->
+    <div class="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto pb-px">
+        <a href="@Url.Action("Index", new { tab = "ALL" })" 
+           class="px-4 py-2.5 text-xs font-bold border-b-2 flex items-center gap-2 transition whitespace-nowrap @(currentTab == "ALL" ? "border-rose-500 text-rose-600 dark:text-rose-400" : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")">
+            <i class="fa-solid fa-list-ul"></i>
+            <span>Tất Cả</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">@Model.TotalCount</span>
+        </a>
+
+        <a href="@Url.Action("Index", new { tab = "UNREAD" })" 
+           class="px-4 py-2.5 text-xs font-bold border-b-2 flex items-center gap-2 transition whitespace-nowrap @(currentTab == "UNREAD" ? "border-rose-500 text-rose-600 dark:text-rose-400" : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")">
+            <i class="fa-solid fa-envelope"></i>
+            <span>Chưa Đọc</span>
+            @if (Model.UnreadCount > 0)
+            {
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-rose-500 text-white animate-pulse">@Model.UnreadCount</span>
+            }
+            else
+            {
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">0</span>
+            }
+        </a>
+
+        <a href="@Url.Action("Index", new { tab = "ORDER" })" 
+           class="px-4 py-2.5 text-xs font-bold border-b-2 flex items-center gap-2 transition whitespace-nowrap @(currentTab == "ORDER" ? "border-rose-500 text-rose-600 dark:text-rose-400" : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")">
+            <i class="fa-solid fa-box text-rose-500"></i>
+            <span>Đơn Hàng</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">@Model.OrderCount</span>
+        </a>
+
+        <a href="@Url.Action("Index", new { tab = "WAREHOUSE" })" 
+           class="px-4 py-2.5 text-xs font-bold border-b-2 flex items-center gap-2 transition whitespace-nowrap @(currentTab == "WAREHOUSE" ? "border-rose-500 text-rose-600 dark:text-rose-400" : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")">
+            <i class="fa-solid fa-boxes-stacked text-amber-500"></i>
+            <span>Kho Hàng</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">@Model.WarehouseCount</span>
+        </a>
+
+        <a href="@Url.Action("Index", new { tab = "SYSTEM" })" 
+           class="px-4 py-2.5 text-xs font-bold border-b-2 flex items-center gap-2 transition whitespace-nowrap @(currentTab == "SYSTEM" ? "border-rose-500 text-rose-600 dark:text-rose-400" : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200")">
+            <i class="fa-solid fa-shield-halved text-sky-500"></i>
+            <span>Hệ Thống & AI</span>
+            <span class="px-1.5 py-0.2 rounded-full text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">@Model.SystemCount</span>
+        </a>
+    </div>
+
+    <!-- Notification List Container -->
+    <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                Danh Sách Thông Báo (@Model.TotalItems)
+            </span>
+            <div class="text-xs text-slate-400">
+                Trang @Model.PageNumber / @Model.TotalPages
+            </div>
+        </div>
+
+        @if (!Model.Items.Any())
+        {
+            <div class="p-12 text-center">
+                <div class="h-16 w-16 mx-auto rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 text-2xl mb-3">
+                    <i class="fa-regular fa-bell-slash"></i>
+                </div>
+                <h4 class="text-base font-bold text-slate-800 dark:text-slate-200">Không có thông báo nào</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
+                    Hiện chưa có thông báo mới thuộc mục này. Các thông báo realtime sẽ xuất hiện tự động khi có biến động.
+                </p>
+            </div>
+        }
+        else
+        {
+            <div class="divide-y divide-slate-100 dark:divide-slate-800">
+                @foreach (var item in Model.Items)
+                {
+                    <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 @(!item.IsRead ? "bg-rose-50/20 dark:bg-rose-950/10" : "") @item.SeverityBorderClass hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
+                        <div class="flex items-start gap-4 flex-1">
+                            <!-- Icon -->
+                            <div class="h-11 w-11 rounded-2xl flex-shrink-0 flex items-center justify-center text-lg @item.TypeBadgeClass shadow-sm">
+                                <i class="@item.TypeIconClass"></i>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="space-y-1 flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">
+                                        @item.Title
+                                    </h4>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold @item.TypeBadgeClass">
+                                        @item.TypeName
+                                    </span>
+                                    @if (!item.IsRead)
+                                    {
+                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500 text-white">
+                                            MỚI
+                                        </span>
+                                    }
+                                </div>
+
+                                <p class="text-xs text-slate-700 dark:text-slate-300 font-medium">
+                                    @item.Message
+                                </p>
+
+                                <div class="flex items-center gap-3 text-[11px] text-slate-400 dark:text-slate-500 pt-0.5 flex-wrap">
+                                    <span>
+                                        <i class="fa-regular fa-clock"></i> @item.TimeAgo
+                                    </span>
+                                    @if (!string.IsNullOrEmpty(item.StoreName))
+                                    {
+                                        <span>
+                                            <i class="fa-solid fa-store"></i> @item.StoreName
+                                        </span>
+                                    }
+                                    @if (item.IsRead && item.ReadAt.HasValue)
+                                    {
+                                        <span>
+                                            <i class="fa-solid fa-check"></i> Đã đọc lúc @item.ReadAt.Value.ToString("HH:mm dd/MM")
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex items-center gap-2 flex-shrink-0 self-end sm:self-center">
+                            @if (!string.IsNullOrEmpty(item.Url))
+                            {
+                                <a href="@item.Url" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 text-white transition flex items-center gap-1.5 shadow-sm">
+                                    <span>Xem chi tiết</span>
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                                </a>
+                            }
+
+                            @if (!item.IsRead)
+                            {
+                                <form asp-action="MarkAsRead" asp-route-id="@item.Id" asp-controller="Notification" asp-area="Admin" method="post" class="inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                    <button type="submit" class="p-2 text-slate-400 hover:text-emerald-600 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Đánh dấu đã đọc">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </form>
+                            }
+
+                            <form asp-action="Delete" asp-route-id="@item.Id" asp-controller="Notification" asp-area="Admin" method="post" class="inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa thông báo này?')">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                <button type="submit" class="p-2 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Xóa">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
+                <div>
+                    Trang @Model.PageNumber / @Model.TotalPages (Tổng @Model.TotalItems bản ghi)
+                </div>
+                <div class="flex items-center gap-1">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <a href="@Url.Action("Index", new { pageNumber = Model.PageNumber - 1, tab = filter.Tab })" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                            Trước
+                        </a>
+                    }
+                    @for (int p = 1; p <= Model.TotalPages; p++)
+                    {
+                        if (p == Model.PageNumber)
+                        {
+                            <span class="px-3 py-1.5 rounded-lg bg-rose-500 text-white font-semibold">@p</span>
+                        }
+                        else if (p <= 3 || p > Model.TotalPages - 2 || Math.Abs(p - Model.PageNumber) <= 1)
+                        {
+                            <a href="@Url.Action("Index", new { pageNumber = p, tab = filter.Tab })" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                                @p
+                            </a>
+                        }
+                    }
+                    @if (Model.HasNextPage)
+                    {
+                        <a href="@Url.Action("Index", new { pageNumber = Model.PageNumber + 1, tab = filter.Tab })" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                            Sau
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>

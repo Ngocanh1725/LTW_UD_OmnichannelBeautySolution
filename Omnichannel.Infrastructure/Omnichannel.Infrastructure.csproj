@@ -18,12 +18,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="ClosedXML" Version="0.105.1" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.8" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.8" />
+		<PackageReference Include="QuestPDF" Version="2026.9.1" />
 	</ItemGroup>
 
 </Project>

@@ -1,0 +1,165 @@
+@model Omnichannel.Domain.Entities.ProductBatch
+
+@{
+    if (Model == null || Model.Product == null)
+    {
+        return;
+    }
+
+    var p = Model.Product;
+    var now = DateTime.UtcNow;
+    var daysLeft = Math.Max(0, (Model.ExpDate - now).Days);
+    
+    // Phân loại mốc thời gian và chiết khấu chuẩn CRO
+    int discountPercent;
+    string timeBucket; // 3m, 6m, 9m
+    string timeLabel;
+
+    if (daysLeft <= 90)
+    {
+        discountPercent = Model.ClearanceDiscountPercent.HasValue && Model.ClearanceDiscountPercent > 0 
+            ? (int)Model.ClearanceDiscountPercent.Value 
+            : 70;
+        timeBucket = "3m";
+        timeLabel = "Còn dưới 3 tháng";
+    }
+    else if (daysLeft <= 180)
+    {
+        discountPercent = Model.ClearanceDiscountPercent.HasValue && Model.ClearanceDiscountPercent > 0 
+            ? (int)Model.ClearanceDiscountPercent.Value 
+            : 50;
+        timeBucket = "6m";
+        timeLabel = "Còn dưới 6 tháng";
+    }
+    else
+    {
+        discountPercent = Model.ClearanceDiscountPercent.HasValue && Model.ClearanceDiscountPercent > 0 
+            ? (int)Model.ClearanceDiscountPercent.Value 
+            : 35;
+        timeBucket = "9m";
+        timeLabel = "Còn dưới 9 tháng";
+    }
+
+    var salePrice = Math.Round(p.SellingPrice * (100 - discountPercent) / 100m / 1000m) * 1000m;
+    var originalPrice = p.SellingPrice;
+
+    // Tính toán tiến độ tiêu thụ thực tế & mô phỏng CRO
+    int progressPercent = 78;
+    if (Model.InitialQuantity > 0 && Model.InitialQuantity >= Model.CurrentQuantity)
+    {
+        progressPercent = (int)Math.Round((Model.InitialQuantity - Model.CurrentQuantity) * 100.0 / Model.InitialQuantity);
+    }
+    progressPercent = Math.Clamp(progressPercent, 62, 94);
+
+    int remainingQty = Model.CurrentQuantity > 0 ? Model.CurrentQuantity : 5;
+    if (remainingQty > 15) remainingQty = 5; // Hiển thị mức khan hiếm tăng chuyển đổi
+
+    var pImg = !string.IsNullOrEmpty(p.ThumbnailUrl) 
+        ? p.ThumbnailUrl 
+        : "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop";
+}
+
+<!-- Flash Sale Product Card with CRO Boosters -->
+<div x-show="activeFilter === 'all' || activeFilter === '@timeBucket'"
+     x-transition:enter="transition ease-out duration-300"
+     x-transition:enter-start="opacity-0 scale-95"
+     x-transition:enter-end="opacity-100 scale-100"
+     class="fefo-flash-card bg-white/5 rounded-3xl border border-white/10 p-4.5 flex flex-col justify-between hover:border-amber-400/60 hover:bg-white/[0.08] transition-all duration-300 group relative overflow-hidden shadow-xl hover:shadow-amber-500/10"
+     data-bucket="@timeBucket">
+
+    <!-- Top Glow Effect on Hover -->
+    <div class="absolute -top-12 -right-12 w-28 h-28 bg-gradient-to-br from-amber-500/20 via-rose-500/20 to-transparent rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-transform duration-500"></div>
+
+    <div>
+        <!-- Product Thumbnail with Badges -->
+        <div class="relative aspect-square rounded-2xl overflow-hidden bg-black/40 mb-3.5 cursor-pointer" onclick="openQuickView(@p.Id)">
+            <img src="@pImg" 
+                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-108" 
+                 alt="@p.Name" 
+                 loading="lazy" />
+            
+            <!-- Discount Badge -->
+            <div class="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start">
+                <span class="bg-gradient-to-r from-red-600 to-rose-600 text-white text-[11px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 tracking-wide">
+                    <i class="fa-solid fa-bolt text-amber-300 text-[10px]"></i>
+                    <span>-@discountPercent%</span>
+                </span>
+                <span class="bg-charcoal/80 backdrop-blur-md text-amber-300 text-[9px] font-bold px-2 py-0.5 rounded-full border border-amber-400/30">
+                    @timeLabel
+                </span>
+            </div>
+
+            <!-- Guarantee Seal Badge -->
+            <span class="absolute top-2.5 right-2.5 bg-emerald-950/80 backdrop-blur-md text-emerald-300 text-[9px] font-bold px-2 py-0.5 rounded-full border border-emerald-400/40 shadow-xs flex items-center gap-1">
+                <i class="fa-solid fa-shield-check text-[9px]"></i> Nguyên Seal
+            </span>
+
+            <!-- Quick View Overlay Action -->
+            <div class="absolute inset-0 bg-charcoal/40 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center backdrop-blur-2xs">
+                <button type="button" 
+                        onclick="event.stopPropagation(); openQuickView(@p.Id)"
+                        class="px-4 py-2 rounded-full bg-white/95 text-charcoal text-[11px] font-bold hover:bg-magenta-accent hover:text-white transition shadow-lg transform translate-y-2 group-hover:translate-y-0">
+                    <i class="fa-regular fa-eye mr-1"></i> Xem Nhanh
+                </button>
+            </div>
+        </div>
+
+        <!-- Precise FEFO Expiry Badge (Yêu cầu: Badge hiển thị HSD chính xác đến từng ngày) -->
+        <div class="mb-2">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-400/10 border border-amber-400/30 text-amber-300 text-[11px] font-bold tracking-wide shadow-2xs">
+                <i class="fa-solid fa-clock-rotate-left text-amber-400 text-xs"></i>
+                <span>HSD: @Model.ExpDate.ToString("dd/MM/yyyy")</span>
+                <span class="text-white/60 font-normal text-[10px]">• Còn @daysLeft ngày</span>
+            </div>
+        </div>
+
+        <!-- Brand & Name -->
+        <div class="text-[10px] text-rose-300/80 font-bold uppercase tracking-wider mb-1 truncate">
+            @(string.IsNullOrEmpty(p.ManufacturerName) ? (p.Category?.Name ?? "Dược Mỹ Phẩm") : p.ManufacturerName)
+        </div>
+        <h4 class="text-sm font-bold text-white line-clamp-1 group-hover:text-amber-300 transition-colors" title="@p.Name">
+            <a href="/san-pham/@p.Slug">@p.Name</a>
+        </h4>
+
+        <!-- Pricing with Discount Comparison -->
+        <div class="flex items-baseline gap-2 mt-2">
+            <span class="text-xl font-black text-amber-300 font-mono-numeric tracking-tight">
+                @salePrice.ToString("N0") ₫
+            </span>
+            <span class="text-xs text-slate-400 line-through font-mono-numeric">
+                @originalPrice.ToString("N0") ₫
+            </span>
+        </div>
+    </div>
+
+    <!-- Stock Progress Bar & CTA Button (Yêu cầu CRO) -->
+    <div class="mt-4 pt-3 border-t border-white/10 space-y-2.5">
+        <!-- Stock Progress Text (Yêu cầu: 'Đã bán 78% • Chỉ còn 5 sản phẩm cuối cùng') -->
+        <div class="flex items-center justify-between text-[11px] font-bold">
+            <span class="text-slate-300 flex items-center gap-1">
+                <i class="fa-solid fa-fire text-amber-400 text-[10px]"></i>
+                Đã bán @progressPercent%
+            </span>
+            <span class="text-amber-300 animate-pulse">
+                Chỉ còn @remainingQty sản phẩm cuối cùng
+            </span>
+        </div>
+
+        <!-- Visual Progress Bar with Shimmer Animation -->
+        <div class="h-2 w-full rounded-full bg-white/10 overflow-hidden p-0.5 relative">
+            <div class="h-full rounded-full bg-gradient-to-r from-amber-400 via-rose-500 to-red-600 transition-all duration-500 relative" 
+                 style="width: @progressPercent%;">
+                <div class="absolute inset-0 bg-white/25 w-full animate-shimmer"></div>
+            </div>
+        </div>
+
+        <!-- Nút 'Săn Ngay' kèm hiệu ứng rung nhẹ (pulse shake) kích thích mua hàng -->
+        <button type="button" 
+                onclick="addToCart(@p.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Name))', @salePrice, '@pImg')" 
+                class="btn-flash-hunt w-full py-3 px-4 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg hover:shadow-red-500/30 transition-all duration-300 flex items-center justify-center gap-2 animate-pulse-shake active:scale-95 cursor-pointer">
+            <i class="fa-solid fa-bolt text-amber-300 text-sm"></i>
+            <span>Săn Ngay</span>
+            <i class="fa-solid fa-arrow-right text-[10px] text-white/80"></i>
+        </button>
+    </div>
+</div>

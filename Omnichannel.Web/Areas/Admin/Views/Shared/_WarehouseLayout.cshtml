@@ -1,9 +1,15 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi" class="h-full bg-slate-100">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kiểm Soát Kho Hàng & Lô FEFO - Omnichannel Beauty</title>
+    <title>Kiểm Soát Kho Hàng & Lô FEFO - Omni Beauty</title>
+    <!-- Brand Identity & Multi-Resolution Favicons -->
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="~/images/branding/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="~/images/branding/favicon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="~/images/branding/favicon-512x512.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="~/images/branding/apple-touch-icon.png" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -41,6 +47,10 @@
             color: #854d0e;
         }
     </style>
+    <!-- Unified Design Tokens & Admin Theme -->
+    <link rel="stylesheet" href="~/css/design-tokens.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/design-system.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-theme.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="h-full flex flex-col text-slate-800 antialiased overflow-hidden">

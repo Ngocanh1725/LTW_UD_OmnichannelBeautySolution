@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Omnichannel.Infrastructure.Security
@@ -9,21 +9,27 @@ namespace Omnichannel.Infrastructure.Security
         {
             PolicyName = policyName ?? throw new ArgumentNullException(nameof(policyName));
 
-            // Policy format: "PERM:MODULE:ACTION" or "PERM:CODE"
+            // Policy format: "PERM:MODULE:ACTION" or "PERM:CODE" or "MODULE_ACTION"
             var raw = policyName.StartsWith(HasPermissionAttribute.PolicyPrefix, StringComparison.OrdinalIgnoreCase)
-                ? policyName.Substring(HasPermissionAttribute.PolicyPrefix.Length)
-                : policyName;
+                ? policyName.Substring(HasPermissionAttribute.PolicyPrefix.Length).TrimStart(':')
+                : policyName.TrimStart(':');
 
-            var parts = raw.Split(new[] { ':', '_' }, StringSplitOptions.RemoveEmptyEntries);
-            if (parts.Length >= 2)
+            if (raw.Contains(':'))
             {
+                var parts = raw.Split(':', 2, StringSplitOptions.RemoveEmptyEntries);
                 Module = parts[0].ToUpperInvariant();
-                Action = parts[1].ToUpperInvariant();
-                PermissionCode = $"{Module}_{Action}";
+                Action = parts.Length > 1 ? parts[1].ToUpperInvariant() : null;
+                PermissionCode = Action != null ? $"{Module}_{Action}" : Module;
             }
             else
             {
                 PermissionCode = raw.ToUpperInvariant();
+                var underscoreIdx = raw.IndexOf('_');
+                if (underscoreIdx > 0)
+                {
+                    Module = raw.Substring(0, underscoreIdx).ToUpperInvariant();
+                    Action = raw.Substring(underscoreIdx + 1).ToUpperInvariant();
+                }
             }
         }
 

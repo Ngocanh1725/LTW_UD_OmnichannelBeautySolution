@@ -1,0 +1,39 @@
+<!-- Partial View Sidebar Admin: Hỗ trợ navigation cho các layout module con -->
+@{
+    var currentPath = Context.Request.Path.Value ?? "";
+}
+
+<div class="space-y-1">
+    <a href="/Admin/Dashboard" class="admin-sidebar-link @(currentPath.Equals("/Admin/Dashboard", StringComparison.OrdinalIgnoreCase) || currentPath == "/Admin" ? "admin-sidebar-link--active" : "")">
+        <i class="fa-solid fa-chart-line text-blue-400"></i>
+        <span>Tổng Quan Doanh Thu</span>
+    </a>
+    <a href="/Admin/Product" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Product", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+        <i class="fa-solid fa-box-archive text-emerald-400"></i>
+        <span>Sản Phẩm & Kho FEFO</span>
+    </a>
+    <a href="/admin/media" class="admin-sidebar-link @(currentPath.StartsWith("/admin/media", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+        <i class="fa-solid fa-photo-film text-rose-400"></i>
+        <span>Thư Viện Media CSDL</span>
+    </a>
+    <a href="/Admin/Banner" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Banner", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+        <i class="fa-solid fa-image text-pink-400"></i>
+        <span>Banner Quảng Cáo</span>
+    </a>
+    <a href="/Admin/Menu" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Menu", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+        <i class="fa-solid fa-bars-staggered text-purple-400"></i>
+        <span>Cây Menu Điều Hướng</span>
+    </a>
+    <a href="/Admin/ThemeConfig" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/ThemeConfig", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+        <i class="fa-solid fa-palette text-amber-400"></i>
+        <span>Tùy Biến Theme & Màu</span>
+    </a>
+    <a href="/Admin/UiSection" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/UiSection", StringComparison.OrdinalIgnoreCase) || currentPath.StartsWith("/admin/ui-section", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+        <i class="fa-solid fa-layer-group text-rose-400"></i>
+        <span>Bố Cục Trang Chủ</span>
+    </a>
+    <a href="/Admin/Settings" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Settings", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+        <i class="fa-solid fa-gears text-indigo-400"></i>
+        <span>Cấu Hình Hệ Thống</span>
+    </a>
+</div>

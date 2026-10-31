@@ -1,0 +1,191 @@
+@model Omnichannel.Web.Models.BlogIndexViewModel
+@{
+    ViewData["Title"] = "Cẩm Nang Làm Đẹp & Skincare Khoa Học - Omnichannel Beauty";
+    ViewData["Description"] = "Khám phá các bí quyết chăm sóc da, chu trình K-Beauty chuẩn spa và kiến thức thành phần mỹ phẩm chuyên sâu.";
+}
+
+<div class="bg-[#fffdfd] min-h-screen py-8 sm:py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- 1. BREADCRUMB -->
+        <nav aria-label="Đường dẫn trang" class="mb-6 text-xs text-slate-500 flex items-center gap-2">
+            <a href="/" class="hover:text-magenta-accent transition flex items-center gap-1">
+                <i class="fa-solid fa-house text-slate-400"></i> Trang Chủ
+            </a>
+            <span class="text-slate-300">/</span>
+            <span class="text-charcoal font-semibold">Cẩm Nang Sắc Đẹp</span>
+        </nav>
+
+        <!-- 2. HEADER HERO & SEARCH -->
+        <div class="text-center max-w-2xl mx-auto mb-10">
+            <span class="text-xs font-bold uppercase tracking-widest text-rose-gold">Omnichannel Beauty Journal</span>
+            <h1 class="font-serif text-3xl sm:text-4xl font-bold text-charcoal mt-2 mb-3">
+                Cẩm Nang Làm Đẹp & Skincare
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-500 mb-6">
+                Kiến thức chăm sóc da khoa học, cập nhật xu hướng làm đẹp và hướng dẫn chọn mỹ phẩm chuẩn hạn dùng FEFO.
+            </p>
+
+            <!-- Search Form -->
+            <form action="/Blog" method="get" class="relative max-w-lg mx-auto shadow-sm rounded-full">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" 
+                       name="q" 
+                       value="@Model.Query" 
+                       placeholder="Tìm kiếm bài viết, thành phần, từ khóa..." 
+                       class="w-full pl-11 pr-24 py-3 rounded-full border border-soft-border text-xs focus:outline-none focus:border-magenta-accent bg-white" />
+                <button type="submit" class="absolute right-1.5 top-1/2 -translate-y-1/2 px-5 py-2 rounded-full bg-magenta-accent text-white font-bold text-xs hover:bg-[#b0276a] transition">
+                    Tìm Kiếm
+                </button>
+            </form>
+        </div>
+
+        <!-- 3. CATEGORY TABS -->
+        <div class="flex items-center justify-center gap-2 overflow-x-auto pb-4 mb-10 border-b border-soft-border">
+            <a href="/Blog" 
+               class="px-4 py-2 rounded-full text-xs font-bold transition whitespace-nowrap @(string.IsNullOrEmpty(Model.SelectedCategorySlug) ? "bg-magenta-accent text-white shadow-xs" : "bg-white text-slate-600 hover:bg-pastel-rose hover:text-magenta-accent border border-soft-border")">
+                Tất Cả
+            </a>
+            @foreach (var cat in Model.Categories)
+            {
+                <a href="/Blog?category=@cat.Slug" 
+                   class="px-4 py-2 rounded-full text-xs font-bold transition whitespace-nowrap @(Model.SelectedCategorySlug == cat.Slug ? "bg-magenta-accent text-white shadow-xs" : "bg-white text-slate-600 hover:bg-pastel-rose hover:text-magenta-accent border border-soft-border")">
+                    @cat.Name
+                </a>
+            }
+        </div>
+
+        <!-- 4. FEATURED HERO POST (If first page and no search) -->
+        @if (Model.FeaturedPost != null && string.IsNullOrEmpty(Model.Query) && Model.CurrentPage == 1)
+        {
+            var feat = Model.FeaturedPost;
+            var featImg = !string.IsNullOrEmpty(feat.ThumbnailUrl) ? feat.ThumbnailUrl : "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1000&fit=crop";
+
+            <div class="mb-14 bg-white rounded-3xl border border-soft-border overflow-hidden shadow-lg shadow-pink-500/5 hover:shadow-xl transition-all duration-300">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-0">
+                    <div class="lg:col-span-7 overflow-hidden relative min-h-[300px] lg:min-h-[420px]">
+                        <a href="/Blog/@feat.Slug" class="block h-full">
+                            <img src="@featImg" alt="@feat.Title" loading="lazy" decoding="async" class="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                        </a>
+                        <span class="absolute top-4 left-4 px-3 py-1 rounded-full bg-magenta-accent text-white font-bold text-[10px] uppercase tracking-wider shadow-sm">
+                            Bài Viết Nổi Bật
+                        </span>
+                    </div>
+                    <div class="lg:col-span-5 p-6 sm:p-10 flex flex-col justify-between">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2 text-[11px] text-slate-400">
+                                <span class="font-bold text-magenta-accent uppercase tracking-wider">@(feat.PostCategory?.Name ?? "Làm đẹp")</span>
+                                <span>•</span>
+                                <span>@(feat.PublishedAt?.ToString("dd/MM/yyyy") ?? feat.CreatedAt.ToString("dd/MM/yyyy"))</span>
+                                <span>•</span>
+                                <span><i class="fa-regular fa-eye mr-1"></i>@feat.ViewCount</span>
+                            </div>
+
+                            <a href="/Blog/@feat.Slug" class="block group">
+                                <h2 class="font-serif font-bold text-2xl sm:text-3xl text-charcoal group-hover:text-magenta-accent transition leading-snug">
+                                    @feat.Title
+                                </h2>
+                            </a>
+
+                            <p class="text-xs sm:text-sm text-slate-500 leading-relaxed font-sans line-clamp-4">
+                                @(feat.Summary ?? "Khám phá bài viết chia sẻ kinh nghiệm chăm sóc sắc đẹp và giải pháp chăm sóc làn da chuẩn chuyên gia.")
+                            </p>
+                        </div>
+
+                        <div class="pt-6 border-t border-soft-border flex items-center justify-between mt-4">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-8 h-8 rounded-full bg-pastel-rose text-magenta-accent font-bold flex items-center justify-center text-xs">
+                                    @(feat.Author?.FullName?.Substring(0, 1) ?? "B")
+                                </div>
+                                <span class="text-xs font-bold text-charcoal">@(feat.Author?.FullName ?? "Ban Biên Tập")</span>
+                            </div>
+
+                            <a href="/Blog/@feat.Slug" class="text-xs font-bold text-magenta-accent hover:underline flex items-center gap-1">
+                                Đọc Ngay <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- 5. POSTS GRID -->
+        @if (Model.Posts == null || !Model.Posts.Any())
+        {
+            <div class="py-16 text-center text-slate-400 bg-white rounded-3xl border border-soft-border p-12 max-w-md mx-auto">
+                <i class="fa-regular fa-folder-open text-4xl mb-3 text-rose-gold"></i>
+                <h3 class="font-bold text-slate-700 text-sm">Chưa có bài viết nào phù hợp</h3>
+                <p class="text-xs text-slate-400 mt-1">Vui lòng thử tìm kiếm bằng từ khóa khác hoặc chuyển chuyên mục.</p>
+                <a href="/Blog" class="inline-block mt-4 px-6 py-2.5 rounded-full bg-charcoal text-white font-bold text-xs hover:bg-magenta-accent transition">
+                    Xem tất cả bài viết
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                @foreach (var post in Model.Posts)
+                {
+                    var pImg = !string.IsNullOrEmpty(post.ThumbnailUrl) ? post.ThumbnailUrl : "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&fit=crop";
+
+                    <article class="bg-white rounded-3xl border border-soft-border overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 flex flex-col group">
+                        <!-- Image Container -->
+                        <div class="aspect-[16/10] overflow-hidden relative">
+                            <a href="/Blog/@post.Slug" class="block h-full">
+                                <img src="@pImg" alt="@post.Title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                            </a>
+                            <span class="absolute top-3 left-3 px-2.5 py-0.5 rounded-full bg-white/90 backdrop-blur-xs text-magenta-accent font-bold text-[10px] shadow-xs">
+                                @(post.PostCategory?.Name ?? "Cẩm nang")
+                            </span>
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="p-5 sm:p-6 flex-1 flex flex-col justify-between space-y-3">
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-2 text-[10px] text-slate-400">
+                                    <span>@(post.PublishedAt?.ToString("dd/MM/yyyy") ?? post.CreatedAt.ToString("dd/MM/yyyy"))</span>
+                                    <span>•</span>
+                                    <span><i class="fa-regular fa-eye mr-1"></i>@post.ViewCount</span>
+                                </div>
+
+                                <a href="/Blog/@post.Slug" class="block">
+                                    <h3 class="font-serif font-bold text-charcoal text-base group-hover:text-magenta-accent transition leading-snug line-clamp-2">
+                                        @post.Title
+                                    </h3>
+                                </a>
+
+                                <p class="text-xs text-slate-500 line-clamp-3 leading-relaxed font-sans">
+                                    @(post.Summary ?? "Hướng dẫn chi tiết quy trình chăm sóc và bảo vệ làn da tươi trẻ, khoa học và minh bạch.")
+                                </p>
+                            </div>
+
+                            <div class="pt-4 border-t border-soft-border flex items-center justify-between text-xs">
+                                <span class="text-slate-600 font-medium truncate max-w-[150px]">
+                                    <i class="fa-regular fa-pen-to-square text-magenta-accent mr-1"></i>@(post.Author?.FullName ?? "Biên tập viên")
+                                </span>
+                                <a href="/Blog/@post.Slug" class="font-bold text-magenta-accent hover:underline flex items-center gap-1">
+                                    Chi tiết <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                }
+            </div>
+
+            <!-- 6. PAGINATION -->
+            @if (Model.TotalPages > 1)
+            {
+                <div class="flex items-center justify-center gap-2 mt-12">
+                    @for (int p = 1; p <= Model.TotalPages; p++)
+                    {
+                        var pageUrl = $"/Blog?page={p}" + (!string.IsNullOrEmpty(Model.SelectedCategorySlug) ? $"&category={Model.SelectedCategorySlug}" : "") + (!string.IsNullOrEmpty(Model.Query) ? $"&q={Model.Query}" : "");
+                        <a href="@pageUrl" class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition @(p == Model.CurrentPage ? "bg-magenta-accent text-white shadow-sm" : "bg-white text-slate-600 hover:bg-pastel-rose border border-soft-border")">
+                            @p
+                        </a>
+                    }
+                </div>
+            }
+        }
+
+    </div>
+</div>

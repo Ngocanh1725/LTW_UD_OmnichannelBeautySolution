@@ -1,0 +1,358 @@
+@model Omnichannel.Application.DTOs.Alerts.PagedAlertResultDto
+@{
+    ViewData["Title"] = "AI Cảnh Báo Tự Động";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var filter = ViewBag.Filter as Omnichannel.Application.DTOs.Alerts.AlertFilterDto ?? new Omnichannel.Application.DTOs.Alerts.AlertFilterDto();
+}
+
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-white shadow-lg shadow-rose-500/20">
+                    <i class="fa-solid fa-bell text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        AI Cảnh Báo Tự Động
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
+                            <span class="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                            Live Monitoring
+                        </span>
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Tự động phát hiện đứt hàng, cận date FEFO, đột biến doanh thu & đơn hàng trễ
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-2.5 flex-wrap">
+            <form asp-action="TriggerCheck" asp-controller="Alert" asp-area="Admin" method="post" class="inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                <button type="submit" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700 text-white shadow-sm flex items-center gap-2 transition">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    Quét Cảnh Báo Ngay
+                </button>
+            </form>
+
+            <form asp-action="MarkAllAsRead" asp-controller="Alert" asp-area="Admin" method="post" class="inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                <button type="submit" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-2 transition">
+                    <i class="fa-solid fa-check-double text-emerald-500"></i>
+                    Đọc Tất Cả
+                </button>
+            </form>
+
+            <form asp-action="ClearAllRead" asp-controller="Alert" asp-area="Admin" method="post" class="inline" onsubmit="return confirm('Bạn có chắc chắn muốn dọn dẹp các cảnh báo đã đọc?')">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                <button type="submit" class="px-3 py-2 text-xs font-semibold rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 transition" title="Xóa các cảnh báo đã đọc">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Alert / Toast Message from TempData -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-sm flex items-center gap-3">
+            <i class="fa-solid fa-circle-check text-emerald-500 text-base"></i>
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+    }
+
+    <!-- 4 KPI Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Danger KPI -->
+        <a href="@Url.Action("Index", new { severity = "DANGER" })" class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-rose-400 transition shadow-sm group">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Nguy Cấp (Danger)</span>
+                    <h3 class="text-2xl font-bold text-rose-600 dark:text-rose-400 mt-1">@Model.DangerCount</h3>
+                </div>
+                <div class="h-10 w-10 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-500 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+            </div>
+            <div class="text-[11px] text-slate-400 dark:text-slate-500 mt-2">
+                Hết hàng & Cận date 15 ngày
+            </div>
+        </a>
+
+        <!-- Warning KPI -->
+        <a href="@Url.Action("Index", new { severity = "WARNING" })" class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-400 transition shadow-sm group">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Cảnh Báo (Warning)</span>
+                    <h3 class="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-1">@Model.WarningCount</h3>
+                </div>
+                <div class="h-10 w-10 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-500 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+            </div>
+            <div class="text-[11px] text-slate-400 dark:text-slate-500 mt-2">
+                Sắp hết hàng & Cận date 60 ngày
+            </div>
+        </a>
+
+        <!-- Success KPI -->
+        <a href="@Url.Action("Index", new { severity = "SUCCESS" })" class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-emerald-400 transition shadow-sm group">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Tăng Trưởng (Success)</span>
+                    <h3 class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">@Model.SuccessCount</h3>
+                </div>
+                <div class="h-10 w-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-500 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+                </div>
+            </div>
+            <div class="text-[11px] text-slate-400 dark:text-slate-500 mt-2">
+                Đột biến doanh thu ngày
+            </div>
+        </a>
+
+        <!-- Info KPI -->
+        <a href="@Url.Action("Index", new { severity = "INFO" })" class="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-sky-400 transition shadow-sm group">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Đơn Treo Quá 24h</span>
+                    <h3 class="text-2xl font-bold text-sky-600 dark:text-sky-400 mt-1">@Model.InfoCount</h3>
+                </div>
+                <div class="h-10 w-10 rounded-xl bg-sky-50 dark:bg-sky-950/50 text-sky-500 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+            </div>
+            <div class="text-[11px] text-slate-400 dark:text-slate-500 mt-2">
+                Đơn hàng chờ xác nhận
+            </div>
+        </a>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+        <form method="get" asp-action="Index" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+            <!-- Keyword -->
+            <div class="lg:col-span-2">
+                <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Tìm kiếm</label>
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                    <input type="text" name="searchTerm" value="@filter.SearchTerm" placeholder="Tìm tên sản phẩm, mã lô, chi nhánh..." class="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl text-xs focus:outline-none focus:border-rose-500" />
+                </div>
+            </div>
+
+            <!-- Alert Type -->
+            <div>
+                <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Loại Cảnh Báo</label>
+                <select name="type" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl text-xs focus:outline-none focus:border-rose-500">
+                    <option value="">-- Tất cả loại (6 loại) --</option>
+                    <option value="OUT_OF_STOCK" selected="@(filter.Type == "OUT_OF_STOCK")">🔴 Hết hàng (stock = 0)</option>
+                    <option value="LOW_STOCK" selected="@(filter.Type == "LOW_STOCK")">🟡 Sắp hết hàng (stock <= 10)</option>
+                    <option value="EXPIRY_CRITICAL" selected="@(filter.Type == "EXPIRY_CRITICAL")">🔴 Cận date <= 15 ngày</option>
+                    <option value="EXPIRY_WARNING" selected="@(filter.Type == "EXPIRY_WARNING")">🟡 Cận date <= 60 ngày</option>
+                    <option value="REVENUE_ANOMALY" selected="@(filter.Type == "REVENUE_ANOMALY")">🟢 Doanh thu đột biến</option>
+                    <option value="PENDING_ORDERS_DELAY" selected="@(filter.Type == "PENDING_ORDERS_DELAY")">🔵 Đơn hàng treo quá 24h</option>
+                </select>
+            </div>
+
+            <!-- Severity -->
+            <div>
+                <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Mức Độ</label>
+                <select name="severity" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl text-xs focus:outline-none focus:border-rose-500">
+                    <option value="">-- Tất cả mức độ --</option>
+                    <option value="DANGER" selected="@(filter.Severity == "DANGER")">🔴 Nguy cấp (Danger)</option>
+                    <option value="WARNING" selected="@(filter.Severity == "WARNING")">🟡 Cảnh báo (Warning)</option>
+                    <option value="SUCCESS" selected="@(filter.Severity == "SUCCESS")">🟢 Tăng trưởng (Success)</option>
+                    <option value="INFO" selected="@(filter.Severity == "INFO")">🔵 Thông tin (Info)</option>
+                </select>
+            </div>
+
+            <!-- Read Status & Action -->
+            <div class="flex items-end gap-2">
+                <div class="flex-1">
+                    <label class="block text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Trạng thái</label>
+                    <select name="isRead" class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl text-xs focus:outline-none focus:border-rose-500">
+                        <option value="">Tất cả</option>
+                        <option value="false" selected="@(filter.IsRead == false)">Chưa đọc (@Model.UnreadCount)</option>
+                        <option value="true" selected="@(filter.IsRead == true)">Đã đọc</option>
+                    </select>
+                </div>
+                <button type="submit" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-xl text-xs font-semibold transition" title="Lọc dữ liệu">
+                    <i class="fa-solid fa-filter"></i> Lọc
+                </button>
+                <a href="/Admin/Alerts" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-semibold transition" title="Đặt lại bộ lọc">
+                    <i class="fa-solid fa-arrow-rotate-left"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Alert Items List -->
+    <div class="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/40">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                    Danh Sách Cảnh Báo (@Model.TotalItems)
+                </span>
+                @if (Model.UnreadCount > 0)
+                {
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-500 text-white">
+                        @Model.UnreadCount chưa đọc
+                    </span>
+                }
+            </div>
+            <div class="text-xs text-slate-400">
+                Hiển thị trang @Model.PageNumber / @Model.TotalPages
+            </div>
+        </div>
+
+        @if (Model.Items.Count == 0)
+        {
+            <div class="p-12 text-center">
+                <div class="h-16 w-16 mx-auto rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 text-2xl mb-3">
+                    <i class="fa-solid fa-shield-check text-emerald-500"></i>
+                </div>
+                <h4 class="text-base font-bold text-slate-800 dark:text-slate-200">Không có cảnh báo nào</h4>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
+                    Tất cả các chỉ số kho hàng, hạn sử dụng FEFO, doanh thu và đơn hàng đều đang trong ngưỡng an toàn hoàn hảo.
+                </p>
+                <div class="mt-4">
+                    <form asp-action="TriggerCheck" asp-controller="Alert" asp-area="Admin" method="post" class="inline">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-50 text-rose-600 hover:bg-rose-100 dark:bg-rose-950/40 dark:text-rose-400 transition">
+                            <i class="fa-solid fa-rotate mr-1"></i> Quét lại toàn hệ thống
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="divide-y divide-slate-100 dark:divide-slate-800">
+                @foreach (var alert in Model.Items)
+                {
+                    <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 @(!alert.IsRead ? "bg-rose-50/20 dark:bg-rose-950/10" : "") @alert.SeverityBorderClass hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
+                        <div class="flex items-start gap-4 flex-1">
+                            <!-- Type Icon -->
+                            <div class="h-11 w-11 rounded-2xl flex-shrink-0 flex items-center justify-center text-lg @alert.SeverityBadgeClass shadow-sm">
+                                <i class="@alert.TypeIconClass"></i>
+                            </div>
+
+                            <!-- Content -->
+                            <div class="space-y-1 flex-1">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">
+                                        @alert.Title
+                                    </h4>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold @alert.SeverityBadgeClass">
+                                        @alert.TypeName
+                                    </span>
+                                    @if (!alert.IsRead)
+                                    {
+                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500 text-white">
+                                            MỚI
+                                        </span>
+                                    }
+                                </div>
+
+                                <p class="text-xs text-slate-700 dark:text-slate-300 font-medium">
+                                    @alert.Message
+                                </p>
+
+                                <div class="flex items-center gap-3 text-[11px] text-slate-400 dark:text-slate-500 pt-0.5 flex-wrap">
+                                    <span>
+                                        <i class="fa-regular fa-clock"></i> @alert.TimeAgo
+                                    </span>
+                                    @if (!string.IsNullOrEmpty(alert.StoreName))
+                                    {
+                                        <span>
+                                            <i class="fa-solid fa-store"></i> @alert.StoreName
+                                        </span>
+                                    }
+                                    @if (alert.IsRead && alert.ReadAt.HasValue)
+                                    {
+                                        <span>
+                                            <i class="fa-solid fa-check"></i> Đã đọc lúc @alert.ReadAt.Value.ToString("HH:mm dd/MM")
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex items-center gap-2 flex-shrink-0 self-end sm:self-center">
+                            @if (!string.IsNullOrEmpty(alert.ActionUrl))
+                            {
+                                <a href="@alert.ActionUrl" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 text-white transition flex items-center gap-1.5 shadow-sm">
+                                    <span>Xử lý ngay</span>
+                                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                                </a>
+                            }
+
+                            @if (!alert.IsRead)
+                            {
+                                <form asp-action="MarkAsRead" asp-route-id="@alert.Id" asp-controller="Alert" asp-area="Admin" method="post" class="inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                    <button type="submit" class="p-2 text-slate-400 hover:text-emerald-600 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Đánh dấu đã đọc">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </form>
+                            }
+
+                            <form asp-action="Delete" asp-route-id="@alert.Id" asp-controller="Alert" asp-area="Admin" method="post" class="inline" onsubmit="return confirm('Bạn có chắc chắn muốn bỏ qua cảnh báo này?')">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                <button type="submit" class="p-2 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Bỏ qua / Xóa">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="p-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
+                <div>
+                    Trang @Model.PageNumber / @Model.TotalPages (Tổng @Model.TotalItems bản ghi)
+                </div>
+                <div class="flex items-center gap-1">
+                    @if (Model.HasPreviousPage)
+                    {
+                        <a href="@Url.Action("Index", new { pageNumber = Model.PageNumber - 1, type = filter.Type, severity = filter.Severity, isRead = filter.IsRead, searchTerm = filter.SearchTerm })" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                            Trước
+                        </a>
+                    }
+                    @for (int p = 1; p <= Model.TotalPages; p++)
+                    {
+                        if (p == Model.PageNumber)
+                        {
+                            <span class="px-3 py-1.5 rounded-lg bg-rose-500 text-white font-semibold">@p</span>
+                        }
+                        else if (p <= 3 || p > Model.TotalPages - 2 || Math.Abs(p - Model.PageNumber) <= 1)
+                        {
+                            <a href="@Url.Action("Index", new { pageNumber = p, type = filter.Type, severity = filter.Severity, isRead = filter.IsRead, searchTerm = filter.SearchTerm })" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                                @p
+                            </a>
+                        }
+                    }
+                    @if (Model.HasNextPage)
+                    {
+                        <a href="@Url.Action("Index", new { pageNumber = Model.PageNumber + 1, type = filter.Type, severity = filter.Severity, isRead = filter.IsRead, searchTerm = filter.SearchTerm })" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                            Sau
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,386 @@
+@model Omnichannel.Application.DTOs.Finance.ProfitLossReportDto
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Báo Cáo Lãi Lỗ (P&L) & Hiệu Quả Chi Nhánh";
+    var turnover = ViewBag.Turnover as Omnichannel.Application.DTOs.Finance.InventoryTurnoverDto;
+    var stores = ViewBag.Stores as List<Omnichannel.Domain.Entities.Store> ?? new();
+    int? selectedStoreId = ViewBag.SelectedStoreId as int?;
+    string fromDate = ViewBag.FromDate as string ?? "";
+    string toDate = ViewBag.ToDate as string ?? "";
+}
+
+<div class="space-y-6">
+    <!-- Top Navigation Subtabs -->
+    <div class="flex items-center gap-2 border-b border-slate-200 bg-white px-6 pt-3 rounded-2xl shadow-sm overflow-x-auto">
+        <a href="/Admin/Finance/ProfitLoss" class="pb-3 text-xs font-bold flex items-center gap-2 border-b-2 border-indigo-600 text-indigo-600 transition">
+            <i class="fa-solid fa-chart-pie"></i> Báo Cáo Lãi Lỗ (P&L)
+        </a>
+        <a href="/Admin/Finance/Ledger" class="pb-3 text-xs font-bold flex items-center gap-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
+            <i class="fa-solid fa-book"></i> Sổ Cái Thu Chi
+        </a>
+        <a href="/Admin/Finance/SupplierDebts" class="pb-3 text-xs font-bold flex items-center gap-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Công Nợ Nhà Cung Cấp
+        </a>
+        <a href="/Admin/Finance/CodReconciliations" class="pb-3 text-xs font-bold flex items-center gap-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
+            <i class="fa-solid fa-hand-holding-dollar"></i> Đối Soát COD
+        </a>
+    </div>
+
+    <!-- Header Bar with Title & Export Actions -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1">
+                <i class="fa-solid fa-scale-balanced"></i> Financial Performance & Store P&L
+            </div>
+            <h1 class="text-2xl font-black text-slate-800 tracking-tight">Báo Cáo Lãi Lỗ & Vòng Quay Vốn</h1>
+            <p class="text-xs text-slate-500 mt-0.5">Giá vốn COGS tính theo phương pháp bình quân gia quyền (Weighted Average Cost) & xuất kho FEFO</p>
+        </div>
+
+        <!-- Export Buttons Group -->
+        <div class="flex items-center gap-2.5">
+            <a href="@Url.Action("ExportProfitLossExcel", "Finance", new { storeId = selectedStoreId, fromDate = fromDate, toDate = toDate })"
+               class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm shadow-emerald-600/30 transition flex items-center gap-2 hover:-translate-y-0.5">
+                <i class="fa-solid fa-file-excel text-sm"></i>
+                <span>Xuất Excel (.xlsx)</span>
+            </a>
+            <a href="@Url.Action("ExportProfitLossPdf", "Finance", new { storeId = selectedStoreId, fromDate = fromDate, toDate = toDate })"
+               target="_blank"
+               class="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm shadow-rose-600/30 transition flex items-center gap-2 hover:-translate-y-0.5">
+                <i class="fa-solid fa-file-pdf text-sm"></i>
+                <span>Xuất PDF</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+        <form method="get" class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-3">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-400 mb-1">Chi Nhánh</label>
+                    <select name="storeId" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-indigo-500">
+                        <option value="">-- Toàn Hệ Thống (Tất cả Store) --</option>
+                        @foreach (var s in stores)
+                        {
+                            <option value="@s.Id" selected="@(s.Id == selectedStoreId)">@s.Name</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-400 mb-1">Khoảng Thời Gian</label>
+                    <div class="flex items-center gap-2">
+                        <input type="date" name="fromDate" value="@fromDate" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:border-indigo-500" />
+                        <span class="text-xs text-slate-400 font-bold">đến</span>
+                        <input type="date" name="toDate" value="@toDate" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:border-indigo-500" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="self-end">
+                <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 transition flex items-center gap-2">
+                    <i class="fa-solid fa-filter"></i> Lọc Dữ Liệu
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 6 KPI Metric Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <!-- Revenue -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-indigo-300 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Doanh Thu Thuần</span>
+                <span class="p-2 rounded-xl bg-indigo-50 text-indigo-600 text-sm group-hover:scale-110 transition"><i class="fa-solid fa-sack-dollar"></i></span>
+            </div>
+            <div class="text-lg font-black text-slate-800 font-mono">@Model.Revenue.ToString("N0") <span class="text-xs font-normal">đ</span></div>
+            <div class="text-[10px] text-emerald-600 mt-1 flex items-center gap-1 font-semibold">
+                <i class="fa-solid fa-check"></i> Đơn đã hoàn tất
+            </div>
+        </div>
+
+        <!-- COGS -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-amber-300 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Giá Vốn (COGS)</span>
+                <span class="p-2 rounded-xl bg-amber-50 text-amber-600 text-sm group-hover:scale-110 transition"><i class="fa-solid fa-boxes-stacked"></i></span>
+            </div>
+            <div class="text-lg font-black text-slate-800 font-mono">@Model.CostOfGoodsSold.ToString("N0") <span class="text-xs font-normal">đ</span></div>
+            <div class="text-[10px] text-slate-500 mt-1">Bình quân gia quyền</div>
+        </div>
+
+        <!-- Gross Profit -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-emerald-300 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Lợi Nhuận Gộp</span>
+                <span class="p-2 rounded-xl bg-emerald-50 text-emerald-600 text-sm group-hover:scale-110 transition"><i class="fa-solid fa-arrow-trend-up"></i></span>
+            </div>
+            <div class="text-lg font-black text-emerald-600 font-mono">@Model.GrossProfit.ToString("N0") <span class="text-xs font-normal">đ</span></div>
+            <div class="text-[10px] text-emerald-700 mt-1 font-bold">Biên gộp: @Model.GrossMarginPercent%</div>
+        </div>
+
+        <!-- Expenses -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-rose-300 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Chi Phí Vận Hành</span>
+                <span class="p-2 rounded-xl bg-rose-50 text-rose-600 text-sm group-hover:scale-110 transition"><i class="fa-solid fa-receipt"></i></span>
+            </div>
+            <div class="text-lg font-black text-slate-800 font-mono">@Model.OperatingExpenses.ToString("N0") <span class="text-xs font-normal">đ</span></div>
+            <div class="text-[10px] text-slate-500 mt-1">Chi phí từ Sổ cái</div>
+        </div>
+
+        <!-- Net Profit -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-emerald-300 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Lợi Nhuận Ròng</span>
+                <span class="p-2 rounded-xl @(Model.NetProfit >= 0 ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600") text-sm group-hover:scale-110 transition">
+                    <i class="fa-solid fa-coins"></i>
+                </span>
+            </div>
+            <div class="text-lg font-black font-mono @(Model.NetProfit >= 0 ? "text-emerald-600" : "text-rose-600")">
+                @Model.NetProfit.ToString("N0") <span class="text-xs font-normal">đ</span>
+            </div>
+            <div class="text-[10px] font-bold mt-1 @(Model.NetProfit >= 0 ? "text-emerald-700" : "text-rose-700")">
+                Biên ròng: @Model.NetMarginPercent%
+            </div>
+        </div>
+
+        <!-- Turnover -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-cyan-300 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Vòng Quay Kho</span>
+                <span class="p-2 rounded-xl bg-cyan-50 text-cyan-600 text-sm group-hover:scale-110 transition"><i class="fa-solid fa-rotate"></i></span>
+            </div>
+            <div class="text-lg font-black text-cyan-700 font-mono">@(turnover?.TurnoverRatio ?? 0) <span class="text-xs font-normal">vòng/năm</span></div>
+            <div class="text-[10px] text-slate-500 mt-1">Lưu kho: @(turnover?.DaysSalesOfInventory ?? 0) ngày</div>
+        </div>
+    </div>
+
+    <!-- Charts Row: Stacked Bar Chart (Doanh thu vs Chi phí theo tháng) + Bar Chart (So sánh P&L Chi Nhánh) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Biểu Đồ Stacked Bar: Doanh Thu vs Chi Phí Theo Tháng (7 Cột) -->
+        <div class="lg:col-span-7 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-column text-indigo-600"></i>
+                        <span>Doanh Thu vs Chi Phí Theo Tháng (Stacked Bar)</span>
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Phân tích cơ cấu Giá vốn (COGS), Chi phí vận hành và Lợi nhuận ròng</p>
+                </div>
+            </div>
+
+            <div class="relative w-full" style="height: 300px;">
+                <canvas id="monthlyPnlChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Biểu Đồ Bar: So Sánh P&L Giữa Các Chi Nhánh (5 Cột) -->
+        <div class="lg:col-span-5 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-store text-emerald-600"></i>
+                        <span>So Sánh Lợi Nhuận Từng Chi Nhánh</span>
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Doanh thu và Lợi nhuận ròng giữa các cơ sở</p>
+                </div>
+            </div>
+
+            <div class="relative w-full" style="height: 300px;">
+                <canvas id="storePnlBarChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chi tiết P&L theo từng Chi Nhánh (Store P&L Breakdown) -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-table-cells text-indigo-600"></i> Hiệu Quả Kinh Doanh Từng Chi Nhánh (P&L Breakdown)
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">Phân tích tỷ suất doanh số trên mỗi mét vuông (Sales per sqft/m²)</p>
+            </div>
+            <span class="text-xs font-semibold text-slate-400">Đơn vị: VNĐ</span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-50/75 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                        <th class="py-3 px-4">Chi Nhánh</th>
+                        <th class="py-3 px-4 text-center">Diện Tích</th>
+                        <th class="py-3 px-4 text-right">Doanh Thu</th>
+                        <th class="py-3 px-4 text-right">Giá Vốn (COGS)</th>
+                        <th class="py-3 px-4 text-right">Lợi Nhuận Gộp</th>
+                        <th class="py-3 px-4 text-right">Chi Phí Vận Hành</th>
+                        <th class="py-3 px-4 text-right">Lợi Nhuận Ròng</th>
+                        <th class="py-3 px-4 text-right">Doanh Thu / m²</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach (var store in Model.BreakdownByStore)
+                    {
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="py-3.5 px-4 font-bold text-slate-800 flex items-center gap-2">
+                                <span class="h-2 w-2 rounded-full bg-indigo-500"></span>
+                                @store.StoreName
+                            </td>
+                            <td class="py-3.5 px-4 text-center text-slate-600">
+                                @store.Area.ToString("N0") m²
+                            </td>
+                            <td class="py-3.5 px-4 text-right font-semibold text-slate-800 font-mono">
+                                @store.Revenue.ToString("N0") đ
+                            </td>
+                            <td class="py-3.5 px-4 text-right text-slate-600 font-mono">
+                                @store.Cogs.ToString("N0") đ
+                            </td>
+                            <td class="py-3.5 px-4 text-right font-semibold text-emerald-600 font-mono">
+                                @store.GrossProfit.ToString("N0") đ
+                            </td>
+                            <td class="py-3.5 px-4 text-right text-slate-600 font-mono">
+                                @store.OperatingExpenses.ToString("N0") đ
+                            </td>
+                            <td class="py-3.5 px-4 text-right font-black font-mono @(store.NetProfit >= 0 ? "text-emerald-600" : "text-rose-600")">
+                                @store.NetProfit.ToString("N0") đ
+                            </td>
+                            <td class="py-3.5 px-4 text-right font-bold text-indigo-600 bg-indigo-50/30 font-mono">
+                                @store.SalesPerSqft.ToString("N0") đ/m²
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr class="bg-slate-100/75 font-black text-slate-900 border-t-2 border-slate-200">
+                        <td class="py-3.5 px-4">TỔNG CỘNG</td>
+                        <td class="py-3.5 px-4 text-center">@Model.BreakdownByStore.Sum(s => s.Area).ToString("N0") m²</td>
+                        <td class="py-3.5 px-4 text-right font-mono">@Model.Revenue.ToString("N0") đ</td>
+                        <td class="py-3.5 px-4 text-right font-mono">@Model.CostOfGoodsSold.ToString("N0") đ</td>
+                        <td class="py-3.5 px-4 text-right text-emerald-700 font-mono">@Model.GrossProfit.ToString("N0") đ</td>
+                        <td class="py-3.5 px-4 text-right font-mono">@Model.OperatingExpenses.ToString("N0") đ</td>
+                        <td class="py-3.5 px-4 text-right font-mono @(Model.NetProfit >= 0 ? "text-emerald-700" : "text-rose-700")">@Model.NetProfit.ToString("N0") đ</td>
+                        <td class="py-3.5 px-4 text-right text-indigo-700 font-mono">
+                            @((Model.BreakdownByStore.Sum(s => s.Area) > 0 ? Model.Revenue / Model.BreakdownByStore.Sum(s => s.Area) : 0).ToString("N0")) đ/m²
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // 1. Biểu đồ Stacked Bar: Doanh Thu vs Chi Phí Theo Tháng
+        const monthlyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyTrends));
+        const pnlCtx = document.getElementById('monthlyPnlChart').getContext('2d');
+
+        new Chart(pnlCtx, {
+            type: 'bar',
+            data: {
+                labels: monthlyData.map(x => x.MonthLabel),
+                datasets: [
+                    {
+                        label: 'Giá Vốn (COGS)',
+                        data: monthlyData.map(x => x.CostOfGoodsSold),
+                        backgroundColor: '#F59E0B',
+                        stack: 'Costs'
+                    },
+                    {
+                        label: 'Chi Phí Vận Hành',
+                        data: monthlyData.map(x => x.OperatingExpenses),
+                        backgroundColor: '#F43F5E',
+                        stack: 'Costs'
+                    },
+                    {
+                        label: 'Lợi Nhuận Ròng',
+                        data: monthlyData.map(x => x.NetProfit),
+                        backgroundColor: '#10B981',
+                        stack: 'Profit'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                return ctx.dataset.label + ': ' + Number(ctx.raw).toLocaleString('vi-VN') + ' đ';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        grid: { display: false }
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (val) {
+                                if (val >= 1000000) return (val / 1000000) + 'M';
+                                return val;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // 2. Biểu đồ Bar: So Sánh P&L Giữa Các Chi Nhánh
+        const storeBreakdowns = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.BreakdownByStore));
+        const storeCtx = document.getElementById('storePnlBarChart').getContext('2d');
+
+        new Chart(storeCtx, {
+            type: 'bar',
+            data: {
+                labels: storeBreakdowns.map(x => x.StoreName),
+                datasets: [
+                    {
+                        label: 'Doanh Thu',
+                        data: storeBreakdowns.map(x => x.Revenue),
+                        backgroundColor: '#6366F1',
+                        borderRadius: 6
+                    },
+                    {
+                        label: 'Lợi Nhuận Ròng',
+                        data: storeBreakdowns.map(x => x.NetProfit),
+                        backgroundColor: '#10B981',
+                        borderRadius: 6
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                return ctx.dataset.label + ': ' + Number(ctx.raw).toLocaleString('vi-VN') + ' đ';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (val) {
+                                if (val >= 1000000) return (val / 1000000) + 'M';
+                                return val;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}

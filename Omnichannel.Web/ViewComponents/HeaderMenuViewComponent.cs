@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Omnichannel.Application.Interfaces.Cms;
 
@@ -16,7 +16,7 @@ namespace Omnichannel.Web.ViewComponents
         public async Task<IViewComponentResult> InvokeAsync(string menuCode = "HEADER_MAIN")
         {
             var menuTree = await _menuService.GetHierarchyTreeAsync(menuCode, onlyActive: true);
-            return View(menuTree);
+            return View(menuTree ?? new System.Collections.Generic.List<Omnichannel.Application.DTOs.Cms.MenuItemDto>());
         }
     }
 }

@@ -22,6 +22,83 @@ namespace Omnichannel.Application.DTOs.Sales
     {
         public decimal ShippingFee { get; set; }
         public decimal FinalTotal { get; set; }
+
+        // --- LUXURY GIFT PACKAGING ---
+        public bool IsGiftWrapped { get; set; }
+        public string? GiftMessage { get; set; }
+        public decimal GiftWrapFee { get; set; } = 50000;
+
+        // --- FREESHIP METER ---
+        public decimal FreeShippingThreshold { get; set; } = 500000;
+        public decimal FreeShippingRemaining => Math.Max(0, FreeShippingThreshold - SubTotal);
+        public decimal FreeShippingProgress => SubTotal >= FreeShippingThreshold ? 100 : (FreeShippingThreshold > 0 ? Math.Round(SubTotal / FreeShippingThreshold * 100, 1) : 100);
+        public bool IsFreeShipping => SubTotal >= FreeShippingThreshold;
+
+        // --- CROSS-SELL CAROUSEL ---
+        public List<CrossSellItemDto> CrossSellItems { get; set; } = new();
+
+        // --- PROMOTION & REWARDS ENGINE BREAKDOWN ---
+        public string? AppliedCouponCode { get; set; }
+        public decimal CouponDiscount { get; set; }
+        public decimal PromotionDiscount { get; set; }
+        public string? AppliedPromotionName { get; set; }
+        public string? MemberTierName { get; set; }
+        public decimal MemberDiscountPercent { get; set; }
+        public decimal MemberTierDiscount { get; set; }
+        public decimal FefoDiscount { get; set; }
+        public string? FefoDiscountDescription { get; set; }
+        public List<FefoClearanceItemDto> FefoClearanceItems { get; set; } = new();
+        public List<PromotionGiftItemDto> GiftItems { get; set; } = new();
+        public List<string> AppliedRulesSummary { get; set; } = new();
+        public string? PromotionMessage { get; set; }
+
+        public static CartViewModel FromDto(CartDto? dto, bool isGiftWrapped = false, string? giftMessage = null)
+        {
+            if (dto == null)
+            {
+                return new CartViewModel
+                {
+                    Items = new List<CartItemDto>(),
+                    CartItems = new List<CartItemDto>(),
+                    IsGiftWrapped = isGiftWrapped,
+                    GiftMessage = giftMessage
+                };
+            }
+
+            decimal shippingFee = (dto.TotalAmount >= 500000 || dto.TotalAmount == 0) ? 0 : 30000;
+            decimal giftFee = isGiftWrapped ? 50000 : 0;
+            decimal finalTotal = dto.TotalAmount + shippingFee + giftFee;
+
+            return new CartViewModel
+            {
+                Id = dto.Id,
+                SessionId = dto.SessionId,
+                UserId = dto.UserId,
+                SubTotal = dto.SubTotal,
+                DiscountAmount = dto.DiscountAmount,
+                TotalAmount = dto.TotalAmount,
+                TotalItems = dto.TotalItems,
+                Items = dto.Items ?? new List<CartItemDto>(),
+                CartItems = dto.CartItems ?? new List<CartItemDto>(),
+                ShippingFee = shippingFee,
+                FinalTotal = finalTotal,
+                IsGiftWrapped = isGiftWrapped,
+                GiftMessage = giftMessage,
+                GiftWrapFee = 50000
+            };
+        }
+    }
+
+    public class CrossSellItemDto
+    {
+        public int ProductId { get; set; }
+        public string ProductName { get; set; } = string.Empty;
+        public string ImageUrl { get; set; } = string.Empty;
+        public decimal OriginalPrice { get; set; }
+        public decimal SpecialPrice { get; set; } = 29000;
+        public string BadgeText { get; set; } = "Ưu đãi thêm +29K";
+        public string CategoryName { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
     }
 
     public class CartItemDto
@@ -40,6 +117,12 @@ namespace Omnichannel.Application.DTOs.Sales
         public decimal DiscountAmount { get; set; }
         public decimal LineTotal { get; set; }
         public string NearestExpDateStr { get; set; } = string.Empty;
+
+        // --- PDP & CART ENHANCEMENTS ---
+        public string? VariantName { get; set; } // Biến thể màu sắc/dung tích
+        public string? BatchStatusText { get; set; } // Lô & HSD FEFO
+        public bool IsNearExpiration { get; set; }
+        public int DaysLeftToExpiry { get; set; }
     }
 
     public class AddToCartRequestDto

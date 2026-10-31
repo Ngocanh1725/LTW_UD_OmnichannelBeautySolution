@@ -1,4 +1,4 @@
-﻿namespace Omnichannel.Application.Interfaces.Security
+namespace Omnichannel.Application.Interfaces.Security
 {
     public interface IPasswordHasherService
     {
@@ -11,5 +11,10 @@
         /// Xác thực mật khẩu nhập vào với chuỗi băm lưu trữ trong CSDL
         /// </summary>
         bool VerifyPassword(string hashedPassword, string providedPassword);
+
+        /// <summary>
+        /// Kiểm tra chính sách mật khẩu: Tối thiểu 8 ký tự, có chữ hoa + thường + số + ký tự đặc biệt
+        /// </summary>
+        (bool IsValid, string? ErrorMessage) ValidatePasswordPolicy(string password);
     }
 }

@@ -1,0 +1,533 @@
+@model Omnichannel.Application.DTOs.Inventory.ProductDetailWithVariantsDto
+@using System.Text.Encodings.Web
+@{
+    ViewData["Title"] = "Chi Tiết Mỹ Phẩm: " + Model.Name;
+    Layout = "_AdminLayout";
+    decimal profitMargin = Model.SellingPrice > 0 ? ((Model.SellingPrice - Model.CostPrice) / Model.SellingPrice) * 100 : 0;
+}
+
+<div class="space-y-6">
+    <!-- Breadcrumb & Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-rose-600 dark:text-rose-400 font-semibold uppercase tracking-wider">
+                <a href="/Admin/Product" class="hover:underline flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Danh sách sản phẩm</span>
+                </a>
+                <span>/</span>
+                <span>Chi tiết</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight mt-1">
+                @Model.Name
+            </h1>
+            <div class="flex items-center gap-3 mt-1.5 flex-wrap text-xs text-slate-500 dark:text-slate-400">
+                <span class="font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-700 dark:text-slate-300 font-semibold">
+                    SKU: @Model.Sku
+                </span>
+                <span class="flex items-center gap-1 font-mono">
+                    <i class="fa-solid fa-barcode text-slate-400"></i>
+                    <span>@Model.Barcode</span>
+                </span>
+                <span>•</span>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-900/40">
+                    @Model.CategoryName
+                </span>
+                @if (!string.IsNullOrWhiteSpace(Model.SupplierName))
+                {
+                    <span class="flex items-center gap-1">
+                        <i class="fa-solid fa-building text-slate-400"></i>
+                        <span>@Model.SupplierName</span>
+                    </span>
+                }
+            </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="flex items-center gap-2.5">
+            <a href="/Admin/Product/Edit/@Model.Id" 
+               class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs shadow-sm transition flex items-center gap-1.5">
+                <i class="fa-solid fa-pen-to-square"></i>
+                <span>Chỉnh sửa</span>
+            </a>
+            <button type="button" 
+                    hx-post="/Admin/Product/ToggleStatus/@Model.Id"
+                    hx-headers='{"RequestVerificationToken": document.querySelector("input[name=__RequestVerificationToken]") ? document.querySelector("input[name=__RequestVerificationToken]").value : ""}'
+                    class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-xs hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center gap-1.5">
+                <i class="fa-solid @(Model.IsActive ? "fa-ban text-rose-500" : "fa-check text-emerald-500")"></i>
+                <span>@(Model.IsActive ? "Tạm ngưng" : "Mở bán lại")</span>
+            </button>
+            <button type="button" 
+                    onclick="confirmDeleteProduct(@Model.Id, '@Html.Raw(JavaScriptEncoder.Default.Encode(Model.Name))')"
+                    class="px-3.5 py-2 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-semibold text-xs hover:bg-rose-100 dark:hover:bg-rose-900/50 transition flex items-center gap-1.5">
+                <i class="fa-solid fa-trash-can"></i>
+                <span>Xóa mềm</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 4 KPI Metrics -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Giá bán -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Giá bán lẻ niêm yết</div>
+            <div class="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                @Model.SellingPrice.ToString("N0") <span class="text-xs font-normal text-slate-400">đ</span>
+            </div>
+            @if (Model.DiscountPrice.HasValue && Model.DiscountPrice.Value > 0)
+            {
+                <div class="text-xs text-emerald-600 dark:text-emerald-400 font-semibold font-mono mt-0.5">
+                    Khuyến mãi: @Model.DiscountPrice.Value.ToString("N0") đ
+                </div>
+            }
+        </div>
+
+        <!-- Giá vốn -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Giá vốn nhập kho</div>
+            <div class="text-xl font-bold font-mono text-slate-900 dark:text-white mt-1">
+                @Model.CostPrice.ToString("N0") <span class="text-xs font-normal text-slate-400">đ</span>
+            </div>
+            <div class="text-xs text-slate-400 mt-0.5">Đơn vị: @Model.Unit</div>
+        </div>
+
+        <!-- Biên lợi nhuận -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Tỷ suất lợi nhuận gộp</div>
+            <div class="text-xl font-bold font-mono @(profitMargin >= 30 ? "text-emerald-600 dark:text-emerald-400" : profitMargin >= 15 ? "text-amber-600 dark:text-amber-400" : "text-rose-600 dark:text-rose-400") mt-1">
+                @profitMargin.ToString("F1")%
+            </div>
+            <div class="text-xs text-slate-400 mt-0.5">Chênh lệch: @((Model.SellingPrice - Model.CostPrice).ToString("N0")) đ</div>
+        </div>
+
+        <!-- Tổng tồn kho -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Tổng tồn kho (FEFO)</div>
+            <div class="text-xl font-bold font-mono @(Model.TotalStock > 10 ? "text-emerald-600 dark:text-emerald-400" : Model.TotalStock > 0 ? "text-amber-600 dark:text-amber-400" : "text-rose-600 dark:text-rose-400") mt-1">
+                @Model.TotalStock <span class="text-xs font-normal text-slate-400">@Model.Unit</span>
+            </div>
+            <div class="text-xs text-slate-400 mt-0.5">Từ @Model.Batches.Count lô hàng</div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left: Image & Specs (4 cols) -->
+        <div class="lg:col-span-4 space-y-6">
+            <!-- Thumbnail card -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+                <div class="aspect-square rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
+                    <img src="@(string.IsNullOrWhiteSpace(Model.ThumbnailUrl) ? "/images/product-placeholder.svg" : Model.ThumbnailUrl)" 
+                         alt="@Model.Name" 
+                         class="w-full h-full object-contain p-4"
+                         onerror="this.onerror=null;this.src='/images/product-placeholder.svg';" />
+                </div>
+                <div class="flex items-center justify-between text-xs pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <span class="text-slate-500 dark:text-slate-400">Trạng thái mở bán:</span>
+                    @if (Model.IsActive)
+                    {
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+                            Đang kinh doanh
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                            Tạm ngừng
+                        </span>
+                    }
+                </div>
+            </div>
+
+            <!-- Cosmetic Specs Card -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+                <h3 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <i class="fa-solid fa-flask-vial text-rose-500"></i>
+                    Đặc Tính Da Liễu
+                </h3>
+
+                <!-- Skin types -->
+                <div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mb-1.5 font-medium">Loại da phù hợp:</div>
+                    @if (Model.SkinTypes.Any())
+                    {
+                        <div class="flex flex-wrap gap-1.5">
+                            @foreach (var st in Model.SkinTypes)
+                            {
+                                <span class="px-2.5 py-1 text-xs rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200/60 dark:border-rose-900/40">
+                                    @st.Name
+                                </span>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="text-xs text-slate-400 italic">Mọi loại da</span>
+                    }
+                </div>
+
+                <!-- Active ingredients -->
+                <div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400 mb-1.5 font-medium">Thành phần hoạt tính:</div>
+                    @if (Model.Ingredients.Any())
+                    {
+                        <div class="space-y-1.5">
+                            @foreach (var ing in Model.Ingredients)
+                            {
+                                <div class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between text-xs">
+                                    <span class="font-semibold text-slate-800 dark:text-slate-200">@ing.Name</span>
+                                    @if (!string.IsNullOrWhiteSpace(ing.Concentration))
+                                    {
+                                        <span class="px-1.5 py-0.5 rounded text-[10px] font-mono bg-pink-100 dark:bg-pink-950/80 text-pink-700 dark:text-pink-300">
+                                            @ing.Concentration
+                                        </span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <span class="text-xs text-slate-400 italic">Chưa khai báo thành phần</span>
+                    }
+                </div>
+
+                <!-- Legal details -->
+                <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2 text-xs">
+                    @if (!string.IsNullOrWhiteSpace(Model.CosmeticNotificationNumber))
+                    {
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Số công bố BYT:</span>
+                            <span class="font-mono font-medium text-slate-800 dark:text-slate-200">@Model.CosmeticNotificationNumber</span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.CountryOfOrigin))
+                    {
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Xuất xứ:</span>
+                            <span class="font-medium text-slate-800 dark:text-slate-200">@Model.CountryOfOrigin</span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.ManufacturerName))
+                    {
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Nhà sản xuất:</span>
+                            <span class="font-medium text-slate-800 dark:text-slate-200">@Model.ManufacturerName</span>
+                        </div>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(Model.ImporterName))
+                    {
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Đơn vị nhập khẩu:</span>
+                            <span class="font-medium text-slate-800 dark:text-slate-200">@Model.ImporterName</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Batches (FEFO), Variants & Descriptions (8 cols) -->
+        <div class="lg:col-span-8 space-y-6">
+            <!-- Section: Quản lý lô hàng FEFO -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-boxes-stacked text-rose-500"></i>
+                            Quản Lý Lô Hàng FEFO (First-Expired, First-Out)
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            Theo dõi hạn sử dụng mỹ phẩm, tự động cảnh báo cận date ≤ 60 ngày.
+                        </p>
+                    </div>
+                </div>
+
+                @if (!Model.Batches.Any())
+                {
+                    <div class="text-center py-8 text-slate-500 dark:text-slate-400 text-xs">
+                        <i class="fa-solid fa-box-open text-2xl text-slate-300 dark:text-slate-600 mb-2 block"></i>
+                        Sản phẩm hiện chưa có lô hàng nhập kho nào.
+                    </div>
+                }
+                else
+                {
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-800 text-xs">
+                            <thead class="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300">
+                                <tr>
+                                    <th scope="col" class="py-2.5 pl-4 pr-2 text-left font-semibold">Mã Lô</th>
+                                    <th scope="col" class="px-2 py-2.5 text-center font-semibold">Ngày SX</th>
+                                    <th scope="col" class="px-2 py-2.5 text-center font-semibold">Hạn Dùng</th>
+                                    <th scope="col" class="px-2 py-2.5 text-center font-semibold">Số Ngày Còn Lại</th>
+                                    <th scope="col" class="px-2 py-2.5 text-right font-semibold">Tồn Kho</th>
+                                    <th scope="col" class="py-2.5 pl-2 pr-4 text-right font-semibold">Giá Nhập Lô</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                @foreach (var b in Model.Batches)
+                                {
+                                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                                        <td class="py-2.5 pl-4 pr-2 font-mono font-bold text-slate-800 dark:text-slate-200">
+                                            @b.BatchNumber
+                                        </td>
+                                        <td class="px-2 py-2.5 text-center text-slate-500 font-mono">
+                                            @b.ManufacturingDate.ToString("dd/MM/yyyy")
+                                        </td>
+                                        <td class="px-2 py-2.5 text-center font-mono font-semibold text-slate-800 dark:text-slate-200">
+                                            @b.ExpDate.ToString("dd/MM/yyyy")
+                                        </td>
+                                        <td class="px-2 py-2.5 text-center">
+                                            @if (b.DaysRemaining <= 0)
+                                            {
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-300 dark:border-rose-800">
+                                                    <i class="fa-solid fa-triangle-exclamation mr-1"></i>Đã quá hạn
+                                                </span>
+                                            }
+                                            else if (b.DaysRemaining <= 60)
+                                            {
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-300 dark:border-amber-800 animate-pulse">
+                                                    <i class="fa-solid fa-clock mr-1"></i>Cận date (@b.DaysRemaining ngày)
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400">
+                                                    Còn @b.DaysRemaining ngày
+                                                </span>
+                                            }
+                                        </td>
+                                        <td class="px-2 py-2.5 text-right font-mono font-bold @(b.CurrentQuantity > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500")">
+                                            @b.CurrentQuantity / @b.InitialQuantity
+                                        </td>
+                                        <td class="py-2.5 pl-2 pr-4 text-right font-mono text-slate-600 dark:text-slate-300">
+                                            @b.ImportCost.ToString("N0") đ
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+
+            <!-- Section: Quản lý Biến Thể & Swatches -->
+            <div x-data="{ addVariantModalOpen: false }" class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-palette text-pink-500"></i>
+                            Biến Thể Sản Phẩm & Swatch Màu
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            Quản lý các tông màu son, phấn má, dung tích khác nhau của sản phẩm.
+                        </p>
+                    </div>
+                    <button type="button" 
+                            @@click="addVariantModalOpen = true"
+                            class="px-3 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-700 dark:bg-pink-950/50 dark:hover:bg-pink-900/50 dark:text-pink-300 font-semibold text-xs transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Thêm biến thể</span>
+                    </button>
+                </div>
+
+                @if (!Model.Variants.Any())
+                {
+                    <div class="text-center py-6 text-slate-500 dark:text-slate-400 text-xs">
+                        Sản phẩm này là phiên bản tiêu chuẩn đơn nhất (chưa tạo biến thể màu/size).
+                    </div>
+                }
+                else
+                {
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        @foreach (var v in Model.Variants)
+                        {
+                            <div class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    @if (!string.IsNullOrWhiteSpace(v.ColorHex))
+                                    {
+                                        <div class="w-8 h-8 rounded-full border-2 border-white shadow-sm flex-shrink-0" style="background-color: @v.ColorHex" title="@v.ColorName"></div>
+                                    }
+                                    <div>
+                                        <div class="text-xs font-bold text-slate-900 dark:text-slate-100">@v.VariantName</div>
+                                        <div class="text-[11px] text-slate-500 font-mono mt-0.5">
+                                            @v.Sku @(!string.IsNullOrWhiteSpace(v.Volume) ? $"• {v.Volume}" : "")
+                                        </div>
+                                        <div class="text-xs font-mono font-semibold text-rose-600 dark:text-rose-400 mt-0.5">
+                                            @v.SellingPrice.ToString("N0") đ
+                                        </div>
+                                    </div>
+                                </div>
+                                <form asp-action="DeleteVariant" method="post" onsubmit="return confirm('Bạn chắc chắn muốn xóa biến thể này?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@v.Id" />
+                                    <input type="hidden" name="productId" value="@Model.Id" />
+                                    <button type="submit" class="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 transition" title="Xóa biến thể">
+                                        <i class="fa-solid fa-trash-can text-xs"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <!-- Modal Add Variant -->
+                <div x-show="addVariantModalOpen" style="display: none;" class="relative z-50">
+                    <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity" @@click="addVariantModalOpen = false"></div>
+                    <div class="fixed inset-0 z-10 w-screen overflow-y-auto p-4 flex items-center justify-center">
+                        <div class="relative w-full max-w-lg rounded-2xl bg-white dark:bg-slate-900 p-6 shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4 text-left">
+                            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                                <h3 class="font-bold text-slate-900 dark:text-white text-base">Thêm Biến Thể Mới</h3>
+                                <button type="button" @@click="addVariantModalOpen = false" class="text-slate-400 hover:text-slate-600">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+
+                            <form asp-action="CreateVariant" method="post" class="space-y-4">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="ProductId" value="@Model.Id" />
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tên biến thể *</label>
+                                    <input type="text" name="VariantName" placeholder="vd: #01 - Đỏ Ruby hoặc 50ml" required class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mã SKU biến thể *</label>
+                                        <input type="text" name="Sku" value="@(Model.Sku + "-V1")" required class="w-full px-3 py-2 text-xs font-mono rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mã Barcode *</label>
+                                        <input type="text" name="Barcode" value="@Model.Barcode" required class="w-full px-3 py-2 text-xs font-mono rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tên màu sắc</label>
+                                        <input type="text" name="ColorName" placeholder="vd: Đỏ Cherry" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mã màu HEX</label>
+                                        <div class="flex items-center gap-2">
+                                            <input type="color" id="hexPicker" onchange="document.getElementById('hexInput').value=this.value" value="#E11D48" class="w-8 h-8 rounded-lg cursor-pointer border-0 p-0" />
+                                            <input type="text" name="ColorHex" id="hexInput" value="#E11D48" class="w-full px-3 py-2 text-xs font-mono rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Giá vốn</label>
+                                        <input type="number" name="CostPrice" value="@Model.CostPrice" class="w-full px-3 py-2 text-xs font-mono rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Giá bán</label>
+                                        <input type="number" name="SellingPrice" value="@Model.SellingPrice" class="w-full px-3 py-2 text-xs font-mono rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-end gap-2 pt-2">
+                                    <button type="button" @@click="addVariantModalOpen = false" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200">
+                                        Hủy
+                                    </button>
+                                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 shadow-sm">
+                                        Lưu Biến Thể
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section: Mô tả & Hướng dẫn sử dụng -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+                <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <i class="fa-solid fa-align-left text-indigo-500"></i>
+                    Mô Tả Sản Phẩm & Hướng Dẫn Sử Dụng
+                </h2>
+
+                @if (!string.IsNullOrWhiteSpace(Model.ShortDescription))
+                {
+                    <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 text-xs text-slate-600 dark:text-slate-300 italic">
+                        "@Model.ShortDescription"
+                    </div>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.Description))
+                {
+                    <div class="prose dark:prose-invert max-w-none text-xs text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed">
+                        @Model.Description
+                    </div>
+                }
+                else
+                {
+                    <p class="text-xs text-slate-400 italic">Chưa có bài viết mô tả chi tiết cho sản phẩm này.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmDeleteProduct(id, name) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+            Swal.fire({
+                title: 'Xóa sản phẩm?',
+                html: `Bạn chắc chắn muốn xóa mềm sản phẩm <b>"${name}"</b>?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Đồng ý xóa',
+                cancelButtonText: 'Hủy bỏ',
+                customClass: { popup: 'rounded-2xl dark:bg-slate-900 dark:text-slate-100' }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/Admin/Product/Delete/${id}`;
+
+                    const inputToken = document.createElement('input');
+                    inputToken.type = 'hidden';
+                    inputToken.name = '__RequestVerificationToken';
+                    inputToken.value = token;
+                    form.appendChild(inputToken);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>
+            Swal.fire({
+                toast: true,
+                position: 'bottom-end',
+                icon: 'success',
+                title: '@Html.Raw(JavaScriptEncoder.Default.Encode(TempData["SuccessMessage"]?.ToString() ?? ""))',
+                showConfirmButton: false,
+                timer: 3500,
+                timerProgressBar: true
+            });
+            </text>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: '@Html.Raw(JavaScriptEncoder.Default.Encode(TempData["ErrorMessage"]?.ToString() ?? ""))',
+                customClass: { popup: 'rounded-2xl' }
+            });
+            </text>
+        }
+    </script>
+}

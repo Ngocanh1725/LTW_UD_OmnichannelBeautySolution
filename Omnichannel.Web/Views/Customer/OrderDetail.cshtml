@@ -1,0 +1,563 @@
+@model Omnichannel.Application.DTOs.Customer.CustomerOrderDetailViewModel
+@{
+    ViewData["Title"] = $"Chi Tiết Đơn Hàng #{Model.OrderCode} - Omni Beauty";
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen bg-slate-50/70 pb-20 pt-6" x-data="orderDetailManager()">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Breadcrumb & Top Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+                <nav class="flex items-center gap-2 text-xs text-slate-400 mb-1.5">
+                    <a href="/" class="hover:text-magenta-accent transition">Trang Chủ</a>
+                    <span>/</span>
+                    <a href="/Customer/Orders" class="hover:text-magenta-accent transition">Đơn Hàng Của Tôi</a>
+                    <span>/</span>
+                    <span class="text-charcoal font-semibold font-mono">#@Model.OrderCode</span>
+                </nav>
+                <div class="flex flex-wrap items-center gap-3">
+                    <h1 class="text-2xl sm:text-3xl font-serif font-bold text-charcoal">
+                        Chi Tiết Đơn Hàng <span class="font-mono text-magenta-accent">#@Model.OrderCode</span>
+                    </h1>
+                    <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full border shadow-2xs @Model.OrderStatusBadgeClass">
+                        <span>@Model.OrderStatusDisplayName</span>
+                    </span>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">
+                    Ngày đặt hàng: <strong class="text-slate-700">@Model.OrderDate.ToString("dd/MM/yyyy HH:mm:ss")</strong> • Phương thức: <strong class="text-slate-700">@Model.PaymentMethod</strong> (@(Model.PaymentStatus == "PAID" ? "Đã thanh toán" : "Chưa thanh toán"))
+                </p>
+            </div>
+
+            <!-- Back to Orders button -->
+            <div class="flex items-center gap-3">
+                <a href="/Customer/Orders" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-slate-700 hover:text-magenta-accent border border-slate-200 text-xs font-bold transition shadow-sm">
+                    <i class="fa-solid fa-arrow-left"></i> Danh Sách Đơn Hàng
+                </a>
+            </div>
+        </div>
+
+        <!-- ===================================================
+             1. TIMELINE TRẠNG THÁI ĐƠN HÀNG 5 NẤC TRỰC QUAN
+             [Đặt hàng thành công] -> [Đã xác nhận] -> [Đang chuẩn bị hàng FEFO] -> [Bàn giao Shipper] -> [Giao thành công]
+             =================================================== -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm mb-8">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h2 class="text-base sm:text-lg font-serif font-bold text-charcoal flex items-center gap-2">
+                        <i class="fa-solid fa-timeline text-magenta-accent"></i>
+                        <span>Hành Trình Giao Hàng & Chuẩn Bị FEFO</span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Quy trình xử lý khép kín bảo quản mỹ phẩm đạt chuẩn nhiệt độ & HSD xa nhất</p>
+                </div>
+
+                <div class="hidden sm:block text-right">
+                    <span class="text-xs font-bold text-slate-500">Mã Vận Đơn:</span>
+                    <span class="font-mono text-xs font-bold text-charcoal ml-1 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200">
+                        @Model.TrackingCode
+                    </span>
+                </div>
+            </div>
+
+            <!-- 5-Step Visual Timeline Progress Bar -->
+            <div class="relative">
+                <!-- Background Connection Line -->
+                <div class="hidden md:block absolute top-6 left-12 right-12 h-1 bg-slate-200 -z-0">
+                    <div class="h-full bg-gradient-to-r from-emerald-500 via-pink-500 to-magenta-accent transition-all duration-700 rounded-full"
+                         style="width: @(Model.OrderStatus == "CANCELLED" ? "0%" : Model.TimelineStep switch { 1 => "10%", 2 => "30%", 3 => "55%", 4 => "80%", 5 => "100%", _ => "20%" });"></div>
+                </div>
+
+                <!-- 5 Steps Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-6 md:gap-4 relative z-10">
+                    @for (int i = 0; i < Model.TimelineEvents.Count; i++)
+                    {
+                        var ev = Model.TimelineEvents[i];
+                        bool isPassed = ev.IsCompleted && !ev.IsCurrent;
+                        bool isCurrent = ev.IsCurrent;
+                        bool isPending = !ev.IsCompleted && !ev.IsCurrent;
+
+                        <div class="flex md:flex-col items-start md:items-center text-left md:text-center gap-4 md:gap-2">
+                            
+                            <!-- Icon Indicator Circle -->
+                            <div class="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 text-base font-bold shadow-md transition-all duration-300
+                                 @(isPassed ? "bg-emerald-500 text-white shadow-emerald-500/20" : "")
+                                 @(isCurrent ? "bg-magenta-accent text-white ring-4 ring-magenta-accent/25 shadow-magenta-accent/30 animate-pulse" : "")
+                                 @(isPending ? "bg-slate-100 text-slate-400 border border-slate-200" : "")">
+                                
+                                @if (ev.StepIndex == 1)
+                                {
+                                    <i class="fa-solid fa-clipboard-check"></i>
+                                }
+                                else if (ev.StepIndex == 2)
+                                {
+                                    <i class="fa-solid fa-circle-check"></i>
+                                }
+                                else if (ev.StepIndex == 3)
+                                {
+                                    <i class="fa-solid fa-boxes-packing"></i>
+                                }
+                                else if (ev.StepIndex == 4)
+                                {
+                                    <i class="fa-solid fa-truck-fast"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa-solid fa-house-chimney-check"></i>
+                                }
+                            </div>
+
+                            <!-- Text Details -->
+                            <div class="flex-1 md:w-full">
+                                <div class="text-xs sm:text-sm font-bold @(isCurrent ? "text-magenta-accent" : (isPassed ? "text-charcoal" : "text-slate-400"))">
+                                    @ev.Title
+                                </div>
+                                <div class="text-[11px] text-slate-500 mt-1 line-clamp-2 md:line-clamp-3">
+                                    @ev.Description
+                                </div>
+                                @if (!string.IsNullOrEmpty(ev.FormattedTime))
+                                {
+                                    <div class="text-[10px] font-mono font-semibold text-slate-400 mt-1.5 flex items-center md:justify-center gap-1">
+                                        <i class="fa-regular fa-clock text-[9px]"></i> @ev.FormattedTime
+                                    </div>
+                                }
+                            </div>
+
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Carrier & Tracking Info Bar -->
+            <div class="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/60 p-4 rounded-2xl">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-sm shrink-0">
+                        <i class="fa-solid fa-truck"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-charcoal">Đơn vị vận chuyển: @Model.CarrierName</div>
+                        <div class="text-[11px] text-slate-500">Mã bưu gửi: <strong class="font-mono text-slate-700">@Model.TrackingCode</strong></div>
+                    </div>
+                </div>
+                <div>
+                    <button type="button" 
+                            @@click="copyTrackingCode('@Model.TrackingCode')" 
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold text-slate-700 transition">
+                        <i class="fa-regular fa-copy text-slate-400"></i>
+                        <span x-text="copied ? 'Đã sao chép!' : 'Sao chép mã vận đơn'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===================================================
+             2. NỘI DUNG CHÍNH (2 CỘT: SẢN PHẨM & TỔNG KẾT TÀI CHÍNH)
+             =================================================== -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            
+            <!-- Left Col (8 Cols): Sản phẩm chi tiết & Thông tin giao hàng -->
+            <div class="lg:col-span-8 space-y-6">
+                
+                <!-- Bảng danh sách sản phẩm & Thông tin FEFO -->
+                <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                        <h3 class="text-base font-serif font-bold text-charcoal flex items-center gap-2">
+                            <i class="fa-solid fa-basket-shopping text-rose-gold"></i>
+                            <span>Kiện Hàng & Danh Sách Sản Phẩm (@Model.Items.Count món)</span>
+                        </h3>
+                        <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 flex items-center gap-1">
+                            <i class="fa-solid fa-shield-halved text-[10px]"></i> Đảm bảo chuẩn FEFO hạn xa
+                        </span>
+                    </div>
+
+                    <!-- Items List -->
+                    <div class="divide-y divide-slate-100">
+                        @foreach (var item in Model.Items)
+                        {
+                            <div class="py-4 first:pt-0 last:pb-0 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                
+                                <!-- Product Image & Name -->
+                                <div class="flex items-start gap-4">
+                                    <div class="w-20 h-20 rounded-2xl bg-slate-100 border border-slate-100 overflow-hidden shrink-0 shadow-xs">
+                                        <img src="@item.ThumbnailUrl" 
+                                             alt="@item.ProductName" 
+                                             class="w-full h-full object-cover" 
+                                             onerror="this.src='/images/branding/default-product.png'" />
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-charcoal hover:text-magenta-accent transition">
+                                            @item.ProductName
+                                        </h4>
+                                        <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 mt-1">
+                                            <span class="font-mono text-[11px] text-slate-400">SKU: @item.Sku</span>
+                                            @if (!string.IsNullOrEmpty(item.VariantName))
+                                            {
+                                                <span class="text-slate-300">•</span>
+                                                <span class="text-slate-600 bg-slate-100 px-2 py-0.5 rounded-md text-[11px]">@item.VariantName</span>
+                                            }
+                                        </div>
+
+                                        <!-- FEFO Batch & Expiry Tag -->
+                                        <div class="mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50/80 border border-amber-200/80 text-[11px] text-amber-900">
+                                            <i class="fa-solid fa-barcode text-amber-700"></i>
+                                            <span>Lô: <strong>@item.FefoBatchNumber</strong></span>
+                                            <span class="text-amber-300">|</span>
+                                            <i class="fa-regular fa-calendar-check text-amber-700"></i>
+                                            <span>HSD: <strong>@(item.FefoExpiryDate?.ToString("MM/yyyy") ?? "Hạn xa 36 tháng")</strong></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Quantity & Price -->
+                                <div class="text-left sm:text-right shrink-0">
+                                    <div class="text-sm font-bold text-charcoal font-mono">
+                                        @item.LineTotal.ToString("N0") ₫
+                                    </div>
+                                    <div class="text-xs text-slate-400 mt-0.5">
+                                        @item.UnitPrice.ToString("N0") ₫ × @item.Quantity
+                                    </div>
+                                </div>
+
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Thông tin giao hàng & Ghi chú -->
+                <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-serif font-bold text-charcoal mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-location-dot text-magenta-accent"></i>
+                        <span>Địa Chỉ & Thông Tin Nhận Hàng</span>
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Recipient Details -->
+                        <div class="bg-slate-50/80 p-4 rounded-2xl border border-slate-100">
+                            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Người Nhận</div>
+                            <div class="text-sm font-bold text-charcoal flex items-center gap-2">
+                                <i class="fa-regular fa-user text-slate-400"></i>
+                                <span>@Model.RecipientName</span>
+                            </div>
+                            <div class="text-xs font-mono text-slate-600 mt-1 flex items-center gap-2">
+                                <i class="fa-solid fa-phone text-slate-400"></i>
+                                <span>@Model.RecipientPhone</span>
+                            </div>
+                        </div>
+
+                        <!-- Full Shipping Address -->
+                        <div class="bg-slate-50/80 p-4 rounded-2xl border border-slate-100">
+                            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Địa Chỉ Nhận Hàng</div>
+                            <div class="text-xs text-slate-700 leading-relaxed flex items-start gap-2">
+                                <i class="fa-solid fa-map-pin text-slate-400 mt-0.5"></i>
+                                <span>@Model.ShippingAddress</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.OrderNote))
+                    {
+                        <div class="mt-4 p-3.5 rounded-2xl bg-amber-50/60 border border-amber-200/60 text-xs text-amber-900 flex items-start gap-2.5">
+                            <i class="fa-regular fa-note-sticky text-amber-600 mt-0.5"></i>
+                            <div>
+                                <strong class="font-bold">Ghi chú của bạn:</strong> @Model.OrderNote
+                            </div>
+                        </div>
+                    }
+                </div>
+
+            </div>
+
+            <!-- Right Col (4 Cols): Tóm tắt tài chính, Nút Mua Lại 1-click & Xuất VAT -->
+            <div class="lg:col-span-4 space-y-6">
+                
+                <!-- Bảng tổng kết tài chính & Điểm thưởng -->
+                <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-serif font-bold text-charcoal mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-receipt text-slate-400"></i>
+                        <span>Chi Tiết Thanh Toán</span>
+                    </h3>
+
+                    <div class="space-y-3 text-xs">
+                        <div class="flex items-center justify-between text-slate-600">
+                            <span>Tạm tính tiền hàng:</span>
+                            <span class="font-mono font-semibold text-charcoal">@Model.SubTotal.ToString("N0") ₫</span>
+                        </div>
+
+                        <div class="flex items-center justify-between text-slate-600">
+                            <span>Phí vận chuyển:</span>
+                            @if (Model.ShippingFee == 0)
+                            {
+                                <span class="text-emerald-600 font-bold">Miễn phí (Freeship)</span>
+                            }
+                            else
+                            {
+                                <span class="font-mono font-semibold text-charcoal">@Model.ShippingFee.ToString("N0") ₫</span>
+                            }
+                        </div>
+
+                        @if (Model.DiscountAmount > 0)
+                        {
+                            <div class="flex items-center justify-between text-magenta-accent">
+                                <span class="flex items-center gap-1">
+                                    <i class="fa-solid fa-ticket"></i> Voucher giảm giá @(!string.IsNullOrEmpty(Model.AppliedVoucherCode) ? $"({Model.AppliedVoucherCode})" : ""):
+                                </span>
+                                <span class="font-mono font-bold">-@Model.DiscountAmount.ToString("N0") ₫</span>
+                            </div>
+                        }
+
+                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-sm font-bold text-charcoal">Tổng thanh toán:</span>
+                            <span class="text-xl font-bold font-mono text-magenta-accent">
+                                @Model.TotalAmount.ToString("N0") ₫
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Điểm thưởng nhận được -->
+                    <div class="mt-5 p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/80 flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center text-lg shrink-0 shadow-xs">
+                            <i class="fa-solid fa-crown"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs font-bold text-amber-950">
+                                +@Model.LoyaltyPointsEarned Điểm Thưởng Omni Club
+                            </div>
+                            <div class="text-[11px] text-amber-800">
+                                Điểm sẽ tự động cộng vào Ví VIP sau khi đơn hàng giao thành công.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thẻ Hành Động: Mua Lại Đơn Này (1-Click) & Xuất Hóa Đơn VAT -->
+                <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-3">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Hành Động Đơn Hàng</h3>
+
+                    <!-- 1. NÚT "MUA LẠI ĐƠN NÀY" (Re-order in 1-click) -->
+                    <form method="post" asp-action="Reorder" asp-controller="Customer">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="orderId" value="@Model.Id" />
+                        <button type="submit" 
+                                class="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-magenta-accent to-pink-600 hover:from-pink-600 hover:to-magenta-accent text-white font-bold text-xs shadow-md hover:shadow-lg hover:shadow-magenta-accent/25 transition transform active:scale-98 flex items-center justify-center gap-2 group">
+                            <i class="fa-solid fa-arrows-rotate group-hover:rotate-180 transition-transform duration-500"></i>
+                            <span>Mua Lại Đơn Này (1-Click)</span>
+                        </button>
+                    </form>
+
+                    <!-- 2. NÚT "YÊU CẦU XUẤT HÓA ĐƠN VAT" -->
+                    @if (Model.HasVatRequested)
+                    {
+                        <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2.5">
+                            <i class="fa-solid fa-circle-check text-emerald-600 text-sm shrink-0"></i>
+                            <div>
+                                <div class="font-bold">Đã gửi yêu cầu xuất hóa đơn VAT</div>
+                                <div class="text-[11px] text-emerald-700">MST: @(Model.VatInfo?.TaxCode ?? "Đã ghi nhận") • Đang phát hành</div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <button type="button" 
+                                @@click="vatModalOpen = true" 
+                                class="w-full py-3 px-4 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs transition flex items-center justify-center gap-2 shadow-2xs">
+                            <i class="fa-solid fa-file-invoice-dollar text-slate-400"></i>
+                            <span>Yêu Cầu Xuất Hóa Đơn VAT</span>
+                        </button>
+                    }
+
+                    <!-- 3. Hỗ trợ CSKH 24/7 -->
+                    <div class="pt-2 text-center">
+                        <a href="tel:19008899" class="text-xs text-slate-500 hover:text-magenta-accent font-medium inline-flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-headset text-slate-400"></i> Cần hỗ trợ đơn hàng? Gọi 1900 8899
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ===================================================
+         MODAL YÊU CẦU XUẤT HÓA ĐƠN VAT
+         =================================================== -->
+    <div x-show="vatModalOpen" 
+         x-cloak 
+         class="fixed inset-0 z-50 overflow-y-auto"
+         aria-labelledby="modal-title" 
+         role="dialog" 
+         aria-modal="true">
+        
+        <!-- Backdrop -->
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+             x-show="vatModalOpen"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @@click="vatModalOpen = false"></div>
+
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+            <div class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-slate-100"
+                 x-show="vatModalOpen"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+                
+                <!-- Modal Header -->
+                <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-pastel-rose/50 to-white">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-magenta-accent/10 text-magenta-accent flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-file-invoice-dollar"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-serif font-bold text-charcoal">Yêu Cầu Xuất Hóa Đơn Điện Tử VAT</h3>
+                            <p class="text-xs text-slate-400">Áp dụng thuế suất mỹ phẩm theo quy định hiện hành</p>
+                        </div>
+                    </div>
+                    <button type="button" @@click="vatModalOpen = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="p-6 space-y-4">
+                    @Html.AntiForgeryToken()
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Mã số thuế (MST) Doanh nghiệp <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               x-model="vatForm.taxCode" 
+                               placeholder="Ví dụ: 0312345678"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-magenta-accent focus:ring-2 focus:ring-magenta-accent/20 text-xs text-charcoal outline-none transition uppercase" />
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Tên Doanh Nghiệp / Công Ty (Theo GPKD) <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               x-model="vatForm.companyName" 
+                               placeholder="Ví dụ: Công Ty Cổ Phần Mỹ Phẩm & Chăm Sóc Sắc Đẹp Omni"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-magenta-accent focus:ring-2 focus:ring-magenta-accent/20 text-xs text-charcoal outline-none transition" />
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Địa chỉ trụ sở công ty <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" 
+                               x-model="vatForm.companyAddress" 
+                               placeholder="Số nhà, tên đường, Phường/Xã, Quận/Huyện, Tỉnh/TP"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-magenta-accent focus:ring-2 focus:ring-magenta-accent/20 text-xs text-charcoal outline-none transition" />
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Email nhận hóa đơn điện tử (PDF / XML) <span class="text-red-500">*</span>
+                        </label>
+                        <input type="email" 
+                               x-model="vatForm.invoiceEmail" 
+                               placeholder="ketoan@doanhnghiep.vn"
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-magenta-accent focus:ring-2 focus:ring-magenta-accent/20 text-xs text-charcoal outline-none transition" />
+                    </div>
+
+                    <!-- Notice -->
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-500 leading-relaxed">
+                        <i class="fa-solid fa-circle-info text-magenta-accent mr-1"></i> Hóa đơn điện tử VAT được xuất trong vòng 24 giờ làm việc sau khi đơn hàng được giao thành công.
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 rounded-b-3xl flex items-center justify-end gap-3">
+                    <button type="button" 
+                            @@click="vatModalOpen = false" 
+                            class="px-5 py-2.5 rounded-full border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
+                        Đóng
+                    </button>
+                    <button type="button" 
+                            @@click="submitVatRequest()" 
+                            :disabled="submittingVat"
+                            class="px-6 py-2.5 rounded-full bg-magenta-accent text-white text-xs font-bold hover:shadow-lg hover:shadow-magenta-accent/25 transition disabled:opacity-50 flex items-center gap-1.5">
+                        <i class="fa-solid fa-paper-plane" x-show="!submittingVat"></i>
+                        <i class="fa-solid fa-spinner fa-spin" x-show="submittingVat"></i>
+                        <span x-text="submittingVat ? 'Đang gửi...' : 'Gửi Yêu Cầu Xuất VAT'"></span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Alpine Script -->
+<script>
+    function orderDetailManager() {
+        return {
+            copied: false,
+            vatModalOpen: false,
+            submittingVat: false,
+            vatForm: {
+                orderId: @Model.Id,
+                taxCode: '',
+                companyName: '',
+                companyAddress: '',
+                invoiceEmail: ''
+            },
+
+            copyTrackingCode(code) {
+                if (!code) return;
+                navigator.clipboard.writeText(code).then(() => {
+                    this.copied = true;
+                    setTimeout(() => {
+                        this.copied = false;
+                    }, 2500);
+                });
+            },
+
+            async submitVatRequest() {
+                if (!this.vatForm.taxCode || !this.vatForm.companyName || !this.vatForm.invoiceEmail) {
+                    alert("Vui lòng điền đầy đủ Mã số thuế, Tên doanh nghiệp và Email nhận hóa đơn.");
+                    return;
+                }
+
+                this.submittingVat = true;
+
+                try {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                    const response = await fetch('/Customer/RequestVatInvoice', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token
+                        },
+                        body: JSON.stringify(this.vatForm)
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        alert(result.message);
+                        this.vatModalOpen = false;
+                        window.location.reload();
+                    } else {
+                        alert(result.message || "Đã xảy ra lỗi khi gửi yêu cầu.");
+                    }
+                } catch (err) {
+                    console.error("Lỗi gửi yêu cầu VAT:", err);
+                    alert("Không thể kết nối đến máy chủ. Vui lòng thử lại sau.");
+                } finally {
+                    this.submittingVat = false;
+                }
+            }
+        };
+    }
+</script>

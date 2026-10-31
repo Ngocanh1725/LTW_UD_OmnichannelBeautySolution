@@ -1,139 +1,328 @@
-@model IEnumerable<Omnichannel.Application.DTOs.Inventory.ProductItemViewModel>
+@model Omnichannel.Application.DTOs.Inventory.ProductListPagedViewModel
+@using System.Text.Encodings.Web
 @{
-    ViewData["Title"] = "Danh mục Sản phẩm SKU";
+    ViewData["Title"] = "Quản Lý Sản Phẩm Mỹ Phẩm";
     Layout = "_AdminLayout";
 }
 
 @Html.AntiForgeryToken()
 
-<div x-data="{ createModalOpen: false }" 
-     @@htmx:after-swap.window="if($event.detail.target.id === 'createModalBody') { createModalOpen = true }"
-     @@reloadproducttable.window="htmx.trigger('#productTableContainer', 'reload')"
-     class="space-y-6">
-
-    <!-- Header Section -->
-    <div class="md:flex md:items-center md:justify-between">
-        <div class="min-w-0 flex-1">
-            <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl sm:tracking-tight">Danh mục Mỹ phẩm & SKU</h2>
-            <p class="mt-1 text-sm text-gray-500">Quản lý mã vạch EAN-13, giá bán lẻ niêm yết và thông số định mức an toàn.</p>
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-rose-600 dark:text-rose-400 font-semibold uppercase tracking-wider">
+                <i class="fa-solid fa-sparkles"></i>
+                <span>Danh Mục Sản Phẩm</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight mt-1">
+                Quản Lý Sản Phẩm Mỹ Phẩm
+            </h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Quản lý mã vạch EAN-13, bảng giá niêm yết, phân loại da liễu & hạn sử dụng FEFO.
+            </p>
         </div>
-        <div class="mt-4 flex md:ml-4 md:mt-0">
-            <button type="button" 
-                    hx-get="/Admin/Product/Create" 
-                    hx-target="#createModalBody"
-                    class="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-                <i class="fa-solid fa-plus mr-2"></i>Thêm Mới Sản Phẩm
-            </button>
+        <div class="flex items-center gap-3">
+            <a href="/Admin/Product/Create" 
+               class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-semibold text-sm shadow-md shadow-rose-500/25 transition-all duration-200">
+                <i class="fa-solid fa-plus mr-2"></i>
+                Thêm Sản Phẩm Mới
+            </a>
         </div>
     </div>
 
-    <!-- Filter Section (HTMX driven) -->
-    <div class="bg-white p-4 shadow sm:rounded-lg">
-        <form hx-get="/Admin/Product" 
+    <!-- 4 KPI Stat Pills -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Tổng sản phẩm -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-xl bg-pink-50 dark:bg-pink-950/40 text-pink-600 dark:text-pink-400 flex items-center justify-center text-xl flex-shrink-0">
+                <i class="fa-solid fa-pump-soap"></i>
+            </div>
+            <div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Tổng sản phẩm</div>
+                <div class="text-xl font-bold text-slate-900 dark:text-white mt-0.5">@Model.TotalItems</div>
+            </div>
+        </div>
+
+        <!-- Đang bán -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl flex-shrink-0">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Đang kinh doanh</div>
+                <div class="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">@Model.TotalActive</div>
+            </div>
+        </div>
+
+        <!-- Tạm ngưng -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl flex-shrink-0">
+                <i class="fa-solid fa-ban"></i>
+            </div>
+            <div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Tạm ngừng bán</div>
+                <div class="text-xl font-bold text-amber-600 dark:text-amber-400 mt-0.5">@Model.TotalInactive</div>
+            </div>
+        </div>
+
+        <!-- Hết hàng -->
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xl flex-shrink-0">
+                <i class="fa-solid fa-boxes-packing"></i>
+            </div>
+            <div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Hết tồn kho</div>
+                <div class="text-xl font-bold text-rose-600 dark:text-rose-400 mt-0.5">@Model.TotalOutOfStock</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Search Toolbar (HTMX) -->
+    <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+        <form id="productFilterForm"
+              hx-get="/Admin/Product" 
               hx-target="#productTableContainer" 
-              hx-trigger="submit, keyup delay:500ms from:input[name=keyword], change from:select[name=categoryId]"
-              class="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div>
-                <label for="keyword" class="sr-only">Tìm kiếm</label>
-                <div class="relative rounded-md shadow-sm">
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                        <i class="fa-solid fa-magnifying-glass text-gray-400"></i>
+              hx-indicator="#tableLoadingIndicator"
+              hx-trigger="submit, keyup delay:400ms from:#filterKeyword, change from:#filterCategory, change from:#filterStockStatus, change from:#filterStatus">
+            
+            <input type="hidden" name="Page" id="filterPage" value="1" />
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+                <!-- Keyword search -->
+                <div class="md:col-span-4">
+                    <label for="filterKeyword" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Tìm kiếm</label>
+                    <div class="relative">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                        </div>
+                        <input type="text" 
+                               name="Keyword" 
+                               id="filterKeyword" 
+                               value="@Model.Filter.Keyword"
+                               class="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition" 
+                               placeholder="Tên mỹ phẩm, mã SKU, Barcode EAN-13..." />
                     </div>
-                    <input type="text" name="keyword" id="keyword" class="block w-full rounded-md border-0 py-1.5 pl-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="Tìm theo tên, mã SKU hoặc Barcode...">
                 </div>
-            </div>
-            <div>
-                <label for="categoryId" class="sr-only">Danh mục</label>
-                <select name="categoryId" id="categoryId" asp-items="ViewBag.Categories" class="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
-                    <option value="">-- Tất cả danh mục ngành hàng --</option>
-                </select>
-            </div>
-            <div class="flex items-center space-x-2">
-                <button type="button" onclick="document.getElementById('keyword').value=''; document.getElementById('categoryId').value=''; htmx.trigger(this.closest('form'), 'submit');" class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
-                    <i class="fa-solid fa-rotate-left mr-2"></i> Làm mới
-                </button>
+
+                <!-- Category dropdown -->
+                <div class="md:col-span-3">
+                    <label for="filterCategory" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Ngành hàng</label>
+                    <select name="CategoryId" 
+                            id="filterCategory" 
+                            asp-items="ViewBag.Categories" 
+                            class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition">
+                        <option value="">-- Tất cả ngành hàng --</option>
+                    </select>
+                </div>
+
+                <!-- Stock Status -->
+                <div class="md:col-span-2">
+                    <label for="filterStockStatus" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Tồn kho</label>
+                    <select name="StockStatus" 
+                            id="filterStockStatus" 
+                            class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition">
+                        <option value="all" selected="@(Model.Filter.StockStatus == "all")">Tất cả kho</option>
+                        <option value="in_stock" selected="@(Model.Filter.StockStatus == "in_stock")">Còn hàng (>0)</option>
+                        <option value="low_stock" selected="@(Model.Filter.StockStatus == "low_stock")">Sắp hết (≤10)</option>
+                        <option value="out_of_stock" selected="@(Model.Filter.StockStatus == "out_of_stock")">Hết hàng (=0)</option>
+                    </select>
+                </div>
+
+                <!-- Active Status -->
+                <div class="md:col-span-2">
+                    <label for="filterStatus" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Trạng thái</label>
+                    <select name="Status" 
+                            id="filterStatus" 
+                            class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition">
+                        <option value="">Tất cả</option>
+                        <option value="1" selected="@(Model.Filter.Status == 1)">Đang bán</option>
+                        <option value="0" selected="@(Model.Filter.Status == 0)">Tạm ngưng</option>
+                    </select>
+                </div>
+
+                <!-- Reset button -->
+                <div class="md:col-span-1 flex items-end">
+                    <button type="button" 
+                            onclick="resetProductFilters()" 
+                            class="w-full py-2 px-3 text-sm font-semibold rounded-xl text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center justify-center" 
+                            title="Đặt lại bộ lọc">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                </div>
             </div>
         </form>
     </div>
 
-    <!-- Table Container -->
-    <div id="productTableContainer" 
-         hx-get="/Admin/Product" 
-         hx-trigger="reload from:body" 
-         class="transition-opacity duration-300">
-        <partial name="_ProductList" model="Model" />
-    </div>
-
-    <!-- Alpine Modal for Create/Edit -->
-    <div x-show="createModalOpen" style="display: none;" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-        <div x-show="createModalOpen" 
-             x-transition:enter="ease-out duration-300" 
-             x-transition:enter-start="opacity-0" 
-             x-transition:enter-end="opacity-100" 
-             x-transition:leave="ease-in duration-200" 
-             x-transition:leave-start="opacity-100" 
-             x-transition:leave-end="opacity-0" 
-             class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-
-        <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                <div x-show="createModalOpen" 
-                     @@click.outside="createModalOpen = false"
-                     x-transition:enter="ease-out duration-300" 
-                     x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
-                     x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" 
-                     x-transition:leave="ease-in duration-200" 
-                     x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" 
-                     x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" 
-                     class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:p-6">
-                    
-                    <div class="absolute right-0 top-0 hidden pr-4 pt-4 sm:block">
-                        <button type="button" @@click="createModalOpen = false" class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none">
-                            <span class="sr-only">Close</span>
-                            <i class="fa-solid fa-xmark h-6 w-6 text-xl"></i>
-                        </button>
-                    </div>
-                    
-                    <div id="createModalBody">
-                        <!-- Content loaded via HTMX -->
-                    </div>
-                </div>
+    <!-- Skeleton Loading Indicator for HTMX -->
+    <div id="tableLoadingIndicator" class="htmx-indicator hidden">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-pulse space-y-4">
+            <div class="h-6 bg-slate-200 dark:bg-slate-800 rounded-lg w-1/4"></div>
+            <div class="space-y-3">
+                <div class="h-12 bg-slate-100 dark:bg-slate-800/60 rounded-xl"></div>
+                <div class="h-12 bg-slate-100 dark:bg-slate-800/60 rounded-xl"></div>
+                <div class="h-12 bg-slate-100 dark:bg-slate-800/60 rounded-xl"></div>
+                <div class="h-12 bg-slate-100 dark:bg-slate-800/60 rounded-xl"></div>
             </div>
         </div>
+    </div>
+
+    <!-- Dynamic Table Container (HTMX Target) -->
+    <div id="productTableContainer" 
+         hx-get="/Admin/Product" 
+         hx-trigger="reloadProductTable from:body"
+         class="transition-opacity duration-200">
+        <partial name="_ProductList" model="Model" />
     </div>
 </div>
 
 @section Scripts {
     <script>
-        document.body.addEventListener("htmx:afterRequest", function (evt) {
-            if (evt.detail.successful && evt.detail.elt.hasAttribute('hx-post') && !evt.detail.target) {
-                // Thao tác ToggleStatus hoặc submit Create nếu thành công có trả về HTTP 200 mà không cần target
-                if(evt.detail.xhr.response === "") {
-                    // Modal should be closed if the response is empty and has HX-Trigger
-                    document.dispatchEvent(new CustomEvent('reloadproducttable'));
+        // Pagination handler
+        function goToProductPage(pageNum) {
+            const pageInput = document.getElementById('filterPage');
+            if (pageInput) {
+                pageInput.value = pageNum;
+                const form = document.getElementById('productFilterForm');
+                if (form) {
+                    htmx.trigger(form, 'submit');
                 }
             }
-        });
-        
-        // SignalR Toast Notification
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/systemHub")
-            .build();
+        }
 
-        connection.on("ReceiveNotification", function (message, type) {
+        // Reset filter handler
+        function resetProductFilters() {
+            const kw = document.getElementById('filterKeyword');
+            const cat = document.getElementById('filterCategory');
+            const stock = document.getElementById('filterStockStatus');
+            const stat = document.getElementById('filterStatus');
+            const page = document.getElementById('filterPage');
+
+            if (kw) kw.value = '';
+            if (cat) cat.value = '';
+            if (stock) stock.value = 'all';
+            if (stat) stat.value = '';
+            if (page) page.value = '1';
+
+            const form = document.getElementById('productFilterForm');
+            if (form) {
+                htmx.trigger(form, 'submit');
+            }
+        }
+
+        // SweetAlert2 Soft Delete Confirmation
+        function confirmDeleteProduct(id, name) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+            Swal.fire({
+                title: 'Xóa sản phẩm?',
+                html: `Bạn chắc chắn muốn xóa mềm sản phẩm <b>"${name}"</b>?<br/><span class="text-xs text-gray-500">Sản phẩm sẽ chuyển sang trạng thái ngừng kinh doanh và giữ nguyên lịch sử đơn hàng.</span>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '<i class="fa-solid fa-trash-can mr-1"></i> Đồng ý xóa',
+                cancelButtonText: 'Hủy bỏ',
+                customClass: {
+                    popup: 'rounded-2xl dark:bg-slate-900 dark:text-slate-100',
+                    confirmButton: 'rounded-xl font-medium',
+                    cancelButton: 'rounded-xl font-medium'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/Admin/Product/Delete/${id}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': token,
+                            'HX-Request': 'true'
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            Swal.fire({
+                                toast: true,
+                                position: 'bottom-end',
+                                icon: 'success',
+                                title: `Đã xóa sản phẩm "${name}" thành công!`,
+                                showConfirmButton: false,
+                                timer: 3000,
+                                timerProgressBar: true
+                            });
+                            // Reload HTMX product table
+                            const tableContainer = document.getElementById('productTableContainer');
+                            if (tableContainer) {
+                                htmx.trigger(tableContainer, 'reloadProductTable');
+                            }
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Thao tác thất bại',
+                                text: 'Không thể xóa sản phẩm vào lúc này.',
+                                customClass: { popup: 'rounded-2xl' }
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi kết nối',
+                            text: 'Đã có lỗi xảy ra khi gửi yêu cầu.',
+                            customClass: { popup: 'rounded-2xl' }
+                        });
+                    });
+                }
+            });
+        }
+
+        // Show SweetAlert2 for TempData messages
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>
             Swal.fire({
                 toast: true,
                 position: 'bottom-end',
-                icon: type,
-                title: message,
+                icon: 'success',
+                title: '@Html.Raw(JavaScriptEncoder.Default.Encode(TempData["SuccessMessage"]?.ToString() ?? ""))',
                 showConfirmButton: false,
-                timer: 3000,
+                timer: 3500,
                 timerProgressBar: true
             });
-        });
+            </text>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: '@Html.Raw(JavaScriptEncoder.Default.Encode(TempData["ErrorMessage"]?.ToString() ?? ""))',
+                customClass: { popup: 'rounded-2xl' }
+            });
+            </text>
+        }
 
-        connection.start().catch(function (err) {
-            return console.error(err.toString());
-        });
+        // SignalR Toast Notifications
+        if (typeof signalR !== 'undefined') {
+            const hubConnection = new signalR.HubConnectionBuilder()
+                .withUrl("/systemHub")
+                .withAutomaticReconnect()
+                .build();
+
+            hubConnection.on("ReceiveNotification", function (message, type) {
+                Swal.fire({
+                    toast: true,
+                    position: 'bottom-end',
+                    icon: type || 'info',
+                    title: message,
+                    showConfirmButton: false,
+                    timer: 3500,
+                    timerProgressBar: true
+                });
+            });
+
+            hubConnection.start().catch(err => console.debug("SignalR connection:", err));
+        }
     </script>
 }

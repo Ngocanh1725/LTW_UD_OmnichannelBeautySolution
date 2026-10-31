@@ -1,0 +1,100 @@
+@model Omnichannel.Domain.Entities.Order
+@{
+    ViewData["Title"] = "Cổng Thanh Toán Ví MoMo (Sandbox) - OMNI BEAUTY";
+}
+
+<div class="bg-slate-100 min-h-screen py-10 sm:py-16 flex items-center justify-center font-sans">
+    <div class="max-w-md w-full mx-4">
+        
+        <!-- Header MoMo Brand -->
+        <div class="bg-[#A50064] text-white p-5 rounded-t-3xl text-center space-y-2 shadow-md">
+            <div class="flex items-center justify-center gap-2">
+                <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" alt="MoMo" class="h-8 w-8 object-contain rounded-lg bg-white p-0.5" />
+                <span class="font-bold text-lg tracking-wide uppercase">Cổng Thanh Toán MoMo</span>
+            </div>
+            <div class="inline-block bg-white/20 text-[11px] px-3 py-0.5 rounded-full font-medium">
+                Môi Trường Kiểm Thử Sandbox
+            </div>
+        </div>
+
+        <!-- Body Card -->
+        <div class="bg-white p-6 sm:p-8 rounded-b-3xl border border-slate-200 shadow-xl space-y-6 text-center">
+            
+            <!-- Thông Tin Đơn Hàng -->
+            <div class="space-y-1">
+                <div class="text-xs text-slate-500 font-medium">Nhà cung cấp</div>
+                <div class="font-bold text-charcoal text-base">OMNI BEAUTY OFFICIAL</div>
+                <div class="text-xs text-slate-400">Mã đơn hàng: <strong class="font-mono text-slate-700">@Model.OrderCode</strong></div>
+            </div>
+
+            <!-- Số Tiền -->
+            <div class="p-3 bg-pink-50/60 rounded-2xl border border-pink-100">
+                <div class="text-xs text-slate-500 font-medium">Số tiền cần thanh toán</div>
+                <div class="text-2xl sm:text-3xl font-bold font-mono text-[#A50064] mt-0.5">
+                    @Model.TotalAmount.ToString("N0") ₫
+                </div>
+            </div>
+
+            <!-- Mã QR MoMo -->
+            <div class="space-y-3">
+                <div class="text-xs text-slate-600 font-semibold flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-qrcode text-[#A50064]"></i>
+                    <span>Quét mã QR bằng ứng dụng MoMo</span>
+                </div>
+
+                <div class="p-4 bg-white border-2 border-[#A50064]/30 rounded-2xl inline-block shadow-sm">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=2|99|0909999888|OMNI%20BEAUTY||0|0|@((long)Model.TotalAmount)|OB%20@Model.OrderCode|transfer_myqr" 
+                         alt="MoMo QR Code" 
+                         class="w-52 h-52 mx-auto object-contain rounded-lg" />
+                </div>
+
+                <div class="text-[11px] text-slate-400 flex items-center justify-center gap-1">
+                    <i class="fa-regular fa-clock"></i>
+                    <span>Giao dịch hết hạn sau:</span>
+                    <span id="momoTimer" class="font-mono font-bold text-rose-600">10:00</span>
+                </div>
+            </div>
+
+            <!-- Thao tác Sandbox -->
+            <div class="space-y-3 pt-2">
+                <!-- Nút Xác Nhận Thanh Toán MoMo Sandbox -->
+                <a href="/Checkout/MomoCallback?resultCode=0&orderId=@Model.OrderCode&amount=@((long)Model.TotalAmount)&message=Success"
+                   class="w-full py-3.5 px-6 rounded-full bg-[#A50064] text-white font-bold text-xs uppercase tracking-wide hover:bg-[#850050] transition shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-check"></i>
+                    <span>[Sandbox] Xác Nhận Thanh Toán MoMo Thành Công</span>
+                </a>
+
+                <!-- Nút Hủy -->
+                <a href="/Checkout/MomoCallback?resultCode=1006&orderId=@Model.OrderCode&amount=@((long)Model.TotalAmount)&message=UserCancelled"
+                   class="w-full py-2.5 px-4 rounded-full border border-slate-300 text-slate-500 hover:text-slate-800 text-xs font-semibold hover:bg-slate-50 transition block">
+                    Hủy Giao Dịch & Quay Lại
+                </a>
+            </div>
+
+            <!-- Footer Chứng Chỉ Bảo Mật -->
+            <div class="pt-2 border-t border-slate-100 text-[10px] text-slate-400 flex items-center justify-center gap-3">
+                <span class="flex items-center gap-1"><i class="fa-solid fa-shield-halved text-emerald-600"></i> PCI-DSS Level 1</span>
+                <span>•</span>
+                <span>Mã hóa SSL 256-bit</span>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let momoSec = 600;
+    const momoTimerEl = document.getElementById('momoTimer');
+    if (momoTimerEl) {
+        setInterval(() => {
+            momoSec--;
+            const min = Math.floor(momoSec / 60).toString().padStart(2, '0');
+            const sec = (momoSec % 60).toString().padStart(2, '0');
+            momoTimerEl.innerText = `${min}:${sec}`;
+            if (momoSec <= 0) {
+                momoTimerEl.innerText = '00:00';
+            }
+        }, 1000);
+    }
+</script>

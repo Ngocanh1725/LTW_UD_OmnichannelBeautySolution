@@ -17,10 +17,12 @@ namespace Omnichannel.Infrastructure.Services
     public class CartService : ICartService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IPromotionEngine? _promotionEngine;
 
-        public CartService(ApplicationDbContext context)
+        public CartService(ApplicationDbContext context, IPromotionEngine? promotionEngine = null)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _promotionEngine = promotionEngine;
         }
 
         public async Task<CartDto> GetOrCreateCartAsync(string? sessionId, string? userId, CancellationToken cancellationToken = default)
@@ -47,13 +49,13 @@ namespace Omnichannel.Infrastructure.Services
                 await _context.SaveChangesAsync(cancellationToken);
             }
 
-            return MapToDto(cart);
+            return await MapToDtoAsync(cart, cancellationToken);
         }
 
         public async Task<CartDto?> GetCartAsync(string? sessionId, string? userId, CancellationToken cancellationToken = default)
         {
             var cart = await FindActiveCartEntityAsync(sessionId, userId, cancellationToken);
-            return cart != null ? MapToDto(cart) : null;
+            return cart != null ? await MapToDtoAsync(cart, cancellationToken) : null;
         }
 
         public async Task<CartDto> AddToCartAsync(string? sessionId, string? userId, int productId, int? batchId, int quantity, CancellationToken cancellationToken = default)
@@ -103,7 +105,7 @@ namespace Omnichannel.Infrastructure.Services
             cart.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync(cancellationToken);
 
-            return MapToDto(cart);
+            return await MapToDtoAsync(cart, cancellationToken);
         }
 
         public async Task<CartDto> UpdateQuantityAsync(string? sessionId, string? userId, int cartItemId, int quantity, CancellationToken cancellationToken = default)
@@ -131,7 +133,7 @@ namespace Omnichannel.Infrastructure.Services
                 await _context.SaveChangesAsync(cancellationToken);
             }
 
-            return MapToDto(cart);
+            return await MapToDtoAsync(cart, cancellationToken);
         }
 
         public async Task<CartDto> RemoveFromCartAsync(string? sessionId, string? userId, int cartItemId, CancellationToken cancellationToken = default)
@@ -151,7 +153,7 @@ namespace Omnichannel.Infrastructure.Services
                 await _context.SaveChangesAsync(cancellationToken);
             }
 
-            return MapToDto(cart);
+            return await MapToDtoAsync(cart, cancellationToken);
         }
 
         public async Task ClearCartAsync(string? sessionId, string? userId, CancellationToken cancellationToken = default)
@@ -252,7 +254,7 @@ namespace Omnichannel.Infrastructure.Services
             return null;
         }
 
-        private CartDto MapToDto(Cart cart)
+        private async Task<CartDto> MapToDtoAsync(Cart cart, CancellationToken cancellationToken = default)
         {
             var items = cart.CartItems.Select(ci => new CartItemDto
             {
@@ -272,7 +274,20 @@ namespace Omnichannel.Infrastructure.Services
             }).ToList();
 
             var subTotal = items.Sum(i => i.UnitPrice * i.Quantity);
-            var discountAmount = 0m;
+            decimal discountAmount = 0m;
+
+            if (_promotionEngine != null && items.Any())
+            {
+                try
+                {
+                    var promoResult = await _promotionEngine.EvaluateCartAsync(items, null, cart.UserId, cancellationToken);
+                    discountAmount = promoResult.TotalDiscount;
+                }
+                catch
+                {
+                    // Fallback to 0 discount if promo evaluation fails
+                }
+            }
 
             return new CartDto
             {
@@ -281,7 +296,7 @@ namespace Omnichannel.Infrastructure.Services
                 UserId = cart.UserId,
                 SubTotal = subTotal,
                 DiscountAmount = discountAmount,
-                TotalAmount = subTotal - discountAmount,
+                TotalAmount = Math.Max(0, subTotal - discountAmount),
                 TotalItems = items.Sum(i => i.Quantity),
                 Items = items,
                 CartItems = items

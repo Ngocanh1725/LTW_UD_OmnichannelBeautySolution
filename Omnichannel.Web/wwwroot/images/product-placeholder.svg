@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff1f2"/>
+      <stop offset="100%" stop-color="#ffe4e6"/>
+    </linearGradient>
+    <linearGradient id="bottleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f43f5e"/>
+      <stop offset="100%" stop-color="#e11d48"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="20" fill="url(#bgGrad)"/>
+  <!-- Cosmetic Dropper Bottle Silhouette -->
+  <rect x="88" y="42" width="24" height="12" rx="4" fill="#fda4af"/>
+  <rect x="94" y="28" width="12" height="16" rx="3" fill="#fb7185"/>
+  <path d="M72 70 C72 60 78 54 90 54 L110 54 C122 54 128 60 128 70 L128 146 C128 156 120 164 110 164 L90 164 C80 164 72 156 72 146 Z" fill="url(#bottleGrad)" opacity="0.85"/>
+  <rect x="80" y="88" width="40" height="52" rx="4" fill="#ffffff" opacity="0.9"/>
+  <line x1="86" y1="102" x2="114" y2="102" stroke="#f43f5e" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="90" y1="110" x2="110" y2="110" stroke="#fda4af" stroke-width="2" stroke-linecap="round"/>
+  <line x1="92" y1="118" x2="108" y2="118" stroke="#fda4af" stroke-width="2" stroke-linecap="round"/>
+  <!-- Sparkles -->
+  <path d="M145 65 L148 72 L155 75 L148 78 L145 85 L142 78 L135 75 L142 72 Z" fill="#fb7185" opacity="0.7"/>
+  <path d="M55 125 L57 130 L62 132 L57 134 L55 139 L53 134 L48 132 L53 130 Z" fill="#fda4af" opacity="0.8"/>
+</svg>

@@ -1,4 +1,4 @@
-﻿@model Omnichannel.Application.DTOs.Sales.PosReceiptPrintViewModel
+@model Omnichannel.Application.DTOs.Sales.PosReceiptPrintViewModel
 @{
     Layout = null;
 }
@@ -6,93 +6,187 @@
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
-    <title>In Hóa Đơn - @Model.OrderId</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hóa Đơn Bán Lẻ K80 - @Model.OrderId</title>
     <style>
         @@page {
             size: 80mm auto;
+            margin: 2mm 3mm;
+        }
+
+        @@media print {
+            body {
+                width: 76mm !important;
+                margin: 0 !important;
+                padding: 2px !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: 'Courier New', Courier, monospace, sans-serif;
+            font-family: 'Courier New', Courier, 'Lucida Console', -apple-system, BlinkMacSystemFont, "Segoe UI", monospace;
             width: 76mm;
             margin: 0 auto;
-            padding: 8px 2px;
+            padding: 8px 4px;
             color: #000;
-            font-size: 12px;
-            line-height: 1.25;
-        }
-
-        .text-center {
-            text-align: center;
-        }
-
-        .text-end {
-            text-align: right;
-        }
-
-        .fw-bold {
-            font-weight: bold;
-        }
-
-        .fs-lg {
-            font-size: 15px;
-        }
-
-        .fs-sm {
+            background-color: #fff;
             font-size: 11px;
+            line-height: 1.35;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
+
+        .text-center { text-align: center; }
+        .text-end { text-align: right; }
+        .text-start { text-align: left; }
+        .fw-bold { font-weight: bold; }
+        .fw-bolder { font-weight: 800; }
+        
+        .fs-brand { font-size: 16px; font-weight: 900; letter-spacing: 0.5px; }
+        .fs-title { font-size: 14px; font-weight: 900; letter-spacing: 0.5px; }
+        .fs-sub { font-size: 11px; font-weight: 700; }
+        .fs-sm { font-size: 10.5px; }
+        .fs-xs { font-size: 9.5px; }
 
         .divider {
             border-top: 1px dashed #000;
             margin: 6px 0;
         }
 
-        .table-items {
-            width: 100%;
-            border-collapse: collapse;
+        .divider-double {
+            border-top: 2px solid #000;
             margin: 6px 0;
         }
 
-            .table-items th, .table-items td {
-                padding: 3px 0;
-            }
+        .table-items {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 5px 0;
+        }
+
+        .table-items th {
+            border-top: 1px dashed #000;
+            border-bottom: 1px dashed #000;
+            padding: 4px 0;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .table-items td {
+            padding: 2.5px 0;
+            vertical-align: top;
+        }
+
+        .btn-print {
+            background-color: #e11d48;
+            color: #fff;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(225, 29, 72, 0.3);
+            transition: all 0.2s;
+        }
+        .btn-print:hover {
+            background-color: #be123c;
+        }
+
+        .vip-badge {
+            border: 1px solid #000;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: 700;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+
+        .loyalty-box {
+            border: 1px dashed #000;
+            padding: 4px 6px;
+            margin: 6px 0;
+            border-radius: 4px;
+            background: #fafafa;
+        }
     </style>
 </head>
 <body>
+    <!-- Nút In Thử & Quay Lại (Ẩn khi in) -->
+    <div class="no-print text-center" style="margin-bottom: 12px;">
+        <button type="button" class="btn-print" onclick="window.print()">🖨️ In Hóa Đơn K80</button>
+    </div>
+
+    <!-- 1. Header Thương Hiệu & Showroom -->
     <div class="text-center">
-        <div class="fw-bold fs-lg">OMNICHANNEL BEAUTY</div>
-        <div class="fs-sm">@Model.StoreName</div>
-        <div class="fs-sm">Đ/c: @Model.StoreAddress</div>
-        <div class="fs-sm">Hotline: @Model.StorePhone</div>
+        <div class="fs-brand">OMNI BEAUTY</div>
+        <div class="fs-xs" style="font-weight: 700; letter-spacing: 0.5px;">HỆ THỐNG PHÂN PHỐI MỸ PHẨM CHÍNH HÃNG</div>
+        <div class="fs-sub" style="margin-top: 3px;">@Model.StoreName</div>
+        <div class="fs-xs">Đ/c: @Model.StoreAddress</div>
+        <div class="fs-xs">Hotline: @Model.StorePhone • MST: 0316889988</div>
+        
         <div class="divider"></div>
-        <div class="fw-bold fs-lg">PHIẾU THANH TOÁN & HĐĐT</div>
-        <div class="fs-sm">Mã đơn: <strong>@Model.OrderId</strong></div>
-        <div class="fs-sm">Ký hiệu: @Model.InvoiceSeries - Số HĐ: @Model.InvoiceNumber</div>
-        <div class="fs-sm">Ngày: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</div>
+        <div class="fs-title" style="margin: 2px 0;">HÓA ĐƠN BÁN LẺ</div>
+        <div class="fs-xs" style="letter-spacing: 1px;">MÃ ĐƠN: <strong>@Model.OrderId</strong></div>
+        <div class="fs-xs">Ký hiệu: @Model.InvoiceSeries • Số HĐ: <strong>@Model.InvoiceNumber</strong></div>
+        <div class="fs-xs">Thời gian: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</div>
     </div>
 
     <div class="divider"></div>
-    <div class="fs-sm">Thu ngân: @Model.CashierName</div>
-    <div class="fs-sm">Khách hàng: @Model.CustomerName (@Model.CustomerPhone)</div>
 
+    <!-- 2. Thông Tin Thu Ngân & Khách Hàng -->
+    <div class="fs-sm" style="line-height: 1.4;">
+        <div>Thu ngân: <strong>@Model.CashierName</strong></div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Khách hàng: <strong>@Model.CustomerName</strong></span>
+            @if (!string.IsNullOrWhiteSpace(Model.CustomerVipTier) && Model.CustomerVipTier != "Khách Lẻ")
+            {
+                <span class="vip-badge">@Model.CustomerVipTier</span>
+            }
+        </div>
+        @if (!string.IsNullOrWhiteSpace(Model.CustomerPhone))
+        {
+            <div>SĐT: <strong>@Model.CustomerPhone</strong></div>
+        }
+    </div>
+
+    <!-- 3. Bảng Kê Chi Tiết Sản Phẩm & Lô FEFO -->
     <table class="table-items fs-sm">
         <thead>
-            <tr style="border-bottom: 1px dashed #000;">
-                <th style="text-align: left;">Mặt hàng</th>
-                <th class="text-center" style="width: 30px;">SL</th>
-                <th class="text-end" style="width: 70px;">T.Tiền</th>
+            <tr>
+                <th class="text-start">Tên Mỹ Phẩm</th>
+                <th class="text-center" style="width: 25px;">SL</th>
+                <th class="text-end" style="width: 65px;">Đơn giá</th>
+                <th class="text-end" style="width: 75px;">T.Tiền</th>
             </tr>
         </thead>
         <tbody>
+            @{ int idx = 1; }
             @foreach (var item in Model.Items)
             {
                 <tr>
-                    <td colspan="3" class="fw-bold" style="padding-top: 4px;">@item.ProductName</td>
+                    <td colspan="4" class="fw-bold" style="padding-top: 3px;">
+                        @(idx++). @item.ProductName
+                    </td>
                 </tr>
                 <tr>
-                    <td class="fs-sm" style="font-size: 10px; color: #333;">Lô: @item.BatchNumber (HSD: @item.ExpDateStr)</td>
-                    <td class="text-center">x@item.Quantity</td>
+                    <td class="fs-xs" style="color: #333;">
+                        Lô: @item.BatchNumber @(!string.IsNullOrEmpty(item.ExpDateStr) ? $" • HSD: {item.ExpDateStr}" : "")
+                    </td>
+                    <td class="text-center fw-bold">@item.Quantity</td>
+                    <td class="text-end fs-xs">
+                        @((item.UnitPrice > 0 ? item.UnitPrice : (item.LineTotal / Math.Max(1, item.Quantity))).ToString("N0"))
+                    </td>
                     <td class="text-end fw-bold">@item.LineTotal.ToString("N0")</td>
                 </tr>
             }
@@ -101,46 +195,108 @@
 
     <div class="divider"></div>
 
-    <table style="width: 100%; font-size: 12px;">
+    <!-- 4. Tổng Kết Tài Chính & Chiết Khấu -->
+    <table style="width: 100%; font-size: 11px; line-height: 1.45;">
         <tr>
-            <td>Tiền hàng:</td>
-            <td class="text-end font-monospace">@Model.SubTotal.ToString("N0") đ</td>
+            <td>Tổng tiền hàng:</td>
+            <td class="text-end fw-bold">@Model.SubTotal.ToString("N0") đ</td>
         </tr>
+
         @if (Model.DiscountAmount > 0)
         {
             <tr>
-                <td>Chiết khấu:</td>
-                <td class="text-end font-monospace">-@Model.DiscountAmount.ToString("N0") đ</td>
+                <td>Chiết khấu voucher / VIP / Điểm:</td>
+                <td class="text-end fw-bold">-@Model.DiscountAmount.ToString("N0") đ</td>
             </tr>
         }
+
         <tr>
-            <td>VAT (10%):</td>
-            <td class="text-end font-monospace">@Model.VatAmount.ToString("N0") đ</td>
+            <td>Thuế GTGT (VAT 10%):</td>
+            <td class="text-end">@Model.VatAmount.ToString("N0") đ</td>
         </tr>
-        <tr class="fw-bold fs-lg">
-            <td style="padding-top: 4px;">TỔNG CỘNG:</td>
-            <td class="text-end font-monospace" style="padding-top: 4px;">@Model.FinalTotal.ToString("N0") đ</td>
+
+        <tr class="divider-double">
+            <td colspan="2"></td>
         </tr>
-        <tr>
-            <td>Phương thức:</td>
-            <td class="text-end">@Model.PaymentMethodName</td>
+
+        <tr style="font-size: 13px; font-weight: 900;">
+            <td style="padding: 3px 0;">TỔNG THANH TOÁN:</td>
+            <td class="text-end" style="padding: 3px 0;">@Model.FinalTotal.ToString("N0") đ</td>
         </tr>
-        <tr>
-            <td>Tiền khách đưa:</td>
-            <td class="text-end font-monospace">@Model.CashGiven.ToString("N0") đ</td>
+
+        <tr class="divider-double">
+            <td colspan="2"></td>
         </tr>
-        <tr>
-            <td>Tiền thối lại:</td>
-            <td class="text-end font-monospace">@Model.ChangeAmount.ToString("N0") đ</td>
+
+        <tr class="fs-sm">
+            <td>Hình thức thanh toán:</td>
+            <td class="text-end fw-bold">@Model.PaymentMethodName</td>
         </tr>
+
+        @if (Model.CashGiven > 0)
+        {
+            <tr class="fs-sm">
+                <td>Tiền khách đưa:</td>
+                <td class="text-end">@Model.CashGiven.ToString("N0") đ</td>
+            </tr>
+            <tr class="fs-sm">
+                <td>Tiền thối lại:</td>
+                <td class="text-end fw-bold">@Model.ChangeAmount.ToString("N0") đ</td>
+            </tr>
+        }
     </table>
 
-    <div class="divider"></div>
+    <!-- 5. Tích Điểm Thành Viên Beauty Club -->
+    @if (!string.IsNullOrWhiteSpace(Model.CustomerPhone) && Model.CustomerPhone != "0000000000")
+    {
+        <div class="loyalty-box fs-xs">
+            <div style="font-weight: 800; text-transform: uppercase; margin-bottom: 2px;">
+                ⭐ Beauty Club Member: @Model.CustomerVipTier
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>Điểm tích lũy mới đơn này:</span>
+                <strong>+@Model.LoyaltyPointsEarned điểm</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span>Tổng điểm khả dụng hiện có:</span>
+                <strong>@Model.CurrentLoyaltyPoints.ToString("N0") điểm</strong>
+            </div>
+            <div style="font-style: italic; color: #444; margin-top: 1px;">
+                (1 điểm = 1.000 VNĐ dùng cấn trừ trực tiếp cho đơn kế tiếp)
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="divider"></div>
+    }
 
-    <div class="text-center fs-sm">
+    <!-- 6. Thông Tin Hóa Đơn Điện Tử & Lời Cảm Ơn -->
+    <div class="text-center fs-xs" style="line-height: 1.4; margin-top: 4px;">
         <div>Mã tra cứu HĐĐT: <strong>@Model.TaxLookupCode</strong></div>
-        <div>Tra cứu tại: <em>https://hoadon.beautyomnichannel.vn</em></div>
-        <div style="margin-top: 8px;">Cảm ơn quý khách & Hẹn gặp lại!</div>
+        <div>Website tra cứu: <em>hoadon.beautyomnichannel.vn</em></div>
+        
+        <div class="divider"></div>
+        
+        <div style="font-weight: 900; font-size: 11px; margin-top: 3px;">
+            CẢM ƠN QUÝ KHÁCH & HẸN GẶP LẠI!
+        </div>
+        <div style="margin-top: 2px;">
+            Mỹ phẩm chính hãng 100% - Đổi trả trong 7 ngày
+        </div>
+        <div style="font-size: 8.5px; color: #555; margin-top: 3px;">
+            (Phiếu xuất kho kiêm bảo hành sản phẩm bán lẻ K80)
+        </div>
     </div>
+
+    <script>
+        // Tự động kích hoạt hộp thoại in khi tải xong
+        window.addEventListener('DOMContentLoaded', function () {
+            setTimeout(function () {
+                window.focus();
+                window.print();
+            }, 300);
+        });
+    </script>
 </body>
 </html>

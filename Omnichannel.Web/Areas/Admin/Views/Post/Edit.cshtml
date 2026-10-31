@@ -1,0 +1,179 @@
+@model Omnichannel.Application.DTOs.Cms.EditPostViewModel
+@{
+    ViewData["Title"] = "Chỉnh Sửa Bài Viết";
+    Layout = "_AdminLayout";
+}
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
+    <style>
+        .ql-container {
+            font-size: 14px;
+            font-family: inherit;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            background: #fff;
+            min-height: 280px;
+        }
+        .ql-toolbar {
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            background: #f8fafc;
+        }
+    </style>
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-11">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">Chỉnh Sửa Bài Viết</h4>
+                <p class="text-muted small mb-0">Cập nhật nội dung, thay đổi danh mục và cấu hình SEO</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="/Blog/@Model.Slug" target="_blank" class="btn btn-outline-secondary btn-sm rounded-3">
+                    <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Xem bài viết
+                </a>
+                <a href="/Admin/Post" class="btn btn-outline-secondary btn-sm rounded-3">
+                    <i class="fa-solid fa-arrow-left me-1"></i>Quay lại danh sách
+                </a>
+            </div>
+        </div>
+
+        <form asp-action="Edit" method="post" id="postEditForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="PostId" />
+
+            <div class="row g-4">
+                <!-- Cột trái: Nội dung chính bài viết -->
+                <div class="col-lg-8">
+                    <div class="beauty-card p-4 space-y-4">
+                        <div class="mb-3">
+                            <label asp-for="Title" class="form-label small fw-semibold">Tiêu đề bài viết *</label>
+                            <input asp-for="Title" id="postTitle" class="form-control rounded-3" placeholder="vd: Top 5 Bước Skincare Phục Hồi Hàng Rào Bảo Vệ Da" required />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Slug" class="form-label small fw-semibold">Đường dẫn thân thiện (Slug) *</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted small">/Blog/</span>
+                                <input asp-for="Slug" id="postSlug" class="form-control font-monospace" required />
+                            </div>
+                            <span asp-validation-for="Slug" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Summary" class="form-label small fw-semibold">Tóm tắt ngắn</label>
+                            <textarea asp-for="Summary" rows="3" class="form-control rounded-3" placeholder="Tóm tắt ngắn 1-2 câu hiển thị ở danh sách bài viết..."></textarea>
+                            <span asp-validation-for="Summary" class="text-danger small"></span>
+                        </div>
+
+                        <!-- Rich Text Editor (Quill.js) -->
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Nội dung bài viết chi tiết *</label>
+                            <div id="quillEditor"></div>
+                            <textarea asp-for="ContentHtml" id="contentHtml" class="d-none"></textarea>
+                            <span asp-validation-for="ContentHtml" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải: Phân loại, Ảnh bìa & Cấu hình SEO -->
+                <div class="col-lg-4">
+                    <!-- Card Phân loại & Xuất bản -->
+                    <div class="beauty-card p-4 mb-4">
+                        <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-sliders text-magenta me-2" style="color: var(--accent-pink);"></i>Phân loại & Xuất bản</h6>
+
+                        <div class="mb-3">
+                            <label asp-for="CategoryId" class="form-label small fw-semibold">Chuyên mục *</label>
+                            <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-select rounded-3" required>
+                                <option value="">-- Chọn chuyên mục --</option>
+                            </select>
+                            <span asp-validation-for="CategoryId" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Status" class="form-label small fw-semibold">Trạng thái phát hành</label>
+                            <select asp-for="Status" class="form-select rounded-3">
+                                <option value="3">Xuất bản (Published)</option>
+                                <option value="1">Lưu bản nháp (Draft)</option>
+                            </select>
+                        </div>
+
+                        <!-- Ảnh đại diện & Live Preview -->
+                        <div class="mb-3">
+                            <label asp-for="ThumbnailUrl" class="form-label small fw-semibold">URL Ảnh đại diện (Thumbnail) *</label>
+                            <input asp-for="ThumbnailUrl" id="thumbnailInput" class="form-control rounded-3" placeholder="https://domain.com/skincare.jpg" required oninput="previewThumbnail(this.value)" />
+                            <span asp-validation-for="ThumbnailUrl" class="text-danger small"></span>
+
+                            <div class="mt-2 text-center p-2 rounded-3 border bg-light">
+                                <img id="thumbnailPreview" src="@(string.IsNullOrEmpty(Model.ThumbnailUrl) ? "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&fit=crop" : Model.ThumbnailUrl)" class="img-fluid rounded-2 shadow-xs" style="max-height: 140px; object-fit: cover;" alt="Xem trước ảnh bìa" />
+                                <div class="text-muted mt-1" style="font-size: 10px;">Xem trước ảnh đại diện</div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary-gradient w-100 py-2.5 mt-2">
+                            <i class="fa-solid fa-floppy-disk me-1"></i>Lưu Thay Đổi
+                        </button>
+                    </div>
+
+                    <!-- Card Cấu hình SEO -->
+                    <div class="beauty-card p-4">
+                        <h6 class="fw-bold text-dark mb-3"><i class="fa-brands fa-google text-primary me-2"></i>Tối ưu hóa SEO</h6>
+                        <div class="mb-2">
+                            <label asp-for="MetaTitle" class="form-label small fw-semibold">Thẻ Tiêu đề SEO (Meta Title)</label>
+                            <input asp-for="MetaTitle" class="form-control rounded-3" placeholder="Tiêu đề chuẩn tìm kiếm Google..." />
+                        </div>
+                        <div class="mb-2">
+                            <label asp-for="MetaKeywords" class="form-label small fw-semibold">Từ khóa SEO (Keywords)</label>
+                            <input asp-for="MetaKeywords" class="form-control rounded-3" placeholder="skincare, phục hồi b5, mỹ phẩm fefo" />
+                        </div>
+                        <div class="mb-2">
+                            <label asp-for="MetaDescription" class="form-label small fw-semibold">Mô tả SEO (Meta Description)</label>
+                            <textarea asp-for="MetaDescription" rows="3" class="form-control rounded-3" placeholder="Mô tả dưới 160 ký tự giúp tăng tỷ lệ click tự nhiên..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+    <script>
+        const quill = new Quill('#quillEditor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['blockquote', 'code-block'],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            },
+            placeholder: 'Nội dung bài viết...'
+        });
+
+        // Nạp nội dung HTML có sẵn
+        const initialHtml = document.getElementById('contentHtml').value;
+        if (initialHtml) {
+            quill.root.innerHTML = initialHtml;
+        }
+
+        document.getElementById('postEditForm').addEventListener('submit', function(e) {
+            const html = quill.root.innerHTML;
+            document.getElementById('contentHtml').value = (html === '<p><br></p>') ? '' : html;
+        });
+
+        function previewThumbnail(url) {
+            if (url && url.trim().length > 5) {
+                document.getElementById('thumbnailPreview').src = url.trim();
+            }
+        }
+    </script>
+}

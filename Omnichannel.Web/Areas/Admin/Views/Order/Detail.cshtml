@@ -1,0 +1,761 @@
+@model Omnichannel.Application.DTOs.Sales.AdminOrderDetailViewModel
+@using System.Text.Encodings.Web
+@{
+    ViewData["Title"] = "Quản Lý Vận Hành Đơn Hàng: " + Model.OrderCode;
+    Layout = "_AdminLayout";
+
+    // VIP Tier styling
+    string vipGradient = Model.CustomerVipTier.ToLower() switch
+    {
+        var t when t.Contains("diamond") || t.Contains("kim cương") => "from-purple-600 via-indigo-600 to-pink-600",
+        var t when t.Contains("gold") || t.Contains("vàng") => "from-amber-500 via-yellow-500 to-amber-600",
+        var t when t.Contains("silver") || t.Contains("bạc") => "from-slate-500 via-gray-600 to-zinc-700",
+        _ => "from-rose-500 via-pink-500 to-rose-600"
+    };
+
+    string vipIcon = Model.CustomerVipTier.ToLower() switch
+    {
+        var t when t.Contains("diamond") || t.Contains("kim cương") => "fa-gem",
+        var t when t.Contains("gold") || t.Contains("vàng") => "fa-crown",
+        var t when t.Contains("silver") || t.Contains("bạc") => "fa-award",
+        _ => "fa-heart"
+    };
+}
+
+@Html.AntiForgeryToken()
+
+<div class="max-w-7xl mx-auto space-y-6">
+    <!-- Header & Breadcrumb & Action Toolbar -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-rose-600 dark:text-rose-400 font-semibold uppercase tracking-wider">
+                <a href="/Admin/Order" class="hover:underline flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Danh sách đơn hàng</span>
+                </a>
+                <span>/</span>
+                <span>Chi tiết vận hành đơn</span>
+            </div>
+            
+            <div class="flex items-center gap-3 mt-1.5 flex-wrap">
+                <h1 class="text-2xl sm:text-3xl font-black font-mono text-slate-900 dark:text-white tracking-tight">
+                    @Model.OrderCode
+                </h1>
+                
+                @if (Model.OrderSource == "POS")
+                {
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                        <i class="fa-solid fa-cash-register text-[11px] mr-1.5 text-emerald-500"></i>
+                        POS Tại Quầy
+                    </span>
+                }
+                else
+                {
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                        <i class="fa-solid fa-globe text-[11px] mr-1.5 text-indigo-500"></i>
+                        E-Commerce Online
+                    </span>
+                }
+
+                @switch (Model.OrderStatus)
+                {
+                    case "PENDING":
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                            <i class="fa-solid fa-clock mr-1.5 text-amber-500"></i> Chờ duyệt đơn
+                        </span>
+                        break;
+                    case "CONFIRMED":
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                            <i class="fa-solid fa-check-double mr-1.5 text-blue-500"></i> Đã duyệt • Đã khóa lô FEFO
+                        </span>
+                        break;
+                    case "PROCESSING":
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                            <i class="fa-solid fa-box-open mr-1.5 text-purple-500"></i> Đang đóng gói
+                        </span>
+                        break;
+                    case "SHIPPING":
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-sky-50 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300 border border-sky-200 dark:border-sky-800">
+                            <i class="fa-solid fa-truck-fast mr-1.5 text-sky-500"></i> Đang giao vận chuyển
+                        </span>
+                        break;
+                    case "COMPLETED":
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                            <i class="fa-solid fa-circle-check mr-1.5 text-emerald-500"></i> Hoàn tất giao hàng
+                        </span>
+                        break;
+                    case "CANCELLED":
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+                            <i class="fa-solid fa-ban mr-1.5 text-rose-500"></i> Đã hủy
+                        </span>
+                        break;
+                }
+            </div>
+            
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 flex items-center gap-2 flex-wrap">
+                <span>Khởi tạo: <strong class="font-mono text-slate-700 dark:text-slate-300">@Model.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss")</strong></span>
+                <span>•</span>
+                <span>Chi nhánh: <strong class="text-slate-700 dark:text-slate-300">@Model.StoreName</strong></span>
+                @if (Model.UpdatedAt.HasValue)
+                {
+                    <span>•</span>
+                    <span>Cập nhật gần nhất: <strong class="font-mono text-slate-600 dark:text-slate-400">@Model.UpdatedAt.Value.ToString("dd/MM/yyyy HH:mm")</strong></span>
+                }
+            </p>
+        </div>
+
+        <!-- Action Buttons (Print A6 Shipping Label & Workflow Transition Steps) -->
+        <div class="flex items-center gap-2 flex-wrap">
+            <!-- IN PHIẾU VẬN ĐƠN KHỔ A6 -->
+            <a href="/Admin/Order/PrintShippingLabel/@Model.Id" 
+               target="_blank"
+               class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-500/20 transition flex items-center gap-2">
+                <i class="fa-solid fa-barcode text-sm"></i>
+                <span>In Phiếu Vận Đơn A6</span>
+            </a>
+
+            <!-- In Hóa Đơn Bán Hàng -->
+            <a href="/Admin/Order/Print/@Model.Id" 
+               target="_blank"
+               class="px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-xs hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center gap-1.5 shadow-sm">
+                <i class="fa-solid fa-receipt text-slate-500"></i>
+                <span>Hóa Đơn</span>
+            </a>
+
+            <!-- Nút Chuyển Trạng Thái 4 Bước Workflow -->
+            @if (Model.OrderStatus == "PENDING")
+            {
+                <button type="button" 
+                        onclick="confirmUpdateStatus(@Model.Id, 'CONFIRMED', 'Xác nhận DUYỆT ĐƠN HÀNG và tự động chỉ định xuất kho các lô FEFO cận hạn nhất?')"
+                        class="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-blue-600/20">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                    <span>[1] Duyệt Đơn</span>
+                </button>
+            }
+            else if (Model.OrderStatus == "CONFIRMED")
+            {
+                <button type="button" 
+                        onclick="confirmUpdateStatus(@Model.Id, 'PROCESSING', 'Chuyển đơn hàng sang quy trình ĐANG ĐÓNG GÓI, in phiếu vận đơn A6 và dán tem niêm phong?')"
+                        class="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-purple-600/20">
+                    <i class="fa-solid fa-box-open"></i>
+                    <span>[2] Đang Đóng Gói</span>
+                </button>
+            }
+            else if (Model.OrderStatus == "PROCESSING")
+            {
+                <button type="button" 
+                        onclick="confirmUpdateStatus(@Model.Id, 'SHIPPING', 'Xác nhận kiện hàng đã hoàn tất đóng gói, BÀN GIAO CHO ĐƠN VỊ VẬN CHUYỂN / BƯU TÁ?')"
+                        class="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-sky-600/20">
+                    <i class="fa-solid fa-truck-fast"></i>
+                    <span>[3] Bàn Giao Vận Chuyển</span>
+                </button>
+            }
+            else if (Model.OrderStatus == "SHIPPING")
+            {
+                <button type="button" 
+                        onclick="confirmUpdateStatus(@Model.Id, 'COMPLETED', 'Xác nhận đơn hàng ĐÃ GIAO THÀNH CÔNG đến tay khách hàng và hoàn tất thanh toán?')"
+                        class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center gap-1.5 shadow-md shadow-emerald-600/20">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>[4] Hoàn Tất Đơn</span>
+                </button>
+            }
+
+            <!-- Nút Hủy Đơn Hàng (Nếu chưa Hoàn tất hoặc chưa Hủy) -->
+            @if (Model.OrderStatus != "COMPLETED" && Model.OrderStatus != "CANCELLED")
+            {
+                <button type="button" 
+                        onclick="promptCancelOrder(@Model.Id, '@Html.Raw(JavaScriptEncoder.Default.Encode(Model.OrderCode))')"
+                        class="px-3.5 py-2.5 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 font-semibold text-xs hover:bg-rose-100 dark:hover:bg-rose-900/50 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-ban"></i>
+                    <span>Hủy Đơn</span>
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- Quy Trình Vận Hành 5 Giai Đoạn (Workflow Stepper Timeline) -->
+    <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+        @if (Model.OrderStatus == "CANCELLED")
+        {
+            <div class="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-900/60 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i class="fa-solid fa-circle-xmark text-xl"></i>
+                </div>
+                <div>
+                    <h4 class="font-bold text-sm">Đơn hàng này đã bị hủy bỏ</h4>
+                    <p class="text-xs mt-1 text-slate-600 dark:text-slate-300">
+                        @(!string.IsNullOrWhiteSpace(Model.Note) ? Model.Note : "Đơn hàng đã được quản trị viên hủy và hoàn trả toàn bộ số lượng tồn kho tạm khóa.")
+                    </p>
+                    <div class="text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-1.5">
+                        Thời điểm ghi nhận: @(Model.UpdatedAt?.ToString("dd/MM/yyyy HH:mm:ss") ?? Model.CreatedAt.ToString("dd/MM/yyyy HH:mm:ss"))
+                    </div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="relative">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-100 dark:border-slate-800 pb-2">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-route text-rose-500"></i>
+                        <span>Tiến Trình Xử Lý Đơn Hàng & Vận Hành Logistics</span>
+                    </h3>
+                    <span class="text-xs font-semibold text-slate-400">
+                        Workflow: [Duyệt Đơn] → [Đang Đóng Gói] → [Bàn Giao Vận Chuyển] → [Hoàn Tất]
+                    </span>
+                </div>
+
+                <!-- Stepper Progress Track -->
+                <div class="relative">
+                    <div class="hidden lg:block absolute top-1/2 left-8 right-8 h-1 bg-slate-100 dark:bg-slate-800 -translate-y-1/2 z-0"></div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 relative z-10">
+                        @for (int i = 0; i < Model.Timeline.Count; i++)
+                        {
+                            var step = Model.Timeline[i];
+                            bool isCurrent = step.IsCurrent;
+                            bool isDone = step.IsCompleted && !isCurrent;
+
+                            <div class="flex lg:flex-col items-center gap-3 lg:text-center p-3 rounded-xl transition @(isCurrent ? "bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/50" : "")">
+                                <!-- Step Circle Icon -->
+                                <div class="w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-base transition-all flex-shrink-0 shadow-sm
+                                    @(isCurrent 
+                                        ? "bg-rose-600 text-white ring-4 ring-rose-200 dark:ring-rose-900 shadow-rose-600/30 animate-pulse" 
+                                        : (isDone 
+                                            ? "bg-emerald-500 text-white ring-2 ring-emerald-100 dark:ring-emerald-950" 
+                                            : "bg-slate-100 dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700"))">
+                                    @if (step.Status == "PENDING")
+                                    {
+                                        <i class="fa-solid fa-cart-shopping"></i>
+                                    }
+                                    else if (step.Status == "CONFIRMED")
+                                    {
+                                        <i class="fa-solid fa-clipboard-check"></i>
+                                    }
+                                    else if (step.Status == "PROCESSING")
+                                    {
+                                        <i class="fa-solid fa-boxes-packing"></i>
+                                    }
+                                    else if (step.Status == "SHIPPING")
+                                    {
+                                        <i class="fa-solid fa-truck-fast"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fa-solid fa-circle-check"></i>
+                                    }
+                                </div>
+
+                                <!-- Step Text -->
+                                <div class="min-w-0 flex-1 lg:flex-initial">
+                                    <div class="text-xs font-bold @(step.IsCompleted ? "text-slate-900 dark:text-white" : "text-slate-400 dark:text-slate-500")">
+                                        @step.Title
+                                    </div>
+                                    <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1">
+                                        @step.Description
+                                    </div>
+                                    <div class="text-[10px] text-slate-400 font-mono mt-0.5">
+                                        @(step.IsCompleted ? step.Timestamp.ToString("dd/MM HH:mm") : "Chờ xử lý")
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Main Content: Left 8 Cols (FEFO Items & Financials), Right 4 Cols (Customer VIP & History) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- LEFT COLUMN: Items with FEFO Auto-Allocation & Totals (8 cols) -->
+        <div class="lg:col-span-8 space-y-6">
+            <!-- Danh Sách Sản Phẩm & Lô Hàng FEFO -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                            <i class="fa-solid fa-boxes-stacked text-rose-500"></i>
+                            <span>Chi Tiết Sản Phẩm & Lô Hàng Xuất Kho FEFO</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono font-normal">
+                                @Model.Items.Count mặt hàng
+                            </span>
+                        </h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                            Quy tắc FEFO (First-Expired, First-Out): Hệ thống tự động ưu tiên xuất lô mỹ phẩm có hạn dùng gần nhất trước.
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                            <i class="fa-solid fa-shield-halved mr-1 text-amber-500"></i> FEFO Auto-Guaranteed
+                        </span>
+                    </div>
+                </div>
+
+                <div class="divide-y divide-slate-100 dark:divide-slate-800">
+                    @foreach (var item in Model.Items)
+                    {
+                        <div class="py-4 space-y-3 first:pt-0 last:pb-0">
+                            <!-- Main item row -->
+                            <div class="flex items-start sm:items-center gap-4">
+                                <!-- Thumbnail -->
+                                <div class="w-16 h-16 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex-shrink-0 flex items-center justify-center">
+                                    <img src="@(string.IsNullOrWhiteSpace(item.ThumbnailUrl) ? "/images/product-placeholder.svg" : item.ThumbnailUrl)" 
+                                         alt="@item.ProductName" 
+                                         class="w-full h-full object-cover"
+                                         onerror="this.onerror=null;this.src='/images/product-placeholder.svg';" />
+                                </div>
+
+                                <!-- Name & SKU -->
+                                <div class="min-w-0 flex-1">
+                                    <a href="/Admin/Product/Details/@item.ProductId" class="text-sm font-bold text-slate-900 dark:text-slate-100 hover:text-rose-600 dark:hover:text-rose-400 transition">
+                                        @item.ProductName
+                                    </a>
+                                    <div class="flex items-center gap-2 mt-1 text-xs text-slate-500 dark:text-slate-400 font-mono flex-wrap">
+                                        <span class="bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded text-[11px]">SKU: @item.ProductSku</span>
+                                        <span>•</span>
+                                        <span>ĐVT: @item.Unit</span>
+                                        <span>•</span>
+                                        <span>Số lượng: <strong class="text-slate-800 dark:text-slate-200">@item.Quantity</strong></span>
+                                    </div>
+                                </div>
+
+                                <!-- Pricing -->
+                                <div class="text-right font-mono flex-shrink-0">
+                                    <div class="text-xs text-slate-500">
+                                        @item.UnitPrice.ToString("N0") đ x @item.Quantity
+                                    </div>
+                                    <div class="text-base font-extrabold text-slate-900 dark:text-slate-100 mt-0.5">
+                                        @item.LineTotal.ToString("N0") đ
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- FEFO Batch Details Card (Chỉ Định Lô Hàng Xuất Kho) -->
+                            <div class="bg-slate-50 dark:bg-slate-800/70 rounded-xl p-3 border border-slate-200/70 dark:border-slate-700/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-xs">
+                                <div class="flex items-center gap-2.5 flex-wrap">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md font-mono font-bold text-[11px] bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                                        <i class="fa-solid fa-barcode text-[10px] mr-1 text-indigo-500"></i>
+                                        Lô: @item.BatchNumber
+                                    </span>
+
+                                    <div class="text-slate-600 dark:text-slate-300 font-mono">
+                                        NSX: <span class="font-medium">@(item.ManufacturingDate?.ToString("dd/MM/yyyy") ?? "--")</span>
+                                    </div>
+                                    <span class="text-slate-300 dark:text-slate-600">•</span>
+                                    <div class="text-slate-600 dark:text-slate-300 font-mono">
+                                        HSD: <strong class="text-slate-900 dark:text-white">@(item.ExpDate?.ToString("dd/MM/yyyy") ?? "--")</strong>
+                                    </div>
+
+                                    @if (item.DaysRemaining.HasValue)
+                                    {
+                                        if (item.DaysRemaining.Value <= 30)
+                                        {
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border border-rose-300">
+                                                <i class="fa-solid fa-triangle-exclamation mr-1 text-rose-600 animate-pulse"></i> Cận hạn: Còn @item.DaysRemaining.Value ngày
+                                            </span>
+                                        }
+                                        else if (item.DaysRemaining.Value <= 90)
+                                        {
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 border border-amber-300">
+                                                <i class="fa-solid fa-clock mr-1 text-amber-600"></i> Còn @item.DaysRemaining.Value ngày
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300">
+                                                <i class="fa-solid fa-circle-check mr-1 text-emerald-600"></i> An toàn: Còn @item.DaysRemaining.Value ngày
+                                            </span>
+                                        }
+                                    }
+                                </div>
+
+                                <div class="text-[11px] text-slate-500 dark:text-slate-400 italic flex items-center gap-1">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i>
+                                    <span>@item.FefoAssignedReason</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Tổng Kết Chi Phí Đơn Hàng -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-calculator text-rose-500"></i>
+                    <span>Bảng Kê Tài Chính & Quyết Toán Đơn Hàng</span>
+                </h3>
+
+                <div class="flex justify-between text-xs text-slate-600 dark:text-slate-400">
+                    <span>Tạm tính tổng giá trị hàng mỹ phẩm:</span>
+                    <span class="font-mono font-semibold text-slate-900 dark:text-slate-100">@Model.SubTotal.ToString("N0") đ</span>
+                </div>
+
+                @if (Model.DiscountAmount > 0)
+                {
+                    <div class="flex justify-between text-xs text-emerald-600 dark:text-emerald-400">
+                        <span class="flex items-center gap-1">
+                            <i class="fa-solid fa-tag"></i>
+                            <span>Chiết khấu Voucher / Ưu đãi VIP:</span>
+                        </span>
+                        <span class="font-mono font-semibold">-@Model.DiscountAmount.ToString("N0") đ</span>
+                    </div>
+                }
+
+                <div class="flex justify-between text-xs text-slate-600 dark:text-slate-400">
+                    <span>Cước phí vận chuyển giao hàng tiêu chuẩn:</span>
+                    <span class="font-mono font-semibold text-slate-900 dark:text-slate-100">
+                        @(Model.ShippingFee > 0 ? Model.ShippingFee.ToString("N0") + " đ" : "Miễn phí cước giao hàng (0 đ)")
+                    </span>
+                </div>
+
+                <div class="border-t border-slate-100 dark:border-slate-800 pt-3 flex justify-between items-baseline">
+                    <div>
+                        <span class="text-sm font-extrabold text-slate-900 dark:text-white">Tổng Tiền Quyết Toán:</span>
+                        <div class="text-[11px] text-slate-400">(Đã bao gồm thuế GTGT & chi phí bảo quản FEFO)</div>
+                    </div>
+                    <span class="text-2xl font-black font-mono text-rose-600 dark:text-rose-400">
+                        @Model.TotalAmount.ToString("N0") <span class="text-sm font-normal text-slate-500">đ</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Ghi Chú Đơn Hàng & Đóng Gói -->
+            @if (!string.IsNullOrWhiteSpace(Model.Note))
+            {
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-2">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-note-sticky text-amber-500"></i>
+                        <span>Lưu Ý Vận Hành & Ghi Chú Đơn Hàng</span>
+                    </h3>
+                    <div class="p-3 bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/50 rounded-xl text-xs text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed">
+                        @Model.Note
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- RIGHT COLUMN: Customer Profile, VIP Tier & Purchase History (4 cols) -->
+        <div class="lg:col-span-4 space-y-6">
+            <!-- Thẻ Hồ Sơ Khách Hàng & Hạng Thẻ VIP -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-user-shield text-rose-500"></i>
+                        <span>Hồ Sơ Khách Hàng & VIP</span>
+                    </h3>
+                    
+                    <!-- VIP Badge Pill -->
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-black bg-gradient-to-r @vipGradient text-white shadow-sm">
+                        <i class="fa-solid @vipIcon text-[10px] mr-1.5"></i>
+                        @Model.CustomerVipTier
+                    </span>
+                </div>
+
+                <!-- Customer Avatar & Basic Info -->
+                <div class="flex items-center gap-3.5">
+                    <div class="w-13 h-13 rounded-2xl bg-gradient-to-tr @vipGradient text-white font-black text-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                        @(string.IsNullOrWhiteSpace(Model.CustomerName) ? "K" : Model.CustomerName.Trim()[0].ToString().ToUpperInvariant())
+                    </div>
+                    <div class="min-w-0">
+                        <div class="font-bold text-base text-slate-900 dark:text-white line-clamp-1">
+                            @Model.CustomerName
+                        </div>
+                        <div class="text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
+                            <span>Beauty Club Member</span>
+                            @if (Model.CustomerMemberSince.HasValue)
+                            {
+                                <span>•</span>
+                                <span>Gia nhập: @Model.CustomerMemberSince.Value.ToString("MM/yyyy")</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loyalty Points & Lifetime Spending Stats -->
+                <div class="grid grid-cols-2 gap-2 pt-2">
+                    <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/60 text-center">
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400">Điểm Beauty Club</div>
+                        <div class="text-base font-extrabold font-mono text-purple-600 dark:text-purple-400 mt-0.5 flex items-center justify-center gap-1">
+                            <i class="fa-solid fa-coins text-xs text-amber-500"></i>
+                            @Model.CustomerLoyaltyPoints.ToString("N0")
+                        </div>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/60 text-center">
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400">Tổng Đã Mua</div>
+                        <div class="text-base font-extrabold font-mono text-rose-600 dark:text-rose-400 mt-0.5">
+                            @Model.CustomerTotalSpent.ToString("N0") đ
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact & Shipping Details -->
+                <div class="space-y-3 pt-2 text-xs border-t border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                        <div class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 flex-shrink-0">
+                            <i class="fa-solid fa-phone text-xs"></i>
+                        </div>
+                        <a href="tel:@Model.CustomerPhone" class="font-mono font-bold hover:text-rose-600 transition text-sm">
+                            @Model.CustomerPhone
+                        </a>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.CustomerEmail))
+                    {
+                        <div class="flex items-center gap-3 text-slate-700 dark:text-slate-300">
+                            <div class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 flex-shrink-0">
+                                <i class="fa-solid fa-envelope text-xs"></i>
+                            </div>
+                            <a href="mailto:@Model.CustomerEmail" class="hover:text-rose-600 transition truncate">
+                                @Model.CustomerEmail
+                            </a>
+                        </div>
+                    }
+
+                    <div class="flex items-start gap-3 text-slate-700 dark:text-slate-300">
+                        <div class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 flex-shrink-0 mt-0.5">
+                            <i class="fa-solid fa-location-dot text-xs text-rose-500"></i>
+                        </div>
+                        <div class="leading-relaxed">
+                            <div class="text-[11px] text-slate-400 font-semibold uppercase">Địa chỉ giao hàng:</div>
+                            <span class="font-medium">@(string.IsNullOrWhiteSpace(Model.ShippingAddress) ? "Nhận trực tiếp tại quầy POS Showroom" : Model.ShippingAddress)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lịch Sử Mua Sắm Gần Nhất Của Khách Hàng (Customer Purchase History) -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-indigo-500"></i>
+                        <span>Lịch Sử Mua Sắm Gần Nhất</span>
+                    </h3>
+                    <span class="text-[11px] font-mono text-slate-400">
+                        Tổng @Model.CustomerTotalOrders đơn
+                    </span>
+                </div>
+
+                @if (Model.CustomerRecentOrders != null && Model.CustomerRecentOrders.Any())
+                {
+                    <div class="space-y-2.5">
+                        @foreach (var hist in Model.CustomerRecentOrders)
+                        {
+                            <a href="/Admin/Order/Detail/@hist.OrderId" 
+                               class="block p-3 rounded-xl bg-slate-50 hover:bg-rose-50/50 dark:bg-slate-800/60 dark:hover:bg-slate-800 transition border border-slate-200/60 dark:border-slate-700/60 group">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-mono font-bold text-xs text-slate-800 dark:text-slate-200 group-hover:text-rose-600 transition">
+                                        @hist.OrderCode
+                                    </span>
+                                    <span class="text-[11px] font-mono font-bold text-slate-900 dark:text-white">
+                                        @hist.TotalAmount.ToString("N0") đ
+                                    </span>
+                                </div>
+                                <div class="flex items-center justify-between mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                                    <span>@hist.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                    @switch (hist.OrderStatus)
+                                    {
+                                        case "COMPLETED":
+                                            <span class="text-emerald-600 dark:text-emerald-400 font-semibold">Đã hoàn thành</span>
+                                            break;
+                                        case "CANCELLED":
+                                            <span class="text-rose-600 dark:text-rose-400 font-semibold">Đã hủy</span>
+                                            break;
+                                        default:
+                                            <span class="text-blue-600 dark:text-blue-400 font-semibold">@hist.OrderStatus</span>
+                                            break;
+                                    }
+                                </div>
+                            </a>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="p-4 text-center text-xs text-slate-400 italic bg-slate-50 dark:bg-slate-800/40 rounded-xl">
+                        Đây là đơn hàng đầu tiên của khách hàng trong hệ thống.
+                    </div>
+                }
+            </div>
+
+            <!-- Thanh Toán & Hóa Đơn VAT -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3.5">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <i class="fa-solid fa-credit-card text-emerald-500"></i>
+                    <span>Thanh Toán & Hóa Đơn Điện Tử</span>
+                </h3>
+
+                <div class="space-y-3 text-xs">
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500">Phương thức thanh toán:</span>
+                        <span class="font-bold text-slate-800 dark:text-slate-200">@Model.PaymentMethod</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-500">Trạng thái thanh toán:</span>
+                        @if (Model.PaymentStatus == "PAID")
+                        {
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                <i class="fa-solid fa-check mr-1 text-[10px]"></i> Đã thanh toán
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                                <i class="fa-solid fa-hourglass-half mr-1 text-[10px]"></i> Chưa thanh toán (Thu COD)
+                            </span>
+                        }
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.InvoiceCode))
+                    {
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-800">
+                            <span class="text-slate-500">Hóa đơn điện tử VAT:</span>
+                            <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-2 py-0.5 rounded">
+                                @Model.InvoiceCode
+                            </span>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Chi Nhánh Xử Lý & Showroom -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <i class="fa-solid fa-store text-amber-500"></i>
+                    <span>Showroom Điều Phối Đơn Hàng</span>
+                </h3>
+                <div class="text-xs space-y-1.5">
+                    <div class="font-bold text-slate-800 dark:text-slate-200">@Model.StoreName</div>
+                    <div class="text-slate-500 dark:text-slate-400 leading-relaxed">@Model.StoreAddress</div>
+                    @if (!string.IsNullOrWhiteSpace(Model.StorePhone))
+                    {
+                        <div class="text-slate-500 font-mono mt-1">
+                            <i class="fa-solid fa-phone text-[10px] text-slate-400 mr-1"></i> Hotline: @Model.StorePhone
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function confirmUpdateStatus(orderId, newStatus, confirmText) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+            Swal.fire({
+                title: 'Chuyển trạng thái đơn hàng?',
+                text: confirmText,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Xác nhận chuyển',
+                cancelButtonText: 'Đóng',
+                customClass: { popup: 'rounded-2xl dark:bg-slate-900 dark:text-slate-100' }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/Admin/Order/UpdateStatus/${orderId}`;
+
+                    const inputToken = document.createElement('input');
+                    inputToken.type = 'hidden';
+                    inputToken.name = '__RequestVerificationToken';
+                    inputToken.value = token;
+                    form.appendChild(inputToken);
+
+                    const inputStatus = document.createElement('input');
+                    inputStatus.type = 'hidden';
+                    inputStatus.name = 'status';
+                    inputStatus.value = newStatus;
+                    form.appendChild(inputStatus);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
+        function promptCancelOrder(orderId, orderCode) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+            Swal.fire({
+                title: 'Hủy đơn hàng?',
+                html: `Xác nhận hủy đơn <b>${orderCode}</b>?<br/><span class="text-xs text-slate-500">Tồn kho tạm khóa (Reserved) sẽ được hoàn trả tự động vào kho.</span>`,
+                icon: 'warning',
+                input: 'text',
+                inputPlaceholder: 'Nhập lý do hủy đơn (bắt buộc)...',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Xác nhận hủy',
+                cancelButtonText: 'Đóng',
+                inputValidator: (val) => {
+                    if (!val || !val.trim()) {
+                        return 'Vui lòng nhập lý do hủy đơn!';
+                    }
+                },
+                customClass: { popup: 'rounded-2xl dark:bg-slate-900 dark:text-slate-100' }
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/Admin/Order/UpdateStatus/${orderId}`;
+
+                    const inputToken = document.createElement('input');
+                    inputToken.type = 'hidden';
+                    inputToken.name = '__RequestVerificationToken';
+                    inputToken.value = token;
+                    form.appendChild(inputToken);
+
+                    const inputStatus = document.createElement('input');
+                    inputStatus.type = 'hidden';
+                    inputStatus.name = 'status';
+                    inputStatus.value = 'CANCELLED';
+                    form.appendChild(inputStatus);
+
+                    const inputReason = document.createElement('input');
+                    inputReason.type = 'hidden';
+                    inputReason.name = 'reason';
+                    inputReason.value = res.value;
+                    form.appendChild(inputReason);
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>
+            Swal.fire({
+                toast: true,
+                position: 'bottom-end',
+                icon: 'success',
+                title: '@Html.Raw(JavaScriptEncoder.Default.Encode(TempData["SuccessMessage"]?.ToString() ?? ""))',
+                showConfirmButton: false,
+                timer: 3500,
+                timerProgressBar: true
+            });
+            </text>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: '@Html.Raw(JavaScriptEncoder.Default.Encode(TempData["ErrorMessage"]?.ToString() ?? ""))',
+                customClass: { popup: 'rounded-2xl' }
+            });
+            </text>
+        }
+    </script>
+}

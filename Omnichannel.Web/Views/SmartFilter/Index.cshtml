@@ -1,0 +1,1065 @@
+@{
+    ViewData["Title"] = "Chẩn Đoán Làn Da Cùng Chuyên Gia AI - OMNI BEAUTY";
+}
+
+<div class="min-h-screen bg-gradient-to-b from-[#fffbfb] via-white to-pink-50/20 py-10 sm:py-16" x-data="skinDiagnosticWizard()">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- HEADER BANNER LUXURY BEAUTY TECH -->
+        <div class="text-center space-y-3 mb-10">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pastel-rose text-magenta-accent text-xs font-bold shadow-xs">
+                <i class="fa-solid fa-wand-magic-sparkles text-sm animate-pulse"></i>
+                <span>OMNI BEAUTY AI DERMATOLOGY</span>
+                <span>•</span>
+                <span>CÔNG NGHỆ CHẨN ĐOÁN 4.0</span>
+            </div>
+            
+            <h1 class="font-serif text-3xl sm:text-5xl font-bold text-charcoal tracking-tight">
+                Chẩn Đoán Làn Da Cùng Chuyên Gia AI
+            </h1>
+            
+            <p class="text-xs sm:text-sm text-slate-500 max-w-2xl mx-auto font-sans">
+                Hệ thống AI phân tích 5 chỉ số sinh học biểu bì, nhận diện chính xác loại da, phát hiện hoạt chất cần tránh (đặc biệt trong thai kỳ) và thiết lập phác đồ tương thích 100%.
+            </p>
+        </div>
+
+        <!-- WIZARD STEPPER PROGRESS BAR (Hiện khi chưa có kết quả) -->
+        <div class="bg-white rounded-3xl border border-soft-border p-6 sm:p-10 shadow-xl shadow-pink-500/5 mb-10 relative overflow-hidden" x-show="!result && !isAnalyzing">
+            
+            <!-- Progress Bar -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between text-xs font-bold text-slate-500 mb-2">
+                    <span class="flex items-center gap-1.5 text-magenta-accent">
+                        <i class="fa-solid fa-circle-dot"></i>
+                        <span>Bước <span x-text="currentStep"></span> / 5</span>
+                    </span>
+                    <span class="text-slate-400 font-mono" x-text="(currentStep * 20) + '%'"></span>
+                </div>
+                <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-pink-400 via-rose-gold to-magenta-accent transition-all duration-500 rounded-full"
+                         :style="'width: ' + (currentStep * 20) + '%'"></div>
+                </div>
+            </div>
+
+            <!-- BƯỚC 1: CẢM NHẬN BUỔI TRƯA -->
+            <div x-show="currentStep === 1" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0" class="space-y-6">
+                <div class="space-y-1">
+                    <span class="text-xs font-bold uppercase tracking-wider text-rose-gold">Câu hỏi 1 / 5</span>
+                    <h2 class="font-serif text-xl sm:text-2xl font-bold text-charcoal">
+                        Làn da của bạn vào buổi trưa cảm thấy như thế nào?
+                    </h2>
+                    <p class="text-xs text-slate-500">
+                        Sau khoảng 4 - 6 giờ rửa mặt buổi sáng và sinh hoạt bình thường.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Oily All -->
+                    <label class="p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-4 hover:shadow-md"
+                           :class="answers.noonFeeling === 'oily_all' ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                        <input type="radio" name="noonFeeling" value="oily_all" x-model="answers.noonFeeling" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                        <div>
+                            <div class="font-bold text-sm text-charcoal flex items-center gap-2">
+                                <i class="fa-solid fa-droplet text-amber-500"></i>
+                                <span>Bóng dầu toàn bộ gương mặt</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">Vùng trán, mũi, hai má và cằm đều bóng nhờn rõ rệt, lớp trang điểm dễ bị trôi và lỗ chân lông to.</p>
+                        </div>
+                    </label>
+
+                    <!-- Dry Tight -->
+                    <label class="p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-4 hover:shadow-md"
+                           :class="answers.noonFeeling === 'dry_tight' ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                        <input type="radio" name="noonFeeling" value="dry_tight" x-model="answers.noonFeeling" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                        <div>
+                            <div class="font-bold text-sm text-charcoal flex items-center gap-2">
+                                <i class="fa-solid fa-wind text-sky-500"></i>
+                                <span>Khô căng, thô ráp hoặc bong tróc</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">Cảm giác da co rút căng cứng, có vảy bong li ti quanh khóe miệng hoặc cánh mũi, da xỉn màu thiếu sức sống.</p>
+                        </div>
+                    </label>
+
+                    <!-- T-Zone Oily -->
+                    <label class="p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-4 hover:shadow-md"
+                           :class="answers.noonFeeling === 'tzone_oily' ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                        <input type="radio" name="noonFeeling" value="tzone_oily" x-model="answers.noonFeeling" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                        <div>
+                            <div class="font-bold text-sm text-charcoal flex items-center gap-2">
+                                <i class="fa-solid fa-arrows-split-up-and-left text-magenta-accent"></i>
+                                <span>Đổ dầu vùng chữ T (Trán, Mũi, Cằm)</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">Vùng chữ T tiết dầu bóng loáng nhưng hai bên má lại khô ráo hoặc bình thường. Điển hình da hỗn hợp.</p>
+                        </div>
+                    </label>
+
+                    <!-- Normal Smooth -->
+                    <label class="p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-4 hover:shadow-md"
+                           :class="answers.noonFeeling === 'normal_smooth' ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                        <input type="radio" name="noonFeeling" value="normal_smooth" x-model="answers.noonFeeling" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                        <div>
+                            <div class="font-bold text-sm text-charcoal flex items-center gap-2">
+                                <i class="fa-solid fa-spa text-emerald-500"></i>
+                                <span>Bình thường, mềm mịn dễ chịu</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">Không thấy bóng nhờn quá mức cũng không hề khô rát, nền da mềm mại và có độ đàn hồi tự nhiên tốt.</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- BƯỚC 2: VẤN ĐỀ QUAN TÂM HÀNG ĐẦU -->
+            <div x-show="currentStep === 2" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0" class="space-y-6">
+                <div class="space-y-1">
+                    <span class="text-xs font-bold uppercase tracking-wider text-rose-gold">Câu hỏi 2 / 5</span>
+                    <h2 class="font-serif text-xl sm:text-2xl font-bold text-charcoal">
+                        Vấn đề về da bạn quan tâm và muốn cải thiện nhất hiện tại?
+                    </h2>
+                    <p class="text-xs text-slate-500">
+                        Chuyên gia AI sẽ tập trung hoạt chất vàng giải quyết dứt điểm nỗi lo này.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Acne & Pores -->
+                    <label class="p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-4 hover:shadow-md"
+                           :class="answers.primaryConcern === 'acne_pore' ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                        <input type="radio" name="primaryConcern" value="acne_pore" x-model="answers.primaryConcern" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                        <div>
+                            <div class="font-bold text-sm text-charcoal flex items-center gap-2">
+                                <i class="fa-solid fa-shield-virus text-rose-500"></i>
+                                <span>Mụn viêm, mụn ẩn & Lỗ chân lông to</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">Cổ nang lông bít tắc bã nhờn, xuất hiện mụn đầu đen, sợi bã nhờn và thâm sau mụn.</p>
+                        </div>
+                    </label>
+
+                    <!-- Pigmentation -->
+                    <label class="p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-4 hover:shadow-md"
+                           :class="answers.primaryConcern === 'pigmentation' ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                        <input type="radio" name="primaryConcern" value="pigmentation" x-model="answers.primaryConcern" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                        <div>
+                            <div class="font-bold text-sm text-charcoal flex items-center gap-2">
+                                <i class="fa-solid fa-sun text-amber-500"></i>
+                                <span>Sạm nám, tàn nhang & Không đều màu</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">Tăng sắc tố melanin do ánh nắng mặt trời, vết thâm nâu lì lợm, da xỉn màu thiếu rạng rỡ.</p>
+                        </div>
+                    </label>
+
+                    <!-- Anti-Aging -->
+                    <label class="p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-4 hover:shadow-md"
+                           :class="answers.primaryConcern === 'wrinkle_aging' ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                        <input type="radio" name="primaryConcern" value="wrinkle_aging" x-model="answers.primaryConcern" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                        <div>
+                            <div class="font-bold text-sm text-charcoal flex items-center gap-2">
+                                <i class="fa-solid fa-hourglass-half text-purple-600"></i>
+                                <span>Nếp nhăn lão hóa & Chảy xệ kém đàn hồi</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">Xuất hiện rãnh cười, vết chân chim đuôi mắt, cơ mặt kém săn chắc do thiếu hụt collagen tự nhiên.</p>
+                        </div>
+                    </label>
+
+                    <!-- Sensitive -->
+                    <label class="p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-4 hover:shadow-md"
+                           :class="answers.primaryConcern === 'sensitive_redness' ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                        <input type="radio" name="primaryConcern" value="sensitive_redness" x-model="answers.primaryConcern" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                        <div>
+                            <div class="font-bold text-sm text-charcoal flex items-center gap-2">
+                                <i class="fa-solid fa-heart-pulse text-red-500"></i>
+                                <span>Nhạy cảm, ửng đỏ & Dễ kích ứng châm chích</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">Hàng rào biểu bì bị suy yếu, da mỏng lộ mao mạch, dễ đỏ bừng khi thay đổi thời tiết hoặc dùng mỹ phẩm lạ.</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- BƯỚC 3: PHÂN KHÚC NGÂN SÁCH ĐẦU TƯ CHO SKINCARE -->
+            <div x-show="currentStep === 3" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0" class="space-y-6">
+                <div class="space-y-1">
+                    <span class="text-xs font-bold uppercase tracking-wider text-rose-gold">Câu hỏi 3 / 5</span>
+                    <h2 class="font-serif text-xl sm:text-2xl font-bold text-charcoal">
+                        Phân khúc ngân sách bạn dự định đầu tư cho mỗi sản phẩm?
+                    </h2>
+                    <p class="text-xs text-slate-500">
+                        AI sẽ ưu tiên các dòng mỹ phẩm chính hãng có giá thành tối ưu trong phân khúc mong muốn.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Under 300k -->
+                    <label class="p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-4 hover:shadow-md"
+                           :class="answers.budgetBracket === 'under_300k' ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                        <input type="radio" name="budgetBracket" value="under_300k" x-model="answers.budgetBracket" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                        <div>
+                            <div class="font-bold text-sm text-charcoal flex items-center gap-2">
+                                <i class="fa-solid fa-piggy-bank text-emerald-500"></i>
+                                <span>Dưới 300.000 ₫ / sản phẩm</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">Phân khúc Tiết kiệm / Học sinh - Sinh viên: Mỹ phẩm lành tính giá bình dân, tập trung thành phần cốt lõi.</p>
+                        </div>
+                    </label>
+
+                    <!-- 300k - 500k -->
+                    <label class="p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-4 hover:shadow-md"
+                           :class="answers.budgetBracket === '300k_500k' ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                        <input type="radio" name="budgetBracket" value="300k_500k" x-model="answers.budgetBracket" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                        <div>
+                            <div class="font-bold text-sm text-charcoal flex items-center gap-2">
+                                <i class="fa-solid fa-award text-amber-500"></i>
+                                <span>300.000 ₫ - 500.000 ₫ (Khuyên dùng)</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">Phân khúc Tiêu chuẩn: Các dòng Dược mỹ phẩm Pháp, Hàn, Nhật phổ biến đạt kiểm định lâm sàng cao.</p>
+                        </div>
+                    </label>
+
+                    <!-- 500k - 1m -->
+                    <label class="p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-4 hover:shadow-md"
+                           :class="answers.budgetBracket === '500k_1m' ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                        <input type="radio" name="budgetBracket" value="500k_1m" x-model="answers.budgetBracket" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                        <div>
+                            <div class="font-bold text-sm text-charcoal flex items-center gap-2">
+                                <i class="fa-solid fa-gem text-indigo-500"></i>
+                                <span>500.000 ₫ - 1.000.000 ₫</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">Phân khúc Chuyên sâu: Tinh chất Serum đặc trị nồng độ cao, công nghệ bọc vi nang hoạt chất tiên tiến.</p>
+                        </div>
+                    </label>
+
+                    <!-- Above 1m -->
+                    <label class="p-5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-4 hover:shadow-md"
+                           :class="answers.budgetBracket === 'above_1m' ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                        <input type="radio" name="budgetBracket" value="above_1m" x-model="answers.budgetBracket" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                        <div>
+                            <div class="font-bold text-sm text-charcoal flex items-center gap-2">
+                                <i class="fa-solid fa-crown text-rose-gold"></i>
+                                <span>Trên 1.000.000 ₫</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">Phân khúc Luxury / Clinic: Dòng mỹ phẩm cao cấp và phác đồ chuyên khoa da liễu phục hồi tức thì.</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- BƯỚC 4: ĐỘ TUỔI VÀ MÔI TRƯỜNG LÀM VIỆC -->
+            <div x-show="currentStep === 4" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0" class="space-y-6">
+                <div class="space-y-1">
+                    <span class="text-xs font-bold uppercase tracking-wider text-rose-gold">Câu hỏi 4 / 5</span>
+                    <h2 class="font-serif text-xl sm:text-2xl font-bold text-charcoal">
+                        Độ tuổi và môi trường làm việc chính của bạn?
+                    </h2>
+                    <p class="text-xs text-slate-500">
+                        Các yếu tố ngoại sinh ảnh hưởng trực tiếp đến tốc độ lão hóa và mất nước biểu bì.
+                    </p>
+                </div>
+
+                <!-- Nhóm Độ Tuổi -->
+                <div class="space-y-3">
+                    <label class="block text-xs font-bold text-slate-700">1. Nhóm độ tuổi sinh học:</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <label class="p-3.5 rounded-xl border text-center cursor-pointer transition text-xs font-semibold"
+                               :class="answers.ageGroup === 'under_20' ? 'border-magenta-accent bg-pastel-rose text-magenta-accent ring-2 ring-magenta-accent/20' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'">
+                            <input type="radio" name="ageGroup" value="under_20" x-model="answers.ageGroup" class="sr-only" />
+                            <span>Dưới 20 tuổi</span>
+                        </label>
+                        <label class="p-3.5 rounded-xl border text-center cursor-pointer transition text-xs font-semibold"
+                               :class="answers.ageGroup === '20_29' ? 'border-magenta-accent bg-pastel-rose text-magenta-accent ring-2 ring-magenta-accent/20' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'">
+                            <input type="radio" name="ageGroup" value="20_29" x-model="answers.ageGroup" class="sr-only" />
+                            <span>20 - 29 tuổi</span>
+                        </label>
+                        <label class="p-3.5 rounded-xl border text-center cursor-pointer transition text-xs font-semibold"
+                               :class="answers.ageGroup === '30_39' ? 'border-magenta-accent bg-pastel-rose text-magenta-accent ring-2 ring-magenta-accent/20' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'">
+                            <input type="radio" name="ageGroup" value="30_39" x-model="answers.ageGroup" class="sr-only" />
+                            <span>30 - 39 tuổi</span>
+                        </label>
+                        <label class="p-3.5 rounded-xl border text-center cursor-pointer transition text-xs font-semibold"
+                               :class="answers.ageGroup === 'above_40' ? 'border-magenta-accent bg-pastel-rose text-magenta-accent ring-2 ring-magenta-accent/20' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300'">
+                            <input type="radio" name="ageGroup" value="above_40" x-model="answers.ageGroup" class="sr-only" />
+                            <span>Từ 40 tuổi trở lên</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Nhóm Môi Trường -->
+                <div class="space-y-3 pt-2">
+                    <label class="block text-xs font-bold text-slate-700">2. Môi trường sinh hoạt & làm việc chủ yếu:</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <label class="p-4 rounded-xl border cursor-pointer transition flex items-center gap-3 text-xs"
+                               :class="answers.environment === 'office_ac' ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 bg-white hover:border-slate-300'">
+                            <input type="radio" name="environment" value="office_ac" x-model="answers.environment" class="text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                            <div>
+                                <strong class="text-charcoal block">Máy lạnh văn phòng cả ngày (> 6 tiếng)</strong>
+                                <span class="text-slate-400 text-[11px]">Độ ẩm không khí thấp, dễ gây da dầu thiếu nước biểu bì</span>
+                            </div>
+                        </label>
+
+                        <label class="p-4 rounded-xl border cursor-pointer transition flex items-center gap-3 text-xs"
+                               :class="answers.environment === 'outdoor_sun' ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 bg-white hover:border-slate-300'">
+                            <input type="radio" name="environment" value="outdoor_sun" x-model="answers.environment" class="text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                            <div>
+                                <strong class="text-charcoal block">Ngoài trời nắng bụi, di chuyển nhiều</strong>
+                                <span class="text-slate-400 text-[11px]">Tác động mạnh từ tia UV & bụi mịn PM2.5 gây stress oxy hóa</span>
+                            </div>
+                        </label>
+
+                        <label class="p-4 rounded-xl border cursor-pointer transition flex items-center gap-3 text-xs"
+                               :class="answers.environment === 'screen_blue_light' ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 bg-white hover:border-slate-300'">
+                            <input type="radio" name="environment" value="screen_blue_light" x-model="answers.environment" class="text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                            <div>
+                                <strong class="text-charcoal block">Tiếp xúc màn hình máy tính / điện thoại liên tục</strong>
+                                <span class="text-slate-400 text-[11px]">Ánh sáng xanh (HEV Light) kích hoạt gốc tự do gây sạm da</span>
+                            </div>
+                        </label>
+
+                        <label class="p-4 rounded-xl border cursor-pointer transition flex items-center gap-3 text-xs"
+                               :class="answers.environment === 'fresh_clean' ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 bg-white hover:border-slate-300'">
+                            <input type="radio" name="environment" value="fresh_clean" x-model="answers.environment" class="text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                            <div>
+                                <strong class="text-charcoal block">Môi trường tự nhiên thoáng mát, trong lành</strong>
+                                <span class="text-slate-400 text-[11px]">Cân bằng vi sinh vật tự nhiên trên bề mặt da được duy trì tốt</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BƯỚC 5: TÌNH TRẠNG THAI KỲ & AN TOÀN DƯỢC MỸ PHẨM -->
+            <div x-show="currentStep === 5" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0" class="space-y-6">
+                <div class="space-y-1">
+                    <span class="text-xs font-bold uppercase tracking-wider text-rose-gold">Câu hỏi 5 / 5 (Rất quan trọng)</span>
+                    <h2 class="font-serif text-xl sm:text-2xl font-bold text-charcoal flex items-center gap-2">
+                        <i class="fa-solid fa-person-breastfeeding text-magenta-accent"></i>
+                        <span>Bạn có đang mang thai hoặc cho con bú không?</span>
+                    </h2>
+                    <p class="text-xs text-slate-500">
+                        Chuyên gia da liễu AI sẽ tự động kích hoạt bộ lọc bảo vệ và loại bỏ tuyệt đối các hoạt chất chống chỉ định như Retinol, BHA liều cao, Hydroquinone.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Không có -->
+                    <label class="p-6 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-4 hover:shadow-md"
+                           :class="!answers.isPregnantOrNursing ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                        <input type="radio" name="isPregnant" :value="false" x-model="answers.isPregnantOrNursing" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                        <div>
+                            <div class="font-bold text-sm text-charcoal flex items-center gap-2">
+                                <i class="fa-solid fa-user-check text-emerald-500"></i>
+                                <span>Không mang thai / Không cho con bú</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">Được quyền tiếp cận tất cả hoạt chất đặc trị chuyên sâu mạnh mẽ nhất (Retinol, BHA 2%, AHA, Niacinamide, Vitamin C...).</p>
+                        </div>
+                    </label>
+
+                    <!-- Có mang thai hoặc cho con bú -->
+                    <label class="p-6 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex items-start gap-4 hover:shadow-md"
+                           :class="answers.isPregnantOrNursing ? 'border-magenta-accent bg-pastel-rose/30 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                        <input type="radio" name="isPregnant" :value="true" x-model="answers.isPregnantOrNursing" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                        <div>
+                            <div class="font-bold text-sm text-charcoal flex items-center gap-2">
+                                <i class="fa-solid fa-shield-heart text-magenta-accent"></i>
+                                <span>Đang mang thai hoặc đang cho con bú</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1 font-semibold text-rose-700">KÍCH HOẠT PHÁC ĐỒ AN TOÀN THAI KỲ: Tự động loại bỏ Retinoids, BHA liều cao, thay thế bằng Bakuchiol thảo dược, B5, HA, Niacinamide an toàn 100%.</p>
+                        </div>
+                    </label>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-start gap-3">
+                    <i class="fa-solid fa-circle-info text-amber-600 text-base mt-0.5"></i>
+                    <span>Omni Beauty tuân thủ nghiêm ngặt bảng phân loại mức độ an toàn dược mỹ phẩm thai kỳ chuẩn FDA (Hoa Kỳ) và Dược thư Châu Âu.</span>
+                </div>
+            </div>
+
+            <!-- WIZARD CONTROLS -->
+            <div class="flex items-center justify-between pt-8 border-t border-slate-100 mt-8">
+                <div>
+                    <button type="button" 
+                             x-show="currentStep > 1" 
+                             x-on:click="currentStep--" 
+                             class="px-6 py-2.5 rounded-full border border-slate-300 text-slate-600 hover:bg-slate-50 text-xs font-bold transition flex items-center gap-2">
+                        <i class="fa-solid fa-arrow-left"></i> Quay lại
+                    </button>
+                </div>
+
+                <div>
+                    <button type="button" 
+                             x-show="currentStep < 5" 
+                             x-on:click="currentStep++" 
+                             class="px-8 py-3 rounded-full bg-charcoal text-white hover:bg-magenta-accent shadow-md text-xs font-bold transition flex items-center gap-2">
+                        <span>Tiếp theo</span> <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+
+                    <button type="button" 
+                             x-show="currentStep === 5" 
+                             x-on:click="submitDiagnosis()" 
+                             class="px-8 py-3.5 rounded-full bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 text-white hover:opacity-95 shadow-pink-glow text-xs font-bold uppercase tracking-wider transition-all duration-300 flex items-center gap-2.5 animate-pulse">
+                        <i class="fa-solid fa-brain"></i>
+                        <span>Xem Chẩn Đoán AI Ngay</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- MÀN HÌNH LOADING QUÉT AI BIỂU BÌ (AI Scanning Animation) -->
+        <div x-show="isAnalyzing" class="bg-white rounded-3xl border border-soft-border p-12 text-center shadow-xl space-y-6 max-w-lg mx-auto mb-10">
+            <div class="relative w-24 h-24 mx-auto">
+                <div class="w-full h-full rounded-full border-4 border-magenta-accent/20 border-t-magenta-accent animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-magenta-accent text-2xl animate-pulse">
+                    <i class="fa-solid fa-fingerprint"></i>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <h3 class="font-serif text-xl font-bold text-charcoal">Đang Phân Tích Chỉ Số Sinh Học Biểu Bì...</h3>
+                <p class="text-xs text-slate-500">Mạng nơ-ron AI đang đối soát 5 trục sức khỏe làn da và lọc danh mục thành phần phù hợp.</p>
+            </div>
+        </div>
+
+        <!-- MÀN HÌNH KẾT QUẢ CHẨN ĐOÁN HOÀN CHỈNH (RESULT SCREEN) -->
+        <div x-show="result" x-transition:enter="transition ease-out duration-500 transform" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="space-y-8">
+            
+            <!-- THẺ TỔNG KẾT CHẨN ĐOÁN & BIỂU ĐỒ RADAR -->
+            <div class="bg-white rounded-3xl border border-soft-border p-6 sm:p-10 shadow-xl shadow-pink-500/5 space-y-8">
+                
+                <div class="flex flex-col lg:flex-row items-center justify-between gap-8 pb-8 border-b border-slate-100">
+                    
+                    <!-- Cột Trái: Chẩn đoán & Điểm số sức khỏe -->
+                    <div class="flex-1 space-y-4 text-center lg:text-left">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>Hoàn Tất Chẩn Đoán Làn Da</span>
+                            <template x-if="result && result.isPregnancySafeApplied">
+                                <span class="bg-magenta-accent text-white px-2 py-0.5 rounded-full text-[10px] ml-1">An Toàn Thai Kỳ</span>
+                            </template>
+                        </div>
+
+                        <div>
+                            <span class="text-xs uppercase tracking-widest text-rose-gold font-bold block">Phân Loại Biểu Bì</span>
+                            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-charcoal mt-1" x-text="result?.skinClassification"></h2>
+                            <p class="text-xs font-semibold text-slate-500 mt-1" x-text="'Tình trạng: ' + result?.skinSubtype"></p>
+                        </div>
+
+                        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-sans" x-text="result?.expertSummary"></p>
+
+                        <!-- Điểm số sức khỏe tổng thể (Thang 100) -->
+                        <div class="inline-flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-pink-50/80 via-white to-purple-50/80 border border-pink-200">
+                            <div class="w-16 h-16 rounded-2xl bg-charcoal text-white flex flex-col items-center justify-center shadow-md">
+                                <span class="font-mono text-2xl font-bold text-magenta-accent" x-text="result?.overallHealthScore"></span>
+                                <span class="text-[9px] uppercase tracking-wider text-slate-400 font-bold">/ 100</span>
+                            </div>
+                            <div class="text-left text-xs">
+                                <span class="font-bold text-charcoal block">Điểm Sức Khỏe Làn Da</span>
+                                <span class="text-slate-500 text-[11px]" x-text="result?.overallHealthScore >= 80 ? 'Nền da tương đối khỏe mạnh, duy trì bảo vệ.' : 'Hàng rào biểu bì cần phục hồi và cấp ẩm chuyên sâu.'"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cột Phải: Biểu Đồ Radar Mạng Nhện 5 Trục (Interactive SVG Spider Chart) -->
+                    <div class="w-full lg:w-5/12 flex flex-col items-center justify-center p-4 bg-slate-50/60 rounded-3xl border border-slate-200">
+                        <div class="text-xs font-bold text-charcoal mb-2 flex items-center gap-1.5">
+                            <i class="fa-solid fa-chart-pie text-magenta-accent"></i>
+                            <span>Biểu Đồ Radar Sức Khỏe Làn Da (5 Trục)</span>
+                        </div>
+                        
+                        <!-- SVG Radar Container -->
+                        <div class="relative w-64 h-64 sm:w-72 sm:h-72">
+                            <svg viewBox="0 0 300 300" class="w-full h-full overflow-visible">
+                                <!-- Lưới Ngũ Giác 20%, 40%, 60%, 80%, 100% -->
+                                <polygon points="150,30 264,113 220,247 80,247 36,113" fill="none" stroke="#e2e8f0" stroke-width="1" />
+                                <polygon points="150,54 241,120 206,227 94,227 59,120" fill="none" stroke="#e2e8f0" stroke-width="1" />
+                                <polygon points="150,78 218,128 192,208 108,208 82,128" fill="none" stroke="#e2e8f0" stroke-width="1" />
+                                <polygon points="150,102 195,135 178,188 122,188 105,135" fill="none" stroke="#e2e8f0" stroke-width="1" />
+                                <polygon points="150,126 172,143 164,169 136,169 128,143" fill="none" stroke="#e2e8f0" stroke-width="1" />
+
+                                <!-- Trục Tọa Độ từ tâm (150, 150) -->
+                                <line x1="150" y1="150" x2="150" y2="30" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2" />
+                                <line x1="150" y1="150" x2="264" y2="113" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2" />
+                                <line x1="150" y1="150" x2="220" y2="247" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2" />
+                                <line x1="150" y1="150" x2="80" y2="247" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2" />
+                                <line x1="150" y1="150" x2="36" y2="113" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="2" />
+
+                                <!-- Đa giác Radar Dữ Liệu Thực Tế -->
+                                <polygon :points="radarPoints"
+                                         fill="rgba(217, 38, 114, 0.25)"
+                                         stroke="#D92672"
+                                         stroke-width="2.5"
+                                         class="transition-all duration-700 ease-out" />
+
+                                <!-- Điểm Nút Phát Sáng -->
+                                <template x-for="(pt, idx) in radarCoordinates" :key="idx">
+                                    <circle :cx="pt.x" :cy="pt.y" r="4.5" fill="#D92672" stroke="#ffffff" stroke-width="2" />
+                                </template>
+
+                                <!-- Nhãn 5 Trục -->
+                                <text x="150" y="18" text-anchor="middle" class="text-[10px] font-bold fill-slate-700">Độ Ẩm Tầng Sâu (<tspan x-text="result?.radarScores?.hydration + '%'"></tspan>)</text>
+                                <text x="270" y="115" text-anchor="start" class="text-[10px] font-bold fill-slate-700">Tuyến Dầu (<tspan x-text="result?.radarScores?.sebumBalance + '%'"></tspan>)</text>
+                                <text x="225" y="265" text-anchor="middle" class="text-[10px] font-bold fill-slate-700">Đàn Hồi (<tspan x-text="result?.radarScores?.firmness + '%'"></tspan>)</text>
+                                <text x="75" y="265" text-anchor="middle" class="text-[10px] font-bold fill-slate-700">Hàng Rào (<tspan x-text="result?.radarScores?.barrierStrength + '%'"></tspan>)</text>
+                                <text x="30" y="115" text-anchor="end" class="text-[10px] font-bold fill-slate-700">Đều Màu (<tspan x-text="result?.radarScores?.radiance + '%'"></tspan>)</text>
+                            </svg>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- BẢNG HOẠT CHẤT: KHUYÊN DÙNG & CẦN TRÁNH (2 CỘT RÕ RÀNG) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                    
+                    <!-- Cột 1: Hoạt Chất Khuyên Dùng (Super Ingredients) -->
+                    <div class="p-5 sm:p-6 rounded-3xl bg-emerald-50/50 border border-emerald-200 space-y-4">
+                        <div class="flex items-center justify-between pb-3 border-b border-emerald-200">
+                            <h3 class="text-sm font-bold text-emerald-900 flex items-center gap-2 m-0">
+                                <span class="w-6 h-6 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs">
+                                    <i class="fa-solid fa-check"></i>
+                                </span>
+                                Hoạt Chất Vàng Khuyên Dùng
+                            </h3>
+                            <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">Tương thích 100%</span>
+                        </div>
+
+                        <div class="space-y-3">
+                            <template x-for="item in result?.recommendedIngredients" :key="item.name">
+                                <div class="p-3 bg-white rounded-2xl border border-emerald-100 text-xs space-y-1 shadow-xs hover:border-emerald-300 transition">
+                                    <div class="font-bold text-emerald-900 flex items-center gap-1.5">
+                                        <i class="fa-solid text-emerald-500" :class="item.icon || 'fa-sparkles'"></i>
+                                        <span x-text="item.name"></span>
+                                    </div>
+                                    <div class="text-[11px] text-slate-500 font-semibold" x-text="'Vai trò: ' + item.role"></div>
+                                    <p class="text-[11px] text-slate-600 leading-snug" x-text="item.reason"></p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Cột 2: Hoạt Chất Cần Tránh (Avoid List) -->
+                    <div class="p-5 sm:p-6 rounded-3xl bg-rose-50/50 border border-rose-200 space-y-4">
+                        <div class="flex items-center justify-between pb-3 border-b border-rose-200">
+                            <h3 class="text-sm font-bold text-rose-900 flex items-center gap-2 m-0">
+                                <span class="w-6 h-6 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center text-xs">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                </span>
+                                Hoạt Chất Cần Tránh Tuyệt Đối
+                            </h3>
+                            <span class="text-[10px] bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full font-bold">Nguy cơ kích ứng</span>
+                        </div>
+
+                        <div class="space-y-3">
+                            <template x-for="item in result?.avoidIngredients" :key="item.name">
+                                <div class="p-3 bg-white rounded-2xl border border-rose-100 text-xs space-y-1 shadow-xs hover:border-rose-300 transition">
+                                    <div class="font-bold text-rose-900 flex items-center gap-1.5">
+                                        <i class="fa-solid text-rose-500" :class="item.icon || 'fa-ban'"></i>
+                                        <span x-text="item.name"></span>
+                                    </div>
+                                    <div class="text-[11px] text-rose-700 font-semibold" x-text="'Cảnh báo: ' + item.role"></div>
+                                    <p class="text-[11px] text-slate-600 leading-snug" x-text="item.reason"></p>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                </div>
+
+                    <!-- LỘ TRÌNH DƯỠNG DA SÁNG & TỐI (AM/PM ROUTINE) -->
+                    <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 space-y-3 text-xs">
+                        <div class="font-bold text-charcoal flex items-center gap-2">
+                            <i class="fa-solid fa-calendar-day text-magenta-accent"></i>
+                            <span>Quy Trình Chăm Sóc Đề Xuất (Routine Chuẩn Y Khoa)</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px]">
+                            <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
+                                <strong class="text-amber-700 flex items-center gap-1"><i class="fa-regular fa-sun"></i> Buổi Sáng:</strong>
+                                <p class="text-slate-600" x-text="result?.routineMorning"></p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
+                                <strong class="text-indigo-700 flex items-center gap-1"><i class="fa-regular fa-moon"></i> Buổi Tối:</strong>
+                                <p class="text-slate-600" x-text="result?.routineEvening"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MA TRẬN XUNG ĐỘT HOẠT CHẤT & HIỆP ĐỒNG (INGREDIENT CONFLICT MATRIX & GOLD SYNERGY) -->
+                    <template x-if="result?.conflictAnalysis?.interactions && result.conflictAnalysis.interactions.length > 0">
+                        <div class="space-y-4 pt-4 border-t border-slate-100">
+                            <!-- Header ma trận -->
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-7 h-7 rounded-lg bg-pink-100 text-magenta-accent flex items-center justify-center text-xs font-bold">
+                                        <i class="fa-solid fa-atom"></i>
+                                    </span>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-charcoal m-0">Ma Trận Tương Tác Hoạt Chất (Ingredient Interaction Matrix)</h4>
+                                        <p class="text-[11px] text-slate-500 m-0">Kiểm tra tương kỵ hóa học & hiệp đồng da liễu giữa các thành phần được kê đơn</p>
+                                    </div>
+                                </div>
+                                <span class="text-[11px] px-2.5 py-1 rounded-full font-bold"
+                                      :class="result.conflictAnalysis.hasCriticalConflicts ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'"
+                                      x-text="result.conflictAnalysis.hasCriticalConflicts ? '⚠️ Cần Tách Lịch Dùng' : '✨ Tương Thích An Toàn'"></span>
+                            </div>
+
+                            <!-- Danh sách cảnh báo tương kỵ & hiệp đồng -->
+                            <div class="space-y-3">
+                                <template x-for="(inter, idx) in result.conflictAnalysis.interactions" :key="idx">
+                                    <div class="p-4 rounded-2xl border text-xs transition space-y-2 shadow-xs"
+                                         :class="{
+                                             'bg-red-50/60 border-red-200 hover:border-red-300': inter.severityBadge === 'DANGER',
+                                             'bg-amber-50/60 border-amber-200 hover:border-amber-300': inter.severityBadge === 'WARNING',
+                                             'bg-emerald-50/60 border-emerald-200 hover:border-emerald-300': inter.severityBadge === 'SUCCESS_SYNERGY'
+                                         }">
+                                        
+                                        <!-- Top badge & Cặp hoạt chất -->
+                                        <div class="flex flex-wrap items-center justify-between gap-2">
+                                            <div class="flex items-center gap-2 font-bold text-sm">
+                                                <i class="fa-solid text-sm"
+                                                   :class="{
+                                                       'fa-triangle-exclamation text-red-600': inter.severityBadge === 'DANGER',
+                                                       'fa-circle-exclamation text-amber-600': inter.severityBadge === 'WARNING',
+                                                       'fa-wand-magic-sparkles text-emerald-600': inter.severityBadge === 'SUCCESS_SYNERGY'
+                                                   }"></i>
+                                                <span class="text-charcoal" x-text="inter.ingredientA + ' ⚡ ' + inter.ingredientB"></span>
+                                            </div>
+
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wide"
+                                                  :class="{
+                                                      'bg-red-600 text-white': inter.severityBadge === 'DANGER',
+                                                      'bg-amber-500 text-white': inter.severityBadge === 'WARNING',
+                                                      'bg-emerald-600 text-white': inter.severityBadge === 'SUCCESS_SYNERGY'
+                                                  }"
+                                                  x-text="inter.severityBadge === 'DANGER' ? 'TƯƠNG KỴ MẠNH (DANGER)' : (inter.severityBadge === 'WARNING' ? 'CẢNH BÁO QUÁ TẢI (WARNING)' : 'HIỆP ĐỒNG VÀNG (GOLD SYNERGY)')"></span>
+                                        </div>
+
+                                        <!-- Giải thích cơ chế khoa học -->
+                                        <div class="p-2.5 rounded-xl bg-white/80 border border-slate-100 text-[11px] text-slate-700 leading-relaxed">
+                                            <strong class="text-slate-900 block mb-0.5"><i class="fa-solid fa-microscope text-indigo-500"></i> Cơ Chế Khoa Học:</strong>
+                                            <span x-text="inter.scientificExplanation"></span>
+                                        </div>
+
+                                        <!-- Hướng dẫn phối hợp / Skin cycling -->
+                                        <div class="p-2.5 rounded-xl border text-[11px] leading-relaxed"
+                                             :class="{
+                                                 'bg-rose-100/60 border-rose-200 text-rose-900': inter.severityBadge === 'DANGER',
+                                                 'bg-amber-100/60 border-amber-200 text-amber-900': inter.severityBadge === 'WARNING',
+                                                 'bg-emerald-100/60 border-emerald-200 text-emerald-900': inter.severityBadge === 'SUCCESS_SYNERGY'
+                                             }">
+                                            <strong class="block mb-0.5 flex items-center gap-1">
+                                                <i class="fa-solid fa-lightbulb"></i>
+                                                <span>Khuyến Nghị Da Liễu (Resolution):</span>
+                                            </strong>
+                                            <span x-text="inter.recommendedResolution"></span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Lịch Skin Cycling nếu có -->
+                            <template x-if="result.conflictAnalysis.alternateNightNotes && result.conflictAnalysis.alternateNightNotes.length > 0">
+                                <div class="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs text-indigo-900 space-y-1.5">
+                                    <div class="font-bold flex items-center gap-1.5">
+                                        <i class="fa-solid fa-arrows-rotate text-indigo-600"></i>
+                                        <span>Lịch Dưỡng Da Cách Ngày Đề Xuất (Skin Cycling Protocol):</span>
+                                    </div>
+                                    <ul class="list-disc list-inside space-y-1 text-[11px] text-indigo-800">
+                                        <template x-for="(note, nIdx) in result.conflictAnalysis.alternateNightNotes" :key="nIdx">
+                                            <li x-text="note"></li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+            </div>
+
+            <!-- GỢI Ý SẢN PHẨM TƯƠNG THÍCH 100% CÓ SẴN TRONG CSDL -->
+            <div class="bg-white rounded-3xl border border-soft-border p-6 sm:p-10 shadow-xl shadow-pink-500/5 space-y-6">
+                <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                    <div>
+                        <span class="text-xs uppercase tracking-widest text-rose-gold font-bold">Phác Đồ Kê Đơn Tự Động</span>
+                        <h3 class="font-serif text-2xl font-bold text-charcoal mt-0.5">
+                            Gợi Ý Sản Phẩm Tương Thích 100% Cho Da Của Bạn
+                        </h3>
+                        <p class="text-xs text-slate-500">
+                            Các sản phẩm chính hãng đang có sẵn tại tổng kho Omni Beauty, đã qua kiểm duyệt thành phần an toàn.
+                        </p>
+                    </div>
+
+                    <template x-if="result && result.isPregnancySafeApplied">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
+                            <i class="fa-solid fa-shield-check"></i> Đã loại bỏ Retinol & BHA cao
+                        </span>
+                    </template>
+                </div>
+
+                <!-- Product Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <template x-for="p in result?.recommendedProducts" :key="p.id">
+                        <div class="group rounded-2xl border border-soft-border bg-white overflow-hidden shadow-xs hover:shadow-xl hover:border-magenta-accent transition-all duration-300 flex flex-col justify-between">
+                            
+                            <div>
+                                <!-- Image & Match Badge -->
+                                <div class="relative bg-slate-50 aspect-square overflow-hidden flex items-center justify-center p-4">
+                                    <img :src="p.thumbnailUrl" :alt="p.name" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" onerror="this.src='/images/default-product.png'" />
+                                    
+                                    <div class="absolute top-2.5 left-2.5 flex flex-col gap-1">
+                                        <span class="px-2 py-0.5 rounded-full bg-charcoal text-white text-[10px] font-bold shadow-sm font-mono" x-text="p.matchScore + '% MATCH'"></span>
+                                        <template x-if="result && result.isPregnancySafeApplied">
+                                            <span class="px-2 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-bold shadow-sm">MẸ BẦU AN TÂM</span>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <!-- Content -->
+                                <div class="p-4 space-y-2">
+                                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider block" x-text="p.categoryName"></span>
+                                    <a :href="'/Product/Detail/' + (p.slug || p.id)" class="font-bold text-xs text-charcoal line-clamp-2 hover:text-magenta-accent transition" x-text="p.name"></a>
+                                    
+                                    <!-- Key Ingredients -->
+                                    <div class="flex flex-wrap gap-1 pt-1" x-show="p.keyIngredients && p.keyIngredients.length > 0">
+                                        <template x-for="ing in p.keyIngredients" :key="ing">
+                                            <span class="text-[10px] bg-pink-50 text-magenta-accent border border-pink-100 px-1.5 py-0.5 rounded font-medium" x-text="ing"></span>
+                                        </template>
+                                    </div>
+
+                                    <!-- Match Reason -->
+                                    <p class="text-[11px] text-emerald-700 bg-emerald-50/70 p-2 rounded-xl border border-emerald-100 line-clamp-2" x-text="p.matchReasons?.[0] || 'Tối ưu cho tình trạng biểu bì hiện tại'"></p>
+                                </div>
+                            </div>
+
+                            <!-- Footer Price & CTA -->
+                            <div class="p-4 pt-0 border-t border-slate-50 flex items-center justify-between gap-2 mt-2">
+                                <div>
+                                    <span class="font-mono text-sm font-bold text-magenta-accent" x-text="p.price.toLocaleString('vi-VN') + ' ₫'"></span>
+                                    <template x-if="p.originalPrice">
+                                        <span class="text-[10px] line-through text-slate-400 block font-mono" x-text="p.originalPrice.toLocaleString('vi-VN') + ' ₫'"></span>
+                                    </template>
+                                </div>
+
+                                <button type="button" 
+                                        x-on:click="addToCart(p.id)" 
+                                        class="px-3.5 py-2 rounded-xl bg-charcoal text-white hover:bg-magenta-accent text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+                                    <i class="fa-solid fa-cart-plus"></i>
+                                    <span>Chọn Mua</span>
+                                </button>
+                            </div>
+
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Nút Chẩn Đoán Lại & In Kết Quả -->
+                <div class="pt-6 border-t border-slate-100 flex flex-wrap items-center justify-center gap-4">
+                    <button type="button" 
+                            x-on:click="resetWizard()" 
+                            class="px-6 py-3 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-50 text-xs font-bold transition flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-left"></i> Chẩn Đoán Lại Cho Người Khác
+                    </button>
+                    
+                    <a href="/Product" class="px-8 py-3 rounded-full bg-charcoal text-white hover:bg-magenta-accent text-xs font-bold uppercase tracking-wider transition shadow-md flex items-center gap-2">
+                        <i class="fa-solid fa-bag-shopping"></i> Khám Phá Toàn Bộ Cửa Hàng
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- CÔNG CỤ TRA CỨU TƯƠNG KỴ & HIỆP ĐỒNG HOẠT CHẤT DA LIỄU ĐỘC LẬP (INTERACTIVE INGREDIENT CONFLICT CHECKER) -->
+            <div class="bg-gradient-to-br from-white via-pink-50/20 to-purple-50/20 rounded-3xl border border-soft-border p-6 sm:p-10 shadow-xl shadow-pink-500/5 space-y-6">
+                <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-pink-100">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pastel-rose text-magenta-accent text-xs font-bold mb-1">
+                            <i class="fa-solid fa-atom"></i>
+                            <span>PHÒNG LAB DA LIỄU AI</span>
+                        </div>
+                        <h3 class="font-serif text-2xl font-bold text-charcoal">
+                            Tra Cứu Tương Kỵ & Hiệp Đồng Hoạt Chất Độc Lập
+                        </h3>
+                        <p class="text-xs text-slate-500">
+                            Thử nghiệm kết hợp bất kỳ hoạt chất nào để kiểm tra cảnh báo xung đột (Conflict) hoặc phát hiện hiệp đồng vàng (Synergy) theo chuẩn Y khoa Quốc tế.
+                        </p>
+                    </div>
+
+                    <button type="button" 
+                            x-on:click="checkInteractiveConflicts()" 
+                            :disabled="selectedIngredients.length < 2 || isCheckingConflicts"
+                            class="px-6 py-3 rounded-full bg-charcoal text-white hover:bg-magenta-accent disabled:opacity-50 disabled:cursor-not-allowed text-xs font-bold transition-all shadow-md flex items-center gap-2">
+                        <template x-if="isCheckingConflicts">
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                        </template>
+                        <template x-if="!isCheckingConflicts">
+                            <i class="fa-solid fa-vial-circle-check"></i>
+                        </template>
+                        <span>Phân Tích Ma Trận (<span x-text="selectedIngredients.length"></span>)</span>
+                    </button>
+                </div>
+
+                <!-- Danh sách 12 Hoạt chất chọn lựa (Pill selection) -->
+                <div class="space-y-2">
+                    <span class="text-xs font-bold text-slate-700 block">Chọn từ 2 hoạt chất trở lên để kiểm tra:</span>
+                    <div class="flex flex-wrap gap-2.5">
+                        <template x-for="ing in commonIngredients" :key="ing.key">
+                            <button type="button"
+                                    x-on:click="toggleIngredient(ing.key)"
+                                    class="px-3.5 py-2 rounded-xl text-xs font-semibold border transition-all flex items-center gap-1.5"
+                                    :class="selectedIngredients.includes(ing.key) 
+                                        ? 'bg-gradient-to-r from-pink-500 to-rose-600 text-white border-transparent shadow-xs scale-102' 
+                                        : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'">
+                                <i class="fa-solid" :class="selectedIngredients.includes(ing.key) ? 'fa-circle-check text-white' : 'fa-circle-plus text-slate-400'"></i>
+                                <span x-text="ing.name"></span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Kết Quả Phân Tích Ma Trận Tương Tác Trực Quan -->
+                <template x-if="conflictResults">
+                    <div class="pt-4 border-t border-slate-100 space-y-4" x-transition>
+                        
+                        <!-- Header Kết Quả -->
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-charcoal flex items-center gap-2">
+                                <i class="fa-solid fa-microscope text-magenta-accent"></i>
+                                <span>Kết Quả Đối Soát Ma Trận Hóa Sinh:</span>
+                            </span>
+
+                            <span class="text-[11px] font-bold px-3 py-1 rounded-full"
+                                  :class="conflictResults.hasCriticalConflicts ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'"
+                                  x-text="conflictResults.hasCriticalConflicts ? '⚠️ CẢNH BÁO: CÓ XUNG ĐỘT KỴ NHAU' : '✨ AN TOÀN / HIỆP ĐỒNG HOÀN HẢO'"></span>
+                        </div>
+
+                        <!-- Nếu không có tương tác nào phát sinh -->
+                        <template x-if="conflictResults.interactions.length === 0">
+                            <div class="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 text-xs text-emerald-900 flex items-center gap-3">
+                                <i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>
+                                <div>
+                                    <strong class="block">Các hoạt chất này an toàn để kết hợp!</strong>
+                                    <span class="text-[11px] text-emerald-700">Không ghi nhận phản ứng hóa học tiêu cực hay tương kỵ nồng độ nào giữa các hoạt chất bạn đã chọn.</span>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Danh sách các tương tác tìm thấy -->
+                        <div class="space-y-3">
+                            <template x-for="(inter, cIdx) in conflictResults.interactions" :key="cIdx">
+                                <div class="p-4 rounded-2xl border text-xs space-y-2 shadow-xs transition"
+                                     :class="{
+                                         'bg-red-50/70 border-red-200': inter.severityBadge === 'DANGER',
+                                         'bg-amber-50/70 border-amber-200': inter.severityBadge === 'WARNING',
+                                         'bg-emerald-50/70 border-emerald-200': inter.severityBadge === 'SUCCESS_SYNERGY'
+                                     }">
+                                    
+                                    <div class="flex flex-wrap items-center justify-between gap-2">
+                                        <div class="font-bold text-sm text-charcoal flex items-center gap-2">
+                                            <i class="fa-solid text-sm"
+                                               :class="{
+                                                   'fa-triangle-exclamation text-red-600': inter.severityBadge === 'DANGER',
+                                                   'fa-circle-exclamation text-amber-600': inter.severityBadge === 'WARNING',
+                                                   'fa-wand-magic-sparkles text-emerald-600': inter.severityBadge === 'SUCCESS_SYNERGY'
+                                               }"></i>
+                                            <span x-text="inter.ingredientA + ' ⚡ ' + inter.ingredientB"></span>
+                                        </div>
+
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold"
+                                              :class="{
+                                                  'bg-red-600 text-white': inter.severityBadge === 'DANGER',
+                                                  'bg-amber-500 text-white': inter.severityBadge === 'WARNING',
+                                                  'bg-emerald-600 text-white': inter.severityBadge === 'SUCCESS_SYNERGY'
+                                              }"
+                                              x-text="inter.severityBadge === 'DANGER' ? 'TƯƠNG KỴ NGUY HIỂM' : (inter.severityBadge === 'WARNING' ? 'CẢNH BÁO QUÁ TẢI' : 'HIỆP ĐỒNG VÀNG')"></span>
+                                    </div>
+
+                                    <div class="p-2.5 rounded-xl bg-white/80 border border-slate-100 text-[11px] text-slate-700 leading-relaxed">
+                                        <strong class="text-slate-900 block mb-0.5"><i class="fa-solid fa-flask text-indigo-500"></i> Cơ chế:</strong>
+                                        <span x-text="inter.scientificExplanation"></span>
+                                    </div>
+
+                                    <div class="p-2.5 rounded-xl border text-[11px] leading-relaxed"
+                                         :class="{
+                                             'bg-rose-100/60 border-rose-200 text-rose-900': inter.severityBadge === 'DANGER',
+                                             'bg-amber-100/60 border-amber-200 text-amber-900': inter.severityBadge === 'WARNING',
+                                             'bg-emerald-100/60 border-emerald-200 text-emerald-900': inter.severityBadge === 'SUCCESS_SYNERGY'
+                                         }">
+                                        <strong class="block mb-0.5"><i class="fa-solid fa-lightbulb"></i> Khuyến nghị da liễu:</strong>
+                                        <span x-text="inter.recommendedResolution"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function skinDiagnosticWizard() {
+            return {
+                currentStep: 1,
+                isAnalyzing: false,
+                result: null,
+
+                answers: {
+                    noonFeeling: 'tzone_oily',
+                    primaryConcern: 'acne_pore',
+                    ageGroup: '20_29',
+                    environment: 'office_ac',
+                    budgetBracket: '300k_500k',
+                    isPregnantOrNursing: false
+                },
+
+                // Interactive Conflict Checker State
+                commonIngredients: [],
+                selectedIngredients: ['retinol', 'bha'],
+                conflictResults: null,
+                isCheckingConflicts: false,
+
+                async init() {
+                    try {
+                        const res = await fetch('/SmartFilter/GetCommonIngredients');
+                        const json = await res.json();
+                        if (json.success) {
+                            this.commonIngredients = json.data;
+                        }
+                    } catch (e) {
+                        console.error('Không thể tải danh sách hoạt chất:', e);
+                    }
+                },
+
+                toggleIngredient(key) {
+                    const idx = this.selectedIngredients.indexOf(key);
+                    if (idx > -1) {
+                        this.selectedIngredients.splice(idx, 1);
+                    } else {
+                        this.selectedIngredients.push(key);
+                    }
+                    this.conflictResults = null;
+                },
+
+                async checkInteractiveConflicts() {
+                    if (this.selectedIngredients.length < 2) return;
+                    this.isCheckingConflicts = true;
+
+                    try {
+                        const res = await fetch('/SmartFilter/CheckConflicts', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ingredientNames: this.selectedIngredients })
+                        });
+                        const json = await res.json();
+                        if (json.success) {
+                            this.conflictResults = json.data;
+                        } else {
+                            alert(json.message || 'Lỗi kiểm tra tương kỵ.');
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        alert('Lỗi kết nối kiểm tra xung đột hoạt chất.');
+                    } finally {
+                        this.isCheckingConflicts = false;
+                    }
+                },
+
+                // Tính toán tọa độ ngũ giác cho biểu đồ SVG Radar
+                get radarCoordinates() {
+                    if (!this.result || !this.result.radarScores) return [];
+                    const scores = this.result.radarScores;
+                    const center = 150;
+                    const maxRadius = 120; // từ r=0 đến r=120
+
+                    // 5 góc ngũ giác (Top, Top-Right, Bottom-Right, Bottom-Left, Top-Left)
+                    const angles = [
+                        -Math.PI / 2,
+                        -Math.PI / 2 + (2 * Math.PI / 5),
+                        -Math.PI / 2 + (4 * Math.PI / 5),
+                        -Math.PI / 2 + (6 * Math.PI / 5),
+                        -Math.PI / 2 + (8 * Math.PI / 5)
+                    ];
+
+                    const vals = [
+                        scores.hydration || 50,
+                        scores.sebumBalance || 50,
+                        scores.firmness || 50,
+                        scores.barrierStrength || 50,
+                        scores.radiance || 50
+                    ];
+
+                    return vals.map((v, i) => {
+                        const r = (v / 100) * maxRadius;
+                        return {
+                            x: Math.round(center + r * Math.cos(angles[i])),
+                            y: Math.round(center + r * Math.sin(angles[i]))
+                        };
+                    });
+                },
+
+                get radarPoints() {
+                    const coords = this.radarCoordinates;
+                    if (!coords.length) return '';
+                    return coords.map(p => `${p.x},${p.y}`).join(' ');
+                },
+
+                async submitDiagnosis() {
+                    this.isAnalyzing = true;
+                    this.result = null;
+
+                    try {
+                        const res = await fetch('/SmartFilter/Diagnose', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(this.answers)
+                        });
+
+                        const json = await res.json();
+                        
+                        // Mô phỏng AI Deep Learning scan trong 900ms để tạo hiệu ứng công nghệ cao
+                        setTimeout(() => {
+                            this.isAnalyzing = false;
+                            if (json.success) {
+                                this.result = json.data;
+                                window.scrollTo({ top: 300, behavior: 'smooth' });
+                            } else {
+                                alert(json.message || 'Lỗi xử lý chẩn đoán.');
+                            }
+                        }, 900);
+                    } catch (e) {
+                        this.isAnalyzing = false;
+                        alert('Lỗi kết nối máy chủ AI.');
+                        console.error(e);
+                    }
+                },
+
+                resetWizard() {
+                    this.currentStep = 1;
+                    this.result = null;
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+
+                async addToCart(productId) {
+                    try {
+                        const res = await fetch('/Cart/AddToCart', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: `productId=${productId}&quantity=1`
+                        });
+
+                        if (res.ok) {
+                            if (typeof showStorefrontToast === 'function') {
+                                showStorefrontToast('Đã thêm sản phẩm tương thích vào giỏ hàng!', 'success');
+                            } else {
+                                alert('Đã thêm sản phẩm vào giỏ hàng thành công!');
+                            }
+                        } else {
+                            alert('Không thể thêm vào giỏ hàng lúc này.');
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        alert('Lỗi kết nối khi thêm giỏ hàng.');
+                    }
+                }
+            }
+        }
+    </script>
+}

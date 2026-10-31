@@ -1,0 +1,495 @@
+@model Omnichannel.Application.DTOs.Sales.AdminOrderDetailViewModel
+@{
+    Layout = null;
+    bool isPaid = Model.PaymentStatus == "PAID";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Phiếu Vận Đơn A6 - @Model.OrderCode</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <!-- Thư viện tạo mã vạch chuẩn Barcode Code 128 -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+    <style>
+        /* CSS In Nhiệt Khổ A6 Chuẩn (100mm x 150mm) */
+        @@page {
+            size: 100mm 150mm;
+            margin: 3mm;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #000;
+            background: #f1f5f9;
+            padding: 16px;
+            font-size: 11px;
+            line-height: 1.35;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .no-print-toolbar {
+            max-width: 420px;
+            margin: 0 auto 14px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-print {
+            background: #e11d48;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(225, 29, 72, 0.35);
+        }
+        .btn-print:hover {
+            background: #be123c;
+        }
+
+        .btn-back {
+            background: #e2e8f0;
+            color: #334155;
+        }
+        .btn-back:hover {
+            background: #cbd5e1;
+        }
+
+        /* Container Tem Vận Đơn A6 */
+        .shipping-label {
+            width: 100mm;
+            min-height: 144mm;
+            max-width: 420px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 2px solid #000;
+            padding: 7px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Header Brand & Barcode */
+        .header-section {
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+
+        .brand-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .brand-logo {
+            font-size: 15px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .brand-tag {
+            font-size: 9px;
+            font-weight: 800;
+            border: 1px solid #000;
+            padding: 1px 4px;
+            border-radius: 3px;
+            text-transform: uppercase;
+        }
+
+        .barcode-wrap {
+            text-align: center;
+            padding: 2px 0;
+        }
+
+        #barcode {
+            max-width: 100%;
+            height: 42px;
+        }
+
+        .order-code-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-align: center;
+            margin-top: 1px;
+        }
+
+        /* Address Box (Sender & Receiver) */
+        .address-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 4px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+
+        .sender-box {
+            font-size: 10px;
+            line-height: 1.3;
+            background: #f8fafc;
+            border: 1px dashed #64748b;
+            padding: 4px 6px;
+            border-radius: 4px;
+        }
+
+        .receiver-box {
+            border: 2px solid #000;
+            padding: 6px;
+            border-radius: 4px;
+            background: #fff;
+        }
+
+        .box-title {
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+            color: #334155;
+        }
+
+        .receiver-name {
+            font-size: 14px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .receiver-phone {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            font-weight: 900;
+            margin-top: 1px;
+        }
+
+        .receiver-address {
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 2px;
+            line-height: 1.3;
+        }
+
+        /* Items Table */
+        .items-section {
+            flex-grow: 1;
+            margin-bottom: 5px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+        }
+
+        .items-table th, .items-table td {
+            border: 1px solid #000;
+            padding: 3px 4px;
+            vertical-align: middle;
+        }
+
+        .items-table th {
+            background: #f1f5f9;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 9px;
+        }
+
+        .batch-pill {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 8.5px;
+            font-weight: 700;
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 0 3px;
+            border-radius: 2px;
+            margin-top: 1px;
+        }
+
+        /* Special Delivery Warning */
+        .fragile-box {
+            border: 2px dashed #000;
+            padding: 4px 6px;
+            text-align: center;
+            font-size: 9.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            background: #fffbeb;
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+
+        /* COD & Payment Row */
+        .cod-row {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            border: 2px solid #000;
+            margin-bottom: 5px;
+        }
+
+        .cod-cell {
+            padding: 5px 6px;
+        }
+
+        .cod-cell:first-child {
+            border-right: 2px solid #000;
+        }
+
+        .cod-label {
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .cod-amount {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            font-weight: 900;
+            margin-top: 1px;
+        }
+
+        /* Signature Section */
+        .sign-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-top: 1px solid #000;
+            padding-top: 4px;
+            text-align: center;
+            font-size: 9px;
+        }
+
+        .sign-box {
+            padding: 2px;
+        }
+
+        .sign-title {
+            font-weight: 700;
+        }
+
+        .sign-space {
+            height: 32px;
+        }
+
+        .sign-hint {
+            font-size: 8px;
+            color: #64748b;
+        }
+
+        /* Print Media Styles */
+        @@media print {
+            body {
+                background: transparent;
+                padding: 0;
+            }
+            .no-print-toolbar {
+                display: none !important;
+            }
+            .shipping-label {
+                box-shadow: none !important;
+                border: 2px solid #000 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 5px !important;
+                page-break-after: avoid;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toolbar Nút Thao Tác (Ẩn khi in nhiệt) -->
+    <div class="no-print-toolbar">
+        <a href="/Admin/Order/Details/@Model.Id" class="btn-action btn-back">
+            ← Quay Lại Đơn Hàng
+        </a>
+        <button type="button" onclick="window.print()" class="btn-action btn-print">
+            🖨️ In Phiếu Vận Đơn A6 (Ctrl+P)
+        </button>
+    </div>
+
+    <!-- KHU VỰC IN TEM VẬN ĐƠN KHỔ A6 (100mm x 150mm) -->
+    <div class="shipping-label">
+        <div>
+            <!-- Header: Logo & Mã Phân Loại Hub -->
+            <div class="header-section">
+                <div class="brand-row">
+                    <div>
+                        <div class="brand-logo">OMNI BEAUTY</div>
+                        <div style="font-size: 8.5px; font-weight: 700; color: #475569;">HAUTE PARFUMERIE & COSMETICS</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <span class="brand-tag">FEFO EXPRESS</span>
+                        <div style="font-size: 9px; font-weight: 800; margin-top: 2px;">
+                            @(Model.OrderSource == "POS" ? "QUẦY SHOWROOM" : "ECOMMERCE WEB")
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mã Vạch Barcode Code128 -->
+                <div class="barcode-wrap">
+                    <svg id="barcode"></svg>
+                    <div class="order-code-text">@Model.OrderCode</div>
+                </div>
+            </div>
+
+            <!-- Khối Địa Chỉ: Người Gửi & Người Nhận -->
+            <div class="address-grid">
+                <!-- Người Gửi (Showroom) -->
+                <div class="sender-box">
+                    <div class="box-title">Từ (Sender / Showroom):</div>
+                    <div style="font-weight: 800;">@Model.StoreName</div>
+                    <div>@Model.StoreAddress</div>
+                    @if (!string.IsNullOrWhiteSpace(Model.StorePhone))
+                    {
+                        <div>Hotline: <strong>@Model.StorePhone</strong></div>
+                    }
+                </div>
+
+                <!-- Người Nhận (Khách Hàng) -->
+                <div class="receiver-box">
+                    <div class="box-title">Đến (Recipient / Khách Hàng):</div>
+                    <div class="receiver-name">@Model.CustomerName</div>
+                    <div class="receiver-phone">SĐT: @Model.CustomerPhone</div>
+                    <div class="receiver-address">
+                        @(string.IsNullOrWhiteSpace(Model.ShippingAddress) ? "Nhận hàng trực tiếp tại showroom" : Model.ShippingAddress)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bảng Kê Chi Tiết Sản Phẩm Kèm Lô Hàng FEFO -->
+            <div class="items-section">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                    <div class="box-title" style="margin-bottom: 0;">Nội Dung Gói Hàng (@Model.Items.Count sản phẩm):</div>
+                    <div style="font-size: 9px; font-weight: 700;">Tổng SL: @Model.Items.Sum(i => i.Quantity)</div>
+                </div>
+
+                <table class="items-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 22px; text-align: center;">#</th>
+                            <th>Mỹ Phẩm / Mã SKU</th>
+                            <th style="width: 85px;">Lô FEFO & HSD</th>
+                            <th style="width: 32px; text-align: center;">SL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ int pIdx = 1; }
+                        @foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td style="text-align: center; font-weight: 700;">@pIdx</td>
+                                <td>
+                                    <div style="font-weight: 700; line-height: 1.2;">@item.ProductName</div>
+                                    <div style="font-family: 'JetBrains Mono', monospace; font-size: 8.5px; color: #475569;">
+                                        @item.ProductSku
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="batch-pill">@(!string.IsNullOrEmpty(item.BatchNumber) ? item.BatchNumber : "FEFO-AUTO")</span>
+                                    <div style="font-size: 8px; font-weight: 600; color: #334155; margin-top: 1px;">
+                                        HSD: @(item.ExpDate?.ToString("dd/MM/yyyy") ?? "--")
+                                    </div>
+                                </td>
+                                <td style="text-align: center; font-family: 'JetBrains Mono', monospace; font-weight: 800; font-size: 11px;">
+                                    @item.Quantity
+                                </td>
+                            </tr>
+                            pIdx++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Lưu Ý Quan Trọng Vận Chuyển -->
+            <div class="fragile-box">
+                ⚠️ HÀNG MỸ PHẨM CAO CẤP DỄ VỠ - CHO KHÁCH XEM HÀNG, KHÔNG THỬ
+            </div>
+
+            <!-- Thu Tiền COD & Khối Lượng -->
+            <div class="cod-row">
+                <div class="cod-cell">
+                    <div class="cod-label">Tiền Thu Hộ (COD):</div>
+                    <div class="cod-amount">
+                        @if (isPaid)
+                        {
+                            <span>0 VNĐ (ĐÃ THANH TOÁN)</span>
+                        }
+                        else
+                        {
+                            <span>@Model.TotalAmount.ToString("N0") VNĐ</span>
+                        }
+                    </div>
+                </div>
+                <div class="cod-cell" style="background: #f8fafc;">
+                    <div class="cod-label">Chữ Ký Nhận Hàng:</div>
+                    <div style="font-size: 9px; font-weight: 700; margin-top: 2px;">
+                        @(isPaid ? "Giao hàng không thu tiền" : "Thu đủ tiền trước khi mở")
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chữ Ký Người Giao & Nhận -->
+        <div class="sign-row">
+            <div class="sign-box">
+                <div class="sign-title">Chữ Ký Bưu Tá Lấy Hàng</div>
+                <div class="sign-space"></div>
+                <div class="sign-hint">(Ký và ghi rõ họ tên)</div>
+            </div>
+            <div class="sign-box" style="border-left: 1px solid #000;">
+                <div class="sign-title">Chữ Ký Người Nhận Hàng</div>
+                <div class="sign-space"></div>
+                <div class="sign-hint">(Xác nhận hàng nguyên vẹn)</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Tự Động Khởi Tạo Barcode Code 128 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                JsBarcode("#barcode", "@Model.OrderCode", {
+                    format: "CODE128",
+                    lineColor: "#000",
+                    width: 2.1,
+                    height: 40,
+                    displayValue: false,
+                    margin: 0
+                });
+            } catch (err) {
+                console.error("Barcode generation error: ", err);
+            }
+        });
+    </script>
+</body>
+</html>

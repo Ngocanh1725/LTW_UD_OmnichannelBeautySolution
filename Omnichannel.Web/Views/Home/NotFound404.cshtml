@@ -1,0 +1,65 @@
+@{
+    ViewData["Title"] = "404 - Không Tìm Thấy Trang";
+    Layout = "_Layout";
+}
+
+<section class="min-h-[70vh] flex items-center justify-center py-16 px-4 bg-gradient-to-b from-rose-50/40 via-white to-slate-50">
+    <div class="max-w-2xl w-full text-center relative">
+        <!-- Background Glow Accent -->
+        <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-96 h-96 bg-gradient-to-tr from-pink-300/30 to-purple-300/20 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+
+        <!-- 404 Badge & Visual -->
+        <div class="inline-flex items-center justify-center w-28 h-28 rounded-3xl bg-gradient-to-tr from-rose-500/10 via-pink-500/15 to-purple-500/10 text-rose-500 border border-rose-200/60 shadow-xl shadow-rose-500/5 mb-6 animate-bounce" style="animation-duration: 3s;">
+            <i class="fa-solid fa-compass-drafting text-4xl"></i>
+        </div>
+
+        <div class="text-7xl sm:text-9xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-rose-600 via-pink-600 to-indigo-600 mb-3 select-none">
+            404
+        </div>
+
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight mb-3">
+            Trang Không Tồn Tại Hoặc Đã Bị Thay Đổi
+        </h1>
+
+        <p class="text-slate-500 text-sm sm:text-base max-w-lg mx-auto mb-8 leading-relaxed">
+            Liên kết bạn truy cập có thể đã hết hạn, bị thay đổi đường dẫn hoặc tạm thời không khả dụng trong hệ thống Omnichannel Beauty.
+        </p>
+
+        <!-- Quick Search Box -->
+        <div class="max-w-md mx-auto mb-8">
+            <form action="/Product/SmartFilter" method="get" class="relative flex items-center">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 text-slate-400 text-sm"></i>
+                <input type="text" 
+                       name="keyword" 
+                       placeholder="Tìm kiếm mỹ phẩm, serum, son môi..." 
+                       class="w-full pl-11 pr-28 py-3.5 bg-white border border-slate-200 rounded-2xl shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all" />
+                <button type="submit" 
+                        class="absolute right-1.5 px-4 py-2 bg-slate-900 hover:bg-rose-600 text-white text-xs font-semibold rounded-xl transition-colors">
+                    Tìm kiếm
+                </button>
+            </form>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap items-center justify-center gap-3">
+            <a href="/" 
+               class="inline-flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-rose-600 to-pink-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-rose-500/20 hover:shadow-rose-500/40 hover:-translate-y-0.5 transition-all">
+                <i class="fa-solid fa-house"></i>
+                <span>Trở Về Trang Chủ</span>
+            </a>
+
+            <a href="/Product/SmartFilter" 
+               class="inline-flex items-center gap-2 px-6 py-3.5 bg-white border border-slate-200 text-slate-700 hover:text-rose-600 hover:border-rose-300 rounded-xl font-bold text-sm shadow-sm hover:-translate-y-0.5 transition-all">
+                <i class="fa-solid fa-sparkles text-rose-500"></i>
+                <span>Xem Sản Phẩm Hot</span>
+            </a>
+
+            <button type="button" 
+                    onclick="window.history.back()" 
+                    class="inline-flex items-center gap-2 px-5 py-3.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-xl font-semibold text-sm transition-colors">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Quay Lại</span>
+            </button>
+        </div>
+    </div>
+</section>

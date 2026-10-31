@@ -1,141 +1,679 @@
 @model Omnichannel.Application.DTOs.Sales.CartViewModel
+@using System.Text.Encodings.Web
 @{
-    ViewData["Title"] = "Giỏ Hàng Của Bạn";
+    ViewData["Title"] = "Giỏ Hàng Của Bạn - Omnichannel Beauty";
+    var vm = Model ?? new Omnichannel.Application.DTOs.Sales.CartViewModel();
+    decimal threshold = 500000m;
+    decimal remaining = Math.Max(0, threshold - vm.SubTotal);
+    decimal progress = vm.SubTotal >= threshold ? 100 : (threshold > 0 ? Math.Round(vm.SubTotal / threshold * 100, 1) : 100);
 }
 
-<div class="container my-5">
-    <div class="d-flex align-items-center gap-2 mb-4">
-        <i class="fa-solid fa-bag-shopping text-pink fs-4" style="color: var(--accent-pink);"></i>
-        <h4 class="fw-bold text-dark mb-0">Giỏ Hàng (@Model.TotalItems sản phẩm)</h4>
-    </div>
+<div class="bg-[#fffdfd] min-h-screen py-8 sm:py-12" x-data="cartPage()">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    @if (!Model.Items.Any())
-    {
-        <div class="beauty-card p-5 text-center">
-            <i class="fa-solid fa-cart-arrow-down fs-1 text-muted mb-3"></i>
-            <h5 class="fw-bold text-dark">Giỏ hàng của bạn đang trống</h5>
-            <p class="text-muted small">Hãy dạo một vòng để lựa chọn sản phẩm mỹ phẩm phù hợp nhé!</p>
-            <a href="/" class="btn btn-primary-gradient px-4 py-2 mt-2">Khám Phá Mỹ Phẩm Ngay</a>
+        <!-- Breadcrumb -->
+        <nav aria-label="Đường dẫn trang" class="mb-6 text-xs text-slate-500 flex items-center gap-2">
+            <a href="/" class="hover:text-magenta-accent transition flex items-center gap-1">
+                <i class="fa-solid fa-house text-slate-400"></i> Trang Chủ
+            </a>
+            <span class="text-slate-300">/</span>
+            <span class="text-charcoal font-semibold">Giỏ Hàng Của Bạn</span>
+        </nav>
+
+        <!-- Top Header & Back to Shop -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            <h1 class="font-serif text-2xl sm:text-3xl font-bold text-charcoal flex items-center gap-3">
+                <i class="fa-solid fa-bag-shopping text-magenta-accent text-2xl"></i>
+                <span>Giỏ Hàng Của Bạn</span>
+                <span class="text-xs font-mono font-bold text-magenta-accent bg-pastel-rose/60 border border-magenta-accent/20 px-3 py-1 rounded-full">
+                    <span x-text="totalItems">@vm.TotalItems</span> sản phẩm
+                </span>
+            </h1>
+            <a href="/Product/Search" class="text-xs font-bold text-magenta-accent hover:text-charcoal transition flex items-center gap-1.5 self-start sm:self-auto">
+                <i class="fa-solid fa-arrow-left text-[10px]"></i> Tiếp tục chọn mỹ phẩm
+            </a>
         </div>
-    }
-    else
-    {
-        <div class="row g-4">
-            <!-- Cột Trái: Bảng Sản Phẩm -->
-            <div class="col-lg-8">
-                <div class="beauty-card overflow-hidden">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr class="small text-secondary">
-                                    <th class="py-3 px-4">Sản phẩm</th>
-                                    <th class="py-3">Đơn giá</th>
-                                    <th class="py-3 text-center">Số lượng</th>
-                                    <th class="py-3 text-end">Thành tiền</th>
-                                    <th class="py-3 text-end px-4"></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var item in Model.Items)
-                                {
-                                    <tr>
-                                        <td class="px-4">
-                                            <div class="d-flex align-items-center gap-3">
-                                                <img src="@(string.IsNullOrEmpty(item.ProductImageUrl) ? "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=100&h=100&fit=crop" : item.ProductImageUrl)" alt="@item.ProductName" class="rounded-3 border" style="width: 60px; height: 60px; object-fit: cover;" />
-                                                <div>
-                                                    <div class="fw-bold text-dark small">@item.ProductName</div>
-                                                    <span class="badge bg-purple-subtle text-purple mt-1" style="background: var(--primary-purple-light); color: var(--primary-purple); font-size: 11px;">
-                                                        Lô HSD: @item.NearestExpDateStr
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="font-monospace small">@item.UnitPrice.ToString("N0") đ</td>
-                                        <td class="text-center">
-                                            <div class="d-inline-flex align-items-center border rounded-3 bg-white p-1">
-                                                <button type="button" class="btn btn-sm btn-light border-0 py-0 px-2" onclick="updateQty('@item.ProductId', -1)">-</button>
-                                                <span class="px-3 fw-bold small">@item.Quantity</span>
-                                                <button type="button" class="btn btn-sm btn-light border-0 py-0 px-2" onclick="updateQty('@item.ProductId', 1)">+</button>
-                                            </div>
-                                        </td>
-                                        <td class="text-end font-monospace fw-bold" style="color: var(--accent-pink);">
-                                            @item.LineTotal.ToString("N0") đ
-                                        </td>
-                                        <td class="text-end px-4">
-                                            <button type="button" class="btn btn-sm text-danger border-0" onclick="removeItem('@item.ProductId')">
-                                                <i class="fa-solid fa-trash-can"></i>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+
+        @if (vm.Items == null || !vm.Items.Any())
+        {
+            <!-- EMPTY CART STATE -->
+            <div class="bg-white rounded-3xl border border-soft-border p-12 text-center max-w-lg mx-auto shadow-sm my-8">
+                <div class="w-20 h-20 rounded-full bg-pastel-rose text-magenta-accent flex items-center justify-center text-3xl mx-auto mb-4 shadow-xs">
+                    <i class="fa-solid fa-cart-arrow-down"></i>
                 </div>
-            </div>
-
-            <!-- Cột Phải: Tổng Kết & Đặt Hàng -->
-            <div class="col-lg-4">
-                <div class="beauty-card p-4">
-                    <h6 class="fw-bold text-dark mb-3">Tóm Tắt Đơn Hàng</h6>
-
-                    <div class="d-flex justify-content-between small mb-2">
-                        <span class="text-muted">Tiền hàng:</span>
-                        <span class="fw-bold font-monospace">@Model.SubTotal.ToString("N0") đ</span>
-                    </div>
-
-                    <div class="d-flex justify-content-between small mb-2">
-                        <span class="text-muted">Phí giao hàng:</span>
-                        <span class="font-monospace">@(Model.ShippingFee == 0 ? "Miễn phí" : Model.ShippingFee.ToString("N0") + " đ")</span>
-                    </div>
-
-                    <hr class="border-soft my-3" />
-
-                    <div class="d-flex justify-content-between align-items-baseline mb-4">
-                        <span class="fw-bold text-dark">Tổng thanh toán:</span>
-                        <span class="fw-bold fs-5 font-monospace" style="color: var(--accent-pink);">@Model.FinalTotal.ToString("N0") đ</span>
-                    </div>
-
-                    <a href="/Checkout" class="btn btn-primary-gradient w-100 py-3 fw-bold">
-                        Tiến Hành Đặt Hàng <i class="fa-solid fa-arrow-right ms-2"></i>
+                <h3 class="font-serif text-xl font-bold text-charcoal">Giỏ hàng của bạn đang trống</h3>
+                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                    Hãy lựa chọn những sản phẩm chăm sóc da và mỹ phẩm chính ngạch chuẩn FEFO để tận hưởng ưu đãi freeship và quà tặng thượng lưu!
+                </p>
+                <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <a href="/Product/Search" class="px-8 py-3.5 rounded-full bg-charcoal text-white font-bold text-xs uppercase tracking-wider hover:bg-magenta-accent shadow-md transition-all">
+                        Khám Phá Mỹ Phẩm Ngay
                     </a>
-
-                    <div class="text-center mt-3">
-                        <a href="/" class="small text-muted text-decoration-none">
-                            <i class="fa-solid fa-arrow-left me-1"></i>Tiếp tục mua hàng
-                        </a>
-                    </div>
                 </div>
             </div>
-        </div>
-    }
+        }
+        else
+        {
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+                <!-- =========================================================================
+                     LEFT COLUMN (8 COLS): ITEMS LIST & PACKAGING & CROSS-SELL
+                     ========================================================================= -->
+                <div class="lg:col-span-8 space-y-6">
+
+                    <!-- 3. THANH TIẾN ĐỘ MIỄN PHÍ VẬN CHUYỂN (FREESHIP METER) -->
+                    <div class="p-5 rounded-3xl bg-gradient-to-r from-pastel-rose/70 via-white to-pastel-rose/50 border border-soft-border shadow-xs transition-all duration-300">
+                        <div class="flex items-center justify-between text-xs font-bold mb-2.5">
+                            <!-- Dynamic text based on free shipping status -->
+                            <div class="flex items-center gap-2">
+                                <template x-if="!isFreeShipping">
+                                    <div class="flex items-center gap-2 text-charcoal">
+                                        <div class="w-7 h-7 rounded-full bg-magenta-accent/10 text-magenta-accent flex items-center justify-center text-xs animate-bounce">
+                                            <i class="fa-solid fa-truck-fast"></i>
+                                        </div>
+                                        <span>
+                                            Mua thêm <strong class="text-magenta-accent font-mono-numeric text-sm" x-text="freeShippingRemainingFormatted">@remaining.ToString("N0") ₫</strong> để nhận <strong class="uppercase text-charcoal">MIỄN PHÍ VẬN CHUYỂN!</strong>
+                                        </span>
+                                    </div>
+                                </template>
+
+                                <template x-if="isFreeShipping">
+                                    <div class="flex items-center gap-2 text-emerald-700">
+                                        <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs">
+                                            <i class="fa-solid fa-circle-check text-sm"></i>
+                                        </div>
+                                        <span class="text-xs font-bold">
+                                            🎉 Chúc mừng! Đơn hàng của bạn đã đủ điều kiện Freeship toàn quốc!
+                                        </span>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <span class="text-magenta-accent font-mono font-bold text-xs" x-text="freeShippingProgress + '%'">
+                                @Math.Round(progress)%
+                            </span>
+                        </div>
+
+                        <!-- Progress Bar Track & Indicator -->
+                        <div class="h-3 w-full rounded-full bg-slate-100 p-0.5 overflow-hidden shadow-inner relative">
+                            <div class="h-full rounded-full transition-all duration-700 relative shadow-sm"
+                                 :class="isFreeShipping ? 'bg-gradient-to-r from-emerald-400 to-emerald-600' : 'bg-gradient-to-r from-rose-gold via-pink-400 to-magenta-accent'"
+                                 :style="'width: ' + freeShippingProgress + '%;'">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 1. DANH SÁCH SẢN PHẨM TRONG GIỎ HÀNG (DETAILED CART ITEMS) -->
+                    <div class="bg-white rounded-3xl border border-soft-border shadow-xs overflow-hidden">
+                        <div class="p-4 sm:p-5 bg-slate-50/70 border-b border-slate-100 flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            <span>Sản phẩm & Thông tin Lô FEFO</span>
+                            <span class="hidden sm:inline-block">Đơn giá / Thành tiền</span>
+                        </div>
+
+                        <div class="divide-y divide-slate-100" id="cartItemsList">
+                            @foreach (var item in vm.Items)
+                            {
+                                var imgUrl = !string.IsNullOrEmpty(item.ProductImageUrl) 
+                                    ? item.ProductImageUrl 
+                                    : "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=200&h=200&fit=crop";
+
+                                <div class="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 transition hover:bg-slate-50/40 relative group" 
+                                     id="cart-row-@item.ProductId"
+                                     data-product-id="@item.ProductId">
+                                    
+                                    <!-- Thumbnail -->
+                                    <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border border-slate-100 shrink-0 bg-slate-50">
+                                        <img src="@imgUrl" alt="@item.ProductName" class="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300" loading="lazy" />
+                                    </div>
+
+                                    <!-- Name, Variant & FEFO Expiry -->
+                                    <div class="flex-1 min-w-0 space-y-1.5">
+                                        <a href="/san-pham/@item.ProductId" class="font-serif font-bold text-sm sm:text-base text-charcoal hover:text-magenta-accent transition line-clamp-2 leading-snug">
+                                            @item.ProductName
+                                        </a>
+
+                                        <!-- Biến thể màu sắc / size / dung tích -->
+                                        @if (!string.IsNullOrEmpty(item.VariantName))
+                                        {
+                                            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-medium border border-slate-200/60">
+                                                <i class="fa-solid fa-swatchbook text-rose-gold text-[10px]"></i>
+                                                <span>@item.VariantName</span>
+                                            </div>
+                                        }
+
+                                        <!-- Thông tin Lô & Hạn dùng FEFO -->
+                                        <div>
+                                            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[10px] font-semibold border @(item.IsNearExpiration ? "bg-amber-50 text-amber-800 border-amber-200" : "bg-emerald-50 text-emerald-800 border-emerald-200")">
+                                                <i class="fa-solid fa-barcode text-[9px]"></i>
+                                                <span>@(string.IsNullOrEmpty(item.BatchStatusText) ? $"Lô: LOT-2028 • HSD: {item.NearestExpDateStr} (Date mới 100%)" : item.BatchStatusText)</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Đơn giá trên Mobile -->
+                                        <div class="text-xs text-slate-500 sm:hidden pt-1">
+                                            Đơn giá: <strong class="font-mono text-charcoal">@item.UnitPrice.ToString("N0") ₫</strong>
+                                        </div>
+                                    </div>
+
+                                    <!-- Đơn giá trên Desktop -->
+                                    <div class="hidden sm:block text-right shrink-0">
+                                        <span class="font-mono-numeric font-bold text-xs text-slate-600 block">@item.UnitPrice.ToString("N0") ₫</span>
+                                        <span class="text-[10px] text-slate-400">Đơn giá</span>
+                                    </div>
+
+                                    <!-- Bộ điều khiển số lượng (Stepper) -->
+                                    <div class="flex items-center rounded-full border border-slate-200 bg-white p-1 shrink-0 shadow-2xs">
+                                        <button type="button" 
+                                                @@click="updateQty('@item.ProductId', -1)" 
+                                                class="w-7 h-7 rounded-full bg-slate-50 hover:bg-magenta-accent hover:text-white flex items-center justify-center text-slate-500 transition active:scale-90"
+                                                aria-label="Giảm số lượng">
+                                            <i class="fa-solid fa-minus text-[9px]"></i>
+                                        </button>
+                                        <span class="w-10 text-center font-mono-numeric font-bold text-xs text-charcoal" id="qty-@item.ProductId">
+                                            @item.Quantity
+                                        </span>
+                                        <button type="button" 
+                                                @@click="updateQty('@item.ProductId', 1)" 
+                                                class="w-7 h-7 rounded-full bg-slate-50 hover:bg-magenta-accent hover:text-white flex items-center justify-center text-slate-500 transition active:scale-90"
+                                                aria-label="Tăng số lượng">
+                                            <i class="fa-solid fa-plus text-[9px]"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Thành tiền dòng sản phẩm -->
+                                    <div class="text-right min-w-[100px] shrink-0">
+                                        <span class="font-mono-numeric font-bold text-sm sm:text-base text-magenta-accent block" id="line-total-@item.ProductId">
+                                            @item.LineTotal.ToString("N0") ₫
+                                        </span>
+                                    </div>
+
+                                    <!-- Nút xóa sản phẩm -->
+                                    <button type="button" 
+                                            @@click="removeItem('@item.ProductId')" 
+                                            class="text-slate-300 hover:text-rose-500 transition p-2 rounded-full hover:bg-rose-50"
+                                            title="Xóa sản phẩm">
+                                        <i class="fa-regular fa-trash-can text-sm"></i>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- 2. DỊCH VỤ HỘP QUÀ TẶNG THƯỢNG LƯU (LUXURY GIFT PACKAGING) -->
+                    <div class="p-6 rounded-3xl bg-gradient-to-br from-pink-50/60 via-white to-pastel-rose/40 border border-magenta-accent/25 shadow-xs space-y-4">
+                        <div class="flex items-start gap-3.5">
+                            <div class="pt-0.5">
+                                <input type="checkbox" 
+                                       id="chkGiftWrap" 
+                                       x-model="isGiftWrapped" 
+                                       @@change="toggleGiftWrap()"
+                                       class="w-5 h-5 rounded-md text-magenta-accent focus:ring-magenta-accent border-slate-300 cursor-pointer accent-magenta-accent" />
+                            </div>
+                            <div class="flex-1">
+                                <label for="chkGiftWrap" class="font-serif font-bold text-charcoal text-sm sm:text-base cursor-pointer flex flex-wrap items-center gap-2">
+                                    <span>Đóng gói làm quà tặng thượng lưu</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-magenta-accent text-white shadow-2xs">
+                                        +50.000 ₫
+                                    </span>
+                                </label>
+                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                                    Món quà hoàn hảo trao gửi trọn vẹn tình cảm đến người thương trong từng chi tiết thủ công:
+                                </p>
+
+                                <!-- 3 Đặc quyền của hộp quà thượng lưu -->
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3 text-xs">
+                                    <div class="p-2.5 rounded-2xl bg-white/80 border border-pink-100 flex items-center gap-2 text-slate-700">
+                                        <span class="text-base">🎁</span>
+                                        <span><strong>Hộp cứng phủ nhung</strong> hồng Pastel Rose ép kim logo</span>
+                                    </div>
+                                    <div class="p-2.5 rounded-2xl bg-white/80 border border-pink-100 flex items-center gap-2 text-slate-700">
+                                        <span class="text-base">🎀</span>
+                                        <span><strong>Dải ruy băng lụa</strong> Rose Gold thắt nơ thủ công</span>
+                                    </div>
+                                    <div class="p-2.5 rounded-2xl bg-white/80 border border-pink-100 flex items-center gap-2 text-slate-700">
+                                        <span class="text-base">✉️</span>
+                                        <span><strong>Thiệp chúc mừng</strong> viết tay nắn nót theo yêu cầu</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ô nhập lời chúc viết tay (khi tick chọn quà tặng) -->
+                        <div x-show="isGiftWrapped" 
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 -translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             class="pt-3 border-t border-pink-100/80 space-y-2">
+                            
+                            <div class="flex items-center justify-between text-xs font-semibold text-slate-700">
+                                <label for="txtGiftMessage" class="flex items-center gap-1.5 text-magenta-accent">
+                                    <i class="fa-solid fa-pen-fancy text-xs"></i>
+                                    <span>Nội dung thiệp chúc mừng viết tay:</span>
+                                </label>
+                                <span class="text-slate-400 font-mono text-[11px]" x-text="giftMessage.length + '/200 ký tự'"></span>
+                            </div>
+
+                            <textarea id="txtGiftMessage" 
+                                      x-model="giftMessage" 
+                                      @@input="updateGiftMessageDebounced()"
+                                      maxlength="200"
+                                      rows="3" 
+                                      placeholder="Ví dụ: Chúc em luôn xinh đẹp, rạng rỡ và ngập tràn hạnh phúc mỗi ngày! Yêu em nhiều..." 
+                                      class="w-full px-4 py-3 rounded-2xl border border-pink-200 focus:border-magenta-accent focus:ring-1 focus:ring-magenta-accent focus:outline-none text-xs text-charcoal bg-white leading-relaxed resize-none"></textarea>
+
+                            <!-- Gợi ý lời chúc nhanh dạng Pill -->
+                            <div class="flex flex-wrap items-center gap-1.5 pt-1 text-[11px]">
+                                <span class="text-slate-400">Gợi ý nhanh:</span>
+                                <button type="button" 
+                                        @@click="setQuickWish('Chúc mừng sinh nhật rạng rỡ và luôn ngập tràn hạnh phúc! ✨')" 
+                                        class="px-2.5 py-1 rounded-full bg-white hover:bg-magenta-accent hover:text-white text-slate-600 border border-slate-200 transition text-[11px]">
+                                    🎂 Sinh nhật
+                                </button>
+                                <button type="button" 
+                                        @@click="setQuickWish('Gửi người phụ nữ tuyệt vời nhất, luôn xinh đẹp và tự tin nhé! 🌸')" 
+                                        class="px-2.5 py-1 rounded-full bg-white hover:bg-magenta-accent hover:text-white text-slate-600 border border-slate-200 transition text-[11px]">
+                                    💖 Tặng nàng
+                                </button>
+                                <button type="button" 
+                                        @@click="setQuickWish('Món quà nhỏ gửi tặng bạn yêu, chúc bạn luôn tỏa sáng rạng ngời! 💕')" 
+                                        class="px-2.5 py-1 rounded-full bg-white hover:bg-magenta-accent hover:text-white text-slate-600 border border-slate-200 transition text-[11px]">
+                                    🎁 Bạn thân
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. KHỐI GỢI Ý MUA KÈM ƯU ĐÃI (CROSS-SELL CAROUSEL - FLASH +29K) -->
+                    <div class="bg-white rounded-3xl border border-soft-border p-6 shadow-xs space-y-4">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-100 pb-3">
+                            <div>
+                                <h3 class="font-serif font-bold text-base text-charcoal flex items-center gap-2">
+                                    <i class="fa-solid fa-fire text-amber-500 text-sm"></i>
+                                    <span>Gợi Ý Mua Kèm Ưu Đãi Độc Quyền</span>
+                                </h3>
+                                <p class="text-xs text-slate-400 mt-0.5">
+                                    Ưu đãi flash deal đặc quyền chỉ áp dụng mua kèm giỏ hàng hiện tại với giá <strong>29.000₫</strong>
+                                </p>
+                            </div>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200/80 self-start sm:self-auto">
+                                Đồng giá 29.000₫
+                            </span>
+                        </div>
+
+                        <!-- Cross-sell Carousel Grid (3 items) -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            @foreach (var cs in vm.CrossSellItems)
+                            {
+                                <div class="p-4 rounded-2xl border border-slate-200/90 hover:border-magenta-accent/60 bg-gradient-to-b from-white to-slate-50/50 hover:shadow-md transition-all flex flex-col justify-between space-y-3 group">
+                                    <div>
+                                        <div class="relative aspect-square rounded-xl overflow-hidden bg-slate-100 mb-2.5">
+                                            <img src="@cs.ImageUrl" alt="@cs.ProductName" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                            <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-magenta-accent text-white text-[10px] font-bold shadow-2xs">
+                                                @cs.BadgeText
+                                            </span>
+                                        </div>
+
+                                        <h4 class="font-bold text-xs text-charcoal line-clamp-2 leading-snug group-hover:text-magenta-accent transition">
+                                            @cs.ProductName
+                                        </h4>
+                                        <p class="text-[11px] text-slate-400 line-clamp-1 mt-0.5">
+                                            @cs.Description
+                                        </p>
+                                    </div>
+
+                                    <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                                        <div>
+                                            <span class="font-mono font-bold text-magenta-accent text-sm block">@cs.SpecialPrice.ToString("N0") ₫</span>
+                                            <span class="font-mono text-slate-400 text-[10px] line-through block">@cs.OriginalPrice.ToString("N0") ₫</span>
+                                        </div>
+
+                                        <button type="button" 
+                                                @@click="addCrossSell(@cs.ProductId)" 
+                                                class="px-3 py-1.5 rounded-full bg-charcoal hover:bg-magenta-accent text-white text-xs font-bold transition flex items-center gap-1.5 shadow-2xs shrink-0">
+                                            <i class="fa-solid fa-plus text-[10px]"></i>
+                                            <span>Thêm +29K</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Cam kết chất lượng chính ngạch -->
+                    <div class="p-4 rounded-2xl bg-white border border-slate-200 flex items-center gap-3 text-xs text-slate-600">
+                        <i class="fa-solid fa-shield-halved text-emerald-600 text-xl shrink-0"></i>
+                        <span>Cam kết 100% mỹ phẩm nhập khẩu chính ngạch có tem vỡ Bộ Công An. Hoàn tiền 200% nếu phát hiện hàng giả hoặc cận date không đúng thông báo FEFO.</span>
+                    </div>
+
+                </div>
+
+                <!-- =========================================================================
+                     RIGHT COLUMN (4 COLS): VOUCHER & TỔNG TIỀN THANH TOÁN
+                     ========================================================================= -->
+                <div class="lg:col-span-4 space-y-6">
+
+                    <!-- Coupon Code Card -->
+                    <div class="bg-white p-6 rounded-3xl border border-soft-border shadow-xs space-y-3">
+                        <h4 class="font-bold text-charcoal text-xs uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-ticket text-magenta-accent"></i> Mã Giảm Giá / Voucher
+                        </h4>
+                        
+                        <div class="flex gap-2">
+                            <input type="text" 
+                                   x-model="couponCode" 
+                                   placeholder="Nhập mã ưu đãi..." 
+                                   class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono uppercase focus:border-magenta-accent focus:outline-none" />
+                            <button type="button" 
+                                    @@click="applyCoupon()" 
+                                    class="px-5 py-2.5 rounded-xl bg-charcoal text-white font-bold text-xs hover:bg-magenta-accent transition shrink-0">
+                                Áp Dụng
+                            </button>
+                        </div>
+
+                        <!-- Feedback Message -->
+                        <div x-show="couponMessage" 
+                             :class="couponSuccess ? 'text-emerald-700 bg-emerald-50 border-emerald-200' : 'text-red-700 bg-red-50 border-red-200'"
+                             class="p-2.5 rounded-xl border text-[11px] leading-snug" 
+                             style="display: none;" 
+                             x-text="couponMessage">
+                        </div>
+
+                        <div class="text-[10px] text-slate-400">
+                            Gợi ý mã hot: <button type="button" @@click="couponCode = 'BEAUTY10'; applyCoupon()" class="text-magenta-accent font-bold hover:underline font-mono">BEAUTY10</button> (Giảm 10% đơn từ 200K)
+                        </div>
+                    </div>
+
+                    <!-- Summary Card (Sticky) -->
+                    <div class="bg-white p-6 sm:p-7 rounded-3xl border border-soft-border shadow-xs space-y-4 sticky top-24">
+                        <h4 class="font-serif font-bold text-charcoal text-base border-b border-soft-border pb-3 flex items-center justify-between">
+                            <span>Tóm Tắt Đơn Hàng</span>
+                            <span class="text-xs font-sans text-slate-400 font-normal">Tạm tính</span>
+                        </h4>
+
+                        <div class="space-y-3 text-xs">
+                            <div class="flex items-center justify-between text-slate-600">
+                                <span>Tiền hàng (<span x-text="totalItems">@vm.TotalItems</span> món):</span>
+                                <span class="font-mono-numeric font-bold text-charcoal" x-text="subTotal">@vm.SubTotal.ToString("N0") ₫</span>
+                            </div>
+
+                            <div class="flex items-center justify-between text-slate-600" x-show="discountAmount !== '0 ₫'">
+                                <span>Giảm giá voucher:</span>
+                                <span class="font-mono-numeric font-bold text-emerald-600" x-text="'-' + discountAmount">-@vm.DiscountAmount.ToString("N0") ₫</span>
+                            </div>
+
+                            <!-- Dòng phí hộp quà tặng nếu có -->
+                            <div class="flex items-center justify-between text-slate-600" x-show="isGiftWrapped">
+                                <span class="flex items-center gap-1.5 text-magenta-accent font-medium">
+                                    <span>🎁 Hộp quà thượng lưu:</span>
+                                </span>
+                                <span class="font-mono-numeric font-bold text-magenta-accent">+50.000 ₫</span>
+                            </div>
+
+                            <!-- Phí vận chuyển -->
+                            <div class="flex items-center justify-between text-slate-600">
+                                <span>Phí vận chuyển:</span>
+                                <span class="font-mono-numeric font-bold" 
+                                      :class="shippingFee === 'Miễn phí' ? 'text-emerald-600 font-bold' : 'text-charcoal'" 
+                                      x-text="shippingFee">
+                                    @(vm.ShippingFee == 0 ? "Miễn phí" : vm.ShippingFee.ToString("N0") + " ₫")
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Tổng thanh toán cuối cùng -->
+                        <div class="border-t border-soft-border pt-4 flex items-baseline justify-between">
+                            <div>
+                                <span class="font-bold text-charcoal text-sm block">Tổng thanh toán:</span>
+                                <span class="text-[10px] text-slate-400">Đã bao gồm VAT</span>
+                            </div>
+                            <span class="font-mono-numeric font-bold text-2xl text-magenta-accent" x-text="finalTotal">
+                                @vm.FinalTotal.ToString("N0") ₫
+                            </span>
+                        </div>
+
+                        <!-- CTA Button -->
+                        <a href="/Checkout" class="w-full py-4 rounded-full bg-magenta-accent text-white font-bold text-xs uppercase tracking-wider text-center block hover:bg-[#b0276a] shadow-lg shadow-magenta-accent/25 hover:shadow-xl hover:shadow-magenta-accent/35 transition-all duration-300 flex items-center justify-center gap-2">
+                            <span>Tiến Hành Đặt Hàng</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </a>
+
+                        <!-- Security Badges -->
+                        <div class="pt-3 border-t border-slate-100 flex items-center justify-center gap-4 text-slate-400 text-xs">
+                            <span class="flex items-center gap-1 text-[11px]"><i class="fa-solid fa-lock text-emerald-600"></i> Thanh toán an toàn</span>
+                            <span>•</span>
+                            <span class="flex items-center gap-1 text-[11px]"><i class="fa-solid fa-clock text-amber-500"></i> Giữ tồn kho FEFO 15p</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
 </div>
 
 @section Scripts {
     <script>
-        async function updateQty(productId, delta) {
-            const res = await fetch('/Cart/UpdateQuantity', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId: productId, delta: delta })
-            });
+        function cartPage() {
+            return {
+                couponCode: '',
+                couponMessage: '',
+                couponSuccess: false,
+                totalItems: @vm.TotalItems,
+                subTotal: '@vm.SubTotal.ToString("N0") ₫',
+                discountAmount: '@vm.DiscountAmount.ToString("N0") ₫',
+                shippingFee: '@(vm.ShippingFee == 0 ? "Miễn phí" : vm.ShippingFee.ToString("N0") + " ₫")',
+                finalTotal: '@vm.FinalTotal.ToString("N0") ₫',
+                isGiftWrapped: @(vm.IsGiftWrapped ? "true" : "false"),
+                giftMessage: '@Html.Raw(JavaScriptEncoder.Default.Encode(vm.GiftMessage ?? ""))',
+                freeShippingRemaining: @remaining,
+                freeShippingRemainingFormatted: '@remaining.ToString("N0") ₫',
+                freeShippingProgress: @Math.Round(progress, 1),
+                isFreeShipping: @(vm.IsFreeShipping ? "true" : "false"),
+                giftMessageTimer: null,
 
-            if (res.ok) {
-                location.reload();
-            }
-        }
+                setQuickWish(text) {
+                    this.giftMessage = text;
+                    this.updateGiftMessageDebounced();
+                },
 
-        async function removeItem(productId) {
-            if (!confirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ?')) return;
-            const res = await fetch('/Cart/RemoveItem', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(productId)
-            });
+                updateGiftMessageDebounced() {
+                    clearTimeout(this.giftMessageTimer);
+                    this.giftMessageTimer = setTimeout(() => {
+                        this.saveGiftPackagingToServer();
+                    }, 500);
+                },
 
-            if (res.ok) {
-                location.reload();
-            }
+                async toggleGiftWrap() {
+                    await this.saveGiftPackagingToServer();
+                },
+
+                async saveGiftPackagingToServer() {
+                    try {
+                        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                        const res = await fetch('/Cart/UpdateGiftPackaging', {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': token
+                            },
+                            body: JSON.stringify({
+                                isGiftWrapped: this.isGiftWrapped,
+                                giftMessage: this.giftMessage
+                            })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            this.finalTotal = data.finalTotalFormatted;
+                            if (typeof showStorefrontToast === 'function') {
+                                showStorefrontToast(data.message, this.isGiftWrapped ? 'success' : 'info');
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Lỗi lưu hộp quà tặng:', e);
+                    }
+                },
+
+                async updateQty(productId, delta) {
+                    try {
+                        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                        const res = await fetch('/Cart/UpdateQuantity', {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': token
+                            },
+                            body: JSON.stringify({ productId: productId.toString(), delta: delta })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            if (data.itemQuantity <= 0) {
+                                document.getElementById('cart-row-' + productId)?.remove();
+                            } else {
+                                const qtyEl = document.getElementById('qty-' + productId);
+                                const lineEl = document.getElementById('line-total-' + productId);
+                                if (qtyEl) qtyEl.innerText = data.itemQuantity;
+                                if (lineEl) lineEl.innerText = data.itemLineTotal;
+                            }
+
+                            this.totalItems = data.totalItems;
+                            this.subTotal = data.subTotal;
+                            this.discountAmount = data.discountAmount;
+                            this.shippingFee = data.shippingFee;
+                            this.finalTotal = data.finalTotal;
+                            this.freeShippingRemaining = data.freeShippingRemaining;
+                            this.freeShippingRemainingFormatted = data.freeShippingRemainingFormatted;
+                            this.freeShippingProgress = data.freeShippingProgress;
+                            this.isFreeShipping = data.isFreeShipping;
+
+                            // Update MiniCart sync badge on header
+                            const badge = document.getElementById('miniCartCountBadge');
+                            if (badge) badge.innerText = data.totalItems;
+                            const totalHeader = document.getElementById('miniCartHeaderTotal');
+                            if (totalHeader) totalHeader.innerText = data.subTotal;
+
+                            if (data.totalItems === 0) {
+                                window.location.reload();
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Lỗi cập nhật giỏ hàng:', e);
+                    }
+                },
+
+                async removeItem(productId) {
+                    Swal.fire({
+                        title: 'Xóa sản phẩm?',
+                        text: 'Bạn có chắc chắn muốn bỏ sản phẩm này khỏi giỏ hàng?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#c2185b',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: 'Đồng ý xóa',
+                        cancelButtonText: 'Hủy'
+                    }).then(async (result) => {
+                        if (result.isConfirmed) {
+                            try {
+                                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                                const res = await fetch('/Cart/RemoveItem', {
+                                    method: 'POST',
+                                    headers: { 
+                                        'Content-Type': 'application/json',
+                                        'RequestVerificationToken': token
+                                    },
+                                    body: JSON.stringify({ productId: productId.toString() })
+                                });
+                                const data = await res.json();
+                                if (data.success) {
+                                    document.getElementById('cart-row-' + productId)?.remove();
+                                    this.totalItems = data.totalItems;
+                                    this.subTotal = data.subTotalFormatted;
+                                    this.shippingFee = data.shippingFee;
+                                    this.finalTotal = data.finalTotal;
+                                    this.freeShippingRemaining = data.freeShippingRemaining;
+                                    this.freeShippingRemainingFormatted = data.freeShippingRemainingFormatted;
+                                    this.freeShippingProgress = data.freeShippingProgress;
+                                    this.isFreeShipping = data.isFreeShipping;
+
+                                    if (typeof showStorefrontToast === 'function') {
+                                        showStorefrontToast('Đã xóa sản phẩm khỏi giỏ hàng.', 'info');
+                                    }
+                                    if (data.totalItems === 0) {
+                                        setTimeout(() => window.location.reload(), 400);
+                                    }
+                                }
+                            } catch (e) {
+                                console.error('Lỗi xóa sản phẩm:', e);
+                            }
+                        }
+                    });
+                },
+
+                async addCrossSell(crossSellId) {
+                    try {
+                        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                        const res = await fetch('/Cart/AddCrossSell', {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': token
+                            },
+                            body: JSON.stringify({ crossSellId: crossSellId })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            if (typeof showStorefrontToast === 'function') {
+                                showStorefrontToast(data.message, 'success');
+                            }
+                            // Reload softly to show the new item in table with full variant and batch details
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 500);
+                        } else {
+                            if (typeof showStorefrontToast === 'function') {
+                                showStorefrontToast(data.message || 'Không thể thêm sản phẩm', 'error');
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Lỗi thêm mua kèm:', e);
+                    }
+                },
+
+                async applyCoupon() {
+                    if (!this.couponCode.trim()) {
+                        this.couponMessage = 'Vui lòng nhập mã giảm giá.';
+                        this.couponSuccess = false;
+                        return;
+                    }
+
+                    try {
+                        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                        const res = await fetch('/Cart/ApplyCoupon', {
+                            method: 'POST',
+                            headers: { 
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': token
+                            },
+                            body: JSON.stringify({ couponCode: this.couponCode.trim() })
+                        });
+                        const data = await res.json();
+                        this.couponMessage = data.message;
+                        this.couponSuccess = data.success;
+                        if (data.success) {
+                            this.discountAmount = data.discountFormatted;
+                            this.shippingFee = data.shippingFeeFormatted;
+                            this.finalTotal = data.finalTotalFormatted;
+                            if (typeof showStorefrontToast === 'function') {
+                                showStorefrontToast(data.message, 'success');
+                            }
+                        }
+                    } catch (e) {
+                        this.couponMessage = 'Lỗi kết nối máy chủ.';
+                        this.couponSuccess = false;
+                    }
+                }
+            };
         }
     </script>
 }

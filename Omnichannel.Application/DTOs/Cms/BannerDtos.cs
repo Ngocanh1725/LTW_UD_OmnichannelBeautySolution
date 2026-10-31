@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Omnichannel.Application.DTOs.Cms
@@ -39,12 +39,15 @@ namespace Omnichannel.Application.DTOs.Cms
         [Display(Name = "Vị trí banner")]
         public int Position { get; set; } = 1;
 
-        [Required(ErrorMessage = "Ảnh máy tính (Desktop) không được để trống")]
         [Display(Name = "URL ảnh Desktop")]
-        public string DesktopImageUrl { get; set; } = string.Empty;
+        public string? DesktopImageUrl { get; set; }
+
+        public int? DesktopMediaId { get; set; }
 
         [Display(Name = "URL ảnh Mobile (Tùy chọn)")]
         public string? MobileImageUrl { get; set; }
+
+        public int? MobileMediaId { get; set; }
 
         [Display(Name = "Liên kết khi nhấp (Link URL)")]
         public string? LinkUrl { get; set; }
@@ -59,5 +62,11 @@ namespace Omnichannel.Application.DTOs.Cms
         [Required(ErrorMessage = "Ngày kết thúc không được để trống")]
         [Display(Name = "Hiệu lực đến ngày")]
         public DateTime ValidTo { get; set; } = DateTime.UtcNow.AddMonths(1);
+    }
+
+    public class EditBannerViewModel : CreateBannerViewModel
+    {
+        public int BannerId { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 }

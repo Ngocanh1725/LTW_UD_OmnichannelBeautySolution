@@ -37,6 +37,12 @@ namespace Omnichannel.Application.DTOs.Sales
         public string CashierName { get; set; } = string.Empty;
         public string CustomerName { get; set; } = string.Empty;
         public string CustomerPhone { get; set; } = string.Empty;
+        public string CustomerVipTier { get; set; } = "Thành viên";
+        public int LoyaltyPointsEarned { get; set; }
+        public int LoyaltyPointsUsed { get; set; }
+        public int CurrentLoyaltyPoints { get; set; }
+        public decimal LoyaltyPointsDiscount { get; set; }
+        public decimal VipDiscountAmount { get; set; }
         public decimal SubTotal { get; set; }
         public decimal DiscountAmount { get; set; }
         public decimal VatAmount { get; set; }
@@ -51,21 +57,36 @@ namespace Omnichannel.Application.DTOs.Sales
     public class PosReceiptPrintItemViewModel
     {
         public string ProductName { get; set; } = string.Empty;
+        public string ProductSku { get; set; } = string.Empty;
         public string BatchNumber { get; set; } = string.Empty;
         public string ExpDateStr { get; set; } = string.Empty;
         public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
         public decimal LineTotal { get; set; }
     }
 
     public class PosCheckoutDto
     {
         public string StoreId { get; set; } = string.Empty;
+        public int? PosShiftId { get; set; }
         public string? CustomerName { get; set; }
         public string? CustomerPhone { get; set; }
+        public int? CustomerUserId { get; set; }
+        public string? CouponCode { get; set; }
         public string PaymentMethod { get; set; } = "CASH";
         public decimal AmountReceived { get; set; }
         public decimal DiscountAmount { get; set; }
+        public int PointsToRedeem { get; set; }
+        public decimal PointDiscountAmount { get; set; }
+        public decimal VipDiscountAmount { get; set; }
         public List<PosCartItemDto> Items { get; set; } = new();
+    }
+
+    public class ApplyCouponRequest
+    {
+        public string CouponCode { get; set; } = string.Empty;
+        public decimal SubTotal { get; set; }
+        public int? UserId { get; set; }
     }
 
     public class PosReceiptItemDto

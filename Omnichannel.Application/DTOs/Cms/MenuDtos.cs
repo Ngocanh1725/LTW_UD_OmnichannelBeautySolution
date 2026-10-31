@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -10,6 +10,8 @@ namespace Omnichannel.Application.DTOs.Cms
         public int MenuId { get; set; }
         public int? ParentId { get; set; }
         public string Title { get; set; } = string.Empty;
+        public string LinkType { get; set; } = "CUSTOM"; // CUSTOM, CATEGORY, POST, STATIC_PAGE, PRODUCT
+        public int? TargetEntityId { get; set; }
         public int TargetType { get; set; } // 1: Category, 2: Product, 3: Post, 4: StaticPage, 5: CustomUrl
         public string? TargetId { get; set; }
         public string? TargetSlug { get; set; }
@@ -35,9 +37,14 @@ namespace Omnichannel.Application.DTOs.Cms
         [Display(Name = "Tiêu đề hiển thị")]
         public string Title { get; set; } = string.Empty;
 
+        [Display(Name = "Loại liên kết đa hình")]
+        public string LinkType { get; set; } = "CUSTOM"; // CUSTOM, CATEGORY, POST, STATIC_PAGE, PRODUCT
+
+        public int? TargetEntityId { get; set; }
+
         [Required(ErrorMessage = "Vui lòng chọn loại liên kết")]
         [Display(Name = "Loại đối tượng liên kết")]
-        public int TargetType { get; set; } = 1; // Mặc định: Category
+        public int TargetType { get; set; } = 1; // 1: Category, 2: Product, 3: Post, 4: StaticPage, 5: CustomUrl
 
         [Display(Name = "Đối tượng đích")]
         public string? TargetId { get; set; }
@@ -85,5 +92,24 @@ namespace Omnichannel.Application.DTOs.Cms
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string Slug { get; set; } = string.Empty;
+    }
+
+    public class EditMenuItemViewModel : CreateMenuItemViewModel
+    {
+        public int MenuItemId { get; set; }
+        public bool IsActive { get; set; } = true;
+    }
+
+    public class ReorderMenuRequest
+    {
+        public int MenuId { get; set; }
+        public List<ReorderItemDto> Items { get; set; } = new();
+    }
+
+    public class ReorderItemDto
+    {
+        public int Id { get; set; }
+        public int? ParentId { get; set; }
+        public int SortOrder { get; set; }
     }
 }

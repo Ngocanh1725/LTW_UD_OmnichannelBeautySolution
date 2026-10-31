@@ -1,81 +1,141 @@
 @model Omnichannel.Application.DTOs.Sales.CartViewModel
-
-<!-- Update total count badge in Header (OOB) -->
-<span id="miniCartCountBadge" hx-swap-oob="true" class="h-5 w-5 rounded-full bg-pink-500 text-white text-[11px] font-bold flex items-center justify-center -mr-1">@Model.TotalItems</span>
-<span id="miniCartHeaderTotal" hx-swap-oob="true" class="text-xs font-bold font-mono-numeric">@Model.SubTotal.ToString("N0") ₫</span>
-
-<!-- Free Shipping Progress Threshold (500,000đ) -->
 @{
+    var vm = Model ?? new Omnichannel.Application.DTOs.Sales.CartViewModel();
     decimal freeShippingThreshold = 500000;
-    decimal remaining = freeShippingThreshold - Model.SubTotal;
-    decimal progress = Model.SubTotal >= freeShippingThreshold ? 100 : (Model.SubTotal / freeShippingThreshold * 100);
+    decimal remaining = Math.Max(0, freeShippingThreshold - vm.SubTotal);
+    decimal progress = vm.SubTotal >= freeShippingThreshold ? 100 : (freeShippingThreshold > 0 ? (vm.SubTotal / freeShippingThreshold * 100) : 100);
 }
 
-<div class="p-4 bg-pink-50/50 border-b border-pink-100 shrink-0">
-    <div class="free-shipping-meter">
-        <div class="flex items-center justify-between text-xs font-semibold text-slate-700 mb-1.5">
+<!-- Synchronize count badge and header total in Header via HTMX OOB Swapping -->
+<span id="miniCartCountBadge" hx-swap-oob="true" class="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-magenta-accent text-white text-[10px] font-bold flex items-center justify-center border-2 border-white shadow-sm">@vm.TotalItems</span>
+<span id="miniCartHeaderTotal" hx-swap-oob="true" class="text-xs font-bold font-mono-numeric tracking-wide">@vm.SubTotal.ToString("N0") ₫</span>
+
+<!-- 1. THANH TIẾN ĐỘ FREESHIP THÔNG MINH -->
+<div class="p-4 bg-gradient-to-r from-pastel-rose/90 via-pink-50/80 to-white border-b border-soft-border shrink-0">
+    <div class="space-y-1.5">
+        <div class="flex items-center justify-between text-xs font-semibold text-slate-700">
             @if (remaining > 0)
             {
-                <span id="shippingMeterText"><i class="fa-solid fa-truck-fast text-pink-600 mr-1"></i> Mua thêm để nhận FREESHIP</span>
-                <span id="shippingRemainingAmount" class="text-pink-600 font-mono-numeric">@remaining.ToString("N0") ₫</span>
+                <span class="flex items-center gap-1.5 text-charcoal">
+                    <i class="fa-solid fa-truck-fast text-magenta-accent"></i>
+                    <span>Mua thêm <strong class="text-magenta-accent font-mono-numeric font-bold">@remaining.ToString("N0") ₫</strong> để được <strong class="text-charcoal uppercase">MIỄN PHÍ VẬN CHUYỂN TOÀN QUỐC!</strong></span>
+                </span>
             }
             else
             {
-                <span id="shippingMeterText" class="text-green-600"><i class="fa-solid fa-check-circle mr-1"></i> Bạn đã đạt mức FREESHIP!</span>
+                <span class="text-emerald-700 font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-heart text-emerald-600 text-sm"></i>
+                    <span>Chúc mừng! Bạn đã đạt mức <strong class="uppercase text-emerald-800">FREESHIP TOÀN QUỐC!</strong></span>
+                </span>
             }
+            <span class="font-mono font-bold text-[11px] @(remaining == 0 ? "text-emerald-600" : "text-slate-400")">
+                @progress.ToString("0")%
+            </span>
         </div>
-        <div class="progress-fefo-container bg-pink-100/50 h-1.5 rounded-full overflow-hidden">
-            <div id="shippingProgressBar" class="progress-fefo-bar bg-pink-500 h-full transition-all duration-500" style="width: @progress.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%;"></div>
+        
+        <!-- Progress Bar Track -->
+        <div class="h-2 rounded-full overflow-hidden bg-pink-100/70 p-0.5 shadow-inner">
+            <div class="h-full rounded-full transition-all duration-500 @(remaining == 0 ? "bg-emerald-500 shadow-sm shadow-emerald-500/30" : "bg-gradient-to-r from-amber-400 via-rose-400 to-magenta-accent shadow-sm")" 
+                 style="width: @progress.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%;">
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Cart Items Scrollable List -->
-<div class="flex-1 overflow-y-auto p-5 space-y-4">
-    @if (!Model.Items.Any())
+<!-- 2. DANH SÁCH SẢN PHẨM TRONG GIỎ (SCROLLABLE LIST) -->
+<div class="flex-1 overflow-y-auto p-4 space-y-3">
+    @if (vm.Items == null || !vm.Items.Any())
     {
-        <div class="text-center py-10 text-slate-400">
-            <i class="fa-solid fa-basket-shopping text-4xl mb-3 text-pink-200"></i>
-            <div class="text-sm">Chưa có sản phẩm nào.</div>
-            <button type="button" @@click="cartOpen = false" class="mt-4 px-4 py-2 rounded-full bg-slate-100 text-slate-700 font-bold text-xs hover:bg-slate-200 transition">Tiếp tục mua sắm</button>
+        <!-- Empty Cart State -->
+        <div class="text-center py-16 text-slate-400 flex flex-col items-center justify-center space-y-3">
+            <div class="w-16 h-16 rounded-full bg-pastel-rose flex items-center justify-center text-rose-gold text-2xl shadow-inner">
+                <i class="fa-solid fa-bag-shopping"></i>
+            </div>
+            <h4 class="text-sm font-bold text-slate-800">Giỏ hàng của bạn đang trống</h4>
+            <p class="text-xs text-slate-400 max-w-xs leading-relaxed">Khám phá các sản phẩm mỹ phẩm chính hãng chuẩn hạn dùng FEFO ngay!</p>
+            <button type="button" 
+                    @@click="cartOpen = false" 
+                    class="mt-2 px-6 py-2.5 rounded-full bg-charcoal text-white font-bold text-xs hover:bg-magenta-accent shadow-md transition-all">
+                Tiếp Tục Mua Sắm
+            </button>
         </div>
     }
     else
     {
-        @foreach (var item in Model.Items)
+        @foreach (var item in vm.Items)
         {
-            <div class="flex gap-3 items-center p-3 rounded-2xl bg-white border border-slate-100 shadow-sm relative group">
-                <img src="@(string.IsNullOrEmpty(item.ProductImageUrl) ? "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=100&h=100&fit=crop" : item.ProductImageUrl)" alt="@item.ProductName" class="rounded-xl w-14 h-14 object-cover border border-slate-50" />
+            var itemImg = string.IsNullOrEmpty(item.ProductImageUrl) ? "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=120&h=120&fit=crop" : item.ProductImageUrl;
+            
+            <div class="flex gap-3 items-center p-3 rounded-2xl bg-white border border-slate-100 shadow-xs relative group hover:border-pink-200 transition-all">
+                <!-- Thumbnail -->
+                <img src="@itemImg" 
+                     alt="@item.ProductName" 
+                     class="rounded-xl w-16 h-16 object-cover border border-slate-100 shrink-0 shadow-2xs" 
+                     loading="lazy" />
                 
-                <div class="flex-1 min-w-0">
-                    <div class="font-bold text-slate-800 text-xs truncate pr-6">@item.ProductName</div>
-                    <div class="text-[10px] text-slate-500 mt-0.5">
-                        <span class="inline-flex items-center rounded-md bg-pink-50 px-1.5 py-0.5 text-[9px] font-medium text-pink-700 ring-1 ring-inset ring-pink-700/10">
-                            HSD: @item.NearestExpDateStr
-                        </span>
+                <!-- Information -->
+                <div class="flex-1 min-w-0 pr-1">
+                    <h5 class="font-bold text-charcoal text-xs truncate leading-snug hover:text-magenta-accent transition" title="@item.ProductName">
+                        <a href="/Product/Detail/@item.ProductId">@item.ProductName</a>
+                    </h5>
+                    
+                    @if (!string.IsNullOrEmpty(item.NearestExpDateStr))
+                    {
+                        <div class="mt-0.5">
+                            <span class="inline-flex items-center rounded-md bg-amber-50 px-1.5 py-0.5 text-[9px] font-semibold text-amber-800 border border-amber-200">
+                                <i class="fa-solid fa-clock mr-1 text-[8px] text-amber-600"></i> HSD: @item.NearestExpDateStr
+                            </span>
+                        </div>
+                    }
+
+                    <div class="flex items-baseline gap-2 mt-1">
+                        <span class="font-bold text-magenta-accent text-xs font-mono-numeric">@item.UnitPrice.ToString("N0") ₫</span>
+                        @if (item.Quantity > 1)
+                        {
+                            <span class="text-[10px] text-slate-400 font-mono">(= @item.LineTotal.ToString("N0") ₫)</span>
+                        }
                     </div>
-                    <div class="font-bold text-pink-600 text-sm mt-1 font-mono-numeric">@item.UnitPrice.ToString("N0") ₫</div>
                 </div>
                 
-                <div class="flex flex-col items-end justify-between h-full">
+                <!-- Actions: Delete & Quantity Stepper -->
+                <div class="flex flex-col items-end justify-between self-stretch shrink-0">
+                    <!-- Nút Xóa Sản Phẩm -->
                     <button type="button" 
                             hx-post="/Cart/RemoveItem" 
                             hx-ext="json-enc" 
                             hx-vals='{"productId": "@item.ProductId"}'
                             hx-trigger="click"
                             hx-on::after-request="if(event.detail.successful) htmx.trigger('body', 'reloadMiniCart')"
-                            class="text-slate-300 hover:text-red-500 transition p-1">
+                            class="text-slate-300 hover:text-rose-600 transition p-1"
+                            title="Xóa khỏi giỏ hàng">
                         <i class="fa-regular fa-trash-can text-xs"></i>
                     </button>
-                    <div class="flex items-center gap-2 bg-slate-50 rounded-lg p-1 border border-slate-100 mt-2">
-                        <!-- Cập nhật số lượng qua AJAX -->
-                        <button type="button" class="w-5 h-5 flex items-center justify-center text-slate-500 hover:text-pink-600 hover:bg-white rounded"
-                                hx-post="/Cart/UpdateQuantity" hx-ext="json-enc" hx-vals='{"productId": "@item.ProductId", "delta": -1}' hx-trigger="click" hx-on::after-request="if(event.detail.successful) htmx.trigger('body', 'reloadMiniCart')">
+                    
+                    <!-- Stepper Tăng/Giảm Số Lượng (+ / -) Cập Nhật Tức Thì Qua AJAX -->
+                    <div class="flex items-center gap-1 bg-slate-50 rounded-lg p-0.5 border border-slate-200 mt-2">
+                        <!-- Decrement Button -->
+                        <button type="button" 
+                                class="w-5 h-5 flex items-center justify-center text-slate-500 hover:text-magenta-accent hover:bg-white rounded transition"
+                                hx-post="/Cart/UpdateQuantity" 
+                                hx-ext="json-enc" 
+                                hx-vals='{"productId": "@item.ProductId", "delta": -1}' 
+                                hx-trigger="click" 
+                                hx-on::after-request="if(event.detail.successful) htmx.trigger('body', 'reloadMiniCart')"
+                                aria-label="Giảm số lượng">
                             <i class="fa-solid fa-minus text-[8px]"></i>
                         </button>
-                        <span class="text-xs font-bold text-slate-700 w-4 text-center">@item.Quantity</span>
-                        <button type="button" class="w-5 h-5 flex items-center justify-center text-slate-500 hover:text-pink-600 hover:bg-white rounded"
-                                hx-post="/Cart/UpdateQuantity" hx-ext="json-enc" hx-vals='{"productId": "@item.ProductId", "delta": 1}' hx-trigger="click" hx-on::after-request="if(event.detail.successful) htmx.trigger('body', 'reloadMiniCart')">
+                        
+                        <span class="text-xs font-bold text-slate-800 w-5 text-center font-mono-numeric">@item.Quantity</span>
+                        
+                        <!-- Increment Button -->
+                        <button type="button" 
+                                class="w-5 h-5 flex items-center justify-center text-slate-500 hover:text-magenta-accent hover:bg-white rounded transition"
+                                hx-post="/Cart/UpdateQuantity" 
+                                hx-ext="json-enc" 
+                                hx-vals='{"productId": "@item.ProductId", "delta": 1}' 
+                                hx-trigger="click" 
+                                hx-on::after-request="if(event.detail.successful) htmx.trigger('body', 'reloadMiniCart')"
+                                aria-label="Tăng số lượng">
                             <i class="fa-solid fa-plus text-[8px]"></i>
                         </button>
                     </div>
@@ -85,17 +145,132 @@
     }
 </div>
 
-<!-- Footer Checkout Action -->
-@if (Model.Items.Any())
+<!-- 3. VOUCHER GIẢM GIÁ GỢI Ý & TỔNG TIỀN TẠM TÍNH & 2 NÚT HÀNH ĐỘNG -->
+@if (vm.Items != null && vm.Items.Any())
 {
-    <div class="p-5 border-t border-slate-100 bg-slate-50/60 space-y-3 shrink-0">
-        <div class="flex items-center justify-between text-sm">
-            <span class="text-slate-500">Tạm tính:</span>
-            <span class="font-bold text-slate-900 font-mono-numeric text-base">@Model.SubTotal.ToString("N0") ₫</span>
+    <div class="p-4 border-t border-slate-200/80 bg-slate-50/90 space-y-3.5 shrink-0" x-data="{
+        couponInput: '',
+        couponMsg: '',
+        isApplying: false,
+        applyVoucher(code) {
+            this.couponInput = code;
+            this.submitCoupon();
+        },
+        submitCoupon() {
+            if (!this.couponInput) return;
+            this.isApplying = true;
+            this.couponMsg = '';
+            fetch('/Cart/ApplyCoupon', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ couponCode: this.couponInput })
+            })
+            .then(r => r.json())
+            .then(data => {
+                this.isApplying = false;
+                if (data.success) {
+                    showStorefrontToast(data.message, 'success');
+                    if (window.htmx) {
+                        htmx.trigger('body', 'reloadMiniCart');
+                    }
+                } else {
+                    this.couponMsg = data.message;
+                    showStorefrontToast(data.message, 'warning');
+                }
+            })
+            .catch(() => {
+                this.isApplying = false;
+                showStorefrontToast('Lỗi áp dụng voucher, vui lòng thử lại', 'error');
+            });
+        }
+    }">
+        
+        <!-- Voucher Giảm Giá Gợi Ý (Quick Coupon Box) -->
+        <div class="space-y-2">
+            <div class="flex items-center justify-between text-[11px]">
+                <span class="font-bold text-charcoal flex items-center gap-1.5">
+                    <i class="fa-solid fa-ticket text-rose-gold"></i> Voucher Gợi Ý Dành Riêng Cho Bạn:
+                </span>
+                <span class="text-magenta-accent font-semibold cursor-pointer hover:underline" @@click="applyVoucher('BEAUTY50K')">
+                    Dùng mã 50K
+                </span>
+            </div>
+
+            <!-- Voucher Chip Button -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                <button type="button" 
+                        @@click="applyVoucher('BEAUTY50K')"
+                        class="px-2.5 py-1 rounded-lg border border-dashed border-magenta-accent/60 bg-magenta-accent/5 text-magenta-accent text-[10px] font-bold flex items-center gap-1 hover:bg-magenta-accent/10 transition shrink-0">
+                    <i class="fa-solid fa-tag text-[9px]"></i> BEAUTY50K (-50.000₫)
+                </button>
+                <button type="button" 
+                        @@click="applyVoucher('FREESHIP')"
+                        class="px-2.5 py-1 rounded-lg border border-dashed border-emerald-500/60 bg-emerald-50 text-emerald-700 text-[10px] font-bold flex items-center gap-1 hover:bg-emerald-100 transition shrink-0">
+                    <i class="fa-solid fa-truck-fast text-[9px]"></i> FREESHIP (-30.000₫)
+                </button>
+            </div>
+
+            <!-- Input Box -->
+            <div class="flex gap-1.5">
+                <input type="text" 
+                       x-model="couponInput" 
+                       placeholder="Nhập mã ưu đãi..." 
+                       class="flex-1 px-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-magenta-accent uppercase font-mono font-bold" />
+                <button type="button" 
+                        @@click="submitCoupon()"
+                        :disabled="isApplying"
+                        class="px-3.5 py-1.5 rounded-xl bg-charcoal hover:bg-magenta-accent text-white font-bold text-xs transition shrink-0">
+                    <span x-show="!isApplying">Áp Dụng</span>
+                    <span x-show="isApplying"><i class="fa-solid fa-spinner fa-spin"></i></span>
+                </button>
+            </div>
+            <div x-show="couponMsg" x-text="couponMsg" class="text-[10px] text-rose-600 font-medium"></div>
         </div>
-        <div class="text-[11px] text-slate-400 italic text-center">Giá đã bao gồm thuế GTGT & miễn phí đóng gói mỹ phẩm cao cấp</div>
-        <a href="/Checkout" class="w-full py-3.5 rounded-full bg-pink-600 text-white font-bold text-xs uppercase tracking-wider text-center block hover:bg-pink-700 shadow-lg shadow-pink-600/25 transition">
-            Tiến Hành Đặt Hàng <i class="fa-solid fa-arrow-right ml-1"></i>
-        </a>
+
+        <!-- Tóm Tắt Chi Phí -->
+        <div class="space-y-1.5 pt-2 border-t border-slate-200 text-xs">
+            <div class="flex items-center justify-between text-slate-500">
+                <span>Tạm tính (@vm.TotalItems sản phẩm):</span>
+                <span class="font-bold text-charcoal font-mono-numeric">@vm.SubTotal.ToString("N0") ₫</span>
+            </div>
+
+            @if (vm.DiscountAmount > 0)
+            {
+                <div class="flex items-center justify-between text-emerald-600">
+                    <span class="flex items-center gap-1"><i class="fa-solid fa-ticket"></i> Voucher giảm giá:</span>
+                    <span class="font-bold font-mono-numeric">-@vm.DiscountAmount.ToString("N0") ₫</span>
+                </div>
+            }
+
+            <div class="flex items-center justify-between text-slate-500">
+                <span>Phí vận chuyển:</span>
+                <span class="font-bold @(remaining == 0 ? "text-emerald-600" : "text-charcoal") font-mono-numeric">
+                    @(remaining == 0 ? "Miễn phí" : "30.000 ₫")
+                </span>
+            </div>
+
+            <div class="flex items-center justify-between text-sm pt-1 border-t border-dashed border-slate-200">
+                <span class="font-bold text-charcoal">Tổng thanh toán:</span>
+                <span class="font-bold text-magenta-accent font-mono-numeric text-base">@vm.FinalTotal.ToString("N0") ₫</span>
+            </div>
+        </div>
+
+        <!-- 2 NÚT HÀNH ĐỘNG NỔI BẬT: Xem Chi Tiết Giỏ Hàng & Thanh Toán Nhanh -->
+        <div class="grid grid-cols-2 gap-2.5 pt-1">
+            <!-- Nút 1: Xem Chi Tiết Giỏ Hàng -->
+            <a href="/Cart" 
+               class="py-3 px-3 rounded-full border border-slate-300 hover:border-charcoal hover:bg-white text-charcoal font-bold text-xs uppercase tracking-wider text-center transition flex items-center justify-center gap-1.5 shadow-2xs">
+                <i class="fa-solid fa-bag-shopping text-rose-gold text-xs"></i>
+                <span>Xem Giỏ Hàng</span>
+            </a>
+
+            <!-- Nút 2: Thanh Toán Nhanh -->
+            <a href="/Checkout" 
+               class="py-3 px-3 rounded-full bg-magenta-accent hover:bg-[#b0276a] text-white font-bold text-xs uppercase tracking-wider text-center transition flex items-center justify-center gap-1.5 shadow-lg shadow-magenta-accent/25">
+                <i class="fa-solid fa-bolt text-xs"></i>
+                <span>Thanh Toán</span>
+            </a>
+        </div>
+
     </div>
 }

@@ -1,0 +1,562 @@
+@model Omnichannel.Application.DTOs.Account.RegisterViewModel
+@{
+    ViewData["Title"] = "Đăng Ký Thành Viên - Omni Beauty Club";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Omni Beauty</title>
+    <!-- Brand Identity & Multi-Resolution Favicons -->
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="~/images/branding/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="~/images/branding/favicon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="~/images/branding/favicon-512x512.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="~/images/branding/apple-touch-icon.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --rose-gold: #B76E79;
+            --rose-gold-light: #F5D6DA;
+            --magenta-accent: #D63384;
+            --champagne-gold: #D4AF37;
+            --pastel-rose: #FDF2F4;
+            --bg-gradient: linear-gradient(135deg, #FFF7F8 0%, #FDF2F4 50%, #F8E9EC 100%);
+            --card-shadow: 0 25px 50px -12px rgba(183, 110, 121, 0.22);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 30px 20px;
+        }
+
+        .register-card {
+            background: #FFFFFF;
+            border-radius: 28px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(183, 110, 121, 0.18);
+            max-width: 520px;
+            width: 100%;
+            padding: 40px 36px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .register-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #B76E79 0%, #D4AF37 50%, #D63384 100%);
+        }
+
+        .brand-avatar {
+            width: 82px;
+            height: 82px;
+            border-radius: 50%;
+            padding: 2.5px;
+            background: linear-gradient(135deg, #B76E79 0%, #D4AF37 50%, #D63384 100%);
+            margin: 0 auto 14px auto;
+            box-shadow: 0 8px 24px -4px rgba(214, 51, 132, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            animation: brandPulseGlow 3s infinite alternate ease-in-out;
+        }
+
+        .brand-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #FFFFFF;
+        }
+
+        .brand-avatar:hover {
+            transform: scale(1.06) rotate(2deg);
+        }
+
+        @@keyframes brandPulseGlow {
+            0% {
+                box-shadow: 0 0 12px rgba(214, 51, 132, 0.25), 0 0 20px rgba(183, 110, 121, 0.15);
+            }
+            50% {
+                box-shadow: 0 0 24px rgba(214, 51, 132, 0.5), 0 0 35px rgba(212, 175, 55, 0.35);
+            }
+            100% {
+                box-shadow: 0 0 14px rgba(214, 51, 132, 0.3), 0 0 22px rgba(183, 110, 121, 0.2);
+            }
+        }
+
+        /* Luxury Welcome Incentive Banner */
+        .welcome-incentive-box {
+            background: linear-gradient(135deg, #FFF0F4 0%, #FFF8FA 100%);
+            border: 1.5px solid rgba(214, 51, 132, 0.25);
+            border-radius: 18px;
+            padding: 14px 18px;
+            margin-bottom: 24px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(214, 51, 132, 0.08);
+        }
+
+        .incentive-badge {
+            background: linear-gradient(135deg, #D4AF37 0%, #F59E0B 100%);
+            color: #FFFFFF;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4A5568;
+            margin-bottom: 6px;
+        }
+
+        .form-control {
+            border-radius: 14px;
+            padding: 11px 16px;
+            border: 1.5px solid #F3E4E8;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--magenta-accent);
+            box-shadow: 0 0 0 4px rgba(214, 51, 132, 0.12);
+        }
+
+        .input-group-text {
+            background: #FFF5F7;
+            border: 1.5px solid #F3E4E8;
+            border-right: none;
+            border-radius: 14px 0 0 14px;
+            color: var(--rose-gold);
+            font-size: 14px;
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+
+        .input-group .form-control {
+            border-left: none;
+            border-radius: 0 14px 14px 0;
+        }
+
+        .btn-toggle-pwd {
+            background: #FFF5F7;
+            border: 1.5px solid #F3E4E8;
+            border-left: none;
+            border-radius: 0 14px 14px 0;
+            color: #94A3B8;
+            cursor: pointer;
+        }
+
+        .btn-toggle-pwd:hover {
+            color: var(--magenta-accent);
+        }
+
+        /* Password Strength Meter */
+        .password-strength-wrap {
+            margin-top: 8px;
+            margin-bottom: 6px;
+        }
+
+        .strength-bar-bg {
+            height: 6px;
+            background: #F1E5E8;
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            gap: 4px;
+        }
+
+        .strength-segment {
+            flex: 1;
+            height: 100%;
+            background: #E2E8F0;
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+
+        .strength-label {
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 4px;
+            display: flex;
+            justify-content: space-between;
+            color: #64748B;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, #D63384 0%, #B76E79 100%);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 14px;
+            padding: 13px;
+            font-weight: 600;
+            font-size: 15px;
+            width: 100%;
+            box-shadow: 0 8px 20px -4px rgba(214, 51, 132, 0.35);
+            transition: all 0.3s ease;
+        }
+
+        .btn-gradient:hover {
+            opacity: 0.96;
+            transform: translateY(-1px);
+            color: #FFFFFF;
+            box-shadow: 0 12px 24px -4px rgba(214, 51, 132, 0.45);
+        }
+
+        .btn-gradient:disabled {
+            opacity: 0.6;
+            transform: none;
+            cursor: not-allowed;
+        }
+
+        .validation-hint {
+            font-size: 11px;
+            color: #94A3B8;
+            margin-top: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-card">
+        <!-- Logo trung tâm Omni Beauty -->
+        <div class="text-center mb-3">
+            <div class="brand-avatar">
+                <img src="~/images/branding/logo-circle.png" alt="Omni Beauty Logo" />
+            </div>
+            <h3 class="fw-bold text-dark mb-1" style="font-family: 'Playfair Display', serif; letter-spacing: 0.12em;">OMNI BEAUTY</h3>
+            <p class="small text-uppercase fw-semibold mb-0" style="color: var(--magenta-accent); letter-spacing: 0.22em; font-size: 10px;">Haute Parfumerie & Cosmetics</p>
+            <p class="text-muted small mt-1 mb-0" style="font-size: 12px;">Đăng Ký Tài Khoản Thành Viên Omni Club</p>
+        </div>
+
+        <!-- Banner Quà Tặng Chào Đón Thành Viên Mới -->
+        <div class="welcome-incentive-box">
+            <div class="d-flex align-items-center justify-content-between mb-1.5">
+                <span class="incentive-badge">
+                    <i class="fa-solid fa-gift"></i> ĐẶC QUYỀN GIA NHẬP
+                </span>
+                <span class="badge rounded-pill bg-danger-subtle text-danger small px-2 py-0.5" style="font-size: 10px;">Hôm nay</span>
+            </div>
+            <div class="d-flex align-items-center gap-2 mt-1">
+                <div style="font-size: 24px; color: var(--magenta-accent);">🎉</div>
+                <div>
+                    <strong class="text-dark d-block" style="font-size: 13px; line-height: 1.35;">Đăng ký hôm nay - Tặng ngay 50 Điểm Thưởng & Voucher Chào Mừng 10%</strong>
+                    <span class="text-muted" style="font-size: 11px;">Tích điểm đổi quà tự động tại hệ thống cửa hàng và Website.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thông báo lỗi tổng quát nếu có -->
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger py-2 px-3 rounded-3 small mb-3 border-0 bg-danger-subtle text-danger">
+                <div asp-validation-summary="All" class="mb-0"></div>
+            </div>
+        }
+
+        <form asp-action="Register" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" id="registerForm" novalidate>
+            @Html.AntiForgeryToken()
+
+            <!-- Họ và tên -->
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label"></label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa-regular fa-user"></i></span>
+                    <input asp-for="FullName" id="FullNameInput" class="form-control" placeholder="Ví dụ: Nguyễn Phương Anh" required autofocus />
+                </div>
+                <span asp-validation-for="FullName" class="text-danger small"></span>
+            </div>
+
+            <!-- Số điện thoại (Mã tích điểm) -->
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <label asp-for="PhoneNumber" class="form-label mb-0"></label>
+                    <span class="badge bg-warning-subtle text-dark border border-warning-subtle" style="font-size: 10px;">
+                        <i class="fa-solid fa-star text-warning me-0.5"></i>Mã tích điểm POS
+                    </span>
+                </div>
+                <div class="input-group mt-1">
+                    <span class="input-group-text"><i class="fa-solid fa-phone"></i></span>
+                    <input asp-for="PhoneNumber" id="PhoneInput" class="form-control" placeholder="0901234567 hoặc 03x, 05x, 07x, 08x" maxlength="11" required />
+                </div>
+                <div id="phoneFeedback" class="validation-hint">Nhập đúng 10 số điện thoại di động Việt Nam.</div>
+                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
+                    <input asp-for="Email" id="EmailInput" type="email" class="form-control" placeholder="phuonganh@example.com" required />
+                </div>
+                <span asp-validation-for="Email" class="text-danger small"></span>
+            </div>
+
+            <!-- Mật khẩu & Strength Meter -->
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                    <input asp-for="Password" id="PasswordInput" type="password" class="form-control" placeholder="Tối thiểu 8 ký tự" required />
+                    <button type="button" class="btn btn-toggle-pwd px-3" onclick="togglePasswordVisibility('PasswordInput', this)" tabindex="-1">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+                
+                <!-- Password Strength Progress -->
+                <div class="password-strength-wrap">
+                    <div class="strength-bar-bg">
+                        <div class="strength-segment" id="seg1"></div>
+                        <div class="strength-segment" id="seg2"></div>
+                        <div class="strength-segment" id="seg3"></div>
+                        <div class="strength-segment" id="seg4"></div>
+                    </div>
+                    <div class="strength-label">
+                        <span id="strengthText">Độ mạnh mật khẩu: Chưa nhập</span>
+                        <span id="strengthHint" class="text-muted" style="font-size: 10px;">Cần chữ hoa, chữ thường & chữ số</span>
+                    </div>
+                </div>
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+
+            <!-- Xác nhận mật khẩu -->
+            <div class="mb-3">
+                <label asp-for="ConfirmPassword" class="form-label"></label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa-solid fa-shield-check"></i></span>
+                    <input asp-for="ConfirmPassword" id="ConfirmPasswordInput" type="password" class="form-control" placeholder="Nhập lại mật khẩu" required />
+                    <button type="button" class="btn btn-toggle-pwd px-3" onclick="togglePasswordVisibility('ConfirmPasswordInput', this)" tabindex="-1">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
+                </div>
+                <div id="confirmFeedback" class="validation-hint"></div>
+                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+            </div>
+
+            <!-- Điều khoản dịch vụ -->
+            <div class="mb-4">
+                <div class="form-check">
+                    <input asp-for="AcceptTerms" class="form-check-input" type="checkbox" id="acceptTermsCheck" checked />
+                    <label class="form-check-label small text-secondary" for="acceptTermsCheck" style="font-size: 12px;">
+                        Tôi đồng ý với <a href="/chinh-sach-bao-mat" target="_blank" class="text-decoration-none fw-semibold" style="color: var(--magenta-accent);">Chính sách bảo mật</a> và điều khoản thành viên Omni Beauty Club.
+                    </label>
+                </div>
+                <span asp-validation-for="AcceptTerms" class="text-danger small"></span>
+            </div>
+
+            <!-- Nút gửi form -->
+            <button type="submit" id="btnRegisterSubmit" class="btn btn-gradient mb-3">
+                <i class="fa-solid fa-user-plus me-2"></i>Tạo tài khoản & Nhận 50 Điểm Thưởng
+            </button>
+
+            <!-- Chuyển sang Đăng nhập -->
+            <div class="text-center mt-2 mb-2">
+                <span class="text-muted small">Đã có tài khoản thành viên? </span>
+                <a asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" class="fw-bold small text-decoration-none" style="color: var(--magenta-accent);">
+                    Đăng nhập ngay <i class="fa-solid fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+
+            <div class="text-center mt-3">
+                <a href="/" class="text-decoration-none small text-muted">
+                    <i class="fa-solid fa-house me-1"></i>Về trang chủ Omni Beauty
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Client-Side Realtime Interactive Validation -->
+    <script>
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // 1. Kiểm tra định dạng số điện thoại Việt Nam realtime
+        const phoneInput = document.getElementById('PhoneInput');
+        const phoneFeedback = document.getElementById('phoneFeedback');
+        const vnPhoneRegex = /^(03|05|07|08|09)[0-9]{8}$/;
+
+        phoneInput.addEventListener('input', function () {
+            const val = this.value.trim();
+            if (!val) {
+                phoneFeedback.innerHTML = 'Nhập đúng 10 số điện thoại di động Việt Nam.';
+                phoneFeedback.style.color = '#94A3B8';
+                return;
+            }
+            if (vnPhoneRegex.test(val)) {
+                phoneFeedback.innerHTML = '<i class="fa-solid fa-circle-check text-success me-1"></i>Số điện thoại Việt Nam hợp lệ (Sẵn sàng tích điểm)';
+                phoneFeedback.style.color = '#16a34a';
+            } else {
+                phoneFeedback.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Số điện thoại chưa đúng định dạng (10 số, bắt đầu bằng 03, 05, 07, 08, 09)';
+                phoneFeedback.style.color = '#dc2626';
+            }
+        });
+
+        // 2. Kiểm tra độ mạnh mật khẩu Realtime
+        const pwdInput = document.getElementById('PasswordInput');
+        const confirmInput = document.getElementById('ConfirmPasswordInput');
+        const confirmFeedback = document.getElementById('confirmFeedback');
+        const seg1 = document.getElementById('seg1');
+        const seg2 = document.getElementById('seg2');
+        const seg3 = document.getElementById('seg3');
+        const seg4 = document.getElementById('seg4');
+        const strengthText = document.getElementById('strengthText');
+        const strengthHint = document.getElementById('strengthHint');
+
+        function evaluatePasswordStrength(password) {
+            let score = 0;
+            if (!password) return 0;
+            if (password.length >= 8) score++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+            if (/\d/.test(password)) score++;
+            if (/[^a-zA-Z0-9]/.test(password)) score++;
+            return score;
+        }
+
+        pwdInput.addEventListener('input', function () {
+            const val = this.value;
+            const score = evaluatePasswordStrength(val);
+
+            // Reset segments
+            [seg1, seg2, seg3, seg4].forEach(s => s.style.background = '#E2E8F0');
+
+            if (val.length === 0) {
+                strengthText.innerText = 'Độ mạnh mật khẩu: Chưa nhập';
+                strengthText.style.color = '#64748B';
+                strengthHint.innerText = 'Cần chữ hoa, chữ thường & chữ số';
+            } else if (score === 1) {
+                seg1.style.background = '#EF4444';
+                strengthText.innerText = 'Độ mạnh: Yếu (Cần thêm ký tự)';
+                strengthText.style.color = '#EF4444';
+                strengthHint.innerText = 'Tối thiểu 8 ký tự';
+            } else if (score === 2) {
+                seg1.style.background = '#F59E0B';
+                seg2.style.background = '#F59E0B';
+                strengthText.innerText = 'Độ mạnh: Trung bình';
+                strengthText.style.color = '#F59E0B';
+                strengthHint.innerText = 'Nên thêm chữ số & ký tự đặc biệt';
+            } else if (score === 3) {
+                seg1.style.background = '#3B82F6';
+                seg2.style.background = '#3B82F6';
+                seg3.style.background = '#3B82F6';
+                strengthText.innerText = 'Độ mạnh: Khá tốt';
+                strengthText.style.color = '#3B82F6';
+                strengthHint.innerText = 'An toàn đạt chuẩn';
+            } else if (score >= 4) {
+                seg1.style.background = '#10B981';
+                seg2.style.background = '#10B981';
+                seg3.style.background = '#10B981';
+                seg4.style.background = '#10B981';
+                strengthText.innerText = 'Độ mạnh: Rất mạnh & Bảo mật tối ưu';
+                strengthText.style.color = '#10B981';
+                strengthHint.innerText = 'Hoàn hảo!';
+            }
+
+            checkPasswordMatch();
+        });
+
+        // 3. Kiểm tra khớp mật khẩu xác nhận
+        function checkPasswordMatch() {
+            const p1 = pwdInput.value;
+            const p2 = confirmInput.value;
+            if (!p2) {
+                confirmFeedback.innerHTML = '';
+                return;
+            }
+            if (p1 === p2) {
+                confirmFeedback.innerHTML = '<i class="fa-solid fa-circle-check text-success me-1"></i>Mật khẩu xác nhận trùng khớp';
+                confirmFeedback.style.color = '#16a34a';
+            } else {
+                confirmFeedback.innerHTML = '<i class="fa-solid fa-circle-xmark text-danger me-1"></i>Mật khẩu xác nhận không khớp';
+                confirmFeedback.style.color = '#dc2626';
+            }
+        }
+
+        confirmInput.addEventListener('input', checkPasswordMatch);
+
+        // 4. Client-side Form Submit Validation
+        document.getElementById('registerForm').addEventListener('submit', function (e) {
+            const fullName = document.getElementById('FullNameInput').value.trim();
+            const phone = phoneInput.value.trim();
+            const email = document.getElementById('EmailInput').value.trim();
+            const pwd = pwdInput.value;
+            const confirm = confirmInput.value;
+            const terms = document.getElementById('acceptTermsCheck').checked;
+
+            if (!fullName) {
+                e.preventDefault();
+                alert('Vui lòng nhập Họ và tên của bạn.');
+                document.getElementById('FullNameInput').focus();
+                return;
+            }
+            if (!vnPhoneRegex.test(phone)) {
+                e.preventDefault();
+                alert('Số điện thoại không đúng định dạng di động Việt Nam (gồm 10 số, bắt đầu bằng 03, 05, 07, 08, 09).');
+                phoneInput.focus();
+                return;
+            }
+            if (!email) {
+                e.preventDefault();
+                alert('Vui lòng nhập địa chỉ Email.');
+                document.getElementById('EmailInput').focus();
+                return;
+            }
+            if (pwd.length < 8) {
+                e.preventDefault();
+                alert('Mật khẩu cần có độ dài tối thiểu 8 ký tự.');
+                pwdInput.focus();
+                return;
+            }
+            if (pwd !== confirm) {
+                e.preventDefault();
+                alert('Mật khẩu xác nhận không trùng khớp.');
+                confirmInput.focus();
+                return;
+            }
+            if (!terms) {
+                e.preventDefault();
+                alert('Bạn cần đồng ý với Điều khoản dịch vụ và Chính sách bảo mật để tiếp tục.');
+                return;
+            }
+        });
+    </script>
+</body>
+</html>

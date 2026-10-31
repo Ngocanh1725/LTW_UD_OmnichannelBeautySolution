@@ -1,0 +1,227 @@
+@model Omnichannel.Application.DTOs.Crm.CustomerEditDto
+@{
+    ViewData["Title"] = $"Chỉnh Sửa Khách Hàng - {Model.FullName}";
+    Layout = "_AdminLayout";
+    var consultants = ViewBag.Consultants as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> ?? new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>();
+}
+
+<div class="space-y-6 max-w-5xl mx-auto">
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+        <a href="/Admin/Dashboard" class="hover:text-rose-500 transition-colors">Bảng Điều Khiển</a>
+        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        <a href="/Admin/Customer" class="hover:text-rose-500 transition-colors">Khách Hàng CRM</a>
+        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        <a href="/Admin/Customer/Profile/@Model.UserId" class="hover:text-rose-500 transition-colors">Hồ Sơ #@Model.UserId</a>
+        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        <span class="text-slate-700 dark:text-slate-300 font-medium">Chỉnh Sửa</span>
+    </div>
+
+    <!-- Page Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
+                <i class="fa-solid fa-user-pen text-rose-500"></i>
+                <span>Cập Nhật Thông Tin Khách Hàng</span>
+            </h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Chỉnh sửa thông tin liên hệ và hồ sơ sắc đẹp cá nhân hóa của khách hàng.
+            </p>
+        </div>
+        <a href="/Admin/Customer/Profile/@Model.UserId" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm">
+            <i class="fa-solid fa-xmark text-xs"></i>
+            <span>Hủy Bỏ</span>
+        </a>
+    </div>
+
+    <!-- Error Summary -->
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="p-4 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-xs space-y-1">
+            <div class="font-bold flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-exclamation text-rose-500"></i>
+                <span>Vui lòng kiểm tra lại thông tin:</span>
+            </div>
+            @Html.ValidationSummary(false, "", new { @class = "list-disc pl-5" })
+        </div>
+    }
+
+    <!-- Edit Form -->
+    <form asp-action="Edit" asp-route-id="@Model.UserId" method="post" class="space-y-6">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="UserId" />
+
+        <!-- CARD 1: Thông Tin Cá Nhân & Tài Khoản -->
+        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-id-card text-rose-500"></i>
+                    <span>Thông Tin Định Danh & Liên Hệ</span>
+                </h3>
+                <span class="text-xs text-slate-400">ID: #@Model.UserId</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Full Name -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                        Họ và Tên Khách Hàng <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" asp-for="FullName" required
+                           class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all" />
+                    <span asp-validation-for="FullName" class="text-[11px] text-rose-500 mt-1 block"></span>
+                </div>
+
+                <!-- Phone -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                        Số Điện Thoại
+                    </label>
+                    <input type="text" asp-for="PhoneNumber"
+                           class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 font-mono focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all" />
+                    <span asp-validation-for="PhoneNumber" class="text-[11px] text-rose-500 mt-1 block"></span>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                        Địa Chỉ Email <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="email" asp-for="Email" required
+                           class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all" />
+                    <span asp-validation-for="Email" class="text-[11px] text-rose-500 mt-1 block"></span>
+                </div>
+
+                <!-- Gender -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                        Giới Tính
+                    </label>
+                    <select asp-for="Gender"
+                            class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all">
+                        <option value="">-- Chưa chọn --</option>
+                        <option value="Female">Nữ (Female)</option>
+                        <option value="Male">Nam (Male)</option>
+                        <option value="Other">Khác (Other)</option>
+                    </select>
+                </div>
+
+                <!-- Date of Birth -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                        Ngày Sinh (Sinh Nhật Nhận Điểm Thưởng)
+                    </label>
+                    <input type="date" asp-for="DateOfBirth" asp-format="{0:yyyy-MM-dd}"
+                           class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all" />
+                </div>
+
+                <!-- Avatar Url -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                        Link Ảnh Đại Diện (Avatar URL)
+                    </label>
+                    <input type="url" asp-for="AvatarUrl" placeholder="https://..."
+                           class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all" />
+                </div>
+            </div>
+
+            <!-- Active Status Toggle -->
+            <div class="pt-2">
+                <label class="inline-flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" asp-for="IsActive" class="w-4 h-4 text-rose-600 rounded border-slate-300 focus:ring-rose-500" />
+                    <span class="text-xs font-semibold text-slate-700 dark:text-slate-300">Tài khoản đang hoạt động (Active)</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- CARD 2: Hồ Sơ Sắc Đẹp & Tư Vấn (Beauty CRM Profile) -->
+        <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm space-y-5">
+            <div class="border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-purple-500"></i>
+                    <span>Hồ Sơ Làn Da & Nhu Cầu Sắc Đẹp</span>
+                </h3>
+                <p class="text-xs text-slate-400 mt-0.5">Dữ liệu cá nhân hóa giúp Beauty Advisor tư vấn sản phẩm chính xác</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Skin Type -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                        Loại Da Hiện Tại
+                    </label>
+                    <select asp-for="CurrentSkinType"
+                            class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all">
+                        <option value="">-- Chưa xác định --</option>
+                        <option value="Da dầu">Da dầu (Oily Skin)</option>
+                        <option value="Da khô">Da khô (Dry Skin)</option>
+                        <option value="Da hỗn hợp thiên dầu">Da hỗn hợp thiên dầu</option>
+                        <option value="Da hỗn hợp thiên khô">Da hỗn hợp thiên khô</option>
+                        <option value="Da nhạy cảm">Da nhạy cảm (Sensitive Skin)</option>
+                        <option value="Da thường">Da thường (Normal Skin)</option>
+                    </select>
+                </div>
+
+                <!-- Consultant In Charge -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                        Chuyên Viên Tư Vấn Phụ Trách
+                    </label>
+                    <select asp-for="ConsultantUserId" asp-items="consultants"
+                            class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all">
+                        <option value="">-- Chưa chỉ định --</option>
+                    </select>
+                </div>
+
+                <!-- Skin Concerns -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Vấn Đề Về Da Quan Tâm (phân cách bằng dấu phẩy)
+                    </label>
+                    <input type="text" asp-for="SkinConcernsInput" placeholder="Ví dụ: Mụn ẩn, Dầu thừa chữ T, Nám, Tàn nhang, Lão hóa..."
+                           class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all" />
+                    <span class="text-[11px] text-slate-400 mt-1 block">Nhập các vấn đề cách nhau bằng dấu phẩy để hệ thống tự động phân loại tag.</span>
+                </div>
+
+                <!-- Known Allergies -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-rose-600 dark:text-rose-400 mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <span>Thành Phần Dị Ứng / Kích Ứng (phân cách bằng dấu phẩy)</span>
+                    </label>
+                    <input type="text" asp-for="KnownAllergiesInput" placeholder="Ví dụ: Cồn khô, Hương liệu nhân tạo, Paraben, BHA nồng độ cao..."
+                           class="w-full px-3 py-2 text-xs rounded-lg border border-rose-200 dark:border-rose-900/60 bg-rose-50/30 dark:bg-rose-950/20 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all" />
+                </div>
+
+                <!-- Preferred Brands -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Thương Hiệu Ưa Thích (phân cách bằng dấu phẩy)
+                    </label>
+                    <input type="text" asp-for="PreferredBrandsInput" placeholder="Ví dụ: La Roche-Posay, Rohto, Laneige, Kiehl's, L'Oréal..."
+                           class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all" />
+                </div>
+
+                <!-- Consultant Note -->
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                        Ghi Chú Liệu Trình / Tư Vấn Chuyên Sâu
+                    </label>
+                    <textarea asp-for="Note" rows="3" placeholder="Ghi chú chi tiết về tình trạng da, thói quen sinh hoạt và chỉ định của chuyên viên..."
+                              class="w-full px-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="flex items-center justify-end gap-3 pt-2">
+            <a href="/Admin/Customer/Profile/@Model.UserId" class="px-4 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-sm">
+                Hủy Bỏ
+            </a>
+            <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white shadow-md shadow-rose-500/25 transition-all">
+                <i class="fa-solid fa-floppy-disk mr-1.5"></i>
+                Lưu Thay Đổi
+            </button>
+        </div>
+    </form>
+</div>

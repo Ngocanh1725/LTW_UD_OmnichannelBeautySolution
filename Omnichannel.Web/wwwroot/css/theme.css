@@ -1,4 +1,7 @@
-﻿/* STREAMING_CHUNK:Configuring luxury color variables and design tokens */
+@import url('design-tokens.css');
+@import url('design-system.css');
+
+/* STREAMING_CHUNK:Configuring luxury color variables and design tokens */
 :root {
     --color-primary: #d63384;
     --color-primary-hover: #b8226c;
@@ -88,9 +91,60 @@ body {
 
 .brand-logo-text {
     font-family: var(--font-heading);
-    letter-spacing: 0.12em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     font-weight: 700;
+}
+
+/* Luxury Brand Logo Styles & Pulse Glow Effect */
+.brand-logo-wrapper {
+    text-decoration: none !important;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brand-logo-wrapper:hover {
+    transform: translateY(-1px);
+}
+
+.brand-logo-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    padding: 2px;
+    background: linear-gradient(135deg, rgba(183, 110, 121, 0.8) 0%, rgba(212, 175, 55, 0.6) 50%, rgba(214, 51, 132, 0.8) 100%);
+    box-shadow: 0 4px 12px rgba(183, 110, 121, 0.15);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brand-logo-img {
+    border-radius: 9999px;
+    object-fit: cover;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.brand-logo-wrapper:hover .brand-logo-badge,
+.brand-logo-badge:hover {
+    box-shadow: 0 0 20px rgba(214, 51, 132, 0.35), 0 0 35px rgba(183, 110, 121, 0.25);
+    animation: brandLogoPulseGlow 2.5s infinite alternate ease-in-out;
+}
+
+.brand-logo-wrapper:hover .brand-logo-img,
+.brand-logo-img:hover {
+    transform: scale(1.04);
+}
+
+@keyframes brandLogoPulseGlow {
+    0% {
+        box-shadow: 0 0 10px rgba(214, 51, 132, 0.25), 0 0 18px rgba(183, 110, 121, 0.15);
+    }
+    50% {
+        box-shadow: 0 0 22px rgba(214, 51, 132, 0.45), 0 0 32px rgba(212, 175, 55, 0.3);
+    }
+    100% {
+        box-shadow: 0 0 12px rgba(214, 51, 132, 0.3), 0 0 20px rgba(183, 110, 121, 0.2);
+    }
 }
 
 /* STREAMING_CHUNK:Styling live search bar and auto-complete dropdown */
@@ -550,3 +604,347 @@ body {
 .mobile-bottom-nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.65rem; color: var(--color-dark-muted); gap: 0.25rem; transition: color 0.2s ease; }
 .mobile-bottom-nav a:hover, .mobile-bottom-nav a.active { color: var(--color-primary); }
 .mobile-bottom-nav a i { font-size: 1.2rem; }
+
+/* STREAMING_CHUNK: Scroll Reveal & Micro-animations */
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+.animate-on-scroll.animate-fade-in-up {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Skeleton Loading Shimmer */
+.skeleton-shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #f8f8f8 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s infinite;
+}
+
+@keyframes skeletonShimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Product Card Luxury Hover Effects */
+.product-card-luxury {
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 20px;
+    border: 1px solid rgba(241, 216, 221, 0.75);
+    overflow: hidden;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card-luxury:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 36px -8px rgba(214, 51, 132, 0.12), 0 6px 18px rgba(183, 110, 121, 0.15);
+    border-color: rgba(214, 51, 132, 0.35);
+}
+
+.product-thumb-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background-color: #faf5f6;
+}
+
+.product-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-card-luxury:hover .product-thumb-img {
+    transform: scale(1.06);
+}
+
+.product-badges-stack {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.badge-fefo-clearance {
+    background: #fff1f2;
+    color: #be123c;
+    border: 1px solid #fecdd3;
+    font-size: 0.625rem;
+    font-weight: 800;
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    box-shadow: 0 2px 8px rgba(244, 63, 94, 0.18);
+}
+
+.badge-fefo-fresh {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    font-size: 0.625rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 9999px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.15);
+}
+
+.product-action-overlay {
+    position: absolute;
+    bottom: 0.75rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    z-index: 20;
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-card-luxury:hover .product-action-overlay {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.btn-card-action {
+    height: 38px;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(8px);
+}
+
+.btn-card-action:not(.btn-cart-primary) {
+    width: 38px;
+    background: rgba(255, 255, 255, 0.95);
+    color: #18181b;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.btn-card-action:not(.btn-cart-primary):hover {
+    background: #18181b;
+    color: #ffffff;
+}
+
+.btn-cart-primary {
+    flex: 1;
+    background: #d63384;
+    color: #ffffff;
+    gap: 0.4rem;
+    box-shadow: 0 4px 12px rgba(214, 51, 132, 0.35);
+}
+
+.btn-cart-primary:hover {
+    background: #b0276a;
+}
+
+/* ============================================================================
+   8. LUXURY MICRO-INTERACTIONS (OMNI BEAUTY)
+   ============================================================================ */
+
+/* --- 8.1 PRODUCT IMAGE DUAL-LAYER & SECONDARY HOVER FLIP --- */
+.product-image-container {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #faf7f8;
+    border-radius: 16px;
+}
+
+.product-image-primary,
+.product-image-secondary {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+}
+
+.product-image-primary {
+    opacity: 1;
+    z-index: 1;
+}
+
+.product-image-secondary {
+    opacity: 0;
+    z-index: 2;
+    transform: scale(1.04);
+}
+
+.luxury-card:hover .product-image-primary,
+.product-card-luxury:hover .product-image-primary {
+    transform: scale(1.06);
+}
+
+.luxury-card:hover .product-image-secondary,
+.product-card-luxury:hover .product-image-secondary {
+    opacity: 1;
+    transform: scale(1.02);
+}
+
+/* --- 8.2 WISHLIST HEART PULSE POP ANIMATION --- */
+.btn-wishlist-heart {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #71717a;
+    border: 1px solid rgba(241, 216, 221, 0.8);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+}
+
+.btn-wishlist-heart:hover {
+    color: #e11d48;
+    background: #ffffff;
+    border-color: #fecdd3;
+    transform: scale(1.12);
+    box-shadow: 0 6px 16px rgba(225, 29, 72, 0.2);
+}
+
+.btn-wishlist-heart.is-active,
+.btn-wishlist-heart:active {
+    color: #e11d48;
+    background: #fff1f2;
+    animation: heartPulsePop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes heartPulsePop {
+    0% {
+        transform: scale(1);
+    }
+    40% {
+        transform: scale(1.35);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* --- 8.3 PRODUCT SLIDE-UP QUICK ACTION BAR --- */
+.product-slide-action-bar {
+    position: absolute;
+    bottom: 0.75rem;
+    left: 0.75rem;
+    right: 0.75rem;
+    z-index: 25;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+}
+
+.luxury-card:hover .product-slide-action-bar,
+.product-card-luxury:hover .product-slide-action-bar {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.btn-quick-add {
+    flex: 1;
+    height: 40px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #b76e79 0%, #d63384 100%);
+    color: #ffffff !important;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border: none;
+    box-shadow: 0 4px 14px rgba(214, 51, 132, 0.35);
+    transition: all 0.25s ease;
+    cursor: pointer;
+    text-decoration: none !important;
+}
+
+.btn-quick-add:hover {
+    background: linear-gradient(135deg, #a35d68 0%, #be2772 100%);
+    box-shadow: 0 6px 18px rgba(214, 51, 132, 0.5);
+    transform: translateY(-1px);
+}
+
+.btn-quick-view-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #18181b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    border: 1px solid rgba(241, 216, 221, 0.8);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+.btn-quick-view-circle:hover {
+    background: #18181b;
+    color: #ffffff;
+    border-color: #18181b;
+    transform: scale(1.08);
+}
+
+

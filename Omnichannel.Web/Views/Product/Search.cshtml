@@ -1,0 +1,221 @@
+@model Omnichannel.Web.Models.ProductSearchViewModel
+@{
+    ViewData["Title"] = !string.IsNullOrEmpty(Model.Query) ? $"Tìm kiếm: {Model.Query}" : "Tìm Kiếm & Bộ Lọc Mỹ Phẩm";
+    ViewData["Description"] = "Khám phá danh mục mỹ phẩm chính ngạch cao cấp với bộ lọc thông minh theo danh mục, thương hiệu, khoảng giá và loại da.";
+}
+
+<div class="bg-[#fffdfd] min-h-screen py-8 sm:py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- 1. BREADCRUMB -->
+        <nav aria-label="Đường dẫn trang" class="mb-6 text-xs text-slate-500 flex items-center gap-2">
+            <a href="/" class="hover:text-magenta-accent transition flex items-center gap-1">
+                <i class="fa-solid fa-house text-slate-400"></i> Trang Chủ
+            </a>
+            <span class="text-slate-300">/</span>
+            <span class="text-charcoal font-semibold">Tìm Kiếm Sản Phẩm</span>
+        </nav>
+
+        <!-- 2. LARGE SEARCH BAR HERO -->
+        <div class="mb-10 text-center max-w-2xl mx-auto">
+            <h1 class="font-serif text-3xl sm:text-4xl font-bold text-charcoal mb-4">
+                Tìm Kiếm Mỹ Phẩm Cao Cấp
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-500 mb-6">
+                Hơn 1.000+ sản phẩm chăm sóc da, trang điểm và nước hoa chính ngạch chuẩn FEFO.
+            </p>
+
+            <!-- Search Form Bar -->
+            <form action="/Product/Search" method="get" class="relative shadow-lg shadow-pink-500/5 rounded-full">
+                <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" 
+                       name="q" 
+                       value="@Model.Query" 
+                       placeholder="Nhập tên sản phẩm, thương hiệu, thành phần (HA, B5, Retinol)..." 
+                       class="w-full pl-12 pr-28 py-4 rounded-full border border-soft-border text-sm focus:outline-none focus:border-magenta-accent focus:ring-2 focus:ring-magenta-accent/20 bg-white" />
+                
+                <button type="submit" 
+                        class="absolute right-2 top-1/2 -translate-y-1/2 px-6 py-2.5 rounded-full bg-magenta-accent text-white font-bold text-xs uppercase tracking-wider hover:bg-[#b0276a] transition shadow-md">
+                    Tìm Kiếm
+                </button>
+            </form>
+        </div>
+
+        <!-- 3. MAIN FILTER & PRODUCTS LAYOUT -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+            <!-- Left Column: Sidebar Filters Form (HTMX Trigger) -->
+            <aside class="lg:col-span-3 bg-white p-6 rounded-3xl border border-soft-border shadow-xs sticky top-24">
+                <div class="flex items-center justify-between pb-4 border-b border-soft-border mb-6">
+                    <h3 class="font-serif font-bold text-charcoal text-base flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-magenta-accent text-sm"></i> Bộ Lọc Tuyển Chọn
+                    </h3>
+                    <a href="/Product/Search" class="text-[11px] text-magenta-accent hover:underline font-semibold">
+                        Đặt lại
+                    </a>
+                </div>
+
+                <form id="filterForm" 
+                      hx-get="/Product/Search" 
+                      hx-trigger="change" 
+                      hx-target="#searchProductsGrid" 
+                      hx-indicator="#searchSkeleton"
+                      class="space-y-6 text-xs">
+                    
+                    <input type="hidden" name="q" value="@Model.Query" />
+
+                    <!-- Filter Group: Danh mục -->
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] flex items-center justify-between">
+                            <span>Danh Mục</span>
+                            <i class="fa-solid fa-layer-group text-slate-400"></i>
+                        </h4>
+                        <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                            @foreach (var c in Model.Categories)
+                            {
+                                <label class="flex items-center justify-between cursor-pointer group">
+                                    <div class="flex items-center gap-2.5">
+                                        <input type="radio" 
+                                               name="categoryId" 
+                                               value="@c.Id" 
+                                               checked="@c.IsSelected" 
+                                               class="text-magenta-accent focus:ring-magenta-accent rounded" />
+                                        <span class="text-slate-600 group-hover:text-charcoal transition">@c.Name</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-mono">(@c.Count)</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-100"></div>
+
+                    <!-- Filter Group: Thương hiệu -->
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] flex items-center justify-between">
+                            <span>Thương Hiệu</span>
+                            <i class="fa-solid fa-gem text-slate-400"></i>
+                        </h4>
+                        <div class="space-y-2 max-h-44 overflow-y-auto pr-1">
+                            @foreach (var b in Model.Brands)
+                            {
+                                <label class="flex items-center justify-between cursor-pointer group">
+                                    <div class="flex items-center gap-2.5">
+                                        <input type="radio" 
+                                               name="brand" 
+                                               value="@b.Name" 
+                                               checked="@b.IsSelected" 
+                                               class="text-magenta-accent focus:ring-magenta-accent rounded" />
+                                        <span class="text-slate-600 group-hover:text-charcoal transition">@b.Name</span>
+                                    </div>
+                                    <span class="text-[10px] text-slate-400 font-mono">(@b.Count)</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-100"></div>
+
+                    <!-- Filter Group: Khoảng giá -->
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] flex items-center justify-between">
+                            <span>Khoảng Giá</span>
+                            <i class="fa-solid fa-tag text-slate-400"></i>
+                        </h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-2.5 cursor-pointer">
+                                <input type="radio" name="maxPrice" value="300000" class="text-magenta-accent focus:ring-magenta-accent" />
+                                <span class="text-slate-600">Dưới 300.000₫</span>
+                            </label>
+                            <label class="flex items-center gap-2.5 cursor-pointer">
+                                <input type="radio" name="maxPrice" value="700000" class="text-magenta-accent focus:ring-magenta-accent" />
+                                <span class="text-slate-600">Dưới 700.000₫</span>
+                            </label>
+                            <label class="flex items-center gap-2.5 cursor-pointer">
+                                <input type="radio" name="maxPrice" value="1500000" class="text-magenta-accent focus:ring-magenta-accent" />
+                                <span class="text-slate-600">Dưới 1.500.000₫</span>
+                            </label>
+                            <label class="flex items-center gap-2.5 cursor-pointer">
+                                <input type="radio" name="maxPrice" value="" checked class="text-magenta-accent focus:ring-magenta-accent" />
+                                <span class="text-slate-600">Tất cả mức giá</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-100"></div>
+
+                    <!-- Filter Group: Đánh giá sao -->
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] flex items-center justify-between">
+                            <span>Đánh Giá Sao</span>
+                            <i class="fa-solid fa-star text-amber-400"></i>
+                        </h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-2.5 cursor-pointer">
+                                <input type="radio" name="minRating" value="5" checked="@(Model.MinRating == 5)" class="text-magenta-accent focus:ring-magenta-accent" />
+                                <span class="flex text-amber-400 text-xs gap-0.5">
+                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                                </span>
+                                <span class="text-slate-600 text-[11px]">5 sao</span>
+                            </label>
+                            <label class="flex items-center gap-2.5 cursor-pointer">
+                                <input type="radio" name="minRating" value="4" checked="@(Model.MinRating == 4)" class="text-magenta-accent focus:ring-magenta-accent" />
+                                <span class="flex text-amber-400 text-xs gap-0.5">
+                                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-regular fa-star text-slate-300"></i>
+                                </span>
+                                <span class="text-slate-600 text-[11px]">Từ 4 sao</span>
+                            </label>
+                            <label class="flex items-center gap-2.5 cursor-pointer">
+                                <input type="radio" name="minRating" value="" checked="@(!Model.MinRating.HasValue)" class="text-magenta-accent focus:ring-magenta-accent" />
+                                <span class="text-slate-600 text-[11px]">Tất cả đánh giá</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-100"></div>
+
+                    <!-- Filter Group: Loại da phù hợp -->
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] flex items-center justify-between">
+                            <span>Loại Da</span>
+                            <i class="fa-solid fa-droplet text-slate-400"></i>
+                        </h4>
+                        <div class="space-y-2">
+                            @foreach (var skin in Model.AvailableSkinTypes)
+                            {
+                                <label class="flex items-center gap-2.5 cursor-pointer">
+                                    <input type="radio" name="skinType" value="@skin" checked="@(Model.SkinType == skin)" class="text-magenta-accent focus:ring-magenta-accent" />
+                                    <span class="text-slate-600">@skin</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+                </form>
+            </aside>
+
+            <!-- Right Column: Products Result Grid Container -->
+            <main class="lg:col-span-9 relative min-h-[500px]">
+                <!-- Skeleton Loading Shimmer Indicator -->
+                <div id="searchSkeleton" class="htmx-indicator absolute inset-0 z-20 bg-white/80 backdrop-blur-xs flex items-center justify-center p-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 w-full">
+                        @for (int i = 0; i < 6; i++)
+                        {
+                            <div class="rounded-3xl border border-soft-border p-4 space-y-4 bg-white">
+                                <div class="aspect-square rounded-2xl skeleton-shimmer"></div>
+                                <div class="h-3 w-1/3 rounded skeleton-shimmer"></div>
+                                <div class="h-4 w-3/4 rounded skeleton-shimmer"></div>
+                                <div class="h-4 w-1/2 rounded skeleton-shimmer"></div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Search Products Grid (Replaced via HTMX) -->
+                <div id="searchProductsGrid">
+                    <partial name="_SearchResultsGrid" model="Model" />
+                </div>
+            </main>
+
+        </div>
+    </div>
+</div>

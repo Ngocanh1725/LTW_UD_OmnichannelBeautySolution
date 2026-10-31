@@ -1,114 +1,342 @@
 @model Omnichannel.Application.DTOs.Sales.CheckoutViewModel
 @{
-    ViewData["Title"] = "Thanh Toán Đơn Hàng";
+    ViewData["Title"] = "Thanh Toán Đơn Hàng - Omni Beauty";
 }
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10" x-data="checkoutForm()">
-    <div class="flex items-center gap-3 mb-8">
-        <i class="fa-solid fa-credit-card text-magenta-accent text-2xl"></i>
-        <h1 class="font-serif text-3xl font-bold text-charcoal m-0">Thanh Toán & Giao Hàng</h1>
+    <!-- Breadcrumb & Stepper chuyển đổi cao -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between flex-wrap gap-4 pb-4 border-b border-soft-border">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-pastel-rose text-magenta-accent flex items-center justify-center shadow-sm">
+                    <i class="fa-solid fa-credit-card text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-serif text-2xl lg:text-3xl font-bold text-charcoal m-0">Thanh Toán & Đặt Hàng</h1>
+                    <p class="text-xs text-slate-500 m-0 mt-0.5">Hoàn tất thông tin giao nhận để Omni Beauty chuẩn bị đơn hàng cho bạn</p>
+                </div>
+            </div>
+
+            <!-- Stepper Indicators -->
+            <div class="hidden sm:flex items-center gap-2 text-xs font-medium">
+                <div class="flex items-center gap-2 text-slate-400">
+                    <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center font-bold text-[11px]"><i class="fa-solid fa-check text-emerald-500"></i></span>
+                    <a asp-controller="Cart" asp-action="Index" class="hover:text-charcoal transition">Giỏ Hàng</a>
+                </div>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                <div class="flex items-center gap-2 text-magenta-accent font-bold">
+                    <span class="w-6 h-6 rounded-full bg-magenta-accent text-white flex items-center justify-center font-bold text-[11px]">2</span>
+                    <span>Thanh Toán</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
+                <div class="flex items-center gap-2 text-slate-400">
+                    <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center font-bold text-[11px]">3</span>
+                    <span>Hoàn Tất</span>
+                </div>
+            </div>
+        </div>
     </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="mb-6 p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-3 animate-shake">
+            <i class="fa-solid fa-circle-exclamation text-lg"></i>
+            <span>@TempData["ErrorMessage"]</span>
+        </div>
+    }
 
     <form asp-action="PlaceOrder" method="post" id="checkoutForm">
         @Html.AntiForgeryToken()
 
-        <div class="flex flex-col lg:flex-row gap-8">
-            <!-- Cột Trái: Thông Tin -->
+        <!-- Dữ liệu ẩn đồng bộ cho Loyalty & Shipping -->
+        <input type="hidden" name="ShippingMethod" :value="shippingMethod" />
+        <input type="hidden" name="UseLoyaltyPoints" :value="useLoyaltyPoints ? 'true' : 'false'" />
+        <input type="hidden" name="LoyaltyPointsToRedeem" :value="loyaltyPointsToRedeem" />
+        <input type="hidden" name="LoyaltyDiscountAmount" :value="currentLoyaltyDiscount" />
+
+        <div class="flex flex-col lg:flex-row gap-8 items-start">
+            
+            <!-- CỘT TRÁI: THÔNG TIN GIAO NHẬN & PHƯƠNG THỨC VẬN CHUYỂN, THANH TOÁN -->
             <div class="w-full lg:w-7/12 space-y-6">
                 
-                <!-- Giao nhận -->
-                <div class="bg-white p-6 rounded-3xl border border-soft-border shadow-sm">
-                    <h3 class="text-sm font-bold text-charcoal mb-5 flex items-center"><i class="fa-solid fa-location-dot text-magenta-accent mr-2"></i> Thông Tin Giao Nhận</h3>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label asp-for="RecipientName" class="block text-xs font-bold text-slate-600 mb-1.5"></label>
-                            <input asp-for="RecipientName" class="w-full rounded-xl border-soft-border text-sm focus:ring-magenta-accent focus:border-magenta-accent" placeholder="Họ và tên" required />
-                            <span asp-validation-for="RecipientName" class="text-red-500 text-xs mt-1 block"></span>
-                        </div>
-                        <div>
-                            <label asp-for="RecipientPhone" class="block text-xs font-bold text-slate-600 mb-1.5"></label>
-                            <input asp-for="RecipientPhone" class="w-full rounded-xl border-soft-border text-sm focus:ring-magenta-accent focus:border-magenta-accent" placeholder="Số điện thoại" required />
-                            <span asp-validation-for="RecipientPhone" class="text-red-500 text-xs mt-1 block"></span>
-                        </div>
+                <!-- 1. Thông Tin Giao Nhận -->
+                <div class="bg-white p-6 sm:p-7 rounded-3xl border border-soft-border shadow-sm">
+                    <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+                        <h3 class="text-sm font-bold text-charcoal m-0 flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-xl bg-pastel-rose text-magenta-accent flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </span>
+                            1. Thông Tin Người Nhận & Địa Chỉ Giao Hàng
+                        </h3>
+                        <span class="text-[11px] text-slate-400"><span class="text-rose-500">*</span> Bắt buộc</span>
                     </div>
-
+                    
+                    <!-- Họ tên, SĐT, Email (3 Cột) -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div>
-                            <label asp-for="ProvinceId" class="block text-xs font-bold text-slate-600 mb-1.5">Tỉnh/Thành Phố</label>
-                            <select asp-for="ProvinceId" x-model="selectedProvince" @@change="loadDistricts()" class="w-full rounded-xl border-soft-border text-sm focus:ring-magenta-accent focus:border-magenta-accent" required>
-                                <option value="">-- Chọn Tỉnh --</option>
-                                <template x-for="p in provinces" :key="p.provinceID">
-                                    <option :value="p.provinceID" x-text="p.provinceName"></option>
-                                </template>
-                            </select>
+                            <label asp-for="RecipientName" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Họ và tên <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                                    <i class="fa-solid fa-user"></i>
+                                </span>
+                                <input asp-for="RecipientName" class="w-full pl-8 pr-3 py-2.5 rounded-xl border border-soft-border text-xs focus:ring-magenta-accent focus:border-magenta-accent" placeholder="Nguyễn Văn A" required />
+                            </div>
+                            <span asp-validation-for="RecipientName" class="text-red-500 text-[11px] mt-1 block"></span>
                         </div>
+
                         <div>
-                            <label asp-for="DistrictId" class="block text-xs font-bold text-slate-600 mb-1.5">Quận/Huyện</label>
-                            <select asp-for="DistrictId" x-model="selectedDistrict" @@change="loadWards()" class="w-full rounded-xl border-soft-border text-sm focus:ring-magenta-accent focus:border-magenta-accent" required :disabled="!selectedProvince">
-                                <option value="">-- Chọn Huyện --</option>
-                                <template x-for="d in districts" :key="d.districtID">
-                                    <option :value="d.districtID" x-text="d.districtName"></option>
-                                </template>
-                            </select>
+                            <label asp-for="RecipientPhone" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Số điện thoại <span class="text-rose-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                                    <i class="fa-solid fa-phone"></i>
+                                </span>
+                                <input asp-for="RecipientPhone" class="w-full pl-8 pr-3 py-2.5 rounded-xl border border-soft-border text-xs focus:ring-magenta-accent focus:border-magenta-accent" placeholder="0901234567" required />
+                            </div>
+                            <span asp-validation-for="RecipientPhone" class="text-red-500 text-[11px] mt-1 block"></span>
                         </div>
+
                         <div>
-                            <label asp-for="WardCode" class="block text-xs font-bold text-slate-600 mb-1.5">Phường/Xã</label>
-                            <select asp-for="WardCode" x-model="selectedWard" @@change="calculateFee()" class="w-full rounded-xl border-soft-border text-sm focus:ring-magenta-accent focus:border-magenta-accent" required :disabled="!selectedDistrict">
-                                <option value="">-- Chọn Xã --</option>
-                                <template x-for="w in wards" :key="w.wardCode">
-                                    <option :value="w.wardCode" x-text="w.wardName"></option>
-                                </template>
-                            </select>
+                            <label asp-for="RecipientEmail" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Email xác nhận
+                            </label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                                    <i class="fa-solid fa-envelope"></i>
+                                </span>
+                                <input asp-for="RecipientEmail" type="email" class="w-full pl-8 pr-3 py-2.5 rounded-xl border border-soft-border text-xs focus:ring-magenta-accent focus:border-magenta-accent" placeholder="name@domain.com" />
+                            </div>
+                            <span asp-validation-for="RecipientEmail" class="text-red-500 text-[11px] mt-1 block"></span>
                         </div>
                     </div>
 
+                    <!-- Tỉnh / Quận / Phường -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div>
+                            <label for="ProvinceId" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Tỉnh / Thành Phố <span class="text-rose-500">*</span>
+                            </label>
+                            <select name="ProvinceId" id="ProvinceId" x-model="selectedProvince" x-on:change="loadDistricts()" class="w-full rounded-xl border border-soft-border text-xs focus:ring-magenta-accent focus:border-magenta-accent bg-white px-3 py-2.5" required>
+                                <option value="">-- Chọn Tỉnh / Thành --</option>
+                                <template x-for="p in provinces" :key="p.provinceID || p.provinceId">
+                                    <option x-bind:value="p.provinceID || p.provinceId" x-text="p.provinceName"></option>
+                                </template>
+                            </select>
+                            <span asp-validation-for="ProvinceId" class="text-red-500 text-[11px] mt-1 block"></span>
+                        </div>
+
+                        <div>
+                            <label for="DistrictId" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Quận / Huyện <span class="text-rose-500">*</span>
+                            </label>
+                            <select name="DistrictId" id="DistrictId" x-model="selectedDistrict" x-on:change="loadWards()" class="w-full rounded-xl border border-soft-border text-xs focus:ring-magenta-accent focus:border-magenta-accent bg-white px-3 py-2.5" required x-bind:disabled="!selectedProvince">
+                                <option value="">-- Chọn Quận / Huyện --</option>
+                                <template x-for="d in districts" :key="d.districtID || d.districtId">
+                                    <option x-bind:value="d.districtID || d.districtId" x-text="d.districtName"></option>
+                                </template>
+                            </select>
+                            <span asp-validation-for="DistrictId" class="text-red-500 text-[11px] mt-1 block"></span>
+                        </div>
+
+                        <div>
+                            <label for="WardCode" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Phường / Xã <span class="text-rose-500">*</span>
+                            </label>
+                            <select name="WardCode" id="WardCode" x-model="selectedWard" x-on:change="calculateFee()" class="w-full rounded-xl border border-soft-border text-xs focus:ring-magenta-accent focus:border-magenta-accent bg-white px-3 py-2.5" required x-bind:disabled="!selectedDistrict">
+                                <option value="">-- Chọn Phường / Xã --</option>
+                                <template x-for="w in wards" :key="w.wardCode || w.WardCode">
+                                    <option x-bind:value="w.wardCode || w.WardCode" x-text="w.wardName || w.WardName"></option>
+                                </template>
+                            </select>
+                            <span asp-validation-for="WardCode" class="text-red-500 text-[11px] mt-1 block"></span>
+                        </div>
+                    </div>
+
+                    <!-- Địa chỉ số nhà cụ thể -->
                     <div class="mb-4">
-                        <label asp-for="ShippingAddress" class="block text-xs font-bold text-slate-600 mb-1.5"></label>
-                        <input asp-for="ShippingAddress" class="w-full rounded-xl border-soft-border text-sm focus:ring-magenta-accent focus:border-magenta-accent" placeholder="Số nhà, đường..." required />
-                        <span asp-validation-for="ShippingAddress" class="text-red-500 text-xs mt-1 block"></span>
+                        <label asp-for="ShippingAddress" class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Địa chỉ chi tiết (Số nhà, tên đường, toà nhà/căn hộ) <span class="text-rose-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                                <i class="fa-solid fa-house-chimney"></i>
+                            </span>
+                            <input asp-for="ShippingAddress" class="w-full pl-8 pr-3 py-2.5 rounded-xl border border-soft-border text-xs focus:ring-magenta-accent focus:border-magenta-accent" placeholder="Số 123 Đường Nguyễn Huệ, Phường Bến Nghé..." required />
+                        </div>
+                        <span asp-validation-for="ShippingAddress" class="text-red-500 text-[11px] mt-1 block"></span>
                     </div>
 
+                    <!-- Ghi chú đơn hàng -->
                     <div>
-                        <label asp-for="Notes" class="block text-xs font-bold text-slate-600 mb-1.5"></label>
-                        <textarea asp-for="Notes" rows="2" class="w-full rounded-xl border-soft-border text-sm focus:ring-magenta-accent focus:border-magenta-accent" placeholder="Ghi chú thêm..."></textarea>
+                        <label asp-for="Notes" class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Ghi chú cho nhân viên giao hàng (Tùy chọn)
+                        </label>
+                        <textarea asp-for="Notes" rows="2" class="w-full rounded-xl border border-soft-border text-xs p-3 focus:ring-magenta-accent focus:border-magenta-accent" placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi đến..."></textarea>
                     </div>
                 </div>
 
-                <!-- Phương Thức Thanh Toán -->
-                <div class="bg-white p-6 rounded-3xl border border-soft-border shadow-sm">
-                    <h3 class="text-sm font-bold text-charcoal mb-5 flex items-center"><i class="fa-solid fa-wallet text-magenta-accent mr-2"></i> Phương Thức Thanh Toán</h3>
+                <!-- 2. Phương Thức Vận Chuyển -->
+                <div class="bg-white p-6 sm:p-7 rounded-3xl border border-soft-border shadow-sm">
+                    <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+                        <h3 class="text-sm font-bold text-charcoal m-0 flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-xl bg-pastel-rose text-magenta-accent flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-truck-fast"></i>
+                            </span>
+                            2. Phương Thức Vận Chuyển
+                        </h3>
+                        <span class="text-xs text-magenta-accent font-semibold flex items-center gap-1">
+                            <i class="fa-solid fa-shield-heart"></i> Bảo hiểm hàng dễ vỡ 100%
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Lựa chọn 1: Giao Tiêu Chuẩn 2-3 Ngày -->
+                        <label class="relative flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200"
+                               :class="shippingMethod === 'STANDARD' ? 'border-magenta-accent bg-pastel-rose/25 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-3">
+                                    <input type="radio" 
+                                           name="shippingMethodOption"
+                                           value="STANDARD" 
+                                           x-model="shippingMethod" 
+                                           class="text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                                    <div>
+                                        <div class="text-xs font-bold text-charcoal flex items-center gap-1.5">
+                                            <span>Giao Tiêu Chuẩn</span>
+                                            <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">2 - 3 Ngày</span>
+                                        </div>
+                                        <div class="text-[11px] text-slate-500 mt-1">Đóng gói chuẩn hộp carton chống sốc, giao toàn quốc</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3 pt-3 border-t border-slate-100/80 flex items-center justify-between">
+                                <span class="text-[11px] text-slate-500">Cước phí:</span>
+                                <template x-if="finalGoodsTotal >= 500000">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="text-[11px] line-through text-slate-400">30.000₫</span>
+                                        <span class="font-bold text-xs text-emerald-600 font-mono-numeric">MIỄN PHÍ</span>
+                                    </div>
+                                </template>
+                                <template x-if="finalGoodsTotal < 500000">
+                                    <span class="font-bold text-xs text-charcoal font-mono-numeric">30.000₫</span>
+                                </template>
+                            </div>
+                        </label>
+
+                        <!-- Lựa chọn 2: Giao Tốc Hành 2H Nội Thành -->
+                        <label class="relative flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200"
+                               :class="shippingMethod === 'EXPRESS_2H' ? 'border-magenta-accent bg-pastel-rose/25 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                            <div class="flex items-start justify-between">
+                                <div class="flex items-center gap-3">
+                                    <input type="radio" 
+                                           name="shippingMethodOption"
+                                           value="EXPRESS_2H" 
+                                           x-model="shippingMethod" 
+                                           class="text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                                    <div>
+                                        <div class="text-xs font-bold text-charcoal flex items-center gap-1.5">
+                                            <span>Giao Tốc Hành 2H</span>
+                                            <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                                                <i class="fa-solid fa-bolt-lightning text-amber-500"></i> Now 2H
+                                            </span>
+                                        </div>
+                                        <div class="text-[11px] text-slate-500 mt-1">Shipper ưu tiên giao liền tay trong 2 giờ nội thành</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3 pt-3 border-t border-slate-100/80 flex items-center justify-between">
+                                <span class="text-[11px] text-slate-500">Cước phí:</span>
+                                <span class="font-bold text-xs text-charcoal font-mono-numeric">45.000₫</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 3. Phương Thức Thanh Toán -->
+                <div class="bg-white p-6 sm:p-7 rounded-3xl border border-soft-border shadow-sm">
+                    <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+                        <h3 class="text-sm font-bold text-charcoal m-0 flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-xl bg-pastel-rose text-magenta-accent flex items-center justify-center text-xs">
+                                <i class="fa-solid fa-wallet"></i>
+                            </span>
+                            3. Phương Thức Thanh Toán
+                        </h3>
+                        <span class="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                            <i class="fa-solid fa-lock"></i> Chuẩn mã hóa SSL 256-bit
+                        </span>
+                    </div>
                     
                     <div class="space-y-3">
-                        <label class="flex items-start gap-4 p-4 rounded-2xl border border-soft-border cursor-pointer hover:border-magenta-accent hover:bg-pastel-rose transition" :class="{'border-magenta-accent bg-pastel-rose': paymentMethod == 3}">
-                            <input type="radio" asp-for="PaymentMethod" value="3" x-model="paymentMethod" class="mt-1 text-magenta-accent focus:ring-magenta-accent" />
-                            <div>
-                                <div class="text-sm font-bold text-charcoal"><img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/9/06ncktiwd6dc1694418123690.png" class="h-4 inline mr-2" alt="VNPay"/> Thanh toán qua VNPAY</div>
-                                <div class="text-xs text-slate-500 mt-1">Hỗ trợ ATM nội địa, QR Code, Visa, Master, JCB</div>
+                        <!-- VNPay -->
+                        <label class="flex items-start gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200" 
+                               :class="paymentMethod == 3 ? 'border-magenta-accent bg-pastel-rose/25 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                            <input type="radio" asp-for="PaymentMethod" value="3" x-model="paymentMethod" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between flex-wrap gap-2">
+                                    <div class="text-xs font-bold text-charcoal flex items-center gap-2">
+                                        <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/9/06ncktiwd6dc1694418123690.png" class="h-4 inline" alt="VNPay" />
+                                        <span>Cổng Thanh Toán VNPAY</span>
+                                    </div>
+                                    <span class="text-[10px] bg-pink-100 text-magenta-accent px-2 py-0.5 rounded-full font-bold">Khuyên dùng</span>
+                                </div>
+                                <div class="text-[11px] text-slate-500 mt-1">Hỗ trợ quét VNPAY-QR, thẻ ATM 40+ ngân hàng nội địa, Visa, MasterCard, JCB</div>
                             </div>
                         </label>
                         
-                        <label class="flex items-start gap-4 p-4 rounded-2xl border border-soft-border cursor-pointer hover:border-magenta-accent hover:bg-pastel-rose transition" :class="{'border-magenta-accent bg-pastel-rose': paymentMethod == 5}">
-                            <input type="radio" asp-for="PaymentMethod" value="5" x-model="paymentMethod" class="mt-1 text-magenta-accent focus:ring-magenta-accent" />
-                            <div>
-                                <div class="text-sm font-bold text-charcoal"><img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" class="h-4 inline mr-2" alt="MoMo"/> Thanh toán qua Ví MoMo</div>
-                                <div class="text-xs text-slate-500 mt-1">Quét mã QR từ ứng dụng MoMo</div>
+                        <!-- MoMo -->
+                        <label class="flex items-start gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200" 
+                               :class="paymentMethod == 5 ? 'border-magenta-accent bg-pastel-rose/25 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                            <input type="radio" asp-for="PaymentMethod" value="5" x-model="paymentMethod" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between flex-wrap gap-2">
+                                    <div class="text-xs font-bold text-charcoal flex items-center gap-2">
+                                        <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png" class="h-4 w-4 inline object-contain rounded" alt="MoMo" />
+                                        <span>Ví Điện Tử MoMo</span>
+                                    </div>
+                                    <span class="text-[10px] bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-medium">Tiện lợi & Nhanh</span>
+                                </div>
+                                <div class="text-[11px] text-slate-500 mt-1">Quét mã QR từ ứng dụng MoMo - Miễn phí giao dịch</div>
                             </div>
                         </label>
 
-                        <label class="flex items-start gap-4 p-4 rounded-2xl border border-soft-border cursor-pointer hover:border-magenta-accent hover:bg-pastel-rose transition" :class="{'border-magenta-accent bg-pastel-rose': paymentMethod == 2}">
-                            <input type="radio" asp-for="PaymentMethod" value="2" x-model="paymentMethod" class="mt-1 text-magenta-accent focus:ring-magenta-accent" />
-                            <div>
-                                <div class="text-sm font-bold text-charcoal"><i class="fa-solid fa-qrcode text-charcoal mr-2"></i> Chuyển khoản VietQR</div>
-                                <div class="text-xs text-slate-500 mt-1">Quét mã QR tự động điền thông tin và xác nhận đơn ngay</div>
+                        <!-- VietQR -->
+                        <label class="flex items-start gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200" 
+                               :class="paymentMethod == 2 ? 'border-magenta-accent bg-pastel-rose/25 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                            <input type="radio" asp-for="PaymentMethod" value="2" x-model="paymentMethod" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between flex-wrap gap-2">
+                                    <div class="text-xs font-bold text-charcoal flex items-center gap-2">
+                                        <span class="w-5 h-5 rounded bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
+                                            <i class="fa-solid fa-qrcode"></i>
+                                        </span>
+                                        <span>Chuyển Khoản Ngân Hàng VietQR 24/7</span>
+                                    </div>
+                                    <span class="text-[10px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">Tự động đối soát</span>
+                                </div>
+                                <div class="text-[11px] text-slate-500 mt-1">Hiển thị mã QR chuẩn Napas247, tự động điền số tiền và xác nhận đơn trong 30 giây</div>
                             </div>
                         </label>
 
-                        <label class="flex items-start gap-4 p-4 rounded-2xl border border-soft-border cursor-pointer hover:border-magenta-accent hover:bg-pastel-rose transition" :class="{'border-magenta-accent bg-pastel-rose': paymentMethod == 4}">
-                            <input type="radio" asp-for="PaymentMethod" value="4" x-model="paymentMethod" class="mt-1 text-magenta-accent focus:ring-magenta-accent" />
-                            <div>
-                                <div class="text-sm font-bold text-charcoal"><i class="fa-solid fa-truck-fast text-charcoal mr-2"></i> Thanh toán khi nhận hàng (COD)</div>
-                                <div class="text-xs text-slate-500 mt-1">Thanh toán bằng tiền mặt khi nhận được hàng</div>
+                        <!-- COD -->
+                        <label class="flex items-start gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200" 
+                               :class="paymentMethod == 4 ? 'border-magenta-accent bg-pastel-rose/25 ring-2 ring-magenta-accent/20' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                            <input type="radio" asp-for="PaymentMethod" value="4" x-model="paymentMethod" class="mt-1 text-magenta-accent focus:ring-magenta-accent h-4 w-4" />
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between flex-wrap gap-2">
+                                    <div class="text-xs font-bold text-charcoal flex items-center gap-2">
+                                        <span class="w-5 h-5 rounded bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
+                                            <i class="fa-solid fa-hand-holding-dollar"></i>
+                                        </span>
+                                        <span>Thanh Toán Khi Nhận Hàng (COD)</span>
+                                    </div>
+                                    <span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">Kiểm tra khi nhận</span>
+                                </div>
+                                <div class="text-[11px] text-slate-500 mt-1">Thanh toán bằng tiền mặt trực tiếp cho shipper khi nhận và đồng kiểm tra hàng</div>
                             </div>
                         </label>
                     </div>
@@ -116,54 +344,229 @@
 
             </div>
 
-            <!-- Cột Phải: Tóm Tắt Đơn -->
+            <!-- CỘT PHẢI: TÓM TẮT ĐƠN HÀNG, MÃ VOUCHER, ĐIỂM THƯỞNG LOYALTY, NÚT XÁC NHẬN SSL -->
             <div class="w-full lg:w-5/12">
-                <div class="bg-white p-6 rounded-3xl border border-soft-border shadow-sm sticky top-24">
-                    <h3 class="text-sm font-bold text-charcoal mb-5">Chi Tiết Đơn Hàng</h3>
+                <div class="bg-white p-6 sm:p-7 rounded-3xl border border-soft-border shadow-sm sticky top-24 space-y-6">
+                    
+                    <!-- Header Tóm Tắt -->
+                    <div class="flex items-center justify-between pb-3 border-b border-soft-border">
+                        <h3 class="text-sm font-bold text-charcoal m-0 flex items-center gap-2">
+                            <i class="fa-solid fa-receipt text-magenta-accent"></i> Chi Tiết Đơn Hàng
+                        </h3>
+                        <span class="text-xs bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded-full font-semibold">
+                            @Model.Cart.TotalItems sản phẩm
+                        </span>
+                    </div>
 
-                    <div class="space-y-4 mb-6">
+                    <!-- Danh sách sản phẩm trong giỏ -->
+                    <div class="space-y-3.5 max-h-64 overflow-y-auto pr-1">
                         @foreach(var item in Model.Cart.Items)
                         {
-                            <div class="flex justify-between items-start text-sm">
-                                <div>
-                                    <div class="font-bold text-charcoal line-clamp-2">@item.ProductName</div>
-                                    <div class="text-[10px] text-slate-500 mt-1 border inline-block px-1.5 py-0.5 rounded bg-slate-50">Lô: @item.NearestExpDateStr</div>
-                                    <span class="text-xs text-slate-400 ml-1">x @item.Quantity</span>
+                            <div class="flex justify-between items-start text-xs pb-3 border-b border-dashed border-slate-100 last:border-0 last:pb-0">
+                                <div class="flex-1 pr-3">
+                                    <div class="font-semibold text-charcoal line-clamp-1 leading-snug">@item.ProductName</div>
+                                    <div class="flex flex-wrap items-center gap-1.5 mt-1 text-[11px]">
+                                        @if (!string.IsNullOrEmpty(item.VariantName))
+                                        {
+                                            <span class="text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">@item.VariantName</span>
+                                        }
+                                        @if (!string.IsNullOrEmpty(item.NearestExpDateStr))
+                                        {
+                                            <span class="text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded text-[10px] font-mono">
+                                                <i class="fa-regular fa-calendar-check text-[9px] mr-0.5"></i>Lô: @item.NearestExpDateStr
+                                            </span>
+                                        }
+                                        <span class="text-slate-400 font-medium">x @item.Quantity</span>
+                                    </div>
                                 </div>
-                                <div class="font-mono-numeric font-bold whitespace-nowrap ml-4">@item.LineTotal.ToString("N0") ₫</div>
+                                <div class="font-mono-numeric font-bold text-charcoal whitespace-nowrap text-xs">
+                                    @item.LineTotal.ToString("N0") ₫
+                                </div>
                             </div>
                         }
                     </div>
 
-                    <div class="border-t border-soft-border pt-4 space-y-3">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-500">Tổng tiền hàng:</span>
-                            <span class="font-mono-numeric font-bold">@Model.Cart.SubTotal.ToString("N0") ₫</span>
+                    <!-- Quà tặng kèm Mua X Tặng Y (GWP) -->
+                    @if (Model.Cart.GiftItems.Any())
+                    {
+                        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-pink-50 to-rose-50 border border-pink-200 text-xs space-y-2">
+                            <div class="font-bold text-magenta-accent flex items-center gap-1.5">
+                                <i class="fa-solid fa-gift text-sm animate-bounce"></i> Quà Tặng Kèm Đơn Hàng (Miễn phí)
+                            </div>
+                            @foreach(var gift in Model.Cart.GiftItems)
+                            {
+                                <div class="flex items-center justify-between text-slate-700 pl-3 border-l-2 border-magenta-accent text-[11px]">
+                                    <span class="line-clamp-1">@gift.ProductName <strong class="text-magenta-accent font-mono">(x@(gift.Quantity))</strong></span>
+                                    <span class="font-bold text-emerald-600 uppercase text-[10px]">Tặng kèm</span>
+                                </div>
+                            }
                         </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-slate-500">Phí giao hàng:</span>
-                            <span class="font-mono-numeric font-bold text-slate-500" x-text="shippingFee === 0 ? 'Miễn phí' : shippingFee.toLocaleString('vi-VN') + ' ₫'">@Model.Cart.ShippingFee.ToString("N0") ₫</span>
+                    }
+
+                    <!-- 1. Khung Nhập Mã Giảm Giá Voucher (AJAX) -->
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                        <label class="block text-xs font-bold text-slate-700 flex items-center justify-between">
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-ticket text-magenta-accent"></i> Mã Khuyến Mãi Voucher
+                            </span>
+                            <span class="text-[10px] text-slate-400 font-normal">Hỗ trợ mã % hoặc tiền mặt</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="text" 
+                                   name="CouponCode"
+                                   x-model="inputCouponCode" 
+                                   placeholder="Nhập mã voucher (vd: BEAUTY10)" 
+                                   class="flex-1 rounded-xl border border-slate-300 text-xs px-3 py-2 font-mono uppercase focus:ring-magenta-accent focus:border-magenta-accent"
+                                   :disabled="isCouponApplied" />
+                            <button type="button" 
+                                    x-show="!isCouponApplied"
+                                    x-on:click="applyCoupon()" 
+                                    class="px-4 py-2 bg-charcoal text-white rounded-xl text-xs font-bold hover:bg-magenta-accent transition flex items-center gap-1">
+                                <i class="fa-solid fa-check" x-show="!isApplyingCoupon"></i>
+                                <i class="fa-solid fa-spinner fa-spin" x-show="isApplyingCoupon"></i>
+                                Áp Dụng
+                            </button>
+                            <button type="button" 
+                                    x-show="isCouponApplied"
+                                    x-on:click="removeCoupon()" 
+                                    class="px-3 py-2 bg-red-100 text-red-700 rounded-xl text-xs font-bold hover:bg-red-200 transition">
+                                <i class="fa-solid fa-xmark"></i> Bỏ
+                            </button>
                         </div>
-                        <div class="flex justify-between text-sm text-green-600" x-show="shippingFee === 0 && @Model.Cart.ShippingFee == 0">
-                            <span class="font-bold"><i class="fa-solid fa-gift mr-1"></i> Ưu đãi:</span>
-                            <span>Freeship toàn quốc</span>
+                        <!-- Thông báo voucher AJAX -->
+                        <div x-show="couponAlertMessage" 
+                             class="text-xs font-medium p-2.5 rounded-xl transition" 
+                             :class="isCouponValid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200'"
+                             x-text="couponAlertMessage"></div>
+                    </div>
+
+                    <!-- 2. Khung Tích Hợp Sử Dụng Điểm Thưởng Loyalty -->
+                    <div class="p-4 rounded-2xl bg-gradient-to-r from-amber-50/70 via-purple-50/60 to-pink-50/60 border border-amber-200/90 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-charcoal flex items-center gap-1.5">
+                                <i class="fa-solid fa-crown text-amber-500"></i> Ưu Đãi Điểm Thưởng Loyalty
+                            </span>
+                            <span class="text-[11px] font-mono-numeric font-bold text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded-full border border-amber-200">
+                                <i class="fa-solid fa-coins text-amber-500 mr-1"></i>Ví: @Model.AvailableLoyaltyPoints điểm
+                            </span>
+                        </div>
+                        
+                        <label class="flex items-start gap-3 p-2.5 rounded-xl bg-white/80 border border-amber-100 cursor-pointer hover:bg-white transition">
+                            <input type="checkbox" 
+                                   id="useLoyaltyPointsCheckbox"
+                                   x-model="useLoyaltyPoints" 
+                                   class="mt-0.5 text-magenta-accent focus:ring-magenta-accent rounded h-4 w-4" />
+                            <div class="text-xs leading-relaxed">
+                                <span class="font-bold text-charcoal">
+                                    Sử dụng @Model.LoyaltyPointsToRedeem điểm thưởng
+                                </span>
+                                <span class="text-magenta-accent font-semibold">
+                                    (tương đương giảm @Model.LoyaltyDiscountAmount.ToString("N0")₫)
+                                </span>
+                                <div class="text-[10px] text-slate-500 mt-0.5">Quy đổi tỉ lệ vàng: 1 điểm = 1.000₫ trừ trực tiếp vào đơn hàng</div>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- 3. Bảng Tính Toàn Bộ Chi Phí Đơn Hàng -->
+                    <div class="border-t border-soft-border pt-4 space-y-2.5 text-xs">
+                        <div class="flex justify-between text-slate-600">
+                            <span>Tạm tính tiền hàng:</span>
+                            <span class="font-mono-numeric font-bold text-slate-800" x-text="subTotal.toLocaleString('vi-VN') + ' ₫'">@Model.Cart.SubTotal.ToString("N0") ₫</span>
+                        </div>
+
+                        <!-- Chiết khấu Hạng thành viên -->
+                        <div class="flex justify-between items-center text-amber-700 bg-amber-50 px-2.5 py-1.5 rounded-xl border border-amber-200" x-show="memberTierDiscount > 0">
+                            <span class="flex items-center gap-1 font-semibold">
+                                <i class="fa-solid fa-crown text-amber-500"></i>
+                                <span x-text="'Hạng ' + (memberTierName || 'VIP') + ' (-' + memberDiscountPercent + '%)'"></span>
+                            </span>
+                            <span class="font-mono-numeric font-bold" x-text="'-' + memberTierDiscount.toLocaleString('vi-VN') + ' ₫'"></span>
+                        </div>
+
+                        <!-- Chiết khấu FEFO cận date -->
+                        <div class="flex justify-between items-center text-rose-700 bg-rose-50 px-2.5 py-1.5 rounded-xl border border-rose-200" x-show="fefoDiscount > 0">
+                            <span class="flex items-center gap-1 font-semibold">
+                                <i class="fa-solid fa-clock-rotate-left text-rose-500"></i> Ưu đãi cận date FEFO
+                            </span>
+                            <span class="font-mono-numeric font-bold" x-text="'-' + fefoDiscount.toLocaleString('vi-VN') + ' ₫'"></span>
+                        </div>
+
+                        <!-- Chiết khấu Voucher Giảm Giá -->
+                        <div class="flex justify-between items-center text-emerald-700 bg-emerald-50 px-2.5 py-1.5 rounded-xl border border-emerald-200" x-show="couponDiscount > 0">
+                            <span class="flex items-center gap-1 font-semibold">
+                                <i class="fa-solid fa-tag text-emerald-500"></i> Giảm giá Voucher (<strong x-text="appliedCouponCode"></strong>)
+                            </span>
+                            <span class="font-mono-numeric font-bold" x-text="'-' + couponDiscount.toLocaleString('vi-VN') + ' ₫'"></span>
+                        </div>
+
+                        <!-- Chiết khấu Điểm Thưởng Loyalty -->
+                        <div class="flex justify-between items-center text-purple-700 bg-purple-50 px-2.5 py-1.5 rounded-xl border border-purple-200" x-show="useLoyaltyPoints && currentLoyaltyDiscount > 0">
+                            <span class="flex items-center gap-1 font-semibold">
+                                <i class="fa-solid fa-gem text-purple-500"></i> Giảm giá điểm thưởng Loyalty (@Model.LoyaltyPointsToRedeem điểm)
+                            </span>
+                            <span class="font-mono-numeric font-bold" x-text="'-' + currentLoyaltyDiscount.toLocaleString('vi-VN') + ' ₫'"></span>
+                        </div>
+
+                        <!-- Phí đóng gói hộp quà tặng thượng lưu -->
+                        @if (Model.Cart.IsGiftWrapped)
+                        {
+                            <div class="flex justify-between items-center text-purple-700 bg-purple-50 px-2.5 py-1.5 rounded-xl border border-purple-200">
+                                <span class="flex items-center gap-1 font-semibold">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-purple-500"></i> Hộp quà nhung Pastel Rose
+                                </span>
+                                <span class="font-mono-numeric font-bold">+50.000 ₫</span>
+                            </div>
+                        }
+
+                        <!-- Phí Vận Chuyển -->
+                        <div class="flex justify-between items-center text-slate-600">
+                            <span class="flex items-center gap-1">
+                                <i class="fa-solid fa-truck text-slate-400"></i> Phí giao hàng (<span x-text="shippingMethod === 'EXPRESS_2H' ? 'Tốc hành 2H' : 'Tiêu chuẩn'"></span>):
+                            </span>
+                            <span class="font-mono-numeric font-bold" 
+                                  :class="calculatedShippingFee === 0 ? 'text-emerald-600 font-bold' : 'text-slate-800'" 
+                                  x-text="calculatedShippingFee === 0 ? 'Miễn phí (Freeship)' : calculatedShippingFee.toLocaleString('vi-VN') + ' ₫'">
+                            </span>
                         </div>
                     </div>
 
-                    <div class="border-t border-soft-border mt-4 pt-4 flex justify-between items-end">
-                        <span class="font-bold text-charcoal text-sm">Tổng thanh toán:</span>
-                        <span class="font-mono-numeric font-bold text-2xl text-magenta-accent" x-text="finalTotal.toLocaleString('vi-VN') + ' ₫'">@Model.Cart.FinalTotal.ToString("N0") ₫</span>
+                    <!-- Tổng Thanh Toán Cuối Cùng -->
+                    <div class="border-t border-soft-border pt-4 flex justify-between items-end">
+                        <div>
+                            <span class="font-bold text-charcoal text-sm block">Tổng thanh toán:</span>
+                            <span class="text-[10px] text-slate-400">(Đã bao gồm VAT và toàn bộ ưu đãi)</span>
+                        </div>
+                        <span class="font-mono-numeric font-bold text-2xl lg:text-3xl text-magenta-accent" x-text="finalTotal.toLocaleString('vi-VN') + ' ₫'">
+                            @Model.Cart.FinalTotal.ToString("N0") ₫
+                        </span>
                     </div>
 
-                    <div class="mt-6 bg-amber-50 text-amber-800 text-[11px] p-3 rounded-xl border border-amber-200">
-                        <i class="fa-solid fa-clock mr-1"></i> Hệ thống tự động <strong>khoá tạm tồn kho FEFO trong 15 phút</strong> khi bắt đầu thanh toán để đảm bảo hàng hóa.
-                    </div>
-
-                    <button type="submit" class="w-full mt-5 py-4 rounded-full bg-charcoal text-white font-bold text-sm hover:bg-magenta-accent shadow-pink-glow transition-all duration-300 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-lock"></i> Đặt Hàng Ngay
+                    <!-- Nút Xác Nhận Đặt Hàng Nổi Bật Chuẩn Luxury & Chuyển Đổi Cao -->
+                    <button type="submit" 
+                            class="w-full py-4 px-6 rounded-full bg-charcoal text-white font-bold text-sm tracking-wide hover:bg-magenta-accent active:scale-[0.99] shadow-pink-glow transition-all duration-300 flex items-center justify-center gap-2.5 group">
+                        <i class="fa-solid fa-lock text-sm group-hover:scale-110 transition-transform"></i>
+                        <span>XÁC NHẬN ĐẶT HÀNG</span>
                     </button>
+
+                    <!-- Huy hiệu bảo mật SSL 256-bit chuẩn Quốc Tế -->
+                    <div class="pt-2 space-y-2 border-t border-slate-100 text-[11px] text-slate-500">
+                        <div class="flex items-center justify-center gap-2 font-medium text-slate-700">
+                            <i class="fa-solid fa-shield-halved text-emerald-600 text-sm"></i>
+                            <span>Bảo mật chứng chỉ SSL 256-bit chuẩn Quốc tế</span>
+                        </div>
+                        <div class="flex items-center justify-center gap-4 text-[10px] text-slate-400">
+                            <span class="flex items-center gap-1"><i class="fa-solid fa-check text-emerald-500"></i> 100% Chính hãng</span>
+                            <span>•</span>
+                            <span class="flex items-center gap-1"><i class="fa-solid fa-rotate-left text-emerald-500"></i> Đổi trả 7 ngày</span>
+                            <span>•</span>
+                            <span class="flex items-center gap-1"><i class="fa-solid fa-lock text-emerald-500"></i> An toàn tuyệt đối</span>
+                        </div>
+                    </div>
+
                 </div>
             </div>
+
         </div>
     </form>
 </div>
@@ -173,52 +576,157 @@
         function checkoutForm() {
             return {
                 paymentMethod: @Model.PaymentMethod,
+                shippingMethod: '@Model.ShippingMethod', // 'STANDARD' hoặc 'EXPRESS_2H'
                 provinces: [],
                 districts: [],
                 wards: [],
-                selectedProvince: '',
-                selectedDistrict: '',
-                selectedWard: '',
+                selectedProvince: '@Model.ProvinceId',
+                selectedDistrict: '@Model.DistrictId',
+                selectedWard: '@Model.WardCode',
+
+                // Dữ liệu tài chính & Khuyến mãi từ PromotionEngine
                 subTotal: @Model.Cart.SubTotal,
-                shippingFee: @Model.Cart.ShippingFee,
-                get finalTotal() {
-                    return this.subTotal + this.shippingFee;
+                memberTierName: '@(Model.Cart.MemberTierName ?? "")',
+                memberDiscountPercent: @Model.Cart.MemberDiscountPercent,
+                memberTierDiscount: @Model.Cart.MemberTierDiscount,
+                fefoDiscount: @Model.Cart.FefoDiscount,
+                couponDiscount: @Model.Cart.CouponDiscount,
+                appliedCouponCode: '@(Model.Cart.AppliedCouponCode ?? Model.CouponCode ?? "")',
+                inputCouponCode: '@(Model.Cart.AppliedCouponCode ?? Model.CouponCode ?? "")',
+                isGiftWrapped: @(Model.Cart.IsGiftWrapped ? "true" : "false"),
+                giftWrapFee: @(Model.Cart.IsGiftWrapped ? 50000 : 0),
+
+                // Loyalty Points
+                useLoyaltyPoints: @(Model.UseLoyaltyPoints ? "true" : "false"),
+                availableLoyaltyPoints: @Model.AvailableLoyaltyPoints,
+                loyaltyPointsToRedeem: @Model.LoyaltyPointsToRedeem,
+                pointConversionRate: @Model.PointConversionRate,
+                loyaltyDiscountAmount: @Model.LoyaltyDiscountAmount,
+
+                isCouponApplied: @(!string.IsNullOrEmpty(Model.Cart.AppliedCouponCode) ? "true" : "false"),
+                isCouponValid: true,
+                couponAlertMessage: '@(Model.Cart.PromotionMessage ?? "")',
+                isApplyingCoupon: false,
+
+                get currentLoyaltyDiscount() {
+                    return this.useLoyaltyPoints ? this.loyaltyDiscountAmount : 0;
                 },
+
+                get finalGoodsTotal() {
+                    const totalDisc = this.memberTierDiscount + this.fefoDiscount + this.couponDiscount;
+                    return Math.max(0, this.subTotal - totalDisc);
+                },
+
+                get calculatedShippingFee() {
+                    if (this.shippingMethod === 'EXPRESS_2H') {
+                        return 45000;
+                    }
+                    // Giao tiêu chuẩn: Đơn hàng sau giảm giá >= 500.000₫ được miễn phí ship
+                    return this.finalGoodsTotal >= 500000 ? 0 : 30000;
+                },
+
+                get finalTotal() {
+                    const afterLoyalty = Math.max(0, this.finalGoodsTotal - this.currentLoyaltyDiscount);
+                    return afterLoyalty + this.calculatedShippingFee + this.giftWrapFee;
+                },
+
                 init() {
                     this.loadProvinces();
                 },
-                async loadProvinces() {
-                    const res = await fetch('/api/location/provinces');
-                    this.provinces = await res.json();
+
+                async applyCoupon() {
+                    const code = (this.inputCouponCode || '').trim();
+                    if (!code) {
+                        this.isCouponValid = false;
+                        this.couponAlertMessage = 'Vui lòng nhập mã giảm giá.';
+                        return;
+                    }
+
+                    this.isApplyingCoupon = true;
+                    try {
+                        const res = await fetch('/Checkout/ApplyVoucher', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ couponCode: code })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            this.isCouponApplied = true;
+                            this.isCouponValid = true;
+                            this.appliedCouponCode = data.couponCode;
+                            this.inputCouponCode = data.couponCode;
+                            this.couponDiscount = data.couponDiscount;
+                            this.memberTierDiscount = data.memberTierDiscount || this.memberTierDiscount;
+                            this.fefoDiscount = data.fefoDiscount || this.fefoDiscount;
+                            this.couponAlertMessage = data.message;
+                        } else {
+                            this.isCouponValid = false;
+                            this.couponAlertMessage = data.message || 'Mã giảm giá không hợp lệ.';
+                        }
+                    } catch (e) {
+                        this.isCouponValid = false;
+                        this.couponAlertMessage = 'Lỗi kết nối máy chủ khi áp dụng mã.';
+                    } finally {
+                        this.isApplyingCoupon = false;
+                    }
                 },
+
+                async removeCoupon() {
+                    try {
+                        const res = await fetch('/Checkout/RemoveVoucher', { method: 'POST' });
+                        const data = await res.json();
+                        this.isCouponApplied = false;
+                        this.appliedCouponCode = '';
+                        this.inputCouponCode = '';
+                        this.couponDiscount = 0;
+                        this.couponAlertMessage = data.message;
+                        this.isCouponValid = true;
+                    } catch (e) {
+                        console.error(e);
+                    }
+                },
+
+                async loadProvinces() {
+                    try {
+                        const res = await fetch('/api/location/provinces');
+                        if (res.ok) {
+                            this.provinces = await res.json();
+                        }
+                    } catch (e) {
+                        console.error('Error loading provinces:', e);
+                    }
+                },
+
                 async loadDistricts() {
                     this.selectedDistrict = '';
                     this.selectedWard = '';
                     this.wards = [];
-                    if(!this.selectedProvince) return;
-                    const res = await fetch('/api/location/districts/' + this.selectedProvince);
-                    this.districts = await res.json();
-                    this.calculateFee();
+                    if (!this.selectedProvince) return;
+                    try {
+                        const res = await fetch('/api/location/districts/' + this.selectedProvince);
+                        if (res.ok) {
+                            this.districts = await res.json();
+                        }
+                    } catch (e) {
+                        console.error('Error loading districts:', e);
+                    }
                 },
+
                 async loadWards() {
                     this.selectedWard = '';
-                    if(!this.selectedDistrict) return;
-                    const res = await fetch('/api/location/wards/' + this.selectedDistrict);
-                    this.wards = await res.json();
-                    this.calculateFee();
+                    if (!this.selectedDistrict) return;
+                    try {
+                        const res = await fetch('/api/location/wards/' + this.selectedDistrict);
+                        if (res.ok) {
+                            this.wards = await res.json();
+                        }
+                    } catch (e) {
+                        console.error('Error loading wards:', e);
+                    }
                 },
+
                 async calculateFee() {
-                    if(!this.selectedDistrict) {
-                        this.shippingFee = @Model.Cart.TotalAmount >= 500000 ? 0 : 30000;
-                        return;
-                    }
-                    if(this.subTotal >= 500000) {
-                        this.shippingFee = 0;
-                        return;
-                    }
-                    const res = await fetch(`/api/location/fee?districtId=${this.selectedDistrict}&wardCode=${this.selectedWard}`);
-                    const data = await res.json();
-                    this.shippingFee = data.fee;
+                    // Cập nhật phí vận chuyển tiêu chuẩn nếu cần
                 }
             }
         }

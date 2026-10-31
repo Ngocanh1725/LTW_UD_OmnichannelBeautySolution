@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Omnichannel.Application.DTOs.Security;
@@ -9,20 +10,27 @@ using Omnichannel.Application.Interfaces.Security;
 using Omnichannel.Domain.Entities;
 using Omnichannel.Infrastructure.Data;
 using Omnichannel.Infrastructure.Security;
+using Omnichannel.Web.Extensions;
 
 namespace Omnichannel.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [HasPermission("SECURITY", "MANAGE")]
+    [Authorize(Roles = "SuperAdmin,SUPER_ADMIN")]
+    [HasPermission("PERMISSION_MANAGE")]
     public class PermissionManagementController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IPermissionService _permissionService;
+        private readonly IAuditLogService _auditLogService;
 
-        public PermissionManagementController(ApplicationDbContext context, IPermissionService permissionService)
+        public PermissionManagementController(
+            ApplicationDbContext context,
+            IPermissionService permissionService,
+            IAuditLogService auditLogService)
         {
             _context = context;
             _permissionService = permissionService;
+            _auditLogService = auditLogService;
         }
 
         [HttpGet]
@@ -140,6 +148,21 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 // Evict Cache tức thì của toàn bộ người dùng thuộc Role này
                 await _permissionService.InvalidateRolePermissionCacheAsync(dto.RoleId);
 
+                // Ghi Audit Log thay đổi ma trận phân quyền
+                string ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+                string userAgent = Request.Headers["User-Agent"].ToString();
+                await _auditLogService.LogAsync(
+                    action: "PERMISSION_ROLE_UPDATE",
+                    entityType: "Role",
+                    entityId: role.Id.ToString(),
+                    oldValues: null,
+                    newValues: $"Cập nhật phân quyền cho vai trò '{role.Name}'. Số quyền gán: {dto.PermissionIds?.Count ?? 0}.",
+                    userId: User.GetUserId(),
+                    userName: User.Identity?.Name,
+                    ipAddress: ipAddress,
+                    userAgent: userAgent
+                );
+
                 return Json(new { success = true, message = $"Cập nhật ma trận phân quyền cho vai trò '{role.Name}' thành công!" });
             }
             catch (Exception ex)
@@ -197,6 +220,21 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             await _context.SaveChangesAsync();
             await _permissionService.InvalidateUserPermissionCacheAsync(dto.UserId);
 
+            // Ghi Audit Log đặc cách quyền cá nhân
+            string ipAddr = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+            string uAgent = Request.Headers["User-Agent"].ToString();
+            await _auditLogService.LogAsync(
+                action: "PERMISSION_USER_OVERRIDE",
+                entityType: "UserPermission",
+                entityId: $"User:{dto.UserId}-Perm:{dto.PermissionId}",
+                oldValues: null,
+                newValues: $"Đặc cách người dùng ID {dto.UserId}: Quyền ID {dto.PermissionId} -> {(dto.OverrideStatus == true ? "CẤP THÊM (GRANTED)" : dto.OverrideStatus == false ? "TƯỚC BỎ (REVOKED)" : "TRẢ VỀ MẶC ĐỊNH (RESET)")}.",
+                userId: User.GetUserId(),
+                userName: User.Identity?.Name,
+                ipAddress: ipAddr,
+                userAgent: uAgent
+            );
+
             return Json(new { success = true, message = "Cập nhật đặc cách quyền cá nhân thành công!" });
         }
 
@@ -209,14 +247,20 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
         private static string GetModuleDisplayName(string moduleCode) => moduleCode.ToUpperInvariant() switch
         {
-            "DASHBOARD" => "Tổng Quan Hệ Thống",
-            "CATALOG" or "PRODUCT" => "Danh Mục & Sản Phẩm",
-            "INVENTORY" => "Quản Lý Kho & Lô Hàng FEFO",
+            "DASHBOARD" => "Tổng Quan Hệ Thống (Dashboard)",
+            "CATALOG" or "PRODUCT" => "Danh Mục & Sản Phẩm (Product)",
+            "INVENTORY" => "Quản Lý Kho & Lô Hàng FEFO (Inventory)",
             "POS" => "Bán Lẻ Điểm Bán (POS)",
-            "ORDER" => "Quản Lý Đơn Hàng Đa Kênh",
-            "CMS" => "Biên Tập Nội Dung & Banner",
-            "REPORT" => "Báo Cáo & Thống Kê Doanh Thu",
-            "SECURITY" => "Định Danh & Phân Quyền Bảo Mật",
+            "ORDER" => "Quản Lý Đơn Hàng Đa Kênh (Order)",
+            "CUSTOMER" or "CRM" => "Khách Hàng & Hồ Sơ CRM (Customer)",
+            "CMS" => "Biên Tập Nội Dung & Banner (CMS)",
+            "REPORT" => "Báo Cáo & Thống Kê (Report)",
+            "FINANCE" => "Tài Chính & Kế Toán Sổ Cái (Finance)",
+            "PROMOTION" => "Khuyến Mãi & Voucher (Promotion)",
+            "LOYALTY" => "Ví Điểm & Hạng Thành Viên (Loyalty)",
+            "STOCK_TRANSFER" or "TRANSFER" => "Điều Chuyển Kho Liên Chi Nhánh (Stock Transfer)",
+            "SETTINGS" => "Cài Đặt Hệ Thống (Settings)",
+            "SECURITY" => "Định Danh & Phân Quyền Bảo Mật (Security)",
             _ => moduleCode
         };
         #endregion

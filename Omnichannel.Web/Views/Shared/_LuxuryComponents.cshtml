@@ -1,0 +1,286 @@
+@*
+    ============================================================================
+    OMNI BEAUTY LUXURY COMPONENT LIBRARY & DESIGN SYSTEM SHOWCASE
+    Shared partial: _LuxuryComponents.cshtml
+    Purpose: Reusable Haute Parfumerie & Luxury Cosmetics UI Elements
+    ============================================================================
+*@
+
+<div class="luxury-components-showcase py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-12">
+    <!-- Header Title -->
+    <div class="text-center max-w-3xl mx-auto space-y-3">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pastel-rose text-magenta-accent text-xs font-bold tracking-widest uppercase">
+            <i class="fa-solid fa-sparkles"></i> Design System 2.0
+        </div>
+        <h2 class="text-3xl sm:text-4xl font-serif font-bold text-charcoal tracking-wide">
+            Thư Viện Giao Diện Thượng Lưu OMNI BEAUTY
+        </h2>
+        <p class="text-sm text-slate-500 leading-relaxed font-sans">
+            Chuẩn hóa hệ thống thẻ sản phẩm bóng kính mờ (Glassmorphism), huy hiệu kiểm soát hạn dùng FEFO, phân hạng thẻ VIP và hiệu ứng tương tác vi mô tinh tế.
+        </p>
+    </div>
+
+    <!-- 1. LUXURY GLASSMORPHISM PRODUCT CARDS WITH MICRO-INTERACTIONS -->
+    <div class="space-y-4">
+        <div class="flex items-center justify-between border-b border-soft-border pb-3">
+            <h3 class="text-lg font-serif font-bold text-charcoal flex items-center gap-2.5">
+                <span class="h-6 w-1 bg-magenta-accent rounded-full"></span>
+                1. Thẻ Sản Phẩm Thượng Lưu (Luxury Glassmorphism Cards)
+            </h3>
+            <span class="text-xs text-slate-400 font-mono">.luxury-card | .product-image-container | .product-slide-action-bar</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Sample Card 1: Fresh FEFO Stock with Dual Image Flip -->
+            <div class="luxury-card p-4 group">
+                <!-- Image Wrapper with Wishlist & Dual-Layer Hover Flip -->
+                <div class="product-image-container mb-4">
+                    <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&auto=format&fit=crop&q=80" 
+                         alt="Serum B5 Phục Hồi Da" 
+                         class="product-image-primary" />
+                    <img src="https://images.unsplash.com/photo-1608248597359-009848520330?w=600&auto=format&fit=crop&q=80" 
+                         alt="Serum B5 Texture" 
+                         class="product-image-secondary" />
+
+                    <!-- Top Floating Badges: FEFO & Wishlist -->
+                    <div class="absolute top-3 left-3 z-20 flex flex-col gap-1.5">
+                        <span class="badge-fefo-fresh">
+                            <i class="fa-solid fa-shield-heart text-[10px]"></i> Date Mới >18T
+                        </span>
+                        <span class="badge-membership badge-membership--gold text-[10px]">
+                            <i class="fa-solid fa-crown text-[9px]"></i> VIP Gold -10%
+                        </span>
+                    </div>
+
+                    <button type="button" 
+                            class="btn-wishlist-heart absolute top-3 right-3 z-20" 
+                            title="Thêm vào danh sách yêu thích"
+                            onclick="this.classList.toggle('is-active')">
+                        <i class="fa-solid fa-heart text-sm"></i>
+                    </button>
+
+                    <!-- Slide-up Action Bar -->
+                    <div class="product-slide-action-bar">
+                        <button type="button" class="btn-quick-add" onclick="showStorefrontToast('Đã thêm Serum La Roche-Posay vào giỏ hàng!', 'success')">
+                            <i class="fa-solid fa-bag-shopping"></i> Thêm Nhanh
+                        </button>
+                        <button type="button" class="btn-quick-view-circle" title="Xem nhanh sản phẩm">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Product Content -->
+                <div class="space-y-2 flex-1 flex flex-col justify-between">
+                    <div>
+                        <div class="text-[11px] font-bold text-rose-gold uppercase tracking-wider">LA ROCHE-POSAY • PHÁP</div>
+                        <h4 class="font-serif font-bold text-charcoal text-base group-hover:text-magenta-accent transition-colors line-clamp-1">
+                            Tinh Chất Hyalu B5 Serum Phục Hồi & Tái Tạo Da
+                        </h4>
+                        <div class="text-xs text-slate-400 mt-1 line-clamp-1">HSD: 15/08/2028 • Lô #LRP-202409-B1</div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <!-- Luxury Price -->
+                        <div class="price-luxury">
+                            <span class="price-luxury__current">980.000₫</span>
+                            <span class="price-luxury__original">1.250.000₫</span>
+                            <span class="price-luxury__discount">-22%</span>
+                        </div>
+
+                        <!-- Rating Stars -->
+                        <div class="rating-stars">
+                            <i class="fa-solid fa-star rating-stars__star text-xs"></i>
+                            <span class="rating-stars__score text-xs">4.9</span>
+                            <span class="rating-stars__count text-[11px]">(240)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Card 2: FEFO Smart Clearance Flash Sale -->
+            <div class="luxury-card p-4 group border-rose-200">
+                <div class="product-image-container mb-4">
+                    <img src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=600&auto=format&fit=crop&q=80" 
+                         alt="Son Lì Cao Cấp" 
+                         class="product-image-primary" />
+                    <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&auto=format&fit=crop&q=80" 
+                         alt="Swatch Son Lì" 
+                         class="product-image-secondary" />
+
+                    <!-- Top Badges -->
+                    <div class="absolute top-3 left-3 z-20 flex flex-col gap-1.5">
+                        <span class="badge-fefo-clearance">
+                            <i class="fa-solid fa-fire text-[10px]"></i> Cận Date 5T (-50%)
+                        </span>
+                        <span class="badge-membership badge-membership--diamond text-[10px]">
+                            <i class="fa-solid fa-gem text-[9px]"></i> Diamond Deal
+                        </span>
+                    </div>
+
+                    <button type="button" 
+                            class="btn-wishlist-heart absolute top-3 right-3 z-20" 
+                            title="Thêm vào danh sách yêu thích"
+                            onclick="this.classList.toggle('is-active')">
+                        <i class="fa-solid fa-heart text-sm"></i>
+                    </button>
+
+                    <!-- Slide-up Action Bar -->
+                    <div class="product-slide-action-bar">
+                        <button type="button" class="btn-quick-add" onclick="showStorefrontToast('Đã săn deal Flash Sale Son MAC!', 'success')">
+                            <i class="fa-solid fa-bolt"></i> Săn Deal Ngay
+                        </button>
+                        <button type="button" class="btn-quick-view-circle" title="Xem nhanh sản phẩm">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-2 flex-1 flex flex-col justify-between">
+                    <div>
+                        <div class="text-[11px] font-bold text-rose-gold uppercase tracking-wider">MAC COSMETICS • MỸ</div>
+                        <h4 class="font-serif font-bold text-charcoal text-base group-hover:text-magenta-accent transition-colors line-clamp-1">
+                            Son Lì Matte Lipstick #Chili (Đỏ Gạch) 3g
+                        </h4>
+                        <div class="text-xs text-rose-600 font-semibold mt-1">HSD: 20/09/2026 • Còn 4 thỏi xả kho</div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                        <div class="price-luxury">
+                            <span class="price-luxury__current">325.000₫</span>
+                            <span class="price-luxury__original">650.000₫</span>
+                            <span class="price-luxury__discount">-50%</span>
+                        </div>
+
+                        <div class="rating-stars">
+                            <i class="fa-solid fa-star rating-stars__star text-xs"></i>
+                            <span class="rating-stars__score text-xs">5.0</span>
+                            <span class="rating-stars__count text-[11px]">(98)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Card 3: Skeleton Shimmer Loading Placeholder -->
+            <div class="luxury-card p-4 space-y-4">
+                <div class="shimmer-loading h-52 w-full rounded-2xl"></div>
+                <div class="space-y-2">
+                    <div class="shimmer-loading h-3 w-1/3 rounded-md"></div>
+                    <div class="shimmer-loading h-5 w-4/5 rounded-md"></div>
+                    <div class="shimmer-loading h-3 w-1/2 rounded-md"></div>
+                </div>
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                    <div class="shimmer-loading h-6 w-28 rounded-md"></div>
+                    <div class="shimmer-loading h-4 w-14 rounded-md"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. FEFO EXPIRY BADGES SHOWCASE -->
+    <div class="space-y-4">
+        <div class="flex items-center justify-between border-b border-soft-border pb-3">
+            <h3 class="text-lg font-serif font-bold text-charcoal flex items-center gap-2.5">
+                <span class="h-6 w-1 bg-rose-gold rounded-full"></span>
+                2. Huy Hiệu Kiểm Soát Hạn Dùng FEFO (First-Expired, First-Out Badges)
+            </h3>
+            <span class="text-xs text-slate-400 font-mono">.badge-fefo-fresh | .badge-fefo-standard | .badge-fefo-clearance</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+                <div>
+                    <div class="text-xs text-slate-500 mb-1.5 font-medium">Lô Mới Nhất (> 12 tháng)</div>
+                    <span class="badge-fefo-fresh">
+                        <i class="fa-solid fa-seedling"></i> DATE MỚI >18T (CHUẨN HQ)
+                    </span>
+                </div>
+                <span class="text-xs font-mono text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg">100% Giá Niêm Yết</span>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+                <div>
+                    <div class="text-xs text-slate-500 mb-1.5 font-medium">Lô Tiêu Chuẩn (6 - 12 tháng)</div>
+                    <span class="badge-fefo-standard">
+                        <i class="fa-solid fa-calendar-check"></i> HSD: 10 THÁNG (TIÊU CHUẨN)
+                    </span>
+                </div>
+                <span class="text-xs font-mono text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg">Ưu đãi -15%</span>
+            </div>
+
+            <div class="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-sm flex items-center justify-between">
+                <div>
+                    <div class="text-xs text-slate-500 mb-1.5 font-medium">Lô Cận Date (< 6 tháng)</div>
+                    <span class="badge-fefo-clearance">
+                        <i class="fa-solid fa-bolt"></i> SMART CLEARANCE -50%
+                    </span>
+                </div>
+                <span class="text-xs font-mono text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg">Xả Kho Thu Hồi</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. VIP MEMBERSHIP TIERS SHOWCASE -->
+    <div class="space-y-4">
+        <div class="flex items-center justify-between border-b border-soft-border pb-3">
+            <h3 class="text-lg font-serif font-bold text-charcoal flex items-center gap-2.5">
+                <span class="h-6 w-1 bg-champagne-gold rounded-full"></span>
+                3. Huy Hiệu Phân Hạng Khách Hàng VIP (Membership Tiers)
+            </h3>
+            <span class="text-xs text-slate-400 font-mono">.badge-membership--bronze | --silver | --gold | --platinum | --diamond</span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 p-6 rounded-3xl bg-white border border-soft-border shadow-sm">
+            <span class="badge-membership badge-membership--bronze">
+                <i class="fa-solid fa-shield"></i> BRONZE MEMBER
+            </span>
+            <span class="badge-membership badge-membership--silver">
+                <i class="fa-solid fa-award"></i> SILVER VIP (-5%)
+            </span>
+            <span class="badge-membership badge-membership--gold">
+                <i class="fa-solid fa-crown"></i> GOLD VIP (-10%)
+            </span>
+            <span class="badge-membership badge-membership--platinum">
+                <i class="fa-solid fa-gem"></i> PLATINUM VIP (-12%)
+            </span>
+            <span class="badge-membership badge-membership--diamond">
+                <i class="fa-solid fa-diamond"></i> DIAMOND PRESTIGE (-15%)
+            </span>
+        </div>
+    </div>
+
+    <!-- 4. LUXURY BUTTONS & PRICE FORMATTING SHOWCASE -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Buttons Showcase -->
+        <div class="p-6 rounded-3xl bg-white border border-soft-border shadow-sm space-y-4">
+            <h3 class="text-base font-serif font-bold text-charcoal border-b border-slate-100 pb-2.5">
+                4. Nút Bấm Thượng Lưu (Luxury Buttons)
+            </h3>
+            <div class="flex flex-wrap items-center gap-3">
+                <button type="button" class="btn-luxury-primary">
+                    <i class="fa-solid fa-bag-shopping"></i> Mua Ngay Thượng Lưu
+                </button>
+                <button type="button" class="btn-luxury-outline">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> AI Beauty Advisor
+                </button>
+            </div>
+        </div>
+
+        <!-- Price Formatting Showcase -->
+        <div class="p-6 rounded-3xl bg-white border border-soft-border shadow-sm space-y-4">
+            <h3 class="text-base font-serif font-bold text-charcoal border-b border-slate-100 pb-2.5">
+                5. Hiển Thị Giá Tiền VNĐ Cao Cấp (Luxury Price)
+            </h3>
+            <div class="space-y-3">
+                <div class="price-luxury">
+                    <span class="price-luxury__current text-2xl font-bold">2.450.000₫</span>
+                    <span class="price-luxury__original text-base">3.200.000₫</span>
+                    <span class="price-luxury__discount text-xs">-24% TIẾT KIỆM</span>
+                </div>
+                <div class="text-xs text-slate-400">
+                    <i class="fa-solid fa-check text-emerald-500"></i> Đã bao gồm thuế VAT & Tích lũy 245 Điểm Thưởng VIP
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,823 @@
+@* 
+    _ChatbotWidget.cshtml - AI Chatbot Hỗ Trợ Khách Hàng Chuẩn Phong Cách OMNI BEAUTY
+*@
+
+<style>
+    /* Bo góc 24px chuẩn OMNI BEAUTY */
+    .omni-chat-panel {
+        border-radius: 24px !important;
+    }
+
+    @@keyframes omniChatSlideUp {
+        from {
+            opacity: 0;
+            transform: translateY(24px) scale(0.96);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    @@keyframes omniDotBounce {
+        0%, 80%, 100% {
+            transform: scale(0);
+            opacity: 0.4;
+        }
+        40% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    @@keyframes omniPulseGreen {
+        0% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+        }
+    }
+
+    .omni-chat-slide-up {
+        animation: omniChatSlideUp 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .omni-typing-dot {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background-color: #db2777;
+        animation: omniDotBounce 1.4s infinite ease-in-out both;
+    }
+    .omni-typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .omni-typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    .omni-typing-dot:nth-child(3) { animation-delay: 0s; }
+
+    .omni-online-glow {
+        animation: omniPulseGreen 2s infinite;
+    }
+
+    /* Scrollbar tinh tế */
+    .omni-chat-scroll::-webkit-scrollbar {
+        width: 5px;
+    }
+    .omni-chat-scroll::-webkit-scrollbar-track {
+        background: #fdf2f4;
+    }
+    .omni-chat-scroll::-webkit-scrollbar-thumb {
+        background: #f472b6;
+        border-radius: 9999px;
+    }
+    .omni-chat-scroll::-webkit-scrollbar-thumb:hover {
+        background: #db2777;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>
+
+<div id="beautyChatWidget" class="relative z-50">
+    <!-- 1. FLOATING LAUNCHER BUTTON PHONG CÁCH OMNI BEAUTY (Góc phải dưới) -->
+    <div id="chatLauncherContainer" class="fixed bottom-20 sm:bottom-6 right-6 z-50 flex items-center gap-3">
+        <!-- Floating Teaser Tooltip -->
+        <div id="chatTeaserBubble" 
+             onclick="toggleChatPanel(true)"
+             class="hidden md:flex items-center gap-2.5 bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-2xl shadow-xl border border-pink-100 text-xs font-medium text-slate-700 cursor-pointer hover:shadow-2xl hover:border-pink-300 transition-all duration-300 -translate-y-1">
+            <span class="flex h-2.5 w-2.5 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <span class="font-semibold text-slate-800">OMNI BEAUTY AI:</span>
+            <span class="text-slate-600">Hỏi đáp thành phần & tra cứu HSD FEFO ngay!</span>
+            <button type="button" onclick="event.stopPropagation(); dismissChatTeaser();" class="text-slate-400 hover:text-slate-600 ml-1" aria-label="Đóng gợi ý">
+                <i class="fa-solid fa-xmark text-[11px]"></i>
+            </button>
+        </div>
+
+        <!-- Main Launcher Button: Avatar tròn OMNI BEAUTY với đèn xanh online phát sáng -->
+        <button id="chatLauncherBtn" 
+                type="button" 
+                onclick="toggleChatPanel()"
+                class="relative h-15 w-15 sm:h-16 sm:w-16 rounded-full bg-gradient-to-tr from-rose-500 via-pink-600 to-purple-700 text-white shadow-[0_10px_30px_rgba(225,29,72,0.4)] hover:shadow-[0_14px_36px_rgba(225,29,72,0.55)] hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center group focus:outline-none focus:ring-4 focus:ring-pink-300/50 p-1"
+                aria-label="Mở OMNI BEAUTY AI Chatbot">
+            
+            <!-- Avatar Logo Tròn Nội Bộ -->
+            <div class="w-full h-full rounded-full bg-gradient-to-tr from-rose-600 via-pink-500 to-purple-600 flex items-center justify-center overflow-hidden border-2 border-white/80 shadow-inner">
+                <i id="chatOpenIcon" class="fa-solid fa-wand-magic-sparkles text-2xl group-hover:rotate-12 transition-transform text-white drop-shadow"></i>
+                <i id="chatCloseIcon" class="fa-solid fa-xmark text-2xl hidden"></i>
+            </div>
+
+            <!-- ĐÈN XANH ONLINE PHÁT SÁNG (GLOWING GREEN ONLINE INDICATOR) -->
+            <span class="absolute top-0 right-0 flex h-4 w-4">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-white omni-online-glow shadow-[0_0_10px_#10b981]"></span>
+            </span>
+
+            <!-- AI Floating Badge -->
+            <span class="absolute -bottom-1 -left-1 bg-gradient-to-r from-amber-400 to-rose-500 text-white text-[9px] font-black tracking-wider px-1.5 py-0.5 rounded-full shadow border-2 border-white flex items-center gap-0.5">
+                <span>AI</span>
+            </span>
+
+            <!-- Unread Messages Badge -->
+            <span id="chatUnreadBadge" class="hidden absolute -top-1 -left-1 bg-red-600 text-white text-[10px] font-bold h-5 w-5 rounded-full border-2 border-white flex items-center justify-center shadow">
+                1
+            </span>
+        </button>
+    </div>
+
+    <!-- 2. CHAT PANEL DIALOG (BO GÓC 24PX MƯỢT MÀ) -->
+    <div id="chatPanel" 
+         class="hidden fixed inset-0 sm:inset-auto sm:bottom-24 sm:right-6 z-50 w-full sm:w-[420px] h-full sm:h-[620px] sm:max-h-[85vh] bg-white omni-chat-panel shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-pink-100 flex-col overflow-hidden transition-all duration-300">
+        
+        <!-- HEADER SANG TRỌNG OMNI BEAUTY -->
+        <div class="px-5 py-4 bg-gradient-to-r from-rose-600 via-pink-600 to-purple-700 text-white flex items-center justify-between shadow-sm flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <!-- Avatar Logo Tròn Trong Header Có Đèn Xanh Online -->
+                <div class="relative">
+                    <div class="h-11 w-11 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/50 flex items-center justify-center text-white text-lg shadow-inner">
+                        <i class="fa-solid fa-sparkles text-amber-300"></i>
+                    </div>
+                    <!-- Đèn xanh phát sáng -->
+                    <span class="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full bg-emerald-400 border-2 border-white omni-online-glow shadow-[0_0_8px_#34d399]"></span>
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <h3 class="font-bold text-base leading-tight text-white flex items-center gap-1 tracking-tight">
+                            OMNI BEAUTY AI
+                        </h3>
+                        <span class="bg-white/25 text-[9px] px-1.5 py-0.5 rounded-full font-black tracking-wider uppercase text-amber-200 border border-white/30">
+                            ONLINE
+                        </span>
+                    </div>
+                    <p class="text-[11px] text-pink-100 font-normal">Chuyên gia dược mỹ phẩm • Chuẩn FEFO & Y khoa</p>
+                </div>
+            </div>
+
+            <!-- Header Action Controls -->
+            <div class="flex items-center gap-1 text-white/90">
+                <button type="button" 
+                        onclick="resetChatHistory()" 
+                        class="h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition" 
+                        title="Làm mới cuộc trò chuyện"
+                        aria-label="Làm mới đoạn chat">
+                    <i class="fa-solid fa-rotate-right text-xs"></i>
+                </button>
+                <button type="button" 
+                        onclick="toggleChatPanel(false)" 
+                        class="h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition" 
+                        title="Thu nhỏ cửa sổ"
+                        aria-label="Đóng khung chat">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- QUICK ANNOUNCEMENT TICKER -->
+        <div class="bg-gradient-to-r from-pink-50 via-rose-50 to-purple-50 px-4 py-2 border-b border-pink-100 flex items-center justify-between text-[11px] text-slate-700 flex-shrink-0">
+            <div class="flex items-center gap-1.5 truncate">
+                <i class="fa-solid fa-shield-halved text-rose-500"></i>
+                <span>Cam kết 100% chính hãng chuẩn FEFO • Đổi trả 14 ngày</span>
+            </div>
+            <a href="/Promotion" class="text-rose-600 font-bold hover:underline text-[10px] whitespace-nowrap ml-2">Flash Sale</a>
+        </div>
+
+        <!-- MESSAGE STREAM (CONTAINER) -->
+        <div id="chatMessagesStream" class="flex-1 overflow-y-auto p-4 space-y-4 omni-chat-scroll bg-gradient-to-b from-[#fffafd] via-white to-pink-50/20">
+            <!-- Messages inserted dynamically via JS -->
+        </div>
+
+        <!-- TYPING INDICATOR -->
+        <div id="chatTypingIndicator" class="hidden px-4 py-2 bg-transparent flex items-center gap-2 flex-shrink-0">
+            <div class="h-7 w-7 rounded-full bg-gradient-to-tr from-rose-500 to-purple-600 flex items-center justify-center text-white text-[10px] flex-shrink-0 shadow-sm">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <div class="bg-white border border-pink-100 rounded-2xl rounded-tl-none px-3.5 py-2 shadow-xs flex items-center gap-1.5">
+                <span class="text-[11px] text-slate-400 mr-1">Chuyên viên AI đang tra cứu CSDL</span>
+                <span class="omni-typing-dot"></span>
+                <span class="omni-typing-dot"></span>
+                <span class="omni-typing-dot"></span>
+            </div>
+        </div>
+
+        <!-- QUICK QUESTION BUTTONS / CHIPS (4 CÂU HỎI NHANH TRỌNG TÂM) -->
+        <div id="chatQuickReplies" class="px-3 py-2 bg-white/95 border-t border-pink-100/80 flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-shrink-0">
+            <!-- Populated via updateQuickRepliesBar -->
+        </div>
+
+        <!-- INPUT BOX & ACTIONS -->
+        <div class="p-3 bg-white border-t border-slate-100 flex items-center gap-2 flex-shrink-0">
+            <div class="relative flex-1">
+                <textarea id="chatInputMessage" 
+                          rows="1" 
+                          placeholder="Hỏi về BHA, Retinol, kem chống nắng, date FEFO..." 
+                          class="w-full text-xs text-slate-800 bg-slate-50 border border-slate-200 rounded-2xl pl-3.5 pr-10 py-2.5 focus:outline-none focus:border-rose-400 focus:bg-white resize-none transition leading-normal placeholder:text-slate-400 max-h-24 overflow-y-auto"
+                          onkeydown="handleChatInputKeyDown(event)"></textarea>
+            </div>
+
+            <!-- Send Button -->
+            <button id="chatSendBtn" 
+                    type="button" 
+                    onclick="handleUserSendMessage()"
+                    class="h-10 w-10 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-600 to-purple-600 text-white flex items-center justify-center hover:opacity-95 active:scale-95 shadow-md shadow-pink-500/25 transition flex-shrink-0"
+                    aria-label="Gửi tin nhắn">
+                <i class="fa-solid fa-paper-plane text-xs"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // =========================================================================
+    // OMNI BEAUTY AI ASSISTANT - CLIENT LOGIC & SPECIALIZED ENGINE
+    // =========================================================================
+
+    const CHAT_STORAGE_KEY = 'omni_beauty_chat_messages_v2';
+    const CHAT_SESSION_KEY = 'omni_beauty_chat_session_key';
+    const TEASER_DISMISSED_KEY = 'omni_beauty_chat_teaser_dismissed';
+
+    const DEFAULT_PROMPT_CHIPS = [
+        "Tôi cần tìm kem chống nắng cho da dầu mụn?",
+        "Sản phẩm nào đang Flash Sale cận date giảm sâu?",
+        "Kiểm tra hạn sử dụng của serum Estée Lauder?",
+        "Chính sách đổi trả hàng như thế nào?"
+    ];
+
+    let chatSessionKey = sessionStorage.getItem(CHAT_SESSION_KEY);
+    if (!chatSessionKey) {
+        chatSessionKey = 'sess-' + Math.random().toString(36).substring(2, 10) + '-' + Date.now();
+        sessionStorage.setItem(CHAT_SESSION_KEY, chatSessionKey);
+    }
+
+    let isChatOpen = false;
+    let isBotTyping = false;
+
+    // Client-side fallback rule engine
+    const CLIENT_RULES = [
+        {
+            keywords: ['chống nắng cho da dầu mụn', 'chống nắng kiềm dầu', 'kem chống nắng da dầu', 'kem chống nắng cho da dầu mụn'],
+            reply: `☀️ **TƯ VẤN CHUYÊN GIA: KEM CHỐNG NẮNG CHO DA DẦU MỤN**\n\nLàn da dầu mụn cần kem chống nắng phổ rộng **SPF50+ PA++++**, kết cấu sữa mỏng nhẹ, kiềm dầu thông minh suốt 8-12H và không gây bí tắc cổ nang lông (Non-comedogenic).\n\n👇 **Top sản phẩm khuyên dùng chuẩn y khoa từ CSDL OMNI BEAUTY:**`,
+            actionUrl: '/category/kem-chong-nang',
+            actionText: 'Xem Tất Cả Kem Chống Nắng',
+            chips: DEFAULT_PROMPT_CHIPS,
+            productSuggestions: [
+                {
+                    id: 1,
+                    name: "Sữa Chống Nắng Kiềm Dầu Anessa Perfect UV Sunscreen Skincare Milk SPF50+ PA++++ 60ml",
+                    price: 595000,
+                    originalPrice: 715000,
+                    imageUrl: "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=500&h=500&fit=crop",
+                    badge: "SPF50+ Kiềm Dầu 8H",
+                    url: "/Product/Detail/1"
+                },
+                {
+                    id: 2,
+                    name: "Kem Chống Nắng Kiềm Dầu La Roche-Posay Anthelios UVmune 400 Oil Control 50ml",
+                    price: 495000,
+                    originalPrice: 535000,
+                    imageUrl: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=500&h=500&fit=crop",
+                    badge: "Màng Lọc Mexoryl 400",
+                    url: "/Product/Detail/2"
+                }
+            ]
+        },
+        {
+            keywords: ['flash sale cận date', 'cận date giảm sâu', 'cận date', 'sale cận date', 'xả hàng cận date', 'fefo'],
+            reply: `⚡ **CHƯƠNG TRÌNH FLASH SALE CẬN DATE - GIẢM SÂU 40% - 70%**\n\nOmnichannel Beauty tiên phong áp dụng quản trị kho **FEFO (First Expired, First Out)**:\n- 🏷️ Giảm sâu 40% - 70% cho sản phẩm có hạn dùng 3-6 tháng.\n- ❄️ 100% lưu kho chuẩn phòng mát 22°C - 25°C, chất lượng hoàn hảo.\n- 🔍 Minh bạch số lô và hạn dùng trên từng sản phẩm.\n\n👇 **Các deal cận date FEFO nổi bật:**`,
+            actionUrl: '/Promotion',
+            actionText: 'Khám Phá Flash Sale Cận Date',
+            chips: DEFAULT_PROMPT_CHIPS,
+            productSuggestions: [
+                {
+                    id: 3,
+                    name: "Kem Dưỡng Ẩm Phục Hồi Da Klairs Rich Moist Soothing Cream 60ml",
+                    price: 245000,
+                    originalPrice: 490000,
+                    imageUrl: "https://images.unsplash.com/photo-1608248597359-002162604212?w=500&h=500&fit=crop",
+                    badge: "🔥 Giảm 50% FEFO",
+                    url: "/Product/Detail/3"
+                }
+            ]
+        },
+        {
+            keywords: ['hạn sử dụng của serum estée lauder', 'serum estée lauder', 'estee lauder', 'serum estee', 'anr'],
+            reply: `👑 **TRA CỨU HẠN SỬ DỤNG: SERUM ESTÉE LAUDER ADVANCED NIGHT REPAIR (ANR)**\n\nThông tin lô hàng nhập khẩu chính hãng tại kho OMNI BEAUTY:\n- 📦 **Mã Lô (Batch Code)**: \`EST-ANR-202506-B2\`\n- 📅 **Ngày Sản Xuất (MFG)**: 20/06/2025\n- ⏳ **Hạn Sử Dụng (EXP)**: **20/06/2028** *(Chuẩn 36 tháng kể từ NSX)*\n- 🕒 **Hạn Mở Nắp (PAO)**: 24 Tháng\n- 🛡️ Nhập khẩu chính ngạch từ **Công ty TNHH Estée Lauder Việt Nam**, đủ tem phụ tiếng Việt và tem chống giả.\n\n👇 **Sản phẩm Serum Estée Lauder ANR chính hãng có sẵn tại cửa hàng:**`,
+            actionUrl: '/Shop?category=skincare',
+            actionText: 'Xem Serum Estée Lauder',
+            chips: DEFAULT_PROMPT_CHIPS,
+            productSuggestions: [
+                {
+                    id: 4,
+                    name: "Tinh Chất Phục Hồi Ban Đêm Estée Lauder Advanced Night Repair Synchronized 50ml",
+                    price: 2950000,
+                    originalPrice: 3500000,
+                    imageUrl: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=500&h=500&fit=crop",
+                    badge: "Chuẩn FEFO 100% Chính Hãng",
+                    url: "/Product/Detail/4"
+                }
+            ]
+        },
+        {
+            keywords: ['chính sách đổi trả', 'đổi trả hàng như thế nào', 'đổi trả', 'hoàn tiền'],
+            reply: `🛡️ **CHÍNH SÁCH ĐỔI TRẢ HÀNG TOÀN DIỆN (OMNICHANNEL RETURN POLICY)**\n\n1️⃣ **Thời hạn 14 ngày**: Đổi/trả linh hoạt trong 14 ngày kể từ khi nhận hàng.\n2️⃣ **Bảo hành toàn diện**: Đổi mới 1-1 miễn phí nếu vỡ hỏng do vận chuyển hoặc dị ứng da liễu.\n3️⃣ **Đổi trả đa kênh (Omnichannel)**: Mua online có thể ghé đổi trực tiếp tại showroom Hà Nội, TP.HCM, Đà Nẵng hoặc shipper đến tận nhà thu hồi miễn phí.\n4️⃣ **Hoàn tiền 24H**: Hoàn tiền chuyển khoản hoặc tiền mặt trong 24 giờ.\n\n📞 Hotline hỗ trợ miễn cước 24/7: **1900 6868**`,
+            actionUrl: '/Contact',
+            actionText: 'Liên Hệ Showroom Đổi Hàng',
+            chips: DEFAULT_PROMPT_CHIPS
+        },
+        {
+            keywords: ['bha', 'salicylic'],
+            reply: `🧪 **TƯ VẤN HOẠT CHẤT: BHA (SALICYLIC ACID)**\n\n- Axit gốc dầu len lỏi sâu vào lỗ chân lông bẻ gãy bã nhờn tích tụ, đẩy mụn ẩn, mụn đầu đen và giảm sưng viêm.\n- Nồng độ khuyên dùng: 1% - 2% dùng 2-3 lần/tuần buổi tối sau bước toner. Ban ngày luôn thoa kem chống nắng kỹ lưỡng!`,
+            actionUrl: '/Shop?category=skincare',
+            actionText: 'Xem Sản Phẩm Chứa BHA',
+            chips: DEFAULT_PROMPT_CHIPS
+        },
+        {
+            keywords: ['niacinamide', 'b3'],
+            reply: `💎 **TƯ VẤN HOẠT CHẤT: NIACINAMIDE (VITAMIN B3)**\n\n- Tăng cường Ceramides củng cố hàng rào lipid, điều tiết tuyến bã nhờn, se khít lỗ chân lông và làm mờ thâm mụn rõ rệt.\n- Dùng an toàn cả sáng và tối với nồng độ 5% - 10%.`,
+            actionUrl: '/Shop?category=skincare',
+            actionText: 'Xem Sản Phẩm Chứa Niacinamide',
+            chips: DEFAULT_PROMPT_CHIPS
+        },
+        {
+            keywords: ['retinol'],
+            reply: `✨ **TƯ VẤN HOẠT CHẤT: RETINOL (VITAMIN A)**\n\n- Kích thích tăng sinh Collagen & Elastin ở tầng trung bì, gia tốc tái tạo tế bào, làm mờ nếp nhăn và trẻ hóa làn da căng mịn.\n- Bắt đầu với nồng độ 0.1% - 0.3% kết hợp dưỡng ẩm phục hồi B5 theo phương pháp kẹp ẩm.`,
+            actionUrl: '/Shop?category=skincare',
+            actionText: 'Xem Sản Phẩm Chứa Retinol',
+            chips: DEFAULT_PROMPT_CHIPS
+        },
+        {
+            keywords: ['b5', 'panthenol'],
+            reply: `💧 **TƯ VẤN HOẠT CHẤT: VITAMIN B5 (PANTHENOL)**\n\n- Cấp ẩm sâu, dập tắt tức thì cảm giác ngứa rát, đỏ da, phục hồi màng bảo vệ da mỏng yếu sau nặn mụn, peel hoặc treatment.\n- Rất lành tính cho da nhạy cảm và mẹ bầu.`,
+            actionUrl: '/Shop?category=skincare',
+            actionText: 'Xem Sản Phẩm Chứa B5',
+            chips: DEFAULT_PROMPT_CHIPS
+        },
+        {
+            keywords: ['vitamin c'],
+            reply: `🍊 **TƯ VẤN HOẠT CHẤT: VITAMIN C (L-ASCORBIC ACID)**\n\n- Chất chống oxy hóa mạnh mẽ giúp mờ thâm nám, dưỡng trắng sáng đều màu da và kích thích collagen.\n- Dùng buổi sáng trước kem chống nắng để nhân đôi hiệu quả bảo vệ trước tia UV.`,
+            actionUrl: '/Shop?category=skincare',
+            actionText: 'Xem Sản Phẩm Chứa Vitamin C',
+            chips: DEFAULT_PROMPT_CHIPS
+        }
+    ];
+
+    document.addEventListener('DOMContentLoaded', function () {
+        initChatWidget();
+    });
+
+    function initChatWidget() {
+        const teaserDismissed = localStorage.getItem(TEASER_DISMISSED_KEY);
+        if (teaserDismissed) {
+            const teaser = document.getElementById('chatTeaserBubble');
+            if (teaser) teaser.style.display = 'none';
+        }
+
+        renderSavedMessages();
+        updateQuickRepliesBar(DEFAULT_PROMPT_CHIPS);
+    }
+
+    function dismissChatTeaser() {
+        localStorage.setItem(TEASER_DISMISSED_KEY, 'true');
+        const teaser = document.getElementById('chatTeaserBubble');
+        if (teaser) teaser.style.display = 'none';
+    }
+
+    function toggleChatPanel(forceOpen) {
+        const panel = document.getElementById('chatPanel');
+        const openIcon = document.getElementById('chatOpenIcon');
+        const closeIcon = document.getElementById('chatCloseIcon');
+        const unreadBadge = document.getElementById('chatUnreadBadge');
+
+        if (typeof forceOpen === 'boolean') {
+            isChatOpen = forceOpen;
+        } else {
+            isChatOpen = !isChatOpen;
+        }
+
+        if (isChatOpen) {
+            panel.classList.remove('hidden');
+            panel.classList.add('flex', 'omni-chat-slide-up');
+            openIcon.classList.add('hidden');
+            closeIcon.classList.remove('hidden');
+            unreadBadge.classList.add('hidden');
+            dismissChatTeaser();
+
+            setTimeout(() => {
+                const input = document.getElementById('chatInputMessage');
+                if (input) input.focus();
+                scrollChatToBottom();
+            }, 100);
+        } else {
+            panel.classList.add('hidden');
+            panel.classList.remove('flex', 'omni-chat-slide-up');
+            openIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+        }
+    }
+
+    function getStoredMessages() {
+        try {
+            const raw = sessionStorage.getItem(CHAT_STORAGE_KEY);
+            return raw ? JSON.parse(raw) : [];
+        } catch {
+            return [];
+        }
+    }
+
+    function saveMessages(msgs) {
+        try {
+            sessionStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(msgs));
+        } catch (e) {
+            console.warn('Lỗi lưu lịch sử chat vào sessionStorage:', e);
+        }
+    }
+
+    function renderSavedMessages() {
+        const stream = document.getElementById('chatMessagesStream');
+        if (!stream) return;
+
+        const msgs = getStoredMessages();
+        stream.innerHTML = '';
+
+        if (msgs.length === 0) {
+            // Lời chào mừng cá nhân hóa OMNI BEAUTY kèm các nút gợi ý câu hỏi nhanh
+            appendWelcomeGreeting();
+            return;
+        }
+
+        msgs.forEach(m => {
+            if (m.sender === 'USER') {
+                appendUserBubble(m.text, false);
+            } else {
+                appendBotBubble({
+                    reply: m.text,
+                    actionUrl: m.actionUrl,
+                    actionText: m.actionText,
+                    productSuggestions: m.productSuggestions,
+                    chips: m.chips
+                }, false);
+            }
+        });
+
+        scrollChatToBottom();
+    }
+
+    function appendWelcomeGreeting() {
+        const stream = document.getElementById('chatMessagesStream');
+        if (!stream) return;
+
+        const bubble = document.createElement('div');
+        bubble.className = 'flex justify-start items-start gap-2.5';
+
+        const greetingText = `
+            Xin chào bạn! 👋 Mình là <strong>AI Beauty Advisor</strong> - chuyên viên tư vấn sắc đẹp trí tuệ nhân tạo của <strong>OMNI BEAUTY</strong>.<br/><br/>
+            Mình có thể hỗ trợ bạn phân tích thành phần dược mỹ phẩm chuyên sâu (BHA, Retinol, Niacinamide, B5...), tra cứu hạn dùng chuẩn FEFO và chính sách đổi trả hàng.<br/><br/>
+            ✨ <em>Mời bạn chọn một trong các câu hỏi nhanh bên dưới để nhận câu trả lời ngay lập tức:</em>
+        `;
+
+        bubble.innerHTML = `
+            <div class="h-8 w-8 rounded-full bg-gradient-to-tr from-rose-500 via-pink-600 to-purple-600 flex items-center justify-center text-white text-xs shadow-md flex-shrink-0 mt-0.5 border border-white">
+                <i class="fa-solid fa-sparkles text-[11px] text-amber-200"></i>
+            </div>
+            <div class="max-w-[88%] space-y-2.5">
+                <div class="bg-white border border-pink-100 rounded-3xl rounded-tl-sm p-4 shadow-xs text-xs text-slate-700 leading-relaxed break-words">
+                    ${greetingText}
+                    
+                    <!-- 4 NÚT GỢI Ý CÂU HỎI NHANH TRỰC TIẾP TRONG LỜI CHÀO MỪNG -->
+                    <div class="mt-3 pt-3 border-t border-pink-100/70 space-y-1.5">
+                        <button type="button" onclick="sendQuickReply('Tôi cần tìm kem chống nắng cho da dầu mụn?')" class="w-full text-left p-2 rounded-xl bg-pink-50/70 hover:bg-pink-100/90 text-rose-700 font-medium text-[11px] transition flex items-center justify-between group">
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-sun text-amber-500 text-[10px]"></i>
+                                <span>Tôi cần tìm kem chống nắng cho da dầu mụn?</span>
+                            </span>
+                            <i class="fa-solid fa-chevron-right text-[9px] text-rose-400 group-hover:translate-x-0.5 transition-transform"></i>
+                        </button>
+
+                        <button type="button" onclick="sendQuickReply('Sản phẩm nào đang Flash Sale cận date giảm sâu?')" class="w-full text-left p-2 rounded-xl bg-purple-50/70 hover:bg-purple-100/90 text-purple-800 font-medium text-[11px] transition flex items-center justify-between group">
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-bolt text-purple-600 text-[10px]"></i>
+                                <span>Sản phẩm nào đang Flash Sale cận date giảm sâu?</span>
+                            </span>
+                            <i class="fa-solid fa-chevron-right text-[9px] text-purple-400 group-hover:translate-x-0.5 transition-transform"></i>
+                        </button>
+
+                        <button type="button" onclick="sendQuickReply('Kiểm tra hạn sử dụng của serum Estée Lauder?')" class="w-full text-left p-2 rounded-xl bg-amber-50/70 hover:bg-amber-100/90 text-amber-800 font-medium text-[11px] transition flex items-center justify-between group">
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-calendar-check text-amber-600 text-[10px]"></i>
+                                <span>Kiểm tra hạn sử dụng của serum Estée Lauder?</span>
+                            </span>
+                            <i class="fa-solid fa-chevron-right text-[9px] text-amber-400 group-hover:translate-x-0.5 transition-transform"></i>
+                        </button>
+
+                        <button type="button" onclick="sendQuickReply('Chính sách đổi trả hàng như thế nào?')" class="w-full text-left p-2 rounded-xl bg-emerald-50/70 hover:bg-emerald-100/90 text-emerald-800 font-medium text-[11px] transition flex items-center justify-between group">
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-shield-heart text-emerald-600 text-[10px]"></i>
+                                <span>Chính sách đổi trả hàng như thế nào?</span>
+                            </span>
+                            <i class="fa-solid fa-chevron-right text-[9px] text-emerald-400 group-hover:translate-x-0.5 transition-transform"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        stream.appendChild(bubble);
+        scrollChatToBottom();
+    }
+
+    function appendUserBubble(text, save = true) {
+        const stream = document.getElementById('chatMessagesStream');
+        if (!stream) return;
+
+        const bubble = document.createElement('div');
+        bubble.className = 'flex justify-end items-end gap-2';
+        bubble.innerHTML = `
+            <div class="max-w-[82%] bg-gradient-to-r from-rose-500 via-pink-600 to-purple-600 text-white text-xs rounded-2xl rounded-br-xs px-3.5 py-2.5 shadow-sm leading-relaxed break-words font-medium">
+                ${escapeHtml(text)}
+            </div>
+        `;
+        stream.appendChild(bubble);
+
+        if (save) {
+            const msgs = getStoredMessages();
+            msgs.push({ sender: 'USER', text: text, time: new Date().toISOString() });
+            saveMessages(msgs);
+        }
+
+        scrollChatToBottom();
+    }
+
+    function appendBotBubble(data, save = true) {
+        const stream = document.getElementById('chatMessagesStream');
+        if (!stream) return;
+
+        const bubble = document.createElement('div');
+        bubble.className = 'flex justify-start items-start gap-2.5';
+
+        // Avatar bot tròn
+        let html = `
+            <div class="h-8 w-8 rounded-full bg-gradient-to-tr from-rose-500 via-pink-600 to-purple-600 flex items-center justify-center text-white text-xs shadow-md flex-shrink-0 mt-0.5 border border-white">
+                <i class="fa-solid fa-sparkles text-[10px] text-amber-200"></i>
+            </div>
+            <div class="max-w-[88%] space-y-2">
+                <div class="bg-white border border-pink-100 rounded-3xl rounded-tl-sm px-4 py-3 shadow-xs text-xs text-slate-700 leading-relaxed space-y-1.5 break-words">
+                    ${formatBotText(data.reply)}
+                </div>
+        `;
+
+        // Action Button (Link)
+        if (data.actionUrl && data.actionText) {
+            html += `
+                <div class="pt-0.5">
+                    <a href="${data.actionUrl}" 
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pink-50 text-rose-600 hover:bg-rose-600 hover:text-white border border-pink-200 text-xs font-semibold transition-all duration-200 shadow-xs">
+                        <span>${data.actionText}</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </a>
+                </div>
+            `;
+        }
+
+        // THẺ SẢN PHẨM MINI CÓ HÌNH ẢNH, GIÁ BÁN VÀ NÚT "XEM CHI TIẾT"
+        if (data.productSuggestions && data.productSuggestions.length > 0) {
+            html += `<div class="pt-1 flex gap-2.5 overflow-x-auto no-scrollbar pb-1">`;
+            data.productSuggestions.forEach(p => {
+                const priceFormatted = new Intl.NumberFormat('vi-VN').format(p.price) + '₫';
+                const origFormatted = p.originalPrice ? (new Intl.NumberFormat('vi-VN').format(p.originalPrice) + '₫') : null;
+                const badgeHtml = p.badge 
+                    ? `<span class="absolute top-1.5 left-1.5 bg-rose-600/90 backdrop-blur-xs text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-xs line-clamp-1 max-w-[90%]">${p.badge}</span>` 
+                    : '';
+
+                html += `
+                    <div class="w-36 flex-shrink-0 bg-white border border-pink-100 hover:border-pink-300 rounded-2xl p-2.5 shadow-xs hover:shadow-md transition text-left flex flex-col justify-between group">
+                        <div>
+                            <div class="w-full h-24 bg-pink-50/40 rounded-xl overflow-hidden mb-2 relative">
+                                <img src="${p.imageUrl || '/images/default-product.png'}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='/images/default-product.png'">
+                                ${badgeHtml}
+                            </div>
+                            <div class="text-[11px] font-bold text-slate-800 line-clamp-2 leading-tight mb-1 group-hover:text-rose-600 transition-colors" title="${p.name}">${p.name}</div>
+                        </div>
+                        <div class="mt-2">
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-xs font-black text-rose-600">${priceFormatted}</span>
+                                ${origFormatted ? `<span class="text-[10px] text-slate-400 line-through">${origFormatted}</span>` : ''}
+                            </div>
+                            <a href="${p.url}" class="mt-2 w-full py-1 px-2 rounded-lg bg-pink-50 hover:bg-rose-600 text-rose-600 hover:text-white text-[11px] font-semibold text-center transition-all flex items-center justify-center gap-1 shadow-2xs">
+                                <span>Xem chi tiết</span>
+                                <i class="fa-solid fa-arrow-right text-[8px]"></i>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            });
+            html += `</div>`;
+        }
+
+        html += `</div>`;
+        bubble.innerHTML = html;
+        stream.appendChild(bubble);
+
+        // Update Quick Replies Bar
+        if (data.chips && data.chips.length > 0) {
+            updateQuickRepliesBar(data.chips);
+        } else {
+            updateQuickRepliesBar(DEFAULT_PROMPT_CHIPS);
+        }
+
+        if (save) {
+            const msgs = getStoredMessages();
+            msgs.push({
+                sender: 'BOT',
+                text: data.reply,
+                actionUrl: data.actionUrl,
+                actionText: data.actionText,
+                productSuggestions: data.productSuggestions,
+                chips: data.chips,
+                time: new Date().toISOString()
+            });
+            saveMessages(msgs);
+        }
+
+        if (!isChatOpen) {
+            const badge = document.getElementById('chatUnreadBadge');
+            if (badge) badge.classList.remove('hidden');
+        }
+
+        scrollChatToBottom();
+    }
+
+    function updateQuickRepliesBar(chips) {
+        const bar = document.getElementById('chatQuickReplies');
+        if (!bar) return;
+
+        bar.innerHTML = '';
+        const listToUse = (chips && chips.length > 0) ? chips : DEFAULT_PROMPT_CHIPS;
+
+        listToUse.forEach(chip => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'text-xs px-2.5 py-1 rounded-full bg-pink-50 text-rose-700 border border-pink-200 hover:bg-rose-100/70 whitespace-nowrap transition active:scale-95 font-medium flex items-center gap-1 flex-shrink-0';
+            btn.innerHTML = `<span>${escapeHtml(chip)}</span>`;
+            btn.onclick = () => sendQuickReply(chip);
+            bar.appendChild(btn);
+        });
+    }
+
+    function scrollChatToBottom() {
+        const stream = document.getElementById('chatMessagesStream');
+        if (stream) {
+            stream.scrollTop = stream.scrollHeight;
+        }
+    }
+
+    function setTyping(show) {
+        isBotTyping = show;
+        const ind = document.getElementById('chatTypingIndicator');
+        if (ind) {
+            if (show) {
+                ind.classList.remove('hidden');
+                scrollChatToBottom();
+            } else {
+                ind.classList.add('hidden');
+            }
+        }
+    }
+
+    function sendQuickReply(text) {
+        const input = document.getElementById('chatInputMessage');
+        if (input) {
+            input.value = text;
+            handleUserSendMessage();
+        }
+    }
+
+    function handleChatInputKeyDown(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleUserSendMessage();
+        }
+    }
+
+    async function handleUserSendMessage() {
+        const input = document.getElementById('chatInputMessage');
+        if (!input) return;
+
+        const text = input.value.trim();
+        if (!text || isBotTyping) return;
+
+        input.value = '';
+        appendUserBubble(text, true);
+
+        // Hiển thị typing indicator mô phỏng suy nghĩ AI
+        setTyping(true);
+        const startTime = Date.now();
+
+        try {
+            // 1. Gửi request đến Backend C# ChatbotService qua /api/chat
+            const payload = {
+                sessionKey: chatSessionKey,
+                message: text
+            };
+
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const elapsed = Date.now() - startTime;
+            if (elapsed < 500) {
+                await new Promise(r => setTimeout(r, 500 - elapsed));
+            }
+
+            if (response.ok) {
+                const data = await response.json();
+                setTyping(false);
+
+                appendBotBubble({
+                    reply: data.reply || "Cảm ơn bạn, OMNI BEAUTY AI đã ghi nhận yêu cầu.",
+                    actionUrl: data.actionUrl,
+                    actionText: data.actionText,
+                    productSuggestions: data.productSuggestions,
+                    chips: data.quickReplies
+                }, true);
+                return;
+            }
+        } catch (err) {
+            console.warn('API /api/chat chưa phản hồi hoặc mất mạng, chuyển sang client rule engine:', err);
+        }
+
+        // 2. Client-side Fallback nếu offline hoặc lỗi mạng
+        const clientMatch = matchClientRule(text);
+        setTyping(false);
+
+        appendBotBubble({
+            reply: clientMatch.reply,
+            actionUrl: clientMatch.actionUrl,
+            actionText: clientMatch.actionText,
+            productSuggestions: clientMatch.productSuggestions,
+            chips: clientMatch.chips
+        }, true);
+    }
+
+    function matchClientRule(text) {
+        const lower = text.toLowerCase();
+
+        for (const rule of CLIENT_RULES) {
+            if (rule.keywords.some(kw => lower.includes(kw))) {
+                return rule;
+            }
+        }
+
+        return {
+            reply: `Cảm ơn bạn đã nhắn tin cho OMNI BEAUTY AI! 💖\n\nMình có thể hỗ trợ tốt nhất về **Thành phần dược mỹ phẩm**, **Tra cứu HSD lô hàng FEFO**, **Kem chống nắng da dầu mụn** hoặc **Chính sách đổi trả hàng**.\n\nMời bạn chọn một trong các câu hỏi nhanh bên dưới để mình giải đáp ngay nhé!`,
+            actionUrl: '/Shop',
+            actionText: 'Khám Phá Cửa Hàng',
+            chips: DEFAULT_PROMPT_CHIPS
+        };
+    }
+
+    function resetChatHistory() {
+        if (!confirm('Bạn có chắc muốn làm mới cuộc trò chuyện này không?')) return;
+
+        sessionStorage.removeItem(CHAT_STORAGE_KEY);
+        chatSessionKey = 'sess-' + Math.random().toString(36).substring(2, 10) + '-' + Date.now();
+        sessionStorage.setItem(CHAT_SESSION_KEY, chatSessionKey);
+
+        renderSavedMessages();
+    }
+
+    function formatBotText(str) {
+        if (!str) return '';
+        let formatted = escapeHtml(str)
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/`([^`]+)`/g, '<code class="bg-pink-100 text-rose-700 px-1.5 py-0.5 rounded text-[11px] font-mono font-semibold">$1</code>')
+            .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-rose-600 font-semibold underline hover:text-rose-800">$1</a>')
+            .replace(/\n/g, '<br/>');
+
+        return formatted;
+    }
+
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, function (m) { return map[m]; });
+    }
+</script>

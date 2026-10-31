@@ -1,0 +1,312 @@
+@model Omnichannel.Application.DTOs.Sales.AdminOrderDetailViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hóa Đơn Bán Hàng - @Model.OrderCode</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #1e293b;
+            background: #f8fafc;
+            padding: 24px;
+        }
+        .invoice-box {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 36px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+        }
+        .no-print {
+            max-width: 800px;
+            margin: 0 auto 16px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn-print {
+            background: #e11d48;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-back {
+            background: #f1f5f9;
+            color: #475569;
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 24px;
+            margin-bottom: 24px;
+        }
+        .brand-title {
+            font-size: 20px;
+            font-weight: 800;
+            color: #e11d48;
+            letter-spacing: 0.5px;
+        }
+        .brand-sub {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+        .store-info {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+        .invoice-title {
+            text-align: right;
+        }
+        .invoice-title h2 {
+            font-size: 22px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+        .invoice-code {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: #e11d48;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+        .meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+            font-size: 13px;
+        }
+        .meta-label {
+            color: #64748b;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .table-items {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 24px;
+        }
+        .table-items th {
+            background: #f1f5f9;
+            text-align: left;
+            padding: 10px 12px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #475569;
+        }
+        .table-items td {
+            padding: 12px;
+            font-size: 13px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .text-center {
+            text-align: center;
+        }
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .summary-box {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 16px;
+        }
+        .summary-table {
+            width: 320px;
+            font-size: 13px;
+        }
+        .summary-table tr td {
+            padding: 6px 0;
+        }
+        .summary-total {
+            font-size: 16px;
+            font-weight: 800;
+            color: #e11d48;
+            border-top: 2px solid #e2e8f0;
+            padding-top: 8px !important;
+        }
+        .footer-note {
+            margin-top: 36px;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+            border-top: 1px dashed #cbd5e1;
+            padding-top: 20px;
+        }
+
+        @@media print {
+            body {
+                background: #ffffff;
+                padding: 0;
+            }
+            .invoice-box {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print">
+        <a href="javascript:window.history.back()" class="btn-back">← Quay lại</a>
+        <button onclick="window.print()" class="btn-print">In Hóa Đơn</button>
+    </div>
+
+    <div class="invoice-box">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <div class="brand-title">OMNICHANNEL BEAUTY</div>
+                <div class="brand-sub">LUXURY COSMETICS & WELLNESS SUITE</div>
+                <div class="store-info">
+                    <div><strong>Chi nhánh:</strong> @Model.StoreName</div>
+                    <div><strong>Địa chỉ:</strong> @Model.StoreAddress</div>
+                    @if (!string.IsNullOrWhiteSpace(Model.StorePhone))
+                    {
+                        <div><strong>Hotline:</strong> @Model.StorePhone</div>
+                    }
+                </div>
+            </div>
+            <div class="invoice-title">
+                <h2>HÓA ĐƠN BÁN HÀNG</h2>
+                <div class="invoice-code">@Model.OrderCode</div>
+                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+                    Ngày: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                </div>
+                @if (!string.IsNullOrWhiteSpace(Model.InvoiceCode))
+                {
+                    <div style="font-size: 11px; color: #475569; font-family: 'JetBrains Mono', monospace; margin-top: 2px;">
+                        VAT: @Model.InvoiceCode
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Metadata -->
+        <div class="meta-grid">
+            <div>
+                <div class="meta-label">Thông tin khách hàng</div>
+                <div style="font-weight: 700; font-size: 14px;">@Model.CustomerName</div>
+                <div style="color: #475569; margin-top: 2px;">Điện thoại: @Model.CustomerPhone</div>
+                @if (!string.IsNullOrWhiteSpace(Model.ShippingAddress))
+                {
+                    <div style="color: #475569; margin-top: 2px;">Địa chỉ: @Model.ShippingAddress</div>
+                }
+            </div>
+            <div>
+                <div class="meta-label">Thông tin giao dịch</div>
+                <div><strong>Kênh bán:</strong> @(Model.OrderSource == "POS" ? "Quầy thu ngân (POS)" : "Website trực tuyến")</div>
+                <div style="margin-top: 2px;"><strong>Thanh toán:</strong> @Model.PaymentMethod (@(Model.PaymentStatus == "PAID" ? "Đã thanh toán" : "Chưa thanh toán"))</div>
+                <div style="margin-top: 2px;"><strong>Trạng thái đơn:</strong> @Model.OrderStatus</div>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <table class="table-items">
+            <thead>
+                <tr>
+                    <th style="width: 40px;" class="text-center">#</th>
+                    <th>Tên Sản Phẩm / Mã SKU</th>
+                    <th class="text-center" style="width: 60px;">ĐVT</th>
+                    <th class="text-center" style="width: 60px;">SL</th>
+                    <th class="text-right" style="width: 110px;">Đơn Giá</th>
+                    <th class="text-right" style="width: 120px;">Thành Tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ int idx = 1; }
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td class="text-center" style="color: #94a3b8;">@idx</td>
+                        <td>
+                            <div style="font-weight: 600;">@item.ProductName</div>
+                            <div style="font-size: 11px; color: #64748b; font-family: 'JetBrains Mono', monospace;">
+                                SKU: @item.ProductSku @(!string.IsNullOrWhiteSpace(item.BatchNumber) ? $"• Lô: {item.BatchNumber}" : "")
+                            </div>
+                        </td>
+                        <td class="text-center" style="color: #64748b;">@item.Unit</td>
+                        <td class="text-center font-mono" style="font-weight: 700;">@item.Quantity</td>
+                        <td class="text-right font-mono">@item.UnitPrice.ToString("N0") đ</td>
+                        <td class="text-right font-mono" style="font-weight: 700;">@item.LineTotal.ToString("N0") đ</td>
+                    </tr>
+                    idx++;
+                }
+            </tbody>
+        </table>
+
+        <!-- Summary Totals -->
+        <div class="summary-box">
+            <table class="summary-table">
+                <tr>
+                    <td style="color: #64748b;">Tiền hàng tạm tính:</td>
+                    <td class="text-right font-mono">@Model.SubTotal.ToString("N0") đ</td>
+                </tr>
+                @if (Model.DiscountAmount > 0)
+                {
+                    <tr>
+                        <td style="color: #e11d48;">Chiết khấu giảm giá:</td>
+                        <td class="text-right font-mono" style="color: #e11d48;">-@Model.DiscountAmount.ToString("N0") đ</td>
+                    </tr>
+                }
+                <tr>
+                    <td style="color: #64748b;">Phí giao hàng:</td>
+                    <td class="text-right font-mono">@(Model.ShippingFee > 0 ? Model.ShippingFee.ToString("N0") + " đ" : "0 đ")</td>
+                </tr>
+                <tr>
+                    <td class="summary-total">TỔNG THANH TOÁN:</td>
+                    <td class="text-right font-mono summary-total">@Model.TotalAmount.ToString("N0") đ</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer-note">
+            <p><strong>Cảm ơn quý khách đã tin tưởng và mua sắm tại Omnichannel Beauty!</strong></p>
+            <p style="margin-top: 4px; font-size: 11px;">Quý khách vui lòng kiểm tra kỹ hàng hóa và hóa đơn trước khi rời quầy hoặc thanh toán cho shipper.</p>
+        </div>
+    </div>
+</body>
+</html>

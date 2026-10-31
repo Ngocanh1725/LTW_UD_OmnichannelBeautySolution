@@ -1,0 +1,578 @@
+@model Omnichannel.Application.DTOs.Cms.ThemeConfigDto
+@{
+    ViewData["Title"] = "Tùy Biến Giao Diện & Bảng Màu";
+    Layout = "_AdminLayout";
+}
+
+<div class="max-w-7xl mx-auto space-y-6" x-data="{ currentTab: 'colors' }">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-rose-600 dark:text-rose-400 font-semibold uppercase tracking-wider">
+                <a href="/Admin/Dashboard" class="hover:underline flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Bảng điều khiển</span>
+                </a>
+                <span>/</span>
+                <span>Giao diện</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight mt-1 flex items-center gap-3">
+                <i class="fa-solid fa-palette text-amber-500"></i>
+                <span>Tùy Biến Giao Diện & Bảng Màu</span>
+            </h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Quản lý bộ nhận diện thương hiệu, hệ thống màu sắc HSL/HEX, phông chữ và CSS động thời gian thực từ CSDL.
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/" target="_blank" 
+               class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center gap-2">
+                <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                <span>Xem Storefront</span>
+            </a>
+            <button type="submit" 
+                    form="themeConfigForm"
+                    class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-semibold text-sm shadow-md shadow-rose-500/25 transition flex items-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Lưu Thay Đổi</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Alert Notifications -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-sm flex items-center gap-3">
+            <i class="fa-solid fa-circle-check text-emerald-500 text-base"></i>
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-sm flex items-center gap-3">
+            <i class="fa-solid fa-circle-exclamation text-rose-500 text-base"></i>
+            <span>@TempData["ErrorMessage"]</span>
+        </div>
+    }
+
+    <!-- Tabs Navigation -->
+    <div class="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto pb-1 text-sm font-semibold">
+        <button type="button" @@click="currentTab = 'branding'" 
+                :class="currentTab === 'branding' ? 'border-rose-500 text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/30' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
+                class="px-4 py-2.5 rounded-xl border-b-2 transition flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-shield-heart"></i>
+            <span>1. Nhận Diện Thương Hiệu</span>
+        </button>
+        <button type="button" @@click="currentTab = 'colors'" 
+                :class="currentTab === 'colors' ? 'border-rose-500 text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/30' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
+                class="px-4 py-2.5 rounded-xl border-b-2 transition flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-palette"></i>
+            <span>2. Bảng Màu & Typography</span>
+        </button>
+        <button type="button" @@click="currentTab = 'announcement'" 
+                :class="currentTab === 'announcement' ? 'border-rose-500 text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/30' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
+                class="px-4 py-2.5 rounded-xl border-b-2 transition flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-bullhorn"></i>
+            <span>3. Thanh Thông Báo</span>
+        </button>
+        <button type="button" @@click="currentTab = 'footer'" 
+                :class="currentTab === 'footer' ? 'border-rose-500 text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/30' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
+                class="px-4 py-2.5 rounded-xl border-b-2 transition flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-id-card"></i>
+            <span>4. Chân Trang & Liên Hệ</span>
+        </button>
+        <button type="button" @@click="currentTab = 'css'" 
+                :class="currentTab === 'css' ? 'border-rose-500 text-rose-600 dark:text-rose-400 bg-rose-50/50 dark:bg-rose-950/30' : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'"
+                class="px-4 py-2.5 rounded-xl border-b-2 transition flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-code"></i>
+            <span>5. Tùy Biến CSS</span>
+        </button>
+    </div>
+
+    <!-- Main Form -->
+    <form id="themeConfigForm" asp-action="Index" method="post" class="space-y-6">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        <!-- TAB 1: NHẬN DIỆN THƯƠNG HIỆU -->
+        <div x-show="currentTab === 'branding'" class="space-y-6">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-6">
+                <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <i class="fa-solid fa-shield-heart text-rose-500"></i>
+                    Thông Tin Nhận Diện Thương Hiệu
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label asp-for="BrandName" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                            Tên thương hiệu chính <span class="text-rose-500">*</span>
+                        </label>
+                        <input asp-for="BrandName" 
+                               id="inputBrandName"
+                               oninput="updatePreviewText()"
+                               placeholder="vd: OMNI BEAUTY" 
+                               class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition" required />
+                    </div>
+
+                    <div>
+                        <label asp-for="Slogan" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                            Khẩu hiệu / Slogan thương hiệu
+                        </label>
+                        <input asp-for="Slogan" 
+                               id="inputSlogan"
+                               oninput="updatePreviewText()"
+                               placeholder="vd: Hệ Thống Bán Lẻ Mỹ Phẩm Cao Cấp Tiên Phong Công Nghệ FEFO" 
+                               class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+                    <!-- Logo Selector -->
+                    <div class="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-3">
+                        <label class="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                            Logo Chính (Header & Footer)
+                        </label>
+                        <div class="flex items-center gap-4">
+                            <div class="h-16 w-16 rounded-2xl overflow-hidden border border-slate-300 dark:border-slate-700 bg-white flex items-center justify-center p-1 shrink-0">
+                                <img id="logoPreviewImg" src="@Model.LogoUrl" alt="Logo Preview" class="w-full h-full object-contain" onerror="this.src='/images/branding/logo-circle.png'" />
+                            </div>
+                            <div class="flex-1 space-y-2">
+                                <input type="hidden" asp-for="LogoMediaId" id="logoMediaIdInput" />
+                                <button type="button" 
+                                        class="btn-select-media px-3.5 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white text-xs font-semibold shadow transition flex items-center gap-1.5"
+                                        data-input="#logoMediaIdInput" data-preview="#logoPreviewImg" data-category="LOGO">
+                                    <i class="fa-solid fa-photo-film"></i>
+                                    <span>Chọn Logo từ Thư Viện</span>
+                                </button>
+                                <p class="text-[11px] text-slate-400">Khuyên dùng ảnh PNG/SVG trong suốt kích thước 200x200px</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Favicon Selector -->
+                    <div class="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-3">
+                        <label class="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                            Favicon (Biểu tượng Tab Trình Duyệt)
+                        </label>
+                        <div class="flex items-center gap-4">
+                            <div class="h-16 w-16 rounded-2xl overflow-hidden border border-slate-300 dark:border-slate-700 bg-white flex items-center justify-center p-1 shrink-0">
+                                <img id="faviconPreviewImg" src="@Model.FaviconUrl" alt="Favicon Preview" class="h-8 w-8 object-contain" onerror="this.src='/images/branding/favicon-32x32.png'" />
+                            </div>
+                            <div class="flex-1 space-y-2">
+                                <input type="hidden" asp-for="FaviconMediaId" id="faviconMediaIdInput" />
+                                <button type="button" 
+                                        class="btn-select-media px-3.5 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white text-xs font-semibold shadow transition flex items-center gap-1.5"
+                                        data-input="#faviconMediaIdInput" data-preview="#faviconPreviewImg" data-category="FAVICON">
+                                    <i class="fa-solid fa-photo-film"></i>
+                                    <span>Chọn Favicon từ Thư Viện</span>
+                                </button>
+                                <p class="text-[11px] text-slate-400">Khuyên dùng ảnh PNG vuông kích thước 32x32 hoặc 64x64px</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: BẢNG MÀU & TYPOGRAPHY KÈM LIVE PREVIEW -->
+        <div x-show="currentTab === 'colors'" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left: Color inputs (7 cols) -->
+            <div class="lg:col-span-7 space-y-6">
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-6">
+                    <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                        <i class="fa-solid fa-palette text-amber-500"></i>
+                        Hệ Thống Bảng Màu & Phông Chữ Động
+                    </h2>
+
+                    <!-- Primary Color -->
+                    <div class="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                Màu Chủ Đạo (Primary Color)
+                            </label>
+                            <span class="text-[11px] text-slate-400">Nút bấm chính, viền gạch, icon thương hiệu</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <input type="color" 
+                                   id="primaryPicker" 
+                                   value="@Model.PrimaryColor" 
+                                   oninput="syncColor('primaryPicker', 'primaryText')"
+                                   class="h-10 w-14 rounded-xl border-0 p-0 cursor-pointer bg-transparent" />
+                            <input asp-for="PrimaryColor" 
+                                   id="primaryText" 
+                                   oninput="syncColor('primaryText', 'primaryPicker')"
+                                   class="w-full px-3.5 py-2 text-sm font-mono uppercase rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+                        </div>
+                    </div>
+
+                    <!-- Secondary Color -->
+                    <div class="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                Màu Phụ (Secondary Color)
+                            </label>
+                            <span class="text-[11px] text-slate-400">Gradient phụ trợ, tag phân loại, thanh tiến trình</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <input type="color" 
+                                   id="secondaryPicker" 
+                                   value="@Model.SecondaryColor" 
+                                   oninput="syncColor('secondaryPicker', 'secondaryText')"
+                                   class="h-10 w-14 rounded-xl border-0 p-0 cursor-pointer bg-transparent" />
+                            <input asp-for="SecondaryColor" 
+                                   id="secondaryText" 
+                                   oninput="syncColor('secondaryText', 'secondaryPicker')"
+                                   class="w-full px-3.5 py-2 text-sm font-mono uppercase rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+                        </div>
+                    </div>
+
+                    <!-- Accent Color -->
+                    <div class="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-bold text-slate-800 dark:text-slate-200">
+                                Màu Điểm Nhấn (Accent Color)
+                            </label>
+                            <span class="text-[11px] text-slate-400">Huy hiệu HOT, ngôi sao đánh giá, deal flash sale</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <input type="color" 
+                                   id="accentPicker" 
+                                   value="@Model.AccentColor" 
+                                   oninput="syncColor('accentPicker', 'accentText')"
+                                   class="h-10 w-14 rounded-xl border-0 p-0 cursor-pointer bg-transparent" />
+                            <input asp-for="AccentColor" 
+                                   id="accentText" 
+                                   oninput="syncColor('accentText', 'accentPicker')"
+                                   class="w-full px-3.5 py-2 text-sm font-mono uppercase rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+                        </div>
+                    </div>
+
+                    <!-- Typography Selector -->
+                    <div class="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-2">
+                        <label asp-for="FontFamily" class="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                            Phông Chữ Chính (Font Family)
+                        </label>
+                        <select asp-for="FontFamily" 
+                                id="fontFamilySelect"
+                                onchange="updatePreviewFont(this.value)"
+                                class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500">
+                            <option value="'Inter', sans-serif">'Inter', sans-serif (Hiện đại, tối giản, thanh lịch)</option>
+                            <option value="'Plus Jakarta Sans', sans-serif">'Plus Jakarta Sans', sans-serif (Sang trọng, tinh gọn)</option>
+                            <option value="'Montserrat', sans-serif">'Montserrat', sans-serif (Trẻ trung, năng động)</option>
+                            <option value="'Playfair Display', serif">'Playfair Display', serif (Quý phái, chuẩn Haute Parfumerie)</option>
+                            <option value="'Roboto', sans-serif">'Roboto', sans-serif (Thực dụng, chuẩn quốc tế)</option>
+                        </select>
+                    </div>
+
+                    <!-- Preset Quick Palettes -->
+                    <div class="pt-2">
+                        <span class="text-xs font-semibold text-slate-500 block mb-2">Bảng màu gợi ý chuẩn phong cách Beauty:</span>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <button type="button" onclick="applyPreset('#E11D48', '#BE185D', '#F59E0B')" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-left hover:border-rose-400 transition">
+                                <div class="flex gap-1 h-3 rounded overflow-hidden mb-1">
+                                    <div class="w-1/3 bg-[#E11D48]"></div>
+                                    <div class="w-1/3 bg-[#BE185D]"></div>
+                                    <div class="w-1/3 bg-[#F59E0B]"></div>
+                                </div>
+                                <span class="text-[11px] font-bold block truncate">Rose Luxury</span>
+                            </button>
+                            <button type="button" onclick="applyPreset('#0D9488', '#0F766E', '#F59E0B')" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-left hover:border-teal-400 transition">
+                                <div class="flex gap-1 h-3 rounded overflow-hidden mb-1">
+                                    <div class="w-1/3 bg-[#0D9488]"></div>
+                                    <div class="w-1/3 bg-[#0F766E]"></div>
+                                    <div class="w-1/3 bg-[#F59E0B]"></div>
+                                </div>
+                                <span class="text-[11px] font-bold block truncate">Organic Teal</span>
+                            </button>
+                            <button type="button" onclick="applyPreset('#7C3AED', '#6D28D9', '#EC4899')" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-left hover:border-purple-400 transition">
+                                <div class="flex gap-1 h-3 rounded overflow-hidden mb-1">
+                                    <div class="w-1/3 bg-[#7C3AED]"></div>
+                                    <div class="w-1/3 bg-[#6D28D9]"></div>
+                                    <div class="w-1/3 bg-[#EC4899]"></div>
+                                </div>
+                                <span class="text-[11px] font-bold block truncate">Lavender Violet</span>
+                            </button>
+                            <button type="button" onclick="applyPreset('#D97706', '#B45309', '#DC2626')" class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-left hover:border-amber-400 transition">
+                                <div class="flex gap-1 h-3 rounded overflow-hidden mb-1">
+                                    <div class="w-1/3 bg-[#D97706]"></div>
+                                    <div class="w-1/3 bg-[#B45309]"></div>
+                                    <div class="w-1/3 bg-[#DC2626]"></div>
+                                </div>
+                                <span class="text-[11px] font-bold block truncate">Amber Glow</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Interactive Live Preview (5 cols) -->
+            <div class="lg:col-span-5 space-y-4">
+                <div class="sticky top-24 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                            <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span>Khung Live Preview Thời Gian Thực</span>
+                        </span>
+                        <span class="text-[10px] text-slate-400">Không cần tải lại trang</span>
+                    </div>
+
+                    <!-- Preview Frame Wrapper -->
+                    <div id="livePreviewContainer" 
+                         style="--preview-primary: @Model.PrimaryColor; --preview-secondary: @Model.SecondaryColor; --preview-accent: @Model.AccentColor; --preview-announcement: @Model.AnnouncementBarBgColor; font-family: @Html.Raw(Model.FontFamily);"
+                         class="rounded-3xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl overflow-hidden p-5 space-y-5 transition-all">
+                        
+                        <!-- Simulated Top Announcement -->
+                        <div id="prevAnnouncementBar" class="p-2 rounded-xl text-white text-[11px] text-center font-medium transition" style="background-color: var(--preview-announcement);">
+                            <span id="prevAnnouncementText">@Model.AnnouncementBarText</span>
+                        </div>
+
+                        <!-- Simulated Header -->
+                        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                            <div class="flex items-center gap-2">
+                                <div class="h-7 w-7 rounded-full flex items-center justify-center text-white text-xs font-bold transition" style="background-color: var(--preview-primary);">
+                                    OB
+                                </div>
+                                <div>
+                                    <span id="prevBrandName" class="font-bold text-xs text-slate-900 dark:text-white block leading-none">@Model.BrandName</span>
+                                    <span id="prevSlogan" class="text-[8px] text-slate-400 uppercase tracking-widest">@(Model.Slogan ?? "Luxury Cosmetics")</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 text-[10px] font-bold" style="color: var(--preview-primary);">
+                                <span>Trang Chủ</span>
+                                <span class="text-slate-400">•</span>
+                                <span class="text-slate-400">Chăm Sóc Da</span>
+                            </div>
+                        </div>
+
+                        <!-- Simulated CTA Button -->
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 block mb-1.5 uppercase">1. Nút Bấm Chính (CTA Button)</span>
+                            <button type="button" 
+                                    class="w-full py-2.5 px-4 rounded-xl text-white text-xs font-bold shadow transition flex items-center justify-center gap-2 hover:opacity-90"
+                                    style="background-color: var(--preview-primary);">
+                                <i class="fa-solid fa-sparkles"></i>
+                                <span>Khám Phá Bộ Sưu Tập Mới</span>
+                            </button>
+                        </div>
+
+                        <!-- Simulated Product Card -->
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 block mb-1.5 uppercase">2. Thẻ Sản Phẩm (Product Card)</span>
+                            <div class="rounded-2xl border border-slate-200 dark:border-slate-800 p-3 bg-slate-50/50 dark:bg-slate-800/40 flex items-center gap-3">
+                                <div class="relative h-20 w-20 rounded-xl overflow-hidden bg-white shrink-0 p-1 flex items-center justify-center border border-slate-200">
+                                    <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=200&fit=crop" alt="Serum B5" class="h-full w-full object-contain" />
+                                    <span class="absolute top-1 left-1 px-1.5 py-0.5 rounded text-[8px] font-bold text-white shadow-xs" style="background-color: var(--preview-secondary);">
+                                        -35%
+                                    </span>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-1 text-[9px] mb-0.5" style="color: var(--preview-accent);">
+                                        <span>★★★★★</span>
+                                        <span class="text-slate-400">(4.9)</span>
+                                    </div>
+                                    <div class="text-xs font-bold text-slate-800 dark:text-white truncate">Serum Hyaluronic Acid B5</div>
+                                    <div class="flex items-center gap-2 mt-1">
+                                        <span class="text-xs font-bold font-mono" style="color: var(--preview-primary);">420.000 ₫</span>
+                                        <span class="text-[10px] text-slate-400 line-through font-mono">650.000 ₫</span>
+                                    </div>
+                                    <button type="button" class="mt-2 py-1 px-2.5 rounded-lg text-white text-[10px] font-semibold transition" style="background-color: var(--preview-primary);">
+                                        Thêm Vào Giỏ
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: THANH THÔNG BÁO KHUYẾN MÃI -->
+        <div x-show="currentTab === 'announcement'" class="space-y-6">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-6">
+                <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <i class="fa-solid fa-bullhorn text-pink-500"></i>
+                    Thanh Thông Báo Trên Cùng (Top Announcement Bar)
+                </h2>
+
+                <!-- Switch Active -->
+                <div class="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40">
+                    <div>
+                        <div class="text-sm font-semibold text-slate-800 dark:text-slate-200">Kích hoạt thanh thông báo</div>
+                        <div class="text-xs text-slate-400">Hiển thị dòng chữ ticker chạy ngang trên đầu trang website Storefront</div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" asp-for="AnnouncementBarActive" class="sr-only peer" />
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500"></div>
+                    </label>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label asp-for="AnnouncementBarText" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                            Nội dung dòng chữ thông báo
+                        </label>
+                        <input asp-for="AnnouncementBarText" 
+                               id="inputAnnouncementText"
+                               oninput="updateAnnouncementPreview(this.value)"
+                               placeholder="✨ Chào mừng bạn đến với OMNI BEAUTY - Miễn phí vận chuyển cho đơn hàng từ 300K ✨" 
+                               class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500" />
+                    </div>
+
+                    <div class="p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 space-y-2">
+                        <label class="block text-xs font-bold text-slate-800 dark:text-slate-200">
+                            Màu Nền Thanh Thông Báo (Background Color)
+                        </label>
+                        <div class="flex items-center gap-3">
+                            <input type="color" 
+                                   id="announcementPicker" 
+                                   value="@Model.AnnouncementBarBgColor" 
+                                   oninput="syncAnnouncementColor('announcementPicker', 'announcementText')"
+                                   class="h-10 w-14 rounded-xl border-0 p-0 cursor-pointer bg-transparent" />
+                            <input asp-for="AnnouncementBarBgColor" 
+                                   id="announcementText" 
+                                   oninput="syncAnnouncementColor('announcementText', 'announcementPicker')"
+                                   class="w-full px-3.5 py-2 text-sm font-mono uppercase rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: CHÂN TRANG & THÔNG TIN LIÊN HỆ -->
+        <div x-show="currentTab === 'footer'" class="space-y-6">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-6">
+                <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <i class="fa-solid fa-id-card text-emerald-500"></i>
+                    Thông Tin Chân Trang & Pháp Lý
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label asp-for="Hotline" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                            Hotline CSKH (Hiển thị Header & Footer)
+                        </label>
+                        <input asp-for="Hotline" placeholder="1900 8888" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500" />
+                    </div>
+
+                    <div>
+                        <label asp-for="ContactEmail" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                            Email tiếp nhận phản hồi
+                        </label>
+                        <input asp-for="ContactEmail" type="email" placeholder="hotro@omnibeauty.vn" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500" />
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label asp-for="Address" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                            Địa chỉ trụ sở chính
+                        </label>
+                        <input asp-for="Address" placeholder="68 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh" class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500" />
+                    </div>
+
+                    <div class="md:col-span-2">
+                        <label asp-for="FooterCopyright" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                            Dòng chữ bản quyền (Copyright)
+                        </label>
+                        <input asp-for="FooterCopyright" placeholder="© 2026 OMNI BEAUTY. Tất cả quyền được bảo lưu." class="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-rose-500" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: TÙY BIẾN CSS NÂNG CAO -->
+        <div x-show="currentTab === 'css'" class="space-y-6">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                    <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-code text-indigo-500"></i>
+                        Mã CSS Tùy Biến Bổ Sung
+                    </h2>
+                    <span class="text-xs text-slate-400 font-mono">Được chèn trực tiếp vào thẻ &lt;head&gt; Storefront</span>
+                </div>
+
+                <p class="text-xs text-slate-500">
+                    Bạn có thể ghi đè các lớp giao diện hoặc bổ sung hiệu ứng CSS chuyên sâu (animations, shadows, glassmorphism) trực tiếp tại đây.
+                </p>
+
+                <textarea asp-for="CustomCss" 
+                          rows="12" 
+                          placeholder="/* Ví dụ: */&#10;.nav-link-beauty { font-weight: 800; }&#10;.mega-menu-content { border-radius: 28px; }" 
+                          class="w-full p-4 font-mono text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-900 text-emerald-400 focus:ring-2 focus:ring-rose-500 outline-none leading-relaxed"></textarea>
+            </div>
+        </div>
+
+        <!-- Submit Button Footer -->
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+            <a href="/Admin/Dashboard" class="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 transition">
+                Hủy Bỏ
+            </a>
+            <button type="submit" 
+                    class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-bold text-sm shadow-md shadow-rose-500/25 transition flex items-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Lưu Cấu Hình Theme</span>
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <partial name="_MediaPickerModal" />
+    <script src="~/js/admin-media-picker.js"></script>
+    <script>
+        // Live Preview Color Synchronization
+        function syncColor(sourceId, targetId) {
+            const val = document.getElementById(sourceId).value;
+            document.getElementById(targetId).value = val;
+
+            const preview = document.getElementById('livePreviewContainer');
+            if (sourceId.includes('primary')) {
+                preview.style.setProperty('--preview-primary', val);
+            } else if (sourceId.includes('secondary')) {
+                preview.style.setProperty('--preview-secondary', val);
+            } else if (sourceId.includes('accent')) {
+                preview.style.setProperty('--preview-accent', val);
+            }
+        }
+
+        function syncAnnouncementColor(sourceId, targetId) {
+            const val = document.getElementById(sourceId).value;
+            document.getElementById(targetId).value = val;
+            const bar = document.getElementById('prevAnnouncementBar');
+            if (bar) bar.style.backgroundColor = val;
+        }
+
+        function updateAnnouncementPreview(text) {
+            const el = document.getElementById('prevAnnouncementText');
+            if (el) el.textContent = text || '✨ Thông báo khuyến mãi mẫu ✨';
+        }
+
+        function updatePreviewText() {
+            const brand = document.getElementById('inputBrandName')?.value || 'OMNI BEAUTY';
+            const slogan = document.getElementById('inputSlogan')?.value || 'Luxury Cosmetics';
+            
+            const prevBrand = document.getElementById('prevBrandName');
+            const prevSlog = document.getElementById('prevSlogan');
+            if (prevBrand) prevBrand.textContent = brand;
+            if (prevSlog) prevSlog.textContent = slogan;
+        }
+
+        function updatePreviewFont(fontFamily) {
+            const preview = document.getElementById('livePreviewContainer');
+            if (preview) preview.style.fontFamily = fontFamily;
+        }
+
+        function applyPreset(primary, secondary, accent) {
+            document.getElementById('primaryPicker').value = primary;
+            document.getElementById('primaryText').value = primary;
+            document.getElementById('secondaryPicker').value = secondary;
+            document.getElementById('secondaryText').value = secondary;
+            document.getElementById('accentPicker').value = accent;
+            document.getElementById('accentText').value = accent;
+
+            const preview = document.getElementById('livePreviewContainer');
+            preview.style.setProperty('--preview-primary', primary);
+            preview.style.setProperty('--preview-secondary', secondary);
+            preview.style.setProperty('--preview-accent', accent);
+        }
+    </script>
+}

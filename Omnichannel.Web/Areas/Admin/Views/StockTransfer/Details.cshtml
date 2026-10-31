@@ -1,0 +1,506 @@
+@model Omnichannel.Application.DTOs.Inventory.StockTransferDto
+@{
+    ViewData["Title"] = $"Chi tiết phiếu {Model.TransferCode}";
+    Layout = "_AdminLayout";
+}
+
+<div class="space-y-6 max-w-6xl mx-auto">
+    <!-- Header with Breadcrumb and Actions -->
+    <div class="md:flex md:items-center md:justify-between border-b pb-4">
+        <div class="min-w-0 flex-1">
+            <div class="flex items-center space-x-3">
+                <a asp-action="Index" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <h2 class="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-3xl font-mono">
+                    @Model.TransferCode
+                </h2>
+                @if (Model.Status == "PENDING")
+                {
+                    <span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                        <i class="fa-regular fa-clock mr-1 mt-0.5"></i>Chờ duyệt xuất
+                    </span>
+                }
+                else if (Model.Status == "IN_TRANSIT")
+                {
+                    <span class="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">
+                        <i class="fa-solid fa-truck-fast mr-1 mt-0.5"></i>Đang trung chuyển
+                    </span>
+                }
+                else if (Model.Status == "RECEIVED")
+                {
+                    <span class="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
+                        <i class="fa-solid fa-check-double mr-1 mt-0.5"></i>Đã nhập kho hoàn tất
+                    </span>
+                }
+                else
+                {
+                    <span class="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-800">
+                        Đã hủy
+                    </span>
+                }
+            </div>
+            <p class="mt-1 text-sm text-gray-500">
+                Lập bởi <span class="font-medium text-gray-800">@Model.CreatedByUserName</span> lúc @Model.RequestedAt.ToString("dd/MM/yyyy HH:mm")
+            </p>
+        </div>
+
+        <div class="mt-4 flex space-x-3 md:ml-4 md:mt-0">
+            @if (Model.Status == "PENDING")
+            {
+                <button type="button" onclick="document.getElementById('approveModal').classList.remove('hidden')" 
+                        class="inline-flex items-center rounded-md bg-emerald-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                    <i class="fa-solid fa-boxes-packing mr-2"></i>Duyệt & Xuất Kho FEFO
+                </button>
+                <button type="button" onclick="document.getElementById('cancelModal').classList.remove('hidden')" 
+                        class="inline-flex items-center rounded-md bg-rose-600 px-3.5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-700">
+                    <i class="fa-solid fa-ban mr-2"></i>Từ Chối / Hủy
+                </button>
+            }
+            else if (Model.Status == "IN_TRANSIT")
+            {
+                <button type="button" onclick="openReceiveModal()" 
+                        class="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700">
+                    <i class="fa-solid fa-barcode mr-2"></i>Scan Barcode & Xác Nhận Nhập Kho
+                </button>
+            }
+            <a asp-action="Index" class="inline-flex items-center rounded-md bg-white px-3.5 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                Danh sách
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="rounded-md bg-green-50 p-4 border border-green-200">
+            <div class="flex">
+                <i class="fa-solid fa-circle-check text-green-600 mt-0.5 mr-3"></i>
+                <div class="text-sm font-medium text-green-800">@TempData["SuccessMessage"]</div>
+            </div>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="rounded-md bg-red-50 p-4 border border-red-200">
+            <div class="flex">
+                <i class="fa-solid fa-circle-xmark text-red-600 mt-0.5 mr-3"></i>
+                <div class="text-sm font-medium text-red-800">@TempData["ErrorMessage"]</div>
+            </div>
+        </div>
+    }
+
+    <!-- Progress / Workflow Bar -->
+    <div class="bg-white p-6 shadow sm:rounded-lg border border-gray-200">
+        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">Tiến Trình Luân Chuyển</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Step 1 -->
+            <div class="flex items-center p-3 rounded-lg border @(Model.Status != "CANCELLED" ? "bg-emerald-50 border-emerald-300" : "bg-gray-50 border-gray-200")">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full bg-emerald-600 flex items-center justify-center text-white font-bold">1</div>
+                <div class="ml-3">
+                    <div class="text-sm font-bold text-gray-900">Yêu cầu chuyển kho</div>
+                    <div class="text-xs text-gray-500">@Model.RequestedAt.ToString("dd/MM/yyyy HH:mm")</div>
+                    <div class="text-xs text-emerald-700 font-medium">Bởi: @Model.CreatedByUserName</div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flex items-center p-3 rounded-lg border @(Model.Status == "IN_TRANSIT" || Model.Status == "RECEIVED" ? "bg-blue-50 border-blue-300" : "bg-gray-50 border-gray-200")">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full @(Model.Status == "IN_TRANSIT" || Model.Status == "RECEIVED" ? "bg-blue-600" : "bg-gray-300") flex items-center justify-center text-white font-bold">2</div>
+                <div class="ml-3">
+                    <div class="text-sm font-bold text-gray-900">Duyệt & Xuất FEFO</div>
+                    @if (Model.ApprovedAt.HasValue)
+                    {
+                        <div class="text-xs text-gray-500">@Model.ApprovedAt.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                        <div class="text-xs text-blue-700 font-medium">Duyệt: @Model.ApprovedByUserName</div>
+                    }
+                    else
+                    {
+                        <div class="text-xs text-gray-400 italic">Đang chờ phê duyệt...</div>
+                    }
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flex items-center p-3 rounded-lg border @(Model.Status == "RECEIVED" ? "bg-green-50 border-green-300" : "bg-gray-50 border-gray-200")">
+                <div class="flex-shrink-0 h-10 w-10 rounded-full @(Model.Status == "RECEIVED" ? "bg-green-600" : "bg-gray-300") flex items-center justify-center text-white font-bold">3</div>
+                <div class="ml-3">
+                    <div class="text-sm font-bold text-gray-900">Nhập kho & Đối chiếu</div>
+                    @if (Model.ReceivedAt.HasValue)
+                    {
+                        <div class="text-xs text-gray-500">@Model.ReceivedAt.Value.ToString("dd/MM/yyyy HH:mm")</div>
+                        <div class="text-xs text-green-700 font-medium">Nhận: @Model.ReceivedByUserName</div>
+                    }
+                    else
+                    {
+                        <div class="text-xs text-gray-400 italic">Chờ kho đích xác nhận...</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Store Route & Quantities Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Route Card -->
+        <div class="bg-white p-5 shadow sm:rounded-lg border border-gray-200">
+            <h4 class="text-sm font-bold text-gray-900 mb-3 flex items-center">
+                <i class="fa-solid fa-route text-indigo-500 mr-2"></i>Tuyến Điều Chuyển
+            </h4>
+            <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                <div class="text-center flex-1">
+                    <div class="text-xs font-semibold text-amber-600 uppercase">Kho nguồn (Xuất)</div>
+                    <div class="text-base font-bold text-gray-900 mt-1">@Model.SourceStoreName</div>
+                </div>
+                <div class="px-4 text-indigo-500 text-xl font-bold">
+                    <i class="fa-solid fa-circle-arrow-right"></i>
+                </div>
+                <div class="text-center flex-1">
+                    <div class="text-xs font-semibold text-emerald-600 uppercase">Kho đích (Nhận)</div>
+                    <div class="text-base font-bold text-gray-900 mt-1">@Model.DestinationStoreName</div>
+                </div>
+            </div>
+            @if (!string.IsNullOrEmpty(Model.Note))
+            {
+                <div class="mt-3 text-xs text-gray-600 bg-amber-50 p-2.5 rounded border border-amber-200">
+                    <span class="font-bold text-amber-800">Ghi chú:</span> @Model.Note
+                </div>
+            }
+        </div>
+
+        <!-- Quantity Summary Card -->
+        <div class="bg-white p-5 shadow sm:rounded-lg border border-gray-200">
+            <h4 class="text-sm font-bold text-gray-900 mb-3 flex items-center">
+                <i class="fa-solid fa-chart-pie text-indigo-500 mr-2"></i>Tổng Hợp Số Lượng
+            </h4>
+            <div class="grid grid-cols-3 gap-3 text-center">
+                <div class="bg-gray-50 p-3 rounded-lg border">
+                    <div class="text-xs text-gray-500">Yêu cầu</div>
+                    <div class="text-2xl font-bold text-gray-800 mt-1">@Model.TotalRequestedQuantity</div>
+                </div>
+                <div class="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                    <div class="text-xs text-blue-700 font-semibold">Thực xuất (FEFO)</div>
+                    <div class="text-2xl font-bold text-blue-900 mt-1">@Model.TotalSentQuantity</div>
+                </div>
+                <div class="bg-green-50 p-3 rounded-lg border border-green-200">
+                    <div class="text-xs text-green-700 font-semibold">Thực nhận</div>
+                    <div class="text-2xl font-bold text-green-900 mt-1">@Model.TotalReceivedQuantity</div>
+                    @if (Model.TotalShortageQuantity > 0)
+                    {
+                        <div class="text-xs text-red-600 font-bold mt-1">Thiếu: -@Model.TotalShortageQuantity</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Table -->
+    <div class="bg-white shadow sm:rounded-lg overflow-hidden border border-gray-200">
+        <div class="px-4 py-4 sm:px-6 bg-gray-50 border-b flex justify-between items-center">
+            <h3 class="text-base font-semibold leading-6 text-gray-900">
+                <i class="fa-solid fa-list-check text-indigo-500 mr-2"></i>Chi Tiết Mặt Hàng & Phân Bổ Lô FEFO (@Model.Details.Count)
+            </h3>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-300">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="py-3.5 pl-4 pr-3 text-left text-xs font-semibold text-gray-900 uppercase">Sản phẩm / Barcode</th>
+                        <th class="px-3 py-3.5 text-left text-xs font-semibold text-gray-900 uppercase">Lô xuất (FEFO)</th>
+                        <th class="px-3 py-3.5 text-center text-xs font-semibold text-gray-900 uppercase">SL Yêu cầu</th>
+                        <th class="px-3 py-3.5 text-center text-xs font-semibold text-gray-900 uppercase">SL Thực xuất</th>
+                        <th class="px-3 py-3.5 text-center text-xs font-semibold text-gray-900 uppercase">SL Thực nhận</th>
+                        <th class="px-3 py-3.5 text-left text-xs font-semibold text-gray-900 uppercase">Chênh lệch / Lý do</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 bg-white">
+                    @foreach (var d in Model.Details)
+                    {
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-4 pl-4 pr-3 text-sm">
+                                <div class="font-bold text-gray-900">@d.ProductName</div>
+                                <div class="text-xs text-gray-500 font-mono">SKU: @(d.ProductSku ?? "N/A") | Barcode: @(d.ProductBarcode ?? "N/A")</div>
+                            </td>
+                            <td class="px-3 py-4 text-sm">
+                                @if (!string.IsNullOrEmpty(d.BatchNumber))
+                                {
+                                    <span class="inline-flex items-center rounded-md bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800 border border-amber-200">
+                                        Lô: @d.BatchNumber
+                                    </span>
+                                    @if (d.ExpDate.HasValue)
+                                    {
+                                        <div class="text-xs text-gray-500 mt-1 font-mono">Hạn dùng: @d.ExpDate.Value.ToString("dd/MM/yyyy")</div>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-xs text-gray-400 italic">Chờ xuất tự động theo FEFO</span>
+                                }
+                            </td>
+                            <td class="px-3 py-4 text-center text-sm font-semibold text-gray-700">
+                                @d.RequestedQuantity
+                            </td>
+                            <td class="px-3 py-4 text-center text-sm font-bold text-blue-700">
+                                @d.SentQuantity
+                            </td>
+                            <td class="px-3 py-4 text-center text-sm font-bold text-green-700">
+                                @(Model.Status == "RECEIVED" ? d.ReceivedQuantity.ToString() : "-")
+                            </td>
+                            <td class="px-3 py-4 text-sm">
+                                @if (Model.Status == "RECEIVED")
+                                {
+                                    @if (d.ShortageQuantity > 0)
+                                    {
+                                        <span class="inline-flex rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-800">
+                                            Thiếu @d.ShortageQuantity
+                                        </span>
+                                        <div class="text-xs text-red-600 mt-0.5">@d.ShortageReason</div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-xs text-green-600 font-medium"><i class="fa-solid fa-check mr-1"></i>Đủ số lượng</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-xs text-gray-400">-</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Duyệt Xuất Kho (FEFO) -->
+<div id="approveModal" class="relative z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+    <div class="fixed inset-0 z-10 overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+            <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md sm:p-6">
+                <form asp-action="Approve" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div>
+                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
+                            <i class="fa-solid fa-dolly text-emerald-600 text-xl"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-5">
+                            <h3 class="text-lg font-bold leading-6 text-gray-900">Xác Nhận Xuất Kho FEFO</h3>
+                            <p class="text-xs text-gray-500 mt-2">
+                                Hệ thống sẽ tự động quét kho nguồn <strong class="text-gray-800">@Model.SourceStoreName</strong> và trừ tồn kho các lô có hạn dùng gần nhất (FEFO). Trạng thái phiếu sẽ chuyển sang <strong>IN_TRANSIT</strong>.
+                            </p>
+                        </div>
+                        <div class="mt-4">
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Ghi chú duyệt xuất</label>
+                            <input type="text" name="note" placeholder="VD: Đã đóng gói và bàn giao xe tải số hiệu..." class="block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm" />
+                        </div>
+                    </div>
+                    <div class="mt-5 sm:mt-6 flex space-x-3">
+                        <button type="button" onclick="document.getElementById('approveModal').classList.add('hidden')" class="w-1/2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Hủy</button>
+                        <button type="submit" class="w-1/2 rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">Duyệt Xuất Hàng</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Xác Nhận Nhập Kho & Scan Barcode -->
+<div id="receiveModal" class="relative z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+    <div class="fixed inset-0 z-10 overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+            <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-2xl sm:p-6">
+                <div>
+                    <div class="flex justify-between items-center border-b pb-3">
+                        <h3 class="text-lg font-bold text-gray-900">
+                            <i class="fa-solid fa-boxes-packing text-indigo-600 mr-2"></i>Kiểm Đếm & Xác Nhận Nhập Kho
+                        </h3>
+                        <button type="button" onclick="document.getElementById('receiveModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <!-- Barcode Scan Input -->
+                    <div class="mt-4 bg-indigo-50 p-3 rounded-lg border border-indigo-200">
+                        <label class="block text-xs font-bold text-indigo-900 mb-1">
+                            <i class="fa-solid fa-barcode mr-1"></i>Quét mã vạch Barcode kiểm đếm nhanh:
+                        </label>
+                        <div class="flex space-x-2">
+                            <input type="text" id="scanInput" placeholder="Đặt con trỏ và quét mã vạch sản phẩm..." class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono" onkeypress="handleScan(event)" />
+                            <button type="button" onclick="triggerScanManual()" class="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white">Đếm +1</button>
+                        </div>
+                    </div>
+
+                    <!-- Items Checklist -->
+                    <div class="mt-4 max-h-80 overflow-y-auto border rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-2 text-left text-xs font-semibold text-gray-700">Sản phẩm</th>
+                                    <th class="p-2 text-center text-xs font-semibold text-gray-700 w-24">Đã xuất</th>
+                                    <th class="p-2 text-center text-xs font-semibold text-gray-700 w-28">Thực nhận</th>
+                                    <th class="p-2 text-left text-xs font-semibold text-gray-700">Lý do thiếu (nếu có)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200 bg-white" id="receiveTableBody">
+                                @foreach (var d in Model.Details)
+                                {
+                                    <tr class="receive-row" data-detail-id="@d.Id" data-barcode="@d.ProductBarcode" data-product-id="@d.ProductId">
+                                        <td class="p-2 text-xs">
+                                            <div class="font-bold text-gray-900">@d.ProductName</div>
+                                            <div class="text-gray-400 font-mono">Barcode: @(d.ProductBarcode ?? "N/A")</div>
+                                        </td>
+                                        <td class="p-2 text-center text-xs font-bold text-blue-700 max-sent" data-max="@d.SentQuantity">
+                                            @d.SentQuantity
+                                        </td>
+                                        <td class="p-2 text-center">
+                                            <input type="number" min="0" max="@d.SentQuantity" value="@d.SentQuantity" class="received-input w-20 text-center text-xs font-bold rounded border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
+                                        </td>
+                                        <td class="p-2">
+                                            <input type="text" placeholder="Ghi nhận vỡ, thiếu..." class="shortage-input w-full text-xs rounded border-gray-300 focus:border-indigo-500 focus:ring-indigo-500" />
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Ghi chú xác nhận nhập kho</label>
+                        <input type="text" id="receiveNote" placeholder="VD: Đã kiểm đếm đầy đủ niêm phong..." class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" />
+                    </div>
+
+                    <div class="mt-5 flex justify-end space-x-3">
+                        <button type="button" onclick="document.getElementById('receiveModal').classList.add('hidden')" class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Hủy</button>
+                        <button type="button" onclick="submitReceive()" class="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700">Hoàn Tất Nhập Kho</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Hủy Phiếu -->
+<div id="cancelModal" class="relative z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+    <div class="fixed inset-0 z-10 overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+            <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-md sm:p-6">
+                <form asp-action="Cancel" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div>
+                        <div class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-100">
+                            <i class="fa-solid fa-triangle-exclamation text-rose-600 text-xl"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-5">
+                            <h3 class="text-lg font-bold leading-6 text-gray-900">Hủy Yêu Cầu Chuyển Kho</h3>
+                            <p class="text-xs text-gray-500 mt-2">
+                                Bạn có chắc chắn muốn từ chối/hủy phiếu điều chuyển này không? Thao tác này không thể hoàn tác.
+                            </p>
+                        </div>
+                        <div class="mt-4">
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Lý do hủy yêu cầu *</label>
+                            <textarea name="reason" rows="2" required placeholder="Nhập lý do từ chối..." class="block w-full rounded-md border-gray-300 shadow-sm focus:border-rose-500 focus:ring-rose-500 sm:text-sm"></textarea>
+                        </div>
+                    </div>
+                    <div class="mt-5 sm:mt-6 flex space-x-3">
+                        <button type="button" onclick="document.getElementById('cancelModal').classList.add('hidden')" class="w-1/2 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Đóng</button>
+                        <button type="submit" class="w-1/2 rounded-md bg-rose-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-700">Xác Nhận Hủy</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openReceiveModal() {
+        document.getElementById('receiveModal').classList.remove('hidden');
+        setTimeout(() => { document.getElementById('scanInput').focus(); }, 150);
+    }
+
+    function handleScan(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            triggerScanManual();
+        }
+    }
+
+    function triggerScanManual() {
+        const input = document.getElementById('scanInput');
+        const code = input.value.trim();
+        if (!code) return;
+
+        let matched = false;
+        document.querySelectorAll('.receive-row').forEach(row => {
+            const barcode = row.getAttribute('data-barcode');
+            if (barcode && barcode.trim() === code) {
+                const qtyInput = row.querySelector('.received-input');
+                const maxSent = parseInt(row.getAttribute('data-max') || '0');
+                let current = parseInt(qtyInput.value || '0');
+                if (current < maxSent) {
+                    qtyInput.value = current + 1;
+                }
+                row.classList.add('bg-green-50');
+                setTimeout(() => row.classList.remove('bg-green-50'), 600);
+                matched = true;
+            }
+        });
+
+        if (!matched) {
+            alert("Mã vạch không khớp với bất kỳ sản phẩm nào trong phiếu!");
+        }
+        input.value = '';
+        input.focus();
+    }
+
+    async function submitReceive() {
+        const items = [];
+        document.querySelectorAll('.receive-row').forEach(row => {
+            const detailId = parseInt(row.getAttribute('data-detail-id'));
+            const productId = parseInt(row.getAttribute('data-product-id'));
+            const receivedQty = parseInt(row.querySelector('.received-input').value || '0');
+            const shortageReason = row.querySelector('.shortage-input').value;
+
+            items.push({
+                detailId: detailId,
+                productId: productId,
+                receivedQuantity: receivedQty,
+                shortageReason: shortageReason
+            });
+        });
+
+        const payload = {
+            transferId: @Model.Id,
+            note: document.getElementById('receiveNote').value,
+            items: items
+        };
+
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+        try {
+            const res = await fetch('/Admin/StockTransfer/Receive', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message);
+                window.location.reload();
+            } else {
+                alert("Lỗi: " + data.message);
+            }
+        } catch (err) {
+            alert("Lỗi kết nối: " + err);
+        }
+    }
+</script>

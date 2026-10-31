@@ -3,12 +3,56 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Omnichannel Beauty Suite</title>
-    <!-- Tailwind CSS CDN -->
+    <title>@ViewData["Title"] - Omni Beauty Suite</title>
+    <!-- Brand Identity & Multi-Resolution Favicons -->
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="~/images/branding/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="~/images/branding/favicon-192x192.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="~/images/branding/favicon-512x512.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="~/images/branding/apple-touch-icon.png" />
+
+    <!-- Tailwind CSS CDN with Class-based Dark Mode -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    <!-- Google Fonts: Luxury Serif, Clean Sans & Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- NProgress Page Loading Bar -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" />
     <style>
+        #nprogress .bar {
+            background: linear-gradient(90deg, #f43f5e, #e11d48, #8b5cf6) !important;
+            height: 3px !important;
+            box-shadow: 0 0 10px rgba(244, 63, 94, 0.7);
+        }
+        #nprogress .peg {
+            box-shadow: 0 0 10px #f43f5e, 0 0 5px #e11d48 !important;
+        }
+        #nprogress .spinner-icon {
+            border-top-color: #f43f5e !important;
+            border-left-color: #f43f5e !important;
+        }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
@@ -16,82 +60,328 @@
     <!-- HTMX, Alpine.js, SignalR & SweetAlert2 -->
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Unified Design Tokens & Admin Theme Compatibility Layer -->
+    <link rel="stylesheet" href="~/css/design-tokens.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/design-system.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-theme.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body class="h-full antialiased text-slate-800">
+<body class="h-full antialiased text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
     <div class="min-h-full flex">
         <!-- Sidebar Navigation -->
         <aside class="w-64 flex-shrink-0 bg-slate-900 text-slate-300 flex flex-col justify-between hidden md:flex">
             <div>
                 <!-- Brand Logo -->
-                <div class="h-16 flex items-center px-6 border-b border-slate-800 gap-3">
-                    <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-pink-500 to-rose-400 flex items-center justify-center text-white font-bold shadow-lg shadow-pink-500/30">
-                        OB
+                <a href="/Admin/Dashboard" class="h-16 flex items-center px-5 border-b border-slate-800 gap-3 group transition hover:bg-slate-800/40" title="Omni Beauty Enterprise">
+                    <div class="brand-logo-badge relative shrink-0 p-[1.5px] rounded-full bg-gradient-to-tr from-rose-400 via-pink-500 to-purple-600 shadow-md">
+                        <img src="~/images/branding/logo-circle.png" alt="Omni Beauty Logo" class="h-9 w-9 rounded-full object-cover brand-logo-img" />
                     </div>
-                    <div>
-                        <div class="font-bold text-white text-base tracking-wide">OMNICHANNEL</div>
-                        <div class="text-[10px] text-pink-400 font-semibold tracking-wider">BEAUTY SYSTEM</div>
+                    <div class="min-w-0">
+                        <div class="font-bold text-white text-sm tracking-widest font-serif truncate group-hover:text-rose-400 transition-colors">OMNI BEAUTY</div>
+                        <div class="text-[9px] text-pink-400 font-semibold tracking-widest uppercase">ENTERPRISE SUITE</div>
                     </div>
-                </div>
+                </a>
 
+@using Omnichannel.Web.Extensions
+@inject Omnichannel.Application.Interfaces.Security.IPermissionService PermissionService
+@{
+    var currentPath = Context.Request.Path.Value ?? "";
+    var isSuper = User.IsSuperAdmin();
+    var currentUserId = User.GetUserId();
+    var userPerms = currentUserId.HasValue 
+        ? await PermissionService.GetEffectivePermissionsAsync(currentUserId.Value) 
+        : new HashSet<string>();
+
+    bool Can(string perm) => isSuper || (userPerms != null && userPerms.Contains(perm));
+    bool CanAny(params string[] perms) => isSuper || (userPerms != null && System.Linq.Enumerable.Any(perms, p => userPerms.Contains(p)));
+
+    bool hasRetail = Can("DASHBOARD_VIEW") || Can("POS_ACCESS") || Can("ORDER_VIEW") || Can("CUSTOMER_VIEW") 
+        || Can("LOYALTY_VIEW") || CanAny("PROMOTION_MANAGE", "COUPON_MANAGE", "VOUCHER_MANAGE") 
+        || CanAny("INVENTORY_VIEW", "INVENTORY_IMPORT", "INVENTORY_ADJUST", "INVENTORY_EXPORT") 
+        || Can("PRODUCT_VIEW") || Can("USER_MANAGE");
+
+    bool hasFinance = CanAny("FINANCE_PNL_VIEW", "FINANCE_LEDGER_VIEW", "FINANCE_SUPPLIER_DEBT", "FINANCE_COD_RECONCILE");
+    bool hasCms = CanAny("CMS_POST_MANAGE", "CMS_BANNER_MANAGE", "CMS_MENU_MANAGE", "CMS_REVIEW_MODERATE", "THEME_MANAGE");
+    bool hasSystem = isSuper || CanAny("SETTINGS_VIEW", "SETTINGS_MANAGE");
+}
                 <div class="px-4 py-6 space-y-1">
-                    <div class="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Điều Hành Bán Lẻ</div>
+                    @if (hasRetail)
+                    {
+                        <div class="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Điều Hành Bán Lẻ</div>
 
-                    <!-- Dashboard -->
-                    <a href="/Admin/Dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition hover:bg-slate-800 hover:text-white">
-                        <i class="fa-solid fa-chart-pie w-5 text-slate-400"></i>
-                        <span>Tổng Quan</span>
-                    </a>
+                        <!-- Dashboard -->
+                        @if (Can("DASHBOARD_VIEW"))
+                        {
+                            <a href="/Admin/Dashboard" class="admin-sidebar-link @(currentPath.Equals("/Admin/Dashboard", StringComparison.OrdinalIgnoreCase) || currentPath == "/Admin" ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-chart-pie"></i>
+                                <span>Tổng Quan</span>
+                            </a>
+                        }
 
-                    <!-- POS Sale -->
-                    <a href="/Admin/Pos" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition hover:bg-slate-800 hover:text-white">
-                        <i class="fa-solid fa-cash-register w-5 text-emerald-400"></i>
-                        <span>Quầy Thu Ngân (POS)</span>
-                    </a>
+                        <!-- POS Sale -->
+                        @if (Can("POS_ACCESS"))
+                        {
+                            <a href="/Admin/Pos" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Pos", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-cash-register text-emerald-400"></i>
+                                <span>Quầy Thu Ngân (POS)</span>
+                            </a>
+                        }
 
-                    <!-- Warehouse & FEFO -->
-                    <a href="/Admin/Warehouse" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition hover:bg-slate-800 hover:text-white">
-                        <i class="fa-solid fa-boxes-stacked w-5 text-amber-400"></i>
-                        <span>Kho & Hạn Lô FEFO</span>
-                    </a>
+                        <!-- Orders Management -->
+                        @if (Can("ORDER_VIEW"))
+                        {
+                            <a href="/Admin/Order" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Order", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-receipt text-rose-400"></i>
+                                <span>Quản Lý Đơn Hàng</span>
+                            </a>
+                        }
 
-                    <!-- Catalog & Products -->
-                    <a href="/Admin/Product" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition hover:bg-slate-800 hover:text-white">
-                        <i class="fa-solid fa-spray-can-sparkles w-5 text-pink-400"></i>
-                        <span>Sản Phẩm Mỹ Phẩm</span>
-                    </a>
+                        <!-- Customer CRM 360 -->
+                        @if (Can("CUSTOMER_VIEW"))
+                        {
+                            <a href="/Admin/Customer" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Customer", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-address-book text-pink-400"></i>
+                                <span>Khách Hàng (CRM)</span>
+                            </a>
+                        }
 
-                    <div class="pt-4 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Hệ Thống & Bảo Mật</div>
+                        <!-- Loyalty & Membership -->
+                        @if (Can("LOYALTY_VIEW"))
+                        {
+                            <a href="/Admin/Loyalty" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Loyalty", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-crown text-amber-400"></i>
+                                <span>Thành Viên & Loyalty</span>
+                            </a>
+                        }
 
-                    <!-- CMS & Menu -->
-                    <a href="/Admin/Menu" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition hover:bg-slate-800 hover:text-white">
-                        <i class="fa-solid fa-bars-staggered w-5 text-slate-400"></i>
-                        <span>Cây Menu Điều Hướng</span>
-                    </a>
+                        <!-- Promotions & Coupons -->
+                        @if (CanAny("PROMOTION_MANAGE", "COUPON_MANAGE", "VOUCHER_MANAGE"))
+                        {
+                            <a href="/Admin/Promotion" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Promotion", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-tags text-rose-400"></i>
+                                <span>Khuyến Mãi & Voucher</span>
+                            </a>
+                        }
 
-                    <a href="/Admin/Banner" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition hover:bg-slate-800 hover:text-white">
-                        <i class="fa-solid fa-image w-5 text-slate-400"></i>
-                        <span>Banner Quảng Cáo</span>
-                    </a>
+                        <!-- Warehouse & FEFO -->
+                        @if (CanAny("INVENTORY_VIEW", "INVENTORY_IMPORT", "INVENTORY_ADJUST", "INVENTORY_EXPORT"))
+                        {
+                            <a href="/Admin/Warehouse" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Warehouse", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-boxes-stacked text-amber-400"></i>
+                                <span>Kho & Hạn Lô FEFO</span>
+                            </a>
+                        }
 
-                    <!-- Dynamic PBAC Matrix -->
-                    <a href="/Admin/PermissionManagement" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 shadow-md shadow-indigo-600/30">
-                        <i class="fa-solid fa-shield-halved w-5"></i>
-                        <span>Ma Trận Phân Quyền</span>
-                    </a>
+                        <!-- Internal Messaging Mailbox -->
+                        <a href="/Admin/Messages" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Message", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                            <i class="fa-solid fa-envelope-open-text text-pink-400"></i>
+                            <span class="flex-1">Hộp Thư Nội Bộ</span>
+                        </a>
+
+                        <!-- Realtime Notification Center -->
+                        <a href="/Admin/Notifications" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Notifications", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                            <i class="fa-solid fa-bell text-sky-400"></i>
+                            <span class="flex-1">Thông Báo</span>
+                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30">Live</span>
+                        </a>
+
+                        <!-- AI Alerts System -->
+                        <a href="/Admin/Alerts" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Alerts", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                            <i class="fa-solid fa-triangle-exclamation text-rose-400"></i>
+                            <span class="flex-1">AI Cảnh Báo</span>
+                            <span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30">AI</span>
+                        </a>
+
+                        <!-- Catalog & Products -->
+                        @if (Can("PRODUCT_VIEW"))
+                        {
+                            <a href="/Admin/Product" class="admin-sidebar-link @(currentPath.Equals("/Admin/Product", StringComparison.OrdinalIgnoreCase) || currentPath.StartsWith("/Admin/Product/", StringComparison.OrdinalIgnoreCase) && !currentPath.StartsWith("/Admin/ProductAttribute", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-spray-can-sparkles text-pink-400"></i>
+                                <span>Sản Phẩm Mỹ Phẩm</span>
+                            </a>
+
+                            <a href="/Admin/ProductAttribute" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/ProductAttribute", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+                                <span>Thuộc Tính & AI Advisor</span>
+                            </a>
+                        }
+
+                        <!-- User Management -->
+                        @if (Can("USER_MANAGE"))
+                        {
+                            <a href="/Admin/User" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/User", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-users text-purple-400"></i>
+                                <span>Quản Lý Nhân Sự</span>
+                            </a>
+                        }
+                    }
+
+                    @if (hasFinance)
+                    {
+                        <div class="pt-4 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Tài Chính & Kế Toán</div>
+
+                        <!-- Finance & P&L -->
+                        @if (Can("FINANCE_PNL_VIEW"))
+                        {
+                            <a href="/Admin/Finance/ProfitLoss" class="admin-sidebar-link @(currentPath.Contains("ProfitLoss", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-chart-pie text-emerald-400"></i>
+                                <span>Báo Cáo Lãi Lỗ (P&L)</span>
+                            </a>
+                        }
+
+                        @if (Can("FINANCE_LEDGER_VIEW"))
+                        {
+                            <a href="/Admin/Finance/Ledger" class="admin-sidebar-link @(currentPath.Contains("Ledger", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-book text-indigo-400"></i>
+                                <span>Sổ Cái Tài Chính</span>
+                            </a>
+                        }
+
+                        @if (Can("FINANCE_SUPPLIER_DEBT"))
+                        {
+                            <a href="/Admin/Finance/SupplierDebts" class="admin-sidebar-link @(currentPath.Contains("SupplierDebts", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-file-invoice-dollar text-amber-400"></i>
+                                <span>Công Nợ Nhà Cung Cấp</span>
+                            </a>
+                        }
+
+                        @if (Can("FINANCE_COD_RECONCILE"))
+                        {
+                            <a href="/Admin/Finance/CodReconciliations" class="admin-sidebar-link @(currentPath.Contains("CodReconciliations", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-hand-holding-dollar text-cyan-400"></i>
+                                <span>Đối Soát COD</span>
+                            </a>
+                        }
+                    }
+
+                    @if (hasCms)
+                    {
+                        <div class="pt-4 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">CMS & Nội Dung Storefront</div>
+
+                        <!-- CMS Post & Blog -->
+                        @if (Can("CMS_POST_MANAGE"))
+                        {
+                            <a href="/Admin/Post" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Post", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-newspaper text-rose-400"></i>
+                                <span>Bài Viết & Cẩm Nang</span>
+                            </a>
+                        }
+
+                        <!-- Banner & Slider -->
+                        @if (Can("CMS_BANNER_MANAGE"))
+                        {
+                            <a href="/Admin/Banner" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Banner", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-image text-pink-400"></i>
+                                <span>Banner Quảng Cáo</span>
+                            </a>
+                        }
+
+                        <!-- Thư Viện Media CSDL -->
+                        <a href="/admin/media" class="admin-sidebar-link @(currentPath.StartsWith("/admin/media", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                            <i class="fa-solid fa-photo-film text-rose-400"></i>
+                            <span>Thư Viện Media CSDL</span>
+                        </a>
+
+                        <!-- Theme & Color Customizer -->
+                        @if (isSuper || Can("THEME_MANAGE"))
+                        {
+                            <a href="/Admin/ThemeConfig" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/ThemeConfig", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-palette text-amber-400"></i>
+                                <span>Tùy Biến Theme & Màu</span>
+                            </a>
+
+                            <a href="/Admin/UiSection" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/UiSection", StringComparison.OrdinalIgnoreCase) || currentPath.StartsWith("/admin/ui-section", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-layer-group text-rose-400"></i>
+                                <span>Bố Cục Trang Chủ</span>
+                            </a>
+                        }
+
+                        <!-- Polymorphic Menu -->
+                        @if (Can("CMS_MENU_MANAGE"))
+                        {
+                            <a href="/Admin/Menu" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Menu", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-bars-staggered text-purple-400"></i>
+                                <span>Cây Menu Điều Hướng</span>
+                            </a>
+                        }
+
+                        <!-- Reviews & Moderation -->
+                        @if (Can("CMS_REVIEW_MODERATE"))
+                        {
+                            <a href="/Admin/Review" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Review", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-star-half-stroke text-amber-400"></i>
+                                <span>Đánh Giá Khách Hàng</span>
+                            </a>
+                        }
+
+                        <!-- AI Chatbot History -->
+                        @if (isSuper || Can("CUSTOMER_VIEW") || Can("SETTINGS_VIEW"))
+                        {
+                            <a href="/Admin/ChatHistory" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/ChatHistory", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-robot text-pink-400"></i>
+                                <span>Hội Thoại Chat AI</span>
+                            </a>
+                        }
+                    }
+
+                    @if (hasSystem)
+                    {
+                        <div class="pt-4 px-3 text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2">Hệ Thống & Bảo Mật</div>
+
+                        <!-- Dynamic Settings -->
+                        @if (CanAny("SETTINGS_VIEW", "SETTINGS_MANAGE"))
+                        {
+                            <a href="/Admin/Settings" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/Settings", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-sliders"></i>
+                                <span>Cài Đặt Hệ Thống</span>
+                            </a>
+                        }
+
+                        <!-- Audit Log -->
+                        @if (isSuper || Can("SETTINGS_VIEW"))
+                        {
+                            <a href="/Admin/AuditLog" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/AuditLog", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-clipboard-list text-indigo-400"></i>
+                                <span>Nhật Ký Kiểm Toán</span>
+                            </a>
+                        }
+
+                        <!-- Dynamic PBAC Matrix (SuperAdmin only) -->
+                        @if (isSuper)
+                        {
+                            <a href="/Admin/PermissionManagement" class="admin-sidebar-link @(currentPath.StartsWith("/Admin/PermissionManagement", StringComparison.OrdinalIgnoreCase) ? "admin-sidebar-link--active" : "")">
+                                <i class="fa-solid fa-shield-halved text-rose-400"></i>
+                                <span>Ma Trận Phân Quyền</span>
+                            </a>
+                        }
+                    }
                 </div>
             </div>
 
             <!-- Store & User Footer -->
             <div class="p-4 border-t border-slate-800">
+                @{
+                    var avatarClaim = User.FindFirst("AvatarUrl")?.Value 
+                        ?? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop";
+                    var userRoleClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value 
+                        ?? (isSuper ? "SuperAdmin" : "Staff");
+                    var userGivenName = User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value 
+                        ?? User.Identity?.Name 
+                        ?? "Quản Trị Viên";
+                    var storeNameClaim = User.FindFirst("StoreName")?.Value;
+                    var storeDisplay = isSuper 
+                        ? "Toàn Hệ Thống (HQ)" 
+                        : (!string.IsNullOrEmpty(storeNameClaim) 
+                            ? storeNameClaim 
+                            : (User.GetStoreId().HasValue ? $"Chi nhánh #{User.GetStoreId()}" : "Toàn hệ thống"));
+                }
                 <div class="flex items-center gap-3">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop" class="h-9 w-9 rounded-full object-cover border border-slate-700" alt="Avatar" />
+                    <img src="@avatarClaim" class="h-9 w-9 rounded-full object-cover border border-slate-700 shrink-0" alt="Avatar" />
                     <div class="truncate">
-                        <div class="text-xs font-bold text-white truncate">@User.Identity?.Name (Quản Trị)</div>
-                        <div class="text-[11px] text-emerald-400 flex items-center gap-1">
-                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Flagship Q1 HCM
+                        <div class="text-xs font-bold text-white truncate" title="@userGivenName (@userRoleClaim)">@userGivenName <span class="text-[10px] text-pink-400 font-normal">(@userRoleClaim)</span></div>
+                        <div class="text-[11px] text-emerald-400 flex items-center gap-1 truncate" title="@storeDisplay">
+                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+                            <span class="truncate">@storeDisplay</span>
                         </div>
                     </div>
                 </div>
@@ -100,22 +390,139 @@
 
         <div class="flex-1 flex flex-col min-w-0">
             <!-- Header Bar -->
-            <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-10 sticky top-0">
+            <header class="h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-6 z-10 sticky top-0 transition-colors duration-200">
                 <!-- Breadcrumbs & Quick Search -->
                 <div class="flex items-center gap-4 flex-1">
                     <div class="relative w-72">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
-                        <input type="text" placeholder="Tìm kiếm nhanh toàn hệ thống (Ctrl + K)..." class="w-full pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:bg-white focus:border-indigo-500" />
+                        <input type="text" placeholder="Tìm kiếm nhanh toàn hệ thống (Ctrl + K)..." class="w-full pl-9 pr-4 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-xl text-xs focus:outline-none focus:bg-white dark:focus:bg-slate-700 focus:border-rose-500 transition-colors" />
                     </div>
                 </div>
 
-                <!-- Notifications & Profile Action -->
-                <div class="flex items-center gap-4">
-                    <button class="relative p-2 text-slate-500 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition">
-                        <i class="fa-regular fa-bell text-base"></i>
-                        <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500"></span>
+                <!-- Dark Mode, Notifications & Profile Action -->
+                <div class="flex items-center gap-3">
+                    <button id="themeToggleBtn" type="button" onclick="toggleDarkMode()" title="Chuyển chế độ Sáng / Tối (Dark Mode)" class="p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                        <i id="themeToggleIcon" class="fa-solid fa-moon text-base"></i>
                     </button>
-                    <a href="/Account/Logout" class="text-xs font-semibold text-rose-600 hover:text-rose-700 px-3 py-1.5 rounded-xl hover:bg-rose-50 transition flex items-center gap-1.5">
+
+                    <!-- Interactive Internal Mailbox Icon -->
+                    <div class="relative" x-data="adminMailIcon()" x-init="init()">
+                        <a href="/Admin/Messages" 
+                           title="Hộp thư nội bộ nhân viên" 
+                           class="relative p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition block">
+                            <i class="fa-regular fa-envelope text-base" :class="unreadCount > 0 ? 'text-indigo-500' : ''"></i>
+                            
+                            <!-- Unread Mail Badge -->
+                            <template x-if="unreadCount > 0">
+                                <span class="absolute -top-1 -right-1 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-gradient-to-r from-pink-500 to-indigo-600 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-slate-900 transition-all"
+                                      :class="hasNewBadge ? 'animate-bounce' : 'animate-pulse'"
+                                      x-text="unreadCount > 99 ? '99+' : unreadCount"></span>
+                            </template>
+                        </a>
+                    </div>
+
+                    <!-- Interactive Notification Bell Dropdown -->
+                    <div class="relative" x-data="adminNotificationBell()" x-init="init()">
+                        <button @@click="toggleOpen()" 
+                                type="button" 
+                                title="Thông báo hệ thống realtime" 
+                                class="relative p-2 text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-100 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                            <i class="fa-regular fa-bell text-base" :class="unreadCount > 0 ? 'text-rose-500' : ''"></i>
+                            
+                            <!-- Red Pulse / Bounce Badge -->
+                            <template x-if="unreadCount > 0">
+                                <span class="absolute -top-1 -right-1 flex h-4 min-w-[16px] px-1 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-white dark:ring-slate-900 transition-all"
+                                      :class="hasNewBadge ? 'animate-bounce' : 'animate-pulse'"
+                                      x-text="unreadCount > 99 ? '99+' : unreadCount"></span>
+                            </template>
+                        </button>
+
+                        <!-- Dropdown Panel (Max 10 notifications) -->
+                        <div x-show="isOpen" 
+                             @@click.outside="isOpen = false"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                             style="display: none;"
+                             class="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl z-50 overflow-hidden">
+                            
+                            <!-- Header -->
+                            <div class="p-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/80 dark:bg-slate-800/40">
+                                <div class="flex items-center gap-2">
+                                    <div class="h-6 w-6 rounded-lg bg-sky-100 text-sky-600 dark:bg-sky-950/60 dark:text-sky-400 flex items-center justify-center text-xs">
+                                        <i class="fa-solid fa-bell"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200">Thông Báo Hệ Thống</span>
+                                    <template x-if="unreadCount > 0">
+                                        <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white" x-text="unreadCount + ' mới'"></span>
+                                    </template>
+                                </div>
+                                <button @@click="markAllAsRead()" 
+                                        type="button"
+                                        class="text-[11px] font-semibold text-rose-600 hover:text-rose-700 dark:text-rose-400 hover:underline">
+                                    Đọc tất cả
+                                </button>
+                            </div>
+
+                            <!-- List (Max 10) -->
+                            <div class="max-h-96 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
+                                <template x-if="loading && notifications.length === 0">
+                                    <div class="p-6 text-center text-xs text-slate-400">
+                                        <i class="fa-solid fa-spinner fa-spin text-base text-sky-500 mb-2"></i>
+                                        <div>Đang tải thông báo...</div>
+                                    </div>
+                                </template>
+
+                                <template x-if="!loading && notifications.length === 0">
+                                    <div class="p-6 text-center">
+                                        <i class="fa-regular fa-bell-slash text-2xl text-slate-400 dark:text-slate-500 mb-2"></i>
+                                        <div class="text-xs font-medium text-slate-600 dark:text-slate-400">Không có thông báo mới</div>
+                                        <div class="text-[10px] text-slate-400 mt-0.5">Hệ thống đang vận hành ổn định</div>
+                                    </div>
+                                </template>
+
+                                <template x-for="item in notifications" :key="item.id">
+                                    <div @@click="handleNotificationClick(item)"
+                                         class="p-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition flex items-start gap-3 relative"
+                                         :class="!item.isRead ? 'bg-sky-50/30 dark:bg-sky-950/20' : ''">
+                                        <div class="h-8 w-8 rounded-xl flex items-center justify-center text-sm flex-shrink-0"
+                                             :class="item.typeBadgeClass">
+                                            <i :class="item.typeIconClass"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between gap-1">
+                                                <h5 class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate" x-text="item.title"></h5>
+                                                <span class="text-[10px] text-slate-400 flex-shrink-0" x-text="item.timeAgo"></span>
+                                            </div>
+                                            <p class="text-[11px] text-slate-600 dark:text-slate-300 line-clamp-2 mt-0.5" x-text="item.message"></p>
+                                        </div>
+                                        <template x-if="!item.isRead">
+                                            <span class="h-2 w-2 rounded-full bg-rose-500 flex-shrink-0 mt-1.5 animate-pulse"></span>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Footer -->
+                            <div class="p-2.5 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/20 flex items-center justify-between text-xs">
+                                <a href="/Admin/Alerts" class="text-[11px] text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center gap-1 font-medium">
+                                    <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>
+                                    <span>AI Cảnh Báo</span>
+                                </a>
+                                <a href="/Admin/Notifications" class="text-[11px] font-bold text-sky-600 hover:text-sky-700 dark:text-sky-400 flex items-center gap-1">
+                                    <span>Xem tất cả thông báo</span>
+                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="/Account/ChangePassword" class="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5" title="Đổi mật khẩu tài khoản">
+                        <i class="fa-solid fa-key"></i> Đổi Mật Khẩu
+                    </a>
+                    <a href="/Account/Logout" class="text-xs font-semibold text-rose-600 hover:text-rose-700 px-3 py-1.5 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 transition flex items-center gap-1.5">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất
                     </a>
                 </div>
@@ -128,6 +535,346 @@
         </div>
     </div>
 
+    <!-- NProgress Script & Navigation Loading Bar -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+    <script>
+        if (typeof NProgress !== 'undefined') {
+            NProgress.configure({ showSpinner: false, speed: 250, minimum: 0.15 });
+            window.addEventListener('beforeunload', function () { NProgress.start(); });
+            document.addEventListener('DOMContentLoaded', function () { NProgress.done(); });
+            document.body.addEventListener('htmx:beforeRequest', function () { NProgress.start(); });
+            document.body.addEventListener('htmx:afterOnLoad', function () { NProgress.done(); });
+        }
+    </script>
+
+    <!-- SignalR, SweetAlert2 & Bootstrap JS Bundle for Modal & Dropdown Compatibility -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function initAdminTheme() {
+            const saved = localStorage.getItem('admin_theme');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (saved === 'dark' || (!saved && prefersDark)) {
+                document.documentElement.classList.add('dark');
+                updateThemeIcon(true);
+            } else {
+                document.documentElement.classList.remove('dark');
+                updateThemeIcon(false);
+            }
+        }
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('admin_theme', isDark ? 'dark' : 'light');
+            updateThemeIcon(isDark);
+        }
+        function updateThemeIcon(isDark) {
+            const icon = document.getElementById('themeToggleIcon');
+            if (icon) {
+                icon.className = isDark ? 'fa-solid fa-sun text-amber-400 text-base' : 'fa-solid fa-moon text-base';
+            }
+        }
+        initAdminTheme();
+
+        // Tự động re-initialize Alpine.js sau khi HTMX swap nội dung
+        document.body.addEventListener('htmx:afterSwap', function (evt) {
+            if (window.Alpine) {
+                Alpine.initTree(evt.detail.target);
+            }
+        });
+
+        // Web Audio Gentle Chime
+        function playAlertChime() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.35);
+            } catch (e) {
+                // AudioContext might be muted before user interaction
+            }
+        }
+
+        // Global Notification & Alert Toast (Slide-in top-right, 5s auto dismiss)
+        const NotificationToast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+            }
+        });
+        const AlertToast = NotificationToast;
+
+        // Alpine.js Realtime Notification Bell Component
+        function adminNotificationBell() {
+            return {
+                isOpen: false,
+                loading: false,
+                isScanning: false,
+                unreadCount: 0,
+                hasNewBadge: false,
+                notifications: [],
+                connection: null,
+
+                init() {
+                    this.fetchUnreadCount();
+                    this.fetchLatest();
+
+                    if (window.signalR) {
+                        this.initSignalR();
+                    }
+
+                    // Tự động kiểm tra số đếm thông báo mỗi 60 giây
+                    setInterval(() => {
+                        this.fetchUnreadCount();
+                    }, 60000);
+                },
+
+                initSignalR() {
+                    try {
+                        this.connection = new signalR.HubConnectionBuilder()
+                            .withUrl("/notificationHub")
+                            .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+                            .build();
+
+                        this.connection.on("ReceiveNotification", (payload, arg2) => {
+                            this.handleIncomingNotification(payload, arg2);
+                        });
+
+                        this.connection.start()
+                            .then(() => console.debug("[SignalR] NotificationHub kết nối thành công."))
+                            .catch(err => console.debug("[SignalR] Lỗi kết nối NotificationHub:", err));
+                    } catch (e) {
+                        console.debug("[SignalR] Init error:", e);
+                    }
+                },
+
+                handleIncomingNotification(payload, arg2) {
+                    playAlertChime();
+
+                    let title = "Thông Báo Mới";
+                    let message = "";
+                    let severity = "INFO";
+                    let type = "SYSTEM";
+                    let url = null;
+                    let newItem = null;
+
+                    if (typeof payload === 'string') {
+                        message = payload;
+                        if (typeof arg2 === 'string') severity = arg2;
+                    } else if (payload && typeof payload === 'object') {
+                        title = payload.title || payload.Title || title;
+                        message = payload.message || payload.Message || "";
+                        severity = (payload.severity || payload.Severity || "INFO").toUpperCase();
+                        type = (payload.type || payload.Type || "SYSTEM").toUpperCase();
+                        url = payload.url || payload.Url || null;
+                        newItem = payload;
+                    }
+
+                    // 1. Kích hoạt hiệu ứng bounce trên chuông thông báo
+                    this.hasNewBadge = true;
+                    this.unreadCount = (this.unreadCount || 0) + 1;
+                    setTimeout(() => {
+                        this.hasNewBadge = false;
+                    }, 4000);
+
+                    // 2. Hiển thị Toast slide-in góc trên phải
+                    const toastIcon = severity === 'DANGER' ? 'error' : (severity === 'WARNING' ? 'warning' : (severity === 'SUCCESS' ? 'success' : 'info'));
+                    NotificationToast.fire({
+                        icon: toastIcon,
+                        title: title,
+                        text: message,
+                        didOpen: (toastEl) => {
+                            if (url) {
+                                toastEl.style.cursor = 'pointer';
+                                toastEl.title = 'Bấm để xem chi tiết';
+                                toastEl.onclick = () => {
+                                    window.location.href = url;
+                                };
+                            }
+                        }
+                    });
+
+                    // 3. Chuẩn hóa và chèn vào đầu danh sách thông báo dropdown
+                    const formattedItem = {
+                        id: newItem?.id || newItem?.Id || Date.now(),
+                        title: title,
+                        message: message,
+                        severity: severity,
+                        type: type,
+                        url: url,
+                        isRead: false,
+                        timeAgo: "Vừa xong",
+                        typeIconClass: type === 'ORDER' ? 'fa-solid fa-box text-rose-500' :
+                                       (type === 'WAREHOUSE' ? 'fa-solid fa-boxes-stacked text-amber-500' :
+                                       (type === 'ALERT' ? 'fa-solid fa-triangle-exclamation text-purple-500' : 'fa-solid fa-bell text-sky-500')),
+                        typeBadgeClass: type === 'ORDER' ? 'bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-400 border border-rose-200 dark:border-rose-800' :
+                                        (type === 'WAREHOUSE' ? 'bg-amber-50 text-amber-800 dark:bg-amber-950/50 dark:text-amber-400 border border-amber-200 dark:border-amber-800' :
+                                        (type === 'ALERT' ? 'bg-purple-50 text-purple-700 dark:bg-purple-950/50 dark:text-purple-400 border border-purple-200 dark:border-purple-800' :
+                                        'bg-sky-50 text-sky-700 dark:bg-sky-950/50 dark:text-sky-400 border border-sky-200 dark:border-sky-800'))
+                    };
+
+                    this.notifications.unshift(formattedItem);
+                    if (this.notifications.length > 10) {
+                        this.notifications.pop();
+                    }
+                },
+
+                toggleOpen() {
+                    this.isOpen = !this.isOpen;
+                    if (this.isOpen) {
+                        this.fetchLatest();
+                    }
+                },
+
+                async fetchUnreadCount() {
+                    try {
+                        const res = await fetch('/api/notifications/unread-count');
+                        if (res.ok) {
+                            const data = await res.json();
+                            this.unreadCount = data.count || 0;
+                        }
+                    } catch (e) {
+                        console.error("fetchUnreadCount error", e);
+                    }
+                },
+
+                async fetchLatest() {
+                    this.loading = true;
+                    try {
+                        const res = await fetch('/api/notifications/latest?take=10');
+                        if (res.ok) {
+                            const data = await res.json();
+                            this.notifications = data.notifications || [];
+                            this.unreadCount = data.unreadCount || 0;
+                        }
+                    } catch (e) {
+                        console.error("fetchLatest error", e);
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                async markAllAsRead() {
+                    try {
+                        const res = await fetch('/api/notifications/mark-all-read', { method: 'POST' });
+                        if (res.ok) {
+                            this.unreadCount = 0;
+                            this.notifications.forEach(n => n.isRead = true);
+                        }
+                    } catch (e) {
+                        console.error("markAllAsRead error", e);
+                    }
+                },
+
+                async handleNotificationClick(item) {
+                    if (!item.isRead) {
+                        try {
+                            await fetch(`/api/notifications/mark-read/${item.id}`, { method: 'POST' });
+                            item.isRead = true;
+                            if (this.unreadCount > 0) this.unreadCount--;
+                        } catch (e) {
+                            console.error("mark-read error", e);
+                        }
+                    }
+                    if (item.url) {
+                        window.location.href = item.url;
+                    }
+                },
+
+                async triggerScan() {
+                    this.isScanning = true;
+                    try {
+                        const res = await fetch('/api/alerts/trigger-check', { method: 'POST' });
+                        if (res.ok) {
+                            const data = await res.json();
+                            await this.fetchLatest();
+                            NotificationToast.fire({
+                                icon: 'success',
+                                title: 'AI đã quét xong!',
+                                text: data.newCount > 0 ? `Phát hiện ${data.newCount} cảnh báo mới!` : 'Không có cảnh báo mới.'
+                            });
+                        }
+                    } catch (e) {
+                        console.error("triggerScan error", e);
+                    } finally {
+                        this.isScanning = false;
+                    }
+                }
+            };
+        }
+
+        // Alpine.js Internal Mail Icon Component
+        function adminMailIcon() {
+            return {
+                unreadCount: 0,
+                hasNewBadge: false,
+
+                init() {
+                    this.fetchUnreadCount();
+
+                    if (window.signalR) {
+                        this.initSignalR();
+                    }
+
+                    // Tự động kiểm tra số đếm thư mỗi 60 giây
+                    setInterval(() => {
+                        this.fetchUnreadCount();
+                    }, 60000);
+                },
+
+                initSignalR() {
+                    try {
+                        const connection = new signalR.HubConnectionBuilder()
+                            .withUrl("/notificationHub")
+                            .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+                            .build();
+
+                        connection.on("ReceiveNotification", (payload) => {
+                            // Khi có notification thư mới tới
+                            this.hasNewBadge = true;
+                            this.fetchUnreadCount();
+                            setTimeout(() => {
+                                this.hasNewBadge = false;
+                            }, 4000);
+                        });
+
+                        connection.start()
+                            .then(() => console.debug("[SignalR] MailIcon SignalR kết nối thành công."))
+                            .catch(err => console.debug("[SignalR] MailIcon lỗi kết nối:", err));
+                    } catch (e) {
+                        console.debug("[SignalR] MailIcon init error:", e);
+                    }
+                },
+
+                async fetchUnreadCount() {
+                    try {
+                        const res = await fetch('/api/messages/unread-count');
+                        if (res.ok) {
+                            const data = await res.json();
+                            this.unreadCount = data.count || 0;
+                        }
+                    } catch (e) {
+                        console.error("fetchUnreadCount error", e);
+                    }
+                }
+            };
+        }
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

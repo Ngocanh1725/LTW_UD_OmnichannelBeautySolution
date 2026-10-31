@@ -1,0 +1,301 @@
+@model Omnichannel.Application.DTOs.Customer.CustomerOrdersViewModel
+@{
+    ViewData["Title"] = "Lịch Sử Đơn Hàng - Omni Beauty";
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen bg-slate-50/70 pb-20 pt-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Breadcrumb & Top Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+                <nav class="flex items-center gap-2 text-xs text-slate-400 mb-1.5">
+                    <a href="/" class="hover:text-magenta-accent transition">Trang Chủ</a>
+                    <span>/</span>
+                    <a href="/Customer/Dashboard" class="hover:text-magenta-accent transition">Khách Hàng</a>
+                    <span>/</span>
+                    <span class="text-charcoal font-semibold">Đơn Hàng Của Tôi</span>
+                </nav>
+                <h1 class="text-2xl sm:text-3xl font-serif font-bold text-charcoal flex items-center gap-2.5">
+                    <span>Lịch Sử Đơn Hàng</span>
+                    <span class="inline-flex items-center gap-1 text-xs font-sans font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                        <i class="fa-solid fa-box-open"></i> @Model.StatusCounts.GetValueOrDefault("all", Model.Orders.Count) Đơn hàng
+                    </span>
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">
+                    Theo dõi hành trình đơn hàng, quản lý hóa đơn và mua lại nhanh chóng với 1 chạm.
+                </p>
+            </div>
+
+            <!-- Quick Action CTA -->
+            <div class="flex items-center gap-3">
+                <a href="/Shop" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-charcoal text-white hover:bg-magenta-accent text-xs font-bold transition shadow-sm">
+                    <i class="fa-solid fa-bag-shopping text-rose-gold"></i> Tiếp Tục Mua Sắm
+                </a>
+            </div>
+        </div>
+
+        <!-- Portal Navigation Tabs (VIP Card | Orders | Addresses) -->
+        <div class="bg-white rounded-2xl p-1.5 border border-slate-200 shadow-sm mb-6 flex flex-wrap items-center gap-1">
+            <a href="/Customer/Dashboard" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-crown text-amber-500"></i> Thẻ VIP & Điểm Thưởng
+            </a>
+            <a href="/Customer/Orders" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-magenta-accent/10 text-magenta-accent border border-magenta-accent/20 shadow-xs">
+                <i class="fa-solid fa-bag-shopping text-magenta-accent"></i> Đơn Hàng Của Tôi
+            </a>
+            <a href="/Customer/Addresses" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-location-dot text-rose-gold"></i> Sổ Địa Chỉ Nhận Hàng
+            </a>
+            <a href="/Wishlist" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-heart text-magenta-accent"></i> Danh Sách Yêu Thích
+            </a>
+        </div>
+
+        <!-- Flash Success Notification -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between shadow-sm animate-in fade-in duration-300">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <span class="text-sm font-medium">@TempData["SuccessMessage"]</span>
+                </div>
+                <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700 text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        }
+
+        <!-- ===================================================
+             BỘ LỌC ĐƠN HÀNG THEO TAB TRẠNG THÁI
+             [Tất cả] | [Chờ xác nhận] | [Đang đóng gói] | [Đang giao hàng] | [Hoàn thành] | [Đã hủy]
+             =================================================== -->
+        <div class="bg-white rounded-2xl p-2 border border-slate-200 shadow-sm mb-8 overflow-x-auto">
+            <div class="flex items-center gap-1.5 min-w-max">
+                
+                <!-- 1. Tất cả -->
+                <a href="/Customer/Orders?status=all" 
+                   class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition @(Model.CurrentTab == "all" ? "bg-charcoal text-white shadow-sm" : "text-slate-600 hover:bg-slate-100 hover:text-charcoal")">
+                    <span>Tất cả</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full @(Model.CurrentTab == "all" ? "bg-white/20 text-white" : "bg-slate-200/80 text-slate-700")">
+                        @Model.StatusCounts.GetValueOrDefault("all", 0)
+                    </span>
+                </a>
+
+                <!-- 2. Chờ xác nhận -->
+                <a href="/Customer/Orders?status=pending" 
+                   class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition @(Model.CurrentTab == "pending" ? "bg-amber-500 text-white shadow-sm" : "text-slate-600 hover:bg-amber-50 hover:text-amber-800")">
+                    <i class="fa-regular fa-clock"></i>
+                    <span>Chờ xác nhận</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full @(Model.CurrentTab == "pending" ? "bg-white/25 text-white" : "bg-amber-100 text-amber-800")">
+                        @Model.StatusCounts.GetValueOrDefault("pending", 0)
+                    </span>
+                </a>
+
+                <!-- 3. Đang đóng gói (Chuẩn FEFO) -->
+                <a href="/Customer/Orders?status=confirmed" 
+                   class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition @(Model.CurrentTab == "confirmed" ? "bg-blue-600 text-white shadow-sm" : "text-slate-600 hover:bg-blue-50 hover:text-blue-800")">
+                    <i class="fa-solid fa-boxes-packing"></i>
+                    <span>Đang đóng gói</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full @(Model.CurrentTab == "confirmed" ? "bg-white/25 text-white" : "bg-blue-100 text-blue-800")">
+                        @Model.StatusCounts.GetValueOrDefault("confirmed", 0)
+                    </span>
+                </a>
+
+                <!-- 4. Đang giao hàng -->
+                <a href="/Customer/Orders?status=shipping" 
+                   class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition @(Model.CurrentTab == "shipping" ? "bg-purple-600 text-white shadow-sm" : "text-slate-600 hover:bg-purple-50 hover:text-purple-800")">
+                    <i class="fa-solid fa-truck-fast"></i>
+                    <span>Đang giao hàng</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full @(Model.CurrentTab == "shipping" ? "bg-white/25 text-white" : "bg-purple-100 text-purple-800")">
+                        @Model.StatusCounts.GetValueOrDefault("shipping", 0)
+                    </span>
+                </a>
+
+                <!-- 5. Hoàn thành -->
+                <a href="/Customer/Orders?status=completed" 
+                   class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition @(Model.CurrentTab == "completed" ? "bg-emerald-600 text-white shadow-sm" : "text-slate-600 hover:bg-emerald-50 hover:text-emerald-800")">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>Hoàn thành</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full @(Model.CurrentTab == "completed" ? "bg-white/25 text-white" : "bg-emerald-100 text-emerald-800")">
+                        @Model.StatusCounts.GetValueOrDefault("completed", 0)
+                    </span>
+                </a>
+
+                <!-- 6. Đã hủy -->
+                <a href="/Customer/Orders?status=cancelled" 
+                   class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition @(Model.CurrentTab == "cancelled" ? "bg-slate-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100 hover:text-slate-800")">
+                    <i class="fa-solid fa-ban"></i>
+                    <span>Đã hủy</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full @(Model.CurrentTab == "cancelled" ? "bg-white/25 text-white" : "bg-slate-200 text-slate-700")">
+                        @Model.StatusCounts.GetValueOrDefault("cancelled", 0)
+                    </span>
+                </a>
+
+            </div>
+        </div>
+
+        <!-- ===================================================
+             DANH SÁCH THẺ TÓM TẮT ĐƠN HÀNG (ORDER CARDS)
+             =================================================== -->
+        @if (Model.Orders == null || !Model.Orders.Any())
+        {
+            <div class="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm max-w-lg mx-auto my-10">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-pastel-rose flex items-center justify-center text-magenta-accent text-3xl">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+                <h3 class="text-lg font-serif font-bold text-charcoal mb-2">Chưa có đơn hàng nào</h3>
+                <p class="text-xs text-slate-500 mb-6 leading-relaxed">
+                    Bạn hiện chưa có đơn hàng nào trong trạng thái này. Khám phá các bộ sưu tập mỹ phẩm và mùi hương cao cấp ngay hôm nay!
+                </p>
+                <a href="/Shop" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-magenta-accent text-white text-xs font-bold hover:shadow-lg hover:shadow-magenta-accent/25 transition">
+                    <i class="fa-solid fa-bag-shopping"></i> Khám Phá Sản Phẩm Ngay
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="space-y-6 mb-12">
+                @foreach (var order in Model.Orders)
+                {
+                    <div class="bg-white rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-md hover:border-slate-300 transition-all duration-300 overflow-hidden">
+                        
+                        <!-- 1. Card Top Bar: Order Code, Date & Status Badge -->
+                        <div class="px-6 py-4 bg-slate-50/70 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <span class="font-mono text-sm font-bold text-charcoal tracking-wide flex items-center gap-1.5">
+                                    <i class="fa-solid fa-receipt text-slate-400"></i> #@order.OrderCode
+                                </span>
+                                <span class="text-slate-300 hidden sm:inline">|</span>
+                                <span class="text-xs text-slate-500 flex items-center gap-1.5">
+                                    <i class="fa-regular fa-calendar text-slate-400"></i> @order.OrderDate.ToString("dd/MM/yyyy HH:mm")
+                                </span>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <span class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full border shadow-2xs @order.OrderStatusBadgeClass">
+                                    @if (order.OrderStatus == "PENDING")
+                                    {
+                                        <i class="fa-regular fa-clock text-[11px]"></i>
+                                    }
+                                    else if (order.OrderStatus == "CONFIRMED" || order.OrderStatus == "ALLOCATED" || order.OrderStatus == "PROCESSING")
+                                    {
+                                        <i class="fa-solid fa-boxes-packing text-[11px]"></i>
+                                    }
+                                    else if (order.OrderStatus == "SHIPPING")
+                                    {
+                                        <i class="fa-solid fa-truck-fast text-[11px]"></i>
+                                    }
+                                    else if (order.OrderStatus == "COMPLETED")
+                                    {
+                                        <i class="fa-solid fa-circle-check text-[11px]"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fa-solid fa-circle-xmark text-[11px]"></i>
+                                    }
+                                    <span>@order.OrderStatusDisplayName</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- 2. Card Body: Thumbnails & Product Summary -->
+                        <div class="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                            
+                            <!-- Left: Thumbnail Images Gallery & Main Product Title -->
+                            <div class="flex items-start gap-4">
+                                <!-- Thumbnails Row -->
+                                <div class="flex items-center -space-x-3 shrink-0">
+                                    @if (order.ProductThumbnails != null && order.ProductThumbnails.Any())
+                                    {
+                                        @foreach (var thumb in order.ProductThumbnails.Take(3))
+                                        {
+                                            <div class="w-16 h-16 rounded-2xl border-2 border-white bg-slate-100 shadow-sm overflow-hidden shrink-0 transition-transform hover:scale-105 hover:z-10">
+                                                <img src="@thumb" 
+                                                     alt="Product" 
+                                                     class="w-full h-full object-cover" 
+                                                     onerror="this.src='/images/branding/default-product.png'" />
+                                            </div>
+                                        }
+
+                                        @if (order.ProductThumbnails.Count > 3)
+                                        {
+                                            <div class="w-16 h-16 rounded-2xl border-2 border-white bg-charcoal text-white shadow-sm flex items-center justify-center text-xs font-bold shrink-0">
+                                                +@(order.ProductThumbnails.Count - 3)
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="w-16 h-16 rounded-2xl border-2 border-white bg-slate-100 text-slate-400 flex items-center justify-center text-xl shrink-0">
+                                            <i class="fa-solid fa-bag-shopping"></i>
+                                        </div>
+                                    }
+                                </div>
+
+                                <!-- Text Details -->
+                                <div>
+                                    <h4 class="text-sm sm:text-base font-bold text-charcoal hover:text-magenta-accent transition line-clamp-1">
+                                        <a href="/Customer/OrderDetail?id=@order.Id">@order.PrimaryProductName</a>
+                                    </h4>
+
+                                    <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 mt-1">
+                                        @if (order.RemainingProductsCount > 0)
+                                        {
+                                            <span class="text-slate-400">và <strong class="text-slate-600">@order.RemainingProductsCount</strong> sản phẩm khác</span>
+                                            <span class="text-slate-300">•</span>
+                                        }
+                                        <span>Tổng số: <strong class="text-slate-700">@order.TotalItemsCount món</strong></span>
+                                        <span class="text-slate-300">•</span>
+                                        <span class="flex items-center gap-1">
+                                            <i class="fa-solid fa-credit-card text-slate-400"></i>
+                                            <span>@order.PaymentMethod (@(order.PaymentStatus == "PAID" ? "Đã thanh toán" : "Chưa thanh toán"))</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Total Amount & CTA Buttons -->
+                            <div class="flex flex-col md:items-end justify-center shrink-0 border-t md:border-t-0 pt-4 md:pt-0 border-slate-100">
+                                <div class="text-xs text-slate-400">Tổng thanh toán</div>
+                                <div class="text-lg sm:text-xl font-bold font-mono text-magenta-accent mt-0.5">
+                                    @order.TotalAmount.ToString("N0") ₫
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="flex items-center gap-2.5 mt-3">
+                                    
+                                    <!-- Xem Chi Tiết -->
+                                    <a href="/Customer/OrderDetail?id=@order.Id" 
+                                       class="px-4 py-2 rounded-full border border-slate-200 text-xs font-bold text-slate-700 hover:border-charcoal hover:bg-charcoal hover:text-white transition shadow-2xs">
+                                        Xem Chi Tiết
+                                    </a>
+
+                                    <!-- Mua Lại Đơn Này (Re-order in 1-click) -->
+                                    @if (order.CanReorder)
+                                    {
+                                        <form method="post" asp-action="Reorder" asp-controller="Customer" class="inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="orderId" value="@order.Id" />
+                                            <button type="submit" 
+                                                    class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-pastel-rose hover:bg-magenta-accent text-magenta-accent hover:text-white text-xs font-bold border border-magenta-accent/20 transition shadow-2xs group">
+                                                <i class="fa-solid fa-arrows-rotate text-[11px] group-hover:rotate-180 transition-transform duration-500"></i>
+                                                <span>Mua Lại</span>
+                                            </button>
+                                        </form>
+                                    }
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                }
+            </div>
+        }
+
+    </div>
+</div>

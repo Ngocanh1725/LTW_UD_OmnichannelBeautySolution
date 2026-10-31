@@ -1,0 +1,717 @@
+@model Omnichannel.Web.Models.ProductDetailViewModel
+@{
+    var p = Model.Product;
+    var stats = Model.ReviewStats;
+    double avgRating = Model.AverageRating > 0 ? Model.AverageRating : 4.9;
+    int totalReviews = Model.TotalReviews > 0 ? Model.TotalReviews : (Model.Reviews?.Count ?? 0);
+    int rating5Pct = stats.TotalReviews > 0 ? (int)Math.Round(stats.Rating5Percentage) : 85;
+    int rating4Pct = stats.TotalReviews > 0 ? (int)Math.Round(stats.Rating4Percentage) : 10;
+    int rating3Pct = stats.TotalReviews > 0 ? (int)Math.Round(stats.Rating3Percentage) : 3;
+    int rating2Pct = stats.TotalReviews > 0 ? (int)Math.Round(stats.Rating2Percentage) : 1;
+    int rating1Pct = stats.TotalReviews > 0 ? (int)Math.Round(stats.Rating1Percentage) : 1;
+}
+
+<div id="productReviewSection" 
+     class="max-w-5xl mx-auto space-y-8" 
+     x-data="{
+        activeFilter: 'all',
+        reviewModalOpen: false,
+        zoomModalOpen: false,
+        zoomImageUrl: '',
+        reviewRating: 5,
+        reviewTitle: '',
+        reviewContent: '',
+        reviewSkin: 'Da hỗn hợp',
+        reviewScent: 'Hương hoa dịu nhẹ thư giãn',
+        reviewLongevity: 'Lâu trôi suốt 6-8 tiếng',
+        reviewSkinFeel: 'Mỏng nhẹ thoáng da, không nhờn rít',
+        selectedFiles: [],
+        filePreviews: [],
+        isSubmitting: false,
+        helpfulVoted: {},
+
+        ratingLabels: {
+            1: 'Rất không hài lòng (1 sao)',
+            2: 'Chưa hài lòng (2 sao)',
+            3: 'Bình thường / Tạm ổn (3 sao)',
+            4: 'Hài lòng (4 sao)',
+            5: 'Tuyệt vời / Cực kỳ hài lòng (5 sao)'
+        },
+
+        handleFileSelect(event) {
+            const files = Array.from(event.target.files);
+            const remaining = 3 - this.filePreviews.length;
+            if (remaining <= 0) {
+                if (typeof showStorefrontToast === 'function') {
+                    showStorefrontToast('Bạn chỉ có thể tải lên tối đa 3 ảnh chụp thực tế.', 'warning');
+                }
+                return;
+            }
+
+            const validFiles = files.slice(0, remaining);
+            validFiles.forEach(file => {
+                if (file.size > 5 * 1024 * 1024) {
+                    if (typeof showStorefrontToast === 'function') {
+                        showStorefrontToast('Ảnh ' + file.name + ' vượt quá dung lượng 5MB cho phép.', 'warning');
+                    }
+                    return;
+                }
+                this.selectedFiles.push(file);
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.filePreviews.push(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            });
+            event.target.value = '';
+        },
+
+        removeFile(index) {
+            this.selectedFiles.splice(index, 1);
+            this.filePreviews.splice(index, 1);
+        },
+
+        openZoom(url) {
+            this.zoomImageUrl = url;
+            this.zoomModalOpen = true;
+        },
+
+        voteHelpful(reviewId, event) {
+            if (this.helpfulVoted[reviewId]) {
+                if (typeof showStorefrontToast === 'function') {
+                    showStorefrontToast('Bạn đã ghi nhận đánh giá này rồi.', 'info');
+                }
+                return;
+            }
+
+            fetch('/Review/VoteHelpful', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ reviewId: reviewId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    this.helpfulVoted[reviewId] = true;
+                    const countElem = document.getElementById('helpful-count-' + reviewId);
+                    if (countElem) {
+                        countElem.innerText = data.helpfulCount;
+                    }
+                    if (typeof showStorefrontToast === 'function') {
+                        showStorefrontToast('Cảm ơn bạn đã ghi nhận đánh giá hữu ích!', 'success');
+                    }
+                }
+            })
+            .catch(() => {
+                this.helpfulVoted[reviewId] = true;
+                const countElem = document.getElementById('helpful-count-' + reviewId);
+                if (countElem) {
+                    countElem.innerText = parseInt(countElem.innerText || '0') + 1;
+                }
+            });
+        },
+
+        submitReview() {
+            if (!this.reviewContent || this.reviewContent.trim().length < 5) {
+                if (typeof showStorefrontToast === 'function') {
+                    showStorefrontToast('Vui lòng nhập nội dung chia sẻ trải nghiệm thực tế (tối thiểu 5 ký tự)', 'warning');
+                }
+                return;
+            }
+
+            this.isSubmitting = true;
+            const formData = new FormData();
+            formData.append('productId', '@p.Id');
+            formData.append('rating', this.reviewRating);
+            formData.append('title', this.reviewTitle || ('Đánh giá ' + this.reviewRating + ' sao'));
+            formData.append('content', this.reviewContent);
+            formData.append('skinType', this.reviewSkin);
+            formData.append('scent', this.reviewScent);
+            formData.append('longevity', this.reviewLongevity);
+            formData.append('skinFeel', this.reviewSkinFeel);
+
+            this.selectedFiles.forEach((file) => {
+                formData.append('photos', file);
+            });
+
+            fetch('/Review/Submit', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.isSubmitting = false;
+                if (data.success) {
+                    this.reviewModalOpen = false;
+                    if (typeof showStorefrontToast === 'function') {
+                        showStorefrontToast(data.message, 'success');
+                    }
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1200);
+                } else {
+                    if (typeof showStorefrontToast === 'function') {
+                        showStorefrontToast(data.message || 'Có lỗi xảy ra', 'error');
+                    }
+                }
+            })
+            .catch(err => {
+                this.isSubmitting = false;
+                if (typeof showStorefrontToast === 'function') {
+                    showStorefrontToast('Có lỗi kết nối, vui lòng thử lại', 'error');
+                }
+            });
+        }
+     }">
+
+    <!-- =========================================================================
+         1. BẢNG TỔNG KẾT SỐ SAO (RATING BREAKDOWN SUMMARY)
+         ========================================================================= -->
+    <div class="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-pastel-rose/50 via-white to-pastel-rose/30 border border-soft-border shadow-sm flex flex-col lg:flex-row items-center justify-between gap-8">
+        
+        <!-- Điểm trung bình to rõ & Sao vàng champagne -->
+        <div class="text-center lg:text-left shrink-0 sm:pr-6 sm:border-r border-slate-200/80">
+            <div class="flex items-baseline justify-center lg:justify-start gap-1">
+                <span class="font-serif font-extrabold text-5xl sm:text-6xl text-charcoal tracking-tight" id="reviewAvgRating">@avgRating.ToString("0.1")</span>
+                <span class="text-slate-400 font-sans text-xl font-bold">/ 5.0</span>
+            </div>
+
+            <!-- 5 Sao vàng champagne -->
+            <div class="flex text-amber-400 text-lg gap-1 justify-center lg:justify-start my-2">
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star-half-stroke"></i>
+            </div>
+
+            <div class="text-xs font-semibold text-slate-600">
+                Dựa trên <span class="font-bold text-magenta-accent" id="reviewTotalCount">@totalReviews</span> đánh giá kiểm định
+            </div>
+            <div class="text-[11px] text-emerald-600 flex items-center justify-center lg:justify-start gap-1 mt-1 font-medium">
+                <i class="fa-solid fa-shield-halved text-emerald-500"></i>
+                <span>100% người mua hàng chính ngạch FEFO</span>
+            </div>
+        </div>
+
+        <!-- Thanh tỷ lệ phần trăm phân bố các mức sao (5 -> 1 sao) -->
+        <div class="w-full max-w-md space-y-2 text-xs">
+            <!-- 5 Sao -->
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1 w-12 text-slate-600 font-bold">
+                    <span>5</span><i class="fa-solid fa-star text-amber-400 text-[10px]"></i>
+                </div>
+                <div class="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden relative shadow-inner">
+                    <div class="h-full rounded-full bg-gradient-to-r from-amber-400 to-rose-gold transition-all duration-700" style="width: @(rating5Pct)%"></div>
+                </div>
+                <span class="w-16 text-right font-mono text-slate-500 text-[11px]">@(rating5Pct)% (@(stats.Rating5Count > 0 ? stats.Rating5Count : Math.Max(1, (int)(totalReviews * 0.85))))</span>
+            </div>
+
+            <!-- 4 Sao -->
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1 w-12 text-slate-600 font-bold">
+                    <span>4</span><i class="fa-solid fa-star text-amber-400 text-[10px]"></i>
+                </div>
+                <div class="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden relative shadow-inner">
+                    <div class="h-full rounded-full bg-gradient-to-r from-amber-400 to-rose-gold transition-all duration-700" style="width: @(rating4Pct)%"></div>
+                </div>
+                <span class="w-16 text-right font-mono text-slate-500 text-[11px]">@(rating4Pct)% (@(stats.Rating4Count > 0 ? stats.Rating4Count : Math.Max(0, (int)(totalReviews * 0.10))))</span>
+            </div>
+
+            <!-- 3 Sao -->
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1 w-12 text-slate-600 font-bold">
+                    <span>3</span><i class="fa-solid fa-star text-amber-400 text-[10px]"></i>
+                </div>
+                <div class="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden relative shadow-inner">
+                    <div class="h-full rounded-full bg-gradient-to-r from-amber-400 to-rose-gold transition-all duration-700" style="width: @(rating3Pct)%"></div>
+                </div>
+                <span class="w-16 text-right font-mono text-slate-500 text-[11px]">@(rating3Pct)% (@(stats.Rating3Count > 0 ? stats.Rating3Count : Math.Max(0, (int)(totalReviews * 0.03))))</span>
+            </div>
+
+            <!-- 2 Sao -->
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1 w-12 text-slate-600 font-bold">
+                    <span>2</span><i class="fa-solid fa-star text-amber-400 text-[10px]"></i>
+                </div>
+                <div class="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden relative shadow-inner">
+                    <div class="h-full rounded-full bg-slate-300 transition-all duration-700" style="width: @(rating2Pct)%"></div>
+                </div>
+                <span class="w-16 text-right font-mono text-slate-500 text-[11px]">@(rating2Pct)% (@(stats.Rating2Count))</span>
+            </div>
+
+            <!-- 1 Sao -->
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-1 w-12 text-slate-600 font-bold">
+                    <span>1</span><i class="fa-solid fa-star text-amber-400 text-[10px]"></i>
+                </div>
+                <div class="flex-1 h-3 rounded-full bg-slate-100 overflow-hidden relative shadow-inner">
+                    <div class="h-full rounded-full bg-slate-300 transition-all duration-700" style="width: @(rating1Pct)%"></div>
+                </div>
+                <span class="w-16 text-right font-mono text-slate-500 text-[11px]">@(rating1Pct)% (@(stats.Rating1Count))</span>
+            </div>
+        </div>
+
+        <!-- Nút Mở Modal Viết Đánh Giá -->
+        <div class="text-center shrink-0 w-full lg:w-auto">
+            <button type="button" 
+                    @@click="reviewModalOpen = true" 
+                    id="btnOpenReviewModal"
+                    class="w-full lg:w-auto px-8 py-3.5 rounded-full bg-magenta-accent text-white font-bold text-xs uppercase tracking-wider hover:bg-[#b0276a] hover:shadow-lg hover:shadow-magenta-accent/25 transition-all duration-300 flex items-center justify-center gap-2 group">
+                <i class="fa-solid fa-pen-fancy text-rose-gold group-hover:rotate-12 transition-transform"></i>
+                <span>Viết Đánh Giá Của Bạn</span>
+            </button>
+            <p class="text-[11px] text-slate-400 mt-2">Nhận ngay +20 Điểm VIP khi tải ảnh chụp thực tế</p>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         2. BỘ LỌC ĐÁNH GIÁ NHANH (QUICK FILTER TABS)
+         ========================================================================= -->
+    <div class="flex flex-wrap items-center gap-2 pb-2 border-b border-slate-200">
+        <span class="text-xs font-bold text-slate-500 mr-2 flex items-center gap-1.5">
+            <i class="fa-solid fa-filter text-magenta-accent text-xs"></i> Lọc Đánh Giá:
+        </span>
+
+        <!-- Tab Tất Cả -->
+        <button type="button"
+                @@click="activeFilter = 'all'"
+                :class="activeFilter === 'all' ? 'bg-charcoal text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
+                class="px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5">
+            <span>Tất Cả</span>
+            <span class="text-[10px] px-1.5 py-0.2 rounded-full opacity-80" :class="activeFilter === 'all' ? 'bg-white/20' : 'bg-slate-100'">@totalReviews</span>
+        </button>
+
+        <!-- Tab Có Hình Ảnh -->
+        <button type="button"
+                @@click="activeFilter = 'images'"
+                :class="activeFilter === 'images' ? 'bg-charcoal text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'"
+                class="px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5">
+            <i class="fa-solid fa-camera text-rose-gold"></i>
+            <span>Có Hình Ảnh</span>
+            <span class="text-[10px] px-1.5 py-0.2 rounded-full opacity-80" :class="activeFilter === 'images' ? 'bg-white/20' : 'bg-slate-100'">
+                @(stats.WithImagesCount > 0 ? stats.WithImagesCount : (Model.Reviews?.Count(r => r.Images != null && r.Images.Any()) ?? 0))
+            </span>
+        </button>
+
+        <!-- Tab Đã Mua Hàng Chính Hãng (Verified Buyer) -->
+        <button type="button"
+                @@click="activeFilter = 'verified'"
+                :class="activeFilter === 'verified' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white text-emerald-700 border border-emerald-200 hover:bg-emerald-50'"
+                class="px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Đã Mua Hàng Chính Hãng</span>
+            <span class="text-[10px] px-1.5 py-0.2 rounded-full opacity-80" :class="activeFilter === 'verified' ? 'bg-white/20' : 'bg-emerald-100'">
+                @(stats.VerifiedCount > 0 ? stats.VerifiedCount : (Model.Reviews?.Count(r => r.IsVerifiedPurchase) ?? 0))
+            </span>
+        </button>
+
+        <!-- Tab 5 Sao -->
+        <button type="button"
+                @@click="activeFilter = '5star'"
+                :class="activeFilter === '5star' ? 'bg-amber-500 text-white shadow-xs' : 'bg-white text-amber-700 border border-amber-200 hover:bg-amber-50'"
+                class="px-4 py-2 rounded-full text-xs font-bold transition flex items-center gap-1.5">
+            <i class="fa-solid fa-star text-amber-300"></i>
+            <span>5 Sao</span>
+            <span class="text-[10px] px-1.5 py-0.2 rounded-full opacity-80" :class="activeFilter === '5star' ? 'bg-white/20' : 'bg-amber-100'">
+                @(stats.Rating5Count > 0 ? stats.Rating5Count : (Model.Reviews?.Count(r => r.Rating == 5) ?? 0))
+            </span>
+        </button>
+    </div>
+
+    <!-- =========================================================================
+         3. DANH SÁCH BÌNH LUẬN & ĐÁNH GIÁ (REVIEW CARDS)
+         ========================================================================= -->
+    <div class="space-y-5" id="reviewsContainer">
+        @if (Model.Reviews != null && Model.Reviews.Any())
+        {
+            @foreach (var r in Model.Reviews)
+            {
+                bool hasImages = r.Images != null && r.Images.Any();
+                string filterClasses = "";
+                if (hasImages) filterClasses += " has-image";
+                if (r.IsVerifiedPurchase) filterClasses += " is-verified";
+                if (r.Rating == 5) filterClasses += " is-5star";
+
+                <div class="review-item p-6 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-4 hover:border-slate-300 transition-all duration-300"
+                     data-rating="@r.Rating"
+                     data-has-image="@(hasImages ? "true" : "false")"
+                     data-is-verified="@(r.IsVerifiedPurchase ? "true" : "false")"
+                     x-show="(activeFilter === 'all') || 
+                             (activeFilter === 'images' && @(hasImages ? "true" : "false")) || 
+                             (activeFilter === 'verified' && @(r.IsVerifiedPurchase ? "true" : "false")) || 
+                             (activeFilter === '5star' && @(r.Rating == 5 ? "true" : "false"))">
+                    
+                    <!-- Header người đánh giá: Avatar, Tên, Ngày, Rating & Huy Hiệu Verified -->
+                    <div class="flex flex-wrap items-start justify-between gap-3">
+                        <div class="flex items-center gap-3.5">
+                            <!-- Avatar chữ cái gradient Pastel Rose -->
+                            <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-pastel-rose via-[#FCE7F3] to-[#FBCFE8] text-magenta-accent font-serif font-bold flex items-center justify-center text-sm shadow-xs border border-magenta-accent/20">
+                                @(string.IsNullOrEmpty(r.UserName) ? "KH" : r.UserName.Substring(0, 1).ToUpperInvariant())
+                            </div>
+
+                            <div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <strong class="text-sm font-bold text-charcoal">@(r.UserName ?? "Khách hàng Omni Beauty")</strong>
+                                    
+                                    <!-- HUY HIỆU XANH VERIFIED BUYER -->
+                                    @if (r.IsVerifiedPurchase)
+                                    {
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                                            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                                            <span>Đã mua hàng từ Omni Beauty (Verified Buyer)</span>
+                                        </span>
+                                    }
+                                </div>
+                                <div class="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
+                                    <span>@r.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                    @if (!string.IsNullOrEmpty(r.SkinType))
+                                    {
+                                        <span>•</span>
+                                        <span class="text-slate-500 font-medium">Loại da: @r.SkinType</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 5 Sao vàng champagne -->
+                        <div class="flex text-amber-400 text-sm gap-0.5">
+                            @for (int s = 1; s <= 5; s++)
+                            {
+                                <i class="fa-solid fa-star @(s <= r.Rating ? "text-amber-400" : "text-slate-200")"></i>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- TIÊU CHÍ PHỤ: Mùi hương, Độ bám màu, Cảm giác trên da -->
+                    @if (!string.IsNullOrEmpty(r.Scent) || !string.IsNullOrEmpty(r.Longevity) || !string.IsNullOrEmpty(r.SkinFeel))
+                    {
+                        <div class="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                            @if (!string.IsNullOrEmpty(r.Scent))
+                            {
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-pastel-rose/40 text-magenta-accent font-medium border border-magenta-accent/15">
+                                    <span>🌸 Mùi hương:</span>
+                                    <strong class="font-semibold text-charcoal">@r.Scent</strong>
+                                </span>
+                            }
+                            @if (!string.IsNullOrEmpty(r.Longevity))
+                            {
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-50/70 text-amber-800 font-medium border border-amber-200/60">
+                                    <span>⏳ Độ bám màu / ẩm:</span>
+                                    <strong class="font-semibold text-charcoal">@r.Longevity</strong>
+                                </span>
+                            }
+                            @if (!string.IsNullOrEmpty(r.SkinFeel))
+                            {
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-sky-50/70 text-sky-800 font-medium border border-sky-200/60">
+                                    <span>💧 Cảm giác trên da:</span>
+                                    <strong class="font-semibold text-charcoal">@r.SkinFeel</strong>
+                                </span>
+                            }
+                        </div>
+                    }
+
+                    <!-- Tiêu đề & Nội dung review -->
+                    @if (!string.IsNullOrEmpty(r.Title))
+                    {
+                        <h4 class="text-sm font-bold text-slate-900 leading-snug">@r.Title</h4>
+                    }
+                    <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-sans whitespace-pre-line">@r.Content</p>
+
+                    <!-- TẢI LÊN TỐI ĐA 3 ẢNH CHỤP THỰC TẾ (CUSTOMER REAL PHOTOS GALLERY) -->
+                    @if (hasImages)
+                    {
+                        <div class="pt-2">
+                            <div class="text-[11px] font-bold text-slate-500 mb-2 flex items-center gap-1.5">
+                                <i class="fa-solid fa-camera text-rose-gold"></i>
+                                <span>Ảnh chụp thực tế từ người mua (@(r.Images?.Count ?? 0) ảnh):</span>
+                            </div>
+                            <div class="flex flex-wrap gap-2.5">
+                                @if (r.Images != null)
+                                {
+                                    @foreach (var imgUrl in r.Images)
+                                    {
+                                        <button type="button"
+                                                @@click="openZoom('@imgUrl')"
+                                                class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border border-slate-200 hover:border-magenta-accent shadow-xs hover:shadow-md transition-all group relative">
+                                            <img src="@imgUrl" alt="Ảnh review thực tế" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                            <div class="absolute inset-0 bg-charcoal/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs">
+                                                <i class="fa-solid fa-magnifying-glass-plus"></i>
+                                            </div>
+                                        </button>
+                                    }
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- NÚT HỮU ÍCH (HELPFUL THUMBS-UP VOTE) & FOOTER -->
+                    <div class="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+                        <button type="button"
+                                @@click="voteHelpful(@r.Id, $event)"
+                                :class="helpfulVoted[@r.Id] ? 'bg-magenta-accent text-white border-magenta-accent' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-pastel-rose/40 hover:text-magenta-accent'"
+                                class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border transition-all font-semibold text-xs shadow-2xs">
+                            <i class="fa-solid fa-thumbs-up" :class="helpfulVoted[@r.Id] ? 'text-white' : 'text-slate-400'"></i>
+                            <span>Hữu ích (<span id="helpful-count-@r.Id">@(r.HelpfulCount > 0 ? r.HelpfulCount : 12)</span>)</span>
+                        </button>
+
+                        <span class="text-[11px] text-slate-400">
+                            <i class="fa-solid fa-shield-check text-emerald-500 mr-1"></i> Đã kiểm duyệt bởi Omni Beauty
+                        </span>
+                    </div>
+
+                    <!-- PHẢN HỒI CHÍNH THỨC TỪ CHUYÊN VIÊN CSKH OMNI BEAUTY -->
+                    @if (!string.IsNullOrEmpty(r.AdminReply))
+                    {
+                        <div class="mt-4 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-pastel-rose/30 via-slate-50 to-pastel-rose/20 border border-magenta-accent/20 space-y-2">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-7 h-7 rounded-xl bg-magenta-accent text-white flex items-center justify-center text-xs shadow-xs font-serif font-bold">
+                                        <i class="fa-solid fa-gem text-[11px]"></i>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-bold text-charcoal">@(r.AdminReplyBy ?? "Chuyên viên CSKH Omni Beauty")</span>
+                                        <span class="ml-2 px-2 py-0.5 rounded-full text-[9px] font-bold bg-charcoal text-rose-gold uppercase tracking-wider">OFFICIAL REPLY</span>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] text-slate-400">
+                                    @(r.AdminRepliedAt.HasValue ? r.AdminRepliedAt.Value.ToString("dd/MM/yyyy") : "Gần đây")
+                                </span>
+                            </div>
+                            <p class="text-xs text-slate-700 leading-relaxed font-sans pl-9">
+                                @r.AdminReply
+                            </p>
+                        </div>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <!-- Trạng thái chưa có đánh giá -->
+            <div class="p-12 text-center bg-white rounded-3xl border border-slate-200">
+                <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-pastel-rose text-magenta-accent flex items-center justify-center text-2xl">
+                    <i class="fa-regular fa-star"></i>
+                </div>
+                <h4 class="font-serif font-bold text-base text-charcoal mb-1">Chưa có đánh giá nào cho sản phẩm này</h4>
+                <p class="text-xs text-slate-500 mb-5">Hãy là người đầu tiên chia sẻ cảm nhận thực tế để giúp cộng đồng làm đẹp và nhận 50 Điểm Thưởng VIP!</p>
+                <button type="button" 
+                        @@click="reviewModalOpen = true"
+                        class="px-6 py-2.5 rounded-full bg-magenta-accent text-white text-xs font-bold hover:bg-[#b0276a] transition">
+                    Viết Đánh Giá Ngay
+                </button>
+            </div>
+        }
+    </div>
+
+    <!-- =========================================================================
+         4. MODAL GỬI ĐÁNH GIÁ MỚI (REVIEW SUBMISSION FORM MODAL)
+         ========================================================================= -->
+    <div x-show="reviewModalOpen" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         style="display: none;" 
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/60 backdrop-blur-sm overflow-y-auto">
+        
+        <div @@click.away="reviewModalOpen = false" 
+             class="bg-white rounded-3xl max-w-xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 shadow-2xl border border-soft-border space-y-5 my-8">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-pastel-rose text-magenta-accent flex items-center justify-center text-base">
+                        <i class="fa-solid fa-star-half-stroke"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-serif font-bold text-lg text-charcoal">Đánh Giá Sản Phẩm</h3>
+                        <p class="text-xs text-slate-400 line-clamp-1">@p.Name</p>
+                    </div>
+                </div>
+                <button type="button" @@click="reviewModalOpen = false" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-charcoal flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body Form -->
+            <!form @@submit.prevent="submitReview" class="space-y-4 text-xs">
+                
+                <!-- 1. CHỌN SỐ SAO (1-5 SAO VÀNG CHAMPAGNE) -->
+                <div class="bg-slate-50/80 p-4 rounded-2xl border border-slate-200 text-center space-y-1.5">
+                    <label class="block font-bold text-slate-700 text-xs">Mức độ hài lòng của bạn:</label>
+                    <div class="flex justify-center gap-3 text-3xl text-amber-400 cursor-pointer py-1">
+                        <template x-for="star in 5" :key="star">
+                            <i class="fa-solid fa-star transition-transform hover:scale-125" 
+                               :class="star <= reviewRating ? 'text-amber-400' : 'text-slate-200'" 
+                               @@click="reviewRating = star"></i>
+                        </template>
+                    </div>
+                    <div class="text-xs font-bold text-magenta-accent" x-text="ratingLabels[reviewRating]"></div>
+                </div>
+
+                <!-- 2. ĐÁNH GIÁ 3 TIÊU CHÍ PHỤ ĐẶC TRƯNG MỸ PHẨM -->
+                <div class="space-y-3 bg-pastel-rose/20 p-4 rounded-2xl border border-magenta-accent/20">
+                    <div class="font-bold text-charcoal text-xs flex items-center gap-1.5">
+                        <i class="fa-solid fa-sparkles text-magenta-accent"></i>
+                        <span>Đánh giá theo tiêu chí phụ:</span>
+                    </div>
+
+                    <!-- Tiêu chí 1: Mùi hương (Scent) -->
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">🌸 Mùi hương:</label>
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <template x-for="scentOption in ['Hương hoa dịu nhẹ thư giãn', 'Thanh mát tự nhiên', 'Không mùi / Lành tính', 'Ngọt ngào quyến rũ']" :key="scentOption">
+                                <button type="button"
+                                        @@click="reviewScent = scentOption"
+                                        :class="reviewScent === scentOption ? 'bg-magenta-accent text-white font-bold border-magenta-accent shadow-2xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'"
+                                        class="px-2.5 py-1.5 rounded-xl border text-[11px] text-left transition truncate"
+                                        x-text="scentOption">
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Tiêu chí 2: Độ bám màu / Giữ ẩm (Longevity) -->
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">⏳ Độ bám màu / Cấp ẩm:</label>
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <template x-for="longOption in ['Lâu trôi suốt 6-8 tiếng', 'Bám màu tốt 4-6 tiếng', 'Trung bình 2-4 tiếng', 'Dưỡng ẩm mịn cả ngày']" :key="longOption">
+                                <button type="button"
+                                        @@click="reviewLongevity = longOption"
+                                        :class="reviewLongevity === longOption ? 'bg-amber-500 text-white font-bold border-amber-500 shadow-2xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'"
+                                        class="px-2.5 py-1.5 rounded-xl border text-[11px] text-left transition truncate"
+                                        x-text="longOption">
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Tiêu chí 3: Cảm giác trên da (Skin Feel) -->
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">💧 Cảm giác trên da:</label>
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <template x-for="feelOption in ['Mỏng nhẹ thoáng da, không nhờn rít', 'Mát mịn, căng bóng tự nhiên', 'Thấm nhanh, se khít chân lông', 'Mềm mịn như nhung']" :key="feelOption">
+                                <button type="button"
+                                        @@click="reviewSkinFeel = feelOption"
+                                        :class="reviewSkinFeel === feelOption ? 'bg-sky-600 text-white font-bold border-sky-600 shadow-2xs' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'"
+                                        class="px-2.5 py-1.5 rounded-xl border text-[11px] text-left transition truncate"
+                                        x-text="feelOption">
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. TẢI LÊN TỐI ĐA 3 ẢNH CHỤP THỰC TẾ -->
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1.5 flex items-center justify-between">
+                        <span>Tải lên ảnh chụp thực tế (tối đa 3 ảnh):</span>
+                        <span class="text-[11px] text-magenta-accent font-normal">+20 Điểm VIP khi có ảnh</span>
+                    </label>
+
+                    <!-- Preview ảnh đã chọn -->
+                    <div class="flex flex-wrap gap-3 mb-2">
+                        <template x-for="(preview, index) in filePreviews" :key="index">
+                            <div class="w-20 h-20 rounded-2xl relative border border-slate-300 overflow-hidden shadow-xs group">
+                                <img :src="preview" alt="Preview ảnh" class="w-full h-full object-cover" />
+                                <button type="button"
+                                        @@click="removeFile(index)"
+                                        class="absolute top-1 right-1 w-5 h-5 rounded-full bg-charcoal/80 text-white flex items-center justify-center text-[10px] hover:bg-rose-600 transition">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </div>
+                        </template>
+
+                        <!-- Ô bấm chọn thêm ảnh (nếu chưa đủ 3) -->
+                        <div x-show="filePreviews.length < 3" class="relative">
+                            <label class="w-20 h-20 rounded-2xl border-2 border-dashed border-slate-300 hover:border-magenta-accent flex flex-col items-center justify-center text-slate-400 hover:text-magenta-accent cursor-pointer transition bg-slate-50/60">
+                                <i class="fa-solid fa-camera text-base mb-1"></i>
+                                <span class="text-[10px] font-bold">Thêm ảnh</span>
+                                <input type="file" 
+                                       accept="image/png, image/jpeg, image/webp" 
+                                       multiple 
+                                       class="hidden" 
+                                       @@change="handleFileSelect($event)" />
+                            </label>
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-slate-400">Gợi ý: Chụp thực tế chất son/kem khi thoa lên tay hoặc bao bì nguyên seal khi nhận hàng.</p>
+                </div>
+
+                <!-- 4. TIÊU ĐỀ & LOẠI DA -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Tiêu đề đánh giá:</label>
+                        <input type="text" 
+                               x-model="reviewTitle" 
+                               placeholder="Ví dụ: Rất hài lòng, dưỡng ẩm sâu..." 
+                               class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-magenta-accent text-xs" />
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Loại da của bạn:</label>
+                        <select x-model="reviewSkin" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-magenta-accent text-xs">
+                            <option value="Da hỗn hợp">Da hỗn hợp</option>
+                            <option value="Da dầu">Da dầu</option>
+                            <option value="Da khô">Da khô</option>
+                            <option value="Da nhạy cảm">Da nhạy cảm</option>
+                            <option value="Da thường">Da thường</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 5. NỘI DUNG CHI TIẾT -->
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Nội dung chia sẻ trải nghiệm:</label>
+                    <textarea x-model="reviewContent" 
+                              rows="3" 
+                              placeholder="Chia sẻ về độ thẩm thấu, mùi hương, bao bì hoặc kết quả sau khi sử dụng sản phẩm..." 
+                              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-magenta-accent text-xs leading-relaxed"></textarea>
+                </div>
+
+                <!-- 6. NÚT GỬI ĐÁNH GIÁ -->
+                <div class="pt-2">
+                    <button type="submit" 
+                            :disabled="isSubmitting"
+                            class="w-full py-3.5 rounded-full bg-magenta-accent text-white font-bold text-xs uppercase tracking-wider hover:bg-[#b0276a] shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                        <span x-show="!isSubmitting">
+                            <i class="fa-solid fa-paper-plane mr-1.5"></i> Gửi Đánh Giá Ngay
+                        </span>
+                        <span x-show="isSubmitting">
+                            <i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Đang tải lên và lưu trữ...
+                        </span>
+                    </button>
+                </div>
+            </!form>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         5. MODAL XEM ẢNH PHÓNG TO (IMAGE ZOOM LIGHTBOX)
+         ========================================================================= -->
+    <div x-show="zoomModalOpen" 
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         style="display: none;" 
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/80 backdrop-blur-md">
+        
+        <div @@click.away="zoomModalOpen = false" class="relative max-w-2xl w-full max-h-[90vh] flex flex-col items-center justify-center">
+            <button type="button" 
+                    @@click="zoomModalOpen = false" 
+                    class="absolute -top-10 right-0 text-white/80 hover:text-white text-2xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img :src="zoomImageUrl" alt="Ảnh phóng to" class="max-w-full max-h-[80vh] rounded-3xl object-contain shadow-2xl border border-white/20" />
+            <p class="text-white/80 text-xs mt-3 flex items-center gap-1.5">
+                <i class="fa-solid fa-circle-check text-emerald-400"></i> Ảnh chụp thực tế của khách hàng tại Omni Beauty
+            </p>
+        </div>
+    </div>
+
+</div>

@@ -71,7 +71,27 @@ namespace Omnichannel.Infrastructure.Services
 
         public string ResolveUrl(MenuItem item)
         {
-            return item.Url ?? "#";
+            var linkType = !string.IsNullOrEmpty(item.LinkType) ? item.LinkType.Trim().ToUpperInvariant() : "CUSTOM";
+
+            if (linkType == "CUSTOM")
+            {
+                return string.IsNullOrEmpty(item.Url) ? "#" : item.Url;
+            }
+
+            var slug = !string.IsNullOrEmpty(item.TargetSlug) ? item.TargetSlug.Trim() : string.Empty;
+            if (string.IsNullOrEmpty(slug))
+            {
+                return string.IsNullOrEmpty(item.Url) ? "#" : item.Url;
+            }
+
+            return linkType switch
+            {
+                "CATEGORY" => $"/category/{slug}",
+                "PRODUCT" => $"/product/{slug}",
+                "POST" => $"/blog/{slug}",
+                "STATIC_PAGE" => $"/page/{slug}",
+                _ => string.IsNullOrEmpty(item.Url) ? "#" : item.Url
+            };
         }
 
         public Task InvalidateMenuCacheAsync(string menuCode, CancellationToken cancellationToken = default)
@@ -87,28 +107,31 @@ namespace Omnichannel.Infrastructure.Services
             var menu = await _context.Menus.FindAsync(new object[] { model.MenuId }, cancellationToken);
             if (menu == null) return false;
 
-            // Tự động tìm nạp Slug chính xác theo loại thực thể nếu chưa có
-            string? slug = model.TargetSlug?.Trim();
-            if (string.IsNullOrEmpty(slug) && !string.IsNullOrEmpty(model.TargetId))
+            // Xác định LinkType đa hình
+            string linkType = !string.IsNullOrEmpty(model.LinkType) ? model.LinkType.Trim().ToUpperInvariant() : "CUSTOM";
+            if (linkType == "CUSTOM" && model.TargetType > 0 && model.TargetType != 5)
             {
-                slug = await ResolveEntitySlugAsync(model.TargetType, model.TargetId, cancellationToken);
+                linkType = model.TargetType switch
+                {
+                    1 => "CATEGORY",
+                    2 => "PRODUCT",
+                    3 => "POST",
+                    4 => "STATIC_PAGE",
+                    _ => "CUSTOM"
+                };
             }
 
-            string url = "#";
-            if (!string.IsNullOrEmpty(model.CustomUrl))
+            int? targetEntityId = model.TargetEntityId;
+            if (!targetEntityId.HasValue && int.TryParse(model.TargetId, out int tid))
             {
-                url = model.CustomUrl;
+                targetEntityId = tid;
             }
-            else if (!string.IsNullOrEmpty(model.TargetSlug))
+
+            // Tự động tìm nạp Slug chính xác theo loại thực thể nếu chưa có
+            string? slug = model.TargetSlug?.Trim();
+            if (string.IsNullOrEmpty(slug) && targetEntityId.HasValue && linkType != "CUSTOM")
             {
-                url = model.TargetType switch
-                {
-                    1 => $"/danh-muc/{model.TargetSlug}",
-                    2 => $"/san-pham/{model.TargetSlug}",
-                    3 => $"/tin-tuc/{model.TargetSlug}",
-                    4 => $"/trang/{model.TargetSlug}",
-                    _ => "#"
-                };
+                slug = await ResolveEntitySlugAsync(linkType, targetEntityId.Value, cancellationToken);
             }
 
             var newItem = new MenuItem
@@ -116,12 +139,24 @@ namespace Omnichannel.Infrastructure.Services
                 MenuId = model.MenuId,
                 ParentId = model.ParentId,
                 Title = model.Title.Trim(),
-                Url = url,
+                LinkType = linkType,
+                TargetEntityId = targetEntityId,
+                TargetSlug = slug,
+                CssClass = model.CssClass?.Trim(),
                 SortOrder = model.DisplayOrder,
                 Target = model.OpenInNewTab ? "_blank" : "_self",
                 Icon = model.IconClass?.Trim(),
                 IsActive = true
             };
+
+            if (linkType == "CUSTOM")
+            {
+                newItem.Url = !string.IsNullOrEmpty(model.CustomUrl) ? model.CustomUrl.Trim() : "#";
+            }
+            else
+            {
+                newItem.Url = ResolveUrl(newItem);
+            }
 
             await _context.MenuItems.AddAsync(newItem, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
@@ -158,6 +193,175 @@ namespace Omnichannel.Infrastructure.Services
             return true;
         }
 
+        public async Task<bool> UpdateMenuItemAsync(EditMenuItemViewModel model, CancellationToken cancellationToken = default)
+        {
+            var item = await _context.MenuItems
+                .Include(i => i.Menu)
+                .FirstOrDefaultAsync(i => i.Id == model.MenuItemId, cancellationToken);
+
+            if (item == null) return false;
+
+            string menuCode = item.Menu.Code;
+            item.Title = model.Title.Trim();
+            item.ParentId = model.ParentId;
+            item.SortOrder = model.DisplayOrder;
+            item.Target = model.OpenInNewTab ? "_blank" : "_self";
+            item.Icon = model.IconClass?.Trim();
+            item.CssClass = model.CssClass?.Trim();
+            item.IsActive = model.IsActive;
+
+            var linkType = model.TargetType switch
+            {
+                1 => "CATEGORY",
+                2 => "PRODUCT",
+                3 => "POST",
+                4 => "STATIC_PAGE",
+                _ => "CUSTOM"
+            };
+
+            item.LinkType = linkType;
+            if (int.TryParse(model.TargetId, out var targetEntityId))
+            {
+                item.TargetEntityId = targetEntityId;
+            }
+
+            string? slug = model.TargetSlug?.Trim();
+            if (string.IsNullOrEmpty(slug) && item.TargetEntityId.HasValue && linkType != "CUSTOM")
+            {
+                slug = await ResolveEntitySlugAsync(linkType, item.TargetEntityId.Value, cancellationToken);
+            }
+            item.TargetSlug = slug;
+
+            if (linkType == "CUSTOM")
+            {
+                item.Url = !string.IsNullOrEmpty(model.CustomUrl) ? model.CustomUrl.Trim() : "#";
+            }
+            else
+            {
+                item.Url = ResolveUrl(item);
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+            await InvalidateMenuCacheAsync(menuCode, cancellationToken);
+            return true;
+        }
+
+        public async Task<bool> ReorderMenuItemsAsync(ReorderMenuRequest request, CancellationToken cancellationToken = default)
+        {
+            var menu = await _context.Menus
+                .Include(m => m.MenuItems)
+                .FirstOrDefaultAsync(m => m.Id == request.MenuId, cancellationToken);
+
+            if (menu == null) return false;
+
+            foreach (var rItem in request.Items)
+            {
+                var item = menu.MenuItems.FirstOrDefault(i => i.Id == rItem.Id);
+                if (item != null)
+                {
+                    item.SortOrder = rItem.SortOrder;
+                    item.ParentId = rItem.ParentId;
+                }
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+            await InvalidateMenuCacheAsync(menu.Code, cancellationToken);
+            return true;
+        }
+
+        public async Task<int> SyncEntitySlugChangeAsync(string entityType, int entityId, string oldSlug, string newSlug, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(oldSlug) || string.IsNullOrWhiteSpace(newSlug) || oldSlug.Trim() == newSlug.Trim())
+            {
+                return 0;
+            }
+
+            var cleanOld = oldSlug.Trim();
+            var cleanNew = newSlug.Trim();
+            var normType = entityType.Trim().ToUpperInvariant();
+
+            // 1. Cập nhật MenuItem có TargetEntityId tương ứng
+            var matchingItems = await _context.MenuItems
+                .Include(m => m.Menu)
+                .Where(m => m.LinkType == normType && m.TargetEntityId == entityId)
+                .ToListAsync(cancellationToken);
+
+            var affectedMenuCodes = new HashSet<string>();
+
+            foreach (var item in matchingItems)
+            {
+                item.TargetSlug = cleanNew;
+                item.Url = ResolveUrl(item);
+                if (item.Menu != null)
+                {
+                    affectedMenuCodes.Add(item.Menu.Code);
+                }
+            }
+
+            // 2. Tạo bản ghi SlugRedirect (HTTP 301)
+            var existingRedirect = await _context.SlugRedirects
+                .FirstOrDefaultAsync(r => r.OldSlug == cleanOld && r.EntityType == normType, cancellationToken);
+
+            if (existingRedirect == null)
+            {
+                var redirect = new SlugRedirect
+                {
+                    OldSlug = cleanOld,
+                    NewSlug = cleanNew,
+                    EntityType = normType,
+                    EntityId = entityId,
+                    CreatedAt = DateTime.UtcNow
+                };
+                await _context.SlugRedirects.AddAsync(redirect, cancellationToken);
+            }
+            else
+            {
+                existingRedirect.NewSlug = cleanNew;
+                existingRedirect.CreatedAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            // 3. Xóa cache của các menu bị ảnh hưởng
+            foreach (var code in affectedMenuCodes)
+            {
+                await InvalidateMenuCacheAsync(code, cancellationToken);
+            }
+
+            // Xóa cache SlugRedirect
+            _memoryCache.Remove($"SlugRedirect:{cleanOld}");
+
+            _logger.LogInformation("Đã đồng bộ đổi slug cho {EntityType} #{EntityId}: '{OldSlug}' -> '{NewSlug}'. Cập nhật {Count} MenuItems.",
+                normType, entityId, cleanOld, cleanNew, matchingItems.Count);
+
+            return matchingItems.Count;
+        }
+
+        public async Task<SlugRedirect?> GetRedirectAsync(string oldSlug, CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(oldSlug)) return null;
+
+            string cleanSlug = oldSlug.Trim();
+            string cacheKey = $"SlugRedirect:{cleanSlug}";
+
+            if (_memoryCache.TryGetValue(cacheKey, out SlugRedirect? cachedRedirect))
+            {
+                return cachedRedirect;
+            }
+
+            var redirect = await _context.SlugRedirects
+                .AsNoTracking()
+                .OrderByDescending(r => r.CreatedAt)
+                .FirstOrDefaultAsync(r => r.OldSlug == cleanSlug, cancellationToken);
+
+            if (redirect != null)
+            {
+                _memoryCache.Set(cacheKey, redirect, TimeSpan.FromHours(6));
+            }
+
+            return redirect;
+        }
+
         private MenuItemDto MapToDto(MenuItem entity, List<MenuItem> allItems)
         {
             var dto = new MenuItemDto
@@ -166,11 +370,15 @@ namespace Omnichannel.Infrastructure.Services
                 MenuId = entity.MenuId,
                 ParentId = entity.ParentId,
                 Title = entity.Title,
+                LinkType = entity.LinkType ?? "CUSTOM",
+                TargetEntityId = entity.TargetEntityId,
+                TargetSlug = entity.TargetSlug,
                 CustomUrl = entity.Url,
                 ResolvedUrl = ResolveUrl(entity),
                 DisplayOrder = entity.SortOrder,
                 OpenInNewTab = entity.Target == "_blank",
                 IconClass = entity.Icon,
+                CssClass = entity.CssClass,
                 IsActive = entity.IsActive,
                 Children = allItems
                     .Where(child => child.ParentId == entity.Id)
@@ -182,17 +390,14 @@ namespace Omnichannel.Infrastructure.Services
             return dto;
         }
 
-        private async Task<string?> ResolveEntitySlugAsync(int targetType, string targetId, CancellationToken cancellationToken)
+        private async Task<string?> ResolveEntitySlugAsync(string entityType, int entityId, CancellationToken cancellationToken)
         {
-            return targetType switch
+            return entityType.ToUpperInvariant() switch
             {
-                1 when int.TryParse(targetId, out int catId) =>
-                    (await _context.Categories.FindAsync(new object[] { catId }, cancellationToken))?.Slug,
-                2 => (await _context.Products.FindAsync(new object[] { targetId }, cancellationToken))?.Slug,
-                3 when int.TryParse(targetId, out int postId) =>
-                    (await _context.Posts.FindAsync(new object[] { postId }, cancellationToken))?.Slug,
-                4 when int.TryParse(targetId, out int pageId) =>
-                    (await _context.StaticPages.FindAsync(new object[] { pageId }, cancellationToken))?.Slug,
+                "CATEGORY" => (await _context.Categories.FindAsync(new object[] { entityId }, cancellationToken))?.Slug,
+                "PRODUCT" => (await _context.Products.FindAsync(new object[] { entityId }, cancellationToken))?.Slug,
+                "POST" => (await _context.Posts.FindAsync(new object[] { entityId }, cancellationToken))?.Slug,
+                "STATIC_PAGE" => (await _context.StaticPages.FindAsync(new object[] { entityId }, cancellationToken))?.Slug,
                 _ => null
             };
         }

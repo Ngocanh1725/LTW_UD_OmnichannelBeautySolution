@@ -1,0 +1,133 @@
+@model Omnichannel.Application.DTOs.Cms.EditBannerViewModel
+@{
+    ViewData["Title"] = "Chỉnh Sửa Banner";
+    Layout = "_AdminLayout";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold text-dark mb-1">Chỉnh Sửa Banner Chiến Dịch</h4>
+                <p class="text-muted small mb-0">Cập nhật hình ảnh, đường dẫn và thời gian hiển thị</p>
+            </div>
+            <a href="/Admin/Banner" class="btn btn-outline-secondary btn-sm rounded-3">
+                <i class="fa-solid fa-arrow-left me-1"></i>Quay lại danh sách
+            </a>
+        </div>
+
+        <div class="beauty-card p-4">
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="BannerId" />
+
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label asp-for="Title" class="form-label small fw-semibold">Tiêu đề chiến dịch / Banner *</label>
+                        <input asp-for="Title" class="form-control rounded-3" placeholder="vd: Siêu Sale Mỹ Phẩm Hè 2026" required autofocus />
+                        <span asp-validation-for="Title" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label asp-for="Position" class="form-label small fw-semibold">Vị trí hiển thị *</label>
+                        <select asp-for="Position" class="form-select rounded-3">
+                            <option value="1">1. Hero Slider (Đầu trang chủ)</option>
+                            <option value="2">2. Popup Khuyến mãi (Giữa trang)</option>
+                            <option value="3">3. Banner Danh mục (Catalog Top)</option>
+                            <option value="4">4. Footer Strip (Chân trang)</option>
+                        </select>
+                    </div>
+
+                    <!-- Desktop Image -->
+                    <div class="col-md-8">
+                        <label asp-for="DesktopImageUrl" class="form-label small fw-semibold">URL Ảnh máy tính (Desktop)</label>
+                        <div class="input-group">
+                            <input asp-for="DesktopImageUrl" id="desktopImgInput" class="form-control rounded-start-3" placeholder="https://images.unsplash.com/..." oninput="previewImg('desktopImgPreview', this.value)" />
+                            <button type="button" class="btn btn-outline-danger btn-select-media" data-input="#desktopMediaIdInput" data-preview="#desktopImgPreview" data-category="BANNER">
+                                <i class="fa-solid fa-photo-film me-1"></i>Chọn từ CSDL
+                            </button>
+                        </div>
+                        <input type="hidden" asp-for="DesktopMediaId" id="desktopMediaIdInput" />
+                        <span asp-validation-for="DesktopImageUrl" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Xem trước Desktop</label>
+                        <div class="p-2 rounded-3 border bg-light text-center">
+                            <img id="desktopImgPreview" src="@(Model.DesktopMediaId.HasValue ? $"/media/{Model.DesktopMediaId}" : (!string.IsNullOrEmpty(Model.DesktopImageUrl) ? Model.DesktopImageUrl : "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&fit=crop"))" alt="Xem trước Desktop" class="img-fluid rounded-2 shadow-xs" style="max-height: 80px; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&fit=crop'" />
+                        </div>
+                    </div>
+
+                    <!-- Mobile Image -->
+                    <div class="col-md-8">
+                        <label asp-for="MobileImageUrl" class="form-label small fw-semibold">URL Ảnh điện thoại (Mobile) (Tùy chọn)</label>
+                        <div class="input-group">
+                            <input asp-for="MobileImageUrl" id="mobileImgInput" class="form-control rounded-start-3" placeholder="https://images.unsplash.com/..." oninput="previewImg('mobileImgPreview', this.value)" />
+                            <button type="button" class="btn btn-outline-danger btn-select-media" data-input="#mobileMediaIdInput" data-preview="#mobileImgPreview" data-category="BANNER">
+                                <i class="fa-solid fa-photo-film me-1"></i>Chọn từ CSDL
+                            </button>
+                        </div>
+                        <input type="hidden" asp-for="MobileMediaId" id="mobileMediaIdInput" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold">Xem trước Mobile</label>
+                        <div class="p-2 rounded-3 border bg-light text-center">
+                            <img id="mobileImgPreview" src="@(Model.MobileMediaId.HasValue ? $"/media/{Model.MobileMediaId}" : (!string.IsNullOrEmpty(Model.MobileImageUrl) ? Model.MobileImageUrl : Model.DesktopImageUrl))" alt="Xem trước Mobile" class="img-fluid rounded-2 shadow-xs" style="max-height: 80px; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=200&fit=crop'" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="LinkUrl" class="form-label small fw-semibold">Liên kết điều hướng (Link URL)</label>
+                        <input asp-for="LinkUrl" class="form-control rounded-3 font-monospace" placeholder="/category/cham-soc-da" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label asp-for="DisplayOrder" class="form-label small fw-semibold">Thứ tự hiển thị</label>
+                        <input asp-for="DisplayOrder" type="number" class="form-control rounded-3 font-monospace" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold d-block">Trạng thái kích hoạt</label>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" asp-for="IsActive" id="activeSwitch">
+                            <label class="form-check-label small" for="activeSwitch">Hiển thị trên web</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ValidFrom" class="form-label small fw-semibold">Bắt đầu hiệu lực</label>
+                        <input asp-for="ValidFrom" type="datetime-local" class="form-control rounded-3" />
+                        <span asp-validation-for="ValidFrom" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ValidTo" class="form-label small fw-semibold">Kết thúc hiệu lực</label>
+                        <input asp-for="ValidTo" type="datetime-local" class="form-control rounded-3" />
+                        <span asp-validation-for="ValidTo" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-12 text-end mt-4 pt-3 border-top">
+                        <a href="/Admin/Banner" class="btn btn-light rounded-3 px-4 me-2">Hủy</a>
+                        <button type="submit" class="btn btn-primary-gradient px-4">
+                            <i class="fa-solid fa-floppy-disk me-1"></i>Lưu Thay Đổi
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <partial name="_MediaPickerModal" />
+    <script src="~/js/admin-media-picker.js"></script>
+    <script>
+        function previewImg(targetId, url) {
+            if (url && url.trim().length > 5) {
+                document.getElementById(targetId).src = url.trim();
+            }
+        }
+    </script>
+}

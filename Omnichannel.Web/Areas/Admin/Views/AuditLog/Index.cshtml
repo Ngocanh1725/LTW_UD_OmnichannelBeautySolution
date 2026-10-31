@@ -1,0 +1,350 @@
+@model List<Omnichannel.Application.DTOs.Security.AuditLogDto>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Nhật Ký Kiểm Toán (Audit Log)";
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalCount = ViewBag.TotalCount ?? 0;
+    var availableEntities = ViewBag.AvailableEntityTypes as List<string> ?? new List<string>();
+    var availableActions = ViewBag.AvailableActions as List<string> ?? new List<string>();
+}
+
+<!-- Page Header -->
+<div class="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
+    <div>
+        <div class="flex items-center gap-3">
+            <span class="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25">
+                <i class="fa-solid fa-clipboard-list text-lg"></i>
+            </span>
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Nhật Ký Kiểm Toán Hệ Thống</h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Theo vết toàn diện các hành vi đăng nhập, đổi mật khẩu, phân quyền và biến động dữ liệu CRUD</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-3">
+        <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 text-xs font-semibold border border-indigo-200/50 dark:border-indigo-800/50">
+            <i class="fa-solid fa-database"></i>
+            <span>Tổng cộng: <strong class="font-mono">@totalCount.ToString("N0")</strong> bản ghi</span>
+        </span>
+    </div>
+</div>
+
+<!-- Filter Toolbar Card -->
+<div class="mb-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm">
+    <form method="get" action="/Admin/AuditLog" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <!-- Search Keyword -->
+        <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Tìm kiếm từ khóa</label>
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                <input type="text" name="search" value="@ViewBag.Search" placeholder="User, ID, IP, chi tiết..."
+                       class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-indigo-500 text-slate-800 dark:text-slate-100" />
+            </div>
+        </div>
+
+        <!-- Entity / Module Filter -->
+        <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Phân Hệ / Thực Thể</label>
+            <select name="entityType" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-indigo-500 text-slate-800 dark:text-slate-100">
+                <option value="">-- Tất cả phân hệ --</option>
+                @foreach (var ent in availableEntities)
+                {
+                    <!option value="@ent" @(ent == ViewBag.EntityType ? "selected" : "")>@ent</!option>
+                }
+            </select>
+        </div>
+
+        <!-- Action Filter -->
+        <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Hành Động</label>
+            <select name="actionType" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-indigo-500 text-slate-800 dark:text-slate-100">
+                <option value="">-- Tất cả hành động --</option>
+                @foreach (var act in availableActions)
+                {
+                    <!option value="@act" @(act == ViewBag.ActionType ? "selected" : "")>@act</!option>
+                }
+            </select>
+        </div>
+
+        <!-- Date Range: From -->
+        <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Từ ngày</label>
+            <input type="date" name="fromDate" value="@ViewBag.FromDate"
+                   class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-indigo-500 text-slate-800 dark:text-slate-100" />
+        </div>
+
+        <!-- Date Range: To + Submit Buttons -->
+        <div>
+            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1.5">Đến ngày</label>
+            <div class="flex items-center gap-2">
+                <input type="date" name="toDate" value="@ViewBag.ToDate"
+                       class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-indigo-500 text-slate-800 dark:text-slate-100" />
+                <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shrink-0 transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-filter"></i> Lọc
+                </button>
+                <a href="/Admin/AuditLog" class="p-2 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Đặt lại bộ lọc">
+                    <i class="fa-solid fa-rotate-left text-xs"></i>
+                </a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Audit Log Table -->
+<div class="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300">
+            <thead class="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 font-semibold uppercase text-slate-500 dark:text-slate-400">
+                <tr>
+                    <th class="px-5 py-3.5">Thời Gian</th>
+                    <th class="px-4 py-3.5">Người Thực Hiện</th>
+                    <th class="px-4 py-3.5 text-center">Hành Động</th>
+                    <th class="px-4 py-3.5">Phân Hệ / Đối Tượng</th>
+                    <th class="px-4 py-3.5">Mã / Chi Tiết</th>
+                    <th class="px-4 py-3.5">Địa Chỉ IP</th>
+                    <th class="px-4 py-3.5 text-center">Chi Tiết</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center text-slate-400">
+                            <i class="fa-solid fa-box-open text-3xl mb-2 text-slate-300 dark:text-slate-600 block"></i>
+                            Chưa có dữ liệu nhật ký kiểm toán phù hợp với bộ lọc.
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var log in Model)
+                    {
+                        var actionBadgeClass = log.Action switch
+                        {
+                            "CREATE" => "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
+                            "UPDATE" => "bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300 border-sky-200 dark:border-sky-800",
+                            "DELETE" => "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800",
+                            "LOGIN_SUCCESS" => "bg-teal-100 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300 border-teal-200 dark:border-teal-800",
+                            "LOGIN_FAILURE" => "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+                            "LOGIN_BLOCKED" => "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border-rose-200 dark:border-rose-800",
+                            "LOGOUT" => "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700",
+                            "CHANGE_PASSWORD" => "bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300 border-purple-200 dark:border-purple-800",
+                            _ when log.Action.StartsWith("PERMISSION") => "bg-indigo-100 text-indigo-800 dark:bg-indigo-950/60 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800",
+                            _ => "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700"
+                        };
+
+                        <tr class="transition hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
+                            <!-- Timestamp -->
+                            <td class="px-5 py-3.5 font-mono text-[11px] whitespace-nowrap text-slate-500 dark:text-slate-400">
+                                @log.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")
+                            </td>
+
+                            <!-- User -->
+                            <td class="px-4 py-3.5 whitespace-nowrap">
+                                <div class="flex items-center gap-2">
+                                    <div class="h-6 w-6 rounded-full bg-gradient-to-tr from-slate-600 to-slate-800 text-white flex items-center justify-center font-bold text-[10px]">
+                                        @((log.UserName ?? "S")[0].ToString().ToUpperInvariant())
+                                    </div>
+                                    <div>
+                                        <div class="font-bold text-slate-800 dark:text-slate-100">@(log.UserName ?? "System / Anonymous")</div>
+                                        @if (log.UserId.HasValue)
+                                        {
+                                            <div class="text-[10px] text-slate-400 font-mono">UID: #@log.UserId</div>
+                                        }
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Action -->
+                            <td class="px-4 py-3.5 text-center whitespace-nowrap">
+                                <span class="inline-block px-2.5 py-1 rounded-lg text-[10px] font-bold border @actionBadgeClass">
+                                    @log.Action
+                                </span>
+                            </td>
+
+                            <!-- Entity / Module -->
+                            <td class="px-4 py-3.5 whitespace-nowrap">
+                                <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-[11px]">
+                                    @log.EntityType
+                                </span>
+                            </td>
+
+                            <!-- Summary / Entity ID -->
+                            <td class="px-4 py-3.5 max-w-xs truncate" title="@log.NewValues">
+                                <span class="font-mono font-semibold text-slate-800 dark:text-slate-200">#@log.EntityId</span>
+                                @if (!string.IsNullOrEmpty(log.NewValues))
+                                {
+                                    <span class="text-slate-400 dark:text-slate-500 ml-1.5 truncate">@log.NewValues</span>
+                                }
+                            </td>
+
+                            <!-- IP Address -->
+                            <td class="px-4 py-3.5 font-mono text-[11px] whitespace-nowrap text-slate-500 dark:text-slate-400">
+                                <i class="fa-solid fa-network-wired text-[10px] text-slate-400 mr-1"></i>
+                                @(string.IsNullOrEmpty(log.IpAddress) ? "127.0.0.1" : log.IpAddress)
+                            </td>
+
+                            <!-- Action Button -->
+                            <td class="px-4 py-3.5 text-center whitespace-nowrap">
+                                <button type="button" onclick="viewAuditDetails(@log.Id)" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 dark:bg-slate-800 dark:hover:bg-indigo-950/60 text-slate-600 hover:text-indigo-600 dark:text-slate-300 dark:hover:text-indigo-400 transition font-semibold text-[11px]">
+                                    <i class="fa-solid fa-eye mr-1"></i> Xem
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Footer -->
+    @if (totalPages > 1)
+    {
+        <div class="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 px-6 py-4 bg-slate-50/50 dark:bg-slate-900">
+            <div class="text-xs text-slate-500 dark:text-slate-400">
+                Trang <strong class="font-mono font-bold text-slate-800 dark:text-slate-200">@currentPage</strong> / <span class="font-mono">@totalPages</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                @if (currentPage > 1)
+                {
+                    <a href="/Admin/AuditLog?page=@(currentPage - 1)&search=@ViewBag.Search&entityType=@ViewBag.EntityType&actionType=@ViewBag.ActionType&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate"
+                       class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition">
+                        <i class="fa-solid fa-chevron-left mr-1"></i> Trước
+                    </a>
+                }
+                @if (currentPage < totalPages)
+                {
+                    <a href="/Admin/AuditLog?page=@(currentPage + 1)&search=@ViewBag.Search&entityType=@ViewBag.EntityType&actionType=@ViewBag.ActionType&fromDate=@ViewBag.FromDate&toDate=@ViewBag.ToDate"
+                       class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition">
+                        Sau <i class="fa-solid fa-chevron-right ml-1"></i>
+                    </a>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<!-- Modal Inspect Audit Log Details -->
+<div id="auditModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 hidden">
+    <div class="w-full max-w-3xl rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <!-- Modal Header -->
+        <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50">
+            <div class="flex items-center gap-2.5">
+                <span class="h-8 w-8 rounded-xl bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm">
+                    <i class="fa-solid fa-file-code"></i>
+                </span>
+                <h3 class="font-bold text-slate-800 dark:text-white text-base">Chi Tiết Bản Ghi Kiểm Toán</h3>
+            </div>
+            <button onclick="closeAuditModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 overflow-y-auto space-y-4">
+            <!-- Metadata summary grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 dark:bg-slate-800/40 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 text-xs">
+                <div>
+                    <span class="text-slate-400 block text-[10px] font-semibold uppercase">Thời Gian</span>
+                    <strong id="modalCreatedAt" class="font-mono text-slate-800 dark:text-slate-200">-</strong>
+                </div>
+                <div>
+                    <span class="text-slate-400 block text-[10px] font-semibold uppercase">Tác Nhân</span>
+                    <strong id="modalUserName" class="text-slate-800 dark:text-slate-200">-</strong>
+                </div>
+                <div>
+                    <span class="text-slate-400 block text-[10px] font-semibold uppercase">Hành Động</span>
+                    <strong id="modalAction" class="text-indigo-600 dark:text-indigo-400 font-bold">-</strong>
+                </div>
+                <div>
+                    <span class="text-slate-400 block text-[10px] font-semibold uppercase">Đối Tượng (ID)</span>
+                    <strong id="modalEntity" class="font-mono text-slate-800 dark:text-slate-200">-</strong>
+                </div>
+            </div>
+
+            <!-- IP and User-Agent -->
+            <div class="text-xs bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div><span class="text-slate-400 font-semibold mr-1">IP:</span> <span id="modalIp" class="font-mono text-slate-700 dark:text-slate-300">-</span></div>
+                <div class="truncate max-w-md"><span class="text-slate-400 font-semibold mr-1">Thiết bị:</span> <span id="modalUserAgent" class="text-slate-500 font-mono text-[11px]">-</span></div>
+            </div>
+
+            <!-- Diff / JSON Blocks -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Old Values -->
+                <div>
+                    <div class="text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-clock-rotate-left text-rose-500"></i> Dữ Liệu Trước (Old Values)
+                    </div>
+                    <pre id="modalOldValues" class="w-full h-64 p-3 bg-slate-900 text-slate-300 font-mono text-[11px] rounded-xl overflow-auto border border-slate-800"></pre>
+                </div>
+
+                <!-- New Values -->
+                <div>
+                    <div class="text-xs font-bold text-slate-600 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-arrow-right-arrow-left text-emerald-500"></i> Dữ Liệu Sau (New Values)
+                    </div>
+                    <pre id="modalNewValues" class="w-full h-64 p-3 bg-slate-900 text-emerald-400 font-mono text-[11px] rounded-xl overflow-auto border border-slate-800"></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="px-6 py-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex justify-end">
+            <button onclick="closeAuditModal()" class="px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-700 dark:text-slate-200 font-semibold rounded-xl text-xs transition">
+                Đóng
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function viewAuditDetails(id) {
+            try {
+                const res = await fetch(`/Admin/AuditLog/GetDetails?id=${id}`);
+                const result = await res.json();
+                if (result.success) {
+                    const data = result.data;
+                    document.getElementById('modalCreatedAt').innerText = data.createdAt;
+                    document.getElementById('modalUserName').innerText = data.userName || 'System';
+                    document.getElementById('modalAction').innerText = data.action;
+                    document.getElementById('modalEntity').innerText = `${data.entityType} (#${data.entityId})`;
+                    document.getElementById('modalIp').innerText = data.ipAddress || '127.0.0.1';
+                    document.getElementById('modalUserAgent').innerText = data.userAgent || 'Unknown';
+
+                    // Format JSON
+                    let oldValFormatted = data.oldValues || 'Không có dữ liệu trước thay đổi';
+                    try {
+                        if (data.oldValues && data.oldValues.startsWith('{')) {
+                            oldValFormatted = JSON.stringify(JSON.parse(data.oldValues), null, 2);
+                        }
+                    } catch (_) {}
+                    document.getElementById('modalOldValues').innerText = oldValFormatted;
+
+                    let newValFormatted = data.newValues || 'Không có dữ liệu mới';
+                    try {
+                        if (data.newValues && data.newValues.startsWith('{')) {
+                            newValFormatted = JSON.stringify(JSON.parse(data.newValues), null, 2);
+                        }
+                    } catch (_) {}
+                    document.getElementById('modalNewValues').innerText = newValFormatted;
+
+                    document.getElementById('auditModal').classList.remove('hidden');
+                }
+            } catch (err) {
+                alert('Lỗi tải chi tiết nhật ký: ' + err);
+            }
+        }
+
+        function closeAuditModal() {
+            document.getElementById('auditModal').classList.add('hidden');
+        }
+
+        // Close on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeAuditModal();
+        });
+    </script>
+}

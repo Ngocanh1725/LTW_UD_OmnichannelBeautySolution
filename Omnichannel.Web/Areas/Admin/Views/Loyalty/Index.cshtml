@@ -1,0 +1,570 @@
+@model List<Omnichannel.Application.DTOs.Loyalty.LoyaltyWalletDto>
+@{
+    ViewData["Title"] = "Quản lý Thành Viên & Tích Điểm (Loyalty CRM)";
+    Layout = "_AdminLayout";
+
+    var summary = ViewBag.Summary as Omnichannel.Application.DTOs.Loyalty.LoyaltySummaryDto ?? new();
+    var tiers = ViewBag.Tiers as List<Omnichannel.Application.DTOs.Loyalty.TierInfoDto> ?? new();
+    string currentSearch = ViewBag.CurrentSearch as string ?? "";
+    int? currentTierId = ViewBag.CurrentTierId as int?;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold text-dark mb-1">Thành Viên Tích Điểm & Hạng Loyalty</h4>
+        <p class="text-muted small mb-0">Hệ thống phân hạng thành viên Silver, Gold, Diamond, tích điểm đa kênh tự động và điều chỉnh điểm chăm sóc khách hàng.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="#tierSettingsSection" class="btn btn-soft-purple">
+            <i class="fa-solid fa-sliders me-1.5"></i>Cấu Hình Bậc Hạng
+        </a>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-3 py-2.5 px-3 border-0 bg-success-subtle text-success small mb-3" role="alert">
+        <i class="fa-solid fa-circle-check me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show rounded-3 py-2.5 px-3 border-0 bg-danger-subtle text-danger small mb-3" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- KPI Cards & Tier Distribution Pie Chart Row -->
+<div class="row g-3 mb-4">
+    <!-- 4 Summary KPI Cards in 8 Cols -->
+    <div class="col-lg-8">
+        <div class="row g-3 h-100">
+            <div class="col-sm-6">
+                <div class="beauty-card p-3 d-flex align-items-center justify-content-between h-100">
+                    <div>
+                        <div class="text-muted small fw-medium">Tổng Thành Viên</div>
+                        <div class="fs-4 fw-bold text-dark mt-1">@summary.TotalMembers.ToString("N0")</div>
+                        <div class="text-muted text-[11px] mt-1">Đã cấp ví Loyalty</div>
+                    </div>
+                    <div class="stat-icon-square bg-purple-light text-purple">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="beauty-card p-3 d-flex align-items-center justify-content-between h-100">
+                    <div>
+                        <div class="text-muted small fw-medium">Điểm Khả Dụng Lưu Hành</div>
+                        <div class="fs-4 fw-bold text-warning mt-1">@summary.TotalActivePoints.ToString("N0") <span class="fs-6 text-muted fw-normal">pts</span></div>
+                        <div class="text-warning text-[11px] mt-1">~ @((summary.TotalActivePoints * 1000m).ToString("N0")) VNĐ quy đổi</div>
+                    </div>
+                    <div class="stat-icon-square bg-warning-subtle text-warning">
+                        <i class="fa-solid fa-coins"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="beauty-card p-3 d-flex align-items-center justify-content-between h-100">
+                    <div>
+                        <div class="text-muted small fw-medium">Điểm Tích Lũy Trọn Đời</div>
+                        <div class="fs-4 fw-bold text-success mt-1">@summary.TotalLifetimePoints.ToString("N0") <span class="fs-6 text-muted fw-normal">pts</span></div>
+                        <div class="text-success text-[11px] mt-1"><i class="fa-solid fa-chart-line me-1"></i>Từ tất cả đơn hàng</div>
+                    </div>
+                    <div class="stat-icon-square bg-success-subtle text-success">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="beauty-card p-3 d-flex align-items-center justify-content-between h-100">
+                    <div>
+                        <div class="text-muted small fw-medium">Khách Hàng VIP (Gold + Diamond)</div>
+                        <div class="fs-4 fw-bold text-purple mt-1">@((summary.GoldCount + summary.DiamondCount).ToString("N0"))</div>
+                        <div class="text-purple text-[11px] mt-1"><i class="fa-solid fa-gem me-1"></i>Chiếm @(summary.TotalMembers > 0 ? Math.Round((double)(summary.GoldCount + summary.DiamondCount) / summary.TotalMembers * 100, 1) : 0)% tổng thành viên</div>
+                    </div>
+                    <div class="stat-icon-square bg-purple-light text-purple">
+                        <i class="fa-solid fa-crown"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tier Distribution Pie Chart in 4 Cols -->
+    <div class="col-lg-4">
+        <div class="beauty-card p-3 h-100 d-flex flex-col justify-content-between">
+            <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-2">
+                <h6 class="fw-bold text-dark small mb-0"><i class="fa-solid fa-chart-pie me-2 text-purple"></i>Phân Bổ Hạng Thành Viên</h6>
+                <span class="badge bg-light text-muted font-mono" style="font-size: 11px;">@summary.TotalMembers TV</span>
+            </div>
+            
+            <div style="height: 160px; position: relative;" class="my-auto">
+                <canvas id="tierDistributionChart"></canvas>
+            </div>
+
+            <div class="d-flex justify-content-around text-center pt-2 border-top mt-2">
+                <div>
+                    <span class="d-inline-block rounded-circle me-1" style="width: 8px; height: 8px; background-color: #64748B;"></span>
+                    <span class="text-muted text-[11px]">Silver: <strong>@summary.SilverCount</strong></span>
+                </div>
+                <div>
+                    <span class="d-inline-block rounded-circle me-1" style="width: 8px; height: 8px; background-color: #F59E0B;"></span>
+                    <span class="text-muted text-[11px]">Gold: <strong>@summary.GoldCount</strong></span>
+                </div>
+                <div>
+                    <span class="d-inline-block rounded-circle me-1" style="width: 8px; height: 8px; background-color: #8B5CF6;"></span>
+                    <span class="text-muted text-[11px]">Diamond: <strong>@summary.DiamondCount</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search & Filter Bar -->
+<div class="beauty-card p-3 mb-4">
+    <form method="get" class="row g-2 align-items-center">
+        <div class="col-md-5">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" name="search" value="@currentSearch" class="form-control border-start-0 ps-0" placeholder="Tìm theo tên khách hàng, số điện thoại, email..." />
+            </div>
+        </div>
+        <div class="col-md-4">
+            <select name="tierId" class="form-select form-select-sm rounded-3" onchange="this.form.submit()">
+                <option value="">-- Tất cả các hạng thành viên --</option>
+                @foreach (var t in tiers)
+                {
+                    <option value="@t.Id" selected="@(currentTierId == t.Id)">@t.TierName (Từ @(t.MinSpend.ToString("N0"))đ - Hệ số x@(t.PointMultiplier.ToString("0.0")))</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3 text-md-end">
+            <button type="submit" class="btn btn-sm btn-primary-gradient px-3 me-1">
+                <i class="fa-solid fa-filter me-1"></i>Lọc
+            </button>
+            @if (!string.IsNullOrEmpty(currentSearch) || currentTierId.HasValue)
+            {
+                <a href="@Url.Action("Index")" class="btn btn-sm btn-light border text-muted">Xóa lọc</a>
+            }
+        </div>
+    </form>
+</div>
+
+<!-- Member List Table -->
+<div class="beauty-card overflow-hidden mb-5">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr class="text-secondary small text-uppercase">
+                    <th class="ps-4">Thành Viên</th>
+                    <th style="width: 160px;">Bậc Hạng</th>
+                    <th style="width: 180px;">Điểm Khả Dụng</th>
+                    <th style="width: 180px;">Chi Tiêu 12 Tháng</th>
+                    <th style="width: 140px;">Ngày Gia Nhập</th>
+                    <th style="width: 160px;" class="text-end pe-4">Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-users-slash fs-1 text-pink-border mb-2" style="color: var(--accent-pink-border);"></i>
+                            <div>Không tìm thấy thành viên nào phù hợp.</div>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var m in Model)
+                    {
+                        var tier = m.CurrentTier?.TierName ?? "Silver";
+                        string tierBadgeStyle = tier switch
+                        {
+                            "Diamond" => "background: linear-gradient(135deg, #7C3AED, #C084FC); color: white;",
+                            "Gold" => "background: linear-gradient(135deg, #D97706, #FBBF24); color: white;",
+                            _ => "background: linear-gradient(135deg, #64748B, #94A3B8); color: white;"
+                        };
+                        string tierIcon = tier switch
+                        {
+                            "Diamond" => "fa-solid fa-gem",
+                            "Gold" => "fa-solid fa-crown",
+                            _ => "fa-solid fa-award"
+                        };
+
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-xs" style="width: 40px; height: 40px; @tierBadgeStyle">
+                                        @(string.IsNullOrEmpty(m.CustomerName) ? "K" : m.CustomerName.Substring(0, 1).ToUpper())
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark">
+                                            @m.CustomerName
+                                        </div>
+                                        <div class="small text-muted font-mono">
+                                            @(m.CustomerPhone ?? "Chưa có SĐT") • <span class="badge bg-light text-muted border">@m.QrCodeData</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="badge px-3 py-1.5 rounded-pill shadow-xs" style="@tierBadgeStyle font-size: 11px;">
+                                    <i class="@tierIcon me-1"></i>@tier
+                                </span>
+                            </td>
+
+                            <td>
+                                <div class="fw-bold text-warning font-mono fs-6">
+                                    @m.CurrentBalance.ToString("N0") <span class="small text-muted fw-normal">pts</span>
+                                </div>
+                                <div class="text-[11px] text-muted">
+                                    ≈ @m.AvailableDiscountVnd.ToString("N0") ₫
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="fw-bold text-dark font-mono">
+                                    @m.TotalSpend12Months.ToString("N0") ₫
+                                </div>
+                                @if (!string.IsNullOrEmpty(m.NextTierName) && m.SpendNeededForNextTier.HasValue && m.SpendNeededForNextTier.Value > 0)
+                                {
+                                    <div class="text-[11px] text-muted">
+                                        Cần +@m.SpendNeededForNextTier.Value.ToString("N0")đ lên @m.NextTierName
+                                    </div>
+                                }
+                                else if (tier == "Diamond")
+                                {
+                                    <div class="text-[11px] text-purple fw-semibold">
+                                        <i class="fa-solid fa-circle-check"></i> Hạng tối cao
+                                    </div>
+                                }
+                            </td>
+
+                            <td>
+                                <div class="small text-dark font-mono">@m.MemberSince.ToString("dd/MM/yyyy")</div>
+                                <div class="text-muted text-[11px]">@m.RecentTransactions.Count giao dịch</div>
+                            </td>
+
+                            <td class="text-end pe-4">
+                                <div class="d-inline-flex gap-1">
+                                    <button type="button" class="btn btn-sm btn-outline-warning border text-dark" onclick="openAdjustModal(@m.UserId, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(m.CustomerName))', @m.CurrentBalance)" title="Điều chỉnh điểm">
+                                        <i class="fa-solid fa-sliders text-warning me-1"></i>Điều chỉnh
+                                    </button>
+                                    <a href="@Url.Action("Details", new { id = m.Id })" class="btn btn-sm btn-soft-purple" title="Xem ví & lịch sử">
+                                        <i class="fa-solid fa-wallet me-1"></i>Ví điểm
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Tier Settings Section (Cấu hình Hạng Thành Viên) -->
+<div id="tierSettingsSection" class="pt-4 border-top">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h5 class="fw-bold text-dark mb-1"><i class="fa-solid fa-sliders text-purple me-2"></i>Chính Sách & Cấu Hình Hạng Thành Viên</h5>
+            <p class="text-muted small mb-0">Thiết lập ngưỡng chi tiêu thăng hạng (12 tháng), hệ số nhân điểm thưởng và điểm tặng sinh nhật.</p>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        @foreach (var t in tiers)
+        {
+            string tierCardHeaderStyle = t.TierName switch
+            {
+                "Diamond" => "background: linear-gradient(135deg, #7C3AED, #C084FC); color: white;",
+                "Gold" => "background: linear-gradient(135deg, #D97706, #FBBF24); color: white;",
+                _ => "background: linear-gradient(135deg, #64748B, #94A3B8); color: white;"
+            };
+            string tierIcon = t.TierName switch
+            {
+                "Diamond" => "fa-solid fa-gem",
+                "Gold" => "fa-solid fa-crown",
+                _ => "fa-solid fa-award"
+            };
+
+            <div class="col-md-4">
+                <div class="beauty-card overflow-hidden h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="p-3 d-flex align-items-center justify-content-between" style="@tierCardHeaderStyle">
+                            <div class="fw-bold fs-6"><i class="@tierIcon me-2"></i>Hạng @t.TierName</div>
+                            <span class="badge bg-white text-dark rounded-pill" style="font-size: 11px;">Thứ tự: @t.SortOrder</span>
+                        </div>
+                        <div class="p-4 space-y-3">
+                            <div class="d-flex justify-content-between align-items-center pb-2 border-bottom">
+                                <span class="small text-muted">Ngưỡng chi tiêu tối thiểu:</span>
+                                <strong class="text-dark font-mono">@t.MinSpend.ToString("N0") ₫</strong>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center pb-2 border-bottom">
+                                <span class="small text-muted">Ngưỡng chi tiêu tối đa:</span>
+                                <strong class="text-dark font-mono">@(t.MaxSpend.HasValue ? $"{t.MaxSpend.Value:N0} ₫" : "Vô cực (∞)")</strong>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center pb-2 border-bottom">
+                                <span class="small text-muted">Hệ số tích điểm:</span>
+                                <strong class="text-purple font-mono fs-6">x@t.PointMultiplier.ToString("0.0")</strong>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center pb-2 border-bottom">
+                                <span class="small text-muted">Điểm thưởng sinh nhật:</span>
+                                <strong class="text-warning font-mono">+@t.BirthdayBonusPoints.ToString("N0") pts</strong>
+                            </div>
+                            <div class="text-muted small mt-2">
+                                <em>@t.Description</em>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-light border-top text-end">
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-3" onclick='openEditTierModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(t)))'>
+                            <i class="fa-solid fa-pen-to-square me-1"></i>Sửa Chính Sách
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal Điều Chỉnh Điểm Thủ Công -->
+<div class="modal fade" id="adjustPointsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-bottom border-soft">
+                <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-sliders text-warning me-2"></i>Điều Chỉnh Điểm Thành Viên</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="AdjustPoints" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="UserId" id="adjustUserId" />
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+
+                <div class="modal-body p-4 space-y-3">
+                    <div class="p-3 rounded-3 bg-light border">
+                        <div class="small text-muted">Khách hàng:</div>
+                        <div class="fw-bold text-dark fs-6" id="adjustCustomerName"></div>
+                        <div class="small text-muted mt-1">Số dư khả dụng hiện tại: <strong class="text-warning font-mono" id="adjustCurrentBalance"></strong> pts</div>
+                    </div>
+
+                    <div>
+                        <label class="form-label small fw-semibold text-secondary">Loại thao tác:</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="adjustType" id="typeAdd" value="add" checked onchange="updateSign()" />
+                                <label class="form-check-label text-success fw-bold small" for="typeAdd">
+                                    <i class="fa-solid fa-plus me-1"></i>Cộng điểm (+)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="adjustType" id="typeSub" value="sub" onchange="updateSign()" />
+                                <label class="form-check-label text-danger fw-bold small" for="typeSub">
+                                    <i class="fa-solid fa-minus me-1"></i>Trừ điểm (-)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="form-label small fw-semibold text-secondary">Số lượng điểm (*):</label>
+                        <div class="input-group">
+                            <span class="input-group-text fw-bold" id="signBadge">+</span>
+                            <input type="number" min="1" step="1" id="adjustPointsAmount" class="form-control rounded-end-3" placeholder="Nhập số điểm cần điều chỉnh..." required oninput="calculateRealPoints()" />
+                        </div>
+                        <input type="hidden" name="Points" id="realPointsHidden" />
+                    </div>
+
+                    <div>
+                        <label class="form-label small fw-semibold text-secondary">Lý do điều chỉnh (*):</label>
+                        <select id="reasonPresetSelect" class="form-select rounded-3 mb-2" onchange="onPresetReasonChange()">
+                            <option value="Thưởng sự kiện & chiến dịch đặc biệt">Thưởng sự kiện & chiến dịch đặc biệt</option>
+                            <option value="Tặng điểm sinh nhật bù">Tặng điểm sinh nhật bù</option>
+                            <option value="Đền bù dịch vụ / giải quyết khiếu nại">Đền bù dịch vụ / giải quyết khiếu nại</option>
+                            <option value="Bù điểm sai sót khi chốt đơn">Bù điểm sai sót khi chốt đơn</option>
+                            <option value="Thu hồi điểm do hoàn trả đơn hàng">Thu hồi điểm do hoàn trả đơn hàng</option>
+                            <option value="other">-- Lý do tùy chỉnh khác --</option>
+                        </select>
+                        <input type="text" name="Reason" id="adjustReasonInput" class="form-control rounded-3" value="Thưởng sự kiện & chiến dịch đặc biệt" required />
+                    </div>
+
+                    <div>
+                        <label class="form-label small fw-semibold text-secondary">Ghi chú nội bộ (nếu có):</label>
+                        <textarea name="Note" rows="2" class="form-control rounded-3" placeholder="Ghi chú chi tiết cho kiểm toán..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top border-soft">
+                    <button type="button" class="btn btn-light rounded-3 px-3" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary-gradient px-4">Xác Nhận Điều Chỉnh</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Sửa Cấu Hình Bậc Hạng -->
+<div class="modal fade" id="editTierModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-bottom border-soft">
+                <h5 class="modal-title fw-bold text-dark">Chỉnh Sửa Chính Sách Hạng Thành Viên</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="UpdateTier" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" id="editTierId" />
+
+                <div class="modal-body p-4 space-y-3">
+                    <div>
+                        <label class="form-label small fw-semibold text-secondary">Tên bậc hạng (*):</label>
+                        <input type="text" name="TierName" id="editTierName" class="form-control rounded-3" required />
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-secondary">Ngưỡng chi tiêu tối thiểu (VNĐ):</label>
+                            <input type="number" step="10000" name="MinSpend" id="editMinSpend" class="form-control rounded-3" required />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-secondary">Hệ số tích điểm (x):</label>
+                            <input type="number" step="0.1" name="PointMultiplier" id="editMultiplier" class="form-control rounded-3" required />
+                        </div>
+                    </div>
+
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-secondary">Điểm thưởng sinh nhật:</label>
+                            <input type="number" step="10" name="BirthdayBonusPoints" id="editBirthdayPoints" class="form-control rounded-3" required />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold text-secondary">Thứ tự ưu tiên:</label>
+                            <input type="number" name="SortOrder" id="editSortOrder" class="form-control rounded-3" required />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="form-label small fw-semibold text-secondary">Mô tả quyền lợi:</label>
+                        <textarea name="Description" id="editTierDescription" rows="2" class="form-control rounded-3"></textarea>
+                    </div>
+
+                    <div class="form-check mt-2">
+                        <input type="checkbox" name="IsActive" value="true" class="form-check-input" id="editTierIsActive" checked />
+                        <label class="form-check-label small" for="editTierIsActive">Kích hoạt bậc hạng này</label>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top border-soft">
+                    <button type="button" class="btn btn-light rounded-3 px-3" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary-gradient px-4">Lưu Cấu Hình</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Chart.js for Pie Chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <script>
+        // Init Tier Distribution Pie Chart
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('tierDistributionChart');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Silver', 'Gold', 'Diamond'],
+                        datasets: [{
+                            data: [@summary.SilverCount, @summary.GoldCount, @summary.DiamondCount],
+                            backgroundColor: ['#64748B', '#F59E0B', '#8B5CF6'],
+                            borderWidth: 2,
+                            borderColor: '#ffffff',
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        const val = context.raw || 0;
+                                        const total = @summary.TotalMembers;
+                                        const pct = total > 0 ? Math.round(val / total * 100) : 0;
+                                        return ` ${context.label}: ${val} thành viên (${pct}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        // Adjust Points Modal Logic
+        function openAdjustModal(userId, customerName, currentBalance) {
+            document.getElementById('adjustUserId').value = userId;
+            document.getElementById('adjustCustomerName').innerText = customerName;
+            document.getElementById('adjustCurrentBalance').innerText = currentBalance.toLocaleString('vi-VN');
+            document.getElementById('adjustPointsAmount').value = '';
+            document.getElementById('typeAdd').checked = true;
+            updateSign();
+
+            const modal = new bootstrap.Modal(document.getElementById('adjustPointsModal'));
+            modal.show();
+        }
+
+        function updateSign() {
+            const isAdd = document.getElementById('typeAdd').checked;
+            const badge = document.getElementById('signBadge');
+            badge.innerText = isAdd ? '+' : '-';
+            badge.className = isAdd ? 'input-group-text fw-bold text-success' : 'input-group-text fw-bold text-danger';
+            calculateRealPoints();
+        }
+
+        function calculateRealPoints() {
+            const isAdd = document.getElementById('typeAdd').checked;
+            const amt = Math.abs(parseInt(document.getElementById('adjustPointsAmount').value) || 0);
+            document.getElementById('realPointsHidden').value = isAdd ? amt : -amt;
+        }
+
+        function onPresetReasonChange() {
+            const select = document.getElementById('reasonPresetSelect');
+            const input = document.getElementById('adjustReasonInput');
+            if (select.value === 'other') {
+                input.value = '';
+                input.focus();
+            } else {
+                input.value = select.value;
+            }
+        }
+
+        // Edit Tier Modal Logic
+        function openEditTierModal(tier) {
+            document.getElementById('editTierId').value = tier.Id;
+            document.getElementById('editTierName').value = tier.TierName;
+            document.getElementById('editMinSpend').value = tier.MinSpend;
+            document.getElementById('editMultiplier').value = tier.PointMultiplier;
+            document.getElementById('editBirthdayPoints').value = tier.BirthdayBonusPoints;
+            document.getElementById('editSortOrder').value = tier.SortOrder;
+            document.getElementById('editTierDescription').value = tier.Description || '';
+            document.getElementById('editTierIsActive').checked = tier.IsActive !== false;
+
+            const modal = new bootstrap.Modal(document.getElementById('editTierModal'));
+            modal.show();
+        }
+    </script>
+}

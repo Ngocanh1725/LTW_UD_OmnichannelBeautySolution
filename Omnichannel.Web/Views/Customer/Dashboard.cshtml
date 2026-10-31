@@ -1,0 +1,808 @@
+@model Omnichannel.Application.DTOs.Loyalty.CustomerDashboardViewModel
+@{
+    ViewData["Title"] = "Thẻ Thành Viên VIP & Đặc Quyền Omni Club";
+    Layout = "_Layout";
+}
+
+<!-- Custom Styles for Shimmer Holographic Metal Card & Luxury VIP Dashboard -->
+<style>
+    /* ===================================================
+       1. LUXURY HOLOGRAPHIC METAL VIP MEMBERSHIP CARD
+       =================================================== */
+    .vip-card-wrapper {
+        perspective: 1000px;
+    }
+
+    .vip-membership-card {
+        width: 100%;
+        max-width: 520px;
+        aspect-ratio: 1.586 / 1;
+        border-radius: 24px;
+        position: relative;
+        overflow: hidden;
+        padding: 26px 28px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.4), 
+                    0 0 0 1px rgba(255, 255, 255, 0.25) inset,
+                    0 2px 10px rgba(255, 255, 255, 0.3) inset;
+        transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.5s ease;
+        user-select: none;
+    }
+
+    .vip-membership-card:hover {
+        transform: translateY(-6px) rotateX(4deg) rotateY(-2deg);
+        box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5), 
+                    0 0 0 1.5px rgba(255, 255, 255, 0.4) inset;
+    }
+
+    /* Shimmer Holographic Light Sweep */
+    .vip-membership-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+            115deg,
+            transparent 20%,
+            rgba(255, 255, 255, 0.15) 35%,
+            rgba(255, 255, 255, 0.5) 45%,
+            rgba(255, 255, 255, 0.2) 50%,
+            transparent 65%
+        );
+        transform: rotate(25deg);
+        animation: cardShimmer 6s infinite ease-in-out;
+        pointer-events: none;
+        mix-blend-mode: overlay;
+    }
+
+    /* Prismatic Iridescent Refraction Sheen */
+    .vip-membership-card::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.35), transparent 60%),
+                    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.15), transparent 50%);
+        pointer-events: none;
+        border-radius: 24px;
+    }
+
+    @@keyframes cardShimmer {
+        0% { transform: translateX(-120%) rotate(25deg); }
+        35%, 100% { transform: translateX(120%) rotate(25deg); }
+    }
+
+    /* 4 METAL TIER THEMES */
+
+    /* 1. Hạng Bronze: Màu đồng thanh lịch */
+    .tier-theme-bronze {
+        background: linear-gradient(135deg, #5C2C16 0%, #8C4827 30%, #B86E46 55%, #8A4322 80%, #4D210F 100%);
+        color: #FFF2EB;
+        border: 1px solid rgba(224, 154, 114, 0.4);
+    }
+    .tier-theme-bronze .tier-pill {
+        background: linear-gradient(90deg, #A85933, #D48C68);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        color: #FFFFFF;
+    }
+
+    /* 2. Hạng Silver: Màu bạc sáng bóng */
+    .tier-theme-silver {
+        background: linear-gradient(135deg, #374151 0%, #6B7280 25%, #E5E7EB 50%, #9CA3AF 75%, #4B5563 100%);
+        color: #111827;
+        border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+    .tier-theme-silver .tier-pill {
+        background: linear-gradient(90deg, #9CA3AF, #F3F4F6);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        color: #1F2937;
+    }
+    .tier-theme-silver .text-card-muted {
+        color: #4B5563 !important;
+    }
+
+    /* 3. Hạng Gold: Màu vàng kim óng ánh */
+    .tier-theme-gold {
+        background: linear-gradient(135deg, #785208 0%, #B8860B 25%, #FFDF73 50%, #D4AF37 75%, #593C04 100%);
+        color: #2D1E04;
+        border: 1px solid rgba(255, 235, 160, 0.6);
+    }
+    .tier-theme-gold .tier-pill {
+        background: linear-gradient(90deg, #D4AF37, #FFF3BF);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        color: #4A3304;
+    }
+    .tier-theme-gold .text-card-muted {
+        color: #5C4308 !important;
+    }
+
+    /* 4. Hạng Diamond: Màu tím than đính đá pha lê lấp lánh */
+    .tier-theme-diamond {
+        background: linear-gradient(135deg, #15082A 0%, #2A0E47 25%, #4C1D7A 50%, #2E0854 75%, #0F0320 100%);
+        color: #F8F5FF;
+        border: 1px solid rgba(192, 132, 252, 0.5);
+        box-shadow: 0 20px 45px -10px rgba(76, 29, 122, 0.5), 
+                    0 0 25px rgba(192, 132, 252, 0.3);
+    }
+    .tier-theme-diamond .tier-pill {
+        background: linear-gradient(90deg, #7E22CE, #C084FC);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        color: #FFFFFF;
+        box-shadow: 0 0 10px rgba(192, 132, 252, 0.6);
+    }
+
+    /* Smart EMV Chip Styling */
+    .emv-chip {
+        width: 44px;
+        height: 34px;
+        border-radius: 6px;
+        background: linear-gradient(135deg, #E2B755 0%, #F5DF88 50%, #C99E38 100%);
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) inset, 0 1px 2px rgba(255, 255, 255, 0.4);
+    }
+    .emv-chip::after {
+        content: '';
+        position: absolute;
+        inset: 4px;
+        border: 1px solid rgba(0, 0, 0, 0.25);
+        border-radius: 3px;
+        background: transparent;
+    }
+
+    /* Realistic Barcode Generator */
+    .barcode-strip {
+        background: #FFFFFF;
+        padding: 8px 12px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        display: inline-flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .barcode-lines {
+        height: 38px;
+        display: flex;
+        align-items: stretch;
+        gap: 1.5px;
+    }
+    .b-bar {
+        background: #111827;
+        width: 2px;
+    }
+    .b-bar.w-1 { width: 1.5px; }
+    .b-bar.w-2 { width: 3px; }
+    .b-bar.w-3 { width: 4.5px; }
+    .b-space {
+        background: transparent;
+        width: 2px;
+    }
+    .b-space.s-1 { width: 1.5px; }
+    .b-space.s-2 { width: 3px; }
+
+    /* Milestone progress track */
+    .milestone-step.active .milestone-dot {
+        background: linear-gradient(135deg, #D4AF37 0%, #D63384 100%);
+        box-shadow: 0 0 0 4px rgba(214, 51, 132, 0.25), 0 0 12px rgba(212, 175, 55, 0.6);
+        color: white;
+    }
+    .milestone-step.passed .milestone-dot {
+        background: #10B981;
+        color: white;
+    }
+</style>
+
+<div class="min-h-screen bg-slate-50/70 pb-20 pt-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Breadcrumb & Top Greeting -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            <div>
+                <nav class="flex items-center gap-2 text-xs text-slate-400 mb-1.5">
+                    <a href="/" class="hover:text-magenta-accent transition">Trang Chủ</a>
+                    <span>/</span>
+                    <a href="/Customer/Dashboard" class="hover:text-magenta-accent transition">Khách Hàng</a>
+                    <span>/</span>
+                    <span class="text-charcoal font-semibold">Omni Club VIP Loyalty</span>
+                </nav>
+                <h1 class="text-2xl sm:text-3xl font-serif font-bold text-charcoal flex items-center gap-2.5">
+                    <span>Thẻ Thành Viên VIP & Đặc Quyền</span>
+                    <span class="inline-flex items-center gap-1 text-xs font-sans font-bold px-2.5 py-1 rounded-full bg-magenta-accent/10 text-magenta-accent border border-magenta-accent/20">
+                        <i class="fa-solid fa-crown text-amber-500"></i> Omni Club
+                    </span>
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">
+                    Xin chào <strong class="text-charcoal font-semibold">@Model.FullName</strong>, tích lũy điểm thưởng và tận hưởng những đặc quyền làm đẹp tối thượng.
+                </p>
+            </div>
+
+            <!-- Quick Action CTA -->
+            <div class="flex items-center gap-3">
+                <a href="/Shop" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-charcoal text-white hover:bg-magenta-accent text-xs font-bold shadow-sm transition">
+                    <i class="fa-solid fa-bag-shopping text-rose-gold"></i> Mua Sắm Tích Điểm
+                </a>
+                <a href="/Customer/Orders" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white text-slate-700 hover:text-magenta-accent border border-slate-200 text-xs font-semibold shadow-sm transition">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Đơn Hàng Của Tôi
+                </a>
+            </div>
+        </div>
+
+        <!-- Portal Navigation Tabs (VIP Card | Orders | Addresses) -->
+        <div class="bg-white rounded-2xl p-1.5 border border-slate-200 shadow-sm mb-8 flex flex-wrap items-center gap-1">
+            <a href="/Customer/Dashboard" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-magenta-accent/10 text-magenta-accent border border-magenta-accent/20 shadow-xs">
+                <i class="fa-solid fa-crown text-amber-500"></i> Thẻ VIP & Điểm Thưởng
+            </a>
+            <a href="/Customer/Orders" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-bag-shopping text-blue-500"></i> Đơn Hàng Của Tôi
+            </a>
+            <a href="/Customer/Addresses" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-location-dot text-rose-gold"></i> Sổ Địa Chỉ Nhận Hàng
+            </a>
+            <a href="/Wishlist" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-heart text-magenta-accent"></i> Danh Sách Yêu Thích
+            </a>
+        </div>
+
+        <!-- ===================================================
+             1. KHU VỰC THẺ THÀNH VIÊN ĐIỆN TỬ VIP (DIGITAL CARD)
+             =================================================== -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10 items-stretch">
+            
+            <!-- Left: Digital VIP Membership Card (5 Cols) -->
+            <div class="lg:col-span-6 xl:col-span-5 flex flex-col justify-between">
+                
+                <!-- Interactive Tier Switcher Tabs (Demo & Preview 4 Tiers) -->
+                <div class="flex items-center justify-between bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm mb-4">
+                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider pl-2 hidden sm:inline">Chất liệu Thẻ:</span>
+                    <div class="flex items-center gap-1 w-full sm:w-auto justify-end">
+                        <a href="/Customer/Dashboard?previewTier=BRONZE" 
+                           class="px-2.5 py-1 rounded-xl text-xs font-bold transition @(Model.TierNormalized == "BRONZE" ? "bg-amber-900/10 text-amber-900 border border-amber-800/30" : "text-slate-500 hover:text-slate-900")">
+                            Đồng
+                        </a>
+                        <a href="/Customer/Dashboard?previewTier=SILVER" 
+                           class="px-2.5 py-1 rounded-xl text-xs font-bold transition @(Model.TierNormalized == "SILVER" ? "bg-slate-200 text-slate-800 border border-slate-300" : "text-slate-500 hover:text-slate-900")">
+                            Bạc
+                        </a>
+                        <a href="/Customer/Dashboard?previewTier=GOLD" 
+                           class="px-2.5 py-1 rounded-xl text-xs font-bold transition @(Model.TierNormalized == "GOLD" ? "bg-amber-100 text-amber-800 border border-amber-300 shadow-sm" : "text-slate-500 hover:text-slate-900")">
+                            Vàng Kim
+                        </a>
+                        <a href="/Customer/Dashboard?previewTier=DIAMOND" 
+                           class="px-2.5 py-1 rounded-xl text-xs font-bold transition @(Model.TierNormalized == "DIAMOND" ? "bg-purple-100 text-purple-900 border border-purple-300 shadow-sm" : "text-slate-500 hover:text-slate-900")">
+                            Kim Cương
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Card Container with 3D Holographic Metal Effect -->
+                <div class="vip-card-wrapper mb-4">
+                    <div class="vip-membership-card tier-theme-@(Model.TierNormalized.ToLowerInvariant())" id="digitalVipCard">
+                        
+                        <!-- Card Top Bar: Brand, Chip & Tier Badge -->
+                        <div class="flex items-start justify-between z-10">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 rounded-full bg-white/20 p-1 flex items-center justify-center backdrop-blur-md border border-white/40">
+                                        <img src="~/images/branding/logo-circle.png" alt="Omni Logo" class="w-full h-full object-cover rounded-full" />
+                                    </div>
+                                    <div>
+                                        <span class="text-xs uppercase tracking-[0.2em] font-serif font-bold opacity-90 block">OMNI BEAUTY</span>
+                                        <span class="text-[9px] uppercase tracking-[0.15em] opacity-75 font-semibold">VIP PRIVILEGE CLUB</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tier Pill Badge -->
+                            <div class="tier-pill px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-md">
+                                @if (Model.TierNormalized == "DIAMOND")
+                                {
+                                    <i class="fa-solid fa-gem text-purple-200 animate-pulse"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa-solid fa-crown text-amber-300"></i>
+                                }
+                                <span>HẠNG @Model.TierName</span>
+                            </div>
+                        </div>
+
+                        <!-- Card Center: EMV Chip & Contactless Wave -->
+                        <div class="flex items-center justify-between my-2 z-10">
+                            <div class="flex items-center gap-3">
+                                <div class="emv-chip"></div>
+                                <i class="fa-solid fa-wifi rotate-90 text-lg opacity-60"></i>
+                            </div>
+
+                            <!-- Điểm khả dụng góc thẻ -->
+                            <div class="text-right">
+                                <span class="text-[10px] uppercase font-bold tracking-wider opacity-75 block text-card-muted">Điểm Khả Dụng</span>
+                                <span class="text-2xl font-serif font-bold tracking-tight">@Model.CurrentPoints.ToString("N0") <span class="text-xs font-sans font-medium">điểm</span></span>
+                            </div>
+                        </div>
+
+                        <!-- Card Bottom: Cardholder Name, Barcode & Expiration -->
+                        <div class="z-10 pt-2 border-t border-white/15">
+                            <div class="flex items-end justify-between">
+                                <div>
+                                    <span class="text-[9px] uppercase tracking-wider opacity-70 block text-card-muted">Chủ Sở Hữu Thẻ</span>
+                                    <div class="text-sm sm:text-base font-serif font-bold uppercase tracking-wider text-shadow">
+                                        @Model.FullName
+                                    </div>
+                                    <div class="text-[11px] font-mono tracking-widest opacity-85 mt-0.5">
+                                        @Model.BarcodeNumber
+                                    </div>
+                                </div>
+
+                                <div class="text-right">
+                                    <span class="text-[9px] uppercase tracking-wider opacity-70 block text-card-muted">Hết Hạn Thẻ</span>
+                                    <span class="text-xs font-mono font-bold">@Model.TierExpirationDate.ToString("dd/MM/yyyy")</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Card Interaction Helper & POS Scanner Action -->
+                <div class="flex items-center justify-between text-xs text-slate-500 bg-white p-3 rounded-2xl border border-slate-200">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-barcode text-magenta-accent text-sm"></i>
+                        <span>Quét tại quầy POS: <strong>@Model.BarcodeNumber</strong></span>
+                    </div>
+                    <button type="button" 
+                            onclick="openQrModal()"
+                            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-magenta-accent/10 hover:bg-magenta-accent hover:text-white text-magenta-accent font-bold transition">
+                        <i class="fa-solid fa-qrcode"></i> Phóng to QR
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Right: Tier Progress Bar & Financial Snapshot (7 Cols) -->
+            <div class="lg:col-span-6 xl:col-span-7 flex flex-col justify-between">
+                
+                <div class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-sm h-full flex flex-col justify-between">
+                    
+                    <div>
+                        <!-- Tier Header with Current Rank -->
+                        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center text-xl shadow-md">
+                                    <i class="fa-solid fa-crown"></i>
+                                </div>
+                                <div>
+                                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Trạng Thái Thành Viên</span>
+                                    <h2 class="text-xl font-serif font-bold text-charcoal">
+                                        Thành Viên Hạng <span class="text-magenta-accent uppercase">@Model.TierName</span>
+                                    </h2>
+                                </div>
+                            </div>
+
+                            <div class="text-right">
+                                <span class="text-xs text-slate-400 block">Hệ số tích điểm</span>
+                                <span class="text-lg font-bold text-emerald-600 font-mono">x@(Model.PointMultiplier.ToString("0.0")) Điểm</span>
+                            </div>
+                        </div>
+
+                        <!-- 2. BẢNG TIẾN ĐỘ NÂNG HẠNG (TIER PROGRESS BAR) -->
+                        <div class="bg-gradient-to-r from-pink-50 via-rose-50/60 to-amber-50/50 p-5 rounded-2xl border border-pink-100 mb-6">
+                            <div class="flex items-start justify-between gap-3 mb-3">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-8 h-8 rounded-full bg-magenta-accent text-white flex items-center justify-center text-sm shadow-sm flex-shrink-0">
+                                        <i class="fa-solid fa-arrow-trend-up"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-sm font-bold text-charcoal">Mục Tiêu Thăng Hạng Tiếp Theo</h3>
+                                        <p class="text-xs text-slate-600 mt-0.5">
+                                            @if (Model.SpendNeededForNextTier > 0)
+                                            {
+                                                <span>Bạn đang là thành viên <strong>@Model.TierName</strong>. Chi tiêu thêm <strong class="text-magenta-accent font-mono text-sm">@Model.SpendNeededForNextTier.ToString("N0")₫</strong> trước <strong>@Model.UpgradeDeadlineText</strong> để thăng hạng <strong class="text-purple-700">@Model.NextTierName</strong>!</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-emerald-700 font-bold">🎉 Bạn đã đạt cấp độ VIP Tối Thượng DIAMOND! Toàn bộ đặc quyền cao nhất đã được kích hoạt.</span>
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                                <span class="text-sm font-bold text-magenta-accent font-mono flex-shrink-0">@Model.ProgressPercentage%</span>
+                            </div>
+
+                            <!-- Animated Visual Progress Bar -->
+                            <div class="w-full bg-slate-200/80 h-3.5 rounded-full overflow-hidden p-0.5 shadow-inner relative">
+                                <div class="bg-gradient-to-r from-amber-400 via-rose-500 to-magenta-accent h-full rounded-full transition-all duration-1000 ease-out shadow-sm relative overflow-hidden" 
+                                     style="width: @Model.ProgressPercentage%;">
+                                    <div class="absolute inset-0 bg-white/30 animate-pulse"></div>
+                                </div>
+                            </div>
+
+                            <!-- 4 Milestone Markers on the Line -->
+                            <div class="grid grid-cols-4 gap-1 text-center mt-3 pt-2 text-[11px]">
+                                <div class="milestone-step @(Model.TotalSpend12Months >= 0 ? "active" : "")">
+                                    <span class="font-bold block text-slate-700">Bronze</span>
+                                    <span class="text-slate-400 text-[10px]">0₫</span>
+                                </div>
+                                <div class="milestone-step @(Model.TotalSpend12Months >= 2000000 ? "active" : "")">
+                                    <span class="font-bold block text-slate-700">Silver</span>
+                                    <span class="text-slate-400 text-[10px]">2.000.000₫</span>
+                                </div>
+                                <div class="milestone-step @(Model.TotalSpend12Months >= 5000000 ? "active" : "")">
+                                    <span class="font-bold block text-slate-700">Gold</span>
+                                    <span class="text-slate-400 text-[10px]">5.000.000₫</span>
+                                </div>
+                                <div class="milestone-step @(Model.TotalSpend12Months >= 10000000 ? "active" : "")">
+                                    <span class="font-bold block text-purple-700">Diamond</span>
+                                    <span class="text-slate-400 text-[10px]">10.000.000₫</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3 Stat Value Boxes -->
+                        <div class="grid grid-cols-3 gap-3 mb-2">
+                            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Tổng chi tiêu 12T</span>
+                                <span class="text-base sm:text-lg font-bold text-charcoal font-mono">@Model.TotalSpend12Months.ToString("N0")₫</span>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Điểm quy đổi VNĐ</span>
+                                <span class="text-base sm:text-lg font-bold text-emerald-600 font-mono">@Model.AvailableDiscountVnd.ToString("N0")₫</span>
+                            </div>
+                            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+                                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Voucher sẵn có</span>
+                                <span class="text-base sm:text-lg font-bold text-magenta-accent font-mono">@Model.AvailableVouchers.Count mã</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Actions & Quick Redemption -->
+                    <div class="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 mt-4">
+                        <div class="flex items-center gap-2 text-xs text-slate-500">
+                            <i class="fa-solid fa-shield-halved text-rose-gold"></i>
+                            <span>Hạn duy trì hạng: <strong>@Model.TierExpirationDate.ToString("dd/MM/yyyy")</strong></span>
+                        </div>
+                        <a href="/Shop" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-magenta-accent to-rose-gold text-white font-bold text-xs shadow-md hover:opacity-95 transition">
+                            <span>Chi tiêu nâng hạng ngay</span>
+                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ===================================================
+             3. BẢNG DANH SÁCH ĐẶC QUYỀN THÀNH VIÊN (PRIVILEGES TABLE)
+             =================================================== -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm mb-12">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-magenta-accent">Quyền Lợi Đẳng Cấp</span>
+                    <h2 class="text-xl sm:text-2xl font-serif font-bold text-charcoal">
+                        Bảng Đặc Quyền Thành Viên Omni Club
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+                        Tích lũy chi tiêu đa kênh (Online & Offline Showroom) để mở khóa những trải nghiệm chăm sóc sắc đẹp đỉnh cao.
+                    </p>
+                </div>
+
+                <!-- Current Tier Highlight Legend -->
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-xs text-amber-800 font-semibold self-start sm:self-auto">
+                    <i class="fa-solid fa-circle-check text-amber-600"></i>
+                    <span>Hạng của bạn đang là: <strong>@Model.TierName</strong></span>
+                </div>
+            </div>
+
+            <!-- Responsive Comparison Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr>
+                            <th class="p-4 bg-slate-50/80 rounded-tl-2xl text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 min-w-[200px]">
+                                Danh mục đặc quyền
+                            </th>
+                            @foreach (var tier in Model.TierPrivileges)
+                            {
+                                <th class="p-4 text-center border-b border-slate-200 min-w-[170px] transition-all
+                                           @(tier.IsCurrentTier ? "bg-pink-50/70 border-t-2 border-t-magenta-accent font-bold" : "bg-slate-50/80 text-slate-600")">
+                                    <div class="text-sm font-serif font-bold text-charcoal">@tier.TierName</div>
+                                    <div class="text-[10px] text-slate-400 font-mono mt-0.5">Từ @tier.MinSpend.ToString("N0")₫</div>
+                                    @if (tier.IsCurrentTier)
+                                    {
+                                        <span class="inline-block mt-1 px-2 py-0.5 rounded-full bg-magenta-accent text-white text-[9px] font-bold uppercase tracking-wider shadow-sm">
+                                            HẠNG HIỆN TẠI
+                                        </span>
+                                    }
+                                </th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-xs sm:text-sm">
+                        
+                        <!-- 1. Tỷ lệ tích điểm (% hoàn tiền) -->
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="p-4 font-semibold text-slate-700">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-7 h-7 rounded-lg bg-pink-100 text-magenta-accent flex items-center justify-center text-xs">
+                                        <i class="fa-solid fa-percent"></i>
+                                    </div>
+                                    <div>
+                                        <span class="block text-charcoal font-bold">Tỷ lệ tích điểm (% hoàn tiền)</span>
+                                        <span class="text-[11px] text-slate-400">Quy đổi 1 điểm = 1.000₫ giảm trực tiếp</span>
+                                    </div>
+                                </div>
+                            </td>
+                            @foreach (var tier in Model.TierPrivileges)
+                            {
+                                <td class="p-4 text-center @(tier.IsCurrentTier ? "bg-pink-50/40 font-bold text-magenta-accent" : "text-slate-600")">
+                                    <span class="font-mono text-xs">@tier.CashBackRate</span>
+                                </td>
+                            }
+                        </tr>
+
+                        <!-- 2. Quà tặng sinh nhật -->
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="p-4 font-semibold text-slate-700">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-7 h-7 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center text-xs">
+                                        <i class="fa-solid fa-cake-candles"></i>
+                                    </div>
+                                    <div>
+                                        <span class="block text-charcoal font-bold">Quà tặng sinh nhật</span>
+                                        <span class="text-[11px] text-slate-400">Gửi tự động vào tháng sinh nhật</span>
+                                    </div>
+                                </div>
+                            </td>
+                            @foreach (var tier in Model.TierPrivileges)
+                            {
+                                <td class="p-4 text-center @(tier.IsCurrentTier ? "bg-pink-50/40 font-bold text-charcoal" : "text-slate-600")">
+                                    @tier.BirthdayGift
+                                </td>
+                            }
+                        </tr>
+
+                        <!-- 3. Miễn phí giao hàng -->
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="p-4 font-semibold text-slate-700">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-xs">
+                                        <i class="fa-solid fa-truck-fast"></i>
+                                    </div>
+                                    <div>
+                                        <span class="block text-charcoal font-bold">Miễn phí giao hàng (Free Shipping)</span>
+                                        <span class="text-[11px] text-slate-400">Áp dụng trên toàn quốc & giao hỏa tốc</span>
+                                    </div>
+                                </div>
+                            </td>
+                            @foreach (var tier in Model.TierPrivileges)
+                            {
+                                <td class="p-4 text-center @(tier.IsCurrentTier ? "bg-pink-50/40 font-bold text-charcoal" : "text-slate-600")">
+                                    @tier.ShippingPrivilege
+                                </td>
+                            }
+                        </tr>
+
+                        <!-- 4. Ưu tiên thử mẫu nước hoa mới -->
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="p-4 font-semibold text-slate-700">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center text-xs">
+                                        <i class="fa-solid fa-spray-can-sparkles"></i>
+                                    </div>
+                                    <div>
+                                        <span class="block text-charcoal font-bold">Ưu tiên thử mẫu nước hoa mới</span>
+                                        <span class="text-[11px] text-slate-400">Haute Parfumerie & Niche Discovery Kits</span>
+                                    </div>
+                                </div>
+                            </td>
+                            @foreach (var tier in Model.TierPrivileges)
+                            {
+                                <td class="p-4 text-center @(tier.IsCurrentTier ? "bg-pink-50/40 font-bold text-charcoal" : "text-slate-600")">
+                                    @tier.FragranceTesting
+                                </td>
+                            }
+                        </tr>
+
+                        <!-- 5. Chuyên gia tư vấn sắc đẹp riêng -->
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="p-4 font-semibold text-slate-700">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs">
+                                        <i class="fa-solid fa-user-doctor"></i>
+                                    </div>
+                                    <div>
+                                        <span class="block text-charcoal font-bold">Chuyên gia tư vấn sắc đẹp 1-1</span>
+                                        <span class="text-[11px] text-slate-400">Soi da đa tầng & phác đồ mỹ phẩm</span>
+                                    </div>
+                                </div>
+                            </td>
+                            @foreach (var tier in Model.TierPrivileges)
+                            {
+                                <td class="p-4 text-center @(tier.IsCurrentTier ? "bg-pink-50/40 font-bold text-charcoal" : "text-slate-600")">
+                                    @tier.ConsultantPrivilege
+                                </td>
+                            }
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+
+        <!-- ===================================================
+             4. KHO VOUCHER CỦA BẠN & LỊCH SỬ TÍCH ĐIỂM
+             =================================================== -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Vouchers (6 cols) -->
+            <div class="lg:col-span-6 bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-ticket text-magenta-accent text-lg"></i>
+                        <h3 class="font-serif font-bold text-lg text-charcoal">Kho Voucher Của Tôi</h3>
+                    </div>
+                    <span class="text-xs font-semibold text-slate-400">@Model.AvailableVouchers.Count voucher khả dụng</span>
+                </div>
+
+                <div class="space-y-3">
+                    @foreach (var v in Model.AvailableVouchers)
+                    {
+                        <div class="p-4 rounded-2xl border border-dashed border-pink-200 bg-pink-50/30 flex items-center justify-between gap-3 hover:bg-pink-50/60 transition group">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-mono font-bold text-xs px-2.5 py-1 rounded-lg bg-white border border-pink-300 text-magenta-accent shadow-2xs">
+                                        @v.VoucherCode
+                                    </span>
+                                    <span class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded-full">Sẵn sàng dùng</span>
+                                </div>
+                                <p class="text-xs font-medium text-slate-700 mt-1.5 line-clamp-1">@v.Description</p>
+                                <span class="text-[10px] text-slate-400 block mt-0.5">HSD: @v.ValidTo.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            <button type="button" 
+                                    onclick="copyVoucherCode('@v.VoucherCode')"
+                                    class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-magenta-accent hover:text-white text-xs font-bold transition shadow-2xs flex-shrink-0">
+                                Sao Chép
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Recent Points Activity (6 cols) -->
+            <div class="lg:col-span-6 bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-sm">
+                <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-clock-rotate-left text-amber-500 text-lg"></i>
+                        <h3 class="font-serif font-bold text-lg text-charcoal">Lịch Sử Biến Động Điểm</h3>
+                    </div>
+                    <span class="text-xs font-semibold text-slate-400">Giao dịch gần nhất</span>
+                </div>
+
+                <div class="space-y-3">
+                    @foreach (var tx in Model.RecentTransactions)
+                    {
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-sm shadow-2xs
+                                            @(tx.TransactionType == "EARN" ? "bg-emerald-100 text-emerald-700" : (tx.TransactionType == "BONUS" ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"))">
+                                    <i class="fa-solid @(tx.TransactionType == "EARN" ? "fa-plus" : (tx.TransactionType == "BONUS" ? "fa-gift" : "fa-arrow-right-arrow-left"))"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-bold text-charcoal line-clamp-1">@tx.Description</p>
+                                    <span class="text-[10px] text-slate-400">@tx.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                                </div>
+                            </div>
+                            <div class="text-right flex-shrink-0">
+                                <span class="text-sm font-bold font-mono @(tx.Points >= 0 ? "text-emerald-600" : "text-rose-600")">
+                                    @(tx.Points >= 0 ? "+" : "")@tx.Points
+                                </span>
+                                <span class="text-[10px] text-slate-400 block font-mono">Dư: @tx.BalanceAfter</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- ===================================================
+     MODAL PHÓNG TO QR CODE & BARCODE CHO QUẦY THU NGÂN POS
+     =================================================== -->
+<div id="qrModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center shadow-2xl relative animate-in fade-in zoom-in duration-200">
+        
+        <button type="button" 
+                onclick="closeQrModal()"
+                class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="w-12 h-12 rounded-full bg-pink-50 text-magenta-accent mx-auto flex items-center justify-center text-xl mb-3">
+            <i class="fa-solid fa-qrcode"></i>
+        </div>
+
+        <h3 class="text-lg font-serif font-bold text-charcoal mb-0.5">Mã Thành Viên Omni Club</h3>
+        <p class="text-xs text-slate-500 mb-4">Đưa mã này cho thu ngân tại quầy Showroom để quét tích điểm</p>
+
+        <!-- QR Code Display Box -->
+        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 inline-block mb-4 shadow-inner">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=@Uri.EscapeDataString(Model.QrCodeData)&color=26-11-46" 
+                 alt="QR Code VIP Membership" 
+                 class="w-44 h-44 mx-auto rounded-lg" />
+            <span class="text-[11px] font-mono text-slate-600 font-bold block mt-2">@Model.QrCodeData</span>
+        </div>
+
+        <!-- Barcode display -->
+        <div class="barcode-strip w-full mb-4">
+            <div class="barcode-lines">
+                <span class="b-bar w-2"></span><span class="b-space s-1"></span>
+                <span class="b-bar w-1"></span><span class="b-space s-2"></span>
+                <span class="b-bar w-3"></span><span class="b-space s-1"></span>
+                <span class="b-bar w-1"></span><span class="b-space s-1"></span>
+                <span class="b-bar w-2"></span><span class="b-space s-2"></span>
+                <span class="b-bar w-3"></span><span class="b-space s-1"></span>
+                <span class="b-bar w-1"></span><span class="b-space s-2"></span>
+                <span class="b-bar w-2"></span><span class="b-space s-1"></span>
+                <span class="b-bar w-3"></span><span class="b-space s-1"></span>
+                <span class="b-bar w-2"></span><span class="b-space s-2"></span>
+                <span class="b-bar w-1"></span><span class="b-space s-1"></span>
+                <span class="b-bar w-3"></span><span class="b-space s-2"></span>
+                <span class="b-bar w-2"></span><span class="b-space s-1"></span>
+                <span class="b-bar w-1"></span><span class="b-space s-1"></span>
+                <span class="b-bar w-3"></span><span class="b-space s-2"></span>
+                <span class="b-bar w-2"></span>
+            </div>
+            <span class="text-xs font-mono font-bold tracking-widest text-slate-800 mt-1">@Model.BarcodeNumber</span>
+        </div>
+
+        <button type="button" 
+                onclick="closeQrModal()"
+                class="w-full py-2.5 rounded-xl bg-charcoal text-white text-xs font-bold hover:bg-magenta-accent transition">
+            Đóng Lại
+        </button>
+    </div>
+</div>
+
+<!-- Copy toast notification -->
+<div id="copyToast" class="fixed bottom-6 right-6 z-50 bg-charcoal text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toastMessage">Đã sao chép thành công!</span>
+</div>
+
+<script>
+    function openQrModal() {
+        document.getElementById('qrModal').classList.remove('hidden');
+    }
+
+    function closeQrModal() {
+        document.getElementById('qrModal').classList.add('hidden');
+    }
+
+    function copyVoucherCode(code) {
+        navigator.clipboard.writeText(code).then(() => {
+            showToast('Đã sao chép mã voucher: ' + code);
+        }).catch(() => {
+            showToast('Mã voucher: ' + code);
+        });
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('copyToast');
+        const text = document.getElementById('toastMessage');
+        text.innerText = msg;
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        setTimeout(() => {
+            toast.classList.add('translate-y-20', 'opacity-0');
+        }, 2500);
+    }
+</script>

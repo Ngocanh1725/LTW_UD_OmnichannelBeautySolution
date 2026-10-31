@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Omnichannel.Infrastructure.Security
 {
@@ -16,6 +16,22 @@ namespace Omnichannel.Infrastructure.Security
         {
             Module = module.ToUpperInvariant();
             Action = action.ToUpperInvariant();
+        }
+
+        public HasPermissionAttribute(string permissionCode)
+            : base(policy: $"{PolicyPrefix}{Separator}{permissionCode.ToUpperInvariant()}")
+        {
+            var underscoreIdx = permissionCode.IndexOf('_');
+            if (underscoreIdx > 0)
+            {
+                Module = permissionCode.Substring(0, underscoreIdx).ToUpperInvariant();
+                Action = permissionCode.Substring(underscoreIdx + 1).ToUpperInvariant();
+            }
+            else
+            {
+                Module = permissionCode.ToUpperInvariant();
+                Action = string.Empty;
+            }
         }
     }
 }

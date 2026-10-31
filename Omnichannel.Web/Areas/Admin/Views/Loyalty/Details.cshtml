@@ -1,0 +1,406 @@
+@model Omnichannel.Application.DTOs.Loyalty.LoyaltyWalletDto
+@{
+    ViewData["Title"] = $"Chi tiết Ví Điểm - {Model.CustomerName}";
+    Layout = "_AdminLayout";
+
+    var tier = Model.CurrentTier?.TierName ?? "Silver";
+    string tierCardBg = tier switch
+    {
+        "Diamond" => "linear-gradient(135deg, #4C1D95 0%, #7C3AED 50%, #C084FC 100%)",
+        "Gold" => "linear-gradient(135deg, #78350F 0%, #D97706 50%, #FBBF24 100%)",
+        _ => "linear-gradient(135deg, #1E293B 0%, #475569 50%, #94A3B8 100%)"
+    };
+    string tierIcon = tier switch
+    {
+        "Diamond" => "fa-solid fa-gem",
+        "Gold" => "fa-solid fa-crown",
+        _ => "fa-solid fa-award"
+    };
+
+    decimal spendProgressPct = 100m;
+    if (Model.SpendNeededForNextTier.HasValue && Model.SpendNeededForNextTier.Value > 0 && Model.CurrentTier != null)
+    {
+        decimal targetSpend = Model.TotalSpend12Months + Model.SpendNeededForNextTier.Value;
+        spendProgressPct = targetSpend > 0 ? Math.Clamp(Math.Round(Model.TotalSpend12Months / targetSpend * 100m, 1), 0m, 100m) : 0m;
+    }
+}
+
+<!-- Top Header & Breadcrumbs -->
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb small mb-1">
+                <li class="breadcrumb-item"><a href="@Url.Action("Index")" class="text-decoration-none text-purple">Loyalty CRM</a></li>
+                <li class="breadcrumb-item active text-muted" aria-current="page">Chi tiết Ví Điểm #@Model.Id</li>
+            </ol>
+        </nav>
+        <h4 class="fw-bold text-dark mb-0">Ví Điểm Thành Viên: @Model.CustomerName</h4>
+    </div>
+    <div class="d-flex gap-2">
+        <button type="button" class="btn btn-warning px-3 shadow-xs" onclick="openAdjustModal(@Model.UserId, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.CustomerName))', @Model.CurrentBalance)">
+            <i class="fa-solid fa-sliders me-1.5"></i>Điều Chỉnh Điểm
+        </button>
+        <a href="@Url.Action("Index")" class="btn btn-light border text-muted">
+            <i class="fa-solid fa-arrow-left me-1"></i>Quay lại danh sách
+        </a>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show rounded-3 py-2.5 px-3 border-0 bg-success-subtle text-success small mb-3" role="alert">
+        <i class="fa-solid fa-circle-check me-2"></i>@TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show rounded-3 py-2.5 px-3 border-0 bg-danger-subtle text-danger small mb-3" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-2"></i>@TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Row 1: Digital Member Card & Metrics -->
+<div class="row g-4 mb-4">
+    <!-- Digital Haute Member Card (Luxury Style) -->
+    <div class="col-lg-5">
+        <div class="rounded-4 p-4 text-white shadow-lg position-relative overflow-hidden h-100 d-flex flex-column justify-content-between" style="background: @tierCardBg; min-height: 240px;">
+            <!-- Background Watermark Glow -->
+            <div class="position-absolute end-0 top-0 opacity-15" style="transform: translate(20%, -20%); pointer-events: none;">
+                <i class="@tierIcon" style="font-size: 200px;"></i>
+            </div>
+
+            <!-- Card Top: Brand & Tier Badge -->
+            <div class="d-flex justify-content-between align-items-center position-relative z-1">
+                <div>
+                    <div class="text-[10px] uppercase font-bold tracking-widest text-white-50">Omnichannel Beauty Suite</div>
+                    <div class="fw-bold font-serif fs-5">MEMBER PASS</div>
+                </div>
+                <span class="badge px-3 py-1.5 rounded-pill bg-white text-dark shadow-xs" style="font-size: 11px;">
+                    <i class="@tierIcon text-warning me-1"></i>Hạng @tier
+                </span>
+            </div>
+
+            <!-- Card Middle: Chip & Balance -->
+            <div class="my-4 position-relative z-1 d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="text-white-50 small">Số dư điểm khả dụng</div>
+                    <div class="fs-2 fw-bold font-mono">@Model.CurrentBalance.ToString("N0") <span class="fs-6 fw-normal text-white-50">pts</span></div>
+                    <div class="text-white-50 text-[11px]">≈ @Model.AvailableDiscountVnd.ToString("N0") VNĐ giảm giá</div>
+                </div>
+                <!-- Card Chip -->
+                <div class="rounded-2 p-1 border border-white-50 bg-white-10" style="width: 48px; height: 36px; background: rgba(255,255,255,0.15);">
+                    <div class="w-100 h-100 border border-white-50 rounded-1 d-flex align-items-center justify-content-center">
+                        <i class="fa-solid fa-microchip text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Bottom: Cardholder Name & QR Code Number -->
+            <div class="d-flex justify-content-between align-items-end position-relative z-1 pt-2 border-top border-white-20">
+                <div>
+                    <div class="text-[10px] text-white-50 uppercase">Chủ thẻ thành viên</div>
+                    <div class="fw-bold fs-6 text-uppercase tracking-wider">@Model.CustomerName</div>
+                </div>
+                <div class="text-end">
+                    <div class="text-[10px] text-white-50 uppercase">Mã quẹt POS</div>
+                    <div class="font-mono text-warning fw-bold">@Model.QrCodeData</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Metrics & Upgrade Progression -->
+    <div class="col-lg-7">
+        <div class="beauty-card p-4 h-100 d-flex flex-column justify-content-between">
+            <div>
+                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-chart-line text-purple me-2"></i>Thống Kê Hoạt Động & Tiến Trình Bậc Hạng</h6>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-4">
+                        <div class="p-3 rounded-3 bg-light border">
+                            <div class="text-muted small">Chi tiêu 12 tháng:</div>
+                            <div class="fs-5 fw-bold text-dark font-mono mt-1">@Model.TotalSpend12Months.ToString("N0") ₫</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="p-3 rounded-3 bg-light border">
+                            <div class="text-muted small">Điểm tích trọn đời:</div>
+                            <div class="fs-5 fw-bold text-success font-mono mt-1">@Model.TotalPointsEarned.ToString("N0") pts</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="p-3 rounded-3 bg-light border">
+                            <div class="text-muted small">Hệ số tích điểm:</div>
+                            <div class="fs-5 fw-bold text-purple font-mono mt-1">x@(Model.CurrentTier?.PointMultiplier.ToString("0.0") ?? "1.0")</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Next Tier Progress Bar -->
+                <div class="p-3 rounded-3 bg-pastel-rose/40 border border-soft mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1.5">
+                        <span class="small fw-bold text-dark">Tiến trình thăng hạng:</span>
+                        @if (!string.IsNullOrEmpty(Model.NextTierName) && Model.SpendNeededForNextTier.HasValue && Model.SpendNeededForNextTier.Value > 0)
+                        {
+                            <span class="small text-purple fw-semibold">
+                                Cần chi tiêu thêm <strong>@Model.SpendNeededForNextTier.Value.ToString("N0") ₫</strong> để đạt hạng <strong>@Model.NextTierName</strong>
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="small text-success fw-bold">
+                                <i class="fa-solid fa-circle-check me-1"></i>Đã đạt hạng thành viên cao nhất (Diamond)
+                            </span>
+                        }
+                    </div>
+
+                    <div class="progress rounded-pill" style="height: 10px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-purple" role="progressbar" style="width: @spendProgressPct%;" aria-valuenow="@spendProgressPct" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+
+                    <div class="d-flex justify-content-between text-[11px] text-muted mt-1 font-mono">
+                        <span>Hạng hiện tại: @tier</span>
+                        <span>@(spendProgressPct)%</span>
+                        <span>Mục tiêu: @(Model.NextTierName ?? "Tối đa")</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center text-muted small pt-3 border-top">
+                <div><i class="fa-regular fa-calendar-check me-1"></i>Gia nhập: @Model.MemberSince.ToString("dd/MM/yyyy HH:mm")</div>
+                <div><i class="fa-solid fa-phone me-1"></i>SĐT: @(Model.CustomerPhone ?? "Chưa cập nhật")</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 2: Transaction History Table -->
+<div class="beauty-card overflow-hidden">
+    <div class="p-3 px-4 border-bottom bg-light d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold text-dark mb-0">
+            <i class="fa-solid fa-clock-rotate-left text-purple me-2"></i>Lịch Sử Giao Dịch Điểm (@Model.RecentTransactions.Count giao dịch)
+        </h6>
+        <span class="text-muted small">Cập nhật theo thời gian thực</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr class="text-secondary small text-uppercase">
+                    <th class="ps-4" style="width: 140px;">Thời Gian</th>
+                    <th style="width: 150px;">Loại Giao Dịch</th>
+                    <th style="width: 140px;" class="text-end">Biến Động</th>
+                    <th style="width: 160px;" class="text-end">Số Dư Sau</th>
+                    <th style="width: 150px;">Đơn Hàng</th>
+                    <th>Nội Dung Chi Tiết</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.RecentTransactions.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-receipt fs-1 text-pink-border mb-2" style="color: var(--accent-pink-border);"></i>
+                            <div>Khách hàng chưa phát sinh giao dịch điểm nào.</div>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var tx in Model.RecentTransactions)
+                    {
+                        string typeBadge = tx.TransactionType switch
+                        {
+                            "EARN" => "bg-success-subtle text-success border border-success-subtle",
+                            "REDEEM" => "bg-warning-subtle text-warning border border-warning-subtle",
+                            "ADJUST" => "bg-primary-subtle text-primary border border-primary-subtle",
+                            "BONUS" => "bg-purple-subtle text-purple border border-purple-subtle",
+                            _ => "bg-light text-secondary border"
+                        };
+                        string typeLabel = tx.TransactionType switch
+                        {
+                            "EARN" => "Tích điểm",
+                            "REDEEM" => "Đổi thưởng",
+                            "ADJUST" => "Điều chỉnh",
+                            "BONUS" => "Thưởng thêm",
+                            _ => tx.TransactionType
+                        };
+
+                        <tr>
+                            <td class="ps-4">
+                                <div class="small text-dark font-mono">@tx.CreatedAt.ToString("dd/MM/yyyy")</div>
+                                <div class="text-muted text-[11px] font-mono">@tx.CreatedAt.ToString("HH:mm:ss")</div>
+                            </td>
+
+                            <td>
+                                <span class="badge px-2.5 py-1 rounded-pill @typeBadge" style="font-size: 11px;">
+                                    @typeLabel
+                                </span>
+                            </td>
+
+                            <td class="text-end">
+                                @if (tx.Points > 0)
+                                {
+                                    <span class="fw-bold text-success font-mono fs-6">+@tx.Points.ToString("N0")</span>
+                                }
+                                else if (tx.Points < 0)
+                                {
+                                    <span class="fw-bold text-danger font-mono fs-6">@tx.Points.ToString("N0")</span>
+                                }
+                                else
+                                {
+                                    <span class="fw-bold text-muted font-mono fs-6">0</span>
+                                }
+                            </td>
+
+                            <td class="text-end">
+                                <span class="fw-bold text-dark font-mono">@tx.BalanceAfter.ToString("N0") pts</span>
+                                <div class="text-[11px] text-muted font-mono">(trước: @tx.BalanceBefore.ToString("N0"))</div>
+                            </td>
+
+                            <td>
+                                @if (tx.OrderId.HasValue && tx.OrderId.Value > 0)
+                                {
+                                    <a href="/Admin/Order/Details/@tx.OrderId" class="fw-bold text-purple font-mono small text-decoration-none">
+                                        #@(tx.OrderCode ?? tx.OrderId.Value.ToString())
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">-</span>
+                                }
+                            </td>
+
+                            <td>
+                                <div class="small text-dark">@tx.Description</div>
+                                @if (tx.ExpiresAt.HasValue)
+                                {
+                                    <div class="text-[11px] text-muted">Hết hạn: @tx.ExpiresAt.Value.ToString("dd/MM/yyyy")</div>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Điều Chỉnh Điểm Thủ Công -->
+<div class="modal fade" id="adjustPointsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-bottom border-soft">
+                <h5 class="modal-title fw-bold text-dark"><i class="fa-solid fa-sliders text-warning me-2"></i>Điều Chỉnh Điểm Thành Viên</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form asp-action="AdjustPoints" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="UserId" id="adjustUserId" value="@Model.UserId" />
+                <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+
+                <div class="modal-body p-4 space-y-3">
+                    <div class="p-3 rounded-3 bg-light border">
+                        <div class="small text-muted">Khách hàng:</div>
+                        <div class="fw-bold text-dark fs-6" id="adjustCustomerName">@Model.CustomerName</div>
+                        <div class="small text-muted mt-1">Số dư khả dụng hiện tại: <strong class="text-warning font-mono" id="adjustCurrentBalance">@Model.CurrentBalance.ToString("N0")</strong> pts</div>
+                    </div>
+
+                    <div>
+                        <label class="form-label small fw-semibold text-secondary">Loại thao tác:</label>
+                        <div class="d-flex gap-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="adjustType" id="typeAdd" value="add" checked onchange="updateSign()" />
+                                <label class="form-check-label text-success fw-bold small" for="typeAdd">
+                                    <i class="fa-solid fa-plus me-1"></i>Cộng điểm (+)
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="adjustType" id="typeSub" value="sub" onchange="updateSign()" />
+                                <label class="form-check-label text-danger fw-bold small" for="typeSub">
+                                    <i class="fa-solid fa-minus me-1"></i>Trừ điểm (-)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="form-label small fw-semibold text-secondary">Số lượng điểm (*):</label>
+                        <div class="input-group">
+                            <span class="input-group-text fw-bold text-success" id="signBadge">+</span>
+                            <input type="number" min="1" step="1" id="adjustPointsAmount" class="form-control rounded-end-3" placeholder="Nhập số điểm cần điều chỉnh..." required oninput="calculateRealPoints()" />
+                        </div>
+                        <input type="hidden" name="Points" id="realPointsHidden" />
+                    </div>
+
+                    <div>
+                        <label class="form-label small fw-semibold text-secondary">Lý do điều chỉnh (*):</label>
+                        <select id="reasonPresetSelect" class="form-select rounded-3 mb-2" onchange="onPresetReasonChange()">
+                            <option value="Thưởng sự kiện & chiến dịch đặc biệt">Thưởng sự kiện & chiến dịch đặc biệt</option>
+                            <option value="Tặng điểm sinh nhật bù">Tặng điểm sinh nhật bù</option>
+                            <option value="Đền bù dịch vụ / giải quyết khiếu nại">Đền bù dịch vụ / giải quyết khiếu nại</option>
+                            <option value="Bù điểm sai sót khi chốt đơn">Bù điểm sai sót khi chốt đơn</option>
+                            <option value="Thu hồi điểm do hoàn trả đơn hàng">Thu hồi điểm do hoàn trả đơn hàng</option>
+                            <option value="other">-- Lý do tùy chỉnh khác --</option>
+                        </select>
+                        <input type="text" name="Reason" id="adjustReasonInput" class="form-control rounded-3" value="Thưởng sự kiện & chiến dịch đặc biệt" required />
+                    </div>
+
+                    <div>
+                        <label class="form-label small fw-semibold text-secondary">Ghi chú nội bộ (nếu có):</label>
+                        <textarea name="Note" rows="2" class="form-control rounded-3" placeholder="Ghi chú chi tiết cho kiểm toán..."></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top border-soft">
+                    <button type="button" class="btn btn-light rounded-3 px-3" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary-gradient px-4">Xác Nhận Điều Chỉnh</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function openAdjustModal(userId, customerName, currentBalance) {
+            document.getElementById('adjustUserId').value = userId;
+            document.getElementById('adjustCustomerName').innerText = customerName;
+            document.getElementById('adjustCurrentBalance').innerText = currentBalance.toLocaleString('vi-VN');
+            document.getElementById('adjustPointsAmount').value = '';
+            document.getElementById('typeAdd').checked = true;
+            updateSign();
+
+            const modal = new bootstrap.Modal(document.getElementById('adjustPointsModal'));
+            modal.show();
+        }
+
+        function updateSign() {
+            const isAdd = document.getElementById('typeAdd').checked;
+            const badge = document.getElementById('signBadge');
+            badge.innerText = isAdd ? '+' : '-';
+            badge.className = isAdd ? 'input-group-text fw-bold text-success' : 'input-group-text fw-bold text-danger';
+            calculateRealPoints();
+        }
+
+        function calculateRealPoints() {
+            const isAdd = document.getElementById('typeAdd').checked;
+            const amt = Math.abs(parseInt(document.getElementById('adjustPointsAmount').value) || 0);
+            document.getElementById('realPointsHidden').value = isAdd ? amt : -amt;
+        }
+
+        function onPresetReasonChange() {
+            const select = document.getElementById('reasonPresetSelect');
+            const input = document.getElementById('adjustReasonInput');
+            if (select.value === 'other') {
+                input.value = '';
+                input.focus();
+            } else {
+                input.value = select.value;
+            }
+        }
+    </script>
+}

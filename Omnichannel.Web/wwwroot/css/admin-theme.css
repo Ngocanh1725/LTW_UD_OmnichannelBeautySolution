@@ -1,0 +1,527 @@
+/**
+ * ADMIN-THEME.CSS - Comprehensive Compatibility & Aesthetic Theme Layer
+ * Seamlessly resolves Bootstrap classes into unified, modern design tokens
+ * Works in perfect synergy with Tailwind CSS CDN
+ */
+
+@import url('design-tokens.css');
+@import url('design-system.css');
+
+/* =========================================================================
+   1. Core Card & Surface Components
+   ========================================================================= */
+.beauty-card, .card {
+    background: #FFFFFF;
+    border-radius: var(--radius-lg);
+    border: 1px solid #E2E8F0;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+    transition: all 0.25s ease;
+    position: relative;
+}
+
+.beauty-card:hover {
+    box-shadow: 0 10px 25px -3px rgba(15, 23, 42, 0.08);
+}
+
+.border-0 { border: 0 !important; }
+.shadow-sm { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px 0 rgba(0, 0, 0, 0.04) !important; }
+
+/* =========================================================================
+   2. Action Buttons & Gradient Elements
+   ========================================================================= */
+.btn-primary-gradient, .btn-gradient {
+    background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: var(--radius-md) !important;
+    padding: 0.6rem 1.25rem !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    box-shadow: 0 4px 15px -3px rgba(236, 72, 153, 0.35) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.25s ease !important;
+    text-decoration: none !important;
+    cursor: pointer;
+}
+
+.btn-primary-gradient:hover, .btn-gradient:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px -4px rgba(236, 72, 153, 0.45) !important;
+    color: #FFFFFF !important;
+}
+
+.btn-soft-purple {
+    background: var(--primary-purple-light) !important;
+    color: var(--primary-purple) !important;
+    border: 1px solid var(--primary-purple-subtle) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 600 !important;
+    font-size: 0.8125rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    transition: all 0.2s ease !important;
+    text-decoration: none !important;
+    cursor: pointer;
+}
+
+.btn-soft-purple:hover {
+    background: var(--primary-purple-subtle) !important;
+    color: var(--primary-purple-hover) !important;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    line-height: 1.5;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+    border: 1px solid transparent;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.8125rem;
+    border-radius: var(--radius-md);
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.65rem !important;
+    font-size: 0.75rem !important;
+}
+
+.btn-outline-secondary {
+    color: #475569;
+    border-color: #CBD5E1;
+    background: #FFFFFF;
+}
+
+.btn-outline-secondary:hover {
+    background: #F1F5F9;
+    color: #1E293B;
+}
+
+.btn-light {
+    background-color: #F1F5F9;
+    border-color: #E2E8F0;
+    color: #475569;
+}
+
+.btn-light:hover {
+    background-color: #E2E8F0;
+    color: #1E293B;
+}
+
+/* =========================================================================
+   3. Status Badges & Avatars
+   ========================================================================= */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.375rem;
+}
+
+.badge-role {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #F3E8FF;
+    color: #7E22CE;
+    border: 1px solid #E9D5FF;
+}
+
+.badge-active {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    background: #ECFDF5;
+    color: #059669;
+    border: 1px solid #A7F3D0;
+}
+
+.badge-locked {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    background: #FEF2F2;
+    color: #DC2626;
+    border: 1px solid #FECACA;
+}
+
+.bg-danger-subtle { background-color: #FEF2F2 !important; }
+.text-danger { color: #EF4444 !important; }
+.bg-primary-subtle { background-color: #F5F3FF !important; }
+.text-primary { color: var(--primary-purple) !important; }
+.bg-success-subtle { background-color: #ECFDF5 !important; }
+.text-success { color: #10B981 !important; }
+.bg-warning-subtle { background-color: #FFFBEB !important; }
+.text-warning { color: #F59E0B !important; }
+.bg-secondary-subtle { background-color: #F1F5F9 !important; }
+
+.border-danger-subtle { border: 1px solid #FECACA !important; }
+.border-warning-subtle { border: 1px solid #FDE68A !important; }
+.border-primary-subtle { border: 1px solid #DDD6FE !important; }
+
+.user-avatar-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
+    color: #FFFFFF;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* =========================================================================
+   4. Form Controls & Input Bridge
+   ========================================================================= */
+.form-control, .form-select {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: #1E293B;
+    background-color: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    border-radius: var(--radius-md);
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control-sm {
+    padding: 0.35rem 0.65rem !important;
+    font-size: 0.8125rem !important;
+}
+
+.form-control-lg {
+    padding: 0.75rem 1rem !important;
+    font-size: 1rem !important;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-purple);
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+}
+
+.form-label {
+    display: inline-block;
+    margin-bottom: 0.35rem;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    color: #334155;
+}
+
+.input-group {
+    display: flex;
+    position: relative;
+    width: 100%;
+}
+
+.input-group > .input-group-text {
+    display: flex;
+    align-items: center;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    color: #64748B;
+    background-color: #F8FAFC;
+    border: 1.5px solid #E2E8F0;
+    border-right: none;
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.input-group > .form-control {
+    border-left: none;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-check-input {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--primary-purple);
+    cursor: pointer;
+}
+
+/* =========================================================================
+   5. Grid & Flexbox Bridge (Fixing row, col-*, d-flex without Bootstrap)
+   ========================================================================= */
+.d-flex { display: flex !important; }
+.d-inline-flex { display: inline-flex !important; }
+.d-none { display: none !important; }
+.d-block { display: block !important; }
+.d-inline-block { display: inline-block !important; }
+
+.flex-column { flex-direction: column !important; }
+.flex-grow-1 { flex-grow: 1 !important; }
+.align-items-center { align-items: center !important; }
+.align-items-start { align-items: flex-start !important; }
+.align-items-end { align-items: flex-end !important; }
+.justify-content-between { justify-content: space-between !important; }
+.justify-content-center { justify-content: center !important; }
+.justify-content-end { justify-content: flex-end !important; }
+.justify-content-around { justify-content: space-around !important; }
+
+.gap-1 { gap: 0.25rem !important; }
+.gap-2 { gap: 0.5rem !important; }
+.gap-3 { gap: 0.75rem !important; }
+.gap-4 { gap: 1rem !important; }
+
+.h-100 { height: 100% !important; }
+.w-100 { width: 100% !important; }
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-left: -0.75rem;
+    margin-right: -0.75rem;
+}
+
+.justify-content-center {
+    justify-content: center !important;
+}
+
+.row.g-2 { margin-left: -0.5rem; margin-right: -0.5rem; }
+.row.g-2 > * { padding-left: 0.5rem; padding-right: 0.5rem; margin-bottom: 0.5rem; }
+
+.row.g-3 { margin-left: -0.75rem; margin-right: -0.75rem; }
+.row.g-3 > * { padding-left: 0.75rem; padding-right: 0.75rem; margin-bottom: 0.75rem; }
+
+.row.g-4 { margin-left: -1rem; margin-right: -1rem; }
+.row.g-4 > * { padding-left: 1rem; padding-right: 1rem; margin-bottom: 1rem; }
+
+.col-6 { flex: 0 0 50%; width: 50%; max-width: 50%; padding-left: 0.75rem; padding-right: 0.75rem; }
+.col-12 { flex: 0 0 100%; width: 100%; max-width: 100%; padding-left: 0.75rem; padding-right: 0.75rem; }
+
+@media (min-width: 576px) {
+    .col-sm-3 { flex: 0 0 25%; width: 25%; max-width: 25%; }
+    .col-sm-6 { flex: 0 0 50%; width: 50%; max-width: 50%; }
+}
+
+@media (min-width: 768px) {
+    .col-md-3 { flex: 0 0 25%; width: 25%; max-width: 25%; }
+    .col-md-4 { flex: 0 0 33.333333%; width: 33.333333%; max-width: 33.333333%; }
+    .col-md-5 { flex: 0 0 41.666667%; width: 41.666667%; max-width: 41.666667%; }
+    .col-md-6 { flex: 0 0 50%; width: 50%; max-width: 50%; }
+    .col-md-7 { flex: 0 0 58.333333%; width: 58.333333%; max-width: 58.333333%; }
+    .col-md-8 { flex: 0 0 66.666667%; width: 66.666667%; max-width: 66.666667%; }
+}
+
+@media (min-width: 992px) {
+    .col-lg-3 { flex: 0 0 25%; width: 25%; max-width: 25%; }
+    .col-lg-4 { flex: 0 0 33.333333%; width: 33.333333%; max-width: 33.333333%; }
+    .col-lg-6 { flex: 0 0 50%; width: 50%; max-width: 50%; }
+    .col-lg-8 { flex: 0 0 66.666667%; width: 66.666667%; max-width: 66.666667%; }
+    .col-lg-9 { flex: 0 0 75%; width: 75%; max-width: 75%; }
+}
+
+@media (min-width: 1200px) {
+    .col-xl-3 { flex: 0 0 25%; width: 25%; max-width: 25%; }
+    .d-xl-flex { display: flex !important; }
+}
+
+/* =========================================================================
+   6. Table Styles & Micro-interactions
+   ========================================================================= */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 0;
+    color: #334155;
+    vertical-align: middle;
+    border-collapse: collapse;
+}
+
+.table th {
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748B;
+    background-color: #F8FAFC;
+    border-bottom: 1px solid #E2E8F0;
+    padding: 0.75rem 1rem;
+}
+
+.table td {
+    padding: 0.875rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #F1F5F9;
+    font-size: 0.875rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #F8FAFC;
+}
+
+/* =========================================================================
+   7. Typography & Spacing Helpers
+   ========================================================================= */
+.fw-bold { font-weight: 700 !important; }
+.fw-semibold { font-weight: 600 !important; }
+.fw-medium { font-weight: 500 !important; }
+.font-monospace { font-family: var(--font-mono) !important; }
+.text-dark { color: #0F172A !important; }
+.text-muted { color: #64748B !important; }
+.text-secondary { color: #475569 !important; }
+.bg-light { background-color: #F8FAFC !important; }
+.bg-white { background-color: #FFFFFF !important; }
+
+.small { font-size: 0.8125rem !important; }
+.fs-5 { font-size: 1.15rem !important; }
+.fs-6 { font-size: 1rem !important; }
+
+.rounded-3 { border-radius: 0.75rem !important; }
+.rounded-4 { border-radius: 1rem !important; }
+.rounded-pill { border-radius: 9999px !important; }
+
+.p-1 { padding: 0.25rem !important; }
+.p-2 { padding: 0.5rem !important; }
+.p-3 { padding: 1rem !important; }
+.p-4 { padding: 1.5rem !important; }
+.px-2 { padding-left: 0.5rem !important; padding-right: 0.5rem !important; }
+.px-3 { padding-left: 1rem !important; padding-right: 1rem !important; }
+.px-4 { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+.py-1 { padding-top: 0.25rem !important; padding-bottom: 0.25rem !important; }
+.py-2 { padding-top: 0.5rem !important; padding-bottom: 0.5rem !important; }
+.py-3 { padding-top: 0.75rem !important; padding-bottom: 0.75rem !important; }
+
+.mb-0 { margin-bottom: 0 !important; }
+.mb-1 { margin-bottom: 0.25rem !important; }
+.mb-2 { margin-bottom: 0.5rem !important; }
+.mb-3 { margin-bottom: 0.75rem !important; }
+.mb-4 { margin-bottom: 1.5rem !important; }
+.me-1 { margin-right: 0.25rem !important; }
+.me-2 { margin-right: 0.5rem !important; }
+.me-3 { margin-right: 0.75rem !important; }
+
+.text-center { text-align: center !important; }
+.text-end { text-align: right !important; }
+
+/* =========================================================================
+   8. POS (Point of Sale) Specialized Styles
+   ========================================================================= */
+.pos-header {
+    background: #FFFFFF;
+    height: 56px;
+    border-bottom: 1.5px solid var(--border-color);
+    padding: 0 1.5rem;
+}
+
+.pos-workspace {
+    height: calc(100vh - 56px);
+}
+
+.hotkey-badge {
+    background: #EDE9FE;
+    color: #7C3AED;
+    font-size: 10.5px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+}
+
+/* =========================================================================
+   9. Dark Mode Comprehensive Theme & Surface Compatibility
+   ========================================================================= */
+html.dark,
+.dark {
+    color-scheme: dark;
+}
+
+html.dark body,
+.dark body {
+    background-color: #020617 !important;
+    color: #f1f5f9 !important;
+}
+
+html.dark .bg-white,
+.dark .bg-white,
+html.dark .beauty-card,
+.dark .beauty-card,
+html.dark .card,
+.dark .card,
+html.dark .beauty-card-hover,
+.dark .beauty-card-hover {
+    background-color: #0f172a !important;
+    border-color: #1e293b !important;
+    color: #f1f5f9 !important;
+}
+
+html.dark .text-slate-900,
+.dark .text-slate-900 {
+    color: #f8fafc !important;
+}
+
+html.dark .text-slate-800,
+.dark .text-slate-800 {
+    color: #f1f5f9 !important;
+}
+
+html.dark .text-slate-700,
+.dark .text-slate-700 {
+    color: #cbd5e1 !important;
+}
+
+html.dark .text-slate-600,
+.dark .text-slate-600 {
+    color: #94a3b8 !important;
+}
+
+html.dark .text-slate-500,
+.dark .text-slate-500 {
+    color: #64748b !important;
+}
+
+html.dark .border-slate-200,
+html.dark .border-slate-200\/80,
+html.dark .border-slate-100,
+.dark .border-slate-200,
+.dark .border-slate-200\/80,
+.dark .border-slate-100 {
+    border-color: #1e293b !important;
+}
+
+html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+    border-color: #1e293b !important;
+}
+
+html.dark .hover\:bg-slate-50\/60:hover,
+.dark .hover\:bg-slate-50\/60:hover,
+html.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-50:hover {
+    background-color: rgba(30, 41, 59, 0.6) !important;
+}
+

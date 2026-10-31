@@ -1,0 +1,605 @@
+@inject Omnichannel.Application.Interfaces.Cms.IThemeService ThemeService
+@{
+    var theme = await ThemeService.GetCurrentThemeAsync();
+}
+@* Omnichannel Beauty Suite - Storefront Header Partial *@
+<header class="w-full relative z-40">
+    <style>
+        @@keyframes tickerMarquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .animate-ticker-marquee {
+            display: inline-flex;
+            white-space: nowrap;
+            animation: tickerMarquee 30s linear infinite;
+        }
+        .animate-ticker-marquee:hover {
+            animation-play-state: paused;
+        }
+
+        /* Luxury Mega Menu Display on Hover */
+        .group:hover > .mega-menu-content,
+        .has-mega-menu:hover .mega-menu-content {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+            transform: translateY(0) scale(1) !important;
+        }
+
+        /* Luxury Live Search Popover Display on Focus */
+        .search-input-wrapper:focus-within #liveSearchResultsPopover {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+            transform: translateY(0) scale(1) !important;
+        }
+    </style>
+
+    <!-- Top Announcement Bar with Smooth Ticker & VIP Hotline -->
+    @if (theme.AnnouncementBarActive && !string.IsNullOrWhiteSpace(theme.AnnouncementBarText))
+    {
+        <aside aria-label="Thông báo ưu đãi" class="text-white flex items-center justify-between px-3 sm:px-6 py-1.5 text-xs border-b border-white/5 relative overflow-hidden select-none" style="background-color: @theme.AnnouncementBarBgColor;">
+            <!-- Left Luxury Badge (Desktop) -->
+            <div class="hidden xl:flex items-center gap-3 text-slate-300 text-[11px] shrink-0 font-medium">
+                <span class="inline-flex items-center gap-1.5"><i class="fa-solid fa-gem text-rose-gold"></i> Haute Parfumerie</span>
+                <span class="text-slate-600">•</span>
+                <span class="inline-flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left text-amber-400"></i> FEFO Minh Bạch 100%</span>
+            </div>
+
+            <!-- Center Smooth Marquee Ticker -->
+            <div class="overflow-hidden whitespace-nowrap flex-1 mx-2 sm:mx-6 cursor-pointer">
+                <div class="animate-ticker-marquee items-center text-slate-200 text-xs font-medium tracking-wide">
+                    <span class="inline-block px-4">
+                        ✦ <span class="font-bold text-amber-300">@theme.AnnouncementBarText</span> ✦
+                    </span>
+                    <span class="inline-block px-4">
+                        ✦ <span class="font-bold text-amber-300">@theme.AnnouncementBarText</span> ✦
+                    </span>
+                </div>
+            </div>
+
+            <!-- Right VIP Hotline & Utilities -->
+            <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+                @if (!string.IsNullOrWhiteSpace(theme.Hotline))
+                {
+                    <!-- VIP Hotline CTA Button -->
+                    <a href="tel:@theme.Hotline.Replace(" ", "")" 
+                       class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 via-pink-500/20 to-purple-500/20 hover:from-amber-500/30 hover:to-pink-500/30 border border-amber-400/40 text-amber-300 hover:text-white transition-all font-bold text-[11px] shadow-2xs group"
+                       title="Hotline tư vấn VIP @theme.Hotline">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                        </span>
+                        <i class="fa-solid fa-headset text-rose-gold group-hover:scale-110 transition-transform"></i>
+                        <span>Hotline VIP: @theme.Hotline <span class="text-[10px] font-normal text-slate-300 hidden md:inline">(08:00 - 22:00)</span></span>
+                    </a>
+                }
+
+                <div class="hidden lg:flex items-center gap-3 text-[11px] font-semibold text-slate-300">
+                    <span class="text-slate-600">|</span>
+                    <a href="/stores" class="hover:text-magenta-accent transition flex items-center gap-1">
+                        <i class="fa-solid fa-location-dot text-rose-gold"></i> Showroom
+                    </a>
+                    <span class="text-slate-600">|</span>
+                    <span class="text-white font-bold tracking-wider">VNĐ (₫)</span>
+                </div>
+            </div>
+        </aside>
+    }
+
+    <!-- Main Navigation Bar with Glassmorphism -->
+    <div class="header-glass sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-soft-border/70 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="h-20 flex items-center justify-between gap-4">
+
+                <!-- Mobile Menu Hamburger Button -->
+                <button type="button" 
+                        class="lg:hidden p-2.5 rounded-xl text-slate-700 hover:text-magenta-accent hover:bg-pastel-rose transition" 
+                        @@click="mobileMenuOpen = true" 
+                        aria-label="Mở danh mục menu">
+                    <i class="fa-solid fa-bars-staggered text-xl"></i>
+                </button>
+
+                <!-- Brand Logo (Omni Beauty - Dynamic Theme Engine) -->
+                <a href="/" class="brand-logo-wrapper flex items-center gap-2.5 sm:gap-3 group shrink-0" title="@theme.BrandName - @(theme.Slogan ?? "Luxury Cosmetics")">
+                    <div class="brand-logo-badge relative shrink-0">
+                        <img src="@theme.LogoUrl" 
+                             alt="@theme.BrandName Logo" 
+                             class="brand-logo-img h-10 w-10 sm:h-11 sm:w-11 object-cover rounded-full" 
+                             onerror="this.onerror=null; this.src='@theme.LogoUrl'" />
+                    </div>
+                    <div class="flex flex-col items-start leading-none">
+                        <span class="brand-logo-text text-lg sm:text-2xl font-serif font-bold text-charcoal tracking-[0.16em] transition group-hover:text-magenta-accent">
+                            @theme.BrandName
+                        </span>
+                        <span class="text-[8px] sm:text-[9.5px] font-bold tracking-[0.32em] text-magenta-accent uppercase mt-0.5">
+                            @(theme.Slogan ?? "LUXURY COSMETICS")
+                        </span>
+                    </div>
+                </a>
+
+                <!-- Live AJAX Search Bar with Luxury Popover -->
+                <div class="search-input-wrapper hidden md:block relative z-50 flex-1 max-w-lg mx-4"
+                     x-data="{ searchFocused: false }"
+                     @@click.outside="searchFocused = false"
+                     @@keydown.escape="searchFocused = false">
+                    
+                    <form action="/tim-kiem" method="GET" class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input type="text" 
+                               name="q" 
+                               id="storefrontSearchInput" 
+                               hx-get="/Product/LiveSearch" 
+                               hx-trigger="input delay:300ms, keyup delay:300ms, focus" 
+                               hx-target="#searchResultsContent" 
+                               @@focus="searchFocused = true"
+                               @@click="searchFocused = true"
+                               placeholder="Tìm son lì, kem chống nắng, serum HA & B5, nước hoa..." 
+                               class="search-input-beauty w-full pl-11 pr-10 py-2.5 rounded-full border border-slate-200 focus:border-magenta-accent focus:ring-2 focus:ring-magenta-accent/20 bg-slate-50/60 hover:bg-white text-sm outline-none transition-all placeholder:text-slate-400 font-sans" 
+                               autocomplete="off" />
+                        <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-magenta-accent transition" aria-label="Tìm kiếm">
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </form>
+
+                    <!-- AJAX Results Popover with 2 Tabs -->
+                    <div id="liveSearchResultsPopover" 
+                         x-show="searchFocused"
+                         @@click.stop
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-2 scale-98"
+                         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                         x-transition:leave="transition ease-in duration-150"
+                         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                         x-transition:leave-end="opacity-0 translate-y-2 scale-98"
+                         class="search-results-dropdown absolute top-full left-0 right-0 mt-2 bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl border border-rose-100/90 p-3 z-50">
+                        <div id="searchResultsContent"
+                             hx-get="/Product/LiveSearch"
+                             hx-trigger="load"
+                             hx-target="this">
+                            <div class="py-6 px-4 text-center text-slate-400 text-xs">
+                                <i class="fa-solid fa-spinner fa-spin text-magenta-accent text-base mb-2"></i>
+                                <div>Đang tải gợi ý làm đẹp cao cấp...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Utilities: Wishlist, Account, Mini-Cart Drawer Trigger -->
+                <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+                    <!-- Wishlist Link -->
+                    <a href="/wishlist" class="relative p-2.5 text-slate-700 hover:text-magenta-accent transition rounded-full hover:bg-pastel-rose" title="Sản phẩm yêu thích">
+                        <i class="fa-regular fa-heart text-lg"></i>
+                        <span id="wishlistCountBadge" class="absolute top-1 right-1 h-4 w-4 rounded-full bg-magenta-accent text-white text-[10px] font-bold flex items-center justify-center">0</span>
+                    </a>
+
+                    <!-- Storefront Realtime Notification Center Dropdown -->
+                    <div class="relative" x-data="storefrontNotificationCenter()" x-init="init()">
+                        <button @@click="toggleOpen()"
+                                type="button" 
+                                class="relative p-2.5 text-slate-700 hover:text-magenta-accent transition rounded-full hover:bg-pastel-rose focus:outline-none" 
+                                title="Thông báo đơn hàng & Ưu đãi">
+                            <i class="fa-regular fa-bell text-lg" :class="unreadCount > 0 ? 'text-magenta-accent' : ''"></i>
+                            <span x-show="unreadCount > 0" 
+                                  x-text="unreadCount > 9 ? '9+' : unreadCount" 
+                                  class="absolute top-1 right-1 h-4 w-4 rounded-full bg-magenta-accent text-white text-[10px] font-bold flex items-center justify-center animate-pulse shadow-sm">0</span>
+                        </button>
+
+                        <!-- Notification Dropdown Popover -->
+                        <div x-show="isOpen"
+                             @@click.outside="isOpen = false"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+                             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+                             x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+                             style="display: none;"
+                             class="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl bg-white/98 backdrop-blur-xl border border-rose-100 shadow-2xl z-50 overflow-hidden font-sans">
+                            
+                            <!-- Header -->
+                            <div class="p-3.5 border-b border-rose-100 flex items-center justify-between bg-gradient-to-r from-pastel-rose via-white to-pink-50/50">
+                                <div class="flex items-center gap-2">
+                                    <div class="h-6 w-6 rounded-lg bg-pink-100 text-magenta-accent flex items-center justify-center text-xs">
+                                        <i class="fa-solid fa-bell"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-charcoal">Trung Tâm Thông Báo</span>
+                                    <template x-if="unreadCount > 0">
+                                        <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-magenta-accent text-white" x-text="unreadCount + ' mới'"></span>
+                                    </template>
+                                </div>
+                                <button @@click="markAllAsRead()" 
+                                        type="button"
+                                        class="text-[11px] font-semibold text-magenta-accent hover:underline">
+                                    Đọc tất cả
+                                </button>
+                            </div>
+
+                            <!-- Items List -->
+                            <div class="max-h-80 overflow-y-auto divide-y divide-rose-50">
+                                <template x-if="loading && notifications.length === 0">
+                                    <div class="p-6 text-center text-xs text-slate-400">
+                                        <i class="fa-solid fa-spinner fa-spin text-base text-magenta-accent mb-2"></i>
+                                        <div>Đang tải thông báo...</div>
+                                    </div>
+                                </template>
+
+                                <template x-if="!loading && notifications.length === 0">
+                                    <div class="p-6 text-center">
+                                        <i class="fa-regular fa-bell-slash text-2xl text-slate-300 mb-2"></i>
+                                        <div class="text-xs font-medium text-slate-600">Không có thông báo mới</div>
+                                        <div class="text-[10px] text-slate-400 mt-0.5">Bạn sẽ nhận được ưu đãi và cập nhật đơn hàng tại đây</div>
+                                    </div>
+                                </template>
+
+                                <template x-for="item in notifications" :key="item.id">
+                                    <div @@click="handleClick(item)"
+                                         class="p-3 hover:bg-pastel-rose/50 cursor-pointer transition flex items-start gap-3 relative"
+                                         :class="!item.isRead ? 'bg-pink-50/40' : ''">
+                                        <div class="h-8 w-8 rounded-xl flex items-center justify-center text-sm shrink-0"
+                                             :class="item.severity === 'SUCCESS' ? 'bg-emerald-50 text-emerald-600' : (item.severity === 'DANGER' ? 'bg-rose-50 text-rose-600' : 'bg-pink-50 text-magenta-accent')">
+                                            <i :class="item.severity === 'SUCCESS' ? 'fa-solid fa-circle-check' : (item.type === 'ORDER' ? 'fa-solid fa-box' : 'fa-solid fa-bell')"></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center justify-between gap-1">
+                                                <h5 class="text-xs font-bold text-slate-800 truncate" x-text="item.title"></h5>
+                                                <span class="text-[10px] text-slate-400 shrink-0" x-text="item.timeAgo"></span>
+                                            </div>
+                                            <p class="text-[11px] text-slate-600 line-clamp-2 mt-0.5" x-text="item.message"></p>
+                                        </div>
+                                        <template x-if="!item.isRead">
+                                            <span class="h-2 w-2 rounded-full bg-magenta-accent shrink-0 mt-1.5"></span>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Footer -->
+                            <div class="p-2 border-t border-rose-100 bg-slate-50 text-center">
+                                <a href="/Customer/Orders" class="text-[11px] font-bold text-magenta-accent hover:underline block py-1">
+                                    Xem lịch sử đơn hàng & thông báo <i class="fa-solid fa-arrow-right text-[9px] ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Account Menu Dropdown -->
+                    <div class="relative group" x-data="{ userMenuOpen: false }">
+                        <a href="/Account/Login" class="p-2.5 text-slate-700 hover:text-magenta-accent transition rounded-full hover:bg-pastel-rose flex items-center gap-1.5" title="Tài khoản">
+                            <i class="fa-regular fa-user text-lg"></i>
+                            <span class="hidden xl:inline text-xs font-semibold">Tài Khoản</span>
+                        </a>
+                        <div class="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 hidden group-hover:block hover:block transition animate-in fade-in z-50">
+                            <div class="px-3 py-2 border-b border-slate-100 mb-1">
+                                <div class="text-xs font-bold text-charcoal">Khách Hàng Thân Thiết</div>
+                                <div class="text-[10px] text-slate-400">Đăng nhập để tích điểm Loyalty</div>
+                            </div>
+                            <a href="/Account/Login" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition">
+                                <i class="fa-solid fa-arrow-right-to-bracket mr-2 text-slate-400"></i> Đăng Nhập
+                            </a>
+                            <a href="/Account/Register" class="block px-3 py-2 text-xs font-bold text-magenta-accent hover:bg-pastel-rose rounded-xl transition">
+                                <i class="fa-solid fa-gift mr-2 text-warning"></i> Đăng Ký (+50 Điểm)
+                            </a>
+                            <a href="/Customer/Dashboard" class="block px-3 py-2 text-xs font-bold text-amber-800 hover:bg-amber-50/70 rounded-xl transition flex items-center gap-2">
+                                <i class="fa-solid fa-crown text-amber-500"></i> Thẻ VIP & Điểm Thưởng
+                            </a>
+                            <a href="/Customer/Orders" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
+                                <i class="fa-solid fa-bag-shopping text-blue-500"></i> Đơn Hàng Của Tôi
+                            </a>
+                            <a href="/Customer/Addresses" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
+                                <i class="fa-solid fa-location-dot text-rose-gold"></i> Sổ Địa Chỉ Nhận Hàng
+                            </a>
+                            <a href="/orders/tracking" class="block px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition">
+                                <i class="fa-solid fa-truck-fast mr-2 text-slate-400"></i> Tra cứu đơn hàng
+                            </a>
+                            <div class="border-t border-slate-100 my-1"></div>
+                            <a href="/Admin/Dashboard" class="block px-3 py-2 text-xs font-bold text-magenta-accent hover:bg-pastel-rose rounded-xl transition flex items-center gap-2">
+                                <i class="fa-solid fa-shield-halved text-magenta-accent"></i> Quản Trị Hệ Thống
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Mini Cart Trigger Button -->
+                    <button type="button" 
+                            @@click="cartOpen = true" 
+                            id="btnOpenMiniCart" 
+                            class="relative inline-flex items-center gap-2.5 px-4 sm:px-5 py-2.5 rounded-full bg-charcoal text-white hover:bg-charcoal/90 shadow-md transition-all group"
+                            aria-label="Xem giỏ hàng">
+                        <i class="fa-solid fa-bag-shopping text-sm text-rose-gold group-hover:scale-110 transition-transform"></i>
+                        <span class="text-xs font-bold font-mono-numeric tracking-wide" id="miniCartHeaderTotal">0 ₫</span>
+                        <span id="miniCartCountBadge" class="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-magenta-accent text-white text-[10px] font-bold flex items-center justify-center border-2 border-white shadow-sm">0</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mega Navigation Bar (Desktop) -->
+    <nav aria-label="Thanh điều hướng chính" class="nav-mega-wrapper hidden lg:block bg-pastel-rose/70 border-b border-soft-border/80 sticky top-20 z-30 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+            <div class="flex items-center">
+                <!-- All Departments Button with 4-Column Mega Menu -->
+                <div class="relative group mr-4">
+                    <a href="/tim-kiem" class="bg-magenta-accent text-white px-6 py-3.5 text-xs font-bold uppercase tracking-wider flex items-center gap-3 rounded-t-2xl hover:bg-[#b0276a] transition-colors shadow-sm">
+                        <i class="fa-solid fa-bars text-sm"></i>
+                        <span>Danh Mục Mỹ Phẩm</span>
+                        <i class="fa-solid fa-angle-down text-[10px] text-white/70 group-hover:rotate-180 transition-transform duration-300"></i>
+                    </a>
+
+                    <!-- Mega Menu Dropdown 4 Cột với Backdrop Blur -->
+                    <div class="mega-menu-content absolute top-full left-0 w-[960px] bg-white/95 backdrop-blur-xl shadow-2xl rounded-3xl border border-rose-100/90 p-7 z-50 invisible opacity-0 translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto">
+                        <div class="grid grid-cols-4 gap-6">
+                            <!-- Cột 1: Danh mục nhóm da & makeup -->
+                            <div>
+                                <h4 class="font-serif font-bold text-charcoal text-sm mb-3.5 pb-2 border-b border-rose-100 flex items-center gap-2">
+                                    <i class="fa-solid fa-layer-group text-rose-gold text-xs"></i>
+                                    <span>Nhóm Da & Makeup</span>
+                                </h4>
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="text-[10px] font-bold text-rose-gold uppercase tracking-wider mb-1.5">Chăm Sóc & Phục Hồi</div>
+                                        <ul class="space-y-2 text-xs text-slate-600 font-sans">
+                                            <li><a href="/tim-kiem?categorySlug=sua-rua-mat" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Sữa Rửa Mặt Dịu Nhẹ</a></li>
+                                            <li><a href="/tim-kiem?categorySlug=serum-tinh-chat" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Serum B5 & HA Phục Hồi</a></li>
+                                            <li><a href="/tim-kiem?categorySlug=kem-chong-nang" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Kem Chống Nắng Phổ Rộng</a></li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] font-bold text-rose-gold uppercase tracking-wider mb-1.5">Trang Điểm Cao Cấp</div>
+                                        <ul class="space-y-2 text-xs text-slate-600 font-sans">
+                                            <li><a href="/tim-kiem?categorySlug=son-moi" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Son Lì & Son Bóng Căng Mọng</a></li>
+                                            <li><a href="/tim-kiem?categorySlug=kem-nen-cushion" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Cushion Mỏng Nhẹ Tự Nhiên</a></li>
+                                            <li><a href="/tim-kiem?categorySlug=phan-mat" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Phấn Mắt & Má Hồng Lâu Trôi</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cột 2: Thương hiệu đình đám -->
+                            <div>
+                                <h4 class="font-serif font-bold text-charcoal text-sm mb-3.5 pb-2 border-b border-rose-100 flex items-center gap-2">
+                                    <i class="fa-solid fa-crown text-amber-500 text-xs"></i>
+                                    <span>Thương Hiệu Đình Đám</span>
+                                </h4>
+                                <ul class="space-y-2 text-xs font-medium text-slate-700">
+                                    <li>
+                                        <a href="/tim-kiem?brand=Dior" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
+                                            <span class="font-bold">Dior</span>
+                                            <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Haute Parfumerie</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="/tim-kiem?brand=Lancome" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
+                                            <span class="font-bold">Lancôme</span>
+                                            <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Tinh hoa Pháp</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="/tim-kiem?brand=MAC" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
+                                            <span class="font-bold">MAC Cosmetics</span>
+                                            <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Makeup Artist</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="/tim-kiem?brand=Estee Lauder" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
+                                            <span class="font-bold">Estée Lauder</span>
+                                            <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Chống lão hóa</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="/tim-kiem?brand=YSL" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
+                                            <span class="font-bold">YSL Beauty</span>
+                                            <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Quyến rũ</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="/tim-kiem?brand=Chanel" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
+                                            <span class="font-bold">Chanel</span>
+                                            <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Kinh điển</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="/tim-kiem?brand=Kiehls" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
+                                            <span class="font-bold">Kiehl's</span>
+                                            <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Từ năm 1851</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="/tim-kiem?brand=La Roche-Posay" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
+                                            <span class="font-bold">La Roche-Posay</span>
+                                            <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Dược mỹ phẩm</span>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Cột 3: Sản phẩm bán chạy có ảnh nhỏ (Best Sellers) -->
+                            <div>
+                                <h4 class="font-serif font-bold text-charcoal text-sm mb-3.5 pb-2 border-b border-rose-100 flex items-center gap-2">
+                                    <i class="fa-solid fa-fire text-rose-500 text-xs"></i>
+                                    <span>Sản Phẩm Bán Chạy</span>
+                                </h4>
+                                <div class="space-y-3">
+                                    <!-- Best Seller 1 -->
+                                    <a href="/tim-kiem?q=Serum" class="flex items-center gap-3 p-2 rounded-xl bg-slate-50/70 hover:bg-pastel-rose hover:border-pink-200 border border-transparent transition group">
+                                        <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=100&h=100&fit=crop" 
+                                             alt="Serum La Roche-Posay" 
+                                             class="w-12 h-12 rounded-lg object-cover border border-slate-200 group-hover:scale-105 transition shrink-0" />
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-[9px] font-bold text-rose-gold uppercase truncate">La Roche-Posay</div>
+                                            <div class="text-xs font-bold text-slate-800 truncate group-hover:text-magenta-accent">Serum Hyalu B5 30ml</div>
+                                            <div class="flex items-center justify-between mt-0.5">
+                                                <span class="text-xs font-bold text-charcoal font-mono-numeric">980.000₫</span>
+                                                <span class="text-[9px] text-amber-500">★★★★★ 5.0</span>
+                                            </div>
+                                        </div>
+                                    </a>
+
+                                    <!-- Best Seller 2 -->
+                                    <a href="/tim-kiem?q=Dior" class="flex items-center gap-3 p-2 rounded-xl bg-slate-50/70 hover:bg-pastel-rose hover:border-pink-200 border border-transparent transition group">
+                                        <img src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=100&h=100&fit=crop" 
+                                             alt="Son Dior Rouge Forever" 
+                                             class="w-12 h-12 rounded-lg object-cover border border-slate-200 group-hover:scale-105 transition shrink-0" />
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-[9px] font-bold text-rose-gold uppercase truncate">Christian Dior</div>
+                                            <div class="text-xs font-bold text-slate-800 truncate group-hover:text-magenta-accent">Rouge Dior 999 Velvet</div>
+                                            <div class="flex items-center justify-between mt-0.5">
+                                                <span class="text-xs font-bold text-charcoal font-mono-numeric">1.150.000₫</span>
+                                                <span class="text-[9px] text-amber-500">★★★★★ 5.0</span>
+                                            </div>
+                                        </div>
+                                    </a>
+
+                                    <!-- Best Seller 3 -->
+                                    <a href="/tim-kiem?q=Anessa" class="flex items-center gap-3 p-2 rounded-xl bg-slate-50/70 hover:bg-pastel-rose hover:border-pink-200 border border-transparent transition group">
+                                        <img src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=100&h=100&fit=crop" 
+                                             alt="Kem Chống Nắng Anessa" 
+                                             class="w-12 h-12 rounded-lg object-cover border border-slate-200 group-hover:scale-105 transition shrink-0" />
+                                        <div class="flex-1 min-w-0">
+                                            <div class="text-[9px] font-bold text-rose-gold uppercase truncate">Anessa Shiseido</div>
+                                            <div class="text-xs font-bold text-slate-800 truncate group-hover:text-magenta-accent">Perfect UV Sunscreen 60ml</div>
+                                            <div class="flex items-center justify-between mt-0.5">
+                                                <span class="text-xs font-bold text-charcoal font-mono-numeric">550.000₫</span>
+                                                <span class="text-[9px] text-amber-500">★★★★★ 4.9</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Cột 4: Banner khuyến mãi mini có ảnh đại diện thương hiệu -->
+                            <div class="rounded-2xl overflow-hidden relative bg-gradient-to-br from-rose-50 via-white to-pink-50/80 p-5 border border-rose-200/60 flex flex-col justify-between shadow-xs">
+                                <div>
+                                    <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-magenta-accent/10 text-magenta-accent text-[9px] font-bold tracking-widest uppercase mb-2">
+                                        ✦ VIP PRIVILEGE 2026 ✦
+                                    </div>
+                                    <h5 class="font-serif font-bold text-charcoal text-base leading-snug">
+                                        Đặc Quyền Hội Viên & Quà Tặng Dior
+                                    </h5>
+                                    <div class="my-3 rounded-xl overflow-hidden border border-rose-200/50 shadow-2xs">
+                                        <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&h=220&fit=crop" 
+                                             alt="Banner Khuyến Mãi Mỹ Phẩm Cao Cấp" 
+                                             class="w-full h-24 object-cover hover:scale-105 transition duration-300" />
+                                    </div>
+                                    <p class="text-[11px] text-slate-600 font-sans leading-relaxed">
+                                        Tặng bộ Travel Kit Full-size Dior & Lancôme cho đơn hàng từ 1.500.000₫. Date cam kết > 18 tháng chuẩn FEFO.
+                                    </p>
+                                </div>
+                                <a href="/tim-kiem?brand=Dior" class="inline-flex items-center justify-center gap-2 mt-4 px-4 py-2 rounded-xl bg-magenta-accent text-white text-xs font-bold hover:bg-[#b0276a] transition shadow-xs">
+                                    <span>Khám Phá Ngay</span>
+                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Links with Mega Menu from Database / Fallback -->
+                @await Component.InvokeAsync("DynamicMenu", new { menuCode = "HEADER_MAIN" })
+            </div>
+
+            <!-- Trust rating & AI Beauty Advisor Button -->
+            <div class="flex items-center gap-3">
+                <a href="/Product/SmartFilter" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 text-white text-xs font-bold shadow-xs hover:shadow-pink-500/25 hover:scale-105 active:scale-95 transition-all">
+                    <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
+                    <span>AI Beauty Advisor</span>
+                </a>
+                <div class="hidden xl:flex text-xs font-bold text-slate-500 items-center gap-1.5">
+                    <span class="text-amber-500 text-sm">★★★★★</span>
+                    <span>4.9/5</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<script>
+    function storefrontNotificationCenter() {
+        return {
+            isOpen: false,
+            loading: false,
+            unreadCount: 0,
+            notifications: [],
+
+            init() {
+                this.fetchCount();
+                this.fetchLatest();
+
+                // Nghe sự kiện SignalR từ _Layout
+                window.addEventListener('storefront-notification-received', (e) => {
+                    const d = e.detail;
+                    this.unreadCount++;
+                    this.notifications.unshift({
+                        id: d.id,
+                        title: d.title,
+                        message: d.message,
+                        severity: d.severity,
+                        type: d.type || 'ORDER',
+                        url: d.url,
+                        timeAgo: d.timeAgo || 'Vừa xong',
+                        isRead: false
+                    });
+                    if (this.notifications.length > 10) this.notifications.pop();
+                });
+            },
+
+            toggleOpen() {
+                this.isOpen = !this.isOpen;
+                if (this.isOpen) {
+                    this.fetchLatest();
+                }
+            },
+
+            async fetchCount() {
+                try {
+                    const res = await fetch('/api/notifications/unread-count');
+                    if (res.ok) {
+                        const data = await res.json();
+                        this.unreadCount = data.count || 0;
+                    }
+                } catch (e) { }
+            },
+
+            async fetchLatest() {
+                this.loading = true;
+                try {
+                    const res = await fetch('/api/notifications/latest?take=10');
+                    if (res.ok) {
+                        const data = await res.json();
+                        this.notifications = data.notifications || [];
+                        this.unreadCount = data.unreadCount || 0;
+                    }
+                } catch (e) { }
+                finally {
+                    this.loading = false;
+                }
+            },
+
+            async markAllAsRead() {
+                try {
+                    const res = await fetch('/api/notifications/mark-all-read', { method: 'POST' });
+                    if (res.ok) {
+                        this.unreadCount = 0;
+                        this.notifications.forEach(n => n.isRead = true);
+                    }
+                } catch (e) { }
+            },
+
+            async handleClick(item) {
+                if (!item.isRead && item.id) {
+                    try {
+                        await fetch(`/api/notifications/mark-read/${item.id}`, { method: 'POST' });
+                        item.isRead = true;
+                        if (this.unreadCount > 0) this.unreadCount--;
+                    } catch (e) { }
+                }
+                if (item.url) {
+                    window.location.href = item.url;
+                }
+            }
+        };
+    }
+</script>

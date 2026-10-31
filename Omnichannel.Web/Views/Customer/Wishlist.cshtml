@@ -1,0 +1,437 @@
+@using System.Text.Encodings.Web
+@model Omnichannel.Application.DTOs.Customer.WishlistPageViewModel
+@{
+    ViewData["Title"] = "Danh Sách Yêu Thích (Wishlist) - Omni Beauty";
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen bg-slate-50/70 pb-20 pt-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Breadcrumb & Top Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+                <nav class="flex items-center gap-2 text-xs text-slate-400 mb-1.5">
+                    <a href="/" class="hover:text-magenta-accent transition">Trang Chủ</a>
+                    <span>/</span>
+                    <a href="/Customer/Dashboard" class="hover:text-magenta-accent transition">Khách Hàng</a>
+                    <span>/</span>
+                    <span class="text-charcoal font-semibold">Danh Sách Yêu Thích</span>
+                </nav>
+                <h1 class="text-2xl sm:text-3xl font-serif font-bold text-charcoal flex items-center gap-2.5">
+                    <span>Sản Phẩm Yêu Thích</span>
+                    <span class="inline-flex items-center gap-1.5 text-xs font-sans font-bold px-2.5 py-1 rounded-full bg-magenta-accent/10 text-magenta-accent border border-magenta-accent/20">
+                        <i class="fa-solid fa-heart text-magenta-accent text-[11px]"></i>
+                        <span id="wishlistTotalCount">@Model.TotalCount</span> Sản phẩm
+                    </span>
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">
+                    Lưu giữ những món mỹ phẩm & nước hoa bạn yêu thích. Nhận thông báo tự động ngay khi sản phẩm hết hàng về lại kho.
+                </p>
+            </div>
+
+            <!-- Quick Action CTA -->
+            <div class="flex items-center gap-3">
+                <a href="/Shop" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-charcoal text-white hover:bg-magenta-accent text-xs font-bold transition shadow-sm">
+                    <i class="fa-solid fa-bag-shopping text-rose-gold"></i> Khám Phá Thêm
+                </a>
+            </div>
+        </div>
+
+        <!-- Portal Navigation Tabs (VIP Card | Orders | Addresses | Wishlist) -->
+        <div class="bg-white rounded-2xl p-1.5 border border-slate-200 shadow-sm mb-8 flex flex-wrap items-center gap-1">
+            <a href="/Customer/Dashboard" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-crown text-amber-500"></i> Thẻ VIP & Điểm Thưởng
+            </a>
+            <a href="/Customer/Orders" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-bag-shopping text-blue-500"></i> Đơn Hàng Của Tôi
+            </a>
+            <a href="/Customer/Addresses" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-location-dot text-rose-gold"></i> Sổ Địa Chỉ Nhận Hàng
+            </a>
+            <a href="/Wishlist" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-magenta-accent/10 text-magenta-accent border border-magenta-accent/20 shadow-xs">
+                <i class="fa-solid fa-heart text-magenta-accent"></i> Danh Sách Yêu Thích
+            </a>
+        </div>
+
+        <!-- Filters / Status Stats Bar -->
+        <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm mb-8 @(Model.TotalCount == 0 ? "hidden" : "")" id="wishlistFilterBar">
+            <div class="flex items-center gap-2">
+                <button type="button" 
+                        onclick="filterWishlist('all')" 
+                        id="btnFilterAll"
+                        class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-charcoal text-white">
+                    Tất Cả (<span id="filterCountAll">@Model.TotalCount</span>)
+                </button>
+                <button type="button" 
+                        onclick="filterWishlist('instock')" 
+                        id="btnFilterInStock"
+                        class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-check text-[10px] text-emerald-600"></i>
+                    Còn Hàng (<span id="filterCountInStock">@Model.InStockCount</span>)
+                </button>
+                <button type="button" 
+                        onclick="filterWishlist('outofstock')" 
+                        id="btnFilterOutOfStock"
+                        class="filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 text-slate-600 hover:bg-rose-50 hover:text-rose-700 flex items-center gap-1.5">
+                    <i class="fa-solid fa-bell text-[10px] text-rose-500"></i>
+                    Tạm Hết Hàng (<span id="filterCountOutOfStock">@Model.OutOfStockCount</span>)
+                </button>
+            </div>
+
+            <div class="text-xs text-slate-400 hidden sm:block">
+                <i class="fa-solid fa-shield-heart text-magenta-accent mr-1"></i> Sản phẩm yêu thích được lưu tự động trên mọi thiết bị
+            </div>
+        </div>
+
+        <!-- ===================================================
+             EMPTY STATE (KHI DANH SÁCH YÊU THÍCH TRỐNG)
+             =================================================== -->
+        <div class="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm max-w-lg mx-auto my-12 @(Model.TotalCount > 0 ? "hidden" : "")" id="wishlistEmptyState">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-pastel-rose flex items-center justify-center text-magenta-accent text-3xl shadow-xs">
+                <i class="fa-regular fa-heart"></i>
+            </div>
+            <h3 class="text-lg font-serif font-bold text-charcoal mb-2">Danh sách yêu thích trống</h3>
+            <p class="text-xs text-slate-500 mb-6 leading-relaxed">
+                Bạn chưa lưu sản phẩm nào. Hãy bấm biểu tượng trái tim <i class="fa-solid fa-heart text-magenta-accent"></i> trên bất kỳ sản phẩm nào để lưu lại và theo dõi khi có khuyến mãi hoặc hàng về!
+            </p>
+            <a href="/Shop" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-magenta-accent text-white text-xs font-bold hover:shadow-lg hover:shadow-magenta-accent/25 transition">
+                <i class="fa-solid fa-bag-shopping"></i> Khám Phá Mỹ Phẩm Ngay
+            </a>
+        </div>
+
+        <!-- ===================================================
+             WISHLIST PRODUCT GRID (LƯỚI SẢN PHẨM YÊU THÍCH)
+             =================================================== -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12" id="wishlistGrid">
+            @foreach (var item in Model.Items)
+            {
+                <div class="wishlist-card bg-white rounded-3xl border border-slate-200/90 hover:border-slate-300 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col justify-between group relative"
+                     id="wishlist-item-@item.ProductId"
+                     data-product-id="@item.ProductId"
+                     data-stock="@(item.IsInStock ? "instock" : "outofstock")">
+                    
+                    <!-- Top Actions: Status Badge & Remove Heart Button -->
+                    <div>
+                        <div class="relative aspect-square bg-slate-50 overflow-hidden">
+                            <!-- Product Image -->
+                            <img src="@item.ThumbnailUrl" 
+                                 alt="@item.ProductName" 
+                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                 onerror="this.src='/images/branding/default-product.png'" />
+
+                            <!-- Stock Status Badge (Top-Left) -->
+                            <div class="absolute top-3 left-3 z-10">
+                                @if (item.IsInStock)
+                                {
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/90 shadow-2xs backdrop-blur-md">
+                                        <i class="fa-solid fa-circle-check text-[10px]"></i> CÒN HÀNG
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200/90 shadow-2xs backdrop-blur-md">
+                                        <i class="fa-solid fa-bell text-[10px] animate-bounce text-rose-500"></i> TẠM HẾT HÀNG
+                                    </span>
+                                }
+                            </div>
+
+                            <!-- Remove from Wishlist Button (Top-Right) -->
+                            <button type="button" 
+                                    onclick="removeFromWishlist(@item.ProductId)" 
+                                    class="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/90 hover:bg-rose-500 hover:text-white text-rose-500 shadow-sm backdrop-blur-md flex items-center justify-center text-xs transition duration-200"
+                                    title="Xóa khỏi yêu thích">
+                                <i class="fa-solid fa-heart"></i>
+                            </button>
+
+                            <!-- Discount Percent Tag (if any) -->
+                            @if (item.DiscountPercent > 0)
+                            {
+                                <div class="absolute bottom-3 left-3 z-10">
+                                    <span class="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-md bg-magenta-accent text-white shadow-xs">
+                                        -@item.DiscountPercent%
+                                    </span>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Card Information -->
+                        <div class="p-5">
+                            <!-- Category & Brand -->
+                            <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
+                                <span class="uppercase tracking-wider font-semibold truncate">@item.BrandName</span>
+                                <span class="truncate">@item.CategoryName</span>
+                            </div>
+
+                            <!-- Product Title -->
+                            <h4 class="text-sm font-bold text-charcoal hover:text-magenta-accent transition line-clamp-2 mb-2 leading-snug">
+                                <a href="/Product/Detail?id=@item.ProductId">@item.ProductName</a>
+                            </h4>
+
+                            <!-- Price Row -->
+                            <div class="flex items-baseline gap-2 mb-3">
+                                <span class="text-base font-bold font-mono text-magenta-accent">@item.Price.ToString("N0") ₫</span>
+                                @if (item.OriginalPrice.HasValue && item.OriginalPrice.Value > item.Price)
+                                {
+                                    <span class="text-xs text-slate-400 line-through font-mono">@item.OriginalPrice.Value.ToString("N0") ₫</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Footer Actions: Chuyển vào giỏ / Back-In-Stock Alert -->
+                    <div class="p-5 pt-0">
+                        @if (item.IsInStock)
+                        {
+                            <!-- CASE 1: SẢN PHẨM CÒN HÀNG -> NÚT "CHUYỂN VÀO GIỎ HÀNG" -->
+                            <button type="button" 
+                                    onclick="moveToCart(@item.ProductId, '@Html.Raw(JavaScriptEncoder.Default.Encode(item.ProductName))')" 
+                                    id="btn-move-to-cart-@item.ProductId"
+                                    class="w-full py-2.5 px-4 rounded-2xl bg-charcoal hover:bg-magenta-accent text-white font-bold text-xs transition shadow-sm flex items-center justify-center gap-2 group">
+                                <i class="fa-solid fa-bag-shopping text-rose-gold group-hover:scale-110 transition-transform"></i>
+                                <span>Chuyển Vào Giỏ Hàng</span>
+                            </button>
+                        }
+                        else
+                        {
+                            <!-- CASE 2: SẢN PHẨM TẠM HẾT HÀNG -> MINI FORM BACK-IN-STOCK ALERT -->
+                            <div class="bg-rose-50/70 rounded-2xl p-3 border border-rose-100" id="stock-alert-box-@item.ProductId">
+                                <div class="text-[11px] font-bold text-rose-800 mb-1.5 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-bell text-rose-500"></i>
+                                    <span>Thông Báo Khi Có Hàng Lại</span>
+                                </div>
+
+                                <div class="space-y-2" id="stock-alert-form-@item.ProductId">
+                                    <input type="text" 
+                                           id="stock-alert-input-@item.ProductId"
+                                           placeholder="Nhập Email hoặc SĐT..."
+                                           class="w-full px-3 py-1.5 text-xs rounded-xl border border-rose-200 focus:border-magenta-accent focus:ring-1 focus:ring-magenta-accent outline-none bg-white text-charcoal transition" />
+                                    
+                                    <button type="button" 
+                                            onclick="submitBackInStock(@item.ProductId, '@Html.Raw(JavaScriptEncoder.Default.Encode(item.ProductName))')" 
+                                            id="btn-alert-@item.ProductId"
+                                            class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-pink-600 hover:to-rose-600 text-white font-bold text-[11px] transition shadow-xs flex items-center justify-center gap-1.5">
+                                        <i class="fa-regular fa-paper-plane"></i>
+                                        <span>Đăng Ký Nhận Tin</span>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                </div>
+            }
+        </div>
+
+    </div>
+</div>
+
+<!-- JAVASCRIPT XỬ LÝ WISHLIST & BACK-IN-STOCK ALERT -->
+<script>
+    let currentFilter = 'all';
+
+    function filterWishlist(filter) {
+        currentFilter = filter;
+        const cards = document.querySelectorAll('.wishlist-card');
+        
+        cards.forEach(card => {
+            const stock = card.getAttribute('data-stock');
+            if (filter === 'all') {
+                card.style.display = 'flex';
+            } else if (filter === 'instock') {
+                card.style.display = (stock === 'instock') ? 'flex' : 'none';
+            } else if (filter === 'outofstock') {
+                card.style.display = (stock === 'outofstock') ? 'flex' : 'none';
+            }
+        });
+
+        // Cập nhật style nút filter
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.className = 'filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 text-slate-600 hover:bg-slate-200';
+        });
+
+        if (filter === 'all') {
+            document.getElementById('btnFilterAll').className = 'filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-charcoal text-white';
+        } else if (filter === 'instock') {
+            document.getElementById('btnFilterInStock').className = 'filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-emerald-600 text-white';
+        } else if (filter === 'outofstock') {
+            document.getElementById('btnFilterOutOfStock').className = 'filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-rose-600 text-white';
+        }
+    }
+
+    async function removeFromWishlist(productId) {
+        const card = document.getElementById(`wishlist-item-${productId}`);
+        if (card) {
+            card.style.transition = 'all 0.3s ease';
+            card.style.transform = 'scale(0.8)';
+            card.style.opacity = '0';
+            setTimeout(() => {
+                card.remove();
+                updateCounts();
+            }, 300);
+        }
+
+        // Cập nhật LocalStorage
+        try {
+            let localIds = JSON.parse(localStorage.getItem('omni_wishlist_ids') || '[]');
+            localIds = localIds.filter(id => Number(id) !== Number(productId));
+            localStorage.setItem('omni_wishlist_ids', JSON.stringify(localIds));
+            const badge = document.getElementById('wishlistCountBadge');
+            if (badge) badge.innerText = localIds.length;
+        } catch (e) {}
+
+        // Gửi lên server
+        try {
+            await fetch('/Wishlist/Remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId: productId })
+            });
+        } catch (e) {}
+
+        if (typeof showStorefrontToast === 'function') {
+            showStorefrontToast("Đã xóa sản phẩm khỏi danh sách yêu thích.", "info");
+        }
+    }
+
+    async function moveToCart(productId, productName) {
+        const btn = document.getElementById(`btn-move-to-cart-${productId}`);
+        const originalHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Đang thêm...</span>';
+            btn.disabled = true;
+        }
+
+        try {
+            const res = await fetch('/Wishlist/MoveToCart', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId: productId })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                if (typeof showStorefrontToast === 'function') {
+                    showStorefrontToast(data.message, "success");
+                } else {
+                    alert(data.message);
+                }
+
+                // Mở Mini-Cart
+                const btnCart = document.getElementById('btnOpenMiniCart');
+                if (btnCart) {
+                    btnCart.click();
+                }
+            } else {
+                alert(data.message || "Không thể chuyển vào giỏ hàng.");
+            }
+        } catch (err) {
+            console.error("Lỗi chuyển vào giỏ:", err);
+            alert("Có lỗi xảy ra khi kết nối máy chủ.");
+        } finally {
+            if (btn) {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        }
+    }
+
+    async function submitBackInStock(productId, productName) {
+        const input = document.getElementById(`stock-alert-input-${productId}`);
+        const contact = input ? input.value.trim() : '';
+
+        if (!contact) {
+            alert("Vui lòng nhập Email hoặc Số điện thoại để nhận thông báo.");
+            return;
+        }
+
+        const btn = document.getElementById(`btn-alert-${productId}`);
+        const originalHtml = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Đang gửi...</span>';
+            btn.disabled = true;
+        }
+
+        const isEmail = contact.includes('@@');
+        const payload = {
+            productId: productId,
+            email: isEmail ? contact : null,
+            phoneNumber: !isEmail ? contact : null,
+            customerName: '@Html.Raw(JavaScriptEncoder.Default.Encode(Model.CustomerName ?? ""))'
+        };
+
+        try {
+            const res = await fetch('/Wishlist/RegisterStockAlert', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                const box = document.getElementById(`stock-alert-box-${productId}`);
+                if (box) {
+                    box.innerHTML = `
+                        <div class="p-2.5 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-semibold flex items-center gap-2">
+                            <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+                            <span>Đã đăng ký! Chúng tôi sẽ gửi tin cho bạn ngay khi có hàng.</span>
+                        </div>
+                    `;
+                }
+
+                if (typeof showStorefrontToast === 'function') {
+                    showStorefrontToast(data.message, "success");
+                } else {
+                    alert(data.message);
+                }
+            } else {
+                alert(data.message || "Không thể đăng ký nhận tin.");
+            }
+        } catch (err) {
+            console.error("Lỗi đăng ký Back-In-Stock Alert:", err);
+            alert("Có lỗi xảy ra khi kết nối máy chủ.");
+        } finally {
+            if (btn && !btn.closest('.p-2.5')) {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        }
+    }
+
+    function updateCounts() {
+        const allCards = document.querySelectorAll('.wishlist-card');
+        const inStockCards = document.querySelectorAll('.wishlist-card[data-stock="instock"]');
+        const outOfStockCards = document.querySelectorAll('.wishlist-card[data-stock="outofstock"]');
+
+        const total = allCards.length;
+        const inStock = inStockCards.length;
+        const outOfStock = outOfStockCards.length;
+
+        const totalEl = document.getElementById('wishlistTotalCount');
+        const countAllEl = document.getElementById('filterCountAll');
+        const countInStockEl = document.getElementById('filterCountInStock');
+        const countOutOfStockEl = document.getElementById('filterCountOutOfStock');
+
+        if (totalEl) totalEl.innerText = total;
+        if (countAllEl) countAllEl.innerText = total;
+        if (countInStockEl) countInStockEl.innerText = inStock;
+        if (countOutOfStockEl) countOutOfStockEl.innerText = outOfStock;
+
+        if (total === 0) {
+            const filterBar = document.getElementById('wishlistFilterBar');
+            const emptyState = document.getElementById('wishlistEmptyState');
+            if (filterBar) filterBar.classList.add('hidden');
+            if (emptyState) emptyState.classList.remove('hidden');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Đồng bộ LocalStorage cho khách vãng lai
+        try {
+            const localIds = JSON.parse(localStorage.getItem('omni_wishlist_ids') || '[]');
+            const badge = document.getElementById('wishlistCountBadge');
+            const totalOnScreen = document.querySelectorAll('.wishlist-card').length;
+            if (badge) badge.innerText = Math.max(localIds.length, totalOnScreen);
+        } catch (e) {}
+    });
+</script>

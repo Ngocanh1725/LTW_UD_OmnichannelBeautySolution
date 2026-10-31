@@ -25,7 +25,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [HasPermission("MENU", "VIEW")]
+        [HasPermission("CMS_MENU_MANAGE")]
         public async Task<IActionResult> Index(int? menuId = null)
         {
             var menus = await _context.Menus
@@ -66,7 +66,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [HasPermission("MENU", "CREATE")]
+        [HasPermission("CMS_MENU_MANAGE")]
         public async Task<IActionResult> CreateItem(CreateMenuItemViewModel model)
         {
             if (!ModelState.IsValid)
@@ -90,7 +90,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [HasPermission("MENU", "DELETE")]
+        [HasPermission("CMS_MENU_MANAGE")]
         public async Task<IActionResult> DeleteItem(int menuItemId, int menuId)
         {
             bool success = await _menuService.DeleteMenuItemAsync(menuItemId);
@@ -108,7 +108,45 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [HasPermission("MENU", "EVICT_CACHE")]
+        [HasPermission("CMS_MENU_MANAGE")]
+        public async Task<IActionResult> EditItem(EditMenuItemViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Dữ liệu sửa nút menu chưa hợp lệ.";
+                return RedirectToAction(nameof(Index), new { menuId = model.MenuId });
+            }
+
+            bool success = await _menuService.UpdateMenuItemAsync(model);
+            if (success)
+            {
+                TempData["SuccessMessage"] = $"Đã cập nhật nút Menu '{model.Title}' thành công!";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Không thể cập nhật nút Menu.";
+            }
+
+            return RedirectToAction(nameof(Index), new { menuId = model.MenuId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [HasPermission("CMS_MENU_MANAGE")]
+        public async Task<IActionResult> Reorder([FromBody] ReorderMenuRequest request)
+        {
+            if (request == null || request.MenuId <= 0 || !request.Items.Any())
+            {
+                return Json(new { success = false, message = "Dữ liệu sắp xếp không hợp lệ." });
+            }
+
+            bool success = await _menuService.ReorderMenuItemsAsync(request);
+            return Json(new { success, message = success ? "Đã lưu thứ tự menu mới!" : "Lỗi khi lưu thứ tự menu." });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [HasPermission("CMS_MENU_MANAGE")]
         public async Task<IActionResult> EvictCache(string menuCode, int menuId)
         {
             await _menuService.InvalidateMenuCacheAsync(menuCode);
@@ -117,6 +155,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [HasPermission("CMS_MENU_MANAGE")]
         public async Task<IActionResult> GetTargetsByType(int targetType)
         {
             return targetType switch

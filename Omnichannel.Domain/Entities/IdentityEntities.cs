@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -94,6 +94,8 @@ namespace Omnichannel.Domain.Entities
         [Column(TypeName = "varchar(500)")]
         public string? AvatarUrl { get; set; }
 
+        public int? AvatarMediaId { get; set; }
+
         [MaxLength(50)]
         public string? NormalizedUsername { get; set; }
 
@@ -115,11 +117,16 @@ namespace Omnichannel.Domain.Entities
 
         // Navigation properties
         public virtual Store? Store { get; set; }
+        public virtual MediaAsset? AvatarMedia { get; set; }
         public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
         public virtual ICollection<UserPermission> UserPermissions { get; set; } = new List<UserPermission>();
         public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
         public virtual ICollection<InventoryLog> InventoryLogs { get; set; } = new List<InventoryLog>();
         public virtual ICollection<Post> Posts { get; set; } = new List<Post>();
+        public virtual CustomerProfile? CustomerProfile { get; set; }
+        public virtual LoyaltyWallet? LoyaltyWallet { get; set; }
+        public virtual ICollection<Voucher> Vouchers { get; set; } = new List<Voucher>();
+        public virtual ICollection<CouponUsage> CouponUsages { get; set; } = new List<CouponUsage>();
     }
 
     [Table("UserRoles")]

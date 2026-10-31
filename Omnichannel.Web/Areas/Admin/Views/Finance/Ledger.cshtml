@@ -1,0 +1,325 @@
+@model List<Omnichannel.Application.DTOs.Finance.FinancialLedgerDto>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Sổ Cái Tài Chính (Financial Ledger)";
+    var stores = ViewBag.Stores as List<Omnichannel.Domain.Entities.Store> ?? new();
+    int? selectedStoreId = ViewBag.SelectedStoreId as int?;
+    string selectedEntryType = ViewBag.SelectedEntryType as string ?? "";
+    string fromDate = ViewBag.FromDate as string ?? "";
+    string toDate = ViewBag.ToDate as string ?? "";
+
+    decimal totalThu = ViewBag.TotalThu is decimal thu ? thu : 0m;
+    decimal totalChi = ViewBag.TotalChi is decimal chi ? chi : 0m;
+    decimal netBalance = ViewBag.NetBalance is decimal bal ? bal : 0m;
+}
+
+<div class="space-y-6">
+    <!-- Top Navigation Subtabs -->
+    <div class="flex items-center gap-2 border-b border-slate-200 bg-white px-6 pt-3 rounded-2xl shadow-sm overflow-x-auto">
+        <a href="/Admin/Finance/ProfitLoss" class="pb-3 text-xs font-bold flex items-center gap-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
+            <i class="fa-solid fa-chart-pie"></i> Báo Cáo Lãi Lỗ (P&L)
+        </a>
+        <a href="/Admin/Finance/Ledger" class="pb-3 text-xs font-bold flex items-center gap-2 border-b-2 border-indigo-600 text-indigo-600 transition">
+            <i class="fa-solid fa-book"></i> Sổ Cái Thu Chi
+        </a>
+        <a href="/Admin/Finance/SupplierDebts" class="pb-3 text-xs font-bold flex items-center gap-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Công Nợ Nhà Cung Cấp
+        </a>
+        <a href="/Admin/Finance/CodReconciliations" class="pb-3 text-xs font-bold flex items-center gap-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
+            <i class="fa-solid fa-hand-holding-dollar"></i> Đối Soát COD
+        </a>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-3 animate-fade-in">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-3 animate-fade-in">
+            <i class="fa-solid fa-triangle-exclamation text-rose-600 text-sm"></i>
+            <span>@TempData["ErrorMessage"]</span>
+        </div>
+    }
+
+    <!-- Header & Action -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1">
+                <i class="fa-solid fa-book-bookmark"></i> General Accounting Ledger
+            </div>
+            <h1 class="text-2xl font-black text-slate-800 tracking-tight">Sổ Cái Nhật Ký Giao Dịch Thu Chi</h1>
+            <p class="text-xs text-slate-500 mt-0.5">Theo dõi chi tiết dòng tiền vào (Thu), dòng tiền ra (Chi), giá vốn và tính toán số dư lũy kế minh bạch</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <a href="@Url.Action("ExportLedgerExcel", "Finance", new { storeId = selectedStoreId, entryType = selectedEntryType, fromDate = fromDate, toDate = toDate })"
+               class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm shadow-emerald-600/30 transition flex items-center gap-2 hover:-translate-y-0.5">
+                <i class="fa-solid fa-file-excel text-sm"></i>
+                <span>Xuất Excel (.xlsx)</span>
+            </a>
+            <button onclick="document.getElementById('modalCreateEntry').classList.remove('hidden')"
+                    class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 transition flex items-center gap-2 hover:-translate-y-0.5">
+                <i class="fa-solid fa-plus"></i> Ghi Bút Toán Mới
+            </button>
+        </div>
+    </div>
+
+    <!-- 4 KPI Summary Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Tổng Thu -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-emerald-300 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Tổng Thu Trong Kỳ</span>
+                <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm group-hover:scale-110 transition">
+                    <i class="fa-solid fa-arrow-down-left"></i>
+                </span>
+            </div>
+            <div class="text-xl font-black text-emerald-600 font-mono">@totalThu.ToString("N0") <span class="text-xs font-normal">đ</span></div>
+            <div class="text-[11px] text-slate-500 font-medium mt-1">
+                Doanh thu bán hàng & thu nhập khác
+            </div>
+        </div>
+
+        <!-- Tổng Chi -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-rose-300 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Tổng Chi Trong Kỳ</span>
+                <span class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-sm group-hover:scale-110 transition">
+                    <i class="fa-solid fa-arrow-up-right"></i>
+                </span>
+            </div>
+            <div class="text-xl font-black text-rose-600 font-mono">@totalChi.ToString("N0") <span class="text-xs font-normal">đ</span></div>
+            <div class="text-[11px] text-slate-500 font-medium mt-1">
+                Chi phí vận hành & thanh toán NCC
+            </div>
+        </div>
+
+        <!-- Số Dư Kỳ Này -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-indigo-300 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Chênh Lệch (Số Dư Kỳ)</span>
+                <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm group-hover:scale-110 transition">
+                    <i class="fa-solid fa-scale-balanced"></i>
+                </span>
+            </div>
+            <div class="text-xl font-black font-mono @(netBalance >= 0 ? "text-indigo-600" : "text-rose-600")">
+                @netBalance.ToString("N0") <span class="text-xs font-normal">đ</span>
+            </div>
+            <div class="text-[11px] font-bold mt-1 @(netBalance >= 0 ? "text-emerald-600" : "text-rose-600")">
+                @(netBalance >= 0 ? "Thu vượt Chi (Dương dòng tiền)" : "Chi vượt Thu (Âm dòng tiền)")
+            </div>
+        </div>
+
+        <!-- Tổng Giao Dịch -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-slate-300 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Tổng Bút Toán</span>
+                <span class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-sm group-hover:scale-110 transition">
+                    <i class="fa-solid fa-list-check"></i>
+                </span>
+            </div>
+            <div class="text-xl font-black text-slate-800 font-mono">@Model.Count <span class="text-xs font-normal">giao dịch</span></div>
+            <div class="text-[11px] text-slate-500 font-medium mt-1">
+                Đã ghi sổ thành công
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm">
+        <form method="get" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 items-end">
+            <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Chi Nhánh</label>
+                <select name="storeId" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-indigo-500">
+                    <option value="">-- Tất cả Chi nhánh --</option>
+                    @foreach (var s in stores)
+                    {
+                        <option value="@s.Id" selected="@(s.Id == selectedStoreId)">@s.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Phân Loại Nghiệp Vụ</label>
+                <select name="entryType" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-indigo-500">
+                    <option value="">-- Tất cả loại nghiệp vụ --</option>
+                    <option value="REVENUE" selected="@(selectedEntryType == "REVENUE")">[THU] Doanh thu bán hàng (REVENUE)</option>
+                    <option value="EXPENSE" selected="@(selectedEntryType == "EXPENSE")">[CHI] Chi phí vận hành (EXPENSE)</option>
+                    <option value="SUPPLIER_PAYMENT" selected="@(selectedEntryType == "SUPPLIER_PAYMENT")">[CHI] Thanh toán NCC (SUPPLIER_PAYMENT)</option>
+                    <option value="COGS" selected="@(selectedEntryType == "COGS")">[CHI] Giá vốn hàng bán (COGS)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Từ ngày</label>
+                <input type="date" name="fromDate" value="@fromDate" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:border-indigo-500" />
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Đến ngày</label>
+                <input type="date" name="toDate" value="@toDate" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:border-indigo-500" />
+            </div>
+
+            <div>
+                <button type="submit" class="w-full py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-magnifying-glass"></i> Lọc Sổ Cái
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table Sổ Cái Thu Chi -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="p-4 border-b border-slate-200 flex items-center justify-between">
+            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-table-list text-indigo-600"></i>
+                <span>Chi Tiết Nhật Ký Bút Toán Thu Chi</span>
+            </h3>
+            <span class="text-xs text-slate-400 font-semibold">Đơn vị: VNĐ</span>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-50/75 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                        <th class="py-3 px-4">Ngày Ghi Sổ</th>
+                        <th class="py-3 px-4 text-center">Loại (Thu/Chi)</th>
+                        <th class="py-3 px-4">Mã / Tham Chiếu</th>
+                        <th class="py-3 px-4">Chi Nhánh</th>
+                        <th class="py-3 px-4">Diễn Giải Nội Dung</th>
+                        <th class="py-3 px-4 text-right">Số Tiền (VNĐ)</th>
+                        <th class="py-3 px-4 text-right">Số Dư Lũy Kế (VNĐ)</th>
+                        <th class="py-3 px-4">Người Lập</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach (var entry in Model)
+                    {
+                        <tr class="hover:bg-slate-50/60 transition">
+                            <td class="py-3.5 px-4 text-slate-600">
+                                @entry.EntryDate.ToString("dd/MM/yyyy HH:mm")
+                            </td>
+                            <td class="py-3.5 px-4 text-center">
+                                @if (entry.Direction == "THU")
+                                {
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                                        <i class="fa-solid fa-arrow-down-left text-[9px]"></i> THU
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                        <i class="fa-solid fa-arrow-up-right text-[9px]"></i> CHI
+                                    </span>
+                                }
+                                <div class="text-[9px] font-mono text-slate-400 mt-0.5">@entry.EntryType</div>
+                            </td>
+                            <td class="py-3.5 px-4">
+                                <div class="font-mono font-bold text-slate-800">@entry.LedgerCode</div>
+                                @if (!string.IsNullOrEmpty(entry.OrderCode))
+                                {
+                                    <div class="text-[10px] text-indigo-600 font-semibold">Đơn: @entry.OrderCode</div>
+                                }
+                                @if (!string.IsNullOrEmpty(entry.SupplierName))
+                                {
+                                    <div class="text-[10px] text-amber-600 font-medium">NCC: @entry.SupplierName</div>
+                                }
+                            </td>
+                            <td class="py-3.5 px-4 font-medium text-slate-700">
+                                @entry.StoreName
+                            </td>
+                            <td class="py-3.5 px-4 text-slate-600 max-w-xs" title="@entry.Description">
+                                @entry.Description
+                            </td>
+                            <td class="py-3.5 px-4 text-right font-mono font-bold text-sm @(entry.Direction == "THU" ? "text-emerald-600" : "text-rose-600")">
+                                @(entry.Direction == "THU" ? "+" : "-")@entry.Amount.ToString("N0") đ
+                            </td>
+                            <td class="py-3.5 px-4 text-right font-mono font-bold text-sm text-slate-800">
+                                @entry.RunningBalance.ToString("N0") đ
+                            </td>
+                            <td class="py-3.5 px-4 text-slate-500">
+                                @(entry.CreatedByName ?? "System")
+                            </td>
+                        </tr>
+                    }
+                    @if (Model.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-12 text-slate-400">
+                                <i class="fa-solid fa-inbox text-3xl mb-2 text-slate-300"></i>
+                                <p class="text-xs">Chưa có giao dịch sổ cái nào thỏa mãn điều kiện lọc.</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ghi Bút Toán Sổ Cái Mới -->
+<div id="modalCreateEntry" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 animate-scale-up">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-plus-circle text-indigo-600"></i> Ghi Bút Toán Sổ Cái Mới
+            </h3>
+            <button onclick="document.getElementById('modalCreateEntry').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <form asp-action="CreateLedgerEntry" method="post" class="space-y-4">
+            @Html.AntiForgeryToken()
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Chi Nhánh Thực Hiện *</label>
+                <select name="StoreId" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500">
+                    @foreach (var s in stores)
+                    {
+                        <option value="@s.Id">@s.Name</option>
+                    }
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Loại Bút Toán *</label>
+                <select name="EntryType" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500">
+                    <option value="EXPENSE">Chi Phí Vận Hành (EXPENSE - Tiền điện, nước, mặt bằng...)</option>
+                    <option value="REVENUE">Doanh Thu Khác (REVENUE - Thu dịch vụ, thanh lý...)</option>
+                    <option value="COGS">Điều Chỉnh Giá Vốn (COGS - Hao hụt, hàng mẫu...)</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Ghi Nợ (Debit - Chi VNĐ)</label>
+                    <input type="number" name="DebitAmount" value="0" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500 font-mono" />
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Ghi Có (Credit - Thu VNĐ)</label>
+                    <input type="number" name="CreditAmount" value="0" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500 font-mono" />
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Diễn Giải Lý Do / Nội Dung *</label>
+                <textarea name="Description" required rows="3" placeholder="vd: Chi tiền điện nước tháng này, mua văn phòng phẩm..." class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500"></textarea>
+            </div>
+
+            <div class="pt-3 border-t border-slate-200 flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('modalCreateEntry').classList.add('hidden')" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition">
+                    Hủy Bỏ
+                </button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition">
+                    Ghi Sổ Cái
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

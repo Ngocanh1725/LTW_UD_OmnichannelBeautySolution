@@ -6,9 +6,14 @@ namespace Omnichannel.Infrastructure.Data
 {
     public class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        private readonly Microsoft.AspNetCore.Http.IHttpContextAccessor? _httpContextAccessor;
+
+        public ApplicationDbContext(
+            DbContextOptions<ApplicationDbContext> options,
+            Microsoft.AspNetCore.Http.IHttpContextAccessor? httpContextAccessor = null)
             : base(options)
         {
+            _httpContextAccessor = httpContextAccessor;
         }
 
         // 1. PhÃ¢n há»‡ Äá»‹nh danh & Báº£o máº­t
@@ -26,15 +31,31 @@ namespace Omnichannel.Infrastructure.Data
         public DbSet<PostCategory> PostCategories => Set<PostCategory>();
         public DbSet<Post> Posts => Set<Post>();
         public DbSet<StaticPage> StaticPages => Set<StaticPage>();
+        public DbSet<ProductReview> ProductReviews => Set<ProductReview>();
+        public DbSet<MediaAsset> MediaAssets => Set<MediaAsset>();
+        public DbSet<ThemeConfig> ThemeConfigs => Set<ThemeConfig>();
+        public DbSet<UiSection> UiSections => Set<UiSection>();
 
-        // 3. PhÃ¢n há»‡ HÃ ng hÃ³a & Kho FEFO
+        // 3. Phân hệ Hàng hóa & Kho FEFO
         public DbSet<Category> Categories => Set<Category>();
+        public DbSet<Brand> Brands => Set<Brand>();
         public DbSet<Supplier> Suppliers => Set<Supplier>();
         public DbSet<Product> Products => Set<Product>();
         public DbSet<ProductBatch> ProductBatches => Set<ProductBatch>();
         public DbSet<Store> Stores => Set<Store>();
         public DbSet<StoreInventory> StoreInventories => Set<StoreInventory>();
         public DbSet<InventoryLog> InventoryLogs => Set<InventoryLog>();
+        public DbSet<ProductVariant> ProductVariants => Set<ProductVariant>();
+        public DbSet<ProductSwatch> ProductSwatches => Set<ProductSwatch>();
+        public DbSet<ProductAttribute> ProductAttributes => Set<ProductAttribute>();
+        public DbSet<ProductAttributeValue> ProductAttributeValues => Set<ProductAttributeValue>();
+        public DbSet<ProductVariantAttributeValue> ProductVariantAttributeValues => Set<ProductVariantAttributeValue>();
+        public DbSet<ActiveIngredient> ActiveIngredients => Set<ActiveIngredient>();
+        public DbSet<ProductIngredient> ProductIngredients => Set<ProductIngredient>();
+        public DbSet<SkinType> SkinTypes => Set<SkinType>();
+        public DbSet<ProductSkinType> ProductSkinTypes => Set<ProductSkinType>();
+        public DbSet<SkinConcern> SkinConcerns => Set<SkinConcern>();
+        public DbSet<ProductConcern> ProductConcerns => Set<ProductConcern>();
 
         // 4. PhÃ¢n há»‡ BÃ¡n láº» & TÃ i chÃ­nh
         public DbSet<Cart> Carts => Set<Cart>();
@@ -42,6 +63,64 @@ namespace Omnichannel.Infrastructure.Data
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
         public DbSet<Invoice> Invoices => Set<Invoice>();
+
+        // 5. Phân hệ Nhật ký & Kiểm toán (Audit Log)
+        public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
+        // 6. Phân hệ Quản lý Ca bán hàng POS (Shift Management)
+        public DbSet<PosShift> PosShifts => Set<PosShift>();
+        public DbSet<PosDrawerTransaction> PosDrawerTransactions => Set<PosDrawerTransaction>();
+
+        // 7. Phân hệ CRM & Hồ sơ sắc đẹp (Beauty Profile)
+        public DbSet<CustomerProfile> CustomerProfiles => Set<CustomerProfile>();
+        public DbSet<SkinHistory> SkinHistories => Set<SkinHistory>();
+        public DbSet<RepurchaseSchedule> RepurchaseSchedules => Set<RepurchaseSchedule>();
+
+        // 8. Phân hệ Ví điểm thành viên & Thăng hạng (Loyalty & Tier)
+        public DbSet<MemberTier> MemberTiers => Set<MemberTier>();
+        public DbSet<LoyaltyWallet> LoyaltyWallets => Set<LoyaltyWallet>();
+        public DbSet<PointTransaction> PointTransactions => Set<PointTransaction>();
+        public DbSet<Voucher> Vouchers => Set<Voucher>();
+
+        // 9. Phân hệ Khuyến mãi & Coupon (Promotion Engine)
+        public DbSet<Promotion> Promotions => Set<Promotion>();
+        public DbSet<PromotionItem> PromotionItems => Set<PromotionItem>();
+        public DbSet<Coupon> Coupons => Set<Coupon>();
+        public DbSet<CouponUsage> CouponUsages => Set<CouponUsage>();
+
+        // 10. Phân hệ Điều chuyển kho liên chi nhánh (Stock Transfer)
+        public DbSet<StockTransfer> StockTransfers => Set<StockTransfer>();
+        public DbSet<StockTransferDetail> StockTransferDetails => Set<StockTransferDetail>();
+
+        // 11. Phân hệ Cài đặt động & SEO Redirects
+        public DbSet<Setting> Settings => Set<Setting>();
+        public DbSet<SlugRedirect> SlugRedirects => Set<SlugRedirect>();
+
+        // 12. Phân hệ Tài chính, Sổ cái & Công nợ (Finance & Ledger)
+        public DbSet<FinancialLedger> FinancialLedgers => Set<FinancialLedger>();
+        public DbSet<SupplierDebt> SupplierDebts => Set<SupplierDebt>();
+        public DbSet<CodReconciliation> CodReconciliations => Set<CodReconciliation>();
+
+        // 13. Phân hệ Chatbot AI & Hỗ trợ khách hàng (Customer Service AI Chatbot)
+        public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
+        public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
+
+        // 14. Phân hệ Cảnh báo Thông minh (AI Alert System)
+        public DbSet<Alert> Alerts => Set<Alert>();
+
+        // 15. Phân hệ Thông Báo Realtime (Realtime Notifications)
+        public DbSet<Notification> Notifications => Set<Notification>();
+
+        // 16. Phân hệ Hộp Thư Nội Bộ (Internal Messages)
+        public DbSet<InternalMessage> InternalMessages => Set<InternalMessage>();
+
+        // 17. Phân hệ Chăm sóc khách hàng & Giữ chân (Wishlist & Back-In-Stock Alerts)
+        public DbSet<WishlistItem> WishlistItems => Set<WishlistItem>();
+        public DbSet<StockAlert> StockAlerts => Set<StockAlert>();
+
+        // 18. Phân hệ Outbox & Chống trùng lặp (Transactional Outbox & Idempotency)
+        public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+        public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -135,6 +214,67 @@ namespace Omnichannel.Infrastructure.Data
                       .WithMany(mi => mi.Children)
                       .HasForeignKey(mi => mi.ParentId)
                       .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(mi => mi.LinkType).HasMaxLength(20).HasDefaultValue("CUSTOM");
+            });
+
+            modelBuilder.Entity<SlugRedirect>(entity =>
+            {
+                entity.HasIndex(sr => new { sr.EntityType, sr.OldSlug }).IsUnique().HasDatabaseName("IX_SlugRedirects_EntityType_OldSlug");
+            });
+
+            modelBuilder.Entity<Setting>(entity =>
+            {
+                entity.HasIndex(s => s.SettingKey).IsUnique().HasDatabaseName("IX_Settings_SettingKey");
+
+                entity.HasOne(s => s.UpdatedByUser)
+                      .WithMany()
+                      .HasForeignKey(s => s.UpdatedBy)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // =========================================================================
+            // PHÂN HỆ TÀI CHÍNH, SỔ CÁI & CÔNG NỢ (FINANCE & LEDGER)
+            // =========================================================================
+            modelBuilder.Entity<FinancialLedger>(entity =>
+            {
+                entity.HasIndex(fl => fl.LedgerCode).IsUnique().HasDatabaseName("IX_FinancialLedgers_LedgerCode");
+                entity.HasIndex(fl => fl.EntryDate).HasDatabaseName("IX_FinancialLedgers_EntryDate");
+
+                entity.HasOne(fl => fl.Store)
+                      .WithMany(s => s.FinancialLedgers)
+                      .HasForeignKey(fl => fl.StoreId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(fl => fl.Order)
+                      .WithMany()
+                      .HasForeignKey(fl => fl.OrderId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(fl => fl.Supplier)
+                      .WithMany(s => s.FinancialLedgers)
+                      .HasForeignKey(fl => fl.SupplierId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(fl => fl.CreatedByUser)
+                      .WithMany()
+                      .HasForeignKey(fl => fl.CreatedBy)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<SupplierDebt>(entity =>
+            {
+                entity.HasIndex(sd => sd.PurchaseOrderCode).HasDatabaseName("IX_SupplierDebts_PurchaseOrderCode");
+
+                entity.HasOne(sd => sd.Supplier)
+                      .WithMany(s => s.SupplierDebts)
+                      .HasForeignKey(sd => sd.SupplierId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<CodReconciliation>(entity =>
+            {
+                entity.HasIndex(cr => cr.ReconciliationCode).IsUnique().HasDatabaseName("IX_CodReconciliations_ReconciliationCode");
             });
 
             modelBuilder.Entity<PostCategory>(entity =>
@@ -162,6 +302,29 @@ namespace Omnichannel.Infrastructure.Data
                 entity.HasIndex(sp => sp.Slug).IsUnique().HasDatabaseName("IX_StaticPages_Slug");
             });
 
+            modelBuilder.Entity<ProductReview>(entity =>
+            {
+                entity.HasIndex(r => new { r.ProductId, r.IsApproved, r.CreatedAt })
+                      .HasDatabaseName("IX_ProductReviews_Product_Approved_Created");
+
+                entity.ToTable(t => t.HasCheckConstraint("CK_ProductReviews_Rating_Range", "[Rating] >= 1 AND [Rating] <= 5"));
+
+                entity.HasOne(r => r.Product)
+                      .WithMany(p => p.Reviews)
+                      .HasForeignKey(r => r.ProductId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(r => r.User)
+                      .WithMany()
+                      .HasForeignKey(r => r.UserId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(r => r.Order)
+                      .WithMany()
+                      .HasForeignKey(r => r.OrderId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
             // =========================================================================
             // 3. Cáº¤U HÃŒNH PHÃ‚N Há»† HÃ€NG HÃ“A & KHO FEFO (INVENTORY & WAREHOUSE)
             // =========================================================================
@@ -187,18 +350,147 @@ namespace Omnichannel.Infrastructure.Data
                 entity.HasIndex(p => p.Slug).IsUnique().HasDatabaseName("IX_Products_Slug");
                 entity.HasIndex(p => new { p.CategoryId, p.IsActive }).HasDatabaseName("IX_Products_Category_Active");
 
-                // Check constraint: SellingPrice >= 0
-                entity.ToTable(t => t.HasCheckConstraint("CK_Products_SellingPrice_NonNegative", "[SellingPrice] >= 0"));
+                // Check constraints: SellingPrice >= 0, CostPrice >= 0
+                entity.ToTable(t =>
+                {
+                    t.HasCheckConstraint("CK_Products_SellingPrice_NonNegative", "[SellingPrice] >= 0");
+                    t.HasCheckConstraint("CK_Products_CostPrice_NonNegative", "[CostPrice] >= 0");
+                });
 
                 entity.HasOne(p => p.Category)
                       .WithMany(c => c.Products)
                       .HasForeignKey(p => p.CategoryId)
                       .OnDelete(DeleteBehavior.Restrict);
 
+                entity.HasOne(p => p.Brand)
+                      .WithMany()
+                      .HasForeignKey(p => p.BrandId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
                 entity.HasOne(p => p.Supplier)
                       .WithMany(s => s.Products)
                       .HasForeignKey(p => p.SupplierId)
                       .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<ProductVariant>(entity =>
+            {
+                entity.HasIndex(v => v.Sku).IsUnique().HasDatabaseName("IX_ProductVariants_Sku");
+                entity.HasIndex(v => v.Barcode).IsUnique().HasDatabaseName("IX_ProductVariants_Barcode");
+                entity.HasIndex(v => new { v.ProductId, v.IsActive }).HasDatabaseName("IX_ProductVariants_Product_Active");
+
+                entity.ToTable(t => t.HasCheckConstraint("CK_ProductVariants_SellingPrice_NonNegative", "[SellingPrice] >= 0"));
+
+                entity.HasOne(v => v.Product)
+                      .WithMany(p => p.Variants)
+                      .HasForeignKey(v => v.ProductId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ProductSwatch>(entity =>
+            {
+                entity.HasIndex(s => s.ProductVariantId).HasDatabaseName("IX_ProductSwatches_VariantId");
+
+                entity.HasOne(s => s.ProductVariant)
+                      .WithMany(v => v.Swatches)
+                      .HasForeignKey(s => s.ProductVariantId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ProductBatch>(entity =>
+            {
+                entity.HasOne(b => b.ProductVariant)
+                      .WithMany(v => v.Batches)
+                      .HasForeignKey(b => b.ProductVariantId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<ProductAttribute>(entity =>
+            {
+                entity.HasIndex(a => a.Code).IsUnique().HasDatabaseName("IX_ProductAttributes_Code");
+            });
+
+            modelBuilder.Entity<ProductAttributeValue>(entity =>
+            {
+                entity.HasOne(v => v.ProductAttribute)
+                      .WithMany(a => a.Values)
+                      .HasForeignKey(v => v.ProductAttributeId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ProductVariantAttributeValue>(entity =>
+            {
+                entity.HasKey(pvav => new { pvav.ProductVariantId, pvav.ProductAttributeValueId });
+
+                entity.HasOne(pvav => pvav.ProductVariant)
+                      .WithMany(pv => pv.AttributeValues)
+                      .HasForeignKey(pvav => pvav.ProductVariantId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(pvav => pvav.ProductAttributeValue)
+                      .WithMany(pav => pav.VariantMappings)
+                      .HasForeignKey(pvav => pvav.ProductAttributeValueId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<ActiveIngredient>(entity =>
+            {
+                entity.HasIndex(i => i.Slug).IsUnique().HasDatabaseName("IX_ActiveIngredients_Slug");
+            });
+
+            modelBuilder.Entity<ProductIngredient>(entity =>
+            {
+                entity.HasKey(pi => new { pi.ProductId, pi.ActiveIngredientId });
+
+                entity.HasOne(pi => pi.Product)
+                      .WithMany(p => p.ProductIngredients)
+                      .HasForeignKey(pi => pi.ProductId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(pi => pi.ActiveIngredient)
+                      .WithMany(i => i.ProductIngredients)
+                      .HasForeignKey(pi => pi.ActiveIngredientId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<SkinType>(entity =>
+            {
+                entity.HasIndex(st => st.Slug).IsUnique().HasDatabaseName("IX_SkinTypes_Slug");
+            });
+
+            modelBuilder.Entity<ProductSkinType>(entity =>
+            {
+                entity.HasKey(pst => new { pst.ProductId, pst.SkinTypeId });
+
+                entity.HasOne(pst => pst.Product)
+                      .WithMany(p => p.ProductSkinTypes)
+                      .HasForeignKey(pst => pst.ProductId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(pst => pst.SkinType)
+                      .WithMany(st => st.ProductSkinTypes)
+                      .HasForeignKey(pst => pst.SkinTypeId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<SkinConcern>(entity =>
+            {
+                entity.HasIndex(sc => sc.Slug).IsUnique().HasDatabaseName("IX_SkinConcerns_Slug");
+            });
+
+            modelBuilder.Entity<ProductConcern>(entity =>
+            {
+                entity.HasKey(pc => new { pc.ProductId, pc.SkinConcernId });
+
+                entity.HasOne(pc => pc.Product)
+                      .WithMany(p => p.ProductConcerns)
+                      .HasForeignKey(pc => pc.ProductId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(pc => pc.SkinConcern)
+                      .WithMany(sc => sc.ProductConcerns)
+                      .HasForeignKey(pc => pc.SkinConcernId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<ProductBatch>(entity =>
@@ -229,8 +521,13 @@ namespace Omnichannel.Infrastructure.Data
                       .IsUnique()
                       .HasDatabaseName("IX_StoreInventories_Store_Batch");
 
-                // Check constraint: PhysicalQuantity >= ReservedQuantity
-                entity.ToTable(t => t.HasCheckConstraint("CK_StoreInventories_Physical_Reserved", "[PhysicalQuantity] >= [ReservedQuantity]"));
+                // Check constraints: PhysicalQuantity >= ReservedQuantity, PhysicalQuantity >= 0, ReservedQuantity >= 0
+                entity.ToTable(t =>
+                {
+                    t.HasCheckConstraint("CK_StoreInventories_Physical_Reserved", "[PhysicalQuantity] >= [ReservedQuantity]");
+                    t.HasCheckConstraint("CK_StoreInventories_Physical_NonNegative", "[PhysicalQuantity] >= 0");
+                    t.HasCheckConstraint("CK_StoreInventories_Reserved_NonNegative", "[ReservedQuantity] >= 0");
+                });
 
                 entity.HasOne(si => si.Store)
                       .WithMany(s => s.StoreInventories)
@@ -298,6 +595,8 @@ namespace Omnichannel.Infrastructure.Data
             {
                 entity.HasIndex(o => o.OrderCode).IsUnique().HasDatabaseName("IX_Orders_OrderCode");
                 entity.HasIndex(o => new { o.StoreId, o.CreatedAt }).HasDatabaseName("IX_Orders_Store_Created");
+                entity.HasIndex(o => o.CreatedAt).HasDatabaseName("IX_Orders_CreatedAt");
+                entity.HasIndex(o => o.UserId).HasDatabaseName("IX_Orders_UserId");
                 entity.HasIndex(o => new { o.OrderStatus, o.PaymentStatus }).HasDatabaseName("IX_Orders_Status");
 
                 // NgÄƒn cháº·n Multiple Cascade Paths trong SQL Server
@@ -309,6 +608,11 @@ namespace Omnichannel.Infrastructure.Data
                 entity.HasOne(o => o.Store)
                       .WithMany(s => s.Orders)
                       .HasForeignKey(o => o.StoreId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(o => o.PosShift)
+                      .WithMany(ps => ps.Orders)
+                      .HasForeignKey(o => o.PosShiftId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
@@ -346,82 +650,610 @@ namespace Omnichannel.Infrastructure.Data
             });
 
             // =========================================================================
-            // 5. 3NF SCHEMA ADAPTATION (LEGACY C# -> 3NF DB)
+            // 5. CẤU HÌNH NHẬT KÝ & KIỂM TOÁN (AUDIT LOGS)
             // =========================================================================
-            var intToStringConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<int, string>(
-                v => v.ToString(),
-                v => int.Parse(v)
-            );
-            var nullableIntToStringConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<int?, string?>(
-                v => v.HasValue ? v.Value.ToString() : null,
-                v => string.IsNullOrEmpty(v) ? (int?)null : int.Parse(v)
-            );
+            modelBuilder.Entity<AuditLog>(entity =>
+            {
+                entity.HasIndex(a => new { a.UserId, a.CreatedAt }).HasDatabaseName("IX_AuditLogs_UserId_CreatedAt");
+                entity.HasIndex(a => new { a.EntityType, a.EntityId }).HasDatabaseName("IX_AuditLogs_EntityType_EntityId");
+            });
 
-            // Identity
-            modelBuilder.Entity<Role>().Property(x => x.Id).HasColumnName("RoleId").HasColumnType("varchar(50)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<Role>().Property(x => x.Name).HasColumnName("RoleName");
-            modelBuilder.Entity<Permission>().Property(x => x.Id).HasColumnName("PermissionId");
-            modelBuilder.Entity<Permission>().Property(x => x.Name).HasColumnName("PermissionName");
-            modelBuilder.Entity<User>().Property(x => x.Id).HasColumnName("UserId").HasColumnType("varchar(450)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<User>().Property(x => x.StoreId).HasColumnType("varchar(50)").HasConversion(nullableIntToStringConverter);
-            modelBuilder.Entity<UserRole>().Property(x => x.UserId).HasColumnType("varchar(450)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<UserRole>().Property(x => x.RoleId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<RolePermission>().Property(x => x.RoleId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<RolePermission>().Property(x => x.PermissionId).HasColumnName("PermissionId");
-            modelBuilder.Entity<UserPermission>().Property(x => x.UserId).HasColumnType("varchar(450)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<UserPermission>().Property(x => x.PermissionId).HasColumnName("PermissionId");
+            // =========================================================================
+            // 6. CẤU HÌNH QUẢN LÝ CA BÁN HÀNG POS (POS SHIFTS & DRAWER)
+            // =========================================================================
+            modelBuilder.Entity<PosShift>(entity =>
+            {
+                entity.HasIndex(s => s.ShiftCode).IsUnique().HasDatabaseName("IX_PosShifts_ShiftCode");
+                entity.HasIndex(s => new { s.StoreId, s.OpenedAt }).HasDatabaseName("IX_PosShifts_Store_Opened");
 
-            // CMS
-            modelBuilder.Entity<Menu>().Property(x => x.Id).HasColumnName("MenuId");
-            modelBuilder.Entity<Menu>().Property(x => x.Title).HasColumnName("MenuName");
-            modelBuilder.Entity<Menu>().Property(x => x.Code).HasColumnName("MenuCode");
-            modelBuilder.Entity<MenuItem>().Property(x => x.Id).HasColumnName("MenuItemId");
-            modelBuilder.Entity<MenuItem>().Property(x => x.Url).HasColumnName("CustomUrl");
-            modelBuilder.Entity<MenuItem>().Property(x => x.SortOrder).HasColumnName("DisplayOrder");
-            modelBuilder.Entity<MenuItem>().Property(x => x.Target).HasColumnName("TargetType");
-            modelBuilder.Entity<MenuItem>().Property(x => x.Icon).HasColumnName("IconClass");
+                entity.HasOne(s => s.Store)
+                      .WithMany()
+                      .HasForeignKey(s => s.StoreId)
+                      .OnDelete(DeleteBehavior.Restrict);
 
-            // Inventory
-            modelBuilder.Entity<Category>().Property(x => x.Id).HasColumnName("CategoryId");
-            modelBuilder.Entity<Category>().Property(x => x.Name).HasColumnName("CategoryName");
-            modelBuilder.Entity<Category>().Property(x => x.ImageUrl).HasColumnName("IconUrl");
-            modelBuilder.Entity<Category>().Property(x => x.SortOrder).HasColumnName("DisplayOrder");
-            modelBuilder.Entity<Supplier>().Property(x => x.Id).HasColumnName("SupplierId").HasColumnType("varchar(50)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<Supplier>().Property(x => x.Name).HasColumnName("SupplierName");
-            modelBuilder.Entity<Product>().Property(x => x.Id).HasColumnName("ProductId").HasColumnType("varchar(50)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<Product>().Property(x => x.Name).HasColumnName("ProductName");
-            modelBuilder.Entity<Product>().Property(x => x.Sku).HasColumnName("Barcode");
-            modelBuilder.Entity<Product>().Property(x => x.SupplierId).HasColumnType("varchar(50)").HasConversion(nullableIntToStringConverter);
-            modelBuilder.Entity<ProductBatch>().Property(x => x.Id).HasColumnName("BatchId");
-            modelBuilder.Entity<ProductBatch>().Property(x => x.ProductId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<ProductBatch>().Property(x => x.Status).HasColumnName("BatchNumber");
-            modelBuilder.Entity<ProductBatch>().Property(x => x.CurrentQuantity).HasColumnName("Quantity");
-            modelBuilder.Entity<Store>().Property(x => x.Id).HasColumnName("StoreId").HasColumnType("varchar(50)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<Store>().Property(x => x.Name).HasColumnName("StoreName");
-            modelBuilder.Entity<StoreInventory>().Property(x => x.Id).HasColumnName("InventoryId");
-            modelBuilder.Entity<StoreInventory>().Property(x => x.StoreId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<InventoryLog>().Property(x => x.Id).HasColumnName("LogId");
-            modelBuilder.Entity<InventoryLog>().Property(x => x.StoreId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<InventoryLog>().Property(x => x.UserId).HasColumnType("varchar(450)").HasConversion(nullableIntToStringConverter);
+                entity.HasOne(s => s.Cashier)
+                      .WithMany()
+                      .HasForeignKey(s => s.CashierId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
 
-            // Sales
-            modelBuilder.Entity<Cart>().Property(x => x.Id).HasColumnName("CartId");
-            modelBuilder.Entity<CartItem>().Property(x => x.Id).HasColumnName("CartItemId");
-            modelBuilder.Entity<CartItem>().Property(x => x.ProductId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<CartItem>().Property(x => x.CreatedAt).HasColumnName("AddedAt");
-            modelBuilder.Entity<Order>().Property(x => x.Id).HasColumnName("OrderId").HasColumnType("varchar(50)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<Order>().Property(x => x.StoreId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<Order>().Property(x => x.UserId).HasColumnName("CustomerId").HasColumnType("varchar(450)").HasConversion(nullableIntToStringConverter);
-            modelBuilder.Entity<Order>().Property(x => x.OrderSource).HasColumnName("OrderChannel");
-            modelBuilder.Entity<Order>().Property(x => x.CustomerName).HasColumnName("RecipientName");
-            modelBuilder.Entity<Order>().Property(x => x.CustomerPhone).HasColumnName("RecipientPhone");
-            modelBuilder.Entity<Order>().Property(x => x.TotalAmount).HasColumnName("FinalTotal");
-            modelBuilder.Entity<OrderDetail>().Property(x => x.Id).HasColumnName("OrderDetailId");
-            modelBuilder.Entity<OrderDetail>().Property(x => x.OrderId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<OrderDetail>().Property(x => x.ProductId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<Invoice>().Property(x => x.Id).HasColumnName("InvoiceId").HasColumnType("varchar(50)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<Invoice>().Property(x => x.OrderId).HasColumnType("varchar(50)").HasConversion(intToStringConverter);
-            modelBuilder.Entity<Invoice>().Property(x => x.CashierId).HasColumnType("varchar(450)").HasConversion(nullableIntToStringConverter);
+            modelBuilder.Entity<PosDrawerTransaction>(entity =>
+            {
+                entity.HasIndex(t => new { t.PosShiftId, t.CreatedAt }).HasDatabaseName("IX_PosDrawerTransactions_Shift_Created");
+
+                entity.HasOne(t => t.PosShift)
+                      .WithMany(s => s.DrawerTransactions)
+                      .HasForeignKey(t => t.PosShiftId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(t => t.Performer)
+                      .WithMany()
+                      .HasForeignKey(t => t.PerformedBy)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // =========================================================================
+            // 7. CẤU HÌNH CRM & HỒ SƠ SẮC ĐẸP (CUSTOMER PROFILE & SKIN HISTORY)
+            // =========================================================================
+            modelBuilder.Entity<CustomerProfile>(entity =>
+            {
+                entity.HasIndex(cp => cp.UserId).IsUnique().HasDatabaseName("IX_CustomerProfiles_UserId");
+
+                entity.HasOne(cp => cp.User)
+                      .WithOne(u => u.CustomerProfile)
+                      .HasForeignKey<CustomerProfile>(cp => cp.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(cp => cp.Consultant)
+                      .WithMany()
+                      .HasForeignKey(cp => cp.ConsultantUserId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<SkinHistory>(entity =>
+            {
+                entity.HasIndex(sh => new { sh.CustomerProfileId, sh.RecordedAt })
+                      .HasDatabaseName("IX_SkinHistories_Profile_Recorded");
+
+                entity.HasOne(sh => sh.CustomerProfile)
+                      .WithMany(cp => cp.SkinHistories)
+                      .HasForeignKey(sh => sh.CustomerProfileId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(sh => sh.RecordedByUser)
+                      .WithMany()
+                      .HasForeignKey(sh => sh.RecordedBy)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<RepurchaseSchedule>(entity =>
+            {
+                entity.HasIndex(rs => new { rs.CustomerProfileId, rs.EstimatedDepletionDate })
+                      .HasDatabaseName("IX_RepurchaseSchedules_Profile_Depletion");
+
+                entity.HasOne(rs => rs.CustomerProfile)
+                      .WithMany(cp => cp.RepurchaseSchedules)
+                      .HasForeignKey(rs => rs.CustomerProfileId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(rs => rs.Product)
+                      .WithMany()
+                      .HasForeignKey(rs => rs.ProductId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // =========================================================================
+            // 8. CẤU HÌNH PHÂN HỆ VÍ ĐIỂM THÀNH VIÊN & THĂNG HẠNG (LOYALTY & TIER)
+            // =========================================================================
+            modelBuilder.Entity<MemberTier>(entity =>
+            {
+                entity.HasIndex(mt => mt.TierName).IsUnique().HasDatabaseName("IX_MemberTiers_TierName");
+                entity.Property(mt => mt.MinSpend).HasColumnType("decimal(18,2)");
+                entity.Property(mt => mt.MaxSpend).HasColumnType("decimal(18,2)");
+                entity.Property(mt => mt.PointMultiplier).HasColumnType("decimal(5,2)");
+            });
+
+            modelBuilder.Entity<LoyaltyWallet>(entity =>
+            {
+                entity.HasIndex(lw => lw.UserId).IsUnique().HasDatabaseName("IX_LoyaltyWallets_UserId");
+
+                entity.HasOne(lw => lw.User)
+                      .WithOne(u => u.LoyaltyWallet)
+                      .HasForeignKey<LoyaltyWallet>(lw => lw.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(lw => lw.CurrentTier)
+                      .WithMany(mt => mt.Wallets)
+                      .HasForeignKey(lw => lw.CurrentTierId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(lw => lw.TotalSpend12Months).HasColumnType("decimal(18,2)");
+            });
+
+            modelBuilder.Entity<PointTransaction>(entity =>
+            {
+                entity.HasIndex(pt => new { pt.WalletId, pt.CreatedAt }).HasDatabaseName("IX_PointTransactions_Wallet_Created");
+
+                entity.HasOne(pt => pt.Wallet)
+                      .WithMany(lw => lw.Transactions)
+                      .HasForeignKey(pt => pt.WalletId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(pt => pt.Order)
+                      .WithMany(o => o.PointTransactions)
+                      .HasForeignKey(pt => pt.OrderId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<Voucher>(entity =>
+            {
+                entity.HasIndex(v => v.VoucherCode).IsUnique().HasDatabaseName("IX_Vouchers_VoucherCode");
+
+                entity.HasOne(v => v.User)
+                      .WithMany(u => u.Vouchers)
+                      .HasForeignKey(v => v.UserId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(v => v.UsedOrder)
+                      .WithMany(o => o.UsedVouchers)
+                      .HasForeignKey(v => v.UsedOrderId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
+                entity.Property(v => v.DiscountValue).HasColumnType("decimal(18,2)");
+                entity.Property(v => v.MinOrderValue).HasColumnType("decimal(18,2)");
+                entity.Property(v => v.MaxDiscountAmount).HasColumnType("decimal(18,2)");
+            });
+
+            // =========================================================================
+            // 9. CẤU HÌNH PHÂN HỆ KHUYẾN MÃI & COUPON (PROMOTION ENGINE)
+            // =========================================================================
+            modelBuilder.Entity<Promotion>(entity =>
+            {
+                entity.HasIndex(p => p.PromotionCode).IsUnique().HasDatabaseName("IX_Promotions_PromotionCode");
+                entity.Property(p => p.DiscountValue).HasColumnType("decimal(18,2)");
+                entity.Property(p => p.MinOrderValue).HasColumnType("decimal(18,2)");
+                entity.Property(p => p.MaxDiscountAmount).HasColumnType("decimal(18,2)");
+            });
+
+            modelBuilder.Entity<PromotionItem>(entity =>
+            {
+                entity.HasOne(pi => pi.Promotion)
+                      .WithMany(p => p.PromotionItems)
+                      .HasForeignKey(pi => pi.PromotionId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(pi => pi.Product)
+                      .WithMany()
+                      .HasForeignKey(pi => pi.ProductId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(pi => pi.Category)
+                      .WithMany()
+                      .HasForeignKey(pi => pi.CategoryId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(pi => pi.GiftProduct)
+                      .WithMany()
+                      .HasForeignKey(pi => pi.GiftProductId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Coupon>(entity =>
+            {
+                entity.HasIndex(c => c.CouponCode).IsUnique().HasDatabaseName("IX_Coupons_CouponCode");
+                entity.Property(c => c.DiscountValue).HasColumnType("decimal(18,2)");
+                entity.Property(c => c.MinOrderValue).HasColumnType("decimal(18,2)");
+                entity.Property(c => c.MaxDiscountAmount).HasColumnType("decimal(18,2)");
+            });
+
+            modelBuilder.Entity<CouponUsage>(entity =>
+            {
+                entity.HasOne(cu => cu.Coupon)
+                      .WithMany(c => c.Usages)
+                      .HasForeignKey(cu => cu.CouponId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(cu => cu.User)
+                      .WithMany(u => u.CouponUsages)
+                      .HasForeignKey(cu => cu.UserId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(cu => cu.Order)
+                      .WithMany(o => o.CouponUsages)
+                      .HasForeignKey(cu => cu.OrderId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
+                entity.Property(cu => cu.DiscountApplied).HasColumnType("decimal(18,2)");
+            });
+
+            // =========================================================================
+            // 10. CẤU HÌNH PHÂN HỆ ĐIỀU CHUYỂN KHO LIÊN CHI NHÁNH (STOCK TRANSFER)
+            // =========================================================================
+            modelBuilder.Entity<StockTransfer>(entity =>
+            {
+                entity.HasIndex(st => st.TransferCode).IsUnique().HasDatabaseName("IX_StockTransfers_TransferCode");
+
+                entity.HasOne(st => st.SourceStore)
+                      .WithMany(s => s.OutgoingTransfers)
+                      .HasForeignKey(st => st.SourceStoreId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(st => st.DestinationStore)
+                      .WithMany(s => s.IncomingTransfers)
+                      .HasForeignKey(st => st.DestinationStoreId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(st => st.CreatedByUser)
+                      .WithMany()
+                      .HasForeignKey(st => st.CreatedByUserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(st => st.ApprovedByUser)
+                      .WithMany()
+                      .HasForeignKey(st => st.ApprovedByUserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(st => st.ReceivedByUser)
+                      .WithMany()
+                      .HasForeignKey(st => st.ReceivedByUserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<StockTransferDetail>(entity =>
+            {
+                entity.HasOne(std => std.StockTransfer)
+                      .WithMany(st => st.Details)
+                      .HasForeignKey(std => std.StockTransferId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(std => std.Product)
+                      .WithMany()
+                      .HasForeignKey(std => std.ProductId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(std => std.ProductBatch)
+                      .WithMany()
+                      .HasForeignKey(std => std.ProductBatchId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // 14. Phân hệ Cảnh báo Thông minh (AI Alert System)
+            modelBuilder.Entity<Alert>(entity =>
+            {
+                entity.HasIndex(a => new { a.Type, a.EntityKey }).HasDatabaseName("IX_Alerts_Type_EntityKey");
+                entity.HasIndex(a => new { a.IsRead, a.CreatedAt }).HasDatabaseName("IX_Alerts_IsRead_CreatedAt");
+            });
+
+            // 15. Phân hệ Thông Báo Realtime (Realtime Notifications)
+            modelBuilder.Entity<Notification>(entity =>
+            {
+                entity.HasIndex(n => new { n.UserId, n.IsRead, n.CreatedAt }).HasDatabaseName("IX_Notifications_UserId_IsRead");
+                entity.HasIndex(n => new { n.Role, n.IsRead, n.CreatedAt }).HasDatabaseName("IX_Notifications_Role_IsRead");
+                entity.HasIndex(n => new { n.StoreId, n.IsRead, n.CreatedAt }).HasDatabaseName("IX_Notifications_StoreId_IsRead");
+                entity.HasIndex(n => n.Type).HasDatabaseName("IX_Notifications_Type");
+            });
+
+            // 16. Phân hệ Hộp Thư Nội Bộ (Internal Messages)
+            modelBuilder.Entity<InternalMessage>(entity =>
+            {
+                entity.HasOne(m => m.Sender)
+                      .WithMany()
+                      .HasForeignKey(m => m.SenderId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(m => m.Receiver)
+                      .WithMany()
+                      .HasForeignKey(m => m.ReceiverId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(m => new { m.ReceiverId, m.IsRead, m.IsDeletedByReceiver }).HasDatabaseName("IX_InternalMessages_Receiver");
+                entity.HasIndex(m => new { m.SenderId, m.IsDeletedBySender }).HasDatabaseName("IX_InternalMessages_Sender");
+            });
+
+            // =========================================================================
+            // 17. CẤU HÌNH KIỂM SOÁT ĐỒNG THỜI LẠC QUAN (ROWVERSION CONCURRENCY TOKENS)
+            // =========================================================================
+            modelBuilder.Entity<StoreInventory>().Property(x => x.RowVersion).IsRowVersion().IsConcurrencyToken();
+            modelBuilder.Entity<ProductBatch>().Property(x => x.RowVersion).IsRowVersion().IsConcurrencyToken();
+            modelBuilder.Entity<LoyaltyWallet>().Property(x => x.RowVersion).IsRowVersion().IsConcurrencyToken();
+            modelBuilder.Entity<Coupon>().Property(x => x.RowVersion).IsRowVersion().IsConcurrencyToken();
+            modelBuilder.Entity<PosShift>().Property(x => x.RowVersion).IsRowVersion().IsConcurrencyToken();
+            modelBuilder.Entity<Order>().Property(x => x.RowVersion).IsRowVersion().IsConcurrencyToken();
+
+            // =========================================================================
+            // 18. CẤU HÌNH OUTBOX MESSAGES & IDEMPOTENCY RECORDS
+            // =========================================================================
+            modelBuilder.Entity<OutboxMessage>(entity =>
+            {
+                entity.HasIndex(o => new { o.ProcessedAtUtc, o.RetryCount }).HasDatabaseName("IX_OutboxMessages_Processing");
+            });
+
+            modelBuilder.Entity<IdempotencyRecord>(entity =>
+            {
+                entity.HasIndex(i => i.IdempotencyKey).IsUnique().HasDatabaseName("IX_IdempotencyRecords_Key");
+            });
+
+            // GS1 Application Identifier trên ProductBatches
+            modelBuilder.Entity<ProductBatch>(entity =>
+            {
+                entity.HasIndex(b => b.Gs1ApplicationIdentifier)
+                      .IsUnique()
+                      .HasFilter("[Gs1ApplicationIdentifier] IS NOT NULL")
+                      .HasDatabaseName("UQ_ProductBatches_Gs1AI");
+            });
+
+            // =========================================================================
+            // 19. BỘ LỌC TRUY VẤN TOÀN CỤC (GLOBAL QUERY FILTERS CHO SOFT DELETE & ISACTIVE)
+            // =========================================================================
+            modelBuilder.Entity<User>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<Role>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<Product>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<Category>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<Brand>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<Supplier>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<Store>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<ProductAttribute>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<ProductAttributeValue>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<MemberTier>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<Promotion>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<Coupon>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<Banner>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<PostCategory>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<StaticPage>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<ActiveIngredient>().HasQueryFilter(e => e.IsActive);
+
+            // =========================================================================
+            // 20. CẤU HÌNH MEDIA ASSETS & DYNAMIC THEME ENGINE
+            // =========================================================================
+            // 1. Cấu hình bảng MediaAssets
+            modelBuilder.Entity<MediaAsset>(entity =>
+            {
+                entity.HasIndex(e => e.ChecksumHash).HasDatabaseName("IX_MediaAssets_ChecksumHash");
+                entity.HasIndex(e => e.Category).HasDatabaseName("IX_MediaAssets_Category");
+                entity.Property(e => e.Data).HasColumnType("varbinary(max)");
+
+                entity.HasOne(e => e.CreatedByUser)
+                      .WithMany()
+                      .HasForeignKey(e => e.CreatedBy)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // 2. Cấu hình bảng ThemeConfigs
+            modelBuilder.Entity<ThemeConfig>(entity =>
+            {
+                entity.HasOne(e => e.LogoMedia)
+                      .WithMany()
+                      .HasForeignKey(e => e.LogoMediaId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.FaviconMedia)
+                      .WithMany()
+                      .HasForeignKey(e => e.FaviconMediaId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // 3. Cấu hình bảng UiSections
+            modelBuilder.Entity<UiSection>(entity =>
+            {
+                entity.HasIndex(e => e.SectionCode).IsUnique().HasDatabaseName("IX_UiSections_SectionCode");
+                entity.HasOne(e => e.BackgroundMedia)
+                      .WithMany()
+                      .HasForeignKey(e => e.BackgroundMediaId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // 4. Cấu hình quan hệ khóa ngoại Media với Product, Category, Brand, Banner, Post, User
+            modelBuilder.Entity<Product>()
+                  .HasOne(p => p.ThumbnailMedia)
+                  .WithMany()
+                  .HasForeignKey(p => p.ThumbnailMediaId)
+                  .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Category>()
+                  .HasOne(c => c.MediaAsset)
+                  .WithMany()
+                  .HasForeignKey(c => c.MediaAssetId)
+                  .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Brand>()
+                  .HasOne(b => b.LogoMedia)
+                  .WithMany()
+                  .HasForeignKey(b => b.LogoMediaId)
+                  .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Banner>()
+                  .HasOne(b => b.DesktopMedia)
+                  .WithMany()
+                  .HasForeignKey(b => b.DesktopMediaId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Banner>()
+                  .HasOne(b => b.MobileMedia)
+                  .WithMany()
+                  .HasForeignKey(b => b.MobileMediaId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Post>()
+                  .HasOne(p => p.ThumbnailMedia)
+                  .WithMany()
+                  .HasForeignKey(p => p.ThumbnailMediaId)
+                  .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<User>()
+                  .HasOne(u => u.AvatarMedia)
+                  .WithMany()
+                  .HasForeignKey(u => u.AvatarMediaId)
+                  .OnDelete(DeleteBehavior.SetNull);
         }
+
+        #region Automatic Audit Logging ChangeTracker Interceptor
+
+        private class AuditEntry
+        {
+            public Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry Entry { get; set; } = null!;
+            public string Action { get; set; } = string.Empty;
+            public string EntityType { get; set; } = string.Empty;
+            public string EntityId { get; set; } = string.Empty;
+            public System.Collections.Generic.Dictionary<string, object?> OldValues { get; } = new();
+            public System.Collections.Generic.Dictionary<string, object?> NewValues { get; } = new();
+            public System.Collections.Generic.List<Microsoft.EntityFrameworkCore.ChangeTracking.PropertyEntry> TemporaryProperties { get; } = new();
+        }
+
+        public override async Task<int> SaveChangesAsync(System.Threading.CancellationToken cancellationToken = default)
+        {
+            var auditEntries = CaptureAuditEntries();
+            var result = await base.SaveChangesAsync(cancellationToken);
+
+            if (auditEntries != null && auditEntries.Count > 0)
+            {
+                await PersistAuditEntriesAsync(auditEntries, cancellationToken);
+            }
+
+            return result;
+        }
+
+        private System.Collections.Generic.List<AuditEntry> CaptureAuditEntries()
+        {
+            ChangeTracker.DetectChanges();
+            var auditEntries = new System.Collections.Generic.List<AuditEntry>();
+
+            foreach (var entry in ChangeTracker.Entries())
+            {
+                if (entry.Entity is AuditLog || entry.State == EntityState.Detached || entry.State == EntityState.Unchanged)
+                    continue;
+
+                var entityType = entry.Entity.GetType().Name;
+                if (entityType.EndsWith("Proxy") || entityType == "AuditLog")
+                    continue;
+
+                var auditEntry = new AuditEntry
+                {
+                    Entry = entry,
+                    EntityType = entityType
+                };
+
+                switch (entry.State)
+                {
+                    case EntityState.Added:
+                        auditEntry.Action = "CREATE";
+                        foreach (var property in entry.Properties)
+                        {
+                            if (property.IsTemporary)
+                            {
+                                auditEntry.TemporaryProperties.Add(property);
+                                continue;
+                            }
+                            if (property.Metadata.IsPrimaryKey())
+                            {
+                                auditEntry.EntityId = property.CurrentValue?.ToString() ?? "0";
+                            }
+                            auditEntry.NewValues[property.Metadata.Name] = property.CurrentValue;
+                        }
+                        auditEntries.Add(auditEntry);
+                        break;
+
+                    case EntityState.Deleted:
+                        auditEntry.Action = "DELETE";
+                        foreach (var property in entry.Properties)
+                        {
+                            if (property.Metadata.IsPrimaryKey())
+                            {
+                                auditEntry.EntityId = property.OriginalValue?.ToString() ?? "0";
+                            }
+                            auditEntry.OldValues[property.Metadata.Name] = property.OriginalValue;
+                        }
+                        auditEntries.Add(auditEntry);
+                        break;
+
+                    case EntityState.Modified:
+                        auditEntry.Action = "UPDATE";
+                        bool hasRealChanges = false;
+                        foreach (var property in entry.Properties)
+                        {
+                            if (property.Metadata.IsPrimaryKey())
+                            {
+                                auditEntry.EntityId = property.CurrentValue?.ToString() ?? "0";
+                            }
+                            if (property.IsModified)
+                            {
+                                auditEntry.OldValues[property.Metadata.Name] = property.OriginalValue;
+                                auditEntry.NewValues[property.Metadata.Name] = property.CurrentValue;
+                                hasRealChanges = true;
+                            }
+                        }
+                        if (hasRealChanges)
+                        {
+                            auditEntries.Add(auditEntry);
+                        }
+                        break;
+                }
+            }
+
+            return auditEntries;
+        }
+
+        private async Task PersistAuditEntriesAsync(System.Collections.Generic.List<AuditEntry> auditEntries, System.Threading.CancellationToken cancellationToken)
+        {
+            try
+            {
+                int? currentUserId = null;
+                string? currentUserName = null;
+                string? ipAddress = null;
+                string? userAgent = null;
+
+                var httpContext = _httpContextAccessor?.HttpContext;
+                if (httpContext != null)
+                {
+                    var uidStr = httpContext.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                    if (int.TryParse(uidStr, out var uid)) currentUserId = uid;
+                    currentUserName = httpContext.User?.Identity?.Name;
+                    ipAddress = httpContext.Connection?.RemoteIpAddress?.ToString();
+                    userAgent = httpContext.Request?.Headers["User-Agent"].ToString();
+                }
+
+                foreach (var entry in auditEntries)
+                {
+                    foreach (var prop in entry.TemporaryProperties)
+                    {
+                        if (prop.Metadata.IsPrimaryKey())
+                        {
+                            entry.EntityId = prop.CurrentValue?.ToString() ?? entry.EntityId;
+                        }
+                        entry.NewValues[prop.Metadata.Name] = prop.CurrentValue;
+                    }
+
+                    if (string.IsNullOrEmpty(entry.EntityId) || entry.EntityId == "0")
+                    {
+                        var pk = entry.Entry.Properties.FirstOrDefault(p => p.Metadata.IsPrimaryKey());
+                        if (pk != null) entry.EntityId = pk.CurrentValue?.ToString() ?? "0";
+                    }
+
+                    var log = new AuditLog
+                    {
+                        Action = entry.Action,
+                        EntityType = entry.EntityType,
+                        EntityId = string.IsNullOrEmpty(entry.EntityId) ? "0" : entry.EntityId,
+                        OldValues = entry.OldValues.Count > 0 ? System.Text.Json.JsonSerializer.Serialize(entry.OldValues) : null,
+                        NewValues = entry.NewValues.Count > 0 ? System.Text.Json.JsonSerializer.Serialize(entry.NewValues) : null,
+                        UserId = currentUserId,
+                        UserName = currentUserName,
+                        IpAddress = ipAddress,
+                        UserAgent = userAgent,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    AuditLogs.Add(log);
+                }
+
+                await base.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[AuditLog Warning] Save audit entries: {ex.Message}");
+            }
+        }
+
+        #endregion
     }
 }
+

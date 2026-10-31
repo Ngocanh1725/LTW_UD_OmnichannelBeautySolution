@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Omnichannel.Application.DTOs.Sales;
 using Omnichannel.Application.Interfaces.Sales;
 
 namespace Omnichannel.Web.ViewComponents
@@ -17,8 +18,14 @@ namespace Omnichannel.Web.ViewComponents
         public async Task<IViewComponentResult> InvokeAsync()
         {
             string cartId = Request.Cookies.TryGetValue(CartCookieKey, out string? id) ? id ?? "" : "";
-            var cart = await _cartService.GetCartAsync(cartId, null);
-            return View(cart);
+            CartDto? cart = null;
+            if (!string.IsNullOrEmpty(cartId))
+            {
+                cart = await _cartService.GetCartAsync(cartId, null);
+            }
+
+            var vm = CartViewModel.FromDto(cart);
+            return View(vm);
         }
     }
 }

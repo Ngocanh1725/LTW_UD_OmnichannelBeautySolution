@@ -1,0 +1,640 @@
+@using System.Text.Encodings.Web
+@model Omnichannel.Application.DTOs.Customer.AddressListViewModel
+@{
+    ViewData["Title"] = "Sổ Địa Chỉ Nhận Hàng - Omni Beauty";
+    Layout = "_Layout";
+}
+
+<div class="min-h-screen bg-slate-50/70 pb-20 pt-6" x-data="addressManager()">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Breadcrumb & Top Greeting -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+                <nav class="flex items-center gap-2 text-xs text-slate-400 mb-1.5">
+                    <a href="/" class="hover:text-magenta-accent transition">Trang Chủ</a>
+                    <span>/</span>
+                    <a href="/Customer/Dashboard" class="hover:text-magenta-accent transition">Khách Hàng</a>
+                    <span>/</span>
+                    <span class="text-charcoal font-semibold">Sổ Địa Chỉ</span>
+                </nav>
+                <h1 class="text-2xl sm:text-3xl font-serif font-bold text-charcoal flex items-center gap-2.5">
+                    <span>Sổ Địa Chỉ Nhận Hàng</span>
+                    <span class="inline-flex items-center gap-1 text-xs font-sans font-bold px-2.5 py-1 rounded-full bg-magenta-accent/10 text-magenta-accent border border-magenta-accent/20">
+                        <i class="fa-solid fa-location-dot"></i> @Model.Addresses.Count Địa chỉ
+                    </span>
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">
+                    Quản lý danh sách địa chỉ nhận hàng để thanh toán nhanh chóng chỉ với 1-click tại Omni Beauty.
+                </p>
+            </div>
+
+            <!-- Quick Action CTA -->
+            <div class="flex items-center gap-3">
+                <button type="button" 
+                        x-on:click="openCreateModal()" 
+                        id="btnOpenCreateAddress"
+                        style="background: linear-gradient(135deg, #D63384 0%, #E83E8C 100%); color: #FFFFFF;"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full hover:shadow-lg hover:shadow-pink-500/30 text-xs font-bold transition transform active:scale-95 shadow-md">
+                    <i class="fa-solid fa-plus text-sm"></i> Thêm Địa Chỉ Mới
+                </button>
+            </div>
+        </div>
+
+        <!-- Portal Navigation Tabs (VIP Card | Orders | Addresses) -->
+        <div class="bg-white rounded-2xl p-1.5 border border-slate-200 shadow-sm mb-8 flex flex-wrap items-center gap-1">
+            <a href="/Customer/Dashboard" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-crown text-amber-500"></i> Thẻ VIP & Điểm Thưởng
+            </a>
+            <a href="/Customer/Orders" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-bag-shopping text-blue-500"></i> Đơn Hàng Của Tôi
+            </a>
+            <a href="/Customer/Addresses" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-magenta-accent/10 text-magenta-accent border border-magenta-accent/20 shadow-xs">
+                <i class="fa-solid fa-location-dot text-magenta-accent"></i> Sổ Địa Chỉ Nhận Hàng
+            </a>
+            <a href="/Wishlist" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-heart text-rose-500"></i> Danh Sách Yêu Thích
+            </a>
+        </div>
+
+        <!-- Notification Message if available -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 flex items-center justify-between shadow-sm animate-in fade-in duration-300">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <span class="text-sm font-medium">@TempData["SuccessMessage"]</span>
+                </div>
+                <button type="button" onclick="this.parentElement.remove()" class="text-emerald-500 hover:text-emerald-700 text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        }
+
+        <!-- ADDRESS LIST GRID -->
+        @if (Model.Addresses == null || !Model.Addresses.Any())
+        {
+            <div class="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm max-w-xl mx-auto my-8">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-pastel-rose flex items-center justify-center text-magenta-accent text-3xl">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+                <h3 class="text-lg font-serif font-bold text-charcoal mb-2">Bạn chưa có địa chỉ nhận hàng nào</h3>
+                <p class="text-xs text-slate-500 mb-6 leading-relaxed">
+                    Hãy thêm địa chỉ giao hàng đầu tiên để tiết kiệm thời gian đặt mua mỹ phẩm chính hãng và nhận hàng nhanh chóng.
+                </p>
+                <button type="button" 
+                        x-on:click="openCreateModal()" 
+                        class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-magenta-accent text-white text-xs font-bold hover:shadow-lg hover:shadow-magenta-accent/25 transition">
+                    <i class="fa-solid fa-plus"></i> Thêm Địa Chỉ Nhận Hàng Đầu Tiên
+                </button>
+            </div>
+        }
+        else
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                @foreach (var addr in Model.Addresses)
+                {
+                    <div class="relative bg-white rounded-3xl p-6 border transition-all duration-300 flex flex-col justify-between hover:shadow-xl group @(addr.IsDefault ? "border-amber-300 ring-2 ring-amber-400/20 shadow-md" : "border-slate-200 hover:border-slate-300 shadow-sm")">
+                        
+                        <!-- Top Badges & Actions -->
+                        <div>
+                            <div class="flex items-start justify-between gap-2 mb-3">
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <!-- Default Badge -->
+                                    @if (addr.IsDefault)
+                                    {
+                                        <span style="background: linear-gradient(135deg, #D97706 0%, #B45309 100%); color: #FFFFFF;"
+                                              class="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full shadow-xs">
+                                            <i class="fa-solid fa-star text-[10px] text-amber-200"></i> MẶC ĐỊNH
+                                        </span>
+                                    }
+
+                                    <!-- Label Badge: NHÀ RIÊNG / CÔNG TY -->
+                                    @if (addr.Label == "CÔNG TY")
+                                    {
+                                        <span class="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-purple-100 text-purple-700 border border-purple-200">
+                                            <i class="fa-solid fa-building text-[10px]"></i> CÔNG TY
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full bg-sky-100 text-sky-700 border border-sky-200">
+                                            <i class="fa-solid fa-house text-[10px]"></i> NHÀ RIÊNG
+                                        </span>
+                                    }
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="flex items-center gap-1.5 opacity-90 group-hover:opacity-100">
+                                    <button type="button" 
+                                            x-on:click="editAddressById(@addr.Id)" 
+                                            class="w-8 h-8 rounded-full bg-slate-100 hover:bg-magenta-accent hover:text-white text-slate-600 flex items-center justify-center text-xs transition" 
+                                            title="Chỉnh sửa địa chỉ">
+                                        <i class="fa-regular fa-pen-to-square"></i>
+                                    </button>
+
+                                    @if (!addr.IsDefault)
+                                    {
+                                        <form method="post" action="/Customer/DeleteAddress" class="inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa địa chỉ này?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@addr.Id" />
+                                            <button type="submit" 
+                                                    class="w-8 h-8 rounded-full bg-slate-100 hover:bg-red-500 hover:text-white text-slate-500 flex items-center justify-center text-xs transition" 
+                                                    title="Xóa địa chỉ">
+                                                <i class="fa-regular fa-trash-can"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Recipient Details -->
+                            <div class="mb-3">
+                                <div class="text-base font-bold text-charcoal flex items-center gap-2">
+                                    <span>@addr.FullName</span>
+                                </div>
+                                <div class="text-xs text-slate-500 flex items-center gap-2 mt-1">
+                                    <i class="fa-solid fa-phone text-slate-400"></i>
+                                    <span class="font-mono">@addr.PhoneNumber</span>
+                                </div>
+                            </div>
+
+                            <!-- Full Address -->
+                            <div class="text-xs text-slate-600 leading-relaxed bg-slate-50/80 p-3.5 rounded-2xl border border-slate-100 mb-4">
+                                <div class="font-semibold text-slate-800 mb-1">@addr.DetailedAddress</div>
+                                <div class="text-slate-500">@addr.Ward, @addr.District, @addr.Province</div>
+                            </div>
+                        </div>
+
+                        <!-- Bottom Controls -->
+                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+                            @if (addr.IsDefault)
+                            {
+                                <span class="text-[11px] font-semibold text-emerald-600 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-circle-check"></i> Địa chỉ giao hàng ưu tiên
+                                </span>
+                            }
+                            else
+                            {
+                                <form method="post" action="/Customer/SetDefaultAddress" class="w-full">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@addr.Id" />
+                                    <button type="submit" class="text-[11px] font-bold text-slate-500 hover:text-magenta-accent transition flex items-center gap-1.5 py-1">
+                                        <i class="fa-regular fa-circle-dot"></i> Thiết lập làm mặc định
+                                    </button>
+                                </form>
+                            }
+                        </div>
+
+                    </div>
+                }
+
+                <!-- Add New Address Card Placeholder -->
+                <button type="button" 
+                        x-on:click="openCreateModal()" 
+                        class="min-h-[220px] rounded-3xl border-2 border-dashed border-slate-300 hover:border-magenta-accent/60 bg-white/50 hover:bg-magenta-accent/5 p-6 flex flex-col items-center justify-center text-center transition group cursor-pointer">
+                    <div class="w-12 h-12 rounded-full bg-slate-100 group-hover:bg-magenta-accent group-hover:text-white text-slate-400 flex items-center justify-center text-lg transition duration-300 mb-3 shadow-xs">
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                    <span class="text-sm font-bold text-slate-700 group-hover:text-magenta-accent transition">Thêm Địa Chỉ Mới</span>
+                    <span class="text-[11px] text-slate-400 mt-1">Giao hàng tại cơ quan hoặc nhà riêng</span>
+                </button>
+            </div>
+        }
+
+    </div>
+
+    <!-- ===================================================
+         MODAL THÊM / CHỈNH SỬA ĐỊA CHỈ (DROPDOWN ĐỘNG 3 CẤP)
+         =================================================== -->
+    <div x-show="modalOpen" 
+         x-cloak 
+         class="fixed inset-0 z-50 overflow-y-auto"
+         aria-labelledby="modal-title" 
+         role="dialog" 
+         aria-modal="true">
+        
+        <!-- Backdrop Blur -->
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+             x-show="modalOpen"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             x-on:click="modalOpen = false"></div>
+
+        <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+            <div class="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-xl border border-slate-100"
+                 x-show="modalOpen"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+                
+                <!-- Modal Header -->
+                <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-pastel-rose/50 to-white">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-2xl bg-magenta-accent/10 text-magenta-accent flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-map-pin"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-serif font-bold text-charcoal" x-text="isEditMode ? 'Chỉnh Sửa Địa Chỉ' : 'Thêm Địa Chỉ Nhận Hàng Mới'"></h3>
+                            <p class="text-xs text-slate-400">Thông tin địa chỉ giao hàng sẽ được bảo mật</p>
+                        </div>
+                    </div>
+                    <button type="button" x-on:click="modalOpen = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center transition">
+                        <i class="fa-solid fa-xmark text-sm"></i>
+                    </button>
+                </div>
+
+                <!-- Modal Form -->
+                <form method="post" action="/Customer/SaveAddress" x-on:submit="return validateForm($event)">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="Id" x-model="formData.id" />
+
+                    <div class="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+                        
+                        <!-- 1. Họ tên & SĐT -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Họ và tên người nhận <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" 
+                                       name="FullName" 
+                                       x-model="formData.fullName" 
+                                       required
+                                       placeholder="Ví dụ: Nguyễn Phương Anh"
+                                       class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-magenta-accent focus:ring-2 focus:ring-magenta-accent/20 text-xs text-charcoal outline-none transition" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Số điện thoại <span class="text-red-500">*</span>
+                                </label>
+                                <input type="tel" 
+                                       name="PhoneNumber" 
+                                       x-model="formData.phoneNumber" 
+                                       required
+                                       placeholder="Ví dụ: 0908889999"
+                                       class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-magenta-accent focus:ring-2 focus:ring-magenta-accent/20 text-xs text-charcoal outline-none transition" />
+                            </div>
+                        </div>
+
+                        <!-- 2. DROPDOWN ĐỘNG: TỈNH/THÀNH PHỐ -> QUẬN/HUYỆN -> PHƯỜNG/XÃ -->
+                        <div class="space-y-4 pt-1">
+                            <!-- Tỉnh / Thành phố -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Tỉnh / Thành phố <span class="text-red-500">*</span>
+                                </label>
+                                <select name="Province" 
+                                        x-model="formData.province" 
+                                        x-on:change="onProvinceChange()" 
+                                        required
+                                        id="selectProvince"
+                                        class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-magenta-accent focus:ring-2 focus:ring-magenta-accent/20 text-xs text-charcoal outline-none transition bg-white">
+                                    <option value="">-- Chọn Tỉnh / Thành phố --</option>
+                                    <template x-for="p in provinceList" :key="p.name">
+                                        <option :value="p.name" x-text="p.name" :selected="p.name === formData.province"></option>
+                                    </template>
+                                </select>
+                            </div>
+
+                            <!-- Quận / Huyện & Phường / Xã -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                        Quận / Huyện <span class="text-red-500">*</span>
+                                    </label>
+                                    <select name="District" 
+                                            x-model="formData.district" 
+                                            x-on:change="onDistrictChange()" 
+                                            required
+                                            id="selectDistrict"
+                                            :disabled="!availableDistricts.length"
+                                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-magenta-accent focus:ring-2 focus:ring-magenta-accent/20 text-xs text-charcoal outline-none transition bg-white disabled:bg-slate-50 disabled:cursor-not-allowed">
+                                        <option value="">-- Chọn Quận / Huyện --</option>
+                                        <template x-for="d in availableDistricts" :key="d.name">
+                                            <option :value="d.name" x-text="d.name" :selected="d.name === formData.district"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                        Phường / Xã <span class="text-red-500">*</span>
+                                    </label>
+                                    <select name="Ward" 
+                                            x-model="formData.ward" 
+                                            required
+                                            id="selectWard"
+                                            :disabled="!availableWards.length"
+                                            class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-magenta-accent focus:ring-2 focus:ring-magenta-accent/20 text-xs text-charcoal outline-none transition bg-white disabled:bg-slate-50 disabled:cursor-not-allowed">
+                                        <option value="">-- Chọn Phường / Xã --</option>
+                                        <template x-for="w in availableWards" :key="w">
+                                            <option :value="w" x-text="w" :selected="w === formData.ward"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Địa chỉ chi tiết -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Địa chỉ cụ thể (Số nhà, tên đường, tòa nhà/căn hộ) <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" 
+                                   name="DetailedAddress" 
+                                   x-model="formData.detailedAddress" 
+                                   required
+                                   placeholder="Ví dụ: Tòa Saigon Pearl, 92 Nguyễn Hữu Cảnh"
+                                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-magenta-accent focus:ring-2 focus:ring-magenta-accent/20 text-xs text-charcoal outline-none transition" />
+                        </div>
+
+                        <!-- 4. Nhãn địa chỉ: [NHÀ RIÊNG] | [CÔNG TY] -->
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-2">Loại địa chỉ</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="flex items-center gap-2.5 p-3 rounded-2xl border cursor-pointer transition"
+                                       :class="formData.label === 'NHÀ RIÊNG' ? 'border-magenta-accent bg-magenta-accent/5 ring-1 ring-magenta-accent' : 'border-slate-200 hover:bg-slate-50'">
+                                    <input type="radio" name="Label" value="NHÀ RIÊNG" x-model="formData.label" class="text-magenta-accent focus:ring-magenta-accent" />
+                                    <div>
+                                        <div class="text-xs font-bold text-charcoal flex items-center gap-1.5">
+                                            <i class="fa-solid fa-house text-sky-500"></i> Nhà Riêng
+                                        </div>
+                                        <div class="text-[10px] text-slate-400">Giao các ngày trong tuần & cuối tuần</div>
+                                    </div>
+                                </label>
+                                
+                                <label class="flex items-center gap-2.5 p-3 rounded-2xl border cursor-pointer transition"
+                                       :class="formData.label === 'CÔNG TY' ? 'border-magenta-accent bg-magenta-accent/5 ring-1 ring-magenta-accent' : 'border-slate-200 hover:bg-slate-50'">
+                                    <input type="radio" name="Label" value="CÔNG TY" x-model="formData.label" class="text-magenta-accent focus:ring-magenta-accent" />
+                                    <div>
+                                        <div class="text-xs font-bold text-charcoal flex items-center gap-1.5">
+                                            <i class="fa-solid fa-building text-purple-500"></i> Công Ty / Văn Phòng
+                                        </div>
+                                        <div class="text-[10px] text-slate-400">Giao vào giờ hành chính (T2 - T6)</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 5. Đặt làm mặc định -->
+                        <div class="pt-2">
+                            <label class="inline-flex items-center gap-2.5 cursor-pointer">
+                                <input type="checkbox" 
+                                       name="IsDefault" 
+                                       value="true" 
+                                       x-model="formData.isDefault" 
+                                       class="rounded border-slate-300 text-magenta-accent focus:ring-magenta-accent w-4 h-4" />
+                                <span class="text-xs font-semibold text-slate-700">Đặt làm địa chỉ nhận hàng mặc định</span>
+                            </label>
+                        </div>
+
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 rounded-b-3xl flex items-center justify-end gap-3">
+                        <button type="button" 
+                                x-on:click="modalOpen = false" 
+                                class="px-5 py-2.5 rounded-full border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-100 transition">
+                            Hủy Bỏ
+                        </button>
+                        <button type="submit" 
+                                class="px-6 py-2.5 rounded-full bg-magenta-accent text-white text-xs font-bold hover:shadow-lg hover:shadow-magenta-accent/25 transition">
+                            <i class="fa-solid fa-check mr-1.5"></i> Lưu Địa Chỉ
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ADMINISTRATIVE REGION DATA & ALPINE LOGIC -->
+<script>
+    const VIETNAM_LOCATIONS = [
+        {
+            name: "Thành phố Hồ Chí Minh",
+            districts: [
+                {
+                    name: "Quận 1",
+                    wards: ["Phường Bến Nghé", "Phường Bến Thành", "Phường Đa Kao", "Phường Tân Định", "Phường Nguyễn Thái Bình", "Phường Phạm Ngũ Lão"]
+                },
+                {
+                    name: "Quận Bình Thạnh",
+                    wards: ["Phường 22", "Phường 19", "Phường 25", "Phường 26", "Phường 27", "Phường 28", "Phường 15"]
+                },
+                {
+                    name: "Thành phố Thủ Đức",
+                    wards: ["Phường Thảo Điền", "Phường An Phú", "Phường Bình An", "Phường Thủ Thiêm", "Phường Linh Trung", "Phường Hiệp Phú"]
+                },
+                {
+                    name: "Quận 3",
+                    wards: ["Phường Võ Thị Sáu", "Phường 1", "Phường 2", "Phường 4", "Phường 9", "Phường 11"]
+                },
+                {
+                    name: "Quận 7",
+                    wards: ["Phường Tân Phong", "Phường Tân Phú", "Phường Phú Mỹ", "Phường Tân Hưng", "Phường Tân Kiểng"]
+                },
+                {
+                    name: "Quận Phú Nhuận",
+                    wards: ["Phường 1", "Phường 2", "Phường 7", "Phường 8", "Phường 9", "Phường 15"]
+                }
+            ]
+        },
+        {
+            name: "Thành phố Hà Nội",
+            districts: [
+                {
+                    name: "Quận Hoàn Kiếm",
+                    wards: ["Phường Tràng Tiền", "Phường Hàng Bạc", "Phường Hàng Gai", "Phường Hàng Đào", "Phường Lý Thái Tổ", "Phường Phan Chu Trinh"]
+                },
+                {
+                    name: "Quận Ba Đình",
+                    wards: ["Phường Điện Biên", "Phường Quán Thánh", "Phường Kim Mã", "Phường Giảng Võ", "Phường Đội Cấn", "Phường Liễu Giai"]
+                },
+                {
+                    name: "Quận Cầu Giấy",
+                    wards: ["Phường Dịch Vọng", "Phường Dịch Vọng Hậu", "Phường Yên Hòa", "Phường Trung Hòa", "Phường Mai Dịch", "Phường Quan Hoa"]
+                },
+                {
+                    name: "Quận Tây Hồ",
+                    wards: ["Phường Quảng An", "Phường Yên Phụ", "Phường Nhật Tân", "Phường Tứ Liên", "Phường Xuân La", "Phường Thụy Khuê"]
+                },
+                {
+                    name: "Quận Đống Đa",
+                    wards: ["Phường Ô Chợ Dừa", "Phường Cát Linh", "Phường Láng Hạ", "Phường Láng Thượng", "Phường Kim Liên", "Phường Nam Đồng"]
+                }
+            ]
+        },
+        {
+            name: "Thành phố Đà Nẵng",
+            districts: [
+                {
+                    name: "Quận Hải Châu",
+                    wards: ["Phường Hải Châu 1", "Phường Hải Châu 2", "Phường Thạch Thang", "Phường Thanh Bình", "Phường Thuận Phước", "Phường Hòa Cường Bắc"]
+                },
+                {
+                    name: "Quận Sơn Trà",
+                    wards: ["Phường An Hải Bắc", "Phường An Hải Tây", "Phường Phước Mỹ", "Phường Mân Thái", "Phường Nại Hiên Đông"]
+                },
+                {
+                    name: "Quận Ngũ Hành Sơn",
+                    wards: ["Phường Mỹ An", "Phường Khuê Mỹ", "Phường Hòa Hải", "Phường Hòa Quý"]
+                }
+            ]
+        },
+        {
+            name: "Thành phố Hải Phòng",
+            districts: [
+                {
+                    name: "Quận Hồng Bàng",
+                    wards: ["Phường Hoàng Văn Thụ", "Phường Phan Bội Châu", "Phường Minh Khai", "Phường Hạ Lý"]
+                },
+                {
+                    name: "Quận Ngô Quyền",
+                    wards: ["Phường Máy Tơ", "Phường Lạc Viên", "Phường Cầu Đất", "Phường Lê Lợi"]
+                }
+            ]
+        },
+        {
+            name: "Thành phố Cần Thơ",
+            districts: [
+                {
+                    name: "Quận Ninh Kiều",
+                    wards: ["Phường Tân An", "Phường An Cư", "Phường An Nghiệp", "Phường Xuân Khánh", "Phường Hưng Lợi"]
+                }
+            ]
+        },
+        {
+            name: "Tỉnh Bình Dương",
+            districts: [
+                {
+                    name: "Thành phố Thủ Dầu Một",
+                    wards: ["Phường Phú Hòa", "Phường Phú Cường", "Phường Hiệp Thành", "Phường Chánh Nghĩa"]
+                },
+                {
+                    name: "Thành phố Dĩ An",
+                    wards: ["Phường Dĩ An", "Phường An Bình", "Phường Tân Đông Hiệp", "Phường Đông Hòa"]
+                }
+            ]
+        }
+    ];
+
+    // Dữ liệu danh sách địa chỉ từ Server
+    const SERVER_ADDRESSES = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Addresses));
+
+    function addressManager() {
+        return {
+            modalOpen: false,
+            isEditMode: false,
+            provinceList: VIETNAM_LOCATIONS,
+            availableDistricts: [],
+            availableWards: [],
+            formData: {
+                id: 0,
+                fullName: '',
+                phoneNumber: '',
+                province: '',
+                district: '',
+                ward: '',
+                detailedAddress: '',
+                label: 'NHÀ RIÊNG',
+                isDefault: false
+            },
+
+            openCreateModal() {
+                this.isEditMode = false;
+                this.formData = {
+                    id: 0,
+                    fullName: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CustomerName ?? "")),
+                    phoneNumber: '',
+                    province: '',
+                    district: '',
+                    ward: '',
+                    detailedAddress: '',
+                    label: 'NHÀ RIÊNG',
+                    isDefault: @(Model.Addresses == null || !Model.Addresses.Any() ? "true" : "false")
+                };
+                this.availableDistricts = [];
+                this.availableWards = [];
+                this.modalOpen = true;
+            },
+
+            editAddressById(addressId) {
+                const addr = SERVER_ADDRESSES.find(a => (a.Id || a.id) === addressId);
+                if (!addr) return;
+
+                this.isEditMode = true;
+                this.formData = {
+                    id: addr.Id || addr.id,
+                    fullName: addr.FullName || addr.fullName || '',
+                    phoneNumber: addr.PhoneNumber || addr.phoneNumber || '',
+                    province: addr.Province || addr.province || '',
+                    district: addr.District || addr.district || '',
+                    ward: addr.Ward || addr.ward || '',
+                    detailedAddress: addr.DetailedAddress || addr.detailedAddress || '',
+                    label: addr.Label || addr.label || 'NHÀ RIÊNG',
+                    isDefault: addr.IsDefault || addr.isDefault || false
+                };
+
+                // Cập nhật dropdown động
+                this.updateDistrictsForProvince(this.formData.province);
+                this.updateWardsForDistrict(this.formData.province, this.formData.district);
+
+                this.modalOpen = true;
+            },
+
+            onProvinceChange() {
+                this.formData.district = '';
+                this.formData.ward = '';
+                this.availableWards = [];
+                this.updateDistrictsForProvince(this.formData.province);
+            },
+
+            onDistrictChange() {
+                this.formData.ward = '';
+                this.updateWardsForDistrict(this.formData.province, this.formData.district);
+            },
+
+            updateDistrictsForProvince(provinceName) {
+                const foundProvince = this.provinceList.find(p => p.name === provinceName);
+                if (foundProvince) {
+                    this.availableDistricts = foundProvince.districts;
+                } else {
+                    this.availableDistricts = [];
+                }
+            },
+
+            updateWardsForDistrict(provinceName, districtName) {
+                const foundProvince = this.provinceList.find(p => p.name === provinceName);
+                if (foundProvince) {
+                    const foundDistrict = foundProvince.districts.find(d => d.name === districtName);
+                    if (foundDistrict) {
+                        this.availableWards = foundDistrict.wards;
+                        return;
+                    }
+                }
+                this.availableWards = [];
+            },
+
+            validateForm(e) {
+                if (!this.formData.province || !this.formData.district || !this.formData.ward) {
+                    if (e) e.preventDefault();
+                    alert("Vui lòng chọn đầy đủ Tỉnh/Thành phố, Quận/Huyện và Phường/Xã!");
+                    return false;
+                }
+                return true;
+            }
+        };
+    }
+</script>

@@ -1,0 +1,98 @@
+@model IEnumerable<Omnichannel.Application.DTOs.Cms.MenuItemDto>
+@{
+    var menuCode = ViewBag.MenuCode as string ?? "HEADER_MAIN";
+}
+
+@if (menuCode == "HEADER_MAIN")
+{
+    <div class="flex items-center space-x-1">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                if (!item.Children.Any())
+                {
+                    <a href="@item.ResolvedUrl" class="nav-link-beauty px-3.5 py-3.5 text-xs font-bold text-charcoal hover:text-magenta-accent transition flex items-center gap-1.5" target="@(item.OpenInNewTab ? "_blank" : "_self")">
+                        @if (!string.IsNullOrEmpty(item.IconClass))
+                        {
+                            <i class="@item.IconClass text-rose-gold text-xs"></i>
+                        }
+                        <span>@item.Title</span>
+                    </a>
+                }
+                else
+                {
+                    <div class="relative group">
+                        <a href="@item.ResolvedUrl" class="nav-link-beauty px-3.5 py-3.5 text-xs font-bold text-charcoal hover:text-magenta-accent transition flex items-center gap-1.5" target="@(item.OpenInNewTab ? "_blank" : "_self")">
+                            @if (!string.IsNullOrEmpty(item.IconClass))
+                            {
+                                <i class="@item.IconClass text-rose-gold text-xs"></i>
+                            }
+                            <span>@item.Title</span>
+                            <i class="fa-solid fa-angle-down text-[10px] text-slate-400 group-hover:rotate-180 group-hover:text-magenta-accent transition-transform duration-300"></i>
+                        </a>
+
+                        <!-- Dropdown Multi-Level Submenu -->
+                        <div class="dropdown-menu absolute top-full left-0 min-w-[240px] bg-white/98 backdrop-blur-xl shadow-2xl rounded-2xl border border-rose-100 p-3 z-50 invisible opacity-0 translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto">
+                            <ul class="space-y-1 text-xs">
+                                @foreach (var sub in item.Children)
+                                {
+                                    <li class="relative group/sub">
+                                        <a href="@sub.ResolvedUrl" class="flex items-center justify-between p-2.5 rounded-xl text-slate-700 hover:text-magenta-accent hover:bg-rose-50 transition" target="@(sub.OpenInNewTab ? "_blank" : "_self")">
+                                            <span class="flex items-center gap-2 font-medium">
+                                                @if (!string.IsNullOrEmpty(sub.IconClass))
+                                                {
+                                                    <i class="@sub.IconClass text-rose-500 text-xs"></i>
+                                                }
+                                                @sub.Title
+                                            </span>
+                                            @if (sub.Children.Any())
+                                            {
+                                                <i class="fa-solid fa-angle-right text-[10px] text-slate-400"></i>
+                                            }
+                                        </a>
+
+                                        @if (sub.Children.Any())
+                                        {
+                                            <!-- Sub-level 2 -->
+                                            <div class="absolute left-full top-0 ml-1 min-w-[200px] bg-white/98 backdrop-blur-xl shadow-2xl rounded-2xl border border-rose-100 p-2.5 invisible opacity-0 group-hover/sub:visible group-hover/sub:opacity-100 transition-all duration-200">
+                                                <ul class="space-y-1">
+                                                    @foreach (var sub2 in sub.Children)
+                                                    {
+                                                        <li>
+                                                            <a href="@sub2.ResolvedUrl" class="block p-2 rounded-lg text-slate-700 hover:text-magenta-accent hover:bg-rose-50 transition font-medium" target="@(sub2.OpenInNewTab ? "_blank" : "_self")">
+                                                                @sub2.Title
+                                                            </a>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        }
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
+            }
+        }
+    </div>
+}
+else
+{
+    <!-- Footer / Vertical Menu Rendering -->
+    <ul class="space-y-2.5 text-slate-400 text-xs">
+        @if (Model != null)
+        {
+            @foreach (var item in Model)
+            {
+                <li>
+                    <a href="@item.ResolvedUrl" class="hover:text-magenta-accent transition flex items-center gap-1.5" target="@(item.OpenInNewTab ? "_blank" : "_self")">
+                        <i class="fa-solid fa-angle-right text-[10px] text-slate-600"></i>
+                        <span>@item.Title</span>
+                    </a>
+                </li>
+            }
+        }
+    </ul>
+}

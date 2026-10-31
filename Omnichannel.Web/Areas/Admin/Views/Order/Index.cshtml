@@ -1,0 +1,411 @@
+@model Omnichannel.Application.DTOs.Sales.AdminOrderPagedListViewModel
+@using System.Text.Encodings.Web
+@{
+    ViewData["Title"] = "Quản Lý Đơn Hàng";
+    Layout = "_AdminLayout";
+    string currentStatus = string.IsNullOrWhiteSpace(Model.Filter.Status) ? "all" : Model.Filter.Status;
+}
+
+@Html.AntiForgeryToken()
+
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-rose-600 dark:text-rose-400 font-semibold uppercase tracking-wider">
+                <i class="fa-solid fa-receipt"></i>
+                <span>Bán Lẻ Đa Kênh</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight mt-1">
+                Quản Lý Đơn Hàng
+            </h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Theo dõi đơn hàng POS tại quầy & Website Online, phân bổ kho FEFO và xử lý giao nhận.
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/Admin/Pos" 
+               class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold text-sm shadow-md shadow-emerald-500/25 transition">
+                <i class="fa-solid fa-cash-register mr-2"></i>
+                Tạo Đơn Tại Quầy (POS)
+            </a>
+        </div>
+    </div>
+
+    <!-- Status Tabs -->
+    <div class="bg-white dark:bg-slate-900 rounded-2xl p-1.5 border border-slate-200/80 dark:border-slate-800 shadow-sm overflow-x-auto">
+        <nav class="flex space-x-1.5 min-w-max" aria-label="Tabs">
+            <!-- All -->
+            <button type="button" 
+                    onclick="switchOrderTab('all')" 
+                    class="order-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition @(currentStatus == "all" ? "bg-rose-500 text-white shadow-sm shadow-rose-500/30" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800")">
+                <span>Tất cả</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono @(currentStatus == "all" ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300")">
+                    @Model.CountAll
+                </span>
+            </button>
+
+            <!-- Pending -->
+            <button type="button" 
+                    onclick="switchOrderTab('PENDING')" 
+                    class="order-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition @(currentStatus == "PENDING" ? "bg-rose-500 text-white shadow-sm shadow-rose-500/30" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800")">
+                <i class="fa-solid fa-clock text-amber-500"></i>
+                <span>Chờ xác nhận</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono @(currentStatus == "PENDING" ? "bg-white/20 text-white" : "bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-400")">
+                    @Model.CountPending
+                </span>
+            </button>
+
+            <!-- Confirmed / Allocated -->
+            <button type="button" 
+                    onclick="switchOrderTab('CONFIRMED')" 
+                    class="order-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition @(currentStatus == "CONFIRMED" ? "bg-rose-500 text-white shadow-sm shadow-rose-500/30" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800")">
+                <i class="fa-solid fa-boxes-stacked text-blue-500"></i>
+                <span>Đã phân bổ kho</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono @(currentStatus == "CONFIRMED" ? "bg-white/20 text-white" : "bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-400")">
+                    @Model.CountConfirmed
+                </span>
+            </button>
+
+            <!-- Shipping -->
+            <button type="button" 
+                    onclick="switchOrderTab('SHIPPING')" 
+                    class="order-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition @(currentStatus == "SHIPPING" ? "bg-rose-500 text-white shadow-sm shadow-rose-500/30" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800")">
+                <i class="fa-solid fa-truck-fast text-purple-500"></i>
+                <span>Đang giao</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono @(currentStatus == "SHIPPING" ? "bg-white/20 text-white" : "bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-400")">
+                    @Model.CountShipping
+                </span>
+            </button>
+
+            <!-- Completed -->
+            <button type="button" 
+                    onclick="switchOrderTab('COMPLETED')" 
+                    class="order-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition @(currentStatus == "COMPLETED" ? "bg-rose-500 text-white shadow-sm shadow-rose-500/30" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800")">
+                <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                <span>Hoàn thành</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono @(currentStatus == "COMPLETED" ? "bg-white/20 text-white" : "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400")">
+                    @Model.CountCompleted
+                </span>
+            </button>
+
+            <!-- Cancelled -->
+            <button type="button" 
+                    onclick="switchOrderTab('CANCELLED')" 
+                    class="order-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition @(currentStatus == "CANCELLED" ? "bg-rose-500 text-white shadow-sm shadow-rose-500/30" : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800")">
+                <i class="fa-solid fa-ban text-rose-500"></i>
+                <span>Đã hủy</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono @(currentStatus == "CANCELLED" ? "bg-white/20 text-white" : "bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-400")">
+                    @Model.CountCancelled
+                </span>
+            </button>
+        </nav>
+    </div>
+
+    <!-- Filter & Search Toolbar (HTMX) -->
+    <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+        <form id="orderFilterForm"
+              hx-get="/Admin/Order" 
+              hx-target="#orderTableContainer" 
+              hx-indicator="#orderLoadingIndicator"
+              hx-trigger="submit, keyup delay:400ms from:#filterOrderKeyword, change from:#filterOrderSource, change from:#filterStoreId">
+            
+            <input type="hidden" name="Status" id="filterStatus" value="@Model.Filter.Status" />
+            <input type="hidden" name="Page" id="filterPage" value="1" />
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3.5">
+                <!-- Keyword search -->
+                <div class="md:col-span-5">
+                    <label for="filterOrderKeyword" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Tìm kiếm đơn hàng</label>
+                    <div class="relative">
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                        </div>
+                        <input type="text" 
+                               name="Keyword" 
+                               id="filterOrderKeyword" 
+                               value="@Model.Filter.Keyword"
+                               class="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition" 
+                               placeholder="Mã đơn hàng, tên khách, số điện thoại..." />
+                    </div>
+                </div>
+
+                <!-- Store / Branch filter -->
+                <div class="md:col-span-3">
+                    <label for="filterStoreId" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Chi nhánh xuất kho</label>
+                    <select name="StoreId" 
+                            id="filterStoreId" 
+                            asp-items="ViewBag.Stores" 
+                            class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition">
+                        <option value="">-- Tất cả chi nhánh --</option>
+                    </select>
+                </div>
+
+                <!-- Sales Channel filter -->
+                <div class="md:col-span-3">
+                    <label for="filterOrderSource" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Kênh bán</label>
+                    <select name="OrderSource" 
+                            id="filterOrderSource" 
+                            class="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 transition">
+                        <option value="all" selected="@(Model.Filter.OrderSource == "all")">Tất cả kênh bán</option>
+                        <option value="POS" selected="@(Model.Filter.OrderSource == "POS")">Quầy thu ngân (POS)</option>
+                        <option value="WEBSITE" selected="@(Model.Filter.OrderSource == "WEBSITE")">Website trực tuyến</option>
+                    </select>
+                </div>
+
+                <!-- Reset button -->
+                <div class="md:col-span-1 flex items-end">
+                    <button type="button" 
+                            onclick="resetOrderFilters()" 
+                            class="w-full py-2 px-3 text-sm font-semibold rounded-xl text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center justify-center" 
+                            title="Đặt lại bộ lọc">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Skeleton Loading Indicator for HTMX -->
+    <div id="orderLoadingIndicator" class="htmx-indicator hidden">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm animate-pulse space-y-4">
+            <div class="h-6 bg-slate-200 dark:bg-slate-800 rounded-lg w-1/4"></div>
+            <div class="space-y-3">
+                <div class="h-14 bg-slate-100 dark:bg-slate-800/60 rounded-xl"></div>
+                <div class="h-14 bg-slate-100 dark:bg-slate-800/60 rounded-xl"></div>
+                <div class="h-14 bg-slate-100 dark:bg-slate-800/60 rounded-xl"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dynamic Order Table Container (HTMX Target) -->
+    <div id="orderTableContainer" 
+         hx-get="/Admin/Order" 
+         hx-trigger="reloadOrderTable from:body"
+         class="transition-opacity duration-200">
+        <partial name="_OrderList" model="Model" />
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Tab switching
+        function switchOrderTab(status) {
+            const statusInput = document.getElementById('filterStatus');
+            const pageInput = document.getElementById('filterPage');
+            if (statusInput) statusInput.value = status;
+            if (pageInput) pageInput.value = '1';
+
+            // Highlight tab button
+            document.querySelectorAll('.order-tab-btn').forEach(btn => {
+                btn.classList.remove('bg-rose-500', 'text-white', 'shadow-sm', 'shadow-rose-500/30');
+                btn.classList.add('text-slate-600', 'dark:text-slate-400');
+            });
+
+            const form = document.getElementById('orderFilterForm');
+            if (form) {
+                htmx.trigger(form, 'submit');
+            }
+        }
+
+        // Pagination handler
+        function goToOrderPage(pageNum) {
+            const pageInput = document.getElementById('filterPage');
+            if (pageInput) {
+                pageInput.value = pageNum;
+                const form = document.getElementById('orderFilterForm');
+                if (form) {
+                    htmx.trigger(form, 'submit');
+                }
+            }
+        }
+
+        // Reset filters
+        function resetOrderFilters() {
+            const kw = document.getElementById('filterOrderKeyword');
+            const store = document.getElementById('filterStoreId');
+            const source = document.getElementById('filterOrderSource');
+            const status = document.getElementById('filterStatus');
+            const page = document.getElementById('filterPage');
+
+            if (kw) kw.value = '';
+            if (store) store.value = '';
+            if (source) source.value = 'all';
+            if (status) status.value = 'all';
+            if (page) page.value = '1';
+
+            const form = document.getElementById('orderFilterForm');
+            if (form) {
+                htmx.trigger(form, 'submit');
+            }
+        }
+
+        // Quick Update Status
+        function quickUpdateStatus(orderId, newStatus) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+            const statusNames = {
+                'CONFIRMED': 'Xác nhận đơn & Khóa kho',
+                'SHIPPING': 'Bắt đầu giao hàng',
+                'COMPLETED': 'Hoàn thành & Ghi nhận thanh toán'
+            };
+
+            Swal.fire({
+                title: 'Cập nhật trạng thái?',
+                html: `Chuyển đơn hàng sang <b>${statusNames[newStatus] || newStatus}</b>?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy bỏ',
+                customClass: { popup: 'rounded-2xl dark:bg-slate-900 dark:text-slate-100' }
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    fetch(`/Admin/Order/UpdateStatus/${orderId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': token,
+                            'HX-Request': 'true'
+                        },
+                        body: `status=${encodeURIComponent(newStatus)}`
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            Swal.fire({
+                                toast: true,
+                                position: 'bottom-end',
+                                icon: 'success',
+                                title: 'Cập nhật trạng thái thành công!',
+                                showConfirmButton: false,
+                                timer: 2500,
+                                timerProgressBar: true
+                            });
+                            const container = document.getElementById('orderTableContainer');
+                            if (container) htmx.trigger(container, 'reloadOrderTable');
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Thất bại',
+                                text: 'Không thể cập nhật trạng thái đơn hàng.',
+                                customClass: { popup: 'rounded-2xl' }
+                            });
+                        }
+                    })
+                    .catch(err => console.error(err));
+                }
+            });
+        }
+
+        // Prompt Cancel Order with Reason
+        function promptCancelOrder(orderId, orderCode) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+            Swal.fire({
+                title: 'Hủy đơn hàng?',
+                html: `Bạn đang thực hiện hủy đơn <b>${orderCode}</b>.<br/><span class="text-xs text-slate-500">Tồn kho tạm khóa (Reserved) sẽ được hoàn trả tự động vào kho.</span>`,
+                icon: 'warning',
+                input: 'text',
+                inputPlaceholder: 'Nhập lý do hủy (bắt buộc)...',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'Xác nhận hủy đơn',
+                cancelButtonText: 'Đóng',
+                inputValidator: (value) => {
+                    if (!value || !value.trim()) {
+                        return 'Vui lòng nhập lý do hủy đơn hàng!';
+                    }
+                },
+                customClass: { popup: 'rounded-2xl dark:bg-slate-900 dark:text-slate-100' }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const reason = result.value;
+                    fetch(`/Admin/Order/UpdateStatus/${orderId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': token,
+                            'HX-Request': 'true'
+                        },
+                        body: `status=CANCELLED&reason=${encodeURIComponent(reason)}`
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            Swal.fire({
+                                toast: true,
+                                position: 'bottom-end',
+                                icon: 'success',
+                                title: `Đã hủy đơn ${orderCode} thành công!`,
+                                showConfirmButton: false,
+                                timer: 2500,
+                                timerProgressBar: true
+                            });
+                            const container = document.getElementById('orderTableContainer');
+                            if (container) htmx.trigger(container, 'reloadOrderTable');
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Thất bại',
+                                text: 'Không thể hủy đơn hàng này.',
+                                customClass: { popup: 'rounded-2xl' }
+                            });
+                        }
+                    })
+                    .catch(err => console.error(err));
+                }
+            });
+        }
+
+        // TempData messages
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <text>
+            Swal.fire({
+                toast: true,
+                position: 'bottom-end',
+                icon: 'success',
+                title: '@Html.Raw(JavaScriptEncoder.Default.Encode(TempData["SuccessMessage"]?.ToString() ?? ""))',
+                showConfirmButton: false,
+                timer: 3500,
+                timerProgressBar: true
+            });
+            </text>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <text>
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: '@Html.Raw(JavaScriptEncoder.Default.Encode(TempData["ErrorMessage"]?.ToString() ?? ""))',
+                customClass: { popup: 'rounded-2xl' }
+            });
+            </text>
+        }
+
+        // SignalR Toast Notifications
+        if (typeof signalR !== 'undefined') {
+            const hubConnection = new signalR.HubConnectionBuilder()
+                .withUrl("/systemHub")
+                .withAutomaticReconnect()
+                .build();
+
+            hubConnection.on("ReceiveNotification", function (message, type) {
+                Swal.fire({
+                    toast: true,
+                    position: 'bottom-end',
+                    icon: type || 'info',
+                    title: message,
+                    showConfirmButton: false,
+                    timer: 3500,
+                    timerProgressBar: true
+                });
+                const container = document.getElementById('orderTableContainer');
+                if (container) htmx.trigger(container, 'reloadOrderTable');
+            });
+
+            hubConnection.start().catch(err => console.debug("SignalR connection:", err));
+        }
+    </script>
+}

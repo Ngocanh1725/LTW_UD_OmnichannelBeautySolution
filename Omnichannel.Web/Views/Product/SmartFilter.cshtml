@@ -1,0 +1,1138 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Tạo Routine Chăm Sóc Da Riêng Bạn & AI Beauty Advisor";
+    ViewData["Description"] = "Hệ thống chuyên gia da liễu thiết kế chu trình Skincare sáng - tối riêng biệt phù hợp theo loại da, vấn đề da và phân khúc ngân sách (Tiết Kiệm, Tiêu Chuẩn, Thượng Lưu).";
+}
+
+<style>
+    /* Wizard transitions */
+    .routine-fade-enter {
+        animation: fadeInRoutine 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    @@keyframes fadeInRoutine {
+        from {
+            opacity: 0;
+            transform: translateY(12px) scale(0.99);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    /* Custom range slider */
+    .beauty-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 8px;
+        background: #fdf2f4;
+        border-radius: 9999px;
+        outline: none;
+        border: 1px solid #f1d8dd;
+    }
+    .beauty-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #d63384;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(214, 51, 132, 0.35);
+        border: 2px solid #ffffff;
+        transition: transform 0.15s ease;
+    }
+    .beauty-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.15);
+    }
+</style>
+
+<div x-data="personalizedRoutineApp()" x-init="init()" class="py-10 bg-[#fffdfd] min-h-screen">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header Hero Section -->
+        <div class="text-center max-w-3xl mx-auto mb-8">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-pastel-rose text-magenta-accent text-xs font-bold uppercase tracking-wider mb-3 shadow-xs">
+                <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                <span>Dermatology Algorithm 4.0</span>
+            </div>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-charcoal mb-3 tracking-tight">
+                Tạo Routine Chăm Sóc Da Riêng Bạn
+            </h1>
+            <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                Được cá nhân hóa dựa trên Loại da, Vấn đề cần điều trị và Phân khúc ngân sách của bạn với 2 chu trình Sáng - Tối chuẩn y khoa.
+            </p>
+
+            <!-- Mode Switcher Pill Tabs -->
+            <div class="inline-flex p-1.5 bg-slate-100/80 rounded-2xl border border-slate-200 mt-6 shadow-xs">
+                <button type="button" 
+                        @@click="activeMode = 'routine'" 
+                        :class="activeMode === 'routine' ? 'bg-white text-magenta-accent shadow-sm font-bold' : 'text-slate-600 hover:text-charcoal font-medium'"
+                        class="px-5 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span>Thiết Kế Routine Cá Nhân Hóa</span>
+                </button>
+
+                <button type="button" 
+                        @@click="activeMode = 'finder'" 
+                        :class="activeMode === 'finder' ? 'bg-white text-magenta-accent shadow-sm font-bold' : 'text-slate-600 hover:text-charcoal font-medium'"
+                        class="px-5 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-2 transition-all">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Bộ Lọc Sản Phẩm Nhanh AI</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MODE 1: THIẾT KẾ ROUTINE CHĂM SÓC DA RIÊNG BẠN (HERO MODE) -->
+        <!-- ========================================================================= -->
+        <div x-show="activeMode === 'routine'" class="space-y-8">
+            
+            <!-- BUILDER INPUT CARD (Ẩn khi đang hiển thị kết quả routine) -->
+            <div x-show="!hasRoutineResult && !isGeneratingRoutine" class="bg-white rounded-3xl shadow-xl border border-soft-border/70 p-6 sm:p-10 transition-all">
+                
+                <!-- Section 1: Chọn Loại Da -->
+                <div class="mb-10">
+                    <div class="flex items-center gap-2.5 mb-2">
+                        <span class="w-7 h-7 rounded-xl bg-pastel-rose text-magenta-accent flex items-center justify-center font-bold text-xs">1</span>
+                        <h2 class="text-xl font-bold text-charcoal font-serif">Bước 1: Chọn Loại Da Của Bạn</h2>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-500 mb-5 ml-9.5">
+                        Mỗi loại da đòi hỏi kết cấu và cơ chế cân bằng ẩm khác nhau.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+                        <!-- Da Dầu -->
+                        <div @@click="routineSkinType = 'da-dau'"
+                             :class="routineSkinType === 'da-dau' ? 'border-magenta-accent bg-pastel-rose/80 ring-2 ring-magenta-accent/30 shadow-md' : 'border-slate-200 hover:border-pink-300 hover:bg-slate-50/60'"
+                             class="cursor-pointer rounded-2xl border-2 p-4 transition-all duration-200 flex flex-col justify-between group">
+                            <div class="flex items-start justify-between mb-2">
+                                <span class="h-10 w-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-base">
+                                    <i class="fa-solid fa-droplet text-amber-500"></i>
+                                </span>
+                                <div class="h-4 w-4 rounded-full border-2 flex items-center justify-center"
+                                     :class="routineSkinType === 'da-dau' ? 'border-magenta-accent bg-magenta-accent text-white' : 'border-slate-300'">
+                                    <i x-show="routineSkinType === 'da-dau'" class="fa-solid fa-check text-[9px]"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-xs text-charcoal mb-0.5">Da Dầu (Oily)</h3>
+                                <p class="text-[11px] text-slate-500 leading-tight">Đổ dầu bóng nhờn toàn mặt, lỗ chân lông to.</p>
+                            </div>
+                        </div>
+
+                        <!-- Da Khô -->
+                        <div @@click="routineSkinType = 'da-kho'"
+                             :class="routineSkinType === 'da-kho' ? 'border-magenta-accent bg-pastel-rose/80 ring-2 ring-magenta-accent/30 shadow-md' : 'border-slate-200 hover:border-pink-300 hover:bg-slate-50/60'"
+                             class="cursor-pointer rounded-2xl border-2 p-4 transition-all duration-200 flex flex-col justify-between group">
+                            <div class="flex items-start justify-between mb-2">
+                                <span class="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-base">
+                                    <i class="fa-solid fa-snowflake text-blue-500"></i>
+                                </span>
+                                <div class="h-4 w-4 rounded-full border-2 flex items-center justify-center"
+                                     :class="routineSkinType === 'da-kho' ? 'border-magenta-accent bg-magenta-accent text-white' : 'border-slate-300'">
+                                    <i x-show="routineSkinType === 'da-kho'" class="fa-solid fa-check text-[9px]"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-xs text-charcoal mb-0.5">Da Khô (Dry)</h3>
+                                <p class="text-[11px] text-slate-500 leading-tight">Thiếu ẩm, thô ráp, căng rát sau khi rửa mặt.</p>
+                            </div>
+                        </div>
+
+                        <!-- Da Hỗn Hợp -->
+                        <div @@click="routineSkinType = 'da-hon-hop'"
+                             :class="routineSkinType === 'da-hon-hop' ? 'border-magenta-accent bg-pastel-rose/80 ring-2 ring-magenta-accent/30 shadow-md' : 'border-slate-200 hover:border-pink-300 hover:bg-slate-50/60'"
+                             class="cursor-pointer rounded-2xl border-2 p-4 transition-all duration-200 flex flex-col justify-between group">
+                            <div class="flex items-start justify-between mb-2">
+                                <span class="h-10 w-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-base">
+                                    <i class="fa-solid fa-scale-balanced text-purple-500"></i>
+                                </span>
+                                <div class="h-4 w-4 rounded-full border-2 flex items-center justify-center"
+                                     :class="routineSkinType === 'da-hon-hop' ? 'border-magenta-accent bg-magenta-accent text-white' : 'border-slate-300'">
+                                    <i x-show="routineSkinType === 'da-hon-hop'" class="fa-solid fa-check text-[9px]"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-xs text-charcoal mb-0.5">Da Hỗn Hợp</h3>
+                                <p class="text-[11px] text-slate-500 leading-tight">Đổ dầu vùng chữ T, 2 má khô hoặc bình thường.</p>
+                            </div>
+                        </div>
+
+                        <!-- Da Nhạy Cảm -->
+                        <div @@click="routineSkinType = 'da-nhay-cam'"
+                             :class="routineSkinType === 'da-nhay-cam' ? 'border-magenta-accent bg-pastel-rose/80 ring-2 ring-magenta-accent/30 shadow-md' : 'border-slate-200 hover:border-pink-300 hover:bg-slate-50/60'"
+                             class="cursor-pointer rounded-2xl border-2 p-4 transition-all duration-200 flex flex-col justify-between group">
+                            <div class="flex items-start justify-between mb-2">
+                                <span class="h-10 w-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-base">
+                                    <i class="fa-solid fa-shield-heart text-rose-500"></i>
+                                </span>
+                                <div class="h-4 w-4 rounded-full border-2 flex items-center justify-center"
+                                     :class="routineSkinType === 'da-nhay-cam' ? 'border-magenta-accent bg-magenta-accent text-white' : 'border-slate-300'">
+                                    <i x-show="routineSkinType === 'da-nhay-cam'" class="fa-solid fa-check text-[9px]"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-xs text-charcoal mb-0.5">Da Nhạy Cảm</h3>
+                                <p class="text-[11px] text-slate-500 leading-tight">Mỏng manh, dễ đỏ rát ngứa ngáy khi thời tiết đổi.</p>
+                            </div>
+                        </div>
+
+                        <!-- Da Thường -->
+                        <div @@click="routineSkinType = 'da-thuong'"
+                             :class="routineSkinType === 'da-thuong' ? 'border-magenta-accent bg-pastel-rose/80 ring-2 ring-magenta-accent/30 shadow-md' : 'border-slate-200 hover:border-pink-300 hover:bg-slate-50/60'"
+                             class="cursor-pointer rounded-2xl border-2 p-4 transition-all duration-200 flex flex-col justify-between group">
+                            <div class="flex items-start justify-between mb-2">
+                                <span class="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base">
+                                    <i class="fa-solid fa-certificate text-emerald-500"></i>
+                                </span>
+                                <div class="h-4 w-4 rounded-full border-2 flex items-center justify-center"
+                                     :class="routineSkinType === 'da-thuong' ? 'border-magenta-accent bg-magenta-accent text-white' : 'border-slate-300'">
+                                    <i x-show="routineSkinType === 'da-thuong'" class="fa-solid fa-check text-[9px]"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-xs text-charcoal mb-0.5">Da Thường</h3>
+                                <p class="text-[11px] text-slate-500 leading-tight">Cân bằng hoàn hảo giữa độ dầu và độ ẩm.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Chọn Vấn Đề Da Ưu Tiên -->
+                <div class="mb-10">
+                    <div class="flex items-center gap-2.5 mb-2">
+                        <span class="w-7 h-7 rounded-xl bg-pastel-rose text-magenta-accent flex items-center justify-center font-bold text-xs">2</span>
+                        <h2 class="text-xl font-bold text-charcoal font-serif">Bước 2: Vấn Đề Da Bạn Muốn Cải Thiện Nhất?</h2>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-500 mb-5 ml-9.5">
+                        Xác định hoạt chất đặc trị vàng trong bước Serum ban đêm.
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Mụn & Lỗ chân lông -->
+                        <div @@click="routineConcern = 'acne_pore'"
+                             :class="routineConcern === 'acne_pore' ? 'border-magenta-accent bg-pastel-rose/80 ring-2 ring-magenta-accent/30 shadow-md' : 'border-slate-200 hover:border-pink-300 hover:bg-slate-50/60'"
+                             class="cursor-pointer rounded-2xl border-2 p-5 transition-all duration-200 flex flex-col justify-between group">
+                            <div class="flex items-start justify-between mb-3">
+                                <span class="h-11 w-11 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-shield-virus"></i>
+                                </span>
+                                <div class="h-5 w-5 rounded-full border-2 flex items-center justify-center"
+                                     :class="routineConcern === 'acne_pore' ? 'border-magenta-accent bg-magenta-accent text-white' : 'border-slate-300'">
+                                    <i x-show="routineConcern === 'acne_pore'" class="fa-solid fa-check text-[10px]"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-charcoal mb-1">Mụn & Lỗ Chân Lông</h3>
+                                <p class="text-xs text-slate-500">Mụn viêm, mụn ẩn, bã nhờn tích tụ, lỗ chân lông to thô ráp.</p>
+                                <div class="mt-2 text-[10px] text-magenta-accent font-semibold">Hoạt chất: BHA, Niacinamide, Tràm trà</div>
+                            </div>
+                        </div>
+
+                        <!-- Sạm Nám & Thâm Mụn -->
+                        <div @@click="routineConcern = 'pigmentation'"
+                             :class="routineConcern === 'pigmentation' ? 'border-magenta-accent bg-pastel-rose/80 ring-2 ring-magenta-accent/30 shadow-md' : 'border-slate-200 hover:border-pink-300 hover:bg-slate-50/60'"
+                             class="cursor-pointer rounded-2xl border-2 p-5 transition-all duration-200 flex flex-col justify-between group">
+                            <div class="flex items-start justify-between mb-3">
+                                <span class="h-11 w-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                </span>
+                                <div class="h-5 w-5 rounded-full border-2 flex items-center justify-center"
+                                     :class="routineConcern === 'pigmentation' ? 'border-magenta-accent bg-magenta-accent text-white' : 'border-slate-300'">
+                                    <i x-show="routineConcern === 'pigmentation'" class="fa-solid fa-check text-[10px]"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-charcoal mb-1">Sạm Nám & Tàn Nhang</h3>
+                                <p class="text-xs text-slate-500">Đốm nâu, sạm nắng, thâm mụn kéo dài, da xỉn màu thiếu sức sống.</p>
+                                <div class="mt-2 text-[10px] text-magenta-accent font-semibold">Hoạt chất: Vitamin C, Alpha Arbutin</div>
+                            </div>
+                        </div>
+
+                        <!-- Lão Hóa & Nếp Nhăn -->
+                        <div @@click="routineConcern = 'aging'"
+                             :class="routineConcern === 'aging' ? 'border-magenta-accent bg-pastel-rose/80 ring-2 ring-magenta-accent/30 shadow-md' : 'border-slate-200 hover:border-pink-300 hover:bg-slate-50/60'"
+                             class="cursor-pointer rounded-2xl border-2 p-5 transition-all duration-200 flex flex-col justify-between group">
+                            <div class="flex items-start justify-between mb-3">
+                                <span class="h-11 w-11 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                </span>
+                                <div class="h-5 w-5 rounded-full border-2 flex items-center justify-center"
+                                     :class="routineConcern === 'aging' ? 'border-magenta-accent bg-magenta-accent text-white' : 'border-slate-300'">
+                                    <i x-show="routineConcern === 'aging'" class="fa-solid fa-check text-[10px]"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-charcoal mb-1">Lão Hóa Sớm & Nếp Nhăn</h3>
+                                <p class="text-xs text-slate-500">Vết chân chim, rãnh cười sâu, da chùng nhão suy giảm đàn hồi.</p>
+                                <div class="mt-2 text-[10px] text-magenta-accent font-semibold">Hoạt chất: Retinol, Peptide, Men vi sinh</div>
+                            </div>
+                        </div>
+
+                        <!-- Phục Hồi & Nhạy Cảm -->
+                        <div @@click="routineConcern = 'recovery'"
+                             :class="routineConcern === 'recovery' ? 'border-magenta-accent bg-pastel-rose/80 ring-2 ring-magenta-accent/30 shadow-md' : 'border-slate-200 hover:border-pink-300 hover:bg-slate-50/60'"
+                             class="cursor-pointer rounded-2xl border-2 p-5 transition-all duration-200 flex flex-col justify-between group">
+                            <div class="flex items-start justify-between mb-3">
+                                <span class="h-11 w-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-heart-pulse"></i>
+                                </span>
+                                <div class="h-5 w-5 rounded-full border-2 flex items-center justify-center"
+                                     :class="routineConcern === 'recovery' ? 'border-magenta-accent bg-magenta-accent text-white' : 'border-slate-300'">
+                                    <i x-show="routineConcern === 'recovery'" class="fa-solid fa-check text-[10px]"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm text-charcoal mb-1">Phục Hồi Màng Ẩm Yếu</h3>
+                                <p class="text-xs text-slate-500">Da nhiễm corticoid, tổn thương sau peel/laser, kích ứng mẩn đỏ.</p>
+                                <div class="mt-2 text-[10px] text-magenta-accent font-semibold">Hoạt chất: Panthenol B5, HA, Ceramide</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Chọn Phân Khúc Ngân Sách -->
+                <div class="mb-10">
+                    <div class="flex items-center gap-2.5 mb-2">
+                        <span class="w-7 h-7 rounded-xl bg-pastel-rose text-magenta-accent flex items-center justify-center font-bold text-xs">3</span>
+                        <h2 class="text-xl font-bold text-charcoal font-serif">Bước 3: Ngân Sách Mong Muốn Của Bạn?</h2>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-500 mb-5 ml-9.5">
+                        Chúng mình chọn lọc các thương hiệu danh tiếng nhất trong phân khúc phù hợp.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        
+                        <!-- GÓI TIẾT KIỆM -->
+                        <div @@click="routineBudgetTier = 'economy'"
+                             :class="routineBudgetTier === 'economy' ? 'border-emerald-500 bg-emerald-50/50 ring-2 ring-emerald-500/30 shadow-lg scale-[1.02]' : 'border-slate-200 hover:border-emerald-300 hover:bg-slate-50/60'"
+                             class="cursor-pointer rounded-3xl border-2 p-6 transition-all duration-300 flex flex-col justify-between relative overflow-hidden group">
+                            
+                            <div class="flex items-start justify-between mb-4">
+                                <div>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold">
+                                        <i class="fa-solid fa-seedling"></i>
+                                        <span>Gói Tiết Kiệm</span>
+                                    </span>
+                                    <div class="text-xl font-black text-charcoal mt-2 font-mono">Dưới 1.000.000 ₫</div>
+                                    <div class="text-xs text-slate-500 mt-0.5">Hiệu năng cao - Bảng thành phần tối giản</div>
+                                </div>
+                                <div class="h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors"
+                                     :class="routineBudgetTier === 'economy' ? 'border-emerald-500 bg-emerald-500 text-white' : 'border-slate-300'">
+                                    <i x-show="routineBudgetTier === 'economy'" class="fa-solid fa-check text-xs"></i>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2 border-t border-slate-200/80 pt-4 text-xs text-slate-600">
+                                <div class="flex items-center gap-2 font-medium text-slate-700">
+                                    <i class="fa-solid fa-star text-emerald-500 text-[11px]"></i>
+                                    <span>Thương hiệu tiêu biểu:</span>
+                                </div>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="px-2 py-0.5 rounded-md bg-white border border-slate-200 font-semibold text-[11px] text-slate-700">CeraVe</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white border border-slate-200 font-semibold text-[11px] text-slate-700">The Ordinary</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white border border-slate-200 font-semibold text-[11px] text-slate-700">Klairs</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white border border-slate-200 font-semibold text-[11px] text-slate-700">Torriden</span>
+                                </div>
+                                <p class="text-[11px] text-slate-500 pt-1 leading-relaxed">
+                                    Tối ưu hóa chi phí học sinh - sinh viên & văn phòng, công thức tập trung hoạt chất vàng không phụ phí thương hiệu.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- GÓI TIÊU CHUẨN (RECOMMENDED) -->
+                        <div @@click="routineBudgetTier = 'standard'"
+                             :class="routineBudgetTier === 'standard' ? 'border-magenta-accent bg-pastel-rose/80 ring-2 ring-magenta-accent/30 shadow-lg scale-[1.02]' : 'border-slate-200 hover:border-pink-300 hover:bg-slate-50/60'"
+                             class="cursor-pointer rounded-3xl border-2 p-6 transition-all duration-300 flex flex-col justify-between relative overflow-hidden group">
+                            
+                            <div class="absolute top-0 right-0 bg-magenta-accent text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-bl-xl shadow-xs">
+                                Được Chọn Nhiều Nhất
+                            </div>
+
+                            <div class="flex items-start justify-between mb-4">
+                                <div>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-pink-100 text-magenta-accent text-[11px] font-bold">
+                                        <i class="fa-solid fa-gem"></i>
+                                        <span>Gói Tiêu Chuẩn</span>
+                                    </span>
+                                    <div class="text-xl font-black text-magenta-accent mt-2 font-mono">1.000.000₫ - 3.000.000₫</div>
+                                    <div class="text-xs text-slate-500 mt-0.5">Dược mỹ phẩm Pháp / Hàn Quốc</div>
+                                </div>
+                                <div class="h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors"
+                                     :class="routineBudgetTier === 'standard' ? 'border-magenta-accent bg-magenta-accent text-white' : 'border-slate-300'">
+                                    <i x-show="routineBudgetTier === 'standard'" class="fa-solid fa-check text-xs"></i>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2 border-t border-pink-200/80 pt-4 text-xs text-slate-600">
+                                <div class="flex items-center gap-2 font-medium text-slate-700">
+                                    <i class="fa-solid fa-star text-magenta-accent text-[11px]"></i>
+                                    <span>Thương hiệu tiêu biểu:</span>
+                                </div>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="px-2 py-0.5 rounded-md bg-white border border-pink-200 font-semibold text-[11px] text-magenta-accent">La Roche-Posay</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white border border-pink-200 font-semibold text-[11px] text-magenta-accent">Anessa</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white border border-pink-200 font-semibold text-[11px] text-magenta-accent">Laneige</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white border border-pink-200 font-semibold text-[11px] text-magenta-accent">Bioderma</span>
+                                </div>
+                                <p class="text-[11px] text-slate-500 pt-1 leading-relaxed">
+                                    Chuẩn y khoa lâm sàng, được hơn 90.000 bác sĩ da liễu toàn cầu kê đơn, bảo vệ và phục hồi màng biểu bì vượt trội.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- GÓI THƯỢNG LƯU -->
+                        <div @@click="routineBudgetTier = 'luxury'"
+                             :class="routineBudgetTier === 'luxury' ? 'border-amber-500 bg-amber-50/50 ring-2 ring-amber-500/30 shadow-lg scale-[1.02]' : 'border-slate-200 hover:border-amber-300 hover:bg-slate-50/60'"
+                             class="cursor-pointer rounded-3xl border-2 p-6 transition-all duration-300 flex flex-col justify-between relative overflow-hidden group">
+                            
+                            <div class="flex items-start justify-between mb-4">
+                                <div>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold">
+                                        <i class="fa-solid fa-crown"></i>
+                                        <span>Gói Thượng Lưu</span>
+                                    </span>
+                                    <div class="text-xl font-black text-amber-700 mt-2 font-mono">Trên 3.000.000 ₫</div>
+                                    <div class="text-xs text-slate-500 mt-0.5">Mỹ phẩm cao cấp quý tộc</div>
+                                </div>
+                                <div class="h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors"
+                                     :class="routineBudgetTier === 'luxury' ? 'border-amber-500 bg-amber-500 text-white' : 'border-slate-300'">
+                                    <i x-show="routineBudgetTier === 'luxury'" class="fa-solid fa-check text-xs"></i>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2 border-t border-amber-200/80 pt-4 text-xs text-slate-600">
+                                <div class="flex items-center gap-2 font-medium text-slate-700">
+                                    <i class="fa-solid fa-star text-amber-500 text-[11px]"></i>
+                                    <span>Thương hiệu tiêu biểu:</span>
+                                </div>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span class="px-2 py-0.5 rounded-md bg-white border border-amber-200 font-semibold text-[11px] text-amber-800">Estée Lauder</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white border border-amber-200 font-semibold text-[11px] text-amber-800">Sulwhasoo</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white border border-amber-200 font-semibold text-[11px] text-amber-800">SK-II</span>
+                                    <span class="px-2 py-0.5 rounded-md bg-white border border-amber-200 font-semibold text-[11px] text-amber-800">Lancôme</span>
+                                </div>
+                                <p class="text-[11px] text-slate-500 pt-1 leading-relaxed">
+                                    Đỉnh cao sửa chữa DNA tế bào ban đêm, tinh chất men vi sinh Pitera và nhân sâm hoàng gia mang lại diện mạo không tuổi.
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="text-xs text-slate-500">
+                        <i class="fa-solid fa-circle-info text-magenta-accent mr-1"></i>
+                        <span>Cam kết 100% sản phẩm chính hãng có sẵn trong kho, tối ưu không trùng lặp sản phẩm giữa 2 chu trình.</span>
+                    </div>
+
+                    <button type="button" 
+                            @@click="generateRoutine()" 
+                            class="w-full sm:w-auto px-10 py-4 rounded-2xl bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:opacity-95 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-xl shadow-pink-500/25 active:scale-95 transition-all">
+                        <i class="fa-solid fa-wand-magic-sparkles text-base"></i>
+                        <span>Thiết Kế Routine Riêng Bạn Ngay</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- GENERATING LOADING STATE -->
+            <div x-show="isGeneratingRoutine" class="bg-white rounded-3xl shadow-xl border border-soft-border/70 p-16 text-center space-y-4 routine-fade-enter">
+                <div class="inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-pink-50 text-magenta-accent text-4xl shadow-inner animate-pulse">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <h3 class="text-xl font-bold text-charcoal font-serif">Chuyên gia AI đang phân tích và thiết lập phác đồ...</h3>
+                <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+                    Đang sàng lọc hoạt chất tương thích sinh học, phân bổ 3 bước buổi sáng và 4 bước buổi tối với chi phí tối ưu nhất cho bạn.
+                </p>
+                <div class="w-48 h-1.5 bg-slate-100 rounded-full mx-auto overflow-hidden">
+                    <div class="h-full bg-magenta-accent animate-pulse w-3/4"></div>
+                </div>
+            </div>
+
+            <!-- ===================================================================== -->
+            <!-- ROUTINE RESULT DISPLAY (2 CHU TRÌNH HOÀN CHỈNH SÁNG & TỐI + COMBO 10%) -->
+            <!-- ===================================================================== -->
+            <template x-if="hasRoutineResult && routineResult">
+                <div class="space-y-8 routine-fade-enter">
+                    
+                    <!-- HERO COMBO SUMMARY & CTA BANNER -->
+                    <div class="bg-gradient-to-br from-white via-pink-50/40 to-purple-50/50 rounded-3xl border border-pink-200/90 shadow-xl p-6 sm:p-8 relative overflow-hidden">
+                        
+                        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
+                            <!-- Left Info -->
+                            <div class="space-y-2 max-w-2xl">
+                                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
+                                    <i class="fa-solid fa-certificate"></i>
+                                    <span x-text="routineResult.budgetTierName"></span>
+                                </div>
+                                <h2 class="text-2xl sm:text-3xl font-serif font-bold text-charcoal tracking-tight" x-text="'Phác Đồ Chăm Sóc: ' + routineResult.skinTypeName"></h2>
+                                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed" x-text="routineResult.routinePhilosophy"></p>
+                                
+                                <div class="flex flex-wrap items-center gap-3 pt-2 text-xs text-slate-500 font-medium">
+                                    <span class="flex items-center gap-1.5">
+                                        <i class="fa-solid fa-sun text-amber-500"></i>
+                                        <span>Chu trình Sáng: <strong>3 bước</strong></span>
+                                    </span>
+                                    <span>•</span>
+                                    <span class="flex items-center gap-1.5">
+                                        <i class="fa-solid fa-moon text-indigo-500"></i>
+                                        <span>Chu trình Tối: <strong>4 bước</strong></span>
+                                    </span>
+                                    <span>•</span>
+                                    <span class="flex items-center gap-1.5">
+                                        <i class="fa-solid fa-boxes-stacked text-magenta-accent"></i>
+                                        <span>Tổng: <strong x-text="routineResult.totalItemsCount + ' sản phẩm trọn bộ'"></strong></span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Right Pricing & CTA -->
+                            <div class="w-full lg:w-auto bg-white/90 backdrop-blur-md rounded-2xl border border-pink-200 p-5 shadow-sm space-y-4 flex-shrink-0">
+                                <div>
+                                    <div class="flex items-center justify-between gap-4 text-xs text-slate-400">
+                                        <span>Tổng giá trị niêm yết:</span>
+                                        <span class="line-through font-mono" x-text="formatCurrency(routineResult.totalOriginalPrice)"></span>
+                                    </div>
+                                    <div class="flex items-center justify-between gap-4 text-xs text-emerald-600 font-bold mt-1">
+                                        <span>Ưu đãi Combo Routine (-10%):</span>
+                                        <span class="font-mono" x-text="'- ' + formatCurrency(routineResult.discountComboAmount)"></span>
+                                    </div>
+                                    <div class="flex items-baseline justify-between gap-4 mt-2 pt-2 border-t border-slate-100">
+                                        <span class="text-xs font-bold text-slate-700">Giá trọn bộ Combo:</span>
+                                        <span class="text-2xl font-black text-magenta-accent font-mono" x-text="formatCurrency(routineResult.comboFinalPrice)"></span>
+                                    </div>
+                                </div>
+
+                                <!-- 2 NÚT HÀNH ĐỘNG THEO YÊU CẦU ĐỀ BÀI -->
+                                <div class="space-y-2">
+                                    <!-- NÚT 1: ĐẶT MUA TOÀN BỘ ROUTINE TIẾT KIỆM THÊM 10% -->
+                                    <button type="button" 
+                                            @@click="addFullRoutineToCart()" 
+                                            :disabled="isAddingToCart"
+                                            class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 hover:opacity-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-pink-500/25 active:scale-95 transition-all">
+                                        <i class="fa-solid fa-cart-shopping text-sm" :class="{'fa-spin': isAddingToCart}"></i>
+                                        <span>Đặt Mua Toàn Bộ Routine (Tiết Kiệm 10%)</span>
+                                    </button>
+
+                                    <!-- NÚT 2: LƯU ROUTINE VÀO HỒ SƠ CÁ NHÂN -->
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" 
+                                                @@click="saveRoutineToProfile()" 
+                                                class="flex-1 py-2.5 px-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+                                            <i class="fa-regular fa-bookmark text-magenta-accent"></i>
+                                            <span>Lưu Vào Hồ Sơ Cá Nhân</span>
+                                        </button>
+
+                                        <button type="button" 
+                                                @@click="resetRoutineBuilder()" 
+                                                class="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs transition" 
+                                                title="Tạo routine mới">
+                                            <i class="fa-solid fa-rotate-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2 CHU TRÌNH: SÁNG (3 BƯỚC) & TỐI (4 BƯỚC) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        
+                        <!-- ========================================================= -->
+                        <!-- CHU TRÌNH BUỔI SÁNG (MORNING ROUTINE: 3 BƯỚC) -->
+                        <!-- ========================================================= -->
+                        <div class="bg-white rounded-3xl shadow-lg border border-amber-200/80 p-6 sm:p-7 space-y-6">
+                            
+                            <!-- Header Morning -->
+                            <div class="flex items-center justify-between border-b border-amber-100 pb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl shadow-xs">
+                                        <i class="fa-solid fa-sun"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-serif font-bold text-lg text-charcoal">Chu Trình Buổi Sáng</h3>
+                                        <p class="text-xs text-slate-500">Làm sạch dịu nhẹ • Cấp nước 72H • Bảo vệ quang phổ rộng</p>
+                                    </div>
+                                </div>
+                                <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200">
+                                    3 Bước Chuẩn
+                                </span>
+                            </div>
+
+                            <!-- 3 Bước Morning Steps -->
+                            <div class="space-y-6">
+                                <template x-for="step in routineResult.morningRoutine" :key="'m-' + step.stepNumber">
+                                    <div class="rounded-2xl border border-slate-200 hover:border-amber-300 p-4 transition-all duration-200 bg-gradient-to-b from-white to-slate-50/40 relative">
+                                        
+                                        <!-- Step Badge & Title -->
+                                        <div class="flex items-start justify-between gap-2 mb-3">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-6 h-6 rounded-lg bg-amber-500 text-white font-bold text-xs flex items-center justify-center shadow-xs" x-text="step.stepNumber"></span>
+                                                <div>
+                                                    <span class="text-[10px] text-amber-600 font-bold uppercase tracking-wider block" x-text="step.stepCategory"></span>
+                                                    <h4 class="font-bold text-xs text-charcoal" x-text="step.stepTitle"></h4>
+                                                </div>
+                                            </div>
+
+                                            <span class="text-[10px] text-slate-400 font-medium italic">Sáng</span>
+                                        </div>
+
+                                        <!-- Clinical Tip -->
+                                        <div class="mb-3 px-3 py-2 rounded-xl bg-amber-50/70 border border-amber-100 text-[11px] text-slate-600 leading-relaxed">
+                                            <i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i>
+                                            <span x-text="step.clinicalTip"></span>
+                                        </div>
+
+                                        <!-- Associated Product Card -->
+                                        <template x-if="step.product">
+                                            <div class="flex items-center gap-3.5 bg-white rounded-xl border border-slate-200 p-2.5 shadow-2xs hover:shadow-sm transition">
+                                                <a :href="'/Product/Detail/' + step.product.id" class="w-16 h-16 rounded-lg overflow-hidden bg-slate-50 flex-shrink-0">
+                                                    <img :src="step.product.thumbnailUrl" :alt="step.product.name" class="w-full h-full object-cover" onerror="this.src='/images/default-product.png'">
+                                                </a>
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <span class="text-[9px] font-black uppercase text-magenta-accent bg-pink-50 px-1.5 py-0.5 rounded" x-text="step.product.categoryName"></span>
+                                                        <span class="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">99% Match</span>
+                                                    </div>
+                                                    <a :href="'/Product/Detail/' + step.product.id" class="text-xs font-bold text-charcoal hover:text-magenta-accent truncate block mt-0.5" x-text="step.product.name"></a>
+                                                    
+                                                    <div class="flex items-baseline gap-2 mt-1">
+                                                        <span class="text-xs font-black text-magenta-accent font-mono" x-text="formatCurrency(step.product.price)"></span>
+                                                        <span class="text-[10px] text-slate-400 line-through font-mono" x-text="formatCurrency(step.product.originalPrice)"></span>
+                                                    </div>
+                                                </div>
+
+                                                <a :href="'/Product/Detail/' + step.product.id" class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs transition" title="Chi tiết">
+                                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                                </a>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- ========================================================= -->
+                        <!-- CHU TRÌNH BUỔI TỐI (NIGHT ROUTINE: 4 BƯỚC) -->
+                        <!-- ========================================================= -->
+                        <div class="bg-white rounded-3xl shadow-lg border border-indigo-200/80 p-6 sm:p-7 space-y-6">
+                            
+                            <!-- Header Night -->
+                            <div class="flex items-center justify-between border-b border-indigo-100 pb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl shadow-xs">
+                                        <i class="fa-solid fa-moon"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-serif font-bold text-lg text-charcoal">Chu Trình Buổi Tối</h3>
+                                        <p class="text-xs text-slate-500">Double Cleansing • Đặc trị chuyên sâu • Tái tạo màng lipid</p>
+                                    </div>
+                                </div>
+                                <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-200">
+                                    4 Bước Chuẩn
+                                </span>
+                            </div>
+
+                            <!-- 4 Bước Night Steps -->
+                            <div class="space-y-6">
+                                <template x-for="step in routineResult.nightRoutine" :key="'n-' + step.stepNumber">
+                                    <div class="rounded-2xl border border-slate-200 hover:border-indigo-300 p-4 transition-all duration-200 bg-gradient-to-b from-white to-slate-50/40 relative">
+                                        
+                                        <!-- Step Badge & Title -->
+                                        <div class="flex items-start justify-between gap-2 mb-3">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-6 h-6 rounded-lg bg-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-xs" x-text="step.stepNumber"></span>
+                                                <div>
+                                                    <span class="text-[10px] text-indigo-600 font-bold uppercase tracking-wider block" x-text="step.stepCategory"></span>
+                                                    <h4 class="font-bold text-xs text-charcoal" x-text="step.stepTitle"></h4>
+                                                </div>
+                                            </div>
+
+                                            <template x-if="step.isSharedWithOtherRoutine">
+                                                <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                                                    Dùng chung với Sáng
+                                                </span>
+                                            </template>
+                                        </div>
+
+                                        <!-- Clinical Tip -->
+                                        <div class="mb-3 px-3 py-2 rounded-xl bg-indigo-50/70 border border-indigo-100 text-[11px] text-slate-600 leading-relaxed">
+                                            <i class="fa-solid fa-wand-magic-sparkles text-indigo-500 mr-1"></i>
+                                            <span x-text="step.clinicalTip"></span>
+                                        </div>
+
+                                        <!-- Associated Product Card -->
+                                        <template x-if="step.product">
+                                            <div class="flex items-center gap-3.5 bg-white rounded-xl border border-slate-200 p-2.5 shadow-2xs hover:shadow-sm transition">
+                                                <a :href="'/Product/Detail/' + step.product.id" class="w-16 h-16 rounded-lg overflow-hidden bg-slate-50 flex-shrink-0">
+                                                    <img :src="step.product.thumbnailUrl" :alt="step.product.name" class="w-full h-full object-cover" onerror="this.src='/images/default-product.png'">
+                                                </a>
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="flex items-center gap-1.5">
+                                                        <span class="text-[9px] font-black uppercase text-indigo-700 bg-indigo-50 px-1.5 py-0.5 rounded" x-text="step.product.categoryName"></span>
+                                                        <span class="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">99% Match</span>
+                                                    </div>
+                                                    <a :href="'/Product/Detail/' + step.product.id" class="text-xs font-bold text-charcoal hover:text-magenta-accent truncate block mt-0.5" x-text="step.product.name"></a>
+                                                    
+                                                    <div class="flex items-baseline gap-2 mt-1">
+                                                        <span class="text-xs font-black text-magenta-accent font-mono" x-text="formatCurrency(step.product.price)"></span>
+                                                        <span class="text-[10px] text-slate-400 line-through font-mono" x-text="formatCurrency(step.product.originalPrice)"></span>
+                                                    </div>
+                                                </div>
+
+                                                <a :href="'/Product/Detail/' + step.product.id" class="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs transition" title="Chi tiết">
+                                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                                </a>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- FOOTER ACTIONS BOTTOM -->
+                    <div class="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+                        <div class="text-xs text-slate-500">
+                            Bạn muốn điều chỉnh lại tiêu chí hoặc tìm kiếm sản phẩm khác?
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button type="button" @@click="resetRoutineBuilder()" class="px-5 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-50 font-bold text-xs transition">
+                                <i class="fa-solid fa-rotate-left mr-1"></i>
+                                <span>Thiết Kế Lại Routine</span>
+                            </button>
+                            <button type="button" @@click="addFullRoutineToCart()" class="px-6 py-2.5 rounded-xl bg-magenta-accent hover:opacity-90 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                                <span>Mua Trọn Gói Combo (-10%)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </template>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- MODE 2: BỘ LỌC SẢN PHẨM NHANH AI (FINDER MODE - BẢO TỒN TÍNH NĂNG CÓ SẴN) -->
+        <!-- ========================================================================= -->
+        <div x-show="activeMode === 'finder'" class="space-y-8">
+            <!-- 3-Step Progress Indicator -->
+            <div x-show="finderStep <= 3" class="max-w-2xl mx-auto mb-8">
+                <div class="flex items-center justify-between relative">
+                    <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-200 -z-1"></div>
+                    <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-magenta-accent transition-all duration-500 -z-1"
+                         :style="'width: ' + ((finderStep - 1) / 2 * 100) + '%'"></div>
+
+                    <button type="button" @@click="goToFinderStep(1)" class="flex flex-col items-center group focus:outline-none">
+                        <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs transition-all shadow-md"
+                             :class="finderStep === 1 ? 'bg-magenta-accent text-white ring-4 ring-pink-100 scale-110' : (finderStep > 1 ? 'bg-emerald-500 text-white' : 'bg-white text-slate-400 border border-slate-300')">
+                            <span x-text="finderStep > 1 ? '✓' : '1'"></span>
+                        </div>
+                        <span class="text-[11px] font-semibold mt-1.5" :class="finderStep === 1 ? 'text-magenta-accent' : 'text-slate-500'">Loại Da</span>
+                    </button>
+
+                    <button type="button" @@click="goToFinderStep(2)" class="flex flex-col items-center group focus:outline-none">
+                        <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs transition-all shadow-md"
+                             :class="finderStep === 2 ? 'bg-magenta-accent text-white ring-4 ring-pink-100 scale-110' : (finderStep > 2 ? 'bg-emerald-500 text-white' : 'bg-white text-slate-400 border border-slate-300')">
+                            <span x-text="finderStep > 2 ? '✓' : '2'"></span>
+                        </div>
+                        <span class="text-[11px] font-semibold mt-1.5" :class="finderStep === 2 ? 'text-magenta-accent' : 'text-slate-500'">Mối Quan Tâm</span>
+                    </button>
+
+                    <button type="button" @@click="goToFinderStep(3)" class="flex flex-col items-center group focus:outline-none">
+                        <div class="w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs transition-all shadow-md"
+                             :class="finderStep === 3 ? 'bg-magenta-accent text-white ring-4 ring-pink-100 scale-110' : 'bg-white text-slate-400 border border-slate-300'">
+                            <span>3</span>
+                        </div>
+                        <span class="text-[11px] font-semibold mt-1.5" :class="finderStep === 3 ? 'text-magenta-accent' : 'text-slate-500'">Ngân Sách</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CONTAINER FINDER -->
+            <div class="bg-white rounded-3xl shadow-xl border border-soft-border/70 p-6 sm:p-10 transition-all">
+                
+                <!-- BƯỚC 1 -->
+                <div x-show="finderStep === 1" class="space-y-6 routine-fade-enter">
+                    <div class="text-center max-w-xl mx-auto mb-6">
+                        <h2 class="text-xl font-bold text-charcoal font-serif">Chọn loại da cần tìm sản phẩm</h2>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 max-w-4xl mx-auto">
+                        <template x-for="st in availableSkinTypes" :key="st.key">
+                            <div @@click="finderSkinType = st.key"
+                                 :class="finderSkinType === st.key ? 'border-magenta-accent bg-pastel-rose text-magenta-accent font-bold ring-2 ring-magenta-accent/20' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                 class="p-4 rounded-2xl border-2 text-center text-xs cursor-pointer transition">
+                                <i :class="st.icon" class="text-lg block mb-2"></i>
+                                <span x-text="st.name"></span>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="pt-6 border-t border-slate-100 flex justify-end">
+                        <button type="button" @@click="goToFinderStep(2)" :disabled="!finderSkinType" class="px-7 py-2.5 rounded-xl bg-magenta-accent text-white font-bold text-xs">
+                            Tiếp tục
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BƯỚC 2 -->
+                <div x-show="finderStep === 2" class="space-y-6 routine-fade-enter">
+                    <div class="text-center max-w-xl mx-auto mb-6">
+                        <h2 class="text-xl font-bold text-charcoal font-serif">Chọn một hoặc nhiều mối quan tâm</h2>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-3xl mx-auto">
+                        <template x-for="c in availableConcerns" :key="c.key">
+                            <div @@click="toggleFinderConcern(c.key)"
+                                 :class="finderConcerns.includes(c.key) ? 'border-magenta-accent bg-pastel-rose text-magenta-accent font-bold ring-2 ring-magenta-accent/20' : 'border-slate-200 text-slate-600 hover:bg-slate-50'"
+                                 class="p-4 rounded-2xl border-2 text-center text-xs cursor-pointer transition">
+                                <i :class="c.icon" class="text-lg block mb-1.5"></i>
+                                <span x-text="c.name"></span>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="pt-6 border-t border-slate-100 flex justify-between">
+                        <button type="button" @@click="goToFinderStep(1)" class="px-5 py-2 rounded-xl border border-slate-200 text-xs">Quay lại</button>
+                        <button type="button" @@click="goToFinderStep(3)" :disabled="finderConcerns.length === 0" class="px-7 py-2.5 rounded-xl bg-magenta-accent text-white font-bold text-xs">Tiếp tục</button>
+                    </div>
+                </div>
+
+                <!-- BƯỚC 3 -->
+                <div x-show="finderStep === 3" class="space-y-6 routine-fade-enter">
+                    <div class="text-center max-w-xl mx-auto mb-6">
+                        <h2 class="text-xl font-bold text-charcoal font-serif">Khoảng ngân sách cho một sản phẩm</h2>
+                    </div>
+                    <div class="max-w-md mx-auto bg-pastel-rose/40 rounded-3xl p-6 text-center space-y-3 border border-pink-200">
+                        <div class="text-2xl font-black font-mono text-magenta-accent" x-text="formatCurrency(finderBudget)"></div>
+                        <input type="range" min="150000" max="3000000" step="50000" x-model.number="finderBudget" class="beauty-slider" />
+                        <div class="flex justify-between text-[11px] text-slate-400 font-mono">
+                            <span>150K</span>
+                            <span>1.5M</span>
+                            <span>3M+</span>
+                        </div>
+                    </div>
+                    <div class="pt-6 border-t border-slate-100 flex justify-between">
+                        <button type="button" @@click="goToFinderStep(2)" class="px-5 py-2 rounded-xl border border-slate-200 text-xs">Quay lại</button>
+                        <button type="button" @@click="executeFinderFilter()" class="px-8 py-3 rounded-2xl bg-magenta-accent text-white font-bold text-xs shadow-md">
+                            Tìm Kiếm Ngay
+                        </button>
+                    </div>
+                </div>
+
+                <!-- BƯỚC 4: KẾT QUẢ FINDER -->
+                <div x-show="finderStep === 4" class="space-y-6 routine-fade-enter">
+                    <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                        <h3 class="font-bold text-base text-charcoal" x-text="finderResults.length + ' Sản phẩm phù hợp nhất'"></h3>
+                        <button type="button" @@click="goToFinderStep(1)" class="text-xs text-magenta-accent font-bold hover:underline">
+                            Thiết lập lại bộ lọc
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <template x-for="p in finderResults" :key="p.id">
+                            <div class="rounded-2xl border border-slate-200 p-3 bg-white hover:shadow-md transition flex flex-col justify-between">
+                                <div>
+                                    <div class="h-44 rounded-xl overflow-hidden bg-slate-50 mb-2">
+                                        <img :src="p.thumbnailUrl" :alt="p.name" class="w-full h-full object-cover" onerror="this.src='/images/default-product.png'">
+                                    </div>
+                                    <div class="text-[10px] text-slate-400 font-bold uppercase" x-text="p.categoryName"></div>
+                                    <a :href="'/Product/Detail/' + p.id" class="text-xs font-bold text-charcoal hover:text-magenta-accent line-clamp-2 mt-0.5" x-text="p.name"></a>
+                                </div>
+                                <div class="pt-3 border-t border-slate-100 mt-2 flex items-center justify-between">
+                                    <span class="text-xs font-bold text-magenta-accent font-mono" x-text="formatCurrency(p.price)"></span>
+                                    <button type="button" @@click="addSingleProductToCart(p.id)" class="px-3 py-1.5 rounded-lg bg-magenta-accent text-white text-[11px] font-bold">
+                                        Chọn Mua
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function personalizedRoutineApp() {
+        return {
+            activeMode: 'routine', // 'routine' | 'finder'
+            
+            // Routine Builder State
+            routineSkinType: 'da-dau',
+            routineConcern: 'acne_pore',
+            routineBudgetTier: 'standard', // economy | standard | luxury
+            isGeneratingRoutine: false,
+            hasRoutineResult: false,
+            routineResult: null,
+            isAddingToCart: false,
+
+            // Quick Finder State
+            finderStep: 1,
+            finderSkinType: 'da-dau',
+            finderConcerns: ['acne', 'hydration'],
+            finderBudget: 800000,
+            finderResults: [],
+
+            availableSkinTypes: [
+                { key: 'da-dau', name: 'Da Dầu', icon: 'fa-solid fa-droplet' },
+                { key: 'da-kho', name: 'Da Khô', icon: 'fa-solid fa-snowflake' },
+                { key: 'da-hon-hop', name: 'Da Hỗn Hợp', icon: 'fa-solid fa-scale-balanced' },
+                { key: 'da-nhay-cam', name: 'Da Nhạy Cảm', icon: 'fa-solid fa-shield-heart' },
+                { key: 'da-thuong', name: 'Da Thường', icon: 'fa-solid fa-certificate' }
+            ],
+
+            availableConcerns: [
+                { key: 'acne', name: 'Trị Mụn & Kháng Viêm', icon: 'fa-solid fa-shield-virus' },
+                { key: 'hydration', name: 'Dưỡng Ẩm Đa Tầng', icon: 'fa-solid fa-water' },
+                { key: 'brightening', name: 'Làm Sáng & Mờ Thâm', icon: 'fa-solid fa-wand-magic-sparkles' },
+                { key: 'anti_aging', name: 'Chống Lão Hóa', icon: 'fa-solid fa-clock-rotate-left' },
+                { key: 'pore_minimizing', name: 'Se Khít Lỗ Chân Lông', icon: 'fa-solid fa-circle-dot' },
+                { key: 'sun_protection', name: 'Chống Nắng Phổ Rộng', icon: 'fa-solid fa-sun' }
+            ],
+
+            init() {
+                // Kiểm tra xem có Routine đã lưu trong localStorage không
+                const saved = localStorage.getItem('omni_saved_routine');
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        if (parsed && parsed.skinType) {
+                            this.routineSkinType = parsed.skinType;
+                            this.routineConcern = parsed.concern || 'acne_pore';
+                            this.routineBudgetTier = parsed.budgetTier || 'standard';
+                        }
+                    } catch (e) { }
+                }
+            },
+
+            // --- ROUTINE ACTIONS ---
+            async generateRoutine() {
+                this.isGeneratingRoutine = true;
+                const startTime = Date.now();
+
+                try {
+                    const res = await fetch('/Product/BuildRoutine', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            skinType: this.routineSkinType,
+                            concern: this.routineConcern,
+                            budgetTier: this.routineBudgetTier
+                        })
+                    });
+
+                    const data = await res.json();
+
+                    // Delay giả lập AI tính toán tinh tế tối thiểu 700ms
+                    const elapsed = Date.now() - startTime;
+                    if (elapsed < 700) {
+                        await new Promise(r => setTimeout(r, 700 - elapsed));
+                    }
+
+                    if (data && data.success) {
+                        this.routineResult = data;
+                        this.hasRoutineResult = true;
+                        window.scrollTo({ top: 180, behavior: 'smooth' });
+                    }
+                } catch (e) {
+                    console.error('Lỗi khi thiết kế Routine:', e);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Không thể tạo Routine',
+                        text: 'Vui lòng kiểm tra lại kết nối và thử lại.'
+                    });
+                } finally {
+                    this.isGeneratingRoutine = false;
+                }
+            },
+
+            resetRoutineBuilder() {
+                this.hasRoutineResult = false;
+                this.routineResult = null;
+                window.scrollTo({ top: 120, behavior: 'smooth' });
+            },
+
+            // LƯU ROUTINE VÀO HỒ SƠ CÁ NHÂN
+            async saveRoutineToProfile() {
+                if (!this.routineResult) return;
+
+                const routineData = {
+                    routineName: `Routine ${this.routineResult.skinTypeName} - ${this.routineResult.budgetTierName}`,
+                    skinType: this.routineSkinType,
+                    concern: this.routineConcern,
+                    budgetTier: this.routineBudgetTier,
+                    savedAt: new Date().toISOString(),
+                    products: this.routineResult.distinctProducts.map(p => ({
+                        id: p.id,
+                        name: p.name,
+                        price: p.price,
+                        category: p.categoryName
+                    }))
+                };
+
+                // 1. Lưu vào LocalStorage
+                localStorage.setItem('omni_saved_routine', JSON.stringify(routineData));
+
+                // 2. Gửi request tới backend lưu vào profile
+                try {
+                    await fetch('/Product/SaveRoutineToProfile', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            routineName: routineData.routineName,
+                            skinType: this.routineSkinType,
+                            concern: this.routineConcern,
+                            budgetTier: this.routineBudgetTier,
+                            productIds: this.routineResult.distinctProducts.map(p => p.id)
+                        })
+                    });
+                } catch (e) { }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đã Lưu Routine Vào Hồ Sơ Cá Nhân!',
+                    html: `
+                        <p class="text-xs text-slate-600 mb-2">Phác đồ chăm sóc <strong>${this.routineResult.skinTypeName}</strong> đã được lưu thành công vào hồ sơ sắc đẹp của bạn.</p>
+                        <div class="p-3 bg-pink-50 rounded-xl text-left text-xs text-charcoal border border-pink-200">
+                            <div>• Gói lựa chọn: <strong>${this.routineResult.budgetTierName}</strong></div>
+                            <div>• Số bước: <strong>3 bước sáng + 4 bước tối</strong></div>
+                            <div>• Ưu đãi Combo: <strong>Giảm 10% khi đặt mua trọn bộ</strong></div>
+                        </div>
+                    `,
+                    confirmButtonColor: '#d63384',
+                    confirmButtonText: 'Tuyệt vời!'
+                });
+            },
+
+            // ĐẶT MUA TOÀN BỘ ROUTINE TIẾT KIỆM THÊM 10%
+            async addFullRoutineToCart() {
+                if (!this.routineResult || !this.routineResult.distinctProducts || this.routineResult.distinctProducts.length === 0) return;
+
+                this.isAddingToCart = true;
+                const productIds = this.routineResult.distinctProducts.map(p => p.id);
+
+                try {
+                    const res = await fetch('/Product/AddRoutineToCart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            productIds: productIds,
+                            discountPercent: 10
+                        })
+                    });
+
+                    const data = await res.json();
+
+                    if (data && data.success) {
+                        // Kích hoạt cập nhật MiniCart header
+                        document.body.dispatchEvent(new CustomEvent('reloadMiniCart'));
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Đã Thêm Trọn Bộ Routine Vào Giỏ Hàng!',
+                            html: `
+                                <div class="text-xs text-slate-600 space-y-2 mb-3">
+                                    <p>Đã thêm toàn bộ <strong>${data.addedCount} sản phẩm</strong> của chu trình Sáng & Tối vào giỏ hàng.</p>
+                                    <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-emerald-800 text-left">
+                                        <div class="flex justify-between">
+                                            <span>Tiết kiệm ưu đãi Combo 10%:</span>
+                                            <strong class="font-mono text-magenta-accent">-${this.formatCurrency(this.routineResult.discountComboAmount)}</strong>
+                                        </div>
+                                        <div class="flex justify-between mt-1 text-charcoal font-bold">
+                                            <span>Tổng thanh toán Combo:</span>
+                                            <span class="font-mono text-magenta-accent text-sm">${this.formatCurrency(this.routineResult.comboFinalPrice)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `,
+                            showCancelButton: true,
+                            confirmButtonColor: '#d63384',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: '<i class="fa-solid fa-credit-card mr-1"></i> Đến Trang Thanh Toán',
+                            cancelButtonText: 'Tiếp tục xem'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '/Cart';
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.error('Lỗi khi thêm Combo vào giỏ:', e);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Không thể thêm vào giỏ',
+                        text: 'Vui lòng thử lại sau.'
+                    });
+                } finally {
+                    this.isAddingToCart = false;
+                }
+            },
+
+            // --- QUICK FINDER ACTIONS ---
+            goToFinderStep(step) {
+                this.finderStep = step;
+            },
+
+            toggleFinderConcern(cKey) {
+                const idx = this.finderConcerns.indexOf(cKey);
+                if (idx > -1) this.finderConcerns.splice(idx, 1);
+                else this.finderConcerns.push(cKey);
+            },
+
+            async executeFinderFilter() {
+                try {
+                    const url = `/api/products/smart-filter?skinType=${encodeURIComponent(this.finderSkinType)}&concerns=${encodeURIComponent(this.finderConcerns.join(','))}&budget=${this.finderBudget}`;
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    if (data && data.success) {
+                        this.finderResults = data.products || [];
+                        this.finderStep = 4;
+                    }
+                } catch (e) { }
+            },
+
+            async addSingleProductToCart(pId) {
+                try {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                    const res = await fetch('/Cart/AddToCart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': token || ''
+                        },
+                        body: `productId=${pId}&quantity=1`
+                    });
+                    if (res.ok) {
+                        document.body.dispatchEvent(new CustomEvent('reloadMiniCart'));
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Đã thêm sản phẩm vào giỏ!',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }
+                } catch (e) {
+                    window.location.href = `/Product/Detail/${pId}`;
+                }
+            },
+
+            formatCurrency(val) {
+                if (!val) return '0 ₫';
+                return new Intl.NumberFormat('vi-VN').format(val) + ' ₫';
+            }
+        };
+    }
+</script>

@@ -1,0 +1,263 @@
+@model List<Omnichannel.Application.DTOs.Finance.CodReconciliationDto>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Đối Soát Tiền Thu Hộ COD";
+    string selectedPartner = ViewBag.SelectedPartner as string ?? "";
+    string selectedStatus = ViewBag.SelectedStatus as string ?? "";
+
+    decimal totalCodExpected = Model.Sum(r => r.TotalCodAmount);
+    decimal totalReceived = Model.Sum(r => r.ReceivedAmount);
+    decimal totalDiff = Model.Sum(r => r.Difference);
+}
+
+<div class="space-y-6">
+    <!-- Top Navigation Subtabs -->
+    <div class="flex items-center gap-2 border-b border-slate-200 bg-white px-6 pt-3 rounded-2xl shadow-sm overflow-x-auto">
+        <a href="/Admin/Finance/ProfitLoss" class="pb-3 text-xs font-bold flex items-center gap-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
+            <i class="fa-solid fa-chart-pie"></i> Báo Cáo Lãi Lỗ (P&L)
+        </a>
+        <a href="/Admin/Finance/Ledger" class="pb-3 text-xs font-bold flex items-center gap-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
+            <i class="fa-solid fa-book"></i> Sổ Cái Thu Chi
+        </a>
+        <a href="/Admin/Finance/SupplierDebts" class="pb-3 text-xs font-bold flex items-center gap-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Công Nợ Nhà Cung Cấp
+        </a>
+        <a href="/Admin/Finance/CodReconciliations" class="pb-3 text-xs font-bold flex items-center gap-2 border-b-2 border-indigo-600 text-indigo-600 transition">
+            <i class="fa-solid fa-hand-holding-dollar"></i> Đối Soát COD
+        </a>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-3 animate-fade-in">
+            <i class="fa-solid fa-circle-check text-emerald-600 text-sm"></i>
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-3 animate-fade-in">
+            <i class="fa-solid fa-triangle-exclamation text-rose-600 text-sm"></i>
+            <span>@TempData["ErrorMessage"]</span>
+        </div>
+    }
+
+    <!-- Header & Action -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs font-semibold text-indigo-600 uppercase tracking-wider mb-1">
+                <i class="fa-solid fa-truck-fast"></i> Cash On Delivery Reconciliation
+            </div>
+            <h1 class="text-xl font-black text-slate-800">Đối Soát Tiền Thu Hộ COD Đơn Vị Vận Chuyển</h1>
+            <p class="text-xs text-slate-500 mt-0.5">Kiểm tra chênh lệch tiền thu hộ thực tế từ GHN, Viettel Post, GHTK và đối chiếu bảng kê thanh toán</p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button onclick="document.getElementById('modalCreateRecon').classList.remove('hidden')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 transition flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> Tạo Phiên Đối Soát Mới
+            </button>
+        </div>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Tổng Tiền COD Dự Kiến Thu</span>
+            <div class="text-xl font-black text-slate-800 mt-1">@totalCodExpected.ToString("N0") <span class="text-xs font-normal">đ</span></div>
+            <div class="text-[10px] text-slate-500 mt-1">Theo số liệu đơn hàng hệ thống</div>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Thực Nhận Chuyển Khoản</span>
+            <div class="text-xl font-black text-emerald-600 mt-1">@totalReceived.ToString("N0") <span class="text-xs font-normal">đ</span></div>
+            <div class="text-[10px] text-emerald-700 mt-1 font-semibold">Tiền đã về tài khoản công ty</div>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Tổng Chênh Lệch Đối Soát</span>
+            <div class="text-xl font-black @(totalDiff > 0 ? "text-amber-600" : "text-emerald-600") mt-1">@totalDiff.ToString("N0") <span class="text-xs font-normal">đ</span></div>
+            <div class="text-[10px] @(totalDiff > 0 ? "text-amber-700" : "text-emerald-700") mt-1 font-bold">
+                @(totalDiff > 0 ? "Cần khiếu nại đơn vị vận chuyển" : "Số liệu khớp 100%")
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Form -->
+    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <form method="get" class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+            <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Đơn Vị Vận Chuyển</label>
+                <select name="partner" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-indigo-500">
+                    <option value="">-- Tất cả đối tác --</option>
+                    <option value="GHN" selected="@(selectedPartner == "GHN")">Giao Hàng Nhanh (GHN)</option>
+                    <option value="VIETTEL_POST" selected="@(selectedPartner == "VIETTEL_POST")">Viettel Post</option>
+                    <option value="GHTK" selected="@(selectedPartner == "GHTK")">Giao Hàng Tiết Kiệm (GHTK)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-[11px] font-bold text-slate-500 mb-1">Trạng Thái Khớp Lệnh</label>
+                <select name="status" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:border-indigo-500">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option value="PENDING" selected="@(selectedStatus == "PENDING")">Chờ xử lý (PENDING)</option>
+                    <option value="MATCHED" selected="@(selectedStatus == "MATCHED")">Khớp số liệu (MATCHED)</option>
+                    <option value="DISPUTED" selected="@(selectedStatus == "DISPUTED")">Có chênh lệch / Khiếu nại (DISPUTED)</option>
+                </select>
+            </div>
+
+            <div>
+                <button type="submit" class="w-full py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-magnifying-glass"></i> Lọc Bảng Kê
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-50/75 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                        <th class="py-3 px-4">Mã Phiên Đối Soát</th>
+                        <th class="py-3 px-4">Đối Tác Vận Chuyển</th>
+                        <th class="py-3 px-4">Ngày Đối Soát</th>
+                        <th class="py-3 px-4 text-center">Số Đơn Hàng</th>
+                        <th class="py-3 px-4 text-right">Tổng Tiền COD Thu</th>
+                        <th class="py-3 px-4 text-right">Thực Nhận Chuyển Về</th>
+                        <th class="py-3 px-4 text-right">Chênh Lệch</th>
+                        <th class="py-3 px-4 text-center">Trạng Thái</th>
+                        <th class="py-3 px-4 text-center">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach (var r in Model)
+                    {
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="py-3.5 px-4 font-mono font-bold text-slate-800">
+                                @r.ReconciliationCode
+                            </td>
+                            <td class="py-3.5 px-4 font-bold text-indigo-600">
+                                @r.ShippingPartner
+                            </td>
+                            <td class="py-3.5 px-4 text-slate-600">
+                                @r.ReconciliationDate.ToString("dd/MM/yyyy")
+                            </td>
+                            <td class="py-3.5 px-4 text-center font-semibold text-slate-800">
+                                @r.TotalOrders.ToString("N0") đơn
+                            </td>
+                            <td class="py-3.5 px-4 text-right font-semibold text-slate-800">
+                                @r.TotalCodAmount.ToString("N0") đ
+                            </td>
+                            <td class="py-3.5 px-4 text-right font-semibold text-emerald-600">
+                                @r.ReceivedAmount.ToString("N0") đ
+                            </td>
+                            <td class="py-3.5 px-4 text-right font-black @(r.Difference != 0 ? "text-amber-600" : "text-emerald-600")">
+                                @r.Difference.ToString("N0") đ
+                            </td>
+                            <td class="py-3.5 px-4 text-center">
+                                @if (r.Status == "MATCHED")
+                                {
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">KHỚP TIỀN</span>
+                                }
+                                else if (r.Status == "DISPUTED")
+                                {
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">KHIẾU NẠI LỆCH</span>
+                                }
+                                else
+                                {
+                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">CHỜ DUYỆT</span>
+                                }
+                            </td>
+                            <td class="py-3.5 px-4 text-center">
+                                @if (r.Status == "PENDING" || r.Status == "DISPUTED")
+                                {
+                                    <form asp-action="ConfirmCodReconciliation" method="post" class="inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="reconciliationId" value="@r.Id" />
+                                        <input type="hidden" name="status" value="MATCHED" />
+                                        <button type="submit" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold transition">
+                                            Khớp Đạt
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="text-xs text-slate-400 font-semibold"><i class="fa-solid fa-check-double text-emerald-500"></i> Đã đóng</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (Model.Count == 0)
+            {
+                <div class="text-center py-12 text-slate-400">
+                    <i class="fa-solid fa-inbox text-3xl mb-2"></i>
+                    <p class="text-xs">Chưa có phiên đối soát COD nào.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tạo Phiên Đối Soát COD Mới -->
+<div id="modalCreateRecon" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 animate-scale-up">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-plus-circle text-indigo-600"></i> Tạo Phiên Đối Soát Tiền COD Mới
+            </h3>
+            <button onclick="document.getElementById('modalCreateRecon').classList.add('hidden')" class="text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <form asp-action="CreateCodReconciliation" method="post" class="space-y-4">
+            @Html.AntiForgeryToken()
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Đối Tác Vận Chuyển *</label>
+                <select name="ShippingPartner" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500">
+                    <option value="GHN">Giao Hàng Nhanh (GHN)</option>
+                    <option value="VIETTEL_POST">Viettel Post</option>
+                    <option value="GHTK">Giao Hàng Tiết Kiệm (GHTK)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Ngày Đối Soát Bảng Kê *</label>
+                <input type="date" name="ReconciliationDate" value="@DateTime.UtcNow.ToString("yyyy-MM-dd")" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500" />
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Tổng Số Đơn Hàng Giao Thành Công *</label>
+                <input type="number" name="TotalOrders" required min="1" placeholder="vd: 45" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500" />
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Tiền COD Thu Theo Hệ Thống (VNĐ) *</label>
+                <input type="number" name="TotalCodAmount" required min="0" placeholder="vd: 15600000" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500" />
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Tiền Thực Nhận Chuyển Khoản (VNĐ) *</label>
+                <input type="number" name="ReceivedAmount" required min="0" placeholder="vd: 15600000" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-bold text-emerald-600 focus:outline-none focus:border-indigo-500" />
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Ghi Chú</label>
+                <input type="text" name="Note" placeholder="vd: Bảng kê tuần 38 đợt 2..." class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-indigo-500" />
+            </div>
+
+            <div class="pt-3 border-t border-slate-200 flex justify-end gap-3">
+                <button type="button" onclick="document.getElementById('modalCreateRecon').classList.add('hidden')" class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition">
+                    Hủy Bỏ
+                </button>
+                <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition">
+                    Tạo Bảng Đối Soát
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

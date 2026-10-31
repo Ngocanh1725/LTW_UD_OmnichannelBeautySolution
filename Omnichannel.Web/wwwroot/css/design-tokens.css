@@ -1,0 +1,224 @@
+/**
+ * DESIGN-TOKENS.CSS - Luxury Cosmetics Design Tokens & Design System
+ * Omnichannel Beauty Solution - Luxury E-Commerce & Retail Experience
+ */
+
+:root {
+    /* --- Luxury Brand Color Palette --- */
+    --color-pastel-rose: #FFF5F5;
+    --color-pastel-rose-subtle: #FFF0F2;
+    --color-pastel-nude: #FAECEF;
+    --color-pastel-cream: #FFF9F6;
+
+    --color-charcoal: #1E293B;
+    --color-charcoal-dark: #0F172A;
+    --color-dark-slate: #1E293B;
+    --color-dark-muted: #475569;
+
+    --color-champagne-gold: #D4AF37;
+    --color-champagne-gold-light: #F7E7B4;
+    --color-champagne-gold-dark: #B89628;
+    --color-rose-gold: #B76E79;
+    --color-rose-gold-light: #F5D6DA;
+
+    --color-magenta-accent: #E11D48;
+    --color-magenta-hover: #BE123C;
+    --color-magenta-light: #FFE4E6;
+    --color-magenta-glow: rgba(225, 29, 72, 0.25);
+
+    /* Neutral & Backgrounds */
+    --color-bg-body: #FFFDFD;
+    --color-bg-card: #FFFFFF;
+    --color-border-subtle: #F1E5E8;
+    --color-border-gold: rgba(212, 175, 55, 0.35);
+
+    /* --- Typography Tokens --- */
+    --font-serif: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+    --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* --- Shadows & Glow Effects --- */
+    --shadow-soft-glow: 0 0 25px rgba(225, 29, 72, 0.15);
+    --shadow-gold-glow: 0 4px 20px rgba(212, 175, 55, 0.2);
+    --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    --shadow-card: 0 10px 25px -5px rgba(30, 41, 59, 0.05), 0 8px 10px -6px rgba(30, 41, 59, 0.02);
+    --shadow-hover-luxury: 0 20px 35px -10px rgba(225, 29, 72, 0.18);
+
+    /* --- Gradients --- */
+    --gradient-luxury-gold: linear-gradient(135deg, #F7E7B4 0%, #D4AF37 50%, #B89628 100%);
+    --gradient-rose-gold: linear-gradient(135deg, #FDF2F4 0%, #F5D6DA 100%);
+    --gradient-magenta-glow: linear-gradient(135deg, #E11D48 0%, #BE123C 100%);
+    --gradient-glass-acrylic: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.65) 100%);
+    --gradient-dark-noir: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+
+    /* --- Radii --- */
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 28px;
+    --radius-pill: 9999px;
+
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ==========================================================================
+   GLASSMORPHISM & LUXURY CARDS
+   ========================================================================== */
+
+.glass-acrylic {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+    box-shadow: var(--shadow-glass);
+}
+
+.glass-acrylic-dark {
+    background: rgba(30, 41, 59, 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.glass-card-luxury {
+    background: #FFFFFF;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    transition: var(--transition-smooth);
+}
+
+.glass-card-luxury:hover {
+    border-color: rgba(225, 29, 72, 0.3);
+    box-shadow: var(--shadow-hover-luxury);
+    transform: translateY(-4px);
+}
+
+/* ==========================================================================
+   METALLIC GOLD & ACCENT BORDERS
+   ========================================================================== */
+
+.border-gold-subtle {
+    border: 1px solid var(--color-border-gold);
+}
+
+.border-gold-glow {
+    border: 1px solid var(--color-champagne-gold);
+    box-shadow: var(--shadow-gold-glow);
+}
+
+.gold-badge {
+    background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+    color: #92400E;
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    font-family: var(--font-sans);
+    font-weight: 700;
+}
+
+.badge-fefo-fresh {
+    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+    color: #065F46;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    font-weight: 700;
+}
+
+.badge-fefo-clearance {
+    background: linear-gradient(135deg, #FFF1F2 0%, #FFE4E6 100%);
+    color: #9F1239;
+    border: 1px solid rgba(225, 29, 72, 0.4);
+    font-weight: 700;
+}
+
+/* ==========================================================================
+   TYPOGRAPHY CLASSES
+   ========================================================================== */
+
+.font-serif-luxury {
+    font-family: var(--font-serif);
+    letter-spacing: -0.01em;
+}
+
+.font-sans-luxury {
+    font-family: var(--font-sans);
+}
+
+.text-champagne {
+    color: var(--color-champagne-gold);
+}
+
+.text-magenta {
+    color: var(--color-magenta-accent);
+}
+
+.text-charcoal {
+    color: var(--color-charcoal);
+}
+
+/* ==========================================================================
+   MICRO-ANIMATIONS & INTERACTIVITY
+   ========================================================================== */
+
+.hover-lift {
+    transition: var(--transition-smooth);
+}
+
+.hover-lift:hover {
+    transform: translateY(-3px);
+}
+
+.luxury-zoom-container {
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+}
+
+.luxury-zoom-container img {
+    transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.luxury-zoom-container:hover img {
+    transform: scale(1.06);
+}
+
+/* Shimmer Loading Effect */
+@keyframes luxuryShimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.shimmer-effect {
+    background: linear-gradient(90deg, #F8FAFC 0%, #F1F5F9 50%, #F8FAFC 100%);
+    background-size: 200% 100%;
+    animation: luxuryShimmer 1.8s infinite;
+}
+
+/* Subtle Glow Pulse */
+@keyframes softGlowPulse {
+    0%, 100% { box-shadow: 0 0 15px rgba(225, 29, 72, 0.2); }
+    50% { box-shadow: 0 0 30px rgba(225, 29, 72, 0.4); }
+}
+
+.glow-pulse {
+    animation: softGlowPulse 2.5s infinite;
+}
+
+/* Custom Scrollbar for Luxury Drawers and Menus */
+.scrollbar-luxury::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+.scrollbar-luxury::-webkit-scrollbar-track {
+    background: #FDF2F4;
+}
+
+.scrollbar-luxury::-webkit-scrollbar-thumb {
+    background: #E11D48;
+    border-radius: 9999px;
+}
+
+.scrollbar-luxury::-webkit-scrollbar-thumb:hover {
+    background: #BE123C;
+}

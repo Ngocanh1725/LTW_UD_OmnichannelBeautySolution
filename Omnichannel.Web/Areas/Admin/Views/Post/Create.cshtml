@@ -1,104 +1,131 @@
-﻿@model Omnichannel.Application.DTOs.Cms.CreatePostViewModel
+@model Omnichannel.Application.DTOs.Cms.CreatePostViewModel
 @{
     ViewData["Title"] = "Soạn Bài Viết Mới";
     Layout = "_AdminLayout";
 }
 
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
+    <style>
+        .ql-container {
+            font-size: 14px;
+            font-family: inherit;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            background: #fff;
+            min-height: 280px;
+        }
+        .ql-toolbar {
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            background: #f8fafc;
+        }
+    </style>
+}
+
 <div class="row justify-content-center">
-    <div class="col-lg-10">
+    <div class="col-lg-11">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h4 class="fw-bold text-dark mb-1">Soạn Bài Viết Cẩm Nang Làm Đẹp</h4>
-                <p class="text-muted small mb-0">Viết bài tư vấn chăm sóc da, tối ưu thẻ SEO Google</p>
+                <p class="text-muted small mb-0">Viết bài tư vấn chu trình skincare, thành phần hoạt chất và tối ưu SEO</p>
             </div>
             <a href="/Admin/Post" class="btn btn-outline-secondary btn-sm rounded-3">
                 <i class="fa-solid fa-arrow-left me-1"></i>Quay lại danh sách
             </a>
         </div>
 
-        <form asp-action="Create" method="post">
+        <form asp-action="Create" method="post" id="postForm">
             @Html.AntiForgeryToken()
 
             <div class="row g-4">
                 <!-- Cột trái: Nội dung chính bài viết -->
                 <div class="col-lg-8">
-                    <div class="beauty-card p-4">
+                    <div class="beauty-card p-4 space-y-4">
                         <div class="mb-3">
-                            <label asp-for="Title" class="form-label small fw-semibold"></label>
-                            <input asp-for="Title" id="postTitle" class="form-control rounded-3" placeholder="vd: Top 5 Bước Skincare Phục Hồi Hàng Rào Bảo Vệ Da" autofocus onkeyup="generateSlug(this.value)" />
+                            <label asp-for="Title" class="form-label small fw-semibold">Tiêu đề bài viết *</label>
+                            <input asp-for="Title" id="postTitle" class="form-control rounded-3" placeholder="vd: Top 5 Bước Skincare Phục Hồi Hàng Rào Bảo Vệ Da Chuẩn Khoa Học" autofocus onkeyup="generateSlug(this.value)" required />
                             <span asp-validation-for="Title" class="text-danger small"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Slug" class="form-label small fw-semibold"></label>
+                            <label asp-for="Slug" class="form-label small fw-semibold">Đường dẫn thân thiện (Slug) *</label>
                             <div class="input-group">
-                                <span class="input-group-text bg-light text-muted small">/tin-tuc/</span>
-                                <input asp-for="Slug" id="postSlug" class="form-control" placeholder="top-5-buoc-skincare-phuc-hoi" />
+                                <span class="input-group-text bg-light text-muted small">/Blog/</span>
+                                <input asp-for="Slug" id="postSlug" class="form-control font-monospace" placeholder="top-5-buoc-skincare-phuc-hoi" required />
                             </div>
                             <span asp-validation-for="Slug" class="text-danger small"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Summary" class="form-label small fw-semibold"></label>
-                            <textarea asp-for="Summary" rows="3" class="form-control rounded-3" placeholder="Tóm tắt ngắn 1-2 câu hiển thị ở danh sách bài viết..."></textarea>
+                            <label asp-for="Summary" class="form-label small fw-semibold">Tóm tắt ngắn (1-2 câu xuất hiện ở thẻ xem trước)</label>
+                            <textarea asp-for="Summary" rows="3" class="form-control rounded-3" placeholder="Chia sẻ kinh nghiệm dưỡng da nhạy cảm mùa giao mùa giúp da ẩm mượt, căng mọng..."></textarea>
                             <span asp-validation-for="Summary" class="text-danger small"></span>
                         </div>
 
+                        <!-- Rich Text Editor (Quill.js) -->
                         <div class="mb-3">
-                            <label asp-for="ContentHtml" class="form-label small fw-semibold"></label>
-                            <textarea asp-for="ContentHtml" rows="12" class="form-control rounded-3 font-monospace" placeholder="<p>Nhập nội dung bài viết định dạng HTML hoặc sử dụng các thẻ đoạn văn...</p>"></textarea>
+                            <label class="form-label small fw-semibold">Nội dung bài viết chi tiết (Rich Text Editor) *</label>
+                            <div id="quillEditor"></div>
+                            <textarea asp-for="ContentHtml" id="contentHtml" class="d-none"></textarea>
                             <span asp-validation-for="ContentHtml" class="text-danger small"></span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Cột phải: Phân loại & Cấu hình SEO -->
+                <!-- Cột phải: Phân loại, Ảnh bìa & Cấu hình SEO -->
                 <div class="col-lg-4">
                     <!-- Card Phân loại & Xuất bản -->
                     <div class="beauty-card p-4 mb-4">
-                        <h6 class="fw-bold text-dark mb-3">Xuất bản & Phân loại</h6>
+                        <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-sliders text-magenta me-2" style="color: var(--accent-pink);"></i>Phân loại & Xuất bản</h6>
 
                         <div class="mb-3">
-                            <label asp-for="CategoryId" class="form-label small fw-semibold"></label>
-                            <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-select rounded-3">
+                            <label asp-for="CategoryId" class="form-label small fw-semibold">Chuyên mục *</label>
+                            <select asp-for="CategoryId" asp-items="ViewBag.Categories" class="form-select rounded-3" required>
                                 <option value="">-- Chọn chuyên mục --</option>
                             </select>
                             <span asp-validation-for="CategoryId" class="text-danger small"></span>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Status" class="form-label small fw-semibold"></label>
+                            <label asp-for="Status" class="form-label small fw-semibold">Trạng thái phát hành</label>
                             <select asp-for="Status" class="form-select rounded-3">
-                                <option value="3">Xuất bản ngay</option>
-                                <option value="1">Lưu bản nháp</option>
+                                <option value="3">Xuất bản ngay (Published)</option>
+                                <option value="1">Lưu bản nháp (Draft)</option>
                             </select>
                         </div>
 
+                        <!-- Ảnh đại diện & Live Preview -->
                         <div class="mb-3">
-                            <label asp-for="ThumbnailUrl" class="form-label small fw-semibold"></label>
-                            <input asp-for="ThumbnailUrl" class="form-control rounded-3" placeholder="https://domain.com/skincare.jpg" />
+                            <label asp-for="ThumbnailUrl" class="form-label small fw-semibold">URL Ảnh đại diện (Thumbnail) *</label>
+                            <input asp-for="ThumbnailUrl" id="thumbnailInput" class="form-control rounded-3" placeholder="https://images.unsplash.com/photo-..." required oninput="previewThumbnail(this.value)" />
                             <span asp-validation-for="ThumbnailUrl" class="text-danger small"></span>
+
+                            <div class="mt-2 text-center p-2 rounded-3 border bg-light">
+                                <img id="thumbnailPreview" src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&fit=crop" class="img-fluid rounded-2 shadow-xs" style="max-height: 140px; object-fit: cover;" alt="Xem trước ảnh bìa" />
+                                <div class="text-muted mt-1" style="font-size: 10px;">Xem trước ảnh đại diện</div>
+                            </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary-gradient w-100 py-2">
-                            <i class="fa-solid fa-check me-1"></i>Đăng Bài Viết
+                        <button type="submit" class="btn btn-primary-gradient w-100 py-2.5 mt-2">
+                            <i class="fa-solid fa-cloud-arrow-up me-1"></i>Lưu & Đăng Bài Viết
                         </button>
                     </div>
 
                     <!-- Card Cấu hình SEO -->
                     <div class="beauty-card p-4">
-                        <h6 class="fw-bold text-dark mb-3">Tối ưu hóa SEO</h6>
+                        <h6 class="fw-bold text-dark mb-3"><i class="fa-brands fa-google text-primary me-2"></i>Tối ưu hóa SEO</h6>
                         <div class="mb-2">
-                            <label asp-for="MetaTitle" class="form-label small fw-semibold"></label>
-                            <input asp-for="MetaTitle" class="form-control rounded-3" placeholder="Meta Title" />
+                            <label asp-for="MetaTitle" class="form-label small fw-semibold">Thẻ Tiêu đề SEO (Meta Title)</label>
+                            <input asp-for="MetaTitle" class="form-control rounded-3" placeholder="Tiêu đề chuẩn tìm kiếm Google..." />
                         </div>
                         <div class="mb-2">
-                            <label asp-for="MetaKeywords" class="form-label small fw-semibold"></label>
-                            <input asp-for="MetaKeywords" class="form-control rounded-3" placeholder="skincare, phục hồi da, b5" />
+                            <label asp-for="MetaKeywords" class="form-label small fw-semibold">Từ khóa SEO (Keywords)</label>
+                            <input asp-for="MetaKeywords" class="form-control rounded-3" placeholder="skincare, phục hồi b5, mỹ phẩm fefo" />
                         </div>
                         <div class="mb-2">
-                            <label asp-for="MetaDescription" class="form-label small fw-semibold"></label>
-                            <textarea asp-for="MetaDescription" rows="3" class="form-control rounded-3" placeholder="Meta Description..."></textarea>
+                            <label asp-for="MetaDescription" class="form-label small fw-semibold">Mô tả SEO (Meta Description)</label>
+                            <textarea asp-for="MetaDescription" rows="3" class="form-control rounded-3" placeholder="Mô tả dưới 160 ký tự giúp tăng tỷ lệ click tự nhiên..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -108,7 +135,38 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
     <script>
+        // Khởi tạo Quill Rich Text Editor
+        const quill = new Quill('#quillEditor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['blockquote', 'code-block'],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            },
+            placeholder: 'Viết nội dung bài viết chia sẻ bí quyết làm đẹp tại đây...'
+        });
+
+        // Đổ nội dung ban đầu nếu có
+        const initialHtml = document.getElementById('contentHtml').value;
+        if (initialHtml) {
+            quill.root.innerHTML = initialHtml;
+        }
+
+        // Đồng bộ trước khi submit form
+        document.getElementById('postForm').addEventListener('submit', function(e) {
+            const html = quill.root.innerHTML;
+            document.getElementById('contentHtml').value = (html === '<p><br></p>') ? '' : html;
+        });
+
+        // Tạo Slug tự động từ Tiêu đề
         function generateSlug(text) {
             if (!text) {
                 document.getElementById('postSlug').value = '';
@@ -116,20 +174,21 @@
             }
 
             let slug = text.toLowerCase().trim();
-
-            // Chuyển ký tự tiếng Việt có dấu thành không dấu
             slug = slug.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
             slug = slug.replace(/[đĐ]/g, 'd');
-
-            // Xóa ký tự đặc biệt
             slug = slug.replace(/[^a-z0-9\s-]/g, '');
-
-            // Thay khoảng trắng liên tiếp bằng gạch nối
             slug = slug.replace(/\s+/g, '-');
             slug = slug.replace(/-+/g, '-');
             slug = slug.replace(/^-+|-+$/g, '');
 
             document.getElementById('postSlug').value = slug;
+        }
+
+        // Live preview thumbnail
+        function previewThumbnail(url) {
+            if (url && url.trim().length > 5) {
+                document.getElementById('thumbnailPreview').src = url.trim();
+            }
         }
     </script>
 }

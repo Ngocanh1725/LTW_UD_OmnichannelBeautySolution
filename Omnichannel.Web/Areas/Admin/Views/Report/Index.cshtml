@@ -1,147 +1,444 @@
 @model Omnichannel.Application.DTOs.Reports.RevenueDashboardViewModel
 @{
-    ViewData["Title"] = "Báo Cáo Doanh Thu & Kiểm Toán";
+    ViewData["Title"] = "Báo Cáo Doanh Thu Đa Kênh";
     Layout = "_AdminLayout";
+    bool isSuperAdmin = User.IsInRole("SuperAdmin");
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h4 class="fw-bold text-dark mb-1">Báo Cáo Tài Chính & Kiểm Toán Bán Lẻ</h4>
-        <p class="text-muted small mb-0">Theo dõi doanh thu đa kênh, đối soát lợi nhuận gộp và cảnh báo date cận hạn</p>
-    </div>
-</div>
-
-<!-- 4 Thẻ KPI Tài Chính -->
-<div class="row g-3 mb-4">
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="beauty-card p-3 d-flex align-items-center gap-3">
-            <div class="rounded-4 p-3 d-flex align-items-center justify-content-center" style="background: var(--primary-purple-light); color: var(--primary-purple); width: 56px; height: 56px; font-size: 22px;">
-                <i class="fa-solid fa-coins"></i>
+<div class="space-y-6">
+    <!-- 1. Header & Actions Bar -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs font-bold text-indigo-600 uppercase tracking-wider mb-1">
+                <i class="fa-solid fa-chart-line"></i> Omnichannel Sales Analytics
             </div>
-            <div>
-                <div class="text-muted small fw-semibold">Doanh thu hôm nay</div>
-                <h4 class="fw-bold mb-0 text-dark font-monospace">@Model.TodayRevenue.ToString("N0") đ</h4>
+            <h1 class="text-2xl font-black text-slate-800 tracking-tight">Báo Cáo Doanh Thu Bán Lẻ Đa Kênh</h1>
+            <p class="text-xs text-slate-500 mt-0.5">
+                Phân tích dòng tiền toàn diện: Điểm bán lẻ POS & Website Online, kiểm soát tỷ trọng kênh và cảnh báo date FEFO
+            </p>
+        </div>
+
+        <!-- Export Buttons Group -->
+        <div class="flex items-center gap-2.5">
+            <a href="@Url.Action("ExportExcel", "Report", new { storeId = Model.SelectedStoreId, period = Model.Period, fromDate = Model.FromDate.ToString("yyyy-MM-dd"), toDate = Model.ToDate.ToString("yyyy-MM-dd") })"
+               class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm shadow-emerald-600/30 transition flex items-center gap-2 hover:-translate-y-0.5">
+                <i class="fa-solid fa-file-excel text-sm"></i>
+                <span>Xuất Excel (.xlsx)</span>
+            </a>
+            <a href="@Url.Action("ExportCsv", "Report", new { storeId = Model.SelectedStoreId, period = Model.Period, fromDate = Model.FromDate.ToString("yyyy-MM-dd"), toDate = Model.ToDate.ToString("yyyy-MM-dd") })"
+               class="px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold shadow-sm transition flex items-center gap-2 hover:-translate-y-0.5">
+                <i class="fa-solid fa-file-csv text-sm"></i>
+                <span>Xuất CSV</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 2. Interactive Filter Bar -->
+    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <form method="get" id="reportFilterForm" class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <!-- Period Tabs / Buttons -->
+            <div class="flex flex-wrap items-center gap-1.5 p-1 bg-slate-100 rounded-xl">
+                <button type="button" onclick="setPeriod('today')"
+                        class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition @(Model.Period == "today" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-600 hover:text-slate-900")">
+                    Hôm Nay
+                </button>
+                <button type="button" onclick="setPeriod('7days')"
+                        class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition @(Model.Period == "7days" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-600 hover:text-slate-900")">
+                    7 Ngày Qua
+                </button>
+                <button type="button" onclick="setPeriod('30days')"
+                        class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition @(Model.Period == "30days" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-600 hover:text-slate-900")">
+                    30 Ngày Qua
+                </button>
+                <button type="button" onclick="toggleCustomRange()"
+                        class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition @(Model.Period == "custom" ? "bg-white text-indigo-600 shadow-sm" : "text-slate-600 hover:text-slate-900")">
+                    <i class="fa-regular fa-calendar-days me-1"></i> Tùy Chọn
+                </button>
+            </div>
+
+            <input type="hidden" name="period" id="inputPeriod" value="@Model.Period" />
+
+            <!-- Filters Section: Custom Date Range & Branch Selector -->
+            <div class="flex flex-wrap items-center gap-3">
+                <!-- Custom Date Range Picker (shown when custom is selected) -->
+                <div id="customDateRangeBox" class="@(Model.Period == "custom" ? "flex" : "hidden") items-center gap-2">
+                    <div class="relative">
+                        <input type="date" name="fromDate" id="inputFromDate" value="@Model.FromDate.ToString("yyyy-MM-dd")"
+                               class="pl-3 pr-2 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:border-indigo-500" />
+                    </div>
+                    <span class="text-xs text-slate-400 font-bold">đến</span>
+                    <div class="relative">
+                        <input type="date" name="toDate" id="inputToDate" value="@Model.ToDate.ToString("yyyy-MM-dd")"
+                               class="pl-3 pr-2 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-700 focus:outline-none focus:border-indigo-500" />
+                    </div>
+                </div>
+
+                <!-- Store Filter (SuperAdmin Only or Scoped) -->
+                @if (isSuperAdmin)
+                {
+                    <div class="flex items-center gap-1.5">
+                        <select name="storeId" onchange="document.getElementById('reportFilterForm').submit()"
+                                class="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:border-indigo-500">
+                            <option value="">-- Toàn Hệ Thống --</option>
+                            @foreach (var s in Model.Stores)
+                            {
+                                <option value="@s.Id" selected="@(s.Id.ToString() == Model.SelectedStoreId)">@s.Name</option>
+                            }
+                        </select>
+                    </div>
+                }
+                else
+                {
+                    <div class="px-3 py-1.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-location-dot text-indigo-600"></i>
+                        <span>@Model.SelectedStoreName</span>
+                    </div>
+                }
+
+                <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/30 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-filter"></i> Lọc
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 3. KPI Summary Metric Cards (5 Cards) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <!-- Card 1: Doanh Thu Kỳ Này -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-indigo-200 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Doanh Thu Kỳ Này</span>
+                <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm group-hover:scale-110 transition">
+                    <i class="fa-solid fa-coins"></i>
+                </span>
+            </div>
+            <div class="text-xl font-black text-slate-800 font-mono">@Model.FilteredRevenue.ToString("N0") <span class="text-xs font-normal">đ</span></div>
+            <div class="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1">
+                <i class="fa-solid fa-bag-shopping"></i> @Model.FilteredOrderCount đơn hàng hoàn tất
+            </div>
+        </div>
+
+        <!-- Card 2: Doanh Thu Hôm Nay -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-purple-200 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Doanh Thu Hôm Nay</span>
+                <span class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-sm group-hover:scale-110 transition">
+                    <i class="fa-solid fa-calendar-day"></i>
+                </span>
+            </div>
+            <div class="text-xl font-black text-purple-600 font-mono">@Model.TodayRevenue.ToString("N0") <span class="text-xs font-normal">đ</span></div>
+            <div class="text-[11px] text-slate-500 font-medium mt-1">
+                Số đơn: <span class="font-bold text-slate-800">@Model.TodayOrderCount</span> đơn
+            </div>
+        </div>
+
+        <!-- Card 3: Doanh Thu Tháng Này -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-pink-200 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Tháng @DateTime.Now.Month/@DateTime.Now.Year</span>
+                <span class="w-8 h-8 rounded-xl bg-pink-50 text-pink-600 flex items-center justify-center text-sm group-hover:scale-110 transition">
+                    <i class="fa-solid fa-calendar-check"></i>
+                </span>
+            </div>
+            <div class="text-xl font-black text-pink-600 font-mono">@Model.MonthRevenue.ToString("N0") <span class="text-xs font-normal">đ</span></div>
+            <div class="text-[11px] text-slate-500 font-medium mt-1">
+                Lũy kế tháng hiện tại
+            </div>
+        </div>
+
+        <!-- Card 4: Giá Trị Trung Bình Đơn (AOV) -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-amber-200 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Giá Trị TB Đơn (AOV)</span>
+                <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm group-hover:scale-110 transition">
+                    <i class="fa-solid fa-receipt"></i>
+                </span>
+            </div>
+            <div class="text-xl font-black text-amber-600 font-mono">@Model.AverageOrderValue.ToString("N0") <span class="text-xs font-normal">đ</span></div>
+            <div class="text-[11px] text-slate-500 font-medium mt-1">
+                Doanh số / tổng đơn
+            </div>
+        </div>
+
+        <!-- Card 5: Ước Tính Lãi Gộp (~35%) -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm relative overflow-hidden group hover:border-emerald-200 transition">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Ước Tính Lãi Gộp</span>
+                <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm group-hover:scale-110 transition">
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+                </span>
+            </div>
+            <div class="text-xl font-black text-emerald-600 font-mono">@Model.EstimatedGrossProfit.ToString("N0") <span class="text-xs font-normal">đ</span></div>
+            <div class="text-[11px] text-emerald-700 font-bold mt-1">
+                Biên lợi nhuận gộp ~35%
             </div>
         </div>
     </div>
 
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="beauty-card p-3 d-flex align-items-center gap-3">
-            <div class="rounded-4 p-3 d-flex align-items-center justify-content-center" style="background: var(--accent-pink-light); color: var(--accent-pink); width: 56px; height: 56px; font-size: 22px;">
-                <i class="fa-solid fa-chart-pie"></i>
-            </div>
-            <div>
-                <div class="text-muted small fw-semibold">Doanh thu tháng này</div>
-                <h4 class="fw-bold mb-0 text-dark font-monospace">@Model.MonthRevenue.ToString("N0") đ</h4>
-            </div>
-        </div>
-    </div>
+    <!-- 4. Charts Row 1: Line Chart (Day/Week/Month) + Doughnut Chart (POS vs Website) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Biểu Đồ Line: Doanh Thu (Có thể chuyển sang Ngày / Tuần / Tháng) (8 Cột) -->
+        <div class="lg:col-span-8 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-indigo-600"></i>
+                        <span>Biến Động Doanh Thu Bán Hàng</span>
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Biểu đồ đường trực quan theo chu kỳ thời gian đã chọn</p>
+                </div>
 
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="beauty-card p-3 d-flex align-items-center gap-3">
-            <div class="rounded-4 p-3 d-flex align-items-center justify-content-center" style="background: #ECFDF5; color: #059669; width: 56px; height: 56px; font-size: 22px;">
-                <i class="fa-solid fa-bag-shopping"></i>
+                <!-- View Mode Switcher: Ngày / Tuần / Tháng -->
+                <div class="flex items-center p-1 bg-slate-100 rounded-xl self-start sm:self-auto">
+                    <button type="button" id="btnViewDay" onclick="switchLineView('day')"
+                            class="px-3 py-1 rounded-lg text-xs font-bold bg-white text-indigo-600 shadow-sm transition">
+                        Theo Ngày
+                    </button>
+                    <button type="button" id="btnViewWeek" onclick="switchLineView('week')"
+                            class="px-3 py-1 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                        Theo Tuần
+                    </button>
+                    <button type="button" id="btnViewMonth" onclick="switchLineView('month')"
+                            class="px-3 py-1 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 transition">
+                        Theo Tháng
+                    </button>
+                </div>
             </div>
-            <div>
-                <div class="text-muted small fw-semibold">Số đơn chốt hôm nay</div>
-                <h4 class="fw-bold mb-0 text-dark">@Model.TodayOrderCount đơn</h4>
-            </div>
-        </div>
-    </div>
 
-    <div class="col-12 col-sm-6 col-xl-3">
-        <div class="beauty-card p-3 d-flex align-items-center gap-3">
-            <div class="rounded-4 p-3 d-flex align-items-center justify-content-center" style="background: #FEF9C3; color: #CA8A04; width: 56px; height: 56px; font-size: 22px;">
-                <i class="fa-solid fa-hand-holding-dollar"></i>
-            </div>
-            <div>
-                <div class="text-muted small fw-semibold">Ước tính lãi gộp (35%)</div>
-                <h3 class="font-bold text-success">@Model.TodayRevenue.ToString("N0") đ <small class="text-muted fs-6">(~@((Model.TodayRevenue * 0.3m).ToString("N0")) đ LN)</small></h3>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Đồ Thị Doanh Thu & Tỷ Trọng Kênh -->
-<div class="row g-4 mb-4">
-    <!-- Cột Trái: Biểu Đồ 7 Ngày -->
-    <div class="col-lg-8">
-        <div class="beauty-card p-4 h-100">
-            <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-chart-line text-primary me-2"></i>Biến Động Doanh Thu 7 Ngày Gần Nhất</h6>
-            <div style="height: 280px;">
+            <!-- Canvas Container -->
+            <div class="relative w-full" style="height: 320px;">
                 <canvas id="revenueLineChart"></canvas>
             </div>
         </div>
-    </div>
 
-    <!-- Cột Phải: Cơ Cấu Kênh POS vs Website -->
-    <div class="col-lg-4">
-        <div class="beauty-card p-4 h-100 d-flex flex-column justify-content-between">
-            <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-arrows-split-up-and-left text-pink me-2" style="color: var(--accent-pink);"></i>Tỷ Trọng Kênh Bán Hàng</h6>
-            <div style="height: 200px;" class="d-flex align-items-center justify-content-center">
+        <!-- Biểu Đồ Doughnut: Tỷ Trọng Kênh Bán Hàng POS vs Website (4 Cột) -->
+        <div class="lg:col-span-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2 mb-1">
+                    <i class="fa-solid fa-chart-pie text-pink-500"></i>
+                    <span>Tỷ Trọng Kênh Bán Hàng</span>
+                </h3>
+                <p class="text-xs text-slate-500">Cơ cấu doanh thu quầy POS vs Website Online</p>
+            </div>
+
+            <!-- Canvas Doughnut -->
+            <div class="relative my-4 flex items-center justify-center" style="height: 210px;">
                 <canvas id="channelDoughnutChart"></canvas>
             </div>
-            <div class="d-flex justify-content-around mt-3 small">
-                <span class="text-primary fw-bold"><i class="fa-solid fa-circle me-1"></i>Tại quầy POS: @(Model.TotalRevenue > 0 ? "70" : "0")%</span>
-                <span class="text-pink fw-bold" style="color: var(--accent-pink);"><i class="fa-solid fa-circle me-1"></i>Website: @(Model.TotalRevenue > 0 ? "30" : "0")%</span>
+
+            <!-- Channel Legend Info -->
+            <div class="space-y-2 pt-2 border-t border-slate-100">
+                @foreach (var ch in Model.ChannelDistributions)
+                {
+                    <div class="flex items-center justify-between text-xs">
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full @(ch.ChannelKey == "POS" ? "bg-indigo-600" : "bg-pink-500")"></span>
+                            <span class="font-medium text-slate-700">@ch.ChannelName:</span>
+                        </div>
+                        <div class="font-mono font-bold text-slate-800">
+                            @ch.Revenue.ToString("N0") đ
+                            <span class="text-slate-400 font-normal">(@ch.Percentage%)</span>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     </div>
-</div>
 
-<!-- Bảng Top Sản Phẩm Bán Chạy & Cảnh Báo Hạn Dùng -->
-<div class="row g-4">
-    <!-- Top Bán Chạy -->
-    <div class="col-lg-6">
-        <div class="beauty-card p-4 h-100">
-            <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-trophy text-warning me-2"></i>Top 5 Mỹ Phẩm Bán Chạy Nhất</h6>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
-                        <tr class="small text-secondary">
-                            <th class="py-2">Tên sản phẩm</th>
-                            <th class="py-2 text-center">Đã bán</th>
-                            <th class="py-2 text-end">Tổng doanh số</th>
+    <!-- 5. Charts Row 2: Bar Chart (So sánh Chi Nhánh) + Area Chart (Top Danh Mục Bán Chạy) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Biểu Đồ Bar: So Sánh Doanh Thu Giữa Các Chi Nhánh (6 Cột) -->
+        <div class="lg:col-span-6 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div class="mb-4">
+                <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-store text-indigo-600"></i>
+                    <span>Doanh Thu Theo Chi Nhánh</span>
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">So sánh quy mô bán lẻ và sản lượng giữa các cơ sở</p>
+            </div>
+
+            <div class="relative w-full" style="height: 280px;">
+                <canvas id="branchBarChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Biểu Đồ Area: Top Danh Mục Bán Chạy (6 Cột) -->
+        <div class="lg:col-span-6 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <div class="mb-4">
+                <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-shapes text-purple-600"></i>
+                    <span>Top Danh Mục Bán Chạy Nhất</span>
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">Phân bổ doanh số theo nhóm mỹ phẩm (Chăm sóc da, Trang điểm, Son môi...)</p>
+            </div>
+
+            <div class="relative w-full" style="height: 280px;">
+                <canvas id="categoryAreaChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. Bảng Chi Tiết: Từng Đơn Hàng Trong Kỳ Lọc -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="p-5 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+                <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-table-list text-indigo-600"></i>
+                    <span>Danh Sách Đơn Hàng Trong Kỳ (@Model.DetailedOrders.Count đơn hiển thị)</span>
+                </h3>
+                <p class="text-xs text-slate-500 mt-0.5">Bảng dữ liệu giao dịch chi tiết phục vụ đối soát và kiểm toán</p>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <a href="@Url.Action("ExportExcel", "Report", new { storeId = Model.SelectedStoreId, period = Model.Period, fromDate = Model.FromDate.ToString("yyyy-MM-dd"), toDate = Model.ToDate.ToString("yyyy-MM-dd") })"
+                   class="px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-file-excel"></i> Xuất Excel Bảng Này
+                </a>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                    <tr class="bg-slate-50/75 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px] tracking-wider">
+                        <th class="py-3.5 px-4">Mã Đơn</th>
+                        <th class="py-3.5 px-4">Thời Gian</th>
+                        <th class="py-3.5 px-4">Chi Nhánh</th>
+                        <th class="py-3.5 px-4 text-center">Kênh Bán</th>
+                        <th class="py-3.5 px-4">Khách Hàng</th>
+                        <th class="py-3.5 px-4">Phương Thức TT</th>
+                        <th class="py-3.5 px-4 text-center">Trạng Thái</th>
+                        <th class="py-3.5 px-4 text-right">Tổng Tiền (VNĐ)</th>
+                        <th class="py-3.5 px-4 text-center">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach (var o in Model.DetailedOrders)
+                    {
+                        <tr class="hover:bg-slate-50/60 transition">
+                            <td class="py-3 px-4 font-mono font-bold text-slate-800">
+                                @o.OrderCode
+                            </td>
+                            <td class="py-3 px-4 text-slate-600">
+                                @o.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                            </td>
+                            <td class="py-3 px-4 font-medium text-slate-700">
+                                @o.StoreName
+                            </td>
+                            <td class="py-3 px-4 text-center">
+                                @if (o.OrderSource == "WEBSITE")
+                                {
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-pink-50 text-pink-700 border border-pink-200">
+                                        <i class="fa-solid fa-globe text-[9px]"></i> Website
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                        <i class="fa-solid fa-cash-register text-[9px]"></i> Tại Quầy POS
+                                    </span>
+                                }
+                            </td>
+                            <td class="py-3 px-4">
+                                <div class="font-bold text-slate-800">@o.CustomerName</div>
+                                <div class="text-[10px] text-slate-400 font-mono">@o.CustomerPhone</div>
+                            </td>
+                            <td class="py-3 px-4 text-slate-600">
+                                <span class="px-2 py-0.5 bg-slate-100 rounded text-[10px] font-medium">@o.PaymentMethod</span>
+                            </td>
+                            <td class="py-3 px-4 text-center">
+                                <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                                    @o.OrderStatus
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-right font-mono font-bold text-slate-800">
+                                @o.TotalAmount.ToString("N0") đ
+                            </td>
+                            <td class="py-3 px-4 text-center">
+                                <a href="/Admin/Order/Details/@o.OrderId"
+                                   class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 text-[11px] font-bold transition inline-flex items-center gap-1">
+                                    <i class="fa-solid fa-eye text-[10px]"></i> Xem
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                    @if (Model.DetailedOrders.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="9" class="py-12 text-center text-slate-400">
+                                <i class="fa-solid fa-inbox text-3xl mb-2 text-slate-300"></i>
+                                <p class="text-xs">Không có đơn hàng nào phát sinh trong khoảng thời gian này.</p>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 7. Bottom Row: Top Sản Phẩm Bán Chạy & Cảnh Báo Date FEFO -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Top 5 Mỹ Phẩm Bán Chạy -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2 mb-3">
+                <i class="fa-solid fa-trophy text-amber-500"></i>
+                <span>Top 5 Mỹ Phẩm Bán Chạy Nhất</span>
+            </h3>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
+                            <th class="py-2.5 px-3">Sản phẩm</th>
+                            <th class="py-2.5 px-3 text-center">Đã bán</th>
+                            <th class="py-2.5 px-3 text-right">Doanh số</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-slate-100">
                         @foreach (var p in Model.TopSellingProducts)
                         {
-                            <tr>
-                                <td class="small fw-bold text-dark">@p.ProductName</td>
-                                <td class="small text-center fw-semibold">@p.QuantitySold</td>
-                                <td class="small text-end font-monospace fw-bold" style="color: var(--accent-pink);">@p.TotalRevenue.ToString("N0") đ</td>
+                            <tr class="hover:bg-slate-50/50 transition">
+                                <td class="py-2.5 px-3">
+                                    <div class="font-bold text-slate-800">@p.ProductName</div>
+                                    <div class="text-[10px] font-mono text-slate-400">SKU: @p.Sku</div>
+                                </td>
+                                <td class="py-2.5 px-3 text-center font-bold text-slate-700">@p.QuantitySold</td>
+                                <td class="py-2.5 px-3 text-right font-mono font-bold text-pink-600">@p.TotalRevenue.ToString("N0") đ</td>
                             </tr>
                         }
                     </tbody>
                 </table>
             </div>
         </div>
-    </div>
 
-    <!-- Cảnh Báo Lô Cận Date (<60 ngày) Cần Xả Kho -->
-    <div class="col-lg-6">
-        <div class="beauty-card p-4 h-100">
-            <h6 class="fw-bold text-danger mb-3"><i class="fa-solid fa-triangle-exclamation me-2"></i>Cảnh Báo Lô Cận Hạn Sử Dụng (&le;60 ngày)</h6>
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="bg-light">
-                        <tr class="small text-secondary">
-                            <th class="py-2">Mỹ phẩm</th>
-                            <th class="py-2">Lô / HSD</th>
-                            <th class="py-2 text-center">Tồn</th>
-                            <th class="py-2 text-end">Hạn còn</th>
+        <!-- Cảnh Báo Lô Hàng Cận Date (FEFO) -->
+        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+            <h3 class="text-sm font-bold text-rose-600 flex items-center gap-2 mb-3">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>Cảnh Báo Lô Cận Hạn Sử Dụng (&le;60 ngày) - FEFO</span>
+            </h3>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-rose-50/50 text-rose-800 font-bold uppercase text-[10px] tracking-wider border-b border-rose-100">
+                            <th class="py-2.5 px-3">Mỹ phẩm</th>
+                            <th class="py-2.5 px-3">Số lô / HSD</th>
+                            <th class="py-2.5 px-3 text-center">Tồn</th>
+                            <th class="py-2.5 px-3 text-end">Thời hạn</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @foreach (var batch in Model.ExpiringBatches)
+                    <tbody class="divide-y divide-slate-100">
+                        @foreach (var b in Model.ExpiringBatches)
                         {
-                            <tr>
-                                <td class="small fw-semibold text-dark">@batch.ProductName</td>
-                                <td class="small font-monospace">@batch.BatchNumber</td>
-                                <td class="small text-center fw-bold text-danger">@batch.Quantity</td>
-                                <td class="small text-end">
-                                    <span class="badge bg-warning text-dark font-monospace">Còn @batch.DaysRemaining ngày</span>
+                            <tr class="hover:bg-rose-50/20 transition">
+                                <td class="py-2.5 px-3 font-semibold text-slate-800">@b.ProductName</td>
+                                <td class="py-2.5 px-3 font-mono text-[11px] text-slate-600">@b.BatchNumber</td>
+                                <td class="py-2.5 px-3 text-center font-bold text-rose-600">@b.Quantity</td>
+                                <td class="py-2.5 px-3 text-end">
+                                    <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 font-mono">
+                                        Còn @b.DaysRemaining ngày
+                                    </span>
                                 </td>
                             </tr>
                         }
@@ -153,65 +450,263 @@
 </div>
 
 @section Scripts {
-    <!-- Thư Viện Vẽ Biểu Đồ Chart.js -->
+    <!-- Thư viện Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // 1. Biểu đồ đường Doanh thu 7 ngày
-        const lineCtx = document.getElementById('revenueLineChart').getContext('2d');
-        const revData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyRevenues));
-        const labels = revData.map(x => x.DateLabel || x.Date);
-        const data = revData.map(x => x.Revenue);
 
-        new Chart(lineCtx, {
+    <script>
+        // =========================================================================
+        // 1. DỮ LIỆU ĐA DẠNG CHO BIỂU ĐỒ LINE (NGÀY / TUẦN / THÁNG)
+        // =========================================================================
+        const dailyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyRevenues));
+        const weeklyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.WeeklyRevenues));
+        const monthlyData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthlyRevenues));
+
+        // Khởi tạo Chart Line Doanh Thu
+        const lineCtx = document.getElementById('revenueLineChart').getContext('2d');
+
+        // Tạo gradient màu tím cho vùng fill bên dưới đường
+        const purpleGradient = lineCtx.createLinearGradient(0, 0, 0, 300);
+        purpleGradient.addColorStop(0, 'rgba(124, 58, 237, 0.28)');
+        purpleGradient.addColorStop(1, 'rgba(124, 58, 237, 0.01)');
+
+        let lineChart = new Chart(lineCtx, {
             type: 'line',
             data: {
-                labels: labels,
+                labels: dailyData.map(x => x.DateLabel || x.Date),
                 datasets: [{
                     label: 'Doanh thu (VNĐ)',
-                    data: data,
+                    data: dailyData.map(x => x.Revenue),
                     borderColor: '#7C3AED',
-                    backgroundColor: 'rgba(124, 58, 237, 0.1)',
+                    backgroundColor: purpleGradient,
                     fill: true,
                     tension: 0.35,
                     borderWidth: 3,
                     pointBackgroundColor: '#EC4899',
-                    pointRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(val) { return Number(val).toLocaleString() + ' đ'; }
-                        }
-                    }
-                }
-            }
-        });
-
-        // 2. Biểu đồ tròn Tỷ trọng Kênh
-        const doughnutCtx = document.getElementById('channelDoughnutChart').getContext('2d');
-        new Chart(doughnutCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Tại quầy POS', 'Website Online'],
-                datasets: [{
-                    data: [@(Model.TotalRevenue > 0 ? "70" : "0"), @(Model.TotalRevenue > 0 ? "30" : "0")],
-                    backgroundColor: ['#7C3AED', '#EC4899'],
-                    borderWidth: 0
+                    pointBorderColor: '#FFFFFF',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 7
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#1E293B',
+                        titleColor: '#F8FAFC',
+                        bodyColor: '#38BDF8',
+                        padding: 10,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function (ctx) {
+                                return ' Doanh thu: ' + Number(ctx.raw).toLocaleString('vi-VN') + ' đ';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { display: false }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (val) {
+                                if (val >= 1000000) return (val / 1000000) + 'M';
+                                if (val >= 1000) return (val / 1000) + 'k';
+                                return val;
+                            }
+                        }
+                    }
                 }
             }
         });
+
+        // Chuyển đổi chế độ xem biểu đồ Line (Ngày / Tuần / Tháng)
+        function switchLineView(mode) {
+            const btnDay = document.getElementById('btnViewDay');
+            const btnWeek = document.getElementById('btnViewWeek');
+            const btnMonth = document.getElementById('btnViewMonth');
+
+            const activeClass = ['bg-white', 'text-indigo-600', 'shadow-sm'];
+            const inactiveClass = ['text-slate-600', 'hover:text-slate-900'];
+
+            [btnDay, btnWeek, btnMonth].forEach(b => {
+                b.classList.remove(...activeClass);
+                b.classList.add(...inactiveClass);
+            });
+
+            if (mode === 'day') {
+                btnDay.classList.add(...activeClass);
+                btnDay.classList.remove(...inactiveClass);
+                lineChart.data.labels = dailyData.map(x => x.DateLabel || x.Date);
+                lineChart.data.datasets[0].data = dailyData.map(x => x.Revenue);
+            } else if (mode === 'week') {
+                btnWeek.classList.add(...activeClass);
+                btnWeek.classList.remove(...inactiveClass);
+                lineChart.data.labels = weeklyData.map(x => x.WeekLabel);
+                lineChart.data.datasets[0].data = weeklyData.map(x => x.Revenue);
+            } else if (mode === 'month') {
+                btnMonth.classList.add(...activeClass);
+                btnMonth.classList.remove(...inactiveClass);
+                lineChart.data.labels = monthlyData.map(x => x.MonthLabel);
+                lineChart.data.datasets[0].data = monthlyData.map(x => x.Revenue);
+            }
+
+            lineChart.update();
+        }
+
+        // =========================================================================
+        // 2. BIỂU ĐỒ DOUGHNUT: TỶ TRỌNG KÊNH BÁN HÀNG (POS VS WEBSITE)
+        // =========================================================================
+        const channelData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChannelDistributions));
+        const doughnutCtx = document.getElementById('channelDoughnutChart').getContext('2d');
+
+        new Chart(doughnutCtx, {
+            type: 'doughnut',
+            data: {
+                labels: channelData.map(x => x.ChannelName),
+                datasets: [{
+                    data: channelData.map(x => x.Revenue),
+                    backgroundColor: ['#4F46E5', '#EC4899', '#06B6D4'],
+                    hoverOffset: 6,
+                    borderWidth: 2,
+                    borderColor: '#FFFFFF'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '72%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                return ' ' + ctx.label + ': ' + Number(ctx.raw).toLocaleString('vi-VN') + ' đ';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // =========================================================================
+        // 3. BIỂU ĐỒ BAR: SO SÁNH DOANH THU GIỮA CÁC CHI NHÁNH
+        // =========================================================================
+        const storeData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.StoreDistributions));
+        const barCtx = document.getElementById('branchBarChart').getContext('2d');
+
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: storeData.map(x => x.StoreName),
+                datasets: [{
+                    label: 'Doanh thu (VNĐ)',
+                    data: storeData.map(x => x.Revenue),
+                    backgroundColor: '#6366F1',
+                    borderRadius: 8,
+                    maxBarThickness: 36
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                return ' Doanh thu: ' + Number(ctx.raw).toLocaleString('vi-VN') + ' đ';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (val) {
+                                if (val >= 1000000) return (val / 1000000) + 'M';
+                                return val;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // =========================================================================
+        // 4. BIỂU ĐỒ AREA: TOP DANH MỤC BÁN CHẠY
+        // =========================================================================
+        const catData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TopCategories));
+        const areaCtx = document.getElementById('categoryAreaChart').getContext('2d');
+
+        const pinkGradient = areaCtx.createLinearGradient(0, 0, 0, 250);
+        pinkGradient.addColorStop(0, 'rgba(236, 72, 153, 0.35)');
+        pinkGradient.addColorStop(1, 'rgba(236, 72, 153, 0.02)');
+
+        new Chart(areaCtx, {
+            type: 'line',
+            data: {
+                labels: catData.map(x => x.CategoryName),
+                datasets: [{
+                    label: 'Doanh thu danh mục',
+                    data: catData.map(x => x.Revenue),
+                    borderColor: '#EC4899',
+                    backgroundColor: pinkGradient,
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointBackgroundColor: '#7C3AED',
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                return ' Doanh số: ' + Number(ctx.raw).toLocaleString('vi-VN') + ' đ';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (val) {
+                                if (val >= 1000000) return (val / 1000000) + 'M';
+                                return val;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // =========================================================================
+        // 5. CÁC HÀM XỬ LÝ BỘ LỌC THỜI GIAN
+        // =========================================================================
+        function setPeriod(period) {
+            document.getElementById('inputPeriod').value = period;
+            document.getElementById('customDateRangeBox').classList.add('hidden');
+            document.getElementById('reportFilterForm').submit();
+        }
+
+        function toggleCustomRange() {
+            document.getElementById('inputPeriod').value = 'custom';
+            const box = document.getElementById('customDateRangeBox');
+            box.classList.remove('hidden');
+            box.classList.add('flex');
+        }
     </script>
 }
-

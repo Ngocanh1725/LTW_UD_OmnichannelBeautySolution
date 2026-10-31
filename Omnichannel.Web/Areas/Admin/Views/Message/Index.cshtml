@@ -1,0 +1,236 @@
+@model Omnichannel.Application.DTOs.Messages.MessageFolderDto
+@{
+    ViewData["Title"] = Model.Folder == "sent" ? "Thư Đã Gửi" : "Hộp Thư Đến";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    string currentFolder = Model.Folder.ToLowerInvariant();
+    string search = ViewBag.Search as string ?? string.Empty;
+}
+
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <div class="h-10 w-10 rounded-2xl bg-gradient-to-tr from-pink-500 via-rose-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-pink-500/20">
+                <i class="fa-solid fa-envelope-open-text text-lg"></i>
+            </div>
+            <div>
+                <h1 class="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    Hộp Thư Nội Bộ
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                        <span class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        SignalR Realtime
+                    </span>
+                </h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Hệ thống tin nhắn và trao đổi công việc nội bộ giữa các chi nhánh và ban quản lý
+                </p>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 text-xs flex items-center gap-3">
+            <i class="fa-solid fa-circle-check text-emerald-500 text-base"></i>
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-300 text-xs flex items-center gap-3">
+            <i class="fa-solid fa-circle-exclamation text-rose-500 text-base"></i>
+            <span>@TempData["ErrorMessage"]</span>
+        </div>
+    }
+
+    <!-- Main Container Layout (Sidebar + Mail List) -->
+    <div class="flex flex-col md:flex-row items-start gap-6">
+        <!-- Sidebar -->
+        <partial name="_MessageSidebar" model="Model" />
+
+        <!-- Mail List Area (Gmail / Outlook mini style) -->
+        <div class="flex-1 w-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+            <!-- Toolbar & Search -->
+            <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
+                        @(currentFolder == "sent" ? "Thư Đã Gửi" : "Hộp Thư Đến")
+                    </span>
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                        @Model.TotalCount thư
+                    </span>
+                    @if (currentFolder == "inbox" && Model.UnreadCount > 0)
+                    {
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-500 text-white">
+                            @Model.UnreadCount chưa đọc
+                        </span>
+                    }
+                </div>
+
+                <!-- Form Search -->
+                <form method="get" class="w-full sm:w-72 relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                    <input type="text" 
+                           name="search" 
+                           value="@search"
+                           placeholder="Tìm kiếm thư, người gửi, nội dung..." 
+                           class="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-rose-500 transition" />
+                    @if (!string.IsNullOrEmpty(search))
+                    {
+                        <a href="@Url.Action(currentFolder == "sent" ? "Sent" : "Inbox")" 
+                           class="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs" 
+                           title="Xóa tìm kiếm">
+                            <i class="fa-solid fa-xmark"></i>
+                        </a>
+                    }
+                </form>
+            </div>
+
+            <!-- List Content -->
+            @if (!Model.Items.Any())
+            {
+                <div class="p-16 text-center">
+                    <div class="h-16 w-16 mx-auto rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 dark:text-slate-500 text-2xl mb-3">
+                        <i class="fa-regular fa-envelope-open"></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-slate-800 dark:text-slate-200">
+                        @(string.IsNullOrEmpty(search) ? "Không có thư nào trong mục này" : "Không tìm thấy thư phù hợp")
+                    </h4>
+                    <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                        @(currentFolder == "sent" 
+                            ? "Các thư bạn gửi cho đồng nghiệp và ban quản lý sẽ hiển thị tại đây." 
+                            : "Hộp thư đến của bạn đang trống. Các tin nhắn công việc mới sẽ xuất hiện realtime.")
+                    </p>
+                    <div class="mt-4">
+                        <a href="/Admin/Messages/Compose" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition">
+                            <i class="fa-solid fa-pen"></i> Soạn thư ngay
+                        </a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="divide-y divide-slate-100 dark:divide-slate-800/80">
+                    @foreach (var item in Model.Items)
+                    {
+                        bool isUnreadInbox = currentFolder == "inbox" && !item.IsRead;
+                        <div class="group flex items-center justify-between p-3.5 sm:px-5 hover:bg-slate-50/90 dark:hover:bg-slate-800/50 transition cursor-pointer relative @(isUnreadInbox ? "bg-rose-50/40 dark:bg-rose-950/20 font-semibold" : "")"
+                             onclick="window.location.href='/Admin/Messages/View/@item.Id?folder=@currentFolder'">
+                            
+                            <!-- Left: Sender Avatar + Name + Subject + Preview -->
+                            <div class="flex items-center gap-3.5 flex-1 min-w-0 pr-4">
+                                <!-- Avatar -->
+                                <div class="relative flex-shrink-0">
+                                    @if (!string.IsNullOrEmpty(currentFolder == "sent" ? item.ReceiverAvatar : item.SenderAvatar))
+                                    {
+                                        <img src="@(currentFolder == "sent" ? item.ReceiverAvatar : item.SenderAvatar)" 
+                                             class="h-9 w-9 rounded-full object-cover border border-slate-200 dark:border-slate-700" 
+                                             alt="Avatar" />
+                                    }
+                                    else
+                                    {
+                                        <div class="h-9 w-9 rounded-full bg-gradient-to-tr from-pink-400 to-indigo-500 text-white flex items-center justify-center text-xs font-bold shadow-sm">
+                                            @item.SenderInitials
+                                        </div>
+                                    }
+
+                                    @if (isUnreadInbox)
+                                    {
+                                        <span class="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900 animate-pulse"></span>
+                                    }
+                                </div>
+
+                                <!-- Contact Name & Role -->
+                                <div class="w-32 sm:w-44 flex-shrink-0 truncate">
+                                    <div class="text-xs truncate @(isUnreadInbox ? "font-bold text-slate-900 dark:text-white" : "font-medium text-slate-700 dark:text-slate-300")">
+                                        @(currentFolder == "sent" ? $"Tới: {item.ReceiverName}" : item.SenderName)
+                                    </div>
+                                    <div class="text-[10px] text-slate-400 truncate">
+                                        @(currentFolder == "sent" ? item.ReceiverRole : item.SenderRole)
+                                    </div>
+                                </div>
+
+                                <!-- Subject & Preview Snippet -->
+                                <div class="flex-1 min-w-0 truncate">
+                                    <span class="text-xs @(isUnreadInbox ? "font-bold text-slate-900 dark:text-white" : "text-slate-800 dark:text-slate-200")">
+                                        @item.Subject
+                                    </span>
+                                    <span class="text-xs text-slate-400 dark:text-slate-500 font-normal">
+                                        — @item.PreviewText
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Right: Timestamp & Actions -->
+                            <div class="flex items-center gap-3 flex-shrink-0" onclick="event.stopPropagation();">
+                                <span class="text-[11px] whitespace-nowrap @(isUnreadInbox ? "font-bold text-rose-600 dark:text-rose-400" : "text-slate-400")">
+                                    @item.TimeAgo
+                                </span>
+
+                                <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    @if (currentFolder == "inbox" && !item.IsRead)
+                                    {
+                                        <form asp-action="MarkAsRead" asp-route-id="@item.Id" asp-controller="Message" asp-area="Admin" method="post" class="inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                                            <button type="submit" class="p-1.5 text-slate-400 hover:text-emerald-600 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Đánh dấu đã đọc">
+                                                <i class="fa-solid fa-check text-xs"></i>
+                                            </button>
+                                        </form>
+                                    }
+
+                                    <form asp-action="Delete" asp-route-id="@item.Id" asp-controller="Message" asp-area="Admin" method="post" class="inline" onsubmit="return confirm('Bạn có chắc muốn xóa thư này?')">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="folder" value="@currentFolder" />
+                                        <button type="submit" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="Xóa thư">
+                                            <i class="fa-regular fa-trash-can text-xs"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.TotalPages > 1)
+                {
+                    <div class="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500">
+                        <div>Trang @Model.PageNumber / @Model.TotalPages (Tổng @Model.TotalCount thư)</div>
+                        <div class="flex items-center gap-1">
+                            @if (Model.PageNumber > 1)
+                            {
+                                <a href="@Url.Action(currentFolder == "sent" ? "Sent" : "Inbox", new { page = Model.PageNumber - 1, search })" 
+                                   class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                                    Trước
+                                </a>
+                            }
+                            @for (int p = 1; p <= Model.TotalPages; p++)
+                            {
+                                if (p == Model.PageNumber)
+                                {
+                                    <span class="px-3 py-1.5 rounded-lg bg-rose-500 text-white font-bold">@p</span>
+                                }
+                                else if (p <= 3 || p > Model.TotalPages - 2 || Math.Abs(p - Model.PageNumber) <= 1)
+                                {
+                                    <a href="@Url.Action(currentFolder == "sent" ? "Sent" : "Inbox", new { page = p, search })" 
+                                       class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                                        @p
+                                    </a>
+                                }
+                            }
+                            @if (Model.PageNumber < Model.TotalPages)
+                            {
+                                <a href="@Url.Action(currentFolder == "sent" ? "Sent" : "Inbox", new { page = Model.PageNumber + 1, search })" 
+                                   class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                                    Sau
+                                </a>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

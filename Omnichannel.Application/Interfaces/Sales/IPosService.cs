@@ -1,6 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Omnichannel.Application.DTOs.Crm;
 using Omnichannel.Application.DTOs.Sales;
 
 namespace Omnichannel.Application.Interfaces.Sales
@@ -11,5 +12,6 @@ namespace Omnichannel.Application.Interfaces.Sales
         Task<PosReceiptDto> CheckoutAsync(PosCheckoutDto dto, string cashierUserId, CancellationToken cancellationToken = default);
         Task<PosReceiptDto?> GetReceiptAsync(int orderId, CancellationToken cancellationToken = default);
         Task<PosReceiptDto?> GetReceiptByCodeAsync(string orderCode, CancellationToken cancellationToken = default);
+        Task<CustomerProfileDto?> LookupCustomerAsync(string phoneOrQr, CancellationToken cancellationToken = default);
     }
 }

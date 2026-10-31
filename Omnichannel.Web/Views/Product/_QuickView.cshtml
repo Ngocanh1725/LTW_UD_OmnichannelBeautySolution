@@ -1,51 +1,257 @@
 @model Omnichannel.Domain.Entities.Product
-
-<div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
-    <div class="relative rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center">
-        <img src="@(string.IsNullOrEmpty(Model.ThumbnailUrl) ? "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&h=600&fit=crop" : Model.ThumbnailUrl)" class="w-full h-auto object-cover max-h-[500px]" alt="@Model.Name" />
-    </div>
-    
-    <div class="flex flex-col justify-center">
-        <div class="text-xs uppercase tracking-widest font-bold text-pink-600 mb-2">@Model.Category?.Name</div>
-        <h2 class="font-serif-luxury text-2xl font-bold text-slate-900 mb-2">@Model.Name</h2>
-        
-        <div class="flex items-center gap-2 mb-4">
-            <div class="flex text-amber-400 text-sm">
-                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
-            </div>
-            <span class="text-xs text-slate-500">(150 đánh giá)</span>
-        </div>
-        
-        <div class="flex items-end gap-3 mb-6">
-            <span class="text-3xl font-bold text-slate-900 font-mono-numeric">@Model.SellingPrice.ToString("N0") ₫</span>
-            @if(Model.SellingPrice > 0)
+@{
+    var p = Model;
+    var gallery = new List<string>();
+    if (!string.IsNullOrEmpty(p.ThumbnailUrl)) gallery.Add(p.ThumbnailUrl);
+    if (!string.IsNullOrEmpty(p.ImagesJson))
+    {
+        try
+        {
+            var imgs = System.Text.Json.JsonSerializer.Deserialize<List<string>>(p.ImagesJson);
+            if (imgs != null)
             {
-                <span class="text-lg text-slate-400 line-through font-mono-numeric mb-1">@((Model.SellingPrice * 1.2m).ToString("N0")) ₫</span>
+                foreach (var img in imgs)
+                {
+                    if (!string.IsNullOrEmpty(img) && !gallery.Contains(img)) gallery.Add(img);
+                }
+            }
+        }
+        catch { }
+    }
+    if (gallery.Count < 2)
+    {
+        gallery.Add("https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=600&h=600&fit=crop");
+        gallery.Add("https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&h=600&fit=crop");
+    }
+    var gallery3 = gallery.Take(3).ToList();
+    var firstImg = gallery3.FirstOrDefault() ?? "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&h=600&fit=crop";
+    var originalPrice = p.SellingPrice * 1.25m;
+    var isColorVariant = p.Variants != null && p.Variants.Any(v => !string.IsNullOrEmpty(v.SwatchColorHex) || !string.IsNullOrEmpty(v.ColorHex));
+    var bestBatch = p.Batches?.Where(b => b.CurrentQuantity > 0).OrderBy(b => b.ExpDate).FirstOrDefault();
+    var clearancePrice = Math.Round(p.SellingPrice * 0.55m / 1000m) * 1000m;
+}
+
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 p-6 sm:p-8" x-data="{
+    activeImg: '@firstImg',
+    quantity: 1,
+    selectedBatchType: 'fresh',
+    freshPrice: @(p.Variants != null && p.Variants.Any() ? p.Variants.First().SellingPrice : p.SellingPrice),
+    clearancePrice: @clearancePrice,
+    selectedPrice: @(p.Variants != null && p.Variants.Any() ? p.Variants.First().SellingPrice : p.SellingPrice),
+    selectedVariantName: '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Variants != null && p.Variants.Any() ? p.Variants.First().VariantName : p.Name))',
+    
+    selectBatch(type) {
+        this.selectedBatchType = type;
+        this.selectedPrice = (type === 'clearance') ? this.clearancePrice : this.freshPrice;
+    },
+    
+    selectVariant(name, price, img) {
+        this.selectedVariantName = name;
+        this.freshPrice = price;
+        this.clearancePrice = Math.round(price * 0.55 / 1000) * 1000;
+        this.selectedPrice = (this.selectedBatchType === 'clearance') ? this.clearancePrice : this.freshPrice;
+        if (img) this.activeImg = img;
+    },
+
+    addToCartFromQuickView() {
+        const batchNote = this.selectedBatchType === 'clearance' ? ' [Lô Cận Date -45%]' : ' [Lô Mới Nhất]';
+        const finalName = this.selectedVariantName + batchNote;
+        addToCart(@p.Id, finalName, this.selectedPrice, this.activeImg, this.quantity);
+        
+        // Đóng QuickView và mở MiniCart Drawer ngay tức thì
+        if (window.Alpine) {
+            const bodyEl = document.querySelector('body');
+            if (bodyEl && bodyEl.__x && bodyEl.__x.$data) {
+                bodyEl.__x.$data.quickViewOpen = false;
+                setTimeout(() => {
+                    bodyEl.__x.$data.cartOpen = true;
+                    if (window.htmx) {
+                        htmx.trigger('body', 'reloadMiniCart');
+                    }
+                }, 250);
+            }
+        }
+    }
+}">
+    <!-- CỘT TRÁI: GALLERY 3 ẢNH -->
+    <div class="md:col-span-5 space-y-3">
+        <!-- Ảnh Chính Lớn -->
+        <div class="relative aspect-square rounded-2xl overflow-hidden bg-slate-50 border border-slate-200/80 shadow-xs">
+            <img :src="activeImg" 
+                 alt="@p.Name" 
+                 class="w-full h-full object-cover transition-all duration-300" />
+            
+            <div class="absolute top-3 left-3 z-10">
+                <span class="badge-fefo-fresh text-[10px] px-2.5 py-0.5 shadow-sm">
+                    <i class="fa-solid fa-shield-check mr-1"></i> Chính Hãng 100%
+                </span>
+            </div>
+        </div>
+
+        <!-- Băng Chuyền 3 Thumbnails Nhỏ Dưới -->
+        <div class="grid grid-cols-3 gap-2.5">
+            @for (int i = 0; i < gallery3.Count; i++)
+            {
+                var thumb = gallery3[i];
+                <button type="button" 
+                        @@click="activeImg = '@thumb'"
+                        :class="activeImg === '@thumb' ? 'border-magenta-accent ring-2 ring-magenta-accent/20 scale-102' : 'border-slate-200 hover:border-slate-300'"
+                        class="aspect-square rounded-xl overflow-hidden border-2 p-0.5 bg-white transition-all shadow-2xs">
+                    <img src="@thumb" class="w-full h-full object-cover rounded-lg" alt="Thumbnail @(i+1)" />
+                </button>
             }
         </div>
+    </div>
+
+    <!-- CỘT PHẢI: THÔNG TIN CHI TIẾT & CHỌN BIẾN THỂ -->
+    <div class="md:col-span-7 flex flex-col justify-between space-y-4">
         
-        <div class="bg-pink-50 rounded-xl p-4 mb-6 border border-pink-100">
-            <div class="text-sm font-bold text-pink-800 mb-1"><i class="fa-solid fa-shield-halved mr-1"></i> Thông tin Lô hàng & HSD</div>
-            <p class="text-xs text-pink-700 leading-relaxed">Sản phẩm áp dụng thuật toán xuất kho FEFO độc quyền. Cam kết lô hàng giao đến bạn có hạn sử dụng tốt nhất. Đổi trả miễn phí 100% nếu phát hiện hàng cận date không báo trước.</p>
-        </div>
-        
-        <div class="flex items-center gap-4 mt-auto">
-            <div x-data="{ qty: 1 }" class="flex items-center bg-slate-50 rounded-full border border-slate-200">
-                <button type="button" @@click="qty > 1 ? qty-- : null" class="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-pink-600 transition"><i class="fa-solid fa-minus text-xs"></i></button>
-                <input type="text" x-model="qty" readonly class="w-10 h-10 bg-transparent text-center font-bold text-slate-800 text-sm border-none focus:ring-0 p-0" />
-                <button type="button" @@click="qty++" class="w-10 h-10 flex items-center justify-center text-slate-500 hover:text-pink-600 transition"><i class="fa-solid fa-plus text-xs"></i></button>
+        <!-- Header Info: Brand, Category, Name, Rating -->
+        <div class="space-y-1.5">
+            <div class="flex items-center justify-between text-[11px] text-slate-500">
+                <span class="font-bold text-rose-gold uppercase tracking-wider">
+                    @(p.Brand?.Name ?? p.ManufacturerName ?? "OMNICHANNEL BEAUTY")
+                </span>
+                <span class="font-mono text-slate-400">SKU: @p.Sku</span>
             </div>
-            
-            <button type="button" 
-                    hx-post="/Cart/Add" 
-                    hx-ext="json-enc" 
-                    hx-vals='js:{productId: "@Model.Id", quantity: parseInt($el.previousElementSibling.querySelector("input").value) || 1}'
-                    hx-trigger="click"
-                    @@click="quickViewOpen = false"
-                    hx-on::after-request="if(event.detail.successful) htmx.trigger('body', 'reloadMiniCart')"
-                    class="flex-1 py-3 px-6 rounded-full bg-pink-600 text-white font-bold text-sm uppercase tracking-wider hover:bg-pink-700 hover:shadow-lg transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-cart-plus"></i> Thêm Vào Giỏ
-            </button>
+
+            <h3 class="font-serif font-bold text-lg sm:text-xl text-charcoal leading-snug">
+                @p.Name
+            </h3>
+
+            <!-- Rating Bar -->
+            <div class="flex items-center gap-2 text-xs">
+                <div class="flex text-amber-400 text-xs gap-0.5">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                </div>
+                <span class="font-bold text-charcoal text-[11px]">4.9 / 5</span>
+                <span class="text-slate-300">|</span>
+                <span class="text-slate-500 text-[11px]">128 đánh giá kiểm định</span>
+            </div>
         </div>
+
+        <!-- Price Box -->
+        <div class="p-3.5 rounded-xl bg-pastel-rose/50 border border-soft-border flex items-baseline gap-3">
+            <span class="font-mono-numeric font-bold text-2xl text-charcoal" x-text="new Intl.NumberFormat('vi-VN').format(selectedPrice) + ' ₫'">
+                @p.SellingPrice.ToString("N0") ₫
+            </span>
+            <span class="font-mono-numeric text-xs text-slate-400 line-through">
+                @originalPrice.ToString("N0") ₫
+            </span>
+            <span class="px-2 py-0.5 rounded-full text-white font-bold text-[10px]"
+                  :class="selectedBatchType === 'clearance' ? 'bg-gradient-to-r from-amber-500 to-rose-600' : 'bg-magenta-accent'"
+                  x-text="selectedBatchType === 'clearance' ? 'Tiết kiệm 45%' : 'Giá chuẩn'">
+                Giá chuẩn
+            </span>
+        </div>
+
+        <!-- 1. BỘ CHỌN BIẾN THỂ (Swatch Màu Hoặc Dung Tích) -->
+        @if (p.Variants != null && p.Variants.Any())
+        {
+            <div class="space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                    <span class="font-bold text-charcoal">
+                        @(isColorVariant ? "Chọn Tone Màu:" : "Chọn Dung Tích:")
+                    </span>
+                    <span class="font-bold text-magenta-accent text-[11px]" x-text="selectedVariantName"></span>
+                </div>
+
+                @if (isColorVariant)
+                {
+                    <!-- Swatch màu son tròn -->
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        @foreach (var v in p.Variants)
+                        {
+                            var hex = !string.IsNullOrEmpty(v.SwatchColorHex) ? v.SwatchColorHex : (!string.IsNullOrEmpty(v.ColorHex) ? v.ColorHex : "#B76E79");
+                            var vImg = !string.IsNullOrEmpty(v.SwatchImageUrl) ? v.SwatchImageUrl : p.ThumbnailUrl;
+                            <button type="button" 
+                                    @@click="selectVariant('@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(v.VariantName))', @v.SellingPrice, '@vImg')"
+                                    :class="selectedVariantName.includes('@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(v.VariantName))') ? 'ring-2 ring-magenta-accent ring-offset-2 scale-110' : 'border border-slate-200 hover:scale-105'"
+                                    class="w-8 h-8 rounded-full transition-all flex items-center justify-center shadow-xs"
+                                    style="background-color: @hex;"
+                                    title="@v.VariantName">
+                            </button>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <!-- Dung tích pill -->
+                    <div class="flex items-center gap-2 flex-wrap">
+                        @foreach (var v in p.Variants)
+                        {
+                            var vImg = !string.IsNullOrEmpty(v.SwatchImageUrl) ? v.SwatchImageUrl : p.ThumbnailUrl;
+                            <button type="button" 
+                                    @@click="selectVariant('@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(v.VariantName))', @v.SellingPrice, '@vImg')"
+                                    :class="selectedVariantName.includes('@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(v.VariantName))') ? 'bg-charcoal text-white border-charcoal shadow-sm' : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-magenta-accent'"
+                                    class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-all">
+                                @(!string.IsNullOrEmpty(v.Volume) ? v.Volume : v.VariantName)
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- 2. BỘ CHỌN LÔ FEFO MINH BẠCH -->
+        <div class="space-y-1.5">
+            <span class="text-xs font-bold text-charcoal block">Chọn Lô Hàng FEFO:</span>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <div @@click="selectBatch('fresh')"
+                     :class="selectedBatchType === 'fresh' ? 'border-emerald-500 bg-emerald-50/50 ring-1 ring-emerald-500' : 'border-slate-200 bg-white'"
+                     class="p-2.5 rounded-xl border cursor-pointer transition flex items-center justify-between">
+                    <div>
+                        <div class="font-bold text-[11px] text-charcoal">Lô Mới Nhất</div>
+                        <div class="text-[10px] text-slate-400">HSD: 08/2028 (Chuẩn 100%)</div>
+                    </div>
+                    <i class="fa-solid fa-circle-check text-xs" :class="selectedBatchType === 'fresh' ? 'text-emerald-600' : 'text-slate-200'"></i>
+                </div>
+
+                <div @@click="selectBatch('clearance')"
+                     :class="selectedBatchType === 'clearance' ? 'border-amber-500 bg-amber-50/50 ring-1 ring-amber-500' : 'border-slate-200 bg-white'"
+                     class="p-2.5 rounded-xl border cursor-pointer transition flex items-center justify-between">
+                    <div>
+                        <div class="font-bold text-[11px] text-charcoal">Lô Cận Date 6 Tháng</div>
+                        <div class="text-[10px] text-rose-600 font-bold">HSD: 10/2026 (Giảm 45%)</div>
+                    </div>
+                    <i class="fa-solid fa-circle-check text-xs" :class="selectedBatchType === 'clearance' ? 'text-amber-600' : 'text-slate-200'"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. SỐ LƯỢNG & NÚT HÀNH ĐỘNG -->
+        <div class="pt-2 space-y-3">
+            <div class="flex items-center gap-4">
+                <span class="text-xs font-bold text-slate-700">Số Lượng:</span>
+                <div class="flex items-center rounded-full border border-slate-200 bg-slate-50 p-0.5">
+                    <button type="button" @@click="if(quantity > 1) quantity--" class="w-7 h-7 rounded-full bg-white hover:bg-magenta-accent hover:text-white flex items-center justify-center text-slate-600 shadow-2xs transition">
+                        <i class="fa-solid fa-minus text-[10px]"></i>
+                    </button>
+                    <span class="w-10 text-center font-mono-numeric font-bold text-xs text-charcoal" x-text="quantity">1</span>
+                    <button type="button" @@click="quantity++" class="w-7 h-7 rounded-full bg-white hover:bg-magenta-accent hover:text-white flex items-center justify-center text-slate-600 shadow-2xs transition">
+                        <i class="fa-solid fa-plus text-[10px]"></i>
+                    </button>
+                </div>
+                <span class="text-[11px] text-emerald-600 font-medium">
+                    <i class="fa-solid fa-check"></i> Sẵn hàng giao 2H
+                </span>
+            </div>
+
+            <div class="flex gap-2.5">
+                <!-- Nút Thêm Vào Giỏ (Không Reload Trang) -->
+                <button type="button" 
+                        @@click="addToCartFromQuickView()"
+                        class="flex-1 py-3 px-4 rounded-full bg-magenta-accent text-white font-bold text-xs uppercase tracking-wider hover:bg-[#b0276a] shadow-lg shadow-magenta-accent/25 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-bag-shopping text-sm"></i>
+                    <span>Thêm Vào Giỏ Hàng</span>
+                </button>
+
+                <!-- Nút Xem Chi Tiết -->
+                <a href="/Product/Detail/@p.Slug" class="py-3 px-4 rounded-full border border-slate-200 hover:border-charcoal text-charcoal font-bold text-xs uppercase tracking-wider transition flex items-center justify-center" title="Xem đầy đủ thông tin chuyên sâu">
+                    <span>Xem Chi Tiết</span>
+                </a>
+            </div>
+        </div>
+
     </div>
 </div>

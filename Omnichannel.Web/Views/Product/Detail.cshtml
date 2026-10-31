@@ -1,0 +1,1080 @@
+@model Omnichannel.Web.Models.ProductDetailViewModel
+@{
+    var p = Model.Product;
+    ViewData["Title"] = $"{p.Name} | OMNI BEAUTY";
+    ViewData["Description"] = p.ShortDescription ?? $"{p.Name} chính hãng chuẩn FEFO, giao hàng tốc hành 2H.";
+    var mainImg = p.ThumbnailMediaId.HasValue 
+        ? $"/media/{p.ThumbnailMediaId}" 
+        : (Model.GalleryImages.FirstOrDefault() ?? (!string.IsNullOrEmpty(p.ThumbnailUrl) ? p.ThumbnailUrl : "/images/product-placeholder.svg"));
+    var originalPrice = p.SellingPrice * 1.25m;
+    var isLipstickOrMakeup = p.Variants != null && p.Variants.Any(v => !string.IsNullOrEmpty(v.SwatchColorHex) || !string.IsNullOrEmpty(v.ColorHex));
+
+    var baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var productUrl = $"{baseUrl}/Product/Detail/{p.Slug}";
+    var categoryUrl = p.Category != null ? $"{baseUrl}/category/{p.Category.Slug}" : $"{baseUrl}/category";
+    ViewData["CanonicalUrl"] = productUrl;
+    ViewData["OgType"] = "product";
+    ViewData["OgImage"] = mainImg;
+
+    var productImages = new List<string>();
+    if (!string.IsNullOrEmpty(mainImg)) productImages.Add(mainImg.StartsWith("http") ? mainImg : $"{baseUrl}{mainImg}");
+    if (Model.GalleryImages != null)
+    {
+        foreach (var img in Model.GalleryImages.Take(5))
+        {
+            var fullImg = img.StartsWith("http") ? img : $"{baseUrl}{img}";
+            if (!productImages.Contains(fullImg)) productImages.Add(fullImg);
+        }
+    }
+
+    var finalPrice = (p.DiscountPrice.HasValue && p.DiscountPrice.Value > 0) ? p.DiscountPrice.Value : p.SellingPrice;
+    var rawDesc = p.Description ?? p.ShortDescription ?? $"{p.Name} chính hãng cao cấp tại OMNI BEAUTY chuẩn hạn dùng FEFO.";
+    var cleanDesc = System.Text.RegularExpressions.Regex.Replace(rawDesc, "<.*?>", string.Empty).Trim();
+    if (cleanDesc.Length > 300) cleanDesc = cleanDesc.Substring(0, 300) + "...";
+
+    var expDateStr = Model.NearestBatch?.ExpDate.ToString("yyyy-MM-dd") ?? DateTime.UtcNow.AddMonths(18).ToString("yyyy-MM-dd");
+    var batchNo = Model.NearestBatch?.BatchNumber ?? "FEFO-L01";
+
+    var ratingVal = Model.AverageRating > 0 ? Math.Round(Model.AverageRating, 1) : 5.0;
+    var reviewCnt = Model.TotalReviews > 0 ? Model.TotalReviews : (Model.Reviews?.Count > 0 ? Model.Reviews.Count : 15);
+
+    var breadcrumbSchema = new Dictionary<string, object?>
+    {
+        ["@context"] = "https://schema.org",
+        ["@type"] = "BreadcrumbList",
+        ["itemListElement"] = new object[]
+        {
+            new Dictionary<string, object?> { ["@type"] = "ListItem", ["position"] = 1, ["name"] = "Trang Chủ", ["item"] = $"{baseUrl}/" },
+            new Dictionary<string, object?> { ["@type"] = "ListItem", ["position"] = 2, ["name"] = p.Category?.Name ?? "Mỹ Phẩm Cao Cấp", ["item"] = categoryUrl },
+            new Dictionary<string, object?> { ["@type"] = "ListItem", ["position"] = 3, ["name"] = p.Name, ["item"] = productUrl }
+        }
+    };
+
+    var productSchema = new Dictionary<string, object?>
+    {
+        ["@context"] = "https://schema.org",
+        ["@type"] = "Product",
+        ["@id"] = $"{productUrl}#product",
+        ["name"] = p.Name,
+        ["image"] = productImages.ToArray(),
+        ["description"] = cleanDesc,
+        ["sku"] = !string.IsNullOrEmpty(p.Sku) ? p.Sku : $"SKU-{p.Id}",
+        ["mpn"] = !string.IsNullOrEmpty(p.Barcode) ? p.Barcode : (!string.IsNullOrEmpty(p.Sku) ? p.Sku : $"MPN-{p.Id}"),
+        ["category"] = p.Category?.Name ?? "Mỹ Phẩm & Chăm Sóc Da",
+        ["brand"] = new Dictionary<string, object?>
+        {
+            ["@type"] = "Brand",
+            ["name"] = p.Brand?.Name ?? "OMNI BEAUTY"
+        },
+        ["offers"] = new Dictionary<string, object?>
+        {
+            ["@type"] = "Offer",
+            ["url"] = productUrl,
+            ["priceCurrency"] = "VND",
+            ["price"] = finalPrice,
+            ["priceValidUntil"] = DateTime.UtcNow.AddYears(1).ToString("yyyy-12-31"),
+            ["itemCondition"] = "https://schema.org/NewCondition",
+            ["availability"] = "https://schema.org/InStock",
+            ["seller"] = new Dictionary<string, object?>
+            {
+                ["@type"] = "Organization",
+                ["name"] = "OMNI BEAUTY",
+                ["url"] = $"{baseUrl}/"
+            }
+        },
+        ["additionalProperty"] = new object[]
+        {
+            new Dictionary<string, object?> { ["@type"] = "PropertyValue", ["name"] = "Tiêu chuẩn kiểm soát hạn dùng", ["value"] = "FEFO (First Expired, First Out)" },
+            new Dictionary<string, object?> { ["@type"] = "PropertyValue", ["name"] = "Mã lô sản xuất", ["value"] = batchNo },
+            new Dictionary<string, object?> { ["@type"] = "PropertyValue", ["name"] = "Hạn sử dụng khuyến cáo", ["value"] = expDateStr }
+        },
+        ["aggregateRating"] = new Dictionary<string, object?>
+        {
+            ["@type"] = "AggregateRating",
+            ["ratingValue"] = ratingVal,
+            ["bestRating"] = 5,
+            ["worstRating"] = 1,
+            ["reviewCount"] = reviewCnt
+        }
+    };
+
+    if (Model.Reviews != null && Model.Reviews.Any())
+    {
+        productSchema["review"] = Model.Reviews.Take(5).Select(r => new Dictionary<string, object?>
+        {
+            ["@type"] = "Review",
+            ["author"] = new Dictionary<string, object?> { ["@type"] = "Person", ["name"] = !string.IsNullOrEmpty(r.UserName) ? r.UserName : "Khách hàng OMNI BEAUTY" },
+            ["datePublished"] = r.CreatedAt.ToString("yyyy-MM-dd"),
+            ["reviewBody"] = !string.IsNullOrEmpty(r.Content) ? r.Content : (!string.IsNullOrEmpty(r.Title) ? r.Title : "Sản phẩm chính hãng chất lượng cao, date mới tinh."),
+            ["reviewRating"] = new Dictionary<string, object?>
+            {
+                ["@type"] = "Rating",
+                ["ratingValue"] = r.Rating > 0 ? r.Rating : 5,
+                ["bestRating"] = 5,
+                ["worstRating"] = 1
+            }
+        }).ToArray();
+    }
+}
+
+<!-- Structured Data: BreadcrumbList Schema (Google Rich Results) -->
+<script type="application/ld+json">
+@Html.Raw(System.Text.Json.JsonSerializer.Serialize(breadcrumbSchema, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }))
+</script>
+
+<!-- Structured Data: Product Schema with Offers, Rating & FEFO Expiry (Google Rich Results) -->
+<script type="application/ld+json">
+@Html.Raw(System.Text.Json.JsonSerializer.Serialize(productSchema, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }))
+</script>
+
+<div class="bg-white min-h-screen py-6 sm:py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- 1. BREADCRUMB -->
+        <nav aria-label="Đường dẫn trang" class="mb-6 text-xs text-slate-500 flex items-center flex-wrap gap-2">
+            <a href="/" class="hover:text-magenta-accent transition flex items-center gap-1">
+                <i class="fa-solid fa-house text-slate-400"></i> Trang Chủ
+            </a>
+            <span class="text-slate-300">/</span>
+            @if (p.Category != null)
+            {
+                <a href="/category/@p.Category.Slug" class="hover:text-magenta-accent transition">
+                    @p.Category.Name
+                </a>
+                <span class="text-slate-300">/</span>
+            }
+            <span class="text-charcoal font-semibold truncate max-w-xs sm:max-w-md">@p.Name</span>
+        </nav>
+
+        <!-- 2. MAIN PRODUCT HERO (Interactive Product Gallery + Buy Box) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14" x-data="{ 
+            activeMedia: 'image', 
+            activeImage: '@mainImg', 
+            videoUrl: '@(Model.SwatchVideoUrl ?? "https://assets.mixkit.co/videos/preview/mixkit-putting-on-lipstick-42777-large.mp4")',
+            isZooming: false,
+            zoomX: 50,
+            zoomY: 50,
+            quantity: 1,
+            selectedBatchType: 'fresh',
+            freshPrice: @(p.Variants != null && p.Variants.Any() ? p.Variants.First().SellingPrice : p.SellingPrice),
+            clearancePrice: @Model.ClearancePrice,
+            selectedPrice: @(p.Variants != null && p.Variants.Any() ? p.Variants.First().SellingPrice : p.SellingPrice),
+            selectedVariantId: @(p.Variants != null && p.Variants.Any() ? p.Variants.First().Id : 0),
+            selectedVariantName: '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Variants != null && p.Variants.Any() ? p.Variants.First().VariantName : p.Name))',
+            selectedSku: '@(p.Variants != null && p.Variants.Any() ? p.Variants.First().Sku : p.Sku)',
+            
+            handleMouseMove(e) {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const x = ((e.clientX - rect.left) / rect.width) * 100;
+                const y = ((e.clientY - rect.top) / rect.height) * 100;
+                this.zoomX = Math.max(0, Math.min(100, x));
+                this.zoomY = Math.max(0, Math.min(100, y));
+            },
+            
+            selectBatch(type) {
+                this.selectedBatchType = type;
+                if (type === 'clearance') {
+                    this.selectedPrice = this.clearancePrice;
+                } else {
+                    this.selectedPrice = this.freshPrice;
+                }
+            },
+
+            selectVariant(id, name, price, sku, img) {
+                this.selectedVariantId = id;
+                this.selectedVariantName = name;
+                this.freshPrice = price;
+                this.clearancePrice = Math.round(price * (1 - @Model.ClearanceDiscountPercent / 100) / 1000) * 1000;
+                this.selectedSku = sku;
+                if (this.selectedBatchType === 'clearance') {
+                    this.selectedPrice = this.clearancePrice;
+                } else {
+                    this.selectedPrice = this.freshPrice;
+                }
+                if (img) { 
+                    this.activeImage = img; 
+                    this.activeMedia = 'image';
+                }
+            },
+
+            addToCartHandler() {
+                const batchNote = this.selectedBatchType === 'clearance' ? ' [Lô Cận Date - Tiết kiệm @Model.ClearanceDiscountPercent%]' : ' [Lô Mới Nhất 100%]';
+                const finalVariant = this.selectedVariantName + batchNote;
+                addToCart(@p.Id, finalVariant, this.selectedPrice, this.activeImage, this.quantity);
+            },
+
+            buyNow() {
+                this.addToCartHandler();
+                setTimeout(() => { window.location.href = '/Checkout'; }, 400);
+            }
+        }">
+            
+            <!-- Left Column: Gallery Images & Lens Magnifier -->
+            <div class="lg:col-span-6 space-y-4">
+                
+                <!-- Main Large Media Display Container with Magnifier Zoom -->
+                <div class="relative aspect-square rounded-3xl overflow-hidden bg-slate-50 border border-soft-border shadow-md group select-none cursor-crosshair"
+                     @@mouseenter="if (activeMedia === 'image') isZooming = true"
+                     @@mouseleave="isZooming = false"
+                     @@mousemove="handleMouseMove($event)">
+                    
+                    <!-- 1. IMAGE DISPLAY & MAGNIFIER LENS -->
+                    <div x-show="activeMedia === 'image'" class="w-full h-full relative">
+                        <!-- Base Product Image -->
+                        <img src="@mainImg"
+                             :src="activeImage" 
+                             alt="@p.Name" 
+                             class="w-full h-full object-cover transition-opacity duration-300" 
+                             id="mainProductImage" />
+                        
+                        <!-- High Precision Magnifier Zoom Texture Overlay (Phóng to 2.5x chi tiết chất kem/son/vỏ chai) -->
+                        <div x-show="isZooming" 
+                             style="display: none;"
+                             class="absolute inset-0 pointer-events-none transition-opacity duration-200 z-10"
+                             :style="`background-image: url('${activeImage}'); background-position: ${zoomX}% ${zoomY}%; background-size: 260%;`">
+                        </div>
+
+                        <!-- Magnifier Reticle Lens Box Indicator -->
+                        <div x-show="isZooming" 
+                             style="display: none;"
+                             class="absolute w-32 h-32 rounded-full border-2 border-magenta-accent/80 shadow-2xl backdrop-blur-[1px] pointer-events-none -translate-x-1/2 -translate-y-1/2 flex items-center justify-center transition-all duration-75 z-20"
+                             :style="`left: ${zoomX}%; top: ${zoomY}%; box-shadow: 0 0 25px rgba(224, 86, 136, 0.45);`">
+                            <span class="w-2.5 h-2.5 rounded-full bg-magenta-accent"></span>
+                            <span class="absolute text-[9px] font-mono font-bold text-white bg-charcoal/80 px-1.5 py-0.5 rounded-full bottom-2 shadow">2.5X</span>
+                        </div>
+
+                        <!-- Zoom Hint Tag -->
+                        <div x-show="!isZooming" class="absolute bottom-4 right-4 z-20 px-3 py-1.5 rounded-full bg-charcoal/70 backdrop-blur text-white text-[11px] font-medium flex items-center gap-1.5 shadow-lg pointer-events-none">
+                            <i class="fa-solid fa-magnifying-glass-plus text-rose-gold text-xs"></i>
+                            <span>Rê chuột để soi chất kem 2.5x</span>
+                        </div>
+                    </div>
+
+                    <!-- 2. SHORT SWATCH VIDEO PLAYER (Hỗ trợ video ngắn swatch màu son thực tế) -->
+                    <div x-show="activeMedia === 'video'" style="display: none;" class="w-full h-full relative bg-charcoal flex items-center justify-center">
+                        <video :src="videoUrl" 
+                               autoplay loop muted playsinline 
+                               class="w-full h-full object-cover"></video>
+                        <div class="absolute top-4 left-4 z-20 px-3 py-1.5 rounded-full bg-magenta-accent text-white text-xs font-bold flex items-center gap-1.5 shadow-lg">
+                            <i class="fa-solid fa-circle-play animate-pulse text-white"></i>
+                            <span>Video Swatch Son Trên Da Thật</span>
+                        </div>
+                        <button type="button" 
+                                @@click="activeMedia = 'image'"
+                                class="absolute bottom-4 right-4 z-20 px-3.5 py-1.5 rounded-full bg-white/90 backdrop-blur hover:bg-white text-charcoal font-bold text-xs shadow-md transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-image text-slate-500"></i> Xem lại ảnh
+                        </button>
+                    </div>
+
+                    <!-- Top Left Dynamic Batch Badges -->
+                    <div class="absolute top-4 left-4 z-20 flex flex-col gap-1.5 pointer-events-none">
+                        <span x-show="selectedBatchType === 'fresh'" class="badge-fefo-fresh text-xs px-3 py-1 shadow-md">
+                            <i class="fa-solid fa-shield-halved mr-1"></i> Lô Mới Nhất 100%
+                        </span>
+                        <span x-show="selectedBatchType === 'clearance'" style="display: none;" class="badge-fefo-clearance text-xs px-3 py-1 shadow-md animate-pulse">
+                            <i class="fa-solid fa-fire mr-1"></i> Tiết Kiệm @Model.ClearanceDiscountPercent% Cận Date
+                        </span>
+                    </div>
+
+                    <!-- Wishlist button -->
+                    <button type="button" 
+                            class="absolute top-4 right-4 z-20 h-10 w-10 rounded-full bg-white/90 backdrop-blur text-slate-500 hover:text-magenta-accent hover:bg-white shadow-md flex items-center justify-center transition"
+                            aria-label="Thêm vào yêu thích">
+                        <i class="fa-regular fa-heart text-base"></i>
+                    </button>
+                </div>
+
+                <!-- Gallery Thumbnails Carousel + Video Swatch Button -->
+                <div class="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thin">
+                    
+                    <!-- SPECIAL THUMBNAIL: Short Video Swatch Button -->
+                    <button type="button" 
+                            @@click="activeMedia = 'video'" 
+                            :class="activeMedia === 'video' ? 'border-magenta-accent ring-2 ring-magenta-accent/30 scale-105' : 'border-soft-border hover:border-slate-300'"
+                            class="relative w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all p-1 bg-gradient-to-br from-magenta-accent/15 via-pink-100 to-rose-gold/20 shrink-0 flex flex-col items-center justify-center group shadow-xs">
+                        <div class="w-8 h-8 rounded-full bg-magenta-accent text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-play text-xs ml-0.5"></i>
+                        </div>
+                        <span class="text-[9px] font-bold text-magenta-accent mt-1 uppercase tracking-tight">Swatch Video</span>
+                        <span class="absolute top-1.5 right-1.5 flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-magenta-accent opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-magenta-accent"></span>
+                        </span>
+                    </button>
+
+                    <!-- Regular Image Thumbnails -->
+                    @if (Model.GalleryImages != null)
+                    {
+                        @foreach (var img in Model.GalleryImages)
+                        {
+                            <button type="button" 
+                                    @@click="activeImage = '@img'; activeMedia = 'image'" 
+                                    :class="(activeMedia === 'image' && activeImage === '@img') ? 'border-magenta-accent ring-2 ring-magenta-accent/20 scale-105' : 'border-soft-border hover:border-slate-300'"
+                                    class="w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all p-1 bg-white shrink-0">
+                                <img src="@img" class="w-full h-full object-cover rounded-xl" alt="Thumbnail" />
+                            </button>
+                        }
+                    }
+                </div>
+
+                <!-- Trust Highlights Below Gallery -->
+                <div class="pt-3 grid grid-cols-3 gap-3 border-t border-slate-100 text-center text-xs text-slate-600">
+                    <div class="p-3 rounded-2xl bg-pastel-rose/50">
+                        <i class="fa-solid fa-certificate text-magenta-accent text-lg mb-1 block"></i>
+                        <span class="font-bold text-charcoal block">100% Chính Ngạch</span>
+                        <span class="text-[10px] text-slate-400">Tem BYT & QR Code</span>
+                    </div>
+                    <div class="p-3 rounded-2xl bg-pastel-rose/50">
+                        <i class="fa-solid fa-truck-fast text-magenta-accent text-lg mb-1 block"></i>
+                        <span class="font-bold text-charcoal block">Giao Hỏa Tốc 2H</span>
+                        <span class="text-[10px] text-slate-400">Nội thành HCM & HN</span>
+                    </div>
+                    <div class="p-3 rounded-2xl bg-pastel-rose/50">
+                        <i class="fa-solid fa-arrows-rotate text-magenta-accent text-lg mb-1 block"></i>
+                        <span class="font-bold text-charcoal block">Đổi Trả 7 Ngày</span>
+                        <span class="text-[10px] text-slate-400">Bảo hiểm kích ứng da</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Product Info & Buy Box -->
+            <div class="lg:col-span-6 space-y-5">
+                
+                <!-- Brand & Sku Bar -->
+                <div class="flex items-center justify-between text-xs text-slate-500">
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold text-rose-gold uppercase tracking-wider">
+                            @(p.ManufacturerName ?? "OMNICHANNEL BEAUTY")
+                        </span>
+                        <span>•</span>
+                        <span>Xuất xứ: <strong class="text-charcoal">@(p.CountryOfOrigin ?? "Chính Ngạch")</strong></span>
+                    </div>
+                    <span class="font-mono text-slate-400" x-text="'SKU: ' + selectedSku">SKU: @p.Sku</span>
+                </div>
+
+                <!-- Product Name Title -->
+                <h1 class="font-serif text-2xl sm:text-3xl font-bold text-charcoal leading-snug">
+                    @p.Name
+                </h1>
+
+                <!-- Rating & Reviews Bar -->
+                <div class="flex items-center gap-3 text-xs">
+                    <div class="flex text-amber-400 gap-0.5">
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                    <span class="font-bold text-charcoal">@Model.AverageRating.ToString("0.1") / 5</span>
+                    <span class="text-slate-300">|</span>
+                    <a href="#deepDetailsTabs" class="text-magenta-accent hover:underline font-semibold">
+                        @Model.TotalReviews đánh giá kiểm định từ khách hàng
+                    </a>
+                </div>
+
+                <!-- Dynamic Realtime Price Box -->
+                <div class="p-5 rounded-2xl bg-gradient-to-r from-pastel-rose/60 via-pink-50/50 to-white border border-soft-border flex items-baseline gap-4 flex-wrap">
+                    <span class="font-mono-numeric font-bold text-3xl sm:text-4xl text-charcoal" x-text="new Intl.NumberFormat('vi-VN').format(selectedPrice) + ' ₫'">
+                        @p.SellingPrice.ToString("N0") ₫
+                    </span>
+                    <span class="font-mono-numeric text-base text-slate-400 line-through">
+                        @originalPrice.ToString("N0") ₫
+                    </span>
+                    <span class="px-2.5 py-1 rounded-full text-white font-bold text-xs shadow-xs"
+                          :class="selectedBatchType === 'clearance' ? 'bg-gradient-to-r from-amber-500 to-rose-600' : 'bg-magenta-accent'"
+                          x-text="selectedBatchType === 'clearance' ? 'Tiết kiệm @Model.ClearanceDiscountPercent% (FEFO Deal)' : 'Giá niêm yết chuẩn'">
+                        Giá niêm yết chuẩn
+                    </span>
+                </div>
+
+                <!-- 1. BỘ CHỌN BIẾN THỂ (Swatch Màu Son Hoặc Dung Tích) -->
+                @if (p.Variants != null && p.Variants.Any())
+                {
+                    <div class="p-4 rounded-2xl bg-white border border-soft-border space-y-3.5 shadow-xs">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid @(isLipstickOrMakeup ? "fa-palette text-magenta-accent" : "fa-flask text-rose-gold")"></i>
+                                @(isLipstickOrMakeup ? "Bảng Màu Son (Color Swatches):" : "Dung Tích & Kích Cỡ (Volume Sizes):")
+                            </span>
+                            <span class="text-xs font-bold text-magenta-accent" x-text="selectedVariantName"></span>
+                        </div>
+
+                        @if (isLipstickOrMakeup)
+                        {
+                            <!-- Swatch Màu Son: Các ô tròn mã màu thực tế kèm tên tone màu -->
+                            <div class="flex items-center gap-3.5 flex-wrap">
+                                @foreach (var v in p.Variants)
+                                {
+                                    var hex = !string.IsNullOrEmpty(v.SwatchColorHex) ? v.SwatchColorHex : (!string.IsNullOrEmpty(v.ColorHex) ? v.ColorHex : "#B76E79");
+                                    var vImg = !string.IsNullOrEmpty(v.SwatchImageUrl) ? v.SwatchImageUrl : p.ThumbnailUrl;
+                                    <button type="button"
+                                            @@click="selectVariant(@v.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(v.VariantName))', @v.SellingPrice, '@v.Sku', '@vImg')"
+                                            :class="selectedVariantId === @v.Id ? 'ring-2 ring-magenta-accent ring-offset-2 scale-110 shadow-md' : 'border border-slate-200 hover:scale-105'"
+                                            class="group relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-300 focus:outline-none"
+                                            style="background-color: @hex;"
+                                            title="@v.VariantName">
+                                        <span x-show="selectedVariantId === @v.Id" class="text-white drop-shadow-md text-xs">
+                                            <i class="fa-solid fa-check"></i>
+                                        </span>
+                                        <!-- Tooltip Hover -->
+                                        <span class="absolute bottom-full mb-2 hidden group-hover:block px-2.5 py-1 text-[11px] font-semibold text-white bg-charcoal rounded-lg shadow-lg whitespace-nowrap z-30 pointer-events-none">
+                                            @v.ColorName (@v.SellingPrice.ToString("N0") ₫)
+                                        </span>
+                                    </button>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- Dung tích: Các nút pill thể tích (30ml, 50ml, 100ml) -->
+                            <div class="flex items-center gap-2.5 flex-wrap">
+                                @foreach (var v in p.Variants)
+                                {
+                                    var vImg = !string.IsNullOrEmpty(v.SwatchImageUrl) ? v.SwatchImageUrl : p.ThumbnailUrl;
+                                    <button type="button"
+                                            @@click="selectVariant(@v.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(v.VariantName))', @v.SellingPrice, '@v.Sku', '@vImg')"
+                                            :class="selectedVariantId === @v.Id ? 'bg-charcoal text-white border-charcoal shadow-md ring-2 ring-charcoal/20' : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-magenta-accent hover:text-magenta-accent'"
+                                            class="px-4 py-2.5 rounded-xl text-xs font-bold border transition-all duration-200 flex items-center gap-2">
+                                        <span>@(!string.IsNullOrEmpty(v.Volume) ? v.Volume : v.VariantName)</span>
+                                        @if (v.PriceAdjustment > 0)
+                                        {
+                                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-magenta-accent/20 text-magenta-accent font-semibold">
+                                                +@v.PriceAdjustment.ToString("N0") ₫
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-[10px] text-slate-400 font-normal">
+                                                (@v.SellingPrice.ToString("N0") ₫)
+                                            </span>
+                                        }
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+
+                <!-- 2. BỘ CHỌN LÔ HÀNG FEFO THÔNG MINH (DUAL INTERACTIVE BATCH SELECTOR) -->
+                <div class="space-y-2.5">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-magenta-accent"></i>
+                            Chọn Lô Hàng FEFO Thông Minh:
+                        </span>
+                        <span class="text-[11px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                            <i class="fa-solid fa-circle-check text-emerald-500 mr-0.5"></i> Chuẩn Dược Điển FEFO
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        
+                        <!-- TÙY CHỌN 1: Lô Mới Nhất (HSD: 08/2028) - Giá chuẩn 100% -->
+                        <div @@click="selectBatch('fresh')" 
+                             :class="selectedBatchType === 'fresh' ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/40 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'"
+                             class="relative p-3.5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between gap-1 mb-1.5">
+                                    <span class="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold text-[10px] tracking-wide uppercase flex items-center gap-1">
+                                        <i class="fa-solid fa-shield-check text-emerald-600"></i> Lô Mới Nhất
+                                    </span>
+                                    <span class="text-[10px] font-mono font-semibold text-slate-500">
+                                        @(Model.FreshBatch?.BatchNumber ?? "LOT-2028-V01")
+                                    </span>
+                                </div>
+                                <h4 class="font-bold text-xs text-charcoal flex items-center gap-1">
+                                    <span>HSD: @(Model.FreshBatch?.ExpDate.ToString("MM/yyyy") ?? "08/2028")</span>
+                                    <span class="text-[10px] font-normal text-slate-500">(Date xa >24 tháng)</span>
+                                </h4>
+                                <p class="text-[11px] text-slate-500 mt-1 line-clamp-1">Hàng mới về, bảo quản kho lạnh GSP 18-22°C.</p>
+                            </div>
+                            <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
+                                <div>
+                                    <span class="text-[10px] text-slate-400 block">Giá chuẩn 100%:</span>
+                                    <span class="font-mono-numeric font-bold text-sm text-charcoal" x-text="new Intl.NumberFormat('vi-VN').format(freshPrice) + ' ₫'">
+                                        @p.SellingPrice.ToString("N0") ₫
+                                    </span>
+                                </div>
+                                <div class="w-5 h-5 rounded-full flex items-center justify-center transition-colors"
+                                     :class="selectedBatchType === 'fresh' ? 'bg-emerald-600 text-white' : 'border border-slate-300 text-transparent'">
+                                    <i class="fa-solid fa-check text-[10px]"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TÙY CHỌN 2: Lô Cận Date 6 Tháng (HSD: 10/2026) - Tiết kiệm 45% (Chỉ còn 350.000₫) -->
+                        <div @@click="selectBatch('clearance')" 
+                             :class="selectedBatchType === 'clearance' ? 'border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'"
+                             class="relative p-3.5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex flex-col justify-between">
+                            <div class="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 text-white text-[9px] font-extrabold uppercase shadow-sm flex items-center gap-1">
+                                <i class="fa-solid fa-fire text-[9px]"></i> Tiết Kiệm @Model.ClearanceDiscountPercent%
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between gap-1 mb-1.5">
+                                    <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 font-bold text-[10px] tracking-wide uppercase flex items-center gap-1">
+                                        <i class="fa-solid fa-tag text-amber-600"></i> Lô Cận Date 6 Tháng
+                                    </span>
+                                    <span class="text-[10px] font-mono font-semibold text-slate-500">
+                                        @(Model.ClearanceBatch?.BatchNumber ?? "LOT-2026-EXP6M")
+                                    </span>
+                                </div>
+                                <h4 class="font-bold text-xs text-charcoal flex items-center gap-1">
+                                    <span>HSD: @(Model.ClearanceBatch?.ExpDate.ToString("MM/yyyy") ?? "10/2026")</span>
+                                    <span class="text-[10px] font-bold text-rose-600">(Chỉ còn @(Model.ClearanceBatch?.CurrentQuantity ?? 4) sp)</span>
+                                </h4>
+                                <p class="text-[11px] text-slate-500 mt-1 line-clamp-1">Nguyên seal tem màng co, cam kết chuẩn hãng.</p>
+                            </div>
+                            <div class="mt-3 pt-2 border-t border-amber-100 flex items-center justify-between">
+                                <div>
+                                    <span class="text-[10px] text-slate-400 block line-through" x-text="new Intl.NumberFormat('vi-VN').format(freshPrice) + ' ₫'"></span>
+                                    <span class="font-mono-numeric font-bold text-sm text-magenta-accent" x-text="new Intl.NumberFormat('vi-VN').format(clearancePrice) + ' ₫'">
+                                        @Model.ClearancePrice.ToString("N0") ₫
+                                    </span>
+                                </div>
+                                <div class="w-5 h-5 rounded-full flex items-center justify-center transition-colors"
+                                     :class="selectedBatchType === 'clearance' ? 'bg-amber-600 text-white' : 'border border-slate-300 text-transparent'">
+                                    <i class="fa-solid fa-check text-[10px]"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 3. TÌNH TRẠNG CÒN HÀNG THEO TỪNG SHOWROOM GẦN NHẤT -->
+                <div class="p-4 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3" x-data="{ showAllStores: false }">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-store text-rose-gold"></i>
+                            Tình Trạng Có Sẵn Tại Showroom:
+                        </span>
+                        <button type="button" @@click="showAllStores = !showAllStores" class="text-xs font-semibold text-magenta-accent hover:underline flex items-center gap-1">
+                            <span x-text="showAllStores ? 'Thu gọn' : 'Xem toàn bộ chi nhánh'"></span>
+                            <i class="fa-solid" :class="showAllStores ? 'fa-angle-up' : 'fa-angle-down'"></i>
+                        </button>
+                    </div>
+
+                    <div class="space-y-2 text-xs">
+                        @for (int i = 0; i < Model.ShowroomStocks.Count; i++)
+                        {
+                            var st = Model.ShowroomStocks[i];
+                            <div class="p-2.5 rounded-xl bg-white border border-slate-200/80 flex items-start justify-between gap-3 shadow-2xs"
+                                 x-show="@(i < 2 ? "true" : "showAllStores")">
+                                <div class="space-y-0.5">
+                                    <div class="flex items-center gap-2">
+                                        <strong class="font-bold text-charcoal text-xs">@st.StoreName</strong>
+                                        @if (st.HasTester)
+                                        {
+                                            <span class="px-1.5 py-0.5 rounded bg-pink-100 text-pink-700 text-[10px] font-semibold">
+                                                <i class="fa-solid fa-wand-magic-sparkles text-[9px] mr-0.5"></i>Có mẫu thử
+                                            </span>
+                                        }
+                                    </div>
+                                    <p class="text-[11px] text-slate-500">@st.Address</p>
+                                    <span class="inline-flex items-center gap-1 text-[10px] text-slate-400">
+                                        <i class="fa-solid fa-phone text-[9px]"></i> @st.Phone • @st.DeliveryBadge
+                                    </span>
+                                </div>
+                                <div class="text-right shrink-0">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold inline-flex items-center gap-1 @(st.StockQuantity > 5 ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-amber-50 text-amber-700 border border-amber-200")">
+                                        <span class="w-1.5 h-1.5 rounded-full @(st.StockQuantity > 5 ? "bg-emerald-500" : "bg-amber-500")"></span>
+                                        @st.StatusText (@st.StockQuantity)
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Attributes: Unit, Skin Type, Ingredients -->
+                <div class="space-y-2.5 pt-1 text-xs">
+                    <div class="flex items-center gap-3">
+                        <span class="text-slate-400 w-28 shrink-0 font-medium">Quy Cách / Đóng Gói:</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 font-bold border border-slate-200">
+                            @p.Unit
+                        </span>
+                    </div>
+
+                    <div class="flex items-start gap-3">
+                        <span class="text-slate-400 w-28 shrink-0 font-medium pt-1">Loại Da Phù Hợp:</span>
+                        <div class="flex flex-wrap gap-1.5">
+                            @foreach (var skin in Model.SuitableSkinTypes)
+                            {
+                                <span class="px-2.5 py-1 rounded-full bg-pastel-rose text-magenta-accent font-semibold border border-soft-border">
+                                    @skin
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quantity Stepper & Call to Actions -->
+                <div class="pt-2 space-y-4">
+                    <div class="flex items-center gap-4">
+                        <span class="text-xs font-bold text-slate-700">Số Lượng:</span>
+                        <div class="flex items-center rounded-full border border-slate-200 bg-slate-50 p-1">
+                            <button type="button" 
+                                    @@click="if(quantity > 1) quantity--" 
+                                    class="w-8 h-8 rounded-full bg-white hover:bg-magenta-accent hover:text-white flex items-center justify-center text-slate-600 shadow-xs transition"
+                                    aria-label="Giảm số lượng">
+                                <i class="fa-solid fa-minus text-xs"></i>
+                            </button>
+                            <span class="w-12 text-center font-mono-numeric font-bold text-sm text-charcoal" x-text="quantity">1</span>
+                            <button type="button" 
+                                    @@click="quantity++" 
+                                    class="w-8 h-8 rounded-full bg-white hover:bg-magenta-accent hover:text-white flex items-center justify-center text-slate-600 shadow-xs transition"
+                                    aria-label="Tăng số lượng">
+                                <i class="fa-solid fa-plus text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                        <!-- Add to Cart -->
+                        <button type="button" 
+                                @@click="addToCartHandler()"
+                                class="w-full py-4 rounded-full bg-charcoal text-white font-bold text-xs uppercase tracking-wider hover:bg-magenta-accent shadow-md transition-all duration-300 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-bag-shopping text-sm text-rose-gold"></i>
+                            <span>Thêm Giỏ Hàng</span>
+                        </button>
+
+                        <!-- Buy Now -->
+                        <button type="button" 
+                                @@click="buyNow()"
+                                class="w-full py-4 rounded-full bg-magenta-accent text-white font-bold text-xs uppercase tracking-wider hover:bg-[#b0276a] shadow-lg shadow-magenta-accent/25 transition-all duration-300 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-bolt text-sm"></i>
+                            <span>Mua Ngay Lô Đã Chọn</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 3. ACCORDION TAB THÔNG TIN CHUYÊN SÂU (4 TABS CHUẨN DƯỢC MỸ PHẨM) -->
+        <div class="mt-16 pt-10 border-t border-soft-border" x-data="{ activeTab: 'features' }" id="deepDetailsTabs">
+            
+            <!-- Tab Headers Bar (4 Tabs Chuyên Sâu + Tab Đánh Giá) -->
+            <div class="flex items-center justify-center gap-1 sm:gap-4 border-b border-soft-border mb-8 overflow-x-auto pb-2 scrollbar-none">
+                
+                <!-- Tab 1: Công Dụng & Đặc Điểm Nổi Bật -->
+                <button type="button" 
+                        @@click="activeTab = 'features'" 
+                        :class="activeTab === 'features' ? 'border-magenta-accent text-magenta-accent font-bold bg-pastel-rose/30 rounded-t-xl' : 'border-transparent text-slate-500 hover:text-charcoal font-medium'"
+                        class="px-4 py-3 border-b-2 text-xs sm:text-sm font-serif transition-all whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-sparkles text-rose-gold"></i>
+                    <span>1. Công Dụng & Đặc Điểm</span>
+                </button>
+
+                <!-- Tab 2: Bảng Phân Tích Thành Phần Đầy Đủ -->
+                <button type="button" 
+                        @@click="activeTab = 'ingredients'" 
+                        :class="activeTab === 'ingredients' ? 'border-magenta-accent text-magenta-accent font-bold bg-pastel-rose/30 rounded-t-xl' : 'border-transparent text-slate-500 hover:text-charcoal font-medium'"
+                        class="px-4 py-3 border-b-2 text-xs sm:text-sm font-serif transition-all whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-vial-virus text-emerald-600"></i>
+                    <span>2. Phân Tích Thành Phần (INCI)</span>
+                </button>
+
+                <!-- Tab 3: Hướng Dẫn Sử Dụng & Chu Trình Kết Hợp -->
+                <button type="button" 
+                        @@click="activeTab = 'routine'" 
+                        :class="activeTab === 'routine' ? 'border-magenta-accent text-magenta-accent font-bold bg-pastel-rose/30 rounded-t-xl' : 'border-transparent text-slate-500 hover:text-charcoal font-medium'"
+                        class="px-4 py-3 border-b-2 text-xs sm:text-sm font-serif transition-all whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-route text-sky-600"></i>
+                    <span>3. Hướng Dẫn & Chu Trình</span>
+                </button>
+
+                <!-- Tab 4: Chính Sách Đổi Trả 7 Ngày & Cam Kết Chính Hãng 200% -->
+                <button type="button" 
+                        @@click="activeTab = 'policy'" 
+                        :class="activeTab === 'policy' ? 'border-magenta-accent text-magenta-accent font-bold bg-pastel-rose/30 rounded-t-xl' : 'border-transparent text-slate-500 hover:text-charcoal font-medium'"
+                        class="px-4 py-3 border-b-2 text-xs sm:text-sm font-serif transition-all whitespace-nowrap flex items-center gap-2">
+                    <i class="fa-solid fa-shield-heart text-rose-600"></i>
+                    <span>4. Cam Kết 200% & Đổi Trả</span>
+                </button>
+
+                <!-- Tab Đánh Giá Khách Hàng -->
+                <button type="button" 
+                        @@click="activeTab = 'reviews'" 
+                        :class="activeTab === 'reviews' ? 'border-magenta-accent text-magenta-accent font-bold bg-pastel-rose/30 rounded-t-xl' : 'border-transparent text-slate-500 hover:text-charcoal font-medium'"
+                        class="px-4 py-3 border-b-2 text-xs sm:text-sm font-serif transition-all whitespace-nowrap flex items-center gap-1.5">
+                    <span>Đánh Giá</span>
+                    <span class="px-2 py-0.5 rounded-full bg-pastel-rose text-magenta-accent text-[10px] font-bold font-mono">@Model.TotalReviews</span>
+                </button>
+
+            </div>
+
+            <!-- ========================================== -->
+            <!-- TAB 1: CÔNG DỤNG & ĐẶC ĐIỂM NỔI BẬT -->
+            <!-- ========================================== -->
+            <div x-show="activeTab === 'features'" class="max-w-5xl mx-auto space-y-6 text-slate-700 text-sm leading-relaxed">
+                
+                <!-- Hero Feature Banner -->
+                <div class="bg-gradient-to-r from-pastel-rose/50 via-white to-pink-50/50 p-6 sm:p-8 rounded-3xl border border-soft-border space-y-3">
+                    <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-rose-gold">
+                        <i class="fa-solid fa-award"></i> Nghiên Cứu & Phát Triển Chuẩn Quốc Tế
+                    </div>
+                    <h3 class="font-serif font-bold text-xl sm:text-2xl text-charcoal">
+                        Kiệt Tác Chăm Sóc & Tôn Vinh Vẻ Đẹp Thuần Khiết
+                    </h3>
+                    <p class="text-slate-600 leading-relaxed text-xs sm:text-sm">
+                        @(p.Description ?? p.ShortDescription ?? "Sản phẩm được điều chế theo công nghệ vi nang thẩm thấu sâu, mang lại hiệu quả nuôi dưỡng vượt bậc mà vẫn giữ trọn sự thông thoáng, dịu nhẹ cho mọi loại da nhạy cảm.")
+                    </p>
+                </div>
+
+                <!-- 4 Highlight Benefit Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <div class="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-magenta-accent flex items-center justify-center shrink-0 text-xl">
+                            <i class="fa-solid fa-droplet-degree"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <h4 class="font-bold text-charcoal text-sm">Cấp Ẩm Đa Tầng & Khóa Ẩm 72 Giờ</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed">
+                                Phức hợp Hyaluronic Acid phân tử siêu nhỏ len lỏi qua từng tế bào da, giữ độ ẩm mịn màng tự nhiên suốt ngày dài làm việc.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 text-xl">
+                            <i class="fa-solid fa-feather"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <h4 class="font-bold text-charcoal text-sm">Kết Cấu Mỏng Nhẹ, Không Gây Bết Rít</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed">
+                                Thẩm thấu nhanh chóng trong 15 giây sau khi thoa, không để lại cảm giác bóng nhờn, thông thoáng lỗ chân lông tuyệt đối.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 text-xl">
+                            <i class="fa-solid fa-shield-virus"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <h4 class="font-bold text-charcoal text-sm">Phục Hồi Màng Lipid & Kháng Viêm</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed">
+                                Bổ sung tiền tố Vitamin B5 và Madecassoside làm dịu kích ứng, củng cố hàng rào tự nhiên trước khói bụi và tia tử ngoại.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-start gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0 text-xl">
+                            <i class="fa-solid fa-sparkle"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <h4 class="font-bold text-charcoal text-sm">Sắc Tố Chuẩn Nét & Bền Màu Tự Nhiên</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed">
+                                Lên màu chuẩn xác ngay từ lần quẹt đầu tiên, tôn sắc tố da châu Á và duy trì độ tươi tắn rạng ngời từ 8 - 12 tiếng.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ========================================== -->
+            <!-- TAB 2: BẢNG PHÂN TÍCH THÀNH PHẦN ĐẦY ĐỦ (INCI) -->
+            <!-- ========================================== -->
+            <div x-show="activeTab === 'ingredients'" style="display: none;" class="max-w-5xl mx-auto space-y-6">
+                
+                <!-- EWG & Safety Standards Commitment -->
+                <div class="p-5 sm:p-6 rounded-3xl bg-emerald-50/60 border border-emerald-200 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-xl shrink-0">
+                            <i class="fa-solid fa-leaf"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-emerald-950 text-sm sm:text-base">Cam Kết Dược Mỹ Phẩm 5 KHÔNG An Toàn Tuyệt Đối</h4>
+                            <p class="text-xs text-emerald-800">Không Cồn Khô • Không Paraben • Không Hương Liệu Nhân Tạo • Không Dầu Khoáng • Không Chì/Thủy Ngân.</p>
+                        </div>
+                    </div>
+                    <span class="px-3.5 py-1.5 rounded-full bg-emerald-600 text-white text-xs font-bold uppercase tracking-wider shrink-0 shadow-xs">
+                        EWG Skin Deep Score: 1-2 (Green)
+                    </span>
+                </div>
+
+                <!-- Cosmetic Ingredients Breakdown Table -->
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+                    <div class="p-4 sm:p-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                        <div>
+                            <h4 class="font-bold text-charcoal text-sm uppercase tracking-wider">Bảng Phân Tích Hoạt Chất Chủ Đạo (Key Actives)</h4>
+                            <p class="text-[11px] text-slate-500">Được định lượng và kiểm nghiệm lâm sàng bởi Viện Dược Liệu Quốc Tế</p>
+                        </div>
+                        <span class="text-xs font-semibold text-rose-gold">Chuẩn Bộ Y Tế</span>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 text-slate-400 font-bold uppercase text-[10px] tracking-wider border-b border-slate-100">
+                                <tr>
+                                    <th class="py-3 px-4 sm:px-6">Tên Hoạt Chất</th>
+                                    <th class="py-3 px-3">Tỷ Lệ</th>
+                                    <th class="py-3 px-4">Công Dụng Chuyên Sâu</th>
+                                    <th class="py-3 px-3">EWG Score</th>
+                                    <th class="py-3 px-4">Nguồn Gốc Xuất Xứ</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-slate-700">
+                                @foreach (var ing in Model.IngredientBreakdowns)
+                                {
+                                    <tr class="hover:bg-pastel-rose/20 transition-colors">
+                                        <td class="py-3.5 px-4 sm:px-6 font-bold text-charcoal flex items-center gap-2">
+                                            <i class="fa-solid fa-circle-check text-emerald-500 text-xs"></i>
+                                            @ing.Name
+                                        </td>
+                                        <td class="py-3.5 px-3 font-mono font-bold text-magenta-accent">@ing.Percentage</td>
+                                        <td class="py-3.5 px-4 text-slate-600 max-w-xs">@ing.Function</td>
+                                        <td class="py-3.5 px-3">
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold text-[10px] border border-emerald-200">
+                                                <i class="fa-solid fa-shield text-[9px]"></i> Điểm @ing.EwgScore
+                                            </span>
+                                        </td>
+                                        <td class="py-3.5 px-4 text-slate-500 font-medium">@ing.Source</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Full INCI List Box -->
+                <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-2">
+                    <strong class="font-bold text-charcoal block uppercase tracking-wide text-[11px]">
+                        Danh Sách Toàn Bộ Thành Phần (Full INCI Ingredients List):
+                    </strong>
+                    <p class="leading-relaxed font-mono text-[11px] text-slate-500">
+                        Aqua (Water), Glycerin, Butylene Glycol, Panthenol, Niacinamide, Sodium Hyaluronate, Madecassoside, Tocopheryl Acetate (Vitamin E), Centella Asiatica Extract, Allantoin, Dimethicone, Betaine, Caprylic/Capric Triglyceride, Carbomer, 1,2-Hexanediol, Ethylhexylglycerin, Disodium EDTA.
+                    </p>
+                    <span class="text-[10px] text-slate-400 italic block">
+                        * Công thức đạt chứng nhận không gây mụn trứng cá (Non-comedogenic) và an toàn cho phụ nữ mang thai.
+                    </span>
+                </div>
+
+            </div>
+
+            <!-- ========================================== -->
+            <!-- TAB 3: HƯỚNG DẪN SỬ DỤNG & CHU TRÌNH KẾT HỢP -->
+            <!-- ========================================== -->
+            <div x-show="activeTab === 'routine'" style="display: none;" class="max-w-5xl mx-auto space-y-6">
+                
+                <!-- 5 Steps Routine Timeline -->
+                <div class="p-6 sm:p-8 rounded-3xl bg-white border border-soft-border shadow-xs space-y-6">
+                    <div class="flex items-center justify-between flex-wrap gap-2">
+                        <div>
+                            <span class="text-xs font-bold text-rose-gold uppercase tracking-wider">Chu Trình Y Khoa Phối Hợp</span>
+                            <h3 class="font-serif font-bold text-xl text-charcoal mt-0.5">5 Bước Chăm Sóc Làn Da Pha Lê</h3>
+                        </div>
+                        <span class="px-3 py-1 rounded-full bg-pastel-rose text-magenta-accent text-xs font-bold">
+                            Khuyến nghị từ Dược sĩ Da liễu
+                        </span>
+                    </div>
+
+                    <!-- Steps Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+                        
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                            <span class="w-7 h-7 rounded-full bg-charcoal text-white text-xs font-bold flex items-center justify-center">1</span>
+                            <h4 class="font-bold text-charcoal text-xs">Làm Sạch Kép</h4>
+                            <p class="text-[11px] text-slate-500 leading-snug">Nước tẩy trang dịu nhẹ và sữa rửa mặt pH 5.5 lấy đi bụi mịn PM 2.5.</p>
+                        </div>
+
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                            <span class="w-7 h-7 rounded-full bg-charcoal text-white text-xs font-bold flex items-center justify-center">2</span>
+                            <h4 class="font-bold text-charcoal text-xs">Cân Bằng Da</h4>
+                            <p class="text-[11px] text-slate-500 leading-snug">Toner cấp ẩm hoặc tẩy da chết nhẹ nhàng BHA/AHA nồng độ thấp.</p>
+                        </div>
+
+                        <div class="p-3.5 rounded-2xl bg-magenta-accent/10 border border-magenta-accent/30 space-y-2 ring-2 ring-magenta-accent/20">
+                            <span class="w-7 h-7 rounded-full bg-magenta-accent text-white text-xs font-bold flex items-center justify-center">3</span>
+                            <h4 class="font-bold text-magenta-accent text-xs">Đặc Trị Chuyên Sâu</h4>
+                            <p class="text-[11px] text-slate-700 leading-snug font-medium">Thoa sản phẩm này đều khắp vùng cần chăm sóc, vỗ nhẹ 30 giây.</p>
+                        </div>
+
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                            <span class="w-7 h-7 rounded-full bg-charcoal text-white text-xs font-bold flex items-center justify-center">4</span>
+                            <h4 class="font-bold text-charcoal text-xs">Khóa Ẩm Tái Tạo</h4>
+                            <p class="text-[11px] text-slate-500 leading-snug">Kem dưỡng ẩm phục hồi bảo vệ toàn bộ dưỡng chất không bị bay hơi.</p>
+                        </div>
+
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+                            <span class="w-7 h-7 rounded-full bg-charcoal text-white text-xs font-bold flex items-center justify-center">5</span>
+                            <h4 class="font-bold text-charcoal text-xs">Bảo Vệ / Makeup</h4>
+                            <p class="text-[11px] text-slate-500 leading-snug">Kem chống nắng quang phổ rộng SPF 50+ hoặc son dưỡng màu tươi tắn.</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Pro Tips & Warnings -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="p-5 rounded-2xl bg-white border border-slate-200 space-y-2">
+                        <h4 class="font-bold text-charcoal flex items-center gap-2">
+                            <i class="fa-solid fa-lightbulb text-amber-500"></i> Mẹo Từ Chuyên Gia Trang Điểm & Dược Sĩ
+                        </h4>
+                        <ul class="space-y-1.5 text-slate-600 list-disc list-inside">
+                            <li>Đối với son: Thoa một lớp son dưỡng mỏng 5 phút trước khi đánh màu để son lên mướt mịn.</li>
+                            <li>Đối với kem dưỡng/serum: Thoa khi nền da còn hơi ẩm để hấp thụ tối đa phân tử nước.</li>
+                            <li>Bảo quản nơi khô ráo, tránh ánh nắng trực tiếp hoặc bảo quản ngăn mát tủ lạnh 15-20°C.</li>
+                        </ul>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-white border border-slate-200 space-y-2">
+                        <h4 class="font-bold text-charcoal flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Lưu Ý Tương Thích Hoạt Chất
+                        </h4>
+                        <ul class="space-y-1.5 text-slate-600 list-disc list-inside">
+                            <li>Tránh kết hợp nồng độ cao Vitamin C tinh khiết cùng Retinoids trong cùng một buổi thoa.</li>
+                            <li>Nên thử trước tại vùng da dưới quai hàm trong 24 giờ đối với làn da siêu nhạy cảm.</li>
+                            <li>Đậy kín nắp ngay sau khi sử dụng để tránh oxy hóa hoạt chất tự nhiên.</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ========================================== -->
+            <!-- TAB 4: CHÍNH SÁCH ĐỔI TRẢ 7 NGÀY & CAM KẾT CHÍNH HÃNG 200% -->
+            <!-- ========================================== -->
+            <div x-show="activeTab === 'policy'" style="display: none;" class="max-w-5xl mx-auto space-y-6">
+                
+                <!-- Guarantee Hero Card -->
+                <div class="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-rose-50 via-white to-pink-50 border border-rose-200 shadow-xs space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-14 h-14 rounded-2xl bg-rose-600 text-white flex items-center justify-center text-2xl shrink-0 shadow-md">
+                            <i class="fa-solid fa-shield-check"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-rose-600 uppercase tracking-widest">Cam Kết Thép Từ Omnichannel Beauty</span>
+                            <h3 class="font-serif font-bold text-xl sm:text-2xl text-charcoal">
+                                Đền Bù 200% Giá Trị Nếu Phát Hiện Hàng Không Chính Hãng
+                            </h3>
+                        </div>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                        Tất cả sản phẩm tại Omnichannel Beauty đều có hợp đồng ủy quyền trực tiếp từ thương hiệu mẹ hoặc nhà nhập khẩu độc quyền tại Việt Nam. Từng lô hàng đều được lưu trữ theo quy trình FEFO nghiêm ngặt, có tem phụ Tiếng Việt và tem chống giả tích hợp mã QR xác thực.
+                    </p>
+                </div>
+
+                <!-- 3 Pillars of Return Policy -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    
+                    <div class="p-5 rounded-2xl bg-white border border-slate-200 space-y-2.5 shadow-2xs">
+                        <div class="w-9 h-9 rounded-xl bg-magenta-accent/10 text-magenta-accent flex items-center justify-center text-base font-bold">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <h4 class="font-bold text-charcoal text-sm">Đổi Trả 7 Ngày Miễn Phí</h4>
+                        <p class="text-slate-500 leading-relaxed">
+                            Áp dụng đổi mới hoặc hoàn tiền 100% khi sản phẩm phát sinh lỗi đóng gói, bể vỡ khi vận chuyển hoặc hạn dùng không khớp cam kết FEFO.
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-white border border-slate-200 space-y-2.5 shadow-2xs">
+                        <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base font-bold">
+                            <i class="fa-solid fa-user-doctor"></i>
+                        </div>
+                        <h4 class="font-bold text-charcoal text-sm">Bảo Hiểm Dị Ứng Da</h4>
+                        <p class="text-slate-500 leading-relaxed">
+                            Hỗ trợ đổi sản phẩm khác hoặc nhận lại hàng khi da có phản ứng không tương thích, có Dược sĩ chuyên môn tư vấn theo dõi 1-1 miễn phí.
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-2xl bg-white border border-slate-200 space-y-2.5 shadow-2xs">
+                        <div class="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-base font-bold">
+                            <i class="fa-solid fa-shop"></i>
+                        </div>
+                        <h4 class="font-bold text-charcoal text-sm">Đổi Trả Tại Mọi Showroom</h4>
+                        <p class="text-slate-500 leading-relaxed">
+                            Bạn có thể mang sản phẩm đến bất kỳ showroom nào thuộc hệ thống Omnichannel Beauty (Q1, Cầu Giấy...) để được xử lý nhanh trong 5 phút.
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- Contact Support Hotline -->
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between flex-wrap gap-3 text-xs">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-headset text-magenta-accent text-base"></i>
+                        <span class="text-slate-600">Tổng đài tiếp nhận khiếu nại & tư vấn sắc đẹp:</span>
+                        <strong class="font-mono text-charcoal text-sm font-bold">1900 8888 (08:00 - 22:00)</strong>
+                    </div>
+                    <span class="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-circle-check"></i> Phục vụ cả Thứ 7 & Chủ Nhật
+                    </span>
+                </div>
+
+            </div>
+
+            <!-- ========================================== -->
+            <!-- TAB ĐÁNH GIÁ KHÁCH HÀNG & RATING (SOCIAL PROOF) -->
+            <!-- ========================================== -->
+            <div x-show="activeTab === 'reviews'" style="display: none;">
+                @await Html.PartialAsync("_ReviewSection", Model)
+            </div>
+
+        </div>
+
+        <!-- 4. SECTION: RELATED PRODUCTS (Cùng danh mục) -->
+        @if (Model.RelatedProducts != null && Model.RelatedProducts.Any())
+        {
+            <div class="mt-20 pt-12 border-t border-soft-border">
+                <div class="flex items-center justify-between mb-8">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-rose-gold">Gợi Ý Dành Riêng Cho Bạn</span>
+                        <h2 class="font-serif text-2xl sm:text-3xl font-bold text-charcoal mt-1">Sản Phẩm Cùng Danh Mục</h2>
+                    </div>
+                    @if (p.Category != null)
+                    {
+                        <a href="/category/@p.Category.Slug" class="text-xs font-bold text-magenta-accent hover:underline flex items-center gap-1">
+                            Xem tất cả <i class="fa-solid fa-angle-right text-[10px]"></i>
+                        </a>
+                    }
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    @foreach (var rel in Model.RelatedProducts)
+                    {
+                        var relImg = !string.IsNullOrEmpty(rel.ThumbnailUrl) ? rel.ThumbnailUrl : "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop";
+                        var relBatch = rel.Batches?.Where(b => b.CurrentQuantity > 0).OrderBy(b => b.ExpDate).FirstOrDefault();
+
+                        <div class="product-card-luxury group">
+                            <div class="product-thumb-container">
+                                <img src="@relImg" class="product-thumb-img absolute inset-0 z-10" alt="@rel.Name" loading="lazy" />
+                                <div class="product-badges-stack">
+                                    @if (relBatch != null)
+                                    {
+                                        <span class="badge-fefo-fresh">HSD: @relBatch.ExpDate.ToString("MM/yyyy")</span>
+                                    }
+                                </div>
+                                <div class="product-action-overlay">
+                                    <button type="button" class="btn-card-action btn-cart-primary" onclick="addToCart(@rel.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(rel.Name))', @rel.SellingPrice, '@relImg')">
+                                        <i class="fa-solid fa-cart-shopping"></i> Thêm Giỏ
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="p-4 flex-1 flex flex-col justify-between">
+                                <div>
+                                    <span class="text-[10px] uppercase font-bold tracking-widest text-slate-400">@rel.Category?.Name</span>
+                                    <a href="/Product/Detail/@rel.Slug" class="block mt-1">
+                                        <h4 class="font-serif font-bold text-charcoal text-xs leading-snug line-clamp-2 hover:text-magenta-accent transition">@rel.Name</h4>
+                                    </a>
+                                </div>
+                                <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
+                                    <span class="font-mono-numeric font-bold text-sm text-charcoal">@rel.SellingPrice.ToString("N0") ₫</span>
+                                    <span class="text-[10px] text-emerald-600 font-semibold">Còn hàng</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+    </div>
+</div>

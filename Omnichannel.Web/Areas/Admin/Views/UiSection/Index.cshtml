@@ -1,0 +1,357 @@
+@model List<Omnichannel.Domain.Entities.UiSection>
+@{
+    ViewData["Title"] = "Quản Lý Bố Cục Trang Chủ (UI Section Builder)";
+    Layout = "_AdminLayout";
+}
+
+<div class="max-w-6xl mx-auto space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 text-xs text-rose-600 dark:text-rose-400 font-semibold uppercase tracking-wider">
+                <a href="/Admin/Dashboard" class="hover:underline flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Bảng điều khiển</span>
+                </a>
+                <span>/</span>
+                <span>Giao diện</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight mt-1 flex items-center gap-3">
+                <i class="fa-solid fa-layer-group text-rose-500"></i>
+                <span>Bố Cục Trang Chủ (UI Section Builder)</span>
+            </h1>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Kéo thả sắp xếp thứ tự và bật/tắt hiển thị các khối nội dung trên Storefront theo thời gian thực.
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            <a href="/" target="_blank" 
+               class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center gap-2">
+                <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                <span>Xem Storefront</span>
+            </a>
+            <button type="button" 
+                    onclick="saveCurrentOrder()"
+                    id="btnSaveOrder"
+                    class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-semibold text-sm shadow-md shadow-rose-500/25 transition flex items-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i>
+                <span>Lưu Thứ Tự Bố Cục</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Instructions / Tips Banner -->
+    <div class="p-4 rounded-2xl bg-gradient-to-r from-rose-500/10 via-pink-500/10 to-amber-500/10 border border-rose-200/60 dark:border-rose-900/40 flex items-start gap-3">
+        <div class="h-8 w-8 rounded-xl bg-rose-500 text-white flex items-center justify-center shrink-0 text-sm shadow-sm">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </div>
+        <div class="text-xs text-slate-700 dark:text-slate-300 space-y-1">
+            <span class="font-bold text-slate-900 dark:text-white block text-sm">Hướng dẫn sắp xếp trực quan:</span>
+            <p>
+                • <strong>Kéo & thả (Drag and Drop):</strong> Giữ chuột vào biểu tượng <i class="fa-solid fa-grip-vertical text-slate-400"></i> để kéo khối đến vị trí mong muốn.
+            </p>
+            <p>
+                • <strong>Phím điều hướng:</strong> Bạn cũng có thể bấm nút mũi tên <i class="fa-solid fa-chevron-up text-slate-400"></i> hoặc <i class="fa-solid fa-chevron-down text-slate-400"></i> để di chuyển từng nấc một.
+            </p>
+            <p>
+                • <strong>Ẩn/Hiện tức thì:</strong> Nhấp vào công tắc Switch để bật hoặc tắt khối mà không làm mất cấu hình đã lưu.
+            </p>
+        </div>
+    </div>
+
+    <!-- Hidden Anti-Forgery Token Form -->
+    <form id="antiForgeryForm" class="hidden">
+        @Html.AntiForgeryToken()
+    </form>
+
+    <!-- Sections Sortable List -->
+    <div id="sectionCardsContainer" class="space-y-3">
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            var item = Model[i];
+            var iconClass = item.SectionCode switch
+            {
+                "HERO_SLIDER" => "fa-solid fa-images text-blue-500 bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-900",
+                "FLASH_SALE" => "fa-solid fa-bolt-lightning text-amber-500 bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900",
+                "FEATURED_CATEGORIES" => "fa-solid fa-shapes text-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900",
+                "BEST_SELLERS" => "fa-solid fa-fire text-rose-500 bg-rose-50 dark:bg-rose-950/40 border-rose-200 dark:border-rose-900",
+                "MID_BANNER" => "fa-solid fa-panorama text-purple-500 bg-purple-50 dark:bg-purple-950/40 border-purple-200 dark:border-purple-900",
+                "BEAUTY_BLOG" => "fa-solid fa-book-open text-indigo-500 bg-indigo-50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-900",
+                _ => "fa-solid fa-layer-group text-slate-500 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+            };
+
+            <div class="section-card group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-default select-none"
+                 data-id="@item.Id"
+                 data-code="@item.SectionCode"
+                 draggable="true">
+                
+                <!-- Left: Drag Handle, Number Badge, Icon, Info -->
+                <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <!-- Drag Handle -->
+                    <div class="drag-handle cursor-grab active:cursor-grabbing p-2 -ml-2 text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 transition"
+                         title="Kéo thả để đổi thứ tự">
+                        <i class="fa-solid fa-grip-vertical text-lg"></i>
+                    </div>
+
+                    <!-- Order Badge -->
+                    <div class="order-badge h-7 w-7 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold font-mono flex items-center justify-center shrink-0">
+                        @(i + 1)
+                    </div>
+
+                    <!-- Section Icon -->
+                    <div class="h-11 w-11 rounded-2xl border flex items-center justify-center text-lg shrink-0 @iconClass">
+                        <i class="@iconClass.Split(' ')[0] @iconClass.Split(' ')[1]"></i>
+                    </div>
+
+                    <!-- Section Metadata -->
+                    <div class="min-w-0 space-y-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h3 class="text-sm sm:text-base font-bold text-slate-800 dark:text-white truncate">
+                                @item.Title
+                            </h3>
+                            <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono text-[11px] font-semibold">
+                                @item.SectionCode
+                            </span>
+                            @if (!string.IsNullOrEmpty(item.LayoutType))
+                            {
+                                <span class="px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-[10px] font-semibold border border-rose-200/50 dark:border-rose-900/50">
+                                    @item.LayoutType
+                                </span>
+                            }
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
+                            @(item.Subtitle ?? "Khối hiển thị động nạp dữ liệu trực tiếp từ CSDL")
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Right: Status Toggle, Move Buttons -->
+                <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800">
+                    <!-- Toggle Switch -->
+                    <div class="flex items-center gap-2.5 pr-2 sm:pr-4 border-r border-slate-200 dark:border-slate-800">
+                        <span class="status-label text-xs font-semibold @(item.IsVisible ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400")">
+                            @(item.IsVisible ? "Đang hiển thị" : "Đang ẩn")
+                        </span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" 
+                                   class="sr-only peer toggle-visibility-btn" 
+                                   data-id="@item.Id"
+                                   @(item.IsVisible ? "checked" : "")
+                                   onchange="toggleSectionVisibility(@item.Id, this.checked, this)" />
+                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                        </label>
+                    </div>
+
+                    <!-- Up / Down Reorder Buttons -->
+                    <div class="flex items-center gap-1">
+                        <button type="button" 
+                                onclick="moveSectionUp(this)" 
+                                title="Di chuyển lên"
+                                class="btn-move-up p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                            <i class="fa-solid fa-chevron-up text-xs"></i>
+                        </button>
+                        <button type="button" 
+                                onclick="moveSectionDown(this)" 
+                                title="Di chuyển xuống"
+                                class="btn-move-down p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Floating Toast Container -->
+<div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+@section Scripts {
+    <script>
+        // Lấy AntiForgeryToken từ form ẩn
+        function getCsrfToken() {
+            const tokenInput = document.querySelector('#antiForgeryForm input[name="__RequestVerificationToken"]');
+            return tokenInput ? tokenInput.value : '';
+        }
+
+        // Toast thông báo góc phải
+        function showToast(message, isSuccess = true) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `p-3.5 rounded-2xl shadow-xl border text-xs font-semibold flex items-center gap-2.5 transition-all duration-300 transform translate-y-4 pointer-events-auto ${
+                isSuccess 
+                    ? 'bg-emerald-50 dark:bg-emerald-950/90 border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200' 
+                    : 'bg-rose-50 dark:bg-rose-950/90 border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200'
+            }`;
+            
+            toast.innerHTML = `
+                <i class="fa-solid ${isSuccess ? 'fa-circle-check text-emerald-500' : 'fa-circle-exclamation text-rose-500'} text-sm"></i>
+                <span>${message}</span>
+            `;
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-4');
+                toast.classList.add('translate-y-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Cập nhật lại số thứ tự badge hiển thị (1, 2, 3...)
+        function refreshOrderBadges() {
+            const cards = document.querySelectorAll('#sectionCardsContainer .section-card');
+            cards.forEach((card, idx) => {
+                const badge = card.querySelector('.order-badge');
+                if (badge) {
+                    badge.textContent = idx + 1;
+                }
+            });
+        }
+
+        // Di chuyển phần tử lên 1 nấc
+        function moveSectionUp(button) {
+            const card = button.closest('.section-card');
+            const prev = card.previousElementSibling;
+            if (prev && prev.classList.contains('section-card')) {
+                card.parentNode.insertBefore(card, prev);
+                refreshOrderBadges();
+                saveCurrentOrder(true);
+            }
+        }
+
+        // Di chuyển phần tử xuống 1 nấc
+        function moveSectionDown(button) {
+            const card = button.closest('.section-card');
+            const next = card.nextElementSibling;
+            if (next && next.classList.contains('section-card')) {
+                card.parentNode.insertBefore(next, card);
+                refreshOrderBadges();
+                saveCurrentOrder(true);
+            }
+        }
+
+        // Bật / Tắt trạng thái hiển thị khối giao diện
+        async function toggleSectionVisibility(id, isVisible, inputEl) {
+            const label = inputEl.closest('.section-card').querySelector('.status-label');
+            try {
+                const res = await fetch('/admin/ui-section/toggle-visibility', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({ id: id, isVisible: isVisible })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    if (label) {
+                        label.textContent = isVisible ? 'Đang hiển thị' : 'Đang ẩn';
+                        label.className = `status-label text-xs font-semibold ${isVisible ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`;
+                    }
+                    showToast(data.message, true);
+                } else {
+                    inputEl.checked = !isVisible;
+                    showToast(data.message || 'Lỗi khi cập nhật trạng thái.', false);
+                }
+            } catch (err) {
+                console.error(err);
+                inputEl.checked = !isVisible;
+                showToast('Lỗi mạng khi cập nhật trạng thái hiển thị.', false);
+            }
+        }
+
+        // Gửi danh sách thứ tự IDs mới lên máy chủ
+        async function saveCurrentOrder(isAuto = false) {
+            const cards = document.querySelectorAll('#sectionCardsContainer .section-card');
+            const orderedIds = Array.from(cards).map(c => parseInt(c.getAttribute('data-id'), 10));
+
+            const saveBtn = document.getElementById('btnSaveOrder');
+            const origContent = saveBtn ? saveBtn.innerHTML : '';
+            if (saveBtn && !isAuto) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Đang Lưu...</span>';
+            }
+
+            try {
+                const res = await fetch('/admin/ui-section/update-order', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({ orderedIds: orderedIds })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'Đã lưu thứ tự bố cục thành công!', true);
+                } else {
+                    showToast(data.message || 'Lỗi khi lưu thứ tự.', false);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi kết nối khi lưu thứ tự bố cục.', false);
+            } finally {
+                if (saveBtn && !isAuto) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = origContent;
+                }
+            }
+        }
+
+        // ==========================================
+        // HTML5 DRAG & DROP API CHO CÁC KHỐI CARD
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('sectionCardsContainer');
+            let draggedCard = null;
+
+            container.addEventListener('dragstart', (e) => {
+                const card = e.target.closest('.section-card');
+                if (!card) return;
+                draggedCard = card;
+                card.classList.add('opacity-50', 'ring-2', 'ring-rose-500', 'scale-[0.99]');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', card.getAttribute('data-id'));
+            });
+
+            container.addEventListener('dragend', (e) => {
+                const card = e.target.closest('.section-card');
+                if (card) {
+                    card.classList.remove('opacity-50', 'ring-2', 'ring-rose-500', 'scale-[0.99]');
+                }
+                draggedCard = null;
+                document.querySelectorAll('.section-card').forEach(c => {
+                    c.classList.remove('border-rose-500', 'bg-rose-50/20', 'translate-y-1');
+                });
+            });
+
+            container.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                const targetCard = e.target.closest('.section-card');
+                if (targetCard && targetCard !== draggedCard) {
+                    const bounding = targetCard.getBoundingClientRect();
+                    const offset = bounding.y + (bounding.height / 2);
+                    if (e.clientY - offset > 0) {
+                        targetCard.after(draggedCard);
+                    } else {
+                        targetCard.before(draggedCard);
+                    }
+                    refreshOrderBadges();
+                }
+            });
+
+            container.addEventListener('drop', (e) => {
+                e.preventDefault();
+                refreshOrderBadges();
+                saveCurrentOrder(true);
+            });
+        });
+    </script>
+}

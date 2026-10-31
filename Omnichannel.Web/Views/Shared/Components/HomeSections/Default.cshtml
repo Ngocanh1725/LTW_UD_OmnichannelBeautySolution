@@ -1,0 +1,416 @@
+@model Omnichannel.Web.Models.HomeSectionsViewModel
+
+@if (Model != null && Model.Sections.Any())
+{
+    @foreach (var item in Model.Sections)
+    {
+        var code = item.Section.SectionCode.ToUpperInvariant();
+
+        @if (code == "HERO_SLIDER" && item.Banners.Any())
+        {
+            <!-- 1. HERO SLIDER SECTION (Dynamic from DB) -->
+            <section class="relative bg-charcoal text-white overflow-hidden" 
+                     x-data="{
+                         activeSlide: 0,
+                         timer: null,
+                         totalSlides: @item.Banners.Count,
+                         init() {
+                             if (this.totalSlides > 1) {
+                                 this.timer = setInterval(() => { this.next() }, 6000);
+                             }
+                         },
+                         next() {
+                             this.activeSlide = (this.activeSlide + 1) % this.totalSlides;
+                         },
+                         prev() {
+                             this.activeSlide = (this.activeSlide - 1 + this.totalSlides) % this.totalSlides;
+                         },
+                         goTo(idx) {
+                             this.activeSlide = idx;
+                         }
+                     }">
+                <div class="relative min-h-[460px] sm:min-h-[540px] lg:min-h-[620px] flex items-center">
+                    @for (int i = 0; i < item.Banners.Count; i++)
+                    {
+                        var b = item.Banners[i];
+                        var bannerImg = b.DesktopMediaId.HasValue ? $"/media/{b.DesktopMediaId}" : (!string.IsNullOrEmpty(b.DesktopImageUrl) ? b.DesktopImageUrl : (!string.IsNullOrEmpty(b.ImageUrl) ? b.ImageUrl : "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&q=80"));
+
+                        <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+                             x-show="activeSlide === @i"
+                             x-transition:enter="transition ease-out duration-700"
+                             x-transition:enter-start="opacity-0 scale-105"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-500"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             style="@(i == 0 ? "" : "display: none;")">
+                            
+                            <!-- Background Image with Gradient Overlay -->
+                            <img src="@bannerImg" alt="@b.Title" class="w-full h-full object-cover object-center" onerror="this.src='https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&q=80'" />
+                            <div class="absolute inset-0 bg-gradient-to-r from-charcoal/90 via-charcoal/60 to-transparent"></div>
+
+                            <!-- Content Floating Overlay -->
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                                    <div class="max-w-xl space-y-4">
+                                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-magenta-accent/20 border border-magenta-accent/40 text-rose-300 text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
+                                            <i class="fa-solid fa-sparkles text-amber-400"></i>
+                                            <span>Bộ Sưu Tập Mới 2026</span>
+                                        </div>
+                                        <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight text-white drop-shadow-md">
+                                            @b.Title
+                                        </h1>
+                                        <p class="text-sm sm:text-base text-slate-200 font-sans leading-relaxed line-clamp-3">
+                                            @(b.Subtitle ?? "Khám phá chu trình chăm sóc sắc đẹp đa tầng khoa học chuẩn spa và các dòng mỹ phẩm cao cấp.")
+                                        </p>
+                                        <div class="pt-2 flex items-center gap-4">
+                                            <a href="@(b.LinkUrl ?? "/category/all")" class="px-7 py-3.5 rounded-full bg-gradient-to-r from-magenta-accent to-pink-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold text-sm shadow-xl shadow-magenta-accent/30 hover:scale-105 transition-all duration-300 flex items-center gap-2">
+                                                <span>@(b.ButtonText ?? "Khám Phá Ngay")</span>
+                                                <i class="fa-solid fa-arrow-right text-xs"></i>
+                                            </a>
+                                            <a href="/clearance-fefo" class="px-5 py-3.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-sm backdrop-blur-md transition">
+                                                Deal FEFO -50%
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Carousel Nav Arrows -->
+                    @if (item.Banners.Count > 1)
+                    {
+                        <button @@click="prev()" type="button" class="absolute left-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white flex items-center justify-center backdrop-blur-md transition hover:scale-110 z-20" aria-label="Slide trước">
+                            <i class="fa-solid fa-angle-left"></i>
+                        </button>
+                        <button @@click="next()" type="button" class="absolute right-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white flex items-center justify-center backdrop-blur-md transition hover:scale-110 z-20" aria-label="Slide sau">
+                            <i class="fa-solid fa-angle-right"></i>
+                        </button>
+
+                        <!-- Dot Indicators -->
+                        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
+                            @for (int i = 0; i < item.Banners.Count; i++)
+                            {
+                                <button @@click="goTo(@i)" type="button" 
+                                        :class="activeSlide === @i ? 'w-8 bg-magenta-accent' : 'w-2 bg-white/40'" 
+                                        class="h-2 rounded-full transition-all duration-300" 
+                                        aria-label="Tới slide @(i+1)"></button>
+                            }
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+        else if (code == "FEATURED_CATEGORIES" && item.Categories.Any())
+        {
+            <!-- 2. FEATURED CATEGORIES SECTION (Dynamic from DB) -->
+            <section class="py-14 sm:py-20 bg-gradient-to-b from-[#fffdfd] to-pastel-rose/30">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-widest text-magenta-accent flex items-center gap-1.5 mb-1.5">
+                                <i class="fa-solid fa-gem text-rose-gold"></i>
+                                <span>Phân Loại Khoa Học</span>
+                            </span>
+                            <h2 class="font-serif text-2xl sm:text-4xl font-bold text-charcoal">
+                                @item.Section.Title
+                            </h2>
+                            @if (!string.IsNullOrEmpty(item.Section.Subtitle))
+                            {
+                                <p class="text-xs sm:text-sm text-slate-500 mt-1 font-sans">
+                                    @item.Section.Subtitle
+                                </p>
+                            }
+                        </div>
+                        <a href="/category/all" class="text-xs font-bold text-magenta-accent hover:text-[#b0276a] flex items-center gap-1.5 group shrink-0">
+                            <span>Xem tất cả ngành hàng</span>
+                            <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+
+                    <!-- Categories Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
+                        @foreach (var cat in item.Categories)
+                        {
+                            var catImg = cat.MediaAssetId.HasValue ? $"/media/{cat.MediaAssetId}" : (!string.IsNullOrEmpty(cat.ImageUrl) ? cat.ImageUrl : "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=300&h=300&fit=crop");
+
+                            <a href="/tim-kiem?categorySlug=@cat.Slug" class="group flex flex-col items-center text-center p-4 rounded-3xl bg-white border border-rose-100/80 shadow-xs hover:shadow-xl hover:border-pink-300 transition-all duration-300 hover:-translate-y-1">
+                                <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden mb-3 bg-pastel-rose/50 p-2 flex items-center justify-center">
+                                    <img src="@catImg" alt="@cat.Name" class="w-full h-full object-cover rounded-xl group-hover:scale-110 transition duration-300" onerror="this.src='/images/product-placeholder.svg'" />
+                                </div>
+                                <h3 class="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-magenta-accent transition line-clamp-1">
+                                    @cat.Name
+                                </h3>
+                                <span class="text-[10px] text-slate-400 mt-0.5">Khám phá</span>
+                            </a>
+                        }
+                    </div>
+                </div>
+            </section>
+        }
+        else if (code == "FLASH_SALE" && item.FlashSaleProducts.Any())
+        {
+            <!-- 3. FLASH SALE SECTION (Dynamic from DB) -->
+            <section class="py-14 sm:py-20 bg-gradient-to-r from-rose-900 via-charcoal to-slate-900 text-white relative overflow-hidden">
+                <div class="absolute -right-24 -bottom-24 w-96 h-96 rounded-full bg-magenta-accent/10 blur-3xl pointer-events-none"></div>
+
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+                        <div>
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-bold uppercase tracking-wider mb-2">
+                                <i class="fa-solid fa-bolt text-amber-400 animate-bounce"></i>
+                                <span>Giờ Vàng Giá Sốc • FEFO Minh Bạch</span>
+                            </div>
+                            <h2 class="font-serif text-2xl sm:text-4xl font-bold text-white">
+                                @item.Section.Title
+                            </h2>
+                            @if (!string.IsNullOrEmpty(item.Section.Subtitle))
+                            {
+                                <p class="text-xs sm:text-sm text-slate-300 mt-1 font-sans">
+                                    @item.Section.Subtitle
+                                </p>
+                            }
+                        </div>
+                        <a href="/clearance-fefo" class="text-xs font-bold text-amber-300 hover:text-white flex items-center gap-1.5 group shrink-0">
+                            <span>Xem toàn bộ Deal FEFO</span>
+                            <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+
+                    <!-- Products Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                        @foreach (var prod in item.FlashSaleProducts)
+                        {
+                            var prodImg = prod.ThumbnailMediaId.HasValue ? $"/media/{prod.ThumbnailMediaId}" : (!string.IsNullOrEmpty(prod.ThumbnailUrl) ? prod.ThumbnailUrl : "/images/product-placeholder.svg");
+                            var price = prod.SellingPrice;
+                            var discountPrice = prod.DiscountPrice ?? (price * 0.7m);
+                            var discountPercent = price > 0 ? (int)Math.Round((1 - (discountPrice / price)) * 100) : 30;
+
+                            <div class="group rounded-3xl bg-white/95 backdrop-blur-md text-charcoal border border-white/20 p-4 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between">
+                                <div>
+                                    <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-slate-50 mb-3 flex items-center justify-center p-3">
+                                        <img src="@prodImg" alt="@prod.Name" class="w-full h-full object-contain group-hover:scale-105 transition duration-300" onerror="this.src='/images/product-placeholder.svg'" />
+                                        
+                                        <!-- Sale Badge -->
+                                        <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold tracking-wider shadow-sm">
+                                            -@discountPercent%
+                                        </span>
+                                    </div>
+
+                                    <div class="text-[10px] font-bold text-rose-gold uppercase tracking-wider mb-1">
+                                        @(prod.Supplier?.Name ?? "Omni Beauty")
+                                    </div>
+                                    <a href="/san-pham/@prod.Slug" class="block font-bold text-xs sm:text-sm text-slate-800 group-hover:text-magenta-accent transition line-clamp-2">
+                                        @prod.Name
+                                    </a>
+                                </div>
+
+                                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                                    <div>
+                                        <div class="text-xs sm:text-base font-bold text-rose-600 font-mono">
+                                            @discountPrice.ToString("N0") ₫
+                                        </div>
+                                        <div class="text-[10px] text-slate-400 line-through font-mono">
+                                            @price.ToString("N0") ₫
+                                        </div>
+                                    </div>
+                                    <a href="/san-pham/@prod.Slug" class="h-9 w-9 rounded-xl bg-pastel-rose text-magenta-accent hover:bg-magenta-accent hover:text-white flex items-center justify-center transition shadow-xs" title="Xem chi tiết">
+                                        <i class="fa-solid fa-cart-plus text-xs"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </section>
+        }
+        else if (code == "BEST_SELLERS" && item.BestSellers.Any())
+        {
+            <!-- 4. BEST SELLERS SECTION (Dynamic from DB) -->
+            <section class="py-14 sm:py-20 bg-[#fffdfd]">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-widest text-magenta-accent flex items-center gap-1.5 mb-1.5">
+                                <i class="fa-solid fa-crown text-amber-500"></i>
+                                <span>Top Bán Chạy Nhất</span>
+                            </span>
+                            <h2 class="font-serif text-2xl sm:text-4xl font-bold text-charcoal">
+                                @item.Section.Title
+                            </h2>
+                            @if (!string.IsNullOrEmpty(item.Section.Subtitle))
+                            {
+                                <p class="text-xs sm:text-sm text-slate-500 mt-1 font-sans">
+                                    @item.Section.Subtitle
+                                </p>
+                            }
+                        </div>
+                        <a href="/tim-kiem?sort=best_seller" class="text-xs font-bold text-magenta-accent hover:text-[#b0276a] flex items-center gap-1.5 group shrink-0">
+                            <span>Xem tất cả</span>
+                            <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+
+                    <!-- Products Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                        @foreach (var prod in item.BestSellers)
+                        {
+                            var prodImg = prod.ThumbnailMediaId.HasValue ? $"/media/{prod.ThumbnailMediaId}" : (!string.IsNullOrEmpty(prod.ThumbnailUrl) ? prod.ThumbnailUrl : "/images/product-placeholder.svg");
+
+                            <div class="group rounded-3xl bg-white border border-rose-100/80 p-4 shadow-xs hover:shadow-xl hover:border-pink-200 transition-all duration-300 flex flex-col justify-between">
+                                <div>
+                                    <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-slate-50 mb-3 flex items-center justify-center p-3">
+                                        <img src="@prodImg" alt="@prod.Name" class="w-full h-full object-contain group-hover:scale-105 transition duration-300" onerror="this.src='/images/product-placeholder.svg'" />
+                                        
+                                        @if (prod.IsFeatured)
+                                        {
+                                            <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-bold tracking-wider shadow-sm flex items-center gap-1">
+                                                <i class="fa-solid fa-star text-[8px]"></i> HOT
+                                            </span>
+                                        }
+                                    </div>
+
+                                    <div class="text-[10px] font-bold text-rose-gold uppercase tracking-wider mb-1">
+                                        @(prod.Supplier?.Name ?? "Omni Beauty")
+                                    </div>
+                                    <a href="/san-pham/@prod.Slug" class="block font-bold text-xs sm:text-sm text-slate-800 group-hover:text-magenta-accent transition line-clamp-2">
+                                        @prod.Name
+                                    </a>
+                                </div>
+
+                                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+                                    <div>
+                                        <div class="text-xs sm:text-base font-bold text-charcoal font-mono">
+                                            @((prod.DiscountPrice ?? prod.SellingPrice).ToString("N0")) ₫
+                                        </div>
+                                        @if (prod.DiscountPrice.HasValue && prod.DiscountPrice.Value < prod.SellingPrice)
+                                        {
+                                            <div class="text-[10px] text-slate-400 line-through font-mono">
+                                                @prod.SellingPrice.ToString("N0") ₫
+                                            </div>
+                                        }
+                                    </div>
+                                    <a href="/san-pham/@prod.Slug" class="h-9 w-9 rounded-xl bg-pastel-rose text-magenta-accent hover:bg-magenta-accent hover:text-white flex items-center justify-center transition shadow-xs" title="Xem chi tiết">
+                                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </section>
+        }
+
+        @if (code == "MID_BANNER")
+        {
+            var banner = item.MidBanners.FirstOrDefault();
+            var bgImg = banner != null && !string.IsNullOrEmpty(banner.DesktopImageUrl) ? banner.DesktopImageUrl : "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&q=80";
+            var title = banner?.Title ?? item.Section.Title;
+            var sub = banner?.Subtitle ?? item.Section.Subtitle ?? "Khám phá phong cách trang điểm chuẩn chuyên gia và các sản phẩm thuần chay";
+            var link = banner?.LinkUrl ?? "/category/all";
+
+            <!-- 5. MID BANNER SECTION (Dynamic from DB) -->
+            <section class="py-10 bg-slate-50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="relative rounded-3xl overflow-hidden min-h-[320px] sm:min-h-[380px] flex items-center shadow-2xl">
+                        <img src="@bgImg" alt="@title" class="absolute inset-0 w-full h-full object-cover object-center" />
+                        <div class="absolute inset-0 bg-gradient-to-r from-charcoal/90 via-charcoal/60 to-transparent"></div>
+                        <div class="relative max-w-xl p-8 sm:p-12 space-y-4 text-white">
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-magenta-accent/30 border border-magenta-accent/40 text-pink-300 text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
+                                <i class="fa-solid fa-sparkles text-amber-400"></i>
+                                <span>Bộ Sưu Tập Độc Quyền</span>
+                            </span>
+                            <h2 class="font-serif text-2xl sm:text-4xl font-bold leading-tight">
+                                @title
+                            </h2>
+                            <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                                @sub
+                            </p>
+                            <div class="pt-2">
+                                <a href="@link" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-magenta-accent to-pink-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-magenta-accent/30 hover:scale-105 transition-all">
+                                    <span>Khám Phá Ngay</span>
+                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        }
+
+        @if (code == "BEAUTY_BLOG" && item.BlogPosts.Any())
+        {
+            <!-- 6. BEAUTY BLOG SECTION (Dynamic from DB) -->
+            <section class="py-16 bg-white border-t border-rose-100/50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+                        <div>
+                            <div class="flex items-center gap-2 text-magenta-accent text-xs font-bold uppercase tracking-widest mb-1.5">
+                                <i class="fa-solid fa-book-open"></i>
+                                <span>Cẩm Nang Chăm Sóc Sắc Đẹp</span>
+                            </div>
+                            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-charcoal">
+                                @item.Section.Title
+                            </h2>
+                            @if (!string.IsNullOrEmpty(item.Section.Subtitle))
+                            {
+                                <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-xl">
+                                    @item.Section.Subtitle
+                                </p>
+                            }
+                        </div>
+                        <a href="/blog" class="inline-flex items-center gap-2 text-xs font-bold text-magenta-accent hover:text-rose-700 group transition">
+                            <span>Xem tất cả bài viết</span>
+                            <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        @foreach (var post in item.BlogPosts)
+                        {
+                            var postImg = !string.IsNullOrEmpty(post.ThumbnailUrl) ? post.ThumbnailUrl : "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&h=400&fit=crop";
+
+                            <article class="group rounded-3xl bg-slate-50/50 border border-slate-200/80 overflow-hidden hover:shadow-xl hover:border-pink-200 transition-all duration-300 flex flex-col justify-between">
+                                <div>
+                                    <div class="relative w-full aspect-[16/10] overflow-hidden bg-slate-100">
+                                        <img src="@postImg" alt="@post.Title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                        @if (post.PostCategory != null)
+                                        {
+                                            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-slate-800 text-[10px] font-bold shadow-xs">
+                                                @post.PostCategory.Name
+                                            </span>
+                                        }
+                                    </div>
+                                    <div class="p-5 space-y-2">
+                                        <div class="text-[11px] text-slate-400 flex items-center gap-2">
+                                            <i class="fa-regular fa-calendar"></i>
+                                            <span>@((post.PublishedAt ?? post.CreatedAt).ToString("dd/MM/yyyy"))</span>
+                                        </div>
+                                        <h3 class="font-serif text-base font-bold text-charcoal group-hover:text-magenta-accent transition line-clamp-2">
+                                            <a href="/blog/@post.Slug">
+                                                @post.Title
+                                            </a>
+                                        </h3>
+                                        @if (!string.IsNullOrEmpty(post.Summary))
+                                        {
+                                            <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                                                @post.Summary
+                                            </p>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="p-5 pt-0">
+                                    <a href="/blog/@post.Slug" class="text-xs font-bold text-magenta-accent hover:text-rose-700 flex items-center gap-1.5 transition">
+                                        <span>Đọc chi tiết</span>
+                                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                    </a>
+                                </div>
+                            </article>
+                        }
+                    </div>
+                </div>
+            </section>
+        }
+    }
+}

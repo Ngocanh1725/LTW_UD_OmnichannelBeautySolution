@@ -1,24 +1,169 @@
-@model IEnumerable<Omnichannel.Domain.Entities.Product>
+@model Omnichannel.Web.Models.LiveSearchViewModel
 
-@if (!Model.Any())
-{
-    <div class="px-3 py-2 text-xs text-slate-500">Không tìm thấy sản phẩm nào phù hợp.</div>
-}
-else
-{
-    @foreach (var p in Model)
-    {
-        <a href="/product/@p.Slug" class="flex items-center gap-3 p-2 rounded-xl hover:bg-pink-50 transition group">
-            <img src="@(string.IsNullOrEmpty(p.ThumbnailUrl) ? "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=100&h=100&fit=crop" : p.ThumbnailUrl)" class="w-12 h-12 rounded-lg object-cover border border-slate-100 group-hover:border-pink-200 transition" alt="@p.Name" />
-            <div class="flex-1 min-w-0">
-                <div class="text-[10px] font-bold text-pink-600 uppercase">@p.Category?.Name</div>
-                <h4 class="text-xs font-bold text-slate-900 truncate group-hover:text-pink-700 transition">@p.Name</h4>
-                <div class="text-xs font-bold text-slate-900 font-mono-numeric mt-0.5">@p.SellingPrice.ToString("N0") ₫ <span class="text-[9px] text-slate-400 line-through font-mono-numeric">@((p.SellingPrice * 1.2m).ToString("N0")) ₫</span></div>
+<div x-data="{ activeTab: '@(Model.HasSearched ? "products" : "keywords")' }" class="p-1">
+    <!-- Luxury Two-Tab Navigation Header -->
+    <div class="flex items-center justify-between border-b border-rose-100/80 pb-2 mb-3">
+        <div class="flex items-center gap-1.5 p-1 bg-slate-100/70 rounded-xl">
+            <button type="button" 
+                    @@click="activeTab = 'products'" 
+                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5"
+                    :class="activeTab === 'products' ? 'bg-white text-magenta-accent shadow-sm' : 'text-slate-500 hover:text-charcoal'">
+                <i class="fa-solid fa-bag-shopping text-[11px]"></i>
+                <span>Sản Phẩm Tìm Thấy</span>
+                @if (Model.TotalFound > 0)
+                {
+                    <span class="px-1.5 py-0.2 rounded-full text-[10px] font-bold"
+                          :class="activeTab === 'products' ? 'bg-magenta-accent text-white' : 'bg-slate-200 text-slate-600'">
+                        @Model.TotalFound
+                    </span>
+                }
+            </button>
+            <button type="button" 
+                    @@click="activeTab = 'keywords'" 
+                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5"
+                    :class="activeTab === 'keywords' ? 'bg-white text-magenta-accent shadow-sm' : 'text-slate-500 hover:text-charcoal'">
+                <i class="fa-solid fa-fire-flame-curved text-[11px] text-amber-500"></i>
+                <span>Từ Khóa Nổi Bật</span>
+                <span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-rose-100 text-rose-700">HOT</span>
+            </button>
+        </div>
+        
+        <span class="text-[10px] font-medium text-slate-400 hidden sm:inline-flex items-center gap-1">
+            <i class="fa-solid fa-bolt text-amber-400"></i> Tốc độ cao 300ms
+        </span>
+    </div>
+
+    <!-- TAB 1: SẢN PHẨM TÌM THẤY -->
+    <div x-show="activeTab === 'products'" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
+        @if (!Model.Products.Any())
+        {
+            <div class="py-8 px-4 text-center">
+                <div class="h-12 w-12 rounded-full bg-pastel-rose text-magenta-accent flex items-center justify-center mx-auto mb-3 text-lg">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <h5 class="text-xs font-bold text-slate-800 mb-1">Không tìm thấy sản phẩm phù hợp</h5>
+                <p class="text-[11px] text-slate-500 max-w-xs mx-auto mb-4">
+                    Rất tiếc chưa có sản phẩm nào khớp với "@Model.Query". Bạn hãy thử tìm kiếm với các từ khóa gợi ý bên dưới.
+                </p>
+                <button type="button" @@click="activeTab = 'keywords'" class="inline-flex items-center gap-1.5 text-xs font-bold text-magenta-accent hover:underline">
+                    Xem Từ Khóa Xu Hướng <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </button>
             </div>
-        </a>
-    }
-    
-    <a href="#" onclick="document.getElementById('storefrontSearchInput').closest('form')?.submit(); return false;" class="block mt-2 text-center text-xs font-bold text-pink-600 hover:text-pink-700 py-2 border-t border-slate-100">
-        Xem tất cả kết quả <i class="fa-solid fa-arrow-right ml-1"></i>
-    </a>
-}
+        }
+        else
+        {
+            <div class="space-y-1.5 max-h-[380px] overflow-y-auto pr-1 divide-y divide-slate-100/80">
+                @foreach (var p in Model.Products)
+                {
+                    <a href="/san-pham/@p.Slug" class="flex items-center gap-3.5 p-2.5 rounded-xl hover:bg-pastel-rose/80 transition group border border-transparent hover:border-pink-100">
+                        <!-- Product Thumbnail -->
+                        <div class="relative shrink-0">
+                            <img src="@p.ThumbnailUrl" 
+                                 alt="@p.Name" 
+                                 class="w-14 h-14 rounded-xl object-cover border border-slate-200/80 group-hover:border-magenta-accent/40 shadow-xs transition duration-200 group-hover:scale-105" 
+                                 loading="lazy" />
+                            <span class="absolute -top-1 -left-1 text-[8px] bg-charcoal text-white font-bold px-1 rounded-sm shadow-xs">
+                                FEFO
+                            </span>
+                        </div>
+
+                        <!-- Product Info -->
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-0.5">
+                                <span class="text-[9.5px] font-bold text-rose-gold uppercase tracking-wider truncate">
+                                    @p.ManufacturerName
+                                </span>
+                                <span class="text-slate-300">•</span>
+                                <span class="text-[9.5px] text-slate-500 truncate">
+                                    @p.CategoryName
+                                </span>
+                            </div>
+
+                            <h4 class="text-xs font-bold text-slate-800 truncate group-hover:text-magenta-accent transition">
+                                @p.Name
+                            </h4>
+
+                            <div class="flex items-center justify-between gap-2 mt-1">
+                                <div class="flex items-baseline gap-1.5">
+                                    <span class="text-xs font-bold text-charcoal font-mono-numeric">
+                                        @p.SellingPrice.ToString("N0") ₫
+                                    </span>
+                                    @if (p.OriginalPrice > p.SellingPrice)
+                                    {
+                                        <span class="text-[10px] text-slate-400 line-through font-mono-numeric">
+                                            @p.OriginalPrice.ToString("N0") ₫
+                                        </span>
+                                    }
+                                </div>
+
+                                <!-- FEFO Expiry Badge -->
+                                <span class="inline-flex items-center gap-1 text-[9.5px] font-semibold px-2 py-0.5 rounded-full border @p.FefoBadgeClass shadow-2xs">
+                                    <i class="fa-solid fa-clock-rotate-left text-[8px]"></i>
+                                    <span>@p.FefoStatus</span>
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+
+            <!-- View All Footer Link -->
+            @if (!string.IsNullOrWhiteSpace(Model.Query))
+            {
+                <a href="/tim-kiem?q=@Uri.EscapeDataString(Model.Query)" class="w-full flex items-center justify-center gap-2 mt-2 py-2.5 px-4 rounded-xl bg-pastel-rose text-magenta-accent hover:bg-magenta-accent hover:text-white font-bold text-xs transition duration-200 shadow-2xs">
+                    <span>Xem tất cả @(Model.TotalFound > 0 ? $"{Model.TotalFound} " : "")kết quả cho "@Model.Query"</span>
+                    <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                </a>
+            }
+        }
+    </div>
+
+    <!-- TAB 2: TỪ KHÓA NỔI BẬT -->
+    <div x-show="activeTab === 'keywords'" x-transition:enter="transition ease-out duration-150" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" class="py-2">
+        <div class="px-2 mb-3">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                <i class="fa-solid fa-fire text-amber-500"></i> Xu Hướng Tìm Kiếm Hôm Nay
+            </span>
+        </div>
+
+        <!-- Trending Keywords Tag Pills -->
+        <div class="flex flex-wrap gap-2 px-2 mb-5">
+            @foreach (var kw in Model.TrendingKeywords)
+            {
+                <a href="/tim-kiem?q=@Uri.EscapeDataString(kw)" 
+                   onclick="document.getElementById('storefrontSearchInput').value = '@kw';" 
+                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 hover:bg-pastel-rose text-slate-700 hover:text-magenta-accent border border-slate-200/70 hover:border-pink-200 text-xs font-semibold transition group shadow-2xs">
+                    <i class="fa-solid fa-magnifying-glass text-[10px] text-slate-400 group-hover:text-magenta-accent"></i>
+                    <span>@kw</span>
+                </a>
+            }
+        </div>
+
+        <!-- Curated Categories Quick Link -->
+        <div class="px-2 pt-3 border-t border-slate-100">
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">
+                Bộ Sưu Tập Nổi Bật
+            </span>
+            <div class="grid grid-cols-2 gap-2">
+                <a href="/tim-kiem?categorySlug=cham-soc-da" class="flex items-center gap-2 p-2 rounded-xl bg-pastel-rose/50 hover:bg-pastel-rose border border-rose-100/60 transition group">
+                    <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-magenta-accent shadow-2xs group-hover:scale-105 transition">
+                        <i class="fa-solid fa-droplet text-xs"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-charcoal group-hover:text-magenta-accent">Chăm Sóc Da</div>
+                        <div class="text-[10px] text-slate-400">Serum, Toner, B5, HA</div>
+                    </div>
+                </a>
+                <a href="/tim-kiem?categorySlug=trang-diem" class="flex items-center gap-2 p-2 rounded-xl bg-pastel-rose/50 hover:bg-pastel-rose border border-rose-100/60 transition group">
+                    <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-magenta-accent shadow-2xs group-hover:scale-105 transition">
+                        <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs font-bold text-charcoal group-hover:text-magenta-accent">Trang Điểm Cao Cấp</div>
+                        <div class="text-[10px] text-slate-400">Son lì, Cushion, Nền</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

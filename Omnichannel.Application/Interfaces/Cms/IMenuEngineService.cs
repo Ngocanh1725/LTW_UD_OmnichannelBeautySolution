@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Omnichannel.Application.DTOs.Cms;
@@ -32,5 +32,25 @@ namespace Omnichannel.Application.Interfaces.Cms
         /// Xóa nút Menu và toàn bộ nhánh con
         /// </summary>
         Task<bool> DeleteMenuItemAsync(int menuItemId, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Cập nhật thông tin nút Menu
+        /// </summary>
+        Task<bool> UpdateMenuItemAsync(EditMenuItemViewModel model, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Sắp xếp lại thứ tự / cây phân cấp các nút Menu (Drag & Drop)
+        /// </summary>
+        Task<bool> ReorderMenuItemsAsync(ReorderMenuRequest request, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Đồng bộ Slug khi Category, Product, Post, StaticPage thay đổi + ghi nhận SlugRedirect 301
+        /// </summary>
+        Task<int> SyncEntitySlugChangeAsync(string entityType, int entityId, string oldSlug, string newSlug, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Lấy bản ghi chuyển hướng 301 theo Slug cũ (nếu có)
+        /// </summary>
+        Task<SlugRedirect?> GetRedirectAsync(string oldSlug, CancellationToken cancellationToken = default);
     }
 }

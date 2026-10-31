@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Omnichannel.Domain.Common;
 
 namespace Omnichannel.Domain.Entities
 {
@@ -51,11 +52,14 @@ namespace Omnichannel.Domain.Entities
     }
 
     [Table("Orders")]
-    public class Order
+    public class Order : AggregateRoot
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
+
+        [Timestamp]
+        public byte[]? RowVersion { get; set; }
 
         [Required]
         [MaxLength(50)]
@@ -64,6 +68,7 @@ namespace Omnichannel.Domain.Entities
 
         public int? UserId { get; set; }
         public int StoreId { get; set; }
+        public int? PosShiftId { get; set; }
 
         [Required]
         [MaxLength(30)]
@@ -125,8 +130,12 @@ namespace Omnichannel.Domain.Entities
         // Navigation
         public virtual User? User { get; set; }
         public virtual Store Store { get; set; } = null!;
+        public virtual PosShift? PosShift { get; set; }
         public virtual ICollection<OrderDetail> OrderDetails { get; set; } = new List<OrderDetail>();
         public virtual Invoice? Invoice { get; set; }
+        public virtual ICollection<PointTransaction> PointTransactions { get; set; } = new List<PointTransaction>();
+        public virtual ICollection<Voucher> UsedVouchers { get; set; } = new List<Voucher>();
+        public virtual ICollection<CouponUsage> CouponUsages { get; set; } = new List<CouponUsage>();
     }
 
     [Table("OrderDetails")]

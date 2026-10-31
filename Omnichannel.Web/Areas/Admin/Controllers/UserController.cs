@@ -32,7 +32,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [HasPermission("HR_USER", "VIEW")]
+        [HasPermission("USER_MANAGE")]
         public async Task<IActionResult> Index()
         {
             var users = await _context.Users
@@ -58,23 +58,23 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [HasPermission("HR_USER", "CREATE")]
+        [HasPermission("USER_MANAGE")]
         public async Task<IActionResult> Create()
         {
             var roles = await _context.Roles.AsNoTracking().ToListAsync();
-            ViewBag.Roles = new SelectList(roles, "RoleId", "RoleName");
+            ViewBag.Roles = new SelectList(roles, "Id", "Name");
             return View(new CreateUserViewModel());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [HasPermission("HR_USER", "CREATE")]
+        [HasPermission("USER_MANAGE")]
         public async Task<IActionResult> Create(CreateUserViewModel model)
         {
             if (!ModelState.IsValid)
             {
                 var roles = await _context.Roles.AsNoTracking().ToListAsync();
-                ViewBag.Roles = new SelectList(roles, "RoleId", "RoleName");
+                ViewBag.Roles = new SelectList(roles, "Id", "Name");
                 return View(model);
             }
 
@@ -128,7 +128,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [HasPermission("HR_USER", "LOCK_ACCOUNT")]
+        [HasPermission("USER_MANAGE")]
         public async Task<IActionResult> ToggleStatus(int userId)
         {
             var user = await _context.Users.FindAsync(userId);
