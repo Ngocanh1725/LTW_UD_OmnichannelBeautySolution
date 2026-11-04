@@ -1,112 +1,290 @@
-<!-- Reusable Media Picker Modal -->
-<div id="mediaPickerModal" class="fixed inset-0 z-[9999] hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl max-w-4xl w-full h-[85vh] shadow-2xl flex flex-col overflow-hidden border border-gray-100 dark:border-gray-700" onclick="event.stopPropagation()">
+<div id="mediaPickerModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-rose-100 overflow-hidden flex flex-col max-h-[90vh]">
         <!-- Modal Header -->
-        <div class="p-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between bg-gray-50/50 dark:bg-gray-800/50">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-photo-film text-rose-500 text-lg"></i>
-                <h3 class="text-base font-bold text-gray-900 dark:text-white">Thư Viện Ảnh CSDL</h3>
+        <div class="px-6 py-4 bg-gradient-to-r from-slate-900 via-charcoal to-rose-950 text-white flex items-center justify-between border-b border-rose-900/40">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center text-rose-300">
+                    <i class="fa-solid fa-photo-film text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold tracking-tight text-white">Thư Viện Media & Tải Ảnh Trực Quan</h3>
+                    <p class="text-xs text-slate-300">Chọn ảnh có sẵn từ CSDL hoặc tải file mới lên hệ thống</p>
+                </div>
             </div>
-            <button type="button" onclick="closeMediaPickerModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-lg">
+            <button type="button" onclick="closeMediaPicker()" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
         <!-- Tabs Navigation -->
-        <div class="flex border-b border-gray-200 dark:border-gray-700 px-4 bg-white dark:bg-gray-800">
-            <button type="button" id="tabLibraryBtn" onclick="switchMediaTab('library')" class="px-4 py-2.5 text-xs font-semibold border-b-2 border-rose-600 text-rose-600 transition flex items-center gap-1.5">
+        <div class="flex items-center gap-2 px-6 pt-4 border-b border-slate-100 bg-slate-50/70">
+            <button type="button" id="tabLibraryBtn" onclick="switchMediaTab('library')" class="px-5 py-2.5 rounded-t-2xl font-bold text-xs flex items-center gap-2 transition border-b-2 border-magenta-accent text-magenta-accent bg-white">
                 <i class="fa-solid fa-images"></i>
-                Thư Viện CSDL Có Sẵn
+                <span>Thư Viện Ảnh CSDL</span>
             </button>
-            <button type="button" id="tabUploadBtn" onclick="switchMediaTab('upload')" class="px-4 py-2.5 text-xs font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 transition flex items-center gap-1.5">
+            <button type="button" id="tabUploadBtn" onclick="switchMediaTab('upload')" class="px-5 py-2.5 rounded-t-2xl font-semibold text-xs flex items-center gap-2 transition text-slate-500 hover:text-slate-800">
                 <i class="fa-solid fa-cloud-arrow-up"></i>
-                Tải Ảnh Mới Lên
+                <span>Tải Ảnh Mới Từ Máy Tính</span>
             </button>
         </div>
 
         <!-- Tab 1: Library Content -->
-        <div id="mediaTabLibrary" class="flex-1 flex flex-col p-4 overflow-hidden">
-            <!-- Filter Bar -->
-            <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-                <div class="flex items-center gap-2">
-                    <select id="pickerCategorySelect" onchange="loadMediaPickerItems(1)" class="text-xs border rounded-lg px-2.5 py-1.5 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-rose-500">
-                        <option value="ALL">Tất cả danh mục</option>
-                        <option value="PRODUCT">Sản phẩm</option>
-                        <option value="BANNER">Banners</option>
-                        <option value="BRAND">Thương hiệu</option>
-                        <option value="BLOG">Bài viết</option>
-                        <option value="THEME">Giao diện</option>
-                    </select>
+        <div id="mediaTabLibrary" class="p-6 overflow-y-auto flex-1">
+            <div class="flex flex-col sm:flex-row items-center gap-3 mb-6">
+                <div class="relative flex-1 w-full">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="mediaSearchInput" placeholder="Tìm kiếm theo tên file, alt text..." onkeyup="debounceMediaSearch()" class="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition outline-hidden" />
                 </div>
-                <div class="relative">
-                    <input type="text" id="pickerSearchInput" placeholder="Tìm tên file ảnh..." onkeydown="if(event.key==='Enter'){loadMediaPickerItems(1);}"
-                           class="pl-8 pr-3 py-1.5 text-xs rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-rose-500" />
-                    <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-gray-400 text-xs"></i>
-                </div>
+                <select id="mediaCategorySelect" onchange="loadMediaLibrary(1)" class="w-full sm:w-48 py-2.5 px-3 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-hidden bg-white">
+                    <option value="">Tất cả danh mục</option>
+                    <option value="BANNER">Banner Quảng Cáo</option>
+                    <option value="PRODUCT">Sản Phẩm</option>
+                    <option value="CMS">CMS / Theme</option>
+                    <option value="BRAND">Thương Hiệu</option>
+                </select>
+                <button type="button" onclick="loadMediaLibrary(1)" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Làm mới</span>
+                </button>
             </div>
 
-            <!-- Image Grid Container -->
-            <div class="flex-1 overflow-y-auto pr-1">
-                <div id="pickerGridContainer" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
-                    <!-- Dynamic Items render here -->
-                </div>
-                <div id="pickerLoading" class="hidden text-center py-10 text-gray-400">
-                    <i class="fa-solid fa-circle-notch fa-spin text-2xl text-rose-500 mb-2"></i>
-                    <p class="text-xs">Đang tải danh sách ảnh từ CSDL...</p>
-                </div>
-                <div id="pickerEmpty" class="hidden text-center py-10 text-gray-400">
-                    <i class="fa-regular fa-image text-3xl mb-2 text-gray-300 dark:text-gray-600"></i>
-                    <p class="text-xs">Không tìm thấy ảnh nào trong CSDL.</p>
-                </div>
+            <!-- Media Grid -->
+            <div id="mediaGridContainer" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3.5 min-h-[240px]">
+                <!-- Sẽ được nạp động qua AJAX -->
             </div>
 
-            <!-- Pagination Bar -->
-            <div id="pickerPaginationBar" class="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-3 mt-2 text-xs text-gray-500">
-                <span id="pickerPaginationInfo">Trang 1 / 1</span>
-                <div class="flex gap-1" id="pickerPaginationBtns"></div>
+            <!-- Pagination -->
+            <div id="mediaPagination" class="flex items-center justify-between mt-6 pt-4 border-t border-slate-100 text-xs text-slate-500">
+                <span id="mediaTotalCountText">Đang tải dữ liệu...</span>
+                <div class="flex items-center gap-1.5" id="mediaPageButtons"></div>
             </div>
         </div>
 
         <!-- Tab 2: Upload Content -->
-        <div id="mediaTabUpload" class="hidden flex-1 p-6 overflow-y-auto">
-            <div class="max-w-lg mx-auto text-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl p-8 bg-gray-50/50 dark:bg-gray-800/50">
-                <div class="w-14 h-14 mx-auto mb-3 text-rose-500 bg-rose-50 dark:bg-rose-950/40 rounded-full flex items-center justify-center">
-                    <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
+        <div id="mediaTabUpload" class="p-8 hidden flex-1 flex flex-col items-center justify-center">
+            <div id="dropZone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)" class="w-full max-w-lg p-10 border-2 border-dashed border-rose-200 rounded-3xl bg-rose-50/40 hover:bg-rose-50/70 hover:border-magenta-accent transition-all duration-300 flex flex-col items-center justify-center text-center cursor-pointer">
+                <input type="file" id="mediaFileInput" accept="image/png,image/jpeg,image/webp,image/svg+xml" onchange="handleFileSelected(this)" class="hidden" />
+                <div class="w-16 h-16 rounded-3xl bg-white shadow-md border border-rose-100 flex items-center justify-center text-magenta-accent text-2xl mb-4">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
                 </div>
-                <h4 class="text-sm font-bold text-gray-800 dark:text-gray-200 mb-1">Chọn ảnh từ máy tính để lưu vào CSDL</h4>
-                <p class="text-xs text-gray-400 mb-4">Hệ thống sẽ nạp trực tiếp vào bảng MediaAssets dạng varbinary(max).</p>
-                
-                <input type="file" id="modalUploadInput" accept="image/*" class="hidden" onchange="previewUploadFile(this.files)" />
-                <button type="button" onclick="document.getElementById('modalUploadInput').click()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-xl transition shadow">
-                    Duyệt File Trên Máy Tính
+                <h4 class="text-sm font-bold text-slate-800 mb-1">Kéo thả ảnh vào đây, hoặc <span class="text-magenta-accent underline">Duyệt từ máy</span></h4>
+                <p class="text-xs text-slate-400 max-w-xs mb-4">Hỗ trợ JPG, PNG, WEBP, SVG dung lượng tối đa 10MB. Ảnh sẽ được tự động lưu vào SQL Server & đĩa cứng wwwroot/uploads/cms.</p>
+                <button type="button" onclick="document.getElementById('mediaFileInput').click()" class="px-5 py-2.5 rounded-xl bg-magenta-accent hover:bg-pink-600 text-white font-bold text-xs shadow-md transition">
+                    Chọn File Ảnh
                 </button>
+            </div>
 
-                <div id="modalUploadPreviewContainer" class="hidden mt-4 text-left p-3 bg-white dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 flex items-center gap-3">
-                    <img id="modalUploadPreviewImg" src="" class="w-14 h-14 object-cover rounded-lg border" />
-                    <div class="flex-1 overflow-hidden">
-                        <div id="modalUploadFileName" class="text-xs font-bold text-gray-800 dark:text-gray-200 truncate"></div>
-                        <div id="modalUploadFileSize" class="text-[10px] text-gray-400"></div>
-                    </div>
-                    <button type="button" onclick="submitModalUpload()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition">
-                        Lưu Ngay
-                    </button>
+            <div id="uploadProgressContainer" class="w-full max-w-lg mt-6 hidden">
+                <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1.5">
+                    <span id="uploadFileNameText">uploading...</span>
+                    <span id="uploadPercentText">0%</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                    <div id="uploadProgressBar" class="h-full bg-magenta-accent transition-all duration-200" style="width: 0%;"></div>
                 </div>
             </div>
         </div>
 
         <!-- Modal Footer -->
-        <div class="p-3 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-            <div class="text-xs text-gray-500 truncate max-w-sm">
-                <span id="pickerSelectedInfo" class="italic text-gray-400">Chưa chọn ảnh nào</span>
+        <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+            <div class="text-xs text-slate-500 truncate max-w-md" id="selectedMediaInfoText">
+                Chưa chọn ảnh nào
             </div>
-            <div class="flex gap-2">
-                <button type="button" onclick="closeMediaPickerModal()" class="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg hover:bg-gray-300">
-                    Hủy Bỏ
+            <div class="flex items-center gap-2.5">
+                <button type="button" onclick="closeMediaPicker()" class="px-4 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-semibold transition">
+                    Đóng
                 </button>
-                <button type="button" id="btnConfirmPicker" onclick="confirmMediaPickerSelection()" disabled class="px-4 py-1.5 text-xs font-medium text-white bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg hover:bg-rose-700 transition shadow">
-                    Xác Nhận Chọn
+                <button type="button" id="confirmSelectMediaBtn" disabled onclick="confirmMediaSelection()" class="px-5 py-2 rounded-xl bg-magenta-accent hover:bg-pink-600 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold shadow-md transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Áp Dụng Ảnh Này</span>
                 </button>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    let currentMediaSelectionCallback = null;
+    let selectedMediaItem = null;
+    let mediaCurrentPage = 1;
+    let mediaSearchTimeout = null;
+
+    function openMediaPicker(callback) {
+        currentMediaSelectionCallback = callback;
+        selectedMediaItem = null;
+        document.getElementById('confirmSelectMediaBtn').disabled = true;
+        document.getElementById('selectedMediaInfoText').textContent = 'Chưa chọn ảnh nào';
+        document.getElementById('mediaPickerModal').classList.remove('hidden');
+        switchMediaTab('library');
+        loadMediaLibrary(1);
+    }
+
+    function closeMediaPicker() {
+        document.getElementById('mediaPickerModal').classList.add('hidden');
+        currentMediaSelectionCallback = null;
+    }
+
+    function switchMediaTab(tab) {
+        const tabLibBtn = document.getElementById('tabLibraryBtn');
+        const tabUpBtn = document.getElementById('tabUploadBtn');
+        const tabLibContent = document.getElementById('mediaTabLibrary');
+        const tabUpContent = document.getElementById('mediaTabUpload');
+
+        if (tab === 'library') {
+            tabLibBtn.className = "px-5 py-2.5 rounded-t-2xl font-bold text-xs flex items-center gap-2 transition border-b-2 border-magenta-accent text-magenta-accent bg-white";
+            tabUpBtn.className = "px-5 py-2.5 rounded-t-2xl font-semibold text-xs flex items-center gap-2 transition text-slate-500 hover:text-slate-800";
+            tabLibContent.classList.remove('hidden');
+            tabUpContent.classList.add('hidden');
+        } else {
+            tabUpBtn.className = "px-5 py-2.5 rounded-t-2xl font-bold text-xs flex items-center gap-2 transition border-b-2 border-magenta-accent text-magenta-accent bg-white";
+            tabLibBtn.className = "px-5 py-2.5 rounded-t-2xl font-semibold text-xs flex items-center gap-2 transition text-slate-500 hover:text-slate-800";
+            tabUpContent.classList.remove('hidden');
+            tabLibContent.classList.add('hidden');
+        }
+    }
+
+    function debounceMediaSearch() {
+        clearTimeout(mediaSearchTimeout);
+        mediaSearchTimeout = setTimeout(() => {
+            loadMediaLibrary(1);
+        }, 300);
+    }
+
+    async function loadMediaLibrary(page = 1) {
+        mediaCurrentPage = page;
+        const container = document.getElementById('mediaGridContainer');
+        container.innerHTML = '<div class="col-span-full py-12 flex flex-col items-center justify-center text-slate-400 text-xs"><i class="fa-solid fa-circle-notch fa-spin text-2xl text-magenta-accent mb-2"></i><span>Đang nạp ảnh từ kho CSDL...</span></div>';
+
+        const search = document.getElementById('mediaSearchInput').value || '';
+        const category = document.getElementById('mediaCategorySelect').value || '';
+
+        try {
+            const res = await fetch(`/admin/api/media/list?search=${encodeURIComponent(search)}&category=${encodeURIComponent(category)}&page=${page}&pageSize=24`);
+            const data = await res.json();
+
+            if (!data.success || !data.items || data.items.length === 0) {
+                container.innerHTML = '<div class="col-span-full py-12 text-center text-slate-400 text-xs"><i class="fa-regular fa-image text-3xl mb-2 text-slate-300 block"></i>Không tìm thấy ảnh nào phù hợp.</div>';
+                document.getElementById('mediaTotalCountText').textContent = 'Tổng: 0 ảnh';
+                return;
+            }
+
+            document.getElementById('mediaTotalCountText').textContent = `Tổng: ${data.total} ảnh (Trang ${data.page}/${Math.ceil(data.total / data.pageSize)})`;
+
+            let html = '';
+            data.items.forEach(item => {
+                const isSelected = selectedMediaItem && selectedMediaItem.id === item.id;
+                html += `
+                    <div onclick="selectMediaItem(${JSON.stringify(item).replace(/"/g, '&quot;')})" 
+                         id="media-card-${item.id}"
+                         class="media-card group relative rounded-2xl overflow-hidden border-2 ${isSelected ? 'border-magenta-accent ring-2 ring-magenta-accent/30' : 'border-slate-100 hover:border-pink-300'} bg-white cursor-pointer transition-all duration-200 hover:shadow-lg flex flex-col aspect-square">
+                        <img src="${item.publicUrl}" alt="${item.fileName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='/images/product-placeholder.svg'" />
+                        <div class="absolute inset-x-0 bottom-0 p-1.5 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white text-[10px] truncate opacity-0 group-hover:opacity-100 transition">
+                            ${item.fileName}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        } catch (err) {
+            container.innerHTML = '<div class="col-span-full py-12 text-center text-rose-500 text-xs">Không thể kết nối API tải ảnh.</div>';
+        }
+    }
+
+    function selectMediaItem(item) {
+        selectedMediaItem = item;
+        document.querySelectorAll('.media-card').forEach(c => {
+            c.classList.remove('border-magenta-accent', 'ring-2', 'ring-magenta-accent/30');
+            c.classList.add('border-slate-100');
+        });
+        const card = document.getElementById(`media-card-${item.id}`);
+        if (card) {
+            card.classList.remove('border-slate-100');
+            card.classList.add('border-magenta-accent', 'ring-2', 'ring-magenta-accent/30');
+        }
+        document.getElementById('confirmSelectMediaBtn').disabled = false;
+        document.getElementById('selectedMediaInfoText').innerHTML = `<span class="font-bold text-slate-800">${item.fileName}</span> (${(item.fileSize / 1024).toFixed(1)} KB) - ID: ${item.id}`;
+    }
+
+    function confirmMediaSelection() {
+        if (!selectedMediaItem) return;
+        if (typeof currentMediaSelectionCallback === 'function') {
+            currentMediaSelectionCallback(selectedMediaItem);
+        }
+        closeMediaPicker();
+    }
+
+    function handleFileSelected(input) {
+        if (input.files && input.files[0]) {
+            uploadFile(input.files[0]);
+        }
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.currentTarget.classList.add('border-magenta-accent', 'bg-rose-100/50');
+    }
+
+    function handleDragLeave(e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('border-magenta-accent', 'bg-rose-100/50');
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('border-magenta-accent', 'bg-rose-100/50');
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            uploadFile(e.dataTransfer.files[0]);
+        }
+    }
+
+    async function uploadFile(file) {
+        const progContainer = document.getElementById('uploadProgressContainer');
+        const progBar = document.getElementById('uploadProgressBar');
+        const fileNameText = document.getElementById('uploadFileNameText');
+        const percentText = document.getElementById('uploadPercentText');
+
+        progContainer.classList.remove('hidden');
+        fileNameText.textContent = file.name;
+        progBar.style.width = '30%';
+        percentText.textContent = '30%';
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+        try {
+            const res = await fetch('/admin/api/media/upload', {
+                method: 'POST',
+                headers: {
+                    'RequestVerificationToken': token
+                },
+                body: formData
+            });
+
+            progBar.style.width = '100%';
+            percentText.textContent = '100%';
+
+            const data = await res.json();
+            if (data.success) {
+                setTimeout(() => {
+                    progContainer.classList.add('hidden');
+                    switchMediaTab('library');
+                    loadMediaLibrary(1);
+                    selectMediaItem({
+                        id: data.id,
+                        fileName: data.fileName,
+                        publicUrl: data.publicUrl,
+                        fileSize: file.size
+                    });
+                }, 500);
+            } else {
+                alert('Tải ảnh thất bại: ' + (data.message || ''));
+                progContainer.classList.add('hidden');
+            }
+        } catch (err) {
+            alert('Lỗi kết nối khi tải ảnh: ' + err);
+            progContainer.classList.add('hidden');
+        }
+    }
+</script>

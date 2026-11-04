@@ -172,9 +172,12 @@ namespace Omnichannel.Infrastructure.Services
                 return false;
             }
 
-            using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-            try
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
             {
+                using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+                try
+                {
                 foreach (var alloc in allocations)
                 {
                     var inv = await _context.StoreInventories
@@ -197,15 +200,16 @@ namespace Omnichannel.Infrastructure.Services
                     inv.LastUpdated = DateTime.UtcNow;
                 }
 
-                await _context.SaveChangesAsync(cancellationToken);
-                await transaction.CommitAsync(cancellationToken);
-                return true;
-            }
-            catch
-            {
-                await transaction.RollbackAsync(cancellationToken);
-                throw;
-            }
+                    await _context.SaveChangesAsync(cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
+                    return true;
+                }
+                catch
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    throw;
+                }
+            });
         }
 
         public async Task<bool> ReleaseReservedStockAsync(string storeId, List<AllocatedBatchDto> allocations, CancellationToken cancellationToken = default)
@@ -215,9 +219,12 @@ namespace Omnichannel.Infrastructure.Services
                 return false;
             }
 
-            using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-            try
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
             {
+                using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+                try
+                {
                 foreach (var alloc in allocations)
                 {
                     var inv = await _context.StoreInventories
@@ -230,15 +237,16 @@ namespace Omnichannel.Infrastructure.Services
                     }
                 }
 
-                await _context.SaveChangesAsync(cancellationToken);
-                await transaction.CommitAsync(cancellationToken);
-                return true;
-            }
-            catch
-            {
-                await transaction.RollbackAsync(cancellationToken);
-                throw;
-            }
+                    await _context.SaveChangesAsync(cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
+                    return true;
+                }
+                catch
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    throw;
+                }
+            });
         }
 
         public async Task<bool> DeductStockAsync(string storeId, List<AllocatedBatchDto> allocations, string reason = "SALE", CancellationToken cancellationToken = default)
@@ -248,9 +256,12 @@ namespace Omnichannel.Infrastructure.Services
                 return false;
             }
 
-            using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
-            try
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
             {
+                using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+                try
+                {
                 foreach (var alloc in allocations)
                 {
                     var inv = await _context.StoreInventories
@@ -297,15 +308,16 @@ namespace Omnichannel.Infrastructure.Services
                     }
                 }
 
-                await _context.SaveChangesAsync(cancellationToken);
-                await transaction.CommitAsync(cancellationToken);
-                return true;
-            }
-            catch
-            {
-                await transaction.RollbackAsync(cancellationToken);
-                throw;
-            }
+                    await _context.SaveChangesAsync(cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
+                    return true;
+                }
+                catch
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    throw;
+                }
+            });
         }
     }
 }

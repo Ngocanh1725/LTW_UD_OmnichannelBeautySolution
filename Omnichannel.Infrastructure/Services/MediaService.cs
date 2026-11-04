@@ -53,15 +53,29 @@ namespace Omnichannel.Infrastructure.Services
             var detectedMime = ValidateAndDetectMimeType(fileBytes, request.File.FileName);
             var hash = ComputeSha256(fileBytes);
 
-            // Kiểm tra chống trùng lặp dữ liệu nhị phân trong CSDL
+            // Kiểm tra chống trùng lặp dữ liệu nhị phân trong CSDL (Dùng Projection, tuyệt đối không nạp Data byte[])
             var existing = await _context.MediaAssets
                 .AsNoTracking()
-                .FirstOrDefaultAsync(m => m.ChecksumHash == hash);
+                .Where(m => m.ChecksumHash == hash)
+                .Select(m => new MediaAssetDto
+                {
+                    Id = m.Id,
+                    FileName = m.FileName,
+                    ContentType = m.ContentType,
+                    FileSize = m.FileSize,
+                    Width = m.Width,
+                    Height = m.Height,
+                    AltText = m.AltText,
+                    Category = m.Category,
+                    ChecksumHash = m.ChecksumHash,
+                    CreatedAt = m.CreatedAt
+                })
+                .FirstOrDefaultAsync();
 
             if (existing != null)
             {
                 _logger.LogInformation("Phát hiện ảnh trùng lặp SHA256 (ID: {Id}, File: {File}). Tái sử dụng bản ghi.", existing.Id, existing.FileName);
-                return MapToDto(existing);
+                return existing;
             }
 
             var entity = new MediaAsset
@@ -206,26 +220,35 @@ namespace Omnichannel.Infrastructure.Services
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var entity = await _context.MediaAssets.FindAsync(id);
-            if (entity == null) return false;
+            var checksum = await _context.MediaAssets
+                .AsNoTracking()
+                .Where(m => m.Id == id)
+                .Select(m => m.ChecksumHash)
+                .FirstOrDefaultAsync();
 
-            _context.MediaAssets.Remove(entity);
-            await _context.SaveChangesAsync();
+            if (checksum == null) return false;
 
-            _cache.Remove($"media_stream_{id}");
-            _cache.Remove($"media_stream_hash_{entity.ChecksumHash}");
+            int affected = await _context.MediaAssets
+                .Where(m => m.Id == id)
+                .ExecuteDeleteAsync();
 
-            return true;
+            if (affected > 0)
+            {
+                _cache.Remove($"media_stream_{id}");
+                _cache.Remove($"media_stream_hash_{checksum}");
+                return true;
+            }
+
+            return false;
         }
 
         public async Task<bool> UpdateAltTextAsync(int id, string altText)
         {
-            var entity = await _context.MediaAssets.FindAsync(id);
-            if (entity == null) return false;
+            int affected = await _context.MediaAssets
+                .Where(m => m.Id == id)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(m => m.AltText, altText != null ? altText.Trim() : null));
 
-            entity.AltText = altText?.Trim();
-            await _context.SaveChangesAsync();
-            return true;
+            return affected > 0;
         }
 
         #region Helper Methods (Magic Bytes & SHA256)

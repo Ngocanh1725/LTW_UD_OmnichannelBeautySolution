@@ -48,6 +48,9 @@ namespace Omnichannel.Application.DTOs.Loyalty
         public string? NextTierName { get; set; }
         public decimal? SpendNeededForNextTier { get; set; }
         public string? QrCodeData { get; set; }
+        public string? ReferralCode { get; set; }
+        public int CurrentStreak { get; set; }
+        public DateTime? LastCheckInDate { get; set; }
         public List<PointTransactionDto> RecentTransactions { get; set; } = new();
     }
 
@@ -109,5 +112,105 @@ namespace Omnichannel.Application.DTOs.Loyalty
         public int GoldCount { get; set; }
         public int DiamondCount { get; set; }
         public decimal TotalSpendOverall { get; set; }
+    }
+
+    // =========================================================================
+    // GAMIFICATION LOYALTY DTOs (GAP-08 - PHIÊN C7)
+    // =========================================================================
+
+    public class DailyCheckInSlotDto
+    {
+        public int DayNumber { get; set; } // 1..7
+        public int Points { get; set; } // 10, 10, 20, 20, 30, 30, 100
+        public bool IsCheckedIn { get; set; }
+        public bool IsTodaySlot { get; set; }
+        public bool IsJackpot => DayNumber == 7;
+    }
+
+    public class DailyCheckInStatusDto
+    {
+        public int CurrentStreak { get; set; }
+        public bool CheckedInToday { get; set; }
+        public string TodayVietnamDate { get; set; } = string.Empty;
+        public int NextPoints { get; set; }
+        public List<DailyCheckInSlotDto> Slots { get; set; } = new();
+    }
+
+    public class DailyCheckInResultDto
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public int PointsAwarded { get; set; }
+        public int CurrentStreak { get; set; }
+        public int NewBalance { get; set; }
+        public bool CheckedInToday { get; set; }
+    }
+
+    public class ReferralItemDto
+    {
+        public int Id { get; set; }
+        public int ReferredUserId { get; set; }
+        public string ReferredUserName { get; set; } = string.Empty;
+        public string Status { get; set; } = "PENDING"; // PENDING, REWARDED
+        public int PointsAwarded { get; set; }
+        public string? RewardVoucherCode { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? RewardedAt { get; set; }
+    }
+
+    public class ReferralDashboardDto
+    {
+        public string MyReferralCode { get; set; } = string.Empty;
+        public int TotalReferredCount { get; set; }
+        public int RewardedReferredCount { get; set; }
+        public int TotalPointsEarnedFromReferrals { get; set; }
+        public bool CanApplyReferralCode { get; set; }
+        public string? AppliedReferralCode { get; set; }
+        public string? ReferredByStatus { get; set; }
+        public List<ReferralItemDto> Referrals { get; set; } = new();
+    }
+
+    public class ApplyReferralResultDto
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public string? ReferralCode { get; set; }
+        public int PointsAwarded { get; set; }
+        public string? VoucherCode { get; set; }
+        public int NewBalance { get; set; }
+    }
+
+    public class BeautyMissionDto
+    {
+        public string MissionCode { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string IconClass { get; set; } = "fa-solid fa-star";
+        public int PointsReward { get; set; }
+        public bool IsConditionMet { get; set; }
+        public bool IsClaimed { get; set; }
+        public string ActionUrl { get; set; } = "/Shop";
+        public string ActionText { get; set; } = "Thực hiện ngay";
+    }
+
+    public class ClaimMissionResultDto
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public string MissionCode { get; set; } = string.Empty;
+        public int PointsAwarded { get; set; }
+        public int NewBalance { get; set; }
+    }
+
+    public class RewardCatalogItemDto
+    {
+        public string RewardCode { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string BadgeText { get; set; } = string.Empty;
+        public int PointsCost { get; set; }
+        public decimal DiscountValueVnd { get; set; }
+        public decimal MinOrderValueVnd { get; set; }
+        public bool CanAfford { get; set; }
     }
 }

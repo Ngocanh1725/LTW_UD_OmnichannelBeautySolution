@@ -1,3 +1,4 @@
+<div class="warehouse-desktop-scale" style="zoom: 0.84;">
 @model Omnichannel.Application.DTOs.Inventory.WarehouseOverviewViewModel
 @{
     ViewData["Title"] = "Quản Trị Kho & Lô Date FEFO";
@@ -313,13 +314,18 @@
                             int index = 1;
                             foreach (var item in Model.BatchStockItems)
                             {
-                                // Alert color classes based on FEFO days remaining
-                                string statusBgClass = item.IsExpired ? "bg-danger-subtle text-danger border-danger-subtle" 
-                                    : (item.DaysRemaining <= 15 ? "bg-danger-subtle text-danger border-danger-subtle" 
-                                    : (item.IsNearExpiry ? "bg-warning-subtle text-warning-emphasis border-warning-subtle" 
-                                    : "bg-success-subtle text-success border-success-subtle"));
+                                // Alert color classes based on FEFO days remaining (Red <= 30d, Yellow <= 90d, Green > 90d)
+                                bool isRedTier = item.IsExpired || item.DaysRemaining <= 30;
+                                bool isYellowTier = !isRedTier && item.DaysRemaining <= 90;
+                                bool isGreenTier = item.DaysRemaining > 90;
 
-                                string rowStyle = item.IsExpired ? "background: #FEF2F2;" : (item.DaysRemaining <= 15 ? "background: #FFF1F2;" : "");
+                                string statusBgClass = isRedTier ? "bg-danger text-white border-danger" 
+                                    : (isYellowTier ? "bg-warning text-dark border-warning" 
+                                    : "bg-success text-white border-success");
+
+                                string rowStyle = isRedTier ? "background: rgba(254, 226, 226, 0.45); border-left: 4px solid #ef4444;" 
+                                    : (isYellowTier ? "background: rgba(254, 243, 199, 0.45); border-left: 4px solid #f59e0b;" 
+                                    : "background: rgba(240, 253, 244, 0.35); border-left: 4px solid #10b981;");
 
                                 <tr style="@rowStyle">
                                     <td class="px-3 text-muted small font-monospace">@index</td>
@@ -390,46 +396,29 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge rounded-pill border px-2.5 py-1 small fw-semibold @statusBgClass">
-                                            @if (item.IsExpired)
+                                        <span class="badge rounded-pill px-2.5 py-1 small fw-bold font-monospace @statusBgClass shadow-sm">
+                                            @if (isRedTier)
                                             {
-                                                <i class="fa-solid fa-ban me-1"></i><span>HẾT HẠN</span>
+                                                <i class="fa-solid fa-triangle-exclamation me-1"></i><span>ĐỎ: CẬN HẠN (&le;30d)</span>
                                             }
-                                            else if (item.DaysRemaining <= 15)
+                                            else if (isYellowTier)
                                             {
-                                                <i class="fa-solid fa-bell me-1"></i><span>CẬN DATE GẤP (&le;15d)</span>
-                                            }
-                                            else if (item.IsNearExpiry || (item.ClearanceDiscountPercent.HasValue && item.ClearanceDiscountPercent > 0))
-                                            {
-                                                <i class="fa-solid fa-clock-rotate-left me-1"></i><span>CẬN DATE FEFO</span>
-                                            }
-                                            else if (item.DaysRemaining > 540)
-                                            {
-                                                <i class="fa-solid fa-leaf me-1"></i><span>TƯƠI MỚI (&gt;18T)</span>
+                                                <i class="fa-solid fa-clock me-1"></i><span>VÀNG: CẢNH BÁO (&le;90d)</span>
                                             }
                                             else
                                             {
-                                                <i class="fa-solid fa-shield-check me-1"></i><span>TIÊU CHUẨN</span>
+                                                <i class="fa-solid fa-shield-check me-1"></i><span>XANH: AN TOÀN (&gt;90d)</span>
                                             }
                                         </span>
                                     </td>
                                     <td class="px-3 text-end">
-                                        <div class="dropdown">
-                                            <button class="btn btn-sm btn-light border px-2.5 rounded-3 dropdown-toggle shadow-none" type="button" data-bs-toggle="dropdown">
-                                                <i class="fa-solid fa-gear me-1"></i>Thao tác
+                                        <div class="d-flex align-items-center justify-content-end gap-1.5 flex-wrap">
+                                            <button type="button" class="btn btn-xs btn-outline-warning text-dark fw-bold rounded-pill px-2.5 py-1 shadow-sm" style="font-size: 11px; background: #FEF3C7;" onclick="alert('Mở hộp thoại Thiết lập chiết khấu xả hàng cận date cho lô: @item.BatchNumber')">
+                                                <i class="fa-solid fa-tag text-warning me-1"></i>Xả Date
                                             </button>
-                                            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 py-1" style="font-size: 13px;">
-                                                <li>
-                                                    <a class="dropdown-item py-2 text-danger" href="javascript:void(0)" onclick="openDisposeModal(@item.BatchId, '@item.BatchNumber', '@item.ProductName', @item.AvailableQuantity)">
-                                                        <i class="fa-solid fa-trash-can me-2"></i>Xuất hủy / Hao hụt
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item py-2 text-primary" href="javascript:void(0)" onclick="openAdjustModal(@item.BatchId, '@item.BatchNumber', '@item.ProductName', @item.PhysicalQuantity)">
-                                                        <i class="fa-solid fa-sliders me-2"></i>Cân bằng kiểm kê
-                                                    </a>
-                                                </li>
-                                            </ul>
+                                            <button type="button" class="btn btn-xs btn-outline-danger fw-bold rounded-pill px-2.5 py-1 shadow-sm" style="font-size: 11px; background: #FEE2E2;" onclick="openDisposeModal(@item.BatchId, '@item.BatchNumber', '@item.ProductName', @item.AvailableQuantity)">
+                                                <i class="fa-solid fa-trash-can me-1"></i>Xuất Hủy
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -1266,3 +1255,5 @@
         }
     </script>
 }
+
+</div>

@@ -1,0 +1,119 @@
+@startuml Hinh2_2_So_Do_Use_Case_Tong_Quat_Omni_Beauty
+left to right direction
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Times New Roman"
+skinparam defaultFontSize 12
+skinparam roundCorner 8
+skinparam shadowing false
+skinparam ArrowColor #1B4F72
+skinparam ArrowThickness 1.2
+skinparam ActorBorderColor #1B4F72
+skinparam ActorBackgroundColor #EBF5FB
+skinparam packageStyle rectangle
+
+skinparam usecaseBackgroundColor #F4F6F7
+skinparam usecaseBorderColor #2C3E50
+skinparam usecaseFontSize 11
+skinparam usecaseBorderThickness 1
+
+' ========================================================
+' ĐỊNH NGHĨA 6 TÁC NHÂN HỆ THỐNG
+' ========================================================
+actor "Quản trị viên tối cao\n(SuperAdmin)" as SuperAdmin
+actor "Quản lý chi nhánh\n(StoreManager)" as StoreManager
+actor "Thu ngân điểm bán lẻ\n(Cashier)" as Cashier
+actor "Nhân viên thủ kho\n(WarehouseStaff)" as WarehouseStaff
+actor "Biên tập viên CMS\n(ContentEditor)" as ContentEditor
+actor "Khách hàng mua sắm\n(Customer)" as Customer
+
+' ========================================================
+' KHUNG HỆ THỐNG VÀ 17 GÓI PHÂN HỆ CHỨC NĂNG
+' ========================================================
+rectangle "HỆ THỐNG THƯƠNG MẠI ĐIỆN TỬ VÀ BÁN LẺ MỸ PHẨM ĐA KÊNH OMNI BEAUTY" {
+
+    package "1. BÁN LẺ & GIAO DỊCH ĐA KÊNH" #FDEDEC {
+        usecase "UC-POS: Quản lý ca bán lẻ & Két tiền mù" as UC_POS
+        usecase "UC-ORDER: Xử lý đơn & Cấp phát kho 2 giai đoạn" as UC_ORDER
+        usecase "UC-CHECKOUT: Quét mã vạch & Thanh toán đa kênh" as UC_CHECKOUT
+    }
+
+    package "2. QUẢN TRỊ KHO & VẬN HÀNH HẠN DÙNG (FEFO)" #FEF9E7 {
+        usecase "UC-BATCH: Quản lý Lô NSX & Giám sát FEFO 3 cấp" as UC_BATCH
+        usecase "UC-IMPORT: Nhập kho theo PO & In tem mã vạch" as UC_IMPORT
+        usecase "UC-TRF: Điều chuyển kho liên chi nhánh 3 bước" as UC_TRF
+        usecase "UC-STOCKTAKE: Kiểm kê & Cân bằng tồn tự động" as UC_STOCKTAKE
+        usecase "UC-CLEARANCE: Xả kho cận date & Xuất hủy hàng" as UC_CLEARANCE
+    }
+
+    package "3. TRẢI NGHIỆM KHÁCH HÀNG & CHĂM SÓC DA (CRM)" #EAFAF1 {
+        usecase "UC-SMARTFILTER: Khám phá sản phẩm qua Bộ lọc da" as UC_SMARTFILTER
+        usecase "UC-AI: Trắc nghiệm phân tích da & Trợ lý Routine AI" as UC_AI
+        usecase "UC-CRM: Quản lý Hồ sơ sắc đẹp & Lịch sử da" as UC_CRM
+        usecase "UC-LOYALTY: Ví điểm thưởng & Thăng hạng VIP tự động" as UC_LOYALTY
+    }
+
+    package "4. QUẢN TRỊ NỘI DUNG SỐ & TIẾP THỊ (CMS & PROMO)" #F4ECF7 {
+        usecase "UC-MENU: Quản trị Cây Menu điều hướng đa hình" as UC_MENU
+        usecase "UC-CMS: Biên tập bài viết cẩm nang & Banner sự kiện" as UC_CMS
+        usecase "UC-MODERATE: Kiểm duyệt đánh giá & Ảnh swatch thực tế" as UC_MODERATE
+        usecase "UC-PROMO: Cấu hình Khuyến mãi, Coupon & Voucher" as UC_PROMO
+    }
+
+    package "5. TÀI CHÍNH, BÁO CÁO & GIÁM SÁT TOÀN CHUỖI" #EBF5FB {
+        usecase "UC-DASHBOARD: Giám sát Dashboard & Cảnh báo rủi ro AI" as UC_DASHBOARD
+        usecase "UC-FINANCE: Hạch toán Sổ cái kép & Đối soát COD/P&L" as UC_FINANCE
+        usecase "UC-REPORT: Báo cáo Doanh thu & Tồn kho đa chi nhánh" as UC_REPORT
+    }
+
+    package "6. BẢO MẬT & HỆ THỐNG LÕI (PBAC & CORE)" #F2F4F4 {
+        usecase "UC-PBAC: Cấu hình Ma trận phân quyền động 51 quyền" as UC_PBAC
+        usecase "UC-SETTINGS: Quản lý Người dùng & Cấu hình tham số" as UC_SETTINGS
+    }
+}
+
+' ========================================================
+' LIÊN KẾT GIỮA TÁC NHÂN VÀ CÁC CA SỬ DỤNG (USE CASE)
+' ========================================================
+
+SuperAdmin --> UC_PBAC
+SuperAdmin --> UC_SETTINGS
+SuperAdmin --> UC_DASHBOARD
+SuperAdmin --> UC_FINANCE
+SuperAdmin --> UC_REPORT
+SuperAdmin --> UC_TRF
+SuperAdmin --> UC_PROMO
+
+StoreManager --> UC_POS
+StoreManager --> UC_ORDER
+StoreManager --> UC_TRF
+StoreManager --> UC_STOCKTAKE
+StoreManager --> UC_FINANCE
+StoreManager --> UC_REPORT
+StoreManager --> UC_PROMO
+
+Cashier --> UC_POS
+Cashier --> UC_CHECKOUT
+Cashier --> UC_ORDER
+Cashier --> UC_LOYALTY
+Cashier --> UC_CRM
+
+WarehouseStaff --> UC_BATCH
+WarehouseStaff --> UC_IMPORT
+WarehouseStaff --> UC_TRF
+WarehouseStaff --> UC_STOCKTAKE
+WarehouseStaff --> UC_CLEARANCE
+WarehouseStaff --> UC_REPORT
+
+ContentEditor --> UC_MENU
+ContentEditor --> UC_CMS
+ContentEditor --> UC_MODERATE
+
+Customer --> UC_SMARTFILTER
+Customer --> UC_AI
+Customer --> UC_ORDER
+Customer --> UC_CHECKOUT
+Customer --> UC_CRM
+Customer --> UC_LOYALTY
+Customer --> UC_MODERATE
+
+@enduml

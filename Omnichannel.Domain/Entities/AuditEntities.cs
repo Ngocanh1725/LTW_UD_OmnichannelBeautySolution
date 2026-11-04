@@ -16,6 +16,10 @@ namespace Omnichannel.Domain.Entities
         [MaxLength(100)]
         public string? UserName { get; set; }
 
+        [MaxLength(50)]
+        [Column(TypeName = "nvarchar(50)")]
+        public string? StaffCode { get; set; }
+
         [Required]
         [MaxLength(50)]
         [Column(TypeName = "varchar(50)")]
@@ -26,16 +30,30 @@ namespace Omnichannel.Domain.Entities
         [Column(TypeName = "varchar(100)")]
         public string EntityType { get; set; } = string.Empty; // Product, Order, Permission...
 
+        [MaxLength(100)]
+        [Column(TypeName = "nvarchar(100)")]
+        public string? EntityName { get; set; }
+
         [Required]
         [MaxLength(100)]
         [Column(TypeName = "varchar(100)")]
         public string EntityId { get; set; } = string.Empty;
 
+        [MaxLength(100)]
+        [Column(TypeName = "nvarchar(100)")]
+        public string? RecordId { get; set; }
+
         [Column(TypeName = "nvarchar(max)")]
         public string? OldValues { get; set; }
 
         [Column(TypeName = "nvarchar(max)")]
+        public string? OldValuesJson { get; set; }
+
+        [Column(TypeName = "nvarchar(max)")]
         public string? NewValues { get; set; }
+
+        [Column(TypeName = "nvarchar(max)")]
+        public string? NewValuesJson { get; set; }
 
         [MaxLength(50)]
         [Column(TypeName = "varchar(50)")]

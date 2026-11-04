@@ -80,4 +80,68 @@ namespace Omnichannel.Domain.Entities
         [ForeignKey("UserId")]
         public virtual User? User { get; set; }
     }
+
+    /// <summary>
+    /// Đăng ký theo dõi sản phẩm (Back-In-Stock hoặc Price Drop Alert) - GAP-05
+    /// </summary>
+    [Table("ProductSubscriptions")]
+    public class ProductSubscription
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+
+        public int ProductId { get; set; }
+
+        public int? UserId { get; set; }
+
+        /// <summary>
+        /// Loại theo dõi: BACK_IN_STOCK (Báo khi có hàng lại), PRICE_DROP (Báo khi giảm giá)
+        /// </summary>
+        [Required]
+        [MaxLength(30)]
+        [Column(TypeName = "varchar(30)")]
+        public string Type { get; set; } = "BACK_IN_STOCK";
+
+        /// <summary>
+        /// Mức giá mong muốn kích hoạt cảnh báo giảm giá (Target Price)
+        /// </summary>
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? TargetPrice { get; set; }
+
+        [MaxLength(100)]
+        public string? CustomerName { get; set; }
+
+        [MaxLength(100)]
+        [Column(TypeName = "varchar(100)")]
+        public string? Email { get; set; }
+
+        [MaxLength(20)]
+        [Column(TypeName = "varchar(20)")]
+        public string? PhoneNumber { get; set; }
+
+        /// <summary>
+        /// Trạng thái: ACTIVE (Đang theo dõi), NOTIFIED (Đã gửi thông báo), CANCELLED (Đã hủy)
+        /// </summary>
+        [Required]
+        [MaxLength(30)]
+        [Column(TypeName = "varchar(30)")]
+        public string Status { get; set; } = "ACTIVE";
+
+        [Column(TypeName = "datetime2(7)")]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        [Column(TypeName = "datetime2(7)")]
+        public DateTime? NotifiedAt { get; set; }
+
+        [MaxLength(500)]
+        public string? Notes { get; set; }
+
+        // Navigation properties
+        [ForeignKey("ProductId")]
+        public virtual Product? Product { get; set; }
+
+        [ForeignKey("UserId")]
+        public virtual User? User { get; set; }
+    }
 }

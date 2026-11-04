@@ -32,18 +32,22 @@ namespace Omnichannel.Infrastructure.Services
 
             try
             {
-                // =========================================================================
-                // 1. 🔴 HẾT HÀNG (stock = 0): "[Tên SP] tại [Chi nhánh] đã HẾT KHO"
-                // =========================================================================
-                var storeInventories = await _context.StoreInventories
+                // Pre-fetch recent alert keys in the last 24h into a HashSet to eliminate N+1 database queries
+                var recentThreshold = now.AddHours(-24);
+                var alertKeyList = await _context.Alerts
                     .AsNoTracking()
-                    .Include(si => si.Store)
-                    .Include(si => si.ProductBatch)
-                        .ThenInclude(pb => pb.Product)
-                    .Where(si => si.ProductBatch.Product.IsActive)
+                    .Where(a => a.CreatedAt >= recentThreshold && a.EntityKey != null)
+                    .Select(a => a.EntityKey!)
                     .ToListAsync(cancellationToken);
+                var existingAlertKeys = new HashSet<string>(alertKeyList);
 
-                var productStoreGroups = storeInventories
+                // =========================================================================
+                // 1. 🔴 HẾT HÀNG (stock = 0) & 2. 🟡 SẮP HẾT HÀNG (stock <= 10)
+                // Filter and group on the database engine directly; only fetch stock <= 10
+                // =========================================================================
+                var lowStockGroups = await _context.StoreInventories
+                    .AsNoTracking()
+                    .Where(si => si.ProductBatch.Product.IsActive)
                     .GroupBy(si => new
                     {
                         si.StoreId,
@@ -61,15 +65,17 @@ namespace Omnichannel.Infrastructure.Services
                         g.Key.ProductSku,
                         TotalStock = g.Sum(x => x.PhysicalQuantity)
                     })
-                    .ToList();
+                    .Where(g => g.TotalStock <= 10)
+                    .ToListAsync(cancellationToken);
 
-                foreach (var group in productStoreGroups)
+                foreach (var group in lowStockGroups)
                 {
                     if (group.TotalStock <= 0)
                     {
                         var entityKey = $"OUT_OF_STOCK_P{group.ProductId}_S{group.StoreId}";
-                        if (!await HasRecentAlertAsync(entityKey, TimeSpan.FromHours(12), cancellationToken))
+                        if (!existingAlertKeys.Contains(entityKey))
                         {
+                            existingAlertKeys.Add(entityKey);
                             newAlerts.Add(new Alert
                             {
                                 Type = "OUT_OF_STOCK",
@@ -84,15 +90,12 @@ namespace Omnichannel.Infrastructure.Services
                             });
                         }
                     }
-                    // =====================================================================
-                    // 2. 🟡 SẮP HẾT HÀNG (stock <= reorder point): "[Tên SP] tại [Chi nhánh] chỉ còn [SL] — cần nhập thêm"
-                    // Ngưỡng reorder point mặc định cho mỹ phẩm là 10
-                    // =====================================================================
-                    else if (group.TotalStock <= 10)
+                    else
                     {
                         var entityKey = $"LOW_STOCK_P{group.ProductId}_S{group.StoreId}";
-                        if (!await HasRecentAlertAsync(entityKey, TimeSpan.FromHours(12), cancellationToken))
+                        if (!existingAlertKeys.Contains(entityKey))
                         {
+                            existingAlertKeys.Add(entityKey);
                             newAlerts.Add(new Alert
                             {
                                 Type = "LOW_STOCK",
@@ -111,27 +114,33 @@ namespace Omnichannel.Infrastructure.Services
 
                 // =========================================================================
                 // 3. 🔴 LÔ HÀNG HẾT HẠN TRONG 15 NGÀY:
-                // "Lô [Mã lô] của [Tên SP] sẽ hết hạn trong [N] ngày — ĐỀ XUẤT xả kho giảm giá 40%"
                 // =========================================================================
                 var urgentThreshold = today.AddDays(15);
                 var urgentBatches = await _context.ProductBatches
                     .AsNoTracking()
-                    .Include(pb => pb.Product)
                     .Where(pb => pb.CurrentQuantity > 0 && pb.ExpDate.Date >= today && pb.ExpDate.Date <= urgentThreshold)
+                    .Select(pb => new
+                    {
+                        pb.Id,
+                        pb.BatchNumber,
+                        pb.ExpDate,
+                        ProductName = pb.Product != null ? pb.Product.Name : "Mỹ phẩm"
+                    })
                     .ToListAsync(cancellationToken);
 
                 foreach (var batch in urgentBatches)
                 {
                     int daysRemaining = (int)(batch.ExpDate.Date - today).TotalDays;
                     var entityKey = $"EXPIRY_CRIT_B{batch.Id}_{batch.ExpDate:yyyyMMdd}";
-                    if (!await HasRecentAlertAsync(entityKey, TimeSpan.FromHours(24), cancellationToken))
+                    if (!existingAlertKeys.Contains(entityKey))
                     {
+                        existingAlertKeys.Add(entityKey);
                         newAlerts.Add(new Alert
                         {
                             Type = "EXPIRY_CRITICAL",
                             Severity = "DANGER",
                             Title = $"🔴 Lô cận date cấp bách: {batch.BatchNumber}",
-                            Message = $"Lô {batch.BatchNumber} của {batch.Product?.Name ?? "Mỹ phẩm"} sẽ hết hạn trong {daysRemaining} ngày — ĐỀ XUẤT xả kho giảm giá 40%",
+                            Message = $"Lô {batch.BatchNumber} của {batch.ProductName} sẽ hết hạn trong {daysRemaining} ngày — ĐỀ XUẤT xả kho giảm giá 40%",
                             IsRead = false,
                             CreatedAt = now,
                             ActionUrl = $"/Admin/Warehouse?searchTerm={Uri.EscapeDataString(batch.BatchNumber)}",
@@ -142,27 +151,33 @@ namespace Omnichannel.Infrastructure.Services
 
                 // =========================================================================
                 // 4. 🟡 LÔ HÀNG CẬN DATE 60 NGÀY:
-                // "Lô [Mã lô] cận date — xem xét chương trình FEFO Sale"
                 // =========================================================================
                 var warningThreshold = today.AddDays(60);
                 var warningBatches = await _context.ProductBatches
                     .AsNoTracking()
-                    .Include(pb => pb.Product)
                     .Where(pb => pb.CurrentQuantity > 0 && pb.ExpDate.Date > urgentThreshold && pb.ExpDate.Date <= warningThreshold)
+                    .Select(pb => new
+                    {
+                        pb.Id,
+                        pb.BatchNumber,
+                        pb.ExpDate,
+                        ProductName = pb.Product != null ? pb.Product.Name : "Mỹ phẩm"
+                    })
                     .ToListAsync(cancellationToken);
 
                 foreach (var batch in warningBatches)
                 {
                     int daysRemaining = (int)(batch.ExpDate.Date - today).TotalDays;
                     var entityKey = $"EXPIRY_WARN_B{batch.Id}_{batch.ExpDate:yyyyMMdd}";
-                    if (!await HasRecentAlertAsync(entityKey, TimeSpan.FromHours(24), cancellationToken))
+                    if (!existingAlertKeys.Contains(entityKey))
                     {
+                        existingAlertKeys.Add(entityKey);
                         newAlerts.Add(new Alert
                         {
                             Type = "EXPIRY_WARNING",
                             Severity = "WARNING",
                             Title = $"🟡 Lô hàng cận date: {batch.BatchNumber}",
-                            Message = $"Lô {batch.BatchNumber} của {batch.Product?.Name ?? "Mỹ phẩm"} cận date ({daysRemaining} ngày) — xem xét chương trình FEFO Sale",
+                            Message = $"Lô {batch.BatchNumber} của {batch.ProductName} cận date ({daysRemaining} ngày) — xem xét chương trình FEFO Sale",
                             IsRead = false,
                             CreatedAt = now,
                             ActionUrl = $"/Admin/Warehouse?searchTerm={Uri.EscapeDataString(batch.BatchNumber)}",
@@ -172,30 +187,28 @@ namespace Omnichannel.Infrastructure.Services
                 }
 
                 // =========================================================================
-                // 5. 🟢 DOANH THU BẤT THƯỜNG:
-                // "Doanh thu hôm nay TĂNG 150% so với trung bình 7 ngày — kiểm tra?"
+                // 5. 🟢 DOANH THU BẤT THƯỜNG (SQL SumAsync - Zero Entity Allocations)
                 // =========================================================================
                 var past7Start = today.AddDays(-7);
-                var past7Orders = await _context.Orders
+                decimal past7Rev = await _context.Orders
                     .AsNoTracking()
                     .Where(o => o.CreatedAt >= past7Start && o.CreatedAt < today && (o.OrderStatus == "COMPLETED" || o.PaymentStatus == "PAID"))
-                    .ToListAsync(cancellationToken);
+                    .SumAsync(o => (decimal?)o.TotalAmount, cancellationToken) ?? 0m;
 
-                var todayOrders = await _context.Orders
+                decimal todayRev = await _context.Orders
                     .AsNoTracking()
                     .Where(o => o.CreatedAt >= today && o.CreatedAt < today.AddDays(1) && (o.OrderStatus == "COMPLETED" || o.PaymentStatus == "PAID"))
-                    .ToListAsync(cancellationToken);
+                    .SumAsync(o => (decimal?)o.TotalAmount, cancellationToken) ?? 0m;
 
-                decimal todayRev = todayOrders.Sum(o => o.TotalAmount);
-                decimal past7Rev = past7Orders.Sum(o => o.TotalAmount);
                 decimal avg7Rev = past7Rev > 0 ? (past7Rev / 7m) : 0m;
 
                 if (todayRev > 0 && avg7Rev > 0 && todayRev >= (1.5m * avg7Rev))
                 {
                     int percentInc = (int)Math.Round(((todayRev - avg7Rev) / avg7Rev) * 100);
                     var entityKey = $"REV_ANOMALY_{today:yyyyMMdd}";
-                    if (!await HasRecentAlertAsync(entityKey, TimeSpan.FromHours(12), cancellationToken))
+                    if (!existingAlertKeys.Contains(entityKey))
                     {
+                        existingAlertKeys.Add(entityKey);
                         newAlerts.Add(new Alert
                         {
                             Type = "REVENUE_ANOMALY",
@@ -212,7 +225,6 @@ namespace Omnichannel.Infrastructure.Services
 
                 // =========================================================================
                 // 6. 🔵 ĐƠN HÀNG CHỜ XỬ LÝ LÂU:
-                // "[N] đơn hàng chờ xác nhận quá 24h"
                 // =========================================================================
                 var delayThreshold = now.AddHours(-24);
                 var delayedPendingOrdersCount = await _context.Orders
@@ -222,8 +234,9 @@ namespace Omnichannel.Infrastructure.Services
                 if (delayedPendingOrdersCount > 0)
                 {
                     var entityKey = $"PENDING_DELAY_{now:yyyyMMdd_HH}";
-                    if (!await HasRecentAlertAsync(entityKey, TimeSpan.FromHours(6), cancellationToken))
+                    if (!existingAlertKeys.Contains(entityKey))
                     {
+                        existingAlertKeys.Add(entityKey);
                         newAlerts.Add(new Alert
                         {
                             Type = "PENDING_ORDERS_DELAY",
@@ -302,13 +315,25 @@ namespace Omnichannel.Infrastructure.Services
                 query = query.Where(a => a.CreatedAt < toDateEnd);
             }
 
-            // Stats across all alerts
-            var allAlerts = await _context.Alerts.AsNoTracking().ToListAsync(cancellationToken);
-            var unreadCount = allAlerts.Count(a => !a.IsRead);
-            var dangerCount = allAlerts.Count(a => a.Severity == "DANGER");
-            var warningCount = allAlerts.Count(a => a.Severity == "WARNING");
-            var successCount = allAlerts.Count(a => a.Severity == "SUCCESS");
-            var infoCount = allAlerts.Count(a => a.Severity == "INFO");
+            // Stats across all alerts (SQL Aggregation - Zero in-memory entity allocations)
+            var stats = await _context.Alerts
+                .AsNoTracking()
+                .GroupBy(a => 1)
+                .Select(g => new
+                {
+                    UnreadCount = g.Count(a => !a.IsRead),
+                    DangerCount = g.Count(a => a.Severity == "DANGER"),
+                    WarningCount = g.Count(a => a.Severity == "WARNING"),
+                    SuccessCount = g.Count(a => a.Severity == "SUCCESS"),
+                    InfoCount = g.Count(a => a.Severity == "INFO")
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            var unreadCount = stats?.UnreadCount ?? 0;
+            var dangerCount = stats?.DangerCount ?? 0;
+            var warningCount = stats?.WarningCount ?? 0;
+            var successCount = stats?.SuccessCount ?? 0;
+            var infoCount = stats?.InfoCount ?? 0;
 
             var totalItems = await query.CountAsync(cancellationToken);
 
@@ -386,37 +411,51 @@ namespace Omnichannel.Infrastructure.Services
 
         public async Task<AlertSummaryDto> GetAlertSummaryAsync(int? currentUserId = null, CancellationToken cancellationToken = default)
         {
-            var alerts = await _context.Alerts
+            var latest = await _context.Alerts
                 .AsNoTracking()
                 .Include(a => a.Store)
                 .OrderByDescending(a => a.CreatedAt)
+                .Take(5)
+                .Select(a => new AlertDto
+                {
+                    Id = a.Id,
+                    Type = a.Type,
+                    Severity = a.Severity,
+                    Title = a.Title,
+                    Message = a.Message,
+                    IsRead = a.IsRead,
+                    CreatedAt = a.CreatedAt,
+                    ReadAt = a.ReadAt,
+                    UserId = a.UserId,
+                    StoreId = a.StoreId,
+                    StoreName = a.Store != null ? a.Store.Name : "Toàn hệ thống",
+                    ActionUrl = a.ActionUrl,
+                    EntityKey = a.EntityKey
+                })
                 .ToListAsync(cancellationToken);
 
-            var latest = alerts.Take(5).Select(a => new AlertDto
-            {
-                Id = a.Id,
-                Type = a.Type,
-                Severity = a.Severity,
-                Title = a.Title,
-                Message = a.Message,
-                IsRead = a.IsRead,
-                CreatedAt = a.CreatedAt,
-                ReadAt = a.ReadAt,
-                UserId = a.UserId,
-                StoreId = a.StoreId,
-                StoreName = a.Store != null ? a.Store.Name : "Toàn hệ thống",
-                ActionUrl = a.ActionUrl,
-                EntityKey = a.EntityKey
-            }).ToList();
+            var stats = await _context.Alerts
+                .AsNoTracking()
+                .GroupBy(a => 1)
+                .Select(g => new
+                {
+                    TotalAlerts = g.Count(),
+                    UnreadCount = g.Count(a => !a.IsRead),
+                    DangerCount = g.Count(a => a.Severity == "DANGER"),
+                    WarningCount = g.Count(a => a.Severity == "WARNING"),
+                    SuccessCount = g.Count(a => a.Severity == "SUCCESS"),
+                    InfoCount = g.Count(a => a.Severity == "INFO")
+                })
+                .FirstOrDefaultAsync(cancellationToken);
 
             return new AlertSummaryDto
             {
-                TotalAlerts = alerts.Count,
-                UnreadCount = alerts.Count(a => !a.IsRead),
-                DangerCount = alerts.Count(a => a.Severity == "DANGER"),
-                WarningCount = alerts.Count(a => a.Severity == "WARNING"),
-                SuccessCount = alerts.Count(a => a.Severity == "SUCCESS"),
-                InfoCount = alerts.Count(a => a.Severity == "INFO"),
+                TotalAlerts = stats?.TotalAlerts ?? 0,
+                UnreadCount = stats?.UnreadCount ?? 0,
+                DangerCount = stats?.DangerCount ?? 0,
+                WarningCount = stats?.WarningCount ?? 0,
+                SuccessCount = stats?.SuccessCount ?? 0,
+                InfoCount = stats?.InfoCount ?? 0,
                 LatestAlerts = latest
             };
         }

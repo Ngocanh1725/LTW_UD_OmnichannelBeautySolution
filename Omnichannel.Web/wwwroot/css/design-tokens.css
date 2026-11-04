@@ -33,7 +33,7 @@
     --color-border-gold: rgba(212, 175, 55, 0.35);
 
     /* --- Typography Tokens --- */
-    --font-serif: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+    --font-serif: 'Playfair Display', 'Lora', Georgia, serif;
     --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
 

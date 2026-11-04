@@ -370,17 +370,20 @@
         }
     ];
 
-    document.addEventListener('DOMContentLoaded', function () {
-        initChatWidget();
-    });
+    let isChatInitialized = false;
 
-    function initChatWidget() {
+    document.addEventListener('DOMContentLoaded', function () {
+        // Chỉ ẩn teaser nếu người dùng đã bấm tắt trước đó; không nạp tin nhắn sớm
         const teaserDismissed = localStorage.getItem(TEASER_DISMISSED_KEY);
         if (teaserDismissed) {
             const teaser = document.getElementById('chatTeaserBubble');
             if (teaser) teaser.style.display = 'none';
         }
+    });
 
+    function initChatWidget() {
+        if (isChatInitialized) return;
+        isChatInitialized = true;
         renderSavedMessages();
         updateQuickRepliesBar(DEFAULT_PROMPT_CHIPS);
     }
@@ -404,6 +407,11 @@
         }
 
         if (isChatOpen) {
+            // Lazy load nội dung chat lần đầu khi người dùng mở panel
+            if (!isChatInitialized) {
+                initChatWidget();
+            }
+
             panel.classList.remove('hidden');
             panel.classList.add('flex', 'omni-chat-slide-up');
             openIcon.classList.add('hidden');

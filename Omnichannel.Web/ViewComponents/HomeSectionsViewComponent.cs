@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Omnichannel.Application.Interfaces.Inventory;
 using Omnichannel.Domain.Entities;
 using Omnichannel.Infrastructure.Data;
 using Omnichannel.Web.Models;
@@ -16,15 +17,27 @@ namespace Omnichannel.Web.ViewComponents
         public const string CacheKey = "home_ui_sections";
         private readonly ApplicationDbContext _context;
         private readonly IMemoryCache _cache;
+        private readonly IStoreInventoryService _storeInventoryService;
 
-        public HomeSectionsViewComponent(ApplicationDbContext context, IMemoryCache cache)
+        public HomeSectionsViewComponent(
+            ApplicationDbContext context, 
+            IMemoryCache cache,
+            IStoreInventoryService storeInventoryService)
         {
             _context = context;
             _cache = cache;
+            _storeInventoryService = storeInventoryService;
         }
+
+        public const string CompositeModelCacheKey = "HomeSections_Composite_Model_v1";
 
         public async Task<IViewComponentResult> InvokeAsync()
         {
+            if (_cache.TryGetValue(CompositeModelCacheKey, out HomeSectionsViewModel? cachedModel) && cachedModel != null)
+            {
+                return View(cachedModel);
+            }
+
             if (!_cache.TryGetValue(CacheKey, out List<UiSection>? sections) || sections == null)
             {
                 sections = await _context.UiSections
@@ -127,6 +140,9 @@ namespace Omnichannel.Web.ViewComponents
                         break;
 
                     case "FLASH_SALE":
+                        var flashCampaign = await _storeInventoryService.GetActiveFlashSaleAsync();
+                        itemModel.FlashSaleCampaign = flashCampaign;
+
                         if (flashSaleProducts == null)
                         {
                             flashSaleProducts = await _context.Products
@@ -195,6 +211,12 @@ namespace Omnichannel.Web.ViewComponents
 
                 model.Sections.Add(itemModel);
             }
+
+            _cache.Set(CompositeModelCacheKey, model, new MemoryCacheEntryOptions
+            {
+                SlidingExpiration = TimeSpan.FromMinutes(15),
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(30)
+            });
 
             return View(model);
         }

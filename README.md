@@ -21,7 +21,7 @@
   - `Omnichannel.Application`: DTOs, Service Interfaces, CQRS & Workflow Logics
   - `Omnichannel.Infrastructure`: EF Core DbContext, Repositories, Third-party Integrations, PBAC Authorization
   - `Omnichannel.Web`: ASP.NET Core MVC, Areas (Admin), Controllers, Hubs, Middlewares, ViewComponents
-  - `Omnichannel.Tests`: xUnit, FluentAssertions, Moq, Integration Fixtures (148 tests passed 100%)
+  - `Omnichannel.Tests`: xUnit, FluentAssertions, Moq, Integration Fixtures (**317 tests passed 100%**)
 - **Cơ sở dữ liệu**: Microsoft SQL Server / EF Core 8 (Code-First Migration & Dynamic Seeding)
 - **Realtime Communication**: ASP.NET Core SignalR (`NotificationHub`, `SystemHub`)
 - **Tối ưu hiệu năng**: Response Compression (Brotli + Gzip), Read-only `.AsNoTracking()`, Composite DB Indexes
@@ -45,22 +45,40 @@
    - Theo dõi từng sản phẩm theo Lô sản xuất (Batch Number) và Hạn sử dụng (Expiry Date).
    - Tự động xuất kho lô cận date trước, phát cảnh báo AI khi hàng sắp hết hạn (30, 60, 90 ngày).
    - Chương trình khuyến mãi xả kho cận date tự động (Flash Sale Smart Clearance).
-2. **Điều Chuyển Kho Liên Chi Nhánh (Stock Transfer Workflow)**:
-   - Cửa hàng trưởng tạo phiếu yêu cầu xuất hàng (`TRANSFER_CREATE`).
-   - Phê duyệt và điều phối tập trung bởi SuperAdmin (`TRANSFER_APPROVE`).
-   - Nhân viên kho chi nhánh nhận xác nhận nhập kho thực tế (`TRANSFER_RECEIVE`).
-3. **Phân Quyền Hạt Nhân (PBAC Matrix & Store Isolation)**:
-   - Quản trị quyền chi tiết theo `MODULE` và `ACTION`.
-   - Store Isolation Engine: Nhân viên và quản lý chi nhánh chỉ xem và tác nghiệp trên dữ liệu của chi nhánh mình; SuperAdmin có tầm nhìn toàn chuỗi.
-4. **Hộp Thư Nội Bộ (Internal Messaging System)**:
-   - Giao diện trực quan phong cách Gmail / Outlook mini.
-   - Soạn thư, gửi nhận giữa nhân viên, đánh dấu chưa đọc, thông báo realtime qua SignalR.
-5. **Trung Tâm Thông Báo Đa Kênh Realtime**:
-   - Badge chuông cập nhật tự động không cần F5 trang.
-   - Toast thông báo tức thời khi phát sinh đơn hàng, biến động kho, yêu cầu duyệt phiếu.
-6. **Ví Điểm Thưởng & Hạng Thành Viên (Loyalty Program)**:
-   - Hạng Silver, Gold, Diamond với tỷ lệ nhân điểm tích lũy và quà tặng sinh nhật.
-   - Cho phép khách hàng cấn trừ trực tiếp điểm thưởng thành tiền tại trang Thanh toán.
+2. **Khép Kín Vòng Lặp O2O (Click & Collect 1H & Bàn Giao POS)**:
+   - Đặt hàng online, nhận hàng trực tiếp tại Showroom (BOPIS/Click & Collect).
+   - Giữ hàng theo lô FEFO vật lý trong 48h, miễn 100% phí vận chuyển.
+   - Vé nhận hàng ưu tiên (Click & Collect Pass) với QR Code client-side & Mã PIN 6 số có cấu trúc.
+   - Cổng thu ngân POS bàn giao nhanh bằng quét QR/PIN, tự động cập nhật đơn và tích điểm.
+3. **Trợ Lý AI Da Liễu & Cảnh Báo Tương Kỵ Lâm Sàng (Clinical Conflict Engine)**:
+   - Routine Quiz 1-click & Phân tích da bằng AI Vision (`/phan-tich-da`) chuẩn da liễu.
+   - Động cơ phát hiện xung đột hoạt chất AI: Tự động cảnh báo tương kỵ đỏ rực tại giỏ hàng khi phối hợp các chất kích ứng mạnh (như Retinol + BHA) và gợi ý phân tách Skin Cycling.
+4. **Phòng Thử Màu Son Ảo (Virtual Lip Try-On Studio)**:
+   - Thử màu son môi realtime trên 4 tông da Châu Á (Sáng, Tự nhiên, Ngăm, Vàng ấm) và Camera trực tiếp.
+   - Phân tích undertone (Cool/Warm/Neutral) và đối chiếu Split-screen trước/sau.
+5. **Khay So Sánh Mỹ Phẩm Đa Chiều (Compare Drawer & Matrix)**:
+   - Ghim khay so sánh nổi, đối chiếu 2–4 sản phẩm: Đơn giá/ml (VNĐ/ml), Điểm an toàn EWG, Huy hiệu Clean Beauty 5 KHÔNG, và Hạn mở nắp PAO.
+6. **Trung Tâm Ra Quyết Định Điều Hành Chuỗi (Executive Decision Center)**:
+   - Loại bỏ 100% số liệu hardcode: 6 KPI tăng trưởng ▲▼ % so với kỳ trước tính trực tiếp từ SQL Server.
+   - Phễu chuyển đổi 5 bước, Ma trận Heatmap Giờ × Thứ săn sale, Phân khúc RFM 1–5 kèm Xuất CSV & 1-Click Tạo Voucher cá nhân hóa.
+   - Cảnh báo điều phối tồn kho thông minh liên chi nhánh.
+7. **Gamification Khách Hàng Thân Thiết (Omni Rewards)**:
+   - Lịch điểm danh 7 ngày liên tiếp giờ Việt Nam (UTC+7) kèm hiệu ứng pháo hoa Confetti.
+   - Mã giới thiệu bạn bè chống vòng lặp, Nhiệm vụ làm đẹp (Beauty Missions), Quầy đổi voucher Rewards Bazaar dùng ngay tại Checkout.
+8. **Tìm Kiếm Tức Thì (Instant Search Autocomplete)**:
+   - Gợi ý sản phẩm, thương hiệu, danh mục dưới 15ms. Bóc tách tiếng Việt không dấu triệt để (`đ`/`Đ`).
+9. **Theo Dõi Đơn Hàng Timeline & Đổi Trả Tự Phục Vụ**:
+   - Timeline dọc 6 bước minh bạch số hiệu lô FEFO, Cổng tra cứu vãng lai không cần đăng nhập `/tra-cuu-don-hang`.
+   - Khách tự hủy đơn hoàn tồn kho tự động trong transaction; Gửi yêu cầu đổi trả 7 ngày với SignalR realtime.
+10. **Demo Presenter HUD (`Alt + D`)**:
+    - Bảng điều khiển thuyết trình 1-click tích hợp đồng hồ đếm ngược 10 phút, tự động ánh xạ 6 chặng kịch bản Persona "Lê Ngọc Linh", chuyển vai siêu tốc và nạp giỏ hàng mẫu tức thì.
+11. **Phân Quyền Hạt Nhân (PBAC Matrix & Store Isolation)**:
+    - Quản trị quyền chi tiết theo `MODULE` và `ACTION`.
+    - Store Isolation Engine: Nhân viên và quản lý chi nhánh chỉ xem và tác nghiệp trên dữ liệu của chi nhánh mình; SuperAdmin có tầm nhìn toàn chuỗi.
+12. **Điều Chuyển Kho Liên Chi Nhánh (Stock Transfer Workflow)**:
+    - Cửa hàng trưởng tạo phiếu yêu cầu xuất hàng (`TRANSFER_CREATE`).
+    - Phê duyệt và điều phối tập trung bởi SuperAdmin (`TRANSFER_APPROVE`).
+    - Nhân viên kho chi nhánh nhận xác nhận nhập kho thực tế (`TRANSFER_RECEIVE`).
 
 ---
 
@@ -102,6 +120,12 @@
    ```bash
    dotnet test "Omnichannel.Tests/Omnichannel.Tests.csproj"
    ```
+
+6. **Chạy kịch bản kiểm thử hiệu năng tự động (System Performance Benchmark)**:
+   ```powershell
+   pwsh -File ./scripts/test_system_performance_benchmark.ps1 -RequestsPerEndpoint 50
+   ```
+   > 📑 Xem báo cáo chi tiết kỹ thuật tại [PERFORMANCE_OPTIMIZATION_REPORT.md](doc/PERFORMANCE_OPTIMIZATION_REPORT.md).
 
 ---
 

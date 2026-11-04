@@ -1,6 +1,3 @@
-@import url('design-tokens.css');
-@import url('design-system.css');
-
 /* STREAMING_CHUNK:Configuring luxury color variables and design tokens */
 :root {
     --color-primary: #d63384;
@@ -17,9 +14,9 @@
     --color-success: #10b981;
     --color-warning-fefo: #f59e0b;
     --color-danger-fefo: #ef4444;
-    --font-heading: 'Playfair Display', Georgia, serif;
-    --font-subheading: 'Cormorant Garamond', Georgia, serif;
-    --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-heading: 'Playfair Display', 'Lora', Georgia, serif;
+    --font-subheading: 'Plus Jakarta Sans', 'Inter', sans-serif;
+    --font-body: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
     --font-number: 'JetBrains Mono', monospace;
     --shadow-soft: 0 4px 20px -2px rgba(214, 51, 132, 0.08);
     --shadow-luxury: 0 12px 32px -4px rgba(183, 110, 121, 0.18);
@@ -29,8 +26,26 @@
     --radius-card: 1.25rem;
 }
 
-/* STREAMING_CHUNK:Importing typography and resetting global styles */
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+/* GPU Hardware Acceleration & Smooth 60 FPS Performance Helpers */
+.will-change-transform {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+.will-change-opacity {
+    will-change: opacity;
+}
+
+/* Defer Rendering for Off-screen / Below-the-fold Sections to Boost First Load & INP */
+.section-deferred {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 500px;
+}
+
+.aspect-square {
+    aspect-ratio: 1 / 1;
+}
 
 html {
     scroll-behavior: smooth;
@@ -307,12 +322,15 @@ body {
     border: 1px solid rgba(241, 216, 221, 0.7);
     overflow: hidden;
     position: relative;
-    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
 }
 
     .product-card-luxury:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 16px 32px -4px rgba(183, 110, 121, 0.16);
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px -4px rgba(183, 110, 121, 0.16);
         border-color: var(--color-rose-gold-light);
     }
 
@@ -342,7 +360,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    z-index: 2;
+    z-index: 15;
+    pointer-events: none;
 }
 
 .badge-fefo-clearance {
@@ -376,14 +395,17 @@ body {
     justify-content: center;
     gap: 8px;
     opacity: 0;
+    pointer-events: none;
     transform: translateY(12px);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    z-index: 3;
+    z-index: 30 !important;
 }
 
+.group:hover .product-action-overlay,
 .product-card-luxury:hover .product-action-overlay {
-    opacity: 1;
-    transform: translateY(0);
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translateY(0) !important;
 }
 
 .btn-card-action {
@@ -398,6 +420,10 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
     border: 1px solid rgba(241, 216, 221, 0.8);
     transition: all 0.2s ease;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 31 !important;
 }
 
     .btn-card-action:hover {
@@ -729,17 +755,20 @@ body {
     bottom: 0.75rem;
     left: 0.75rem;
     right: 0.75rem;
-    z-index: 20;
+    z-index: 30 !important;
     display: flex;
     gap: 0.5rem;
     opacity: 0;
+    pointer-events: none;
     transform: translateY(8px);
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.group:hover .product-action-overlay,
 .product-card-luxury:hover .product-action-overlay {
-    opacity: 1;
-    transform: translateY(0);
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translateY(0) !important;
 }
 
 .btn-card-action {
@@ -752,6 +781,10 @@ body {
     font-weight: 700;
     transition: all 0.2s ease;
     backdrop-filter: blur(8px);
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    position: relative;
+    z-index: 31 !important;
 }
 
 .btn-card-action:not(.btn-cart-primary) {
@@ -946,5 +979,27 @@ body {
     border-color: #18181b;
     transform: scale(1.08);
 }
+
+/* =========================================================================
+   HTMX SKELETON & INDICATOR SYSTEM - PHIÊN C0: GỠ LỚP PHỦ VÔ HÌNH
+   Đảm bảo khi không có request, indicator PHẢI display: none và pointer-events: none
+   để không chặn tương tác click của người dùng trên lưới sản phẩm.
+   ========================================================================= */
+.htmx-indicator {
+    display: none !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.htmx-request.htmx-indicator,
+.htmx-request .htmx-indicator {
+    display: flex !important;
+    pointer-events: auto !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
 
 

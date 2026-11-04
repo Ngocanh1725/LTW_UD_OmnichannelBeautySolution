@@ -4,7 +4,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Omnichannel.Application.Interfaces.Sales;
@@ -17,26 +19,45 @@ namespace Omnichannel.Infrastructure.Services
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _config;
         private readonly ILogger<GhnShippingService> _logger;
+        private readonly IMemoryCache? _cache;
+        private static bool _isGhnUnavailable = false;
+        private static DateTime _nextGhnRetryTime = DateTime.MinValue;
 
-        public GhnShippingService(HttpClient httpClient, IConfiguration config, ILogger<GhnShippingService> logger)
+        public GhnShippingService(
+            HttpClient httpClient, 
+            IConfiguration config, 
+            ILogger<GhnShippingService> logger,
+            IMemoryCache? cache = null)
         {
             _httpClient = httpClient;
             _config = config;
             _logger = logger;
+            _cache = cache;
         }
 
         public async Task<IEnumerable<dynamic>> GetProvincesAsync()
         {
+            const string cacheKey = "ghn_provinces_cache_v2";
+            if (_cache != null && _cache.TryGetValue(cacheKey, out IEnumerable<dynamic>? cachedProvinces) && cachedProvinces != null)
+            {
+                return cachedProvinces;
+            }
+
             string token = _config["GhnConfig:Token"] ?? "";
             string baseUrl = _config["GhnConfig:BaseUrl"] ?? "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/";
 
-            if (!string.IsNullOrWhiteSpace(token))
+            // Nếu GHN đang trong thời gian tạm ngắt do lỗi (401/timeout), dùng ngay fallback không chặn luồng
+            bool shouldAttemptCall = !string.IsNullOrWhiteSpace(token) && 
+                                     (!_isGhnUnavailable || DateTime.UtcNow > _nextGhnRetryTime);
+
+            if (shouldAttemptCall)
             {
                 try
                 {
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
                     var req = new HttpRequestMessage(HttpMethod.Get, $"{baseUrl}province");
                     req.Headers.Add("Token", token);
-                    var resp = await _httpClient.SendAsync(req);
+                    var resp = await _httpClient.SendAsync(req, cts.Token);
                     if (resp.IsSuccessStatusCode)
                     {
                         var json = await resp.Content.ReadAsStringAsync();
@@ -50,18 +71,32 @@ namespace Omnichannel.Infrastructure.Services
                                 string pname = p.TryGetProperty("ProvinceName", out var pn) ? pn.GetString() ?? "" : "";
                                 list.Add(new { ProvinceID = pid, ProvinceName = pname });
                             }
-                            if (list.Count > 0) return list;
+                            if (list.Count > 0)
+                            {
+                                _isGhnUnavailable = false;
+                                _cache?.Set(cacheKey, list, TimeSpan.FromHours(12));
+                                return list;
+                            }
                         }
+                    }
+                    else
+                    {
+                        // GHN trả về lỗi (ví dụ 401 Unauthorized do token test) -> ghi nhớ trạng thái lỗi trong 1 giờ
+                        _isGhnUnavailable = true;
+                        _nextGhnRetryTime = DateTime.UtcNow.AddHours(1);
+                        _logger.LogWarning("GHN API trả về mã lỗi HTTP {StatusCode}. Tự động ngắt kết nối và kích hoạt danh mục Tỉnh/Thành dự phòng (retry sau 1 giờ).", resp.StatusCode);
                     }
                 }
                 catch (Exception ex)
                 {
+                    _isGhnUnavailable = true;
+                    _nextGhnRetryTime = DateTime.UtcNow.AddMinutes(15);
                     _logger.LogWarning("Không thể tải Tỉnh/Thành từ GHN API ({Message}), sử dụng danh mục dự phòng.", ex.Message);
                 }
             }
 
-            // Fallback danh sách Tỉnh/Thành chuẩn Việt Nam
-            return await Task.FromResult(new List<dynamic>
+            // Fallback danh sách Tỉnh/Thành chuẩn Việt Nam (được cache để tái sử dụng ngay lập tức 0ms)
+            var fallbackProvinces = new List<dynamic>
             {
                 new { ProvinceID = 201, ProvinceName = "Hà Nội" },
                 new { ProvinceID = 202, ProvinceName = "Hồ Chí Minh" },
@@ -70,11 +105,20 @@ namespace Omnichannel.Infrastructure.Services
                 new { ProvinceID = 205, ProvinceName = "Cần Thơ" },
                 new { ProvinceID = 206, ProvinceName = "Bình Dương" },
                 new { ProvinceID = 207, ProvinceName = "Đồng Nai" }
-            });
+            };
+
+            _cache?.Set(cacheKey, fallbackProvinces, TimeSpan.FromHours(1));
+            return await Task.FromResult(fallbackProvinces);
         }
 
         public async Task<IEnumerable<dynamic>> GetDistrictsAsync(string provinceId)
         {
+            string cacheKey = $"ghn_districts_{provinceId}";
+            if (_cache != null && _cache.TryGetValue(cacheKey, out IEnumerable<dynamic>? cached) && cached != null)
+            {
+                return cached;
+            }
+
             var districts = new List<dynamic>();
             if (provinceId == "201") // Hà Nội
             {
@@ -99,11 +143,19 @@ namespace Omnichannel.Infrastructure.Services
             {
                 districts.Add(new { DistrictID = 1600, DistrictName = "Quận / Huyện Trung Tâm" });
             }
+
+            _cache?.Set(cacheKey, districts, TimeSpan.FromHours(12));
             return await Task.FromResult(districts);
         }
 
         public async Task<IEnumerable<dynamic>> GetWardsAsync(string districtId)
         {
+            string cacheKey = $"ghn_wards_{districtId}";
+            if (_cache != null && _cache.TryGetValue(cacheKey, out IEnumerable<dynamic>? cached) && cached != null)
+            {
+                return cached;
+            }
+
             var wards = new List<dynamic>
             {
                 new { WardCode = "1A01", WardName = "Phường Bến Nghé" },
@@ -111,6 +163,8 @@ namespace Omnichannel.Infrastructure.Services
                 new { WardCode = "1A03", WardName = "Phường Dịch Vọng Hậu" },
                 new { WardCode = "1A04", WardName = "Phường Hàng Trống" }
             };
+
+            _cache?.Set(cacheKey, wards, TimeSpan.FromHours(12));
             return await Task.FromResult(wards);
         }
 
@@ -122,15 +176,19 @@ namespace Omnichannel.Infrastructure.Services
             string shopId = _config["GhnConfig:ShopId"] ?? "";
             string feeUrl = _config["GhnConfig:FeeUrl"] ?? "https://dev-online-gateway.ghn.vn/shiip/public-api/v2/shipping-order/fee";
 
-            if (!string.IsNullOrWhiteSpace(token) && int.TryParse(toDistrictId, out int distId))
+            // Nếu GHN đã bị phát hiện không khả dụng (401), dùng ngay biểu phí nội bộ không chờ timeout
+            bool shouldAttemptCall = !_isGhnUnavailable && !string.IsNullOrWhiteSpace(token) && int.TryParse(toDistrictId, out int distId);
+
+            if (shouldAttemptCall)
             {
                 try
                 {
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
                     var reqBody = new
                     {
                         from_district_id = 1442, // Quận 1 HCM (Kho trung tâm OmniBeauty)
                         service_type_id = 2, // Chuẩn E-Commerce
-                        to_district_id = distId,
+                        to_district_id = int.Parse(toDistrictId),
                         to_ward_code = toWardCode ?? "1A01",
                         height = 10,
                         length = 15,
@@ -143,7 +201,7 @@ namespace Omnichannel.Infrastructure.Services
                     req.Headers.Add("Token", token);
                     if (!string.IsNullOrWhiteSpace(shopId)) req.Headers.Add("ShopId", shopId);
 
-                    var resp = await _httpClient.SendAsync(req);
+                    var resp = await _httpClient.SendAsync(req, cts.Token);
                     if (resp.IsSuccessStatusCode)
                     {
                         var json = await resp.Content.ReadAsStringAsync();
@@ -155,9 +213,16 @@ namespace Omnichannel.Infrastructure.Services
                             if (totalFee > 0) return totalFee;
                         }
                     }
+                    else
+                    {
+                        _isGhnUnavailable = true;
+                        _nextGhnRetryTime = DateTime.UtcNow.AddHours(1);
+                    }
                 }
                 catch (Exception ex)
                 {
+                    _isGhnUnavailable = true;
+                    _nextGhnRetryTime = DateTime.UtcNow.AddMinutes(15);
                     _logger.LogWarning("Không thể kết nối GHN Fee API ({Message}), chuyển sang biểu phí mỹ phẩm nội bộ.", ex.Message);
                 }
             }

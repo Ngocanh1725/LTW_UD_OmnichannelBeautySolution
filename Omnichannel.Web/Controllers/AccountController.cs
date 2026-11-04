@@ -1,3 +1,4 @@
+﻿using Omnichannel.Application.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -171,7 +172,7 @@ namespace Omnichannel.Web.Controllers
                 claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
             }
 
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var claimsIdentity = new ClaimsIdentity(claims, AuthConstants.CustomerCookieScheme);
 
             var authProperties = new AuthenticationProperties
             {
@@ -180,7 +181,7 @@ namespace Omnichannel.Web.Controllers
             };
 
             await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
+                AuthConstants.CustomerCookieScheme,
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties);
 
@@ -217,7 +218,7 @@ namespace Omnichannel.Web.Controllers
         public async Task<IActionResult> Logout()
         {
             await RecordLogoutAuditAsync();
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(AuthConstants.CustomerCookieScheme);
             return RedirectToAction("Login", "Account");
         }
 
@@ -227,7 +228,7 @@ namespace Omnichannel.Web.Controllers
         public async Task<IActionResult> LogoutPost()
         {
             await RecordLogoutAuditAsync();
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(AuthConstants.CustomerCookieScheme);
             return RedirectToAction("Login", "Account");
         }
 
@@ -338,7 +339,7 @@ namespace Omnichannel.Web.Controllers
             );
 
             // 6. Force logout để hủy phiên đăng nhập cũ
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(AuthConstants.CustomerCookieScheme);
 
             TempData["SuccessMessage"] = "Đổi mật khẩu thành công! Vui lòng đăng nhập lại với mật khẩu mới.";
             return RedirectToAction("Login", "Account");
@@ -575,9 +576,9 @@ namespace Omnichannel.Web.Controllers
                 new Claim("UserType", "1")
             };
 
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var claimsIdentity = new ClaimsIdentity(claims, AuthConstants.CustomerCookieScheme);
             await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
+                AuthConstants.CustomerCookieScheme,
                 new ClaimsPrincipal(claimsIdentity),
                 new AuthenticationProperties
                 {

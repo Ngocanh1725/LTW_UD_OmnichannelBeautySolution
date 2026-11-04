@@ -26,7 +26,7 @@
             </p>
 
             <!-- Search Form Bar -->
-            <form action="/Product/Search" method="get" class="relative shadow-lg shadow-pink-500/5 rounded-full">
+            <form action="/tim-kiem" method="get" class="relative shadow-lg shadow-pink-500/5 rounded-full">
                 <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                 <input type="text" 
                        name="q" 
@@ -50,19 +50,22 @@
                     <h3 class="font-serif font-bold text-charcoal text-base flex items-center gap-2">
                         <i class="fa-solid fa-sliders text-magenta-accent text-sm"></i> Bộ Lọc Tuyển Chọn
                     </h3>
-                    <a href="/Product/Search" class="text-[11px] text-magenta-accent hover:underline font-semibold">
+                    <a href="/tim-kiem" class="text-[11px] text-magenta-accent hover:underline font-semibold">
                         Đặt lại
                     </a>
                 </div>
 
                 <form id="filterForm" 
-                      hx-get="/Product/Search" 
-                      hx-trigger="change" 
+                      hx-get="/tim-kiem" 
+                      hx-include="#sortSelect"
+                      hx-trigger="change delay:300ms, input delay:300ms" 
                       hx-target="#searchProductsGrid" 
                       hx-indicator="#searchSkeleton"
+                      hx-push-url="true"
                       class="space-y-6 text-xs">
                     
                     <input type="hidden" name="q" value="@Model.Query" />
+                    <input type="hidden" name="categorySlug" id="filterCategorySlug" value="@Model.CategorySlug" />
 
                     <!-- Filter Group: Danh mục -->
                     <div class="space-y-3">
@@ -71,6 +74,17 @@
                             <i class="fa-solid fa-layer-group text-slate-400"></i>
                         </h4>
                         <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                            <label class="flex items-center justify-between cursor-pointer group">
+                                <div class="flex items-center gap-2.5">
+                                    <input type="radio" 
+                                           name="categoryId" 
+                                           value="" 
+                                           checked="@(!Model.CategoryId.HasValue && string.IsNullOrEmpty(Model.CategorySlug))" 
+                                           onchange="var el = document.getElementById('filterCategorySlug'); if (el) el.value = '';"
+                                           class="text-magenta-accent focus:ring-magenta-accent rounded" />
+                                    <span class="text-slate-600 group-hover:text-charcoal transition">Tất cả danh mục</span>
+                                </div>
+                            </label>
                             @foreach (var c in Model.Categories)
                             {
                                 <label class="flex items-center justify-between cursor-pointer group">
@@ -79,6 +93,7 @@
                                                name="categoryId" 
                                                value="@c.Id" 
                                                checked="@c.IsSelected" 
+                                               onchange="var el = document.getElementById('filterCategorySlug'); if (el) el.value = '';"
                                                class="text-magenta-accent focus:ring-magenta-accent rounded" />
                                         <span class="text-slate-600 group-hover:text-charcoal transition">@c.Name</span>
                                     </div>
@@ -97,6 +112,16 @@
                             <i class="fa-solid fa-gem text-slate-400"></i>
                         </h4>
                         <div class="space-y-2 max-h-44 overflow-y-auto pr-1">
+                            <label class="flex items-center justify-between cursor-pointer group">
+                                <div class="flex items-center gap-2.5">
+                                    <input type="radio" 
+                                           name="brand" 
+                                           value="" 
+                                           checked="@(string.IsNullOrEmpty(Model.Brand))" 
+                                           class="text-magenta-accent focus:ring-magenta-accent rounded" />
+                                    <span class="text-slate-600 group-hover:text-charcoal transition">Tất cả thương hiệu</span>
+                                </div>
+                            </label>
                             @foreach (var b in Model.Brands)
                             {
                                 <label class="flex items-center justify-between cursor-pointer group">
@@ -124,19 +149,19 @@
                         </h4>
                         <div class="space-y-2">
                             <label class="flex items-center gap-2.5 cursor-pointer">
-                                <input type="radio" name="maxPrice" value="300000" class="text-magenta-accent focus:ring-magenta-accent" />
+                                <input type="radio" name="maxPrice" value="300000" checked="@(Model.MaxPrice == 300000)" class="text-magenta-accent focus:ring-magenta-accent" />
                                 <span class="text-slate-600">Dưới 300.000₫</span>
                             </label>
                             <label class="flex items-center gap-2.5 cursor-pointer">
-                                <input type="radio" name="maxPrice" value="700000" class="text-magenta-accent focus:ring-magenta-accent" />
+                                <input type="radio" name="maxPrice" value="700000" checked="@(Model.MaxPrice == 700000)" class="text-magenta-accent focus:ring-magenta-accent" />
                                 <span class="text-slate-600">Dưới 700.000₫</span>
                             </label>
                             <label class="flex items-center gap-2.5 cursor-pointer">
-                                <input type="radio" name="maxPrice" value="1500000" class="text-magenta-accent focus:ring-magenta-accent" />
+                                <input type="radio" name="maxPrice" value="1500000" checked="@(Model.MaxPrice == 1500000)" class="text-magenta-accent focus:ring-magenta-accent" />
                                 <span class="text-slate-600">Dưới 1.500.000₫</span>
                             </label>
                             <label class="flex items-center gap-2.5 cursor-pointer">
-                                <input type="radio" name="maxPrice" value="" checked class="text-magenta-accent focus:ring-magenta-accent" />
+                                <input type="radio" name="maxPrice" value="" checked="@(!Model.MaxPrice.HasValue)" class="text-magenta-accent focus:ring-magenta-accent" />
                                 <span class="text-slate-600">Tất cả mức giá</span>
                             </label>
                         </div>
@@ -181,6 +206,10 @@
                             <i class="fa-solid fa-droplet text-slate-400"></i>
                         </h4>
                         <div class="space-y-2">
+                            <label class="flex items-center gap-2.5 cursor-pointer">
+                                <input type="radio" name="skinType" value="" checked="@(string.IsNullOrEmpty(Model.SkinType))" class="text-magenta-accent focus:ring-magenta-accent" />
+                                <span class="text-slate-600">Tất cả loại da</span>
+                            </label>
                             @foreach (var skin in Model.AvailableSkinTypes)
                             {
                                 <label class="flex items-center gap-2.5 cursor-pointer">
@@ -196,7 +225,7 @@
             <!-- Right Column: Products Result Grid Container -->
             <main class="lg:col-span-9 relative min-h-[500px]">
                 <!-- Skeleton Loading Shimmer Indicator -->
-                <div id="searchSkeleton" class="htmx-indicator absolute inset-0 z-20 bg-white/80 backdrop-blur-xs flex items-center justify-center p-4">
+                <div id="searchSkeleton" class="htmx-indicator pointer-events-none absolute inset-0 z-20 bg-white/80 backdrop-blur-xs flex items-center justify-center p-4" style="display: none;">
                     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 w-full">
                         @for (int i = 0; i < 6; i++)
                         {

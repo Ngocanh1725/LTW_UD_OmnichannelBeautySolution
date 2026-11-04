@@ -1,0 +1,534 @@
+@model Omnichannel.Application.DTOs.Cms.PageLayoutDto
+@{
+    Layout = null; // Tự chủ 100% không gian Full-Screen Visual Editor tương tự Shopify Theme Editor
+    ViewData["Title"] = "Visual No-Code Theme Customizer - Omni Beauty";
+}
+
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visual Site Builder | Omni Beauty Enterprise</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .sortable-ghost { opacity: 0.3; background: #ffe4e6 !important; border: 2px dashed #f43f5e !important; }
+        .sortable-drag { opacity: 0.95; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2) !important; }
+        .device-preview-wrapper { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    </style>
+</head>
+<body class="h-full bg-slate-900 text-slate-800 flex flex-col overflow-hidden">
+    @Html.AntiForgeryToken()
+
+    <!-- Topbar Header -->
+    <header class="h-16 bg-slate-950 border-b border-slate-800 px-6 flex items-center justify-between text-white shrink-0 z-20">
+        <!-- Brand & Page Switcher -->
+        <div class="flex items-center gap-4">
+            <a href="/admin/dashboard" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-slate-300 hover:text-white transition" title="Về Admin Dashboard">
+                <i class="fa-solid fa-arrow-left text-sm"></i>
+            </a>
+            <div class="h-6 w-px bg-slate-800"></div>
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="font-bold text-sm tracking-tight">Visual Theme Customizer</span>
+            </div>
+            <div class="hidden sm:flex items-center gap-2 ml-4 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs">
+                <span class="text-slate-400">Đang sửa:</span>
+                <span class="font-bold text-rose-400">Trang Chủ (Home Page)</span>
+            </div>
+        </div>
+
+        <!-- Viewport Switcher Controls -->
+        <div class="hidden md:flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
+            <button type="button" onclick="setDeviceView('desktop')" id="btnDeviceDesktop" class="px-3.5 py-1.5 rounded-lg bg-magenta-accent text-white font-semibold flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-desktop"></i>
+                <span>Desktop (100%)</span>
+            </button>
+            <button type="button" onclick="setDeviceView('tablet')" id="btnDeviceTablet" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white font-semibold flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-tablet-screen-button"></i>
+                <span>Tablet (768px)</span>
+            </button>
+            <button type="button" onclick="setDeviceView('mobile')" id="btnDeviceMobile" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white font-semibold flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-mobile-screen"></i>
+                <span>Mobile (375px)</span>
+            </button>
+        </div>
+
+        <!-- Actions: Save Draft & Publish -->
+        <div class="flex items-center gap-3">
+            <span id="saveStatusIndicator" class="text-xs text-amber-400 flex items-center gap-1.5 hidden">
+                <i class="fa-solid fa-cloud-arrow-up animate-bounce"></i>
+                <span>Đang lưu...</span>
+            </span>
+            <button type="button" onclick="saveDraftLayout(true)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition border border-slate-700 flex items-center gap-2">
+                <i class="fa-regular fa-floppy-disk"></i>
+                <span>Lưu Bản Nháp</span>
+            </button>
+            <button type="button" onclick="publishLayout()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-rose-600 via-pink-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white text-xs font-bold shadow-lg shadow-rose-900/40 transition flex items-center gap-2">
+                <i class="fa-solid fa-rocket"></i>
+                <span>Xuất Bản Thay Đổi</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <div class="flex-1 flex overflow-hidden">
+        <!-- Sidebar Controls (30% - 380px) -->
+        <aside class="w-[380px] bg-white border-r border-slate-200 flex flex-col shrink-0 overflow-hidden shadow-xl z-10">
+            <!-- Sidebar Tabs -->
+            <div class="flex items-center border-b border-slate-100 bg-slate-50 px-4 pt-3 gap-2">
+                <button type="button" onclick="switchSidebarTab('sections')" id="tabBtnSections" class="px-4 py-2 rounded-t-xl font-bold text-xs border-b-2 border-rose-600 text-rose-600 bg-white flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>Bố Cục Sections</span>
+                </button>
+                <button type="button" onclick="switchSidebarTab('theme')" id="tabBtnTheme" class="px-4 py-2 rounded-t-xl font-semibold text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-palette"></i>
+                    <span>Màu Sắc & Fonts</span>
+                </button>
+            </div>
+
+            <!-- Content Area: Sections List (Scrollable) -->
+            <div id="sidebarSectionsContent" class="flex-1 overflow-y-auto p-4 space-y-4">
+                <div class="bg-rose-50/60 rounded-2xl p-3 border border-rose-100 text-[11px] text-slate-600 flex items-start gap-2">
+                    <i class="fa-solid fa-circle-info text-rose-500 mt-0.5"></i>
+                    <span>Kéo thả biểu tượng <b>⠿</b> để đổi vị trí hiển thị. Thao tác tới đâu, khung xem trước bên phải cập nhật tức thì tới đó.</span>
+                </div>
+
+                <!-- Sortable Sections List -->
+                <div id="sectionsList" class="space-y-2.5">
+                    @if (Model.Sections != null && Model.Sections.Any())
+                    {
+                        @foreach (var sec in Model.Sections.OrderBy(s => s.OrderIndex))
+                        {
+                            <div class="section-card bg-white rounded-2xl border border-slate-200 hover:border-rose-300 shadow-xs transition-all overflow-hidden" 
+                                 data-id="@sec.Id" 
+                                 data-key="@sec.SectionKey">
+                                <!-- Card Header -->
+                                <div class="p-3.5 flex items-center justify-between gap-3 bg-slate-50/50">
+                                    <div class="flex items-center gap-2.5 flex-1 min-w-0">
+                                        <div class="drag-handle cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-700 p-1">
+                                            <i class="fa-solid fa-grip-vertical"></i>
+                                        </div>
+                                        <div class="truncate">
+                                            <h4 class="text-xs font-bold text-slate-800 truncate" id="card-title-@sec.Id">@sec.DisplayName</h4>
+                                            <span class="text-[10px] text-slate-400 uppercase font-mono">@sec.SectionKey</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <!-- Visibility Toggle -->
+                                        <label class="relative inline-flex items-center cursor-pointer" title="Bật/Tắt hiển thị khối">
+                                            <input type="checkbox" onchange="toggleSectionVisibility(@sec.Id, this.checked)" class="sr-only peer" @(sec.IsVisible ? "checked" : "") />
+                                            <div class="w-8 h-4 bg-slate-200 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-rose-500"></div>
+                                        </label>
+                                        <!-- Accordion Expand -->
+                                        <button type="button" onclick="toggleSectionAccordion(@sec.Id)" class="w-7 h-7 rounded-lg hover:bg-slate-200/70 text-slate-500 flex items-center justify-center transition">
+                                            <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" id="accordion-icon-@sec.Id"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Accordion Body (Details & Form) -->
+                                <div id="accordion-body-@sec.Id" class="hidden p-4 border-t border-slate-100 bg-white space-y-3.5">
+                                    <div>
+                                        <label class="block text-[11px] font-bold text-slate-700 mb-1">Tiêu Đề Section</label>
+                                        <input type="text" value="@sec.DisplayName" oninput="updateSectionLiveText(@sec.Id, this.value, null)" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-hidden" />
+                                    </div>
+
+                                    <!-- Section Items (Banners / Cards) -->
+                                    @if (sec.Items != null && sec.Items.Any())
+                                    {
+                                        <div class="pt-2 border-t border-slate-100">
+                                            <label class="block text-[11px] font-bold text-slate-700 mb-2">Các Phần Tử Con (Items)</label>
+                                            <div class="space-y-3">
+                                                @foreach (var item in sec.Items.OrderBy(i => i.OrderIndex))
+                                                {
+                                                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
+                                                        <div class="flex items-center gap-3">
+                                                            <div class="relative w-14 h-14 rounded-lg overflow-hidden bg-slate-200 shrink-0 border border-slate-300">
+                                                                <img id="item-img-preview-@item.Id" src="@(!string.IsNullOrEmpty(item.ImageUrl) ? item.ImageUrl : "/images/product-placeholder.svg")" alt="@item.Title" class="w-full h-full object-cover" />
+                                                            </div>
+                                                            <div class="flex-1 min-w-0">
+                                                                <input type="text" value="@item.Title" oninput="updateItemTitle(@item.Id, this.value)" placeholder="Tiêu đề item..." class="w-full px-2 py-1 rounded-lg border border-slate-200 text-[11px] font-semibold mb-1 outline-hidden" />
+                                                                <button type="button" onclick="changeItemImage(@sec.Id, @item.Id)" class="px-2.5 py-1 rounded-lg bg-white border border-slate-300 hover:border-rose-400 hover:text-rose-600 text-[10px] font-bold text-slate-700 transition flex items-center gap-1 shadow-2xs">
+                                                                    <i class="fa-regular fa-image text-xs"></i>
+                                                                    <span>Thay Ảnh</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- Content Area: Theme Tokens & Colors -->
+            <div id="sidebarThemeContent" class="hidden flex-1 overflow-y-auto p-5 space-y-6">
+                <!-- Color Palette -->
+                <div class="space-y-4">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Bảng Màu Chủ Đạo</h4>
+
+                    <!-- Primary Color -->
+                    <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                        <div>
+                            <span class="block text-xs font-bold text-slate-800">Màu Chính (Primary)</span>
+                            <span class="text-[10px] text-slate-400">Nút bấm, huy hiệu, điểm nhấn chính</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="color" id="primaryColorPicker" value="@Model.Theme.PrimaryColor" oninput="updateLiveColor('--primary-color', this.value, 'primaryHexText')" class="w-8 h-8 rounded-lg cursor-pointer border-0 p-0" />
+                            <span id="primaryHexText" class="font-mono text-xs font-bold text-slate-700">@Model.Theme.PrimaryColor</span>
+                        </div>
+                    </div>
+
+                    <!-- Secondary Color -->
+                    <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                        <div>
+                            <span class="block text-xs font-bold text-slate-800">Màu Phụ (Secondary)</span>
+                            <span class="text-[10px] text-slate-400">Gradient, hover states, sub-elements</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="color" id="secondaryColorPicker" value="@Model.Theme.SecondaryColor" oninput="updateLiveColor('--secondary-color', this.value, 'secondaryHexText')" class="w-8 h-8 rounded-lg cursor-pointer border-0 p-0" />
+                            <span id="secondaryHexText" class="font-mono text-xs font-bold text-slate-700">@Model.Theme.SecondaryColor</span>
+                        </div>
+                    </div>
+
+                    <!-- Accent Color -->
+                    <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                        <div>
+                            <span class="block text-xs font-bold text-slate-800">Điểm Nhấn (Accent)</span>
+                            <span class="text-[10px] text-slate-400">Star ratings, badge deal sốc, banner icon</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="color" id="accentColorPicker" value="@Model.Theme.AccentColor" oninput="updateLiveColor('--accent-color', this.value, 'accentHexText')" class="w-8 h-8 rounded-lg cursor-pointer border-0 p-0" />
+                            <span id="accentHexText" class="font-mono text-xs font-bold text-slate-700">@Model.Theme.AccentColor</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Typography -->
+                <div class="space-y-4 pt-4 border-t border-slate-100">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Phông Chữ (Typography)</h4>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Phông Tiêu Đề (Font Heading)</label>
+                        <select id="fontHeadingSelect" onchange="updateLiveFont('heading', this.value)" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-hidden bg-white">
+                            <option value="'Playfair Display', serif" selected="@(Model.Theme.FontHeading.Contains("Playfair"))">Playfair Display (Sang trọng chuẩn Pháp)</option>
+                            <option value="'Lora', serif" selected="@(Model.Theme.FontHeading.Contains("Lora"))">Lora (Cổ điển & Tinh tế)</option>
+                            <option value="'Plus Jakarta Sans', sans-serif" selected="@(Model.Theme.FontHeading.Contains("Jakarta"))">Plus Jakarta Sans (Hiện đại chuẩn Quốc tế)</option>
+                            <option value="'Inter', sans-serif" selected="@(Model.Theme.FontHeading.Contains("Inter"))">Inter (Công nghệ & Tối giản)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Phông Nội Dung (Font Body)</label>
+                        <select id="fontBodySelect" onchange="updateLiveFont('body', this.value)" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 outline-hidden bg-white">
+                            <option value="'Inter', sans-serif" selected="@(Model.Theme.FontBody.Contains("Inter"))">Inter (Rõ nét, dễ đọc trên di động)</option>
+                            <option value="'Plus Jakarta Sans', sans-serif" selected="@(Model.Theme.FontBody.Contains("Jakarta"))">Plus Jakarta Sans (Tươi trẻ)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Right Live Preview Canvas (70%) -->
+        <main class="flex-1 bg-slate-950 flex flex-col items-center justify-center p-4 overflow-hidden relative">
+            <div id="deviceWrapper" class="device-preview-wrapper w-full h-full bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-800 flex flex-col">
+                <!-- Preview Toolbar -->
+                <div class="h-9 bg-slate-900 border-b border-slate-800 px-4 flex items-center justify-between text-slate-400 text-xs shrink-0">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+                        <span class="ml-2 font-mono text-[11px] text-slate-400 bg-slate-800 px-2 py-0.5 rounded">http://localhost:5116/preview?mode=draft</span>
+                    </div>
+                    <button type="button" onclick="reloadPreview()" class="hover:text-white transition flex items-center gap-1">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>F5 Preview</span>
+                    </button>
+                </div>
+                <!-- Iframe Canvas -->
+                <iframe id="previewIframe" src="/preview?mode=draft" class="w-full flex-1 border-0" title="Storefront Live Preview"></iframe>
+            </div>
+        </main>
+    </div>
+
+    <!-- Partial Media Picker Modal -->
+    <partial name="_MediaPickerModal" />
+
+    <!-- Customizer Client Engine Script -->
+    <script>
+        const initialLayoutModel = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+        let layoutState = initialLayoutModel;
+        let isDirty = false;
+        let saveDraftTimer = null;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initSortable();
+        });
+
+        function switchSidebarTab(tab) {
+            const btnSec = document.getElementById('tabBtnSections');
+            const btnTheme = document.getElementById('tabBtnTheme');
+            const contentSec = document.getElementById('sidebarSectionsContent');
+            const contentTheme = document.getElementById('sidebarThemeContent');
+
+            if (tab === 'sections') {
+                btnSec.className = "px-4 py-2 rounded-t-xl font-bold text-xs border-b-2 border-rose-600 text-rose-600 bg-white flex items-center gap-1.5 transition";
+                btnTheme.className = "px-4 py-2 rounded-t-xl font-semibold text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1.5 transition";
+                contentSec.classList.remove('hidden');
+                contentTheme.classList.add('hidden');
+            } else {
+                btnTheme.className = "px-4 py-2 rounded-t-xl font-bold text-xs border-b-2 border-rose-600 text-rose-600 bg-white flex items-center gap-1.5 transition";
+                btnSec.className = "px-4 py-2 rounded-t-xl font-semibold text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1.5 transition";
+                contentTheme.classList.remove('hidden');
+                contentSec.classList.add('hidden');
+            }
+        }
+
+        function setDeviceView(mode) {
+            const wrapper = document.getElementById('deviceWrapper');
+            const btnD = document.getElementById('btnDeviceDesktop');
+            const btnT = document.getElementById('btnDeviceTablet');
+            const btnM = document.getElementById('btnDeviceMobile');
+
+            [btnD, btnT, btnM].forEach(b => {
+                b.className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white font-semibold flex items-center gap-1.5 transition";
+            });
+
+            if (mode === 'desktop') {
+                btnD.className = "px-3.5 py-1.5 rounded-lg bg-magenta-accent text-white font-semibold flex items-center gap-1.5 transition";
+                wrapper.style.width = '100%';
+            } else if (mode === 'tablet') {
+                btnT.className = "px-3.5 py-1.5 rounded-lg bg-magenta-accent text-white font-semibold flex items-center gap-1.5 transition";
+                wrapper.style.width = '768px';
+            } else if (mode === 'mobile') {
+                btnM.className = "px-3.5 py-1.5 rounded-lg bg-magenta-accent text-white font-semibold flex items-center gap-1.5 transition";
+                wrapper.style.width = '375px';
+            }
+        }
+
+        function initSortable() {
+            const el = document.getElementById('sectionsList');
+            if (!el) return;
+
+            Sortable.create(el, {
+                handle: '.drag-handle',
+                animation: 250,
+                ghostClass: 'sortable-ghost',
+                dragClass: 'sortable-drag',
+                onEnd: function () {
+                    const cards = Array.from(el.querySelectorAll('.section-card'));
+                    const newOrder = cards.map(c => parseInt(c.dataset.id));
+                    const newKeys = cards.map(c => c.dataset.key);
+
+                    // Cập nhật OrderIndex trong state
+                    cards.forEach((c, idx) => {
+                        const secId = parseInt(c.dataset.id);
+                        const sec = layoutState.Sections.find(s => s.Id === secId);
+                        if (sec) sec.OrderIndex = idx + 1;
+                    });
+
+                    // GỬI POSTMESSAGE THỜI GIAN THỰC SANG LIVE PREVIEW IFRAME (< 50ms)
+                    sendPostMessage({
+                        type: 'REORDER_SECTIONS',
+                        order: newOrder,
+                        orderKeys: newKeys
+                    });
+
+                    triggerAutoSave();
+                }
+            });
+        }
+
+        function toggleSectionAccordion(id) {
+            const body = document.getElementById(`accordion-body-${id}`);
+            const icon = document.getElementById(`accordion-icon-${id}`);
+            if (body.classList.contains('hidden')) {
+                body.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                body.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function toggleSectionVisibility(id, isVisible) {
+            const sec = layoutState.Sections.find(s => s.Id === id);
+            if (sec) sec.IsVisible = isVisible;
+
+            sendPostMessage({
+                type: 'TOGGLE_SECTION',
+                sectionId: id,
+                isVisible: isVisible
+            });
+
+            triggerAutoSave();
+        }
+
+        function updateSectionLiveText(id, title, subtitle) {
+            const sec = layoutState.Sections.find(s => s.Id === id);
+            if (sec && title) {
+                sec.DisplayName = title;
+                document.getElementById(`card-title-${id}`).textContent = title;
+            }
+
+            sendPostMessage({
+                type: 'UPDATE_SECTION_TEXT',
+                sectionId: id,
+                title: title,
+                subtitle: subtitle
+            });
+
+            triggerAutoSave();
+        }
+
+        function updateLiveColor(prop, val, hexLabelId) {
+            document.getElementById(hexLabelId).textContent = val;
+            if (prop === '--primary-color') layoutState.Theme.PrimaryColor = val;
+            if (prop === '--secondary-color') layoutState.Theme.SecondaryColor = val;
+            if (prop === '--accent-color') layoutState.Theme.AccentColor = val;
+
+            sendPostMessage({
+                type: 'UPDATE_THEME_COLOR',
+                property: prop,
+                value: val
+            });
+
+            triggerAutoSave();
+        }
+
+        function updateLiveFont(target, fontVal) {
+            if (target === 'heading') layoutState.Theme.FontHeading = fontVal;
+            if (target === 'body') layoutState.Theme.FontBody = fontVal;
+            triggerAutoSave();
+        }
+
+        function changeItemImage(sectionId, itemId) {
+            openMediaPicker(function (selectedAsset) {
+                const imgEl = document.getElementById(`item-img-preview-${itemId}`);
+                if (imgEl) imgEl.src = selectedAsset.publicUrl;
+
+                const sec = layoutState.Sections.find(s => s.Id === sectionId);
+                if (sec && sec.Items) {
+                    const item = sec.Items.find(i => i.Id === itemId);
+                    if (item) {
+                        item.MediaAssetId = selectedAsset.id;
+                        item.ImageUrl = selectedAsset.publicUrl;
+                    }
+                }
+
+                sendPostMessage({
+                    type: 'UPDATE_SECTION_IMAGE',
+                    sectionId: sectionId,
+                    itemId: itemId,
+                    imageUrl: selectedAsset.publicUrl
+                });
+
+                triggerAutoSave();
+            });
+        }
+
+        function updateItemTitle(itemId, title) {
+            layoutState.Sections.forEach(s => {
+                const it = s.Items?.find(i => i.Id === itemId);
+                if (it) it.Title = title;
+            });
+            triggerAutoSave();
+        }
+
+        function sendPostMessage(payload) {
+            const iframe = document.getElementById('previewIframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage(payload, '*');
+            }
+        }
+
+        function triggerAutoSave() {
+            isDirty = true;
+            clearTimeout(saveDraftTimer);
+            saveDraftTimer = setTimeout(() => {
+                saveDraftLayout(false);
+            }, 1200);
+        }
+
+        async function saveDraftLayout(showNotice = false) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+            const indicator = document.getElementById('saveStatusIndicator');
+            indicator.classList.remove('hidden');
+
+            try {
+                const res = await fetch('/admin/customizer/save-draft', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': token
+                    },
+                    body: JSON.stringify({
+                        pageKey: 'home_page',
+                        sections: layoutState.Sections,
+                        theme: layoutState.Theme
+                    })
+                });
+
+                const data = await res.json();
+                indicator.classList.add('hidden');
+                if (data.success) {
+                    isDirty = false;
+                    if (showNotice) alert('Bản nháp giao diện đã được lưu thành công!');
+                }
+            } catch (err) {
+                indicator.classList.add('hidden');
+                if (showNotice) alert('Lỗi khi lưu bản nháp: ' + err);
+            }
+        }
+
+        async function publishLayout() {
+            if (!confirm('Bạn có chắc chắn muốn Xuất Bản các thay đổi này ra Storefront cho toàn bộ khách hàng?')) return;
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+            const formData = new FormData();
+            formData.append('pageKey', 'home_page');
+
+            try {
+                // Đảm bảo bản nháp mới nhất đã được lưu
+                await saveDraftLayout(false);
+
+                const res = await fetch('/admin/customizer/publish', {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': token
+                    },
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message || 'Xuất bản thành công!');
+                    reloadPreview();
+                } else {
+                    alert('Lỗi xuất bản: ' + (data.message || ''));
+                }
+            } catch (err) {
+                alert('Lỗi kết nối khi xuất bản: ' + err);
+            }
+        }
+
+        function reloadPreview() {
+            const iframe = document.getElementById('previewIframe');
+            if (iframe) {
+                iframe.src = '/preview?mode=draft&t=' + new Date().getTime();
+            }
+        }
+    </script>
+</body>
+</html>
+

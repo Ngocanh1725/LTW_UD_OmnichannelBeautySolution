@@ -53,7 +53,7 @@
         }
 
         .pos-workspace {
-            height: calc(100vh - 58px);
+            height: calc(100vh - 58px - 42px);
             overflow: hidden;
         }
 
@@ -170,6 +170,9 @@
             } catch (e) { }
         }
     </script>
+    <!-- Demo Presenter HUD (GAP-12: Phiên E1 - Chỉ render khi DemoMode:Enabled = true) -->
+    <partial name="_DemoPresenterHud" />
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

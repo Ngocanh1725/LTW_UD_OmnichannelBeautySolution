@@ -130,7 +130,12 @@ namespace Omnichannel.Infrastructure.Services
             return await _context.SaveChangesAsync(ct) > 0;
         }
 
-        public async Task<List<ProductReviewDto>> GetProductReviewsAsync(int productId, int page = 1, int pageSize = 10, int? ratingFilter = null, string? filterTab = null, CancellationToken ct = default)
+        public Task<List<ProductReviewDto>> GetProductReviewsAsync(int productId, int page, int pageSize, int? ratingFilter, string? filterTab, CancellationToken ct)
+        {
+            return GetProductReviewsAsync(productId, page, pageSize, ratingFilter, filterTab, skinTypeFilter: null, sortBy: null, ct: ct);
+        }
+
+        public async Task<List<ProductReviewDto>> GetProductReviewsAsync(int productId, int page = 1, int pageSize = 10, int? ratingFilter = null, string? filterTab = null, string? skinTypeFilter = null, string? sortBy = null, CancellationToken ct = default)
         {
             var query = _context.ProductReviews
                 .AsNoTracking()
@@ -161,16 +166,62 @@ namespace Omnichannel.Infrastructure.Services
                 }
             }
 
+            // Bộ lọc loại da Skin Twin
+            if (!string.IsNullOrWhiteSpace(skinTypeFilter) && !skinTypeFilter.Equals("all", StringComparison.OrdinalIgnoreCase))
+            {
+                var stLower = skinTypeFilter.Trim().ToLower();
+                query = query.Where(r => r.SkinType != null && r.SkinType.ToLower().Contains(stLower));
+            }
+
+            // Sắp xếp
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                switch (sortBy.Trim().ToLowerInvariant())
+                {
+                    case "helpful":
+                    case "most_helpful":
+                        query = query.OrderByDescending(r => r.HelpfulCount).ThenByDescending(r => r.CreatedAt);
+                        break;
+                    case "highest":
+                    case "highest_rating":
+                    case "rating_desc":
+                        query = query.OrderByDescending(r => r.Rating).ThenByDescending(r => r.CreatedAt);
+                        break;
+                    case "lowest":
+                    case "lowest_rating":
+                        query = query.OrderBy(r => r.Rating).ThenByDescending(r => r.CreatedAt);
+                        break;
+                    case "newest":
+                    default:
+                        query = query.OrderByDescending(r => r.CreatedAt);
+                        break;
+                }
+            }
+            else
+            {
+                query = query.OrderByDescending(r => r.CreatedAt);
+            }
+
             page = Math.Max(1, page);
             pageSize = Math.Clamp(pageSize, 1, 50);
 
             var reviews = await query
-                .OrderByDescending(r => r.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync(ct);
 
-            return reviews.Select(MapToDto).ToList();
+            var dtos = reviews.Select(MapToDto).ToList();
+
+            if (!string.IsNullOrWhiteSpace(skinTypeFilter) && !skinTypeFilter.Equals("all", StringComparison.OrdinalIgnoreCase))
+            {
+                foreach (var dto in dtos)
+                {
+                    dto.IsSkinTwinMatch = !string.IsNullOrEmpty(dto.SkinType) &&
+                        dto.SkinType.ToLower().Contains(skinTypeFilter.Trim().ToLower());
+                }
+            }
+
+            return dtos;
         }
 
         public async Task<ReviewStatsDto> GetReviewStatsAsync(int productId, CancellationToken ct = default)
@@ -211,12 +262,97 @@ namespace Omnichannel.Infrastructure.Services
 
         public async Task<int> VoteHelpfulAsync(int reviewId, CancellationToken ct = default)
         {
-            var review = await _context.ProductReviews.FindAsync(new object[] { reviewId }, ct);
-            if (review == null) return 0;
+            var result = await VoteHelpfulWithCheckAsync(reviewId, null, null, ct);
+            return result.NewCount;
+        }
 
+        public async Task<(bool Success, int NewCount, string Message)> VoteHelpfulWithCheckAsync(int reviewId, int? userId, string? anonymousKey, CancellationToken ct = default)
+        {
+            var review = await _context.ProductReviews.FindAsync(new object[] { reviewId }, ct);
+            if (review == null)
+            {
+                return (false, 0, "Không tìm thấy đánh giá.");
+            }
+
+            // Kiểm tra trùng lặp: nếu user đã đăng nhập, kiểm tra theo userId; nếu vãng lai, kiểm tra theo anonymousKey
+            bool alreadyVoted = false;
+            if (userId.HasValue)
+            {
+                alreadyVoted = await _context.ReviewHelpfulVotes
+                    .AnyAsync(v => v.ReviewId == reviewId && v.UserId == userId.Value, ct);
+            }
+            else if (!string.IsNullOrWhiteSpace(anonymousKey))
+            {
+                alreadyVoted = await _context.ReviewHelpfulVotes
+                    .AnyAsync(v => v.ReviewId == reviewId && v.AnonymousKey == anonymousKey, ct);
+            }
+
+            if (alreadyVoted)
+            {
+                return (false, review.HelpfulCount, "Bạn đã bình chọn đánh giá này hữu ích rồi.");
+            }
+
+            var vote = new ReviewHelpfulVote
+            {
+                ReviewId = reviewId,
+                UserId = userId,
+                AnonymousKey = string.IsNullOrWhiteSpace(anonymousKey) ? null : anonymousKey.Trim(),
+                VotedAt = DateTime.UtcNow
+            };
+
+            _context.ReviewHelpfulVotes.Add(vote);
             review.HelpfulCount += 1;
             await _context.SaveChangesAsync(ct);
-            return review.HelpfulCount;
+
+            _logger.LogInformation("Người dùng {UserId} (Key: {AnonKey}) đã vote helpful thành công cho review {ReviewId}. Tổng vote: {Count}",
+                userId, anonymousKey, reviewId, review.HelpfulCount);
+
+            return (true, review.HelpfulCount, "Cảm ơn bạn đã ghi nhận đánh giá này hữu ích!");
+        }
+
+        public async Task<List<ReviewPhotoGalleryDto>> GetCustomerReviewImagesAsync(int productId, int limit = 12, CancellationToken ct = default)
+        {
+            limit = Math.Clamp(limit, 1, 30);
+
+            var reviewsWithPhotos = await _context.ProductReviews
+                .AsNoTracking()
+                .Include(r => r.User)
+                .Where(r => r.ProductId == productId && r.IsApproved && !r.IsHidden && !string.IsNullOrEmpty(r.ImagesJson) && r.ImagesJson != "[]" && r.ImagesJson != "null")
+                .OrderByDescending(r => r.CreatedAt)
+                .Take(limit * 2)
+                .ToListAsync(ct);
+
+            var gallery = new List<ReviewPhotoGalleryDto>();
+            foreach (var r in reviewsWithPhotos)
+            {
+                try
+                {
+                    var images = !string.IsNullOrEmpty(r.ImagesJson) ? JsonSerializer.Deserialize<List<string>>(r.ImagesJson) ?? new() : new();
+                    foreach (var img in images)
+                    {
+                        if (string.IsNullOrWhiteSpace(img)) continue;
+                        gallery.Add(new ReviewPhotoGalleryDto
+                        {
+                            ReviewId = r.Id,
+                            ImageUrl = img,
+                            Rating = r.Rating,
+                            UserName = r.User?.FullName ?? r.User?.Username ?? "Khách hàng",
+                            SkinType = r.SkinType,
+                            CreatedAt = r.CreatedAt
+                        });
+
+                        if (gallery.Count >= limit) break;
+                    }
+                }
+                catch
+                {
+                    // bỏ qua JSON không hợp lệ
+                }
+
+                if (gallery.Count >= limit) break;
+            }
+
+            return gallery;
         }
 
         public async Task<bool> AddAdminReplyAsync(int reviewId, string replyContent, string replyBy = "Chuyên viên CSKH Omni Beauty", CancellationToken ct = default)

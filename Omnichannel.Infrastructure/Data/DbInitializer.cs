@@ -7,29 +7,82 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Omnichannel.Domain.Entities;
 
 namespace Omnichannel.Infrastructure.Data
 {
-    public static class DbInitializer
+    public static partial class DbInitializer
     {
-        public static async Task SeedAsync(ApplicationDbContext context)
+        private static void LogInfo(ILogger? logger, string message)
+        {
+            logger?.LogInformation("{Message}", message);
+        }
+
+        private static void LogWarning(ILogger? logger, string message)
+        {
+            logger?.LogWarning("{Message}", message);
+        }
+
+        private static void LogError(ILogger? logger, Exception? ex, string message)
+        {
+            if (logger != null)
+            {
+                logger.LogError(ex, "{Message}", message);
+            }
+        }
+
+        public static async Task SeedAsync(ApplicationDbContext context, ILogger? logger = null)
         {
             if (context.Database.IsRelational())
             {
                 await context.Database.MigrateAsync();
-                await EnsureChatTablesExistAsync(context);
-                await EnsureSkinConcernTablesExistAsync(context);
-                await EnsureAlertTablesExistAsync(context);
-                await EnsureNotificationTablesExistAsync(context);
-                await EnsureInternalMessageTablesExistAsync(context);
-                await EnsureCategoryIconColumnExistAsync(context);
-                await EnsureBrandTablesExistAsync(context);
-                await EnsureProductBrandColumnExistAsync(context);
-                await EnsureProductVariantColumnsExistAsync(context);
-                await EnsureProductBatchFefoColumnsExistAsync(context);
-                await EnsureWishlistAndStockAlertTablesExistAsync(context);
-                await EnsureProductReviewColumnsAndSeedAsync(context);
+
+                // Chỉ chạy kiểm tra schema bổ sung nếu bảng Products chưa có dữ liệu (DB mới khởi tạo lần đầu)
+                bool isDatabaseInitialized = await context.Products.AnyAsync();
+                if (!isDatabaseInitialized)
+                {
+                    await EnsureChatTablesExistAsync(context);
+                    await EnsureSkinConcernTablesExistAsync(context);
+                    await EnsureAlertTablesExistAsync(context);
+                    await EnsureNotificationTablesExistAsync(context);
+                    await EnsureInternalMessageTablesExistAsync(context);
+                    await EnsureCategoryIconColumnExistAsync(context);
+                    await EnsureBrandTablesExistAsync(context);
+                    await EnsureProductBrandColumnExistAsync(context);
+                    await EnsureProductVariantColumnsExistAsync(context);
+                    await EnsureProductBatchFefoColumnsExistAsync(context, logger);
+                    await EnsureWishlistAndStockAlertTablesExistAsync(context, logger);
+                    await EnsureProductReviewColumnsAndSeedAsync(context, logger);
+                    await EnsureRowVersionColumnsExistAsync(context, logger);
+                }
+
+                // Đảm bảo các chỉ mục (indexes) hiệu năng cao luôn sẵn sàng
+                await EnsureIndexesExistAsync(context, logger);
+            }
+
+            // Đảm bảo dữ liệu Dynamic CMS, Theme Tokens & Sections luôn sẵn sàng
+            await EnsureDynamicCmsDataSeededAsync(context, logger);
+
+            // Đảm bảo các cột Clean Beauty và chuỗi FullIngredients luôn sẵn sàng
+            await EnsureCleanBeautyColumnsExistAsync(context, logger);
+
+            // Đảm bảo cột RoutineStep và Coupon COMBO15 luôn sẵn sàng
+            await EnsureRoutineStepAndComboSeededAsync(context, logger);
+
+            // Seed dữ liệu chỉ chạy khi bảng rỗng (nếu đã có Products và Roles thì hệ thống đã khởi tạo hoàn tất)
+            if (await context.Products.AnyAsync() && await context.Roles.AnyAsync())
+            {
+                // Đảm bảo đồng bộ lô hàng FEFO thật (Date xa & Cận date) cho toàn bộ sản phẩm
+                await EnsureFefoBatchesSynchronizedAsync(context, logger);
+                // Đảm bảo tồn kho showroom O2O và chiến dịch Flash Sale luôn sẵn sàng
+                await EnsureFlashSaleAndShowroomStockSeededAsync(context, logger);
+                // Đảm bảo dữ liệu demo chuẩn hóa (150+ đơn 90 ngày, 200+ review, 30+ khách hàng, voucher)
+                await EnsureRealisticDemoDataSeededAsync(context, logger);
+                await EnsureOrderStatusHistoriesAndReturnsSeededAsync(context, logger);
+                await EnsureLoyaltyGamificationSeededAsync(context, logger);
+                LogInfo(logger, "[DbInitializer] Cơ sở dữ liệu đã có sẵn dữ liệu nghiệp vụ (Roles, Products). Đã đồng bộ lô FEFO thật và dữ liệu Demo chuẩn hóa.");
+                return;
             }
 
             // Thực hiện seed từng phân hệ nếu chưa có dữ liệu
@@ -57,6 +110,12 @@ namespace Omnichannel.Infrastructure.Data
             await SeedInitialAlertsAsync(context);
             await SeedInitialNotificationsAsync(context);
             await SeedInitialInternalMessagesAsync(context);
+
+            // Đảm bảo đồng bộ lô hàng FEFO thật và tồn kho showroom O2O hoàn tất
+            await EnsureFefoBatchesSynchronizedAsync(context, logger);
+            await EnsureFlashSaleAndShowroomStockSeededAsync(context, logger);
+            await EnsureRealisticDemoDataSeededAsync(context, logger);
+            await EnsureOrderStatusHistoriesAndReturnsSeededAsync(context, logger);
         }
 
         private static string HashPassword(string password)
@@ -301,7 +360,7 @@ namespace Omnichannel.Infrastructure.Data
         // =========================================================================
         private static async Task SeedStoresAsync(ApplicationDbContext context)
         {
-            // Chi nhánh 1: Flagship Showroom Quận 1 (128 Hai Bà Trưng, P. Bến Nghé, Q.1, TP.HCM)
+            // Chi nhánh 1: OMNI BEAUTY - Flagship Showroom Quận 1 (128 Hai Bà Trưng, P. Bến Nghé, Q.1, TP.HCM)
             var store1 = await context.Stores.FirstOrDefaultAsync(s => s.Id == 1 || s.Code == "SH-Q1" || s.Code == "HQ-001");
             if (store1 == null)
             {
@@ -309,7 +368,7 @@ namespace Omnichannel.Infrastructure.Data
                 await context.Stores.AddAsync(store1);
             }
             store1.Code = "SH-Q1";
-            store1.Name = "Flagship Showroom Quận 1";
+            store1.Name = "OMNI BEAUTY - Flagship Showroom Quận 1";
             store1.Address = "128 Hai Bà Trưng, P. Bến Nghé, Q.1, TP.HCM";
             store1.PhoneNumber = "02838221199";
             store1.Email = "flagship.q1@omnichannelbeauty.vn";
@@ -317,7 +376,7 @@ namespace Omnichannel.Infrastructure.Data
             store1.IsHeadquarters = false;
             store1.IsActive = true;
 
-            // Chi nhánh 2: Showroom Ba Đình (86 Trần Phú, Q. Ba Đình, Hà Nội)
+            // Chi nhánh 2: OMNI BEAUTY - Showroom Ba Đình (86 Trần Phú, Q. Ba Đình, Hà Nội)
             var store2 = await context.Stores.FirstOrDefaultAsync(s => s.Id == 2 || s.Code == "SH-BD" || s.Code == "SH-CG");
             if (store2 == null)
             {
@@ -325,7 +384,7 @@ namespace Omnichannel.Infrastructure.Data
                 await context.Stores.AddAsync(store2);
             }
             store2.Code = "SH-BD";
-            store2.Name = "Showroom Ba Đình";
+            store2.Name = "OMNI BEAUTY - Showroom Ba Đình";
             store2.Address = "86 Trần Phú, Q. Ba Đình, Hà Nội";
             store2.PhoneNumber = "02437665588";
             store2.Email = "badinh@omnichannelbeauty.vn";
@@ -333,7 +392,7 @@ namespace Omnichannel.Infrastructure.Data
             store2.IsHeadquarters = false;
             store2.IsActive = true;
 
-            // Chi nhánh 3: Tổng Kho Phân Phối Miền Nam (KCN Tân Bình, TP.HCM)
+            // Chi nhánh 3: OMNI BEAUTY - Tổng Kho Phân Phối Miền Nam (KCN Tân Bình, TP.HCM)
             var store3 = await context.Stores.FirstOrDefaultAsync(s => s.Id == 3 || s.Code == "WH-MN" || s.Code == "SH-TD");
             if (store3 == null)
             {
@@ -341,7 +400,7 @@ namespace Omnichannel.Infrastructure.Data
                 await context.Stores.AddAsync(store3);
             }
             store3.Code = "WH-MN";
-            store3.Name = "Tổng Kho Phân Phối Miền Nam";
+            store3.Name = "OMNI BEAUTY - Tổng Kho Phân Phối Miền Nam";
             store3.Address = "KCN Tân Bình, TP.HCM";
             store3.PhoneNumber = "02838150000";
             store3.Email = "tongkho.miennam@omnichannelbeauty.vn";
@@ -2653,18 +2712,307 @@ namespace Omnichannel.Infrastructure.Data
                 await context.SaveChangesAsync();
             }
 
-            // 6. UI Sections (Storefront Dynamic Sections Builder)
-            if (!await context.UiSections.AnyAsync())
+            // 5.1. Product Questions & Official Answers (Q&A)
+            if (!await context.ProductQuestions.AnyAsync())
             {
-                await context.UiSections.AddRangeAsync(
-                    new UiSection { SectionCode = "HERO_SLIDER", Title = "Banner Slider", Subtitle = "Bộ sưu tập mỹ phẩm dẫn đầu xu hướng làm đẹp 2026", DisplayOrder = 1, IsVisible = true, LayoutType = "CAROUSEL" },
-                    new UiSection { SectionCode = "FLASH_SALE", Title = "Deal Chớp Nhoáng (Flash Sale)", Subtitle = "Cơ hội săn mỹ phẩm cao cấp chuẩn hạn dùng FEFO với giá ưu đãi cực lớn", DisplayOrder = 2, IsVisible = true, LayoutType = "GRID_4" },
-                    new UiSection { SectionCode = "FEATURED_CATEGORIES", Title = "Danh Mục Nổi Bật", Subtitle = "Khám phá vẻ đẹp thuần khiết theo từng phân nhóm da liễu", DisplayOrder = 3, IsVisible = true, LayoutType = "GRID_6" },
-                    new UiSection { SectionCode = "BEST_SELLERS", Title = "Sản Phẩm Bán Chạy", Subtitle = "Top mỹ phẩm được các tín đồ làm đẹp tin chọn nhiều nhất", DisplayOrder = 4, IsVisible = true, LayoutType = "GRID_4" },
-                    new UiSection { SectionCode = "MID_BANNER", Title = "Banner Giữa Trang", Subtitle = "Chiến dịch ưu đãi nổi bật giữa trang", DisplayOrder = 5, IsVisible = true, LayoutType = "BANNER_FULL" },
-                    new UiSection { SectionCode = "BEAUTY_BLOG", Title = "Bài Viết Làm Đẹp", Subtitle = "Cẩm nang làm đẹp khoa học và xu hướng mỹ phẩm mới nhất", DisplayOrder = 6, IsVisible = true, LayoutType = "GRID_3" }
-                );
+                var q1 = new ProductQuestion
+                {
+                    ProductId = 1,
+                    AuthorName = "Lê Ngọc Linh",
+                    Content = "Sản phẩm này có dùng được cho phụ nữ mang thai hoặc cho con bú không ạ?",
+                    IsApproved = true,
+                    CreatedAt = now.AddDays(-5),
+                    Answers = new List<ProductAnswer>
+                    {
+                        new ProductAnswer
+                        {
+                            AuthorName = "Chuyên viên Dược Mỹ Phẩm Omni Beauty",
+                            Content = "Chào bạn Linh! Sản phẩm đạt tiêu chuẩn Clean Beauty 5 KHÔNG, lành tính và an toàn cho phụ nữ mang thai cũng như đang cho con bú theo chuẩn da liễu nhé.",
+                            IsOfficial = true,
+                            IsApproved = true,
+                            CreatedAt = now.AddDays(-5).AddHours(2)
+                        }
+                    }
+                };
+
+                var q2 = new ProductQuestion
+                {
+                    ProductId = 6,
+                    AuthorName = "Trần Thị Mai",
+                    Content = "Serum này nên thoa trên nền da ẩm hay da khô để đạt hiệu quả cấp ẩm tốt nhất?",
+                    IsApproved = true,
+                    CreatedAt = now.AddDays(-3),
+                    Answers = new List<ProductAnswer>
+                    {
+                        new ProductAnswer
+                        {
+                            AuthorName = "Chuyên viên Dược Mỹ Phẩm Omni Beauty",
+                            Content = "Chào bạn Mai! Vì serum có nồng độ Hyaluronic Acid và B5 cao, bạn nên thoa khi da còn hơi ẩm sau bước Toner để phân tử hút ẩm hoạt động tối ưu và không bị hút ẩm ngược.",
+                            IsOfficial = true,
+                            IsApproved = true,
+                            CreatedAt = now.AddDays(-3).AddHours(1)
+                        }
+                    }
+                };
+
+                var q3 = new ProductQuestion
+                {
+                    ProductId = 15,
+                    AuthorName = "Nguyễn Văn Hưng",
+                    Content = "Da đang bị mụn viêm và dầu nhiều có thể dùng chung với hoạt chất Retinol không?",
+                    IsApproved = true,
+                    CreatedAt = now.AddDays(-2),
+                    Answers = new List<ProductAnswer>
+                    {
+                        new ProductAnswer
+                        {
+                            AuthorName = "Chuyên viên Dược Mỹ Phẩm Omni Beauty",
+                            Content = "Chào bạn Hưng! Nếu da đang có mụn viêm cấp tính, bạn nên ưu tiên làm dịu và phục hồi hàng rào bảo vệ da trước. Không nên dùng đồng thời Retinol cùng buổi với BHA để tránh quá tải sừng. Bạn có thể áp dụng chu trình Skin Cycling cách ngày nhé!",
+                            IsOfficial = true,
+                            IsApproved = true,
+                            CreatedAt = now.AddDays(-2).AddHours(3)
+                        }
+                    }
+                };
+
+                context.ProductQuestions.AddRange(q1, q2, q3);
                 await context.SaveChangesAsync();
+            }
+
+            // 5.5. Product Subscriptions (Back-In-Stock & Price Drop - GAP-05)
+            if (!await context.ProductSubscriptions.AnyAsync())
+            {
+                var customerUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "customer@omnichannel.com");
+                int? cUserId = customerUser?.Id;
+
+                var p1 = await context.Products.FirstOrDefaultAsync(p => p.Id == 1);
+                var p6 = await context.Products.FirstOrDefaultAsync(p => p.Id == 6);
+
+                if (p1 != null && p6 != null)
+                {
+                    var subs = new List<ProductSubscription>
+                    {
+                        new ProductSubscription
+                        {
+                            ProductId = 1,
+                            UserId = cUserId,
+                            Type = "BACK_IN_STOCK",
+                            CustomerName = customerUser?.FullName ?? "Khách Hàng Thân Thiết",
+                            Email = "customer@omnichannel.com",
+                            PhoneNumber = "0987654321",
+                            Status = "ACTIVE",
+                            CreatedAt = now.AddDays(-3),
+                            Notes = "Đăng ký nhận tin khi có hàng lại (Demo Seed)"
+                        },
+                        new ProductSubscription
+                        {
+                            ProductId = 6,
+                            UserId = cUserId,
+                            Type = "PRICE_DROP",
+                            TargetPrice = 450000m,
+                            CustomerName = customerUser?.FullName ?? "Khách Hàng Thân Thiết",
+                            Email = "customer@omnichannel.com",
+                            PhoneNumber = "0987654321",
+                            Status = "ACTIVE",
+                            CreatedAt = now.AddDays(-2),
+                            Notes = "Theo dõi giảm giá về mức 450.000 đ (Demo Seed)"
+                        }
+                    };
+
+                    context.ProductSubscriptions.AddRange(subs);
+                    await context.SaveChangesAsync();
+                }
+            }
+
+            // 5.6. Order Status Histories & Return Requests (GAP-07 - Phiên C6)
+            if (!await context.OrderStatusHistories.AnyAsync())
+            {
+                var recentOrders = await context.Orders
+                    .OrderByDescending(o => o.CreatedAt)
+                    .Take(40)
+                    .ToListAsync();
+
+                var historyList = new List<OrderStatusHistory>();
+                foreach (var ord in recentOrders)
+                {
+                    string trackCode = $"GHN{ord.CreatedAt:yyMMdd}{(ord.OrderCode.Length >= 6 ? ord.OrderCode[^6..].Replace("-", "").ToUpperInvariant() : ord.Id.ToString("D6"))}";
+                    string carrier = ord.ShippingFee == 45000m ? "Giao Hàng Hỏa Tốc 2H (Omni VIP Express)" : "Giao Hàng Nhanh (GHN Express)";
+
+                    // Mốc 1: Đặt hàng
+                    historyList.Add(new OrderStatusHistory
+                    {
+                        OrderId = ord.Id,
+                        Status = "PENDING",
+                        Title = "Đặt hàng",
+                        Description = $"Hệ thống tiếp nhận đơn hàng #{ord.OrderCode} từ kênh {ord.OrderSource}.",
+                        ChangedByUserId = ord.UserId,
+                        ChangedByName = ord.CustomerName,
+                        CreatedAt = ord.CreatedAt
+                    });
+
+                    if (ord.OrderStatus == "CANCELLED")
+                    {
+                        historyList.Add(new OrderStatusHistory
+                        {
+                            OrderId = ord.Id,
+                            Status = "CANCELLED",
+                            Title = "Đã hủy đơn hàng & Hoàn tồn FEFO",
+                            Description = !string.IsNullOrWhiteSpace(ord.Note) ? ord.Note : "Khách hàng yêu cầu hủy đơn • Đã hoàn trả tồn kho đúng lô FEFO.",
+                            ChangedByName = ord.CustomerName,
+                            CreatedAt = ord.CreatedAt.AddMinutes(20)
+                        });
+                        continue;
+                    }
+
+                    if (ord.OrderStatus == "CONFIRMED" || ord.OrderStatus == "PROCESSING" || ord.OrderStatus == "SHIPPING" || ord.OrderStatus == "COMPLETED")
+                    {
+                        historyList.Add(new OrderStatusHistory
+                        {
+                            OrderId = ord.Id,
+                            Status = "CONFIRMED",
+                            Title = "Xác nhận",
+                            Description = "Bộ phận CSKH đã xác nhận đơn hàng & giữ chỗ lô FEFO.",
+                            ChangedByName = "CSKH Omni Beauty",
+                            CreatedAt = ord.CreatedAt.AddMinutes(15)
+                        });
+                    }
+
+                    if (ord.OrderStatus == "PROCESSING" || ord.OrderStatus == "SHIPPING" || ord.OrderStatus == "COMPLETED")
+                    {
+                        historyList.Add(new OrderStatusHistory
+                        {
+                            OrderId = ord.Id,
+                            Status = "PROCESSING",
+                            Title = "Đóng gói (Lô FEFO đã cấp phát)",
+                            Description = "Kho GSP đã cấp phát lô mỹ phẩm theo chuẩn FEFO và đóng gói chống sốc.",
+                            ChangedByName = "Kho Điều Phối FEFO",
+                            CreatedAt = ord.CreatedAt.AddMinutes(50)
+                        });
+                    }
+
+                    if (ord.OrderStatus == "SHIPPING" || ord.OrderStatus == "COMPLETED")
+                    {
+                        historyList.Add(new OrderStatusHistory
+                        {
+                            OrderId = ord.Id,
+                            Status = "HANDED_OVER",
+                            Title = "Bàn giao vận chuyển",
+                            Description = $"Đã bàn giao kiện hàng cho {carrier}. Mã vận đơn: {trackCode}.",
+                            TrackingCode = trackCode,
+                            CarrierName = carrier,
+                            ChangedByName = "Điều Phối Logistics",
+                            CreatedAt = ord.CreatedAt.AddHours(2)
+                        });
+
+                        historyList.Add(new OrderStatusHistory
+                        {
+                            OrderId = ord.Id,
+                            Status = "SHIPPING",
+                            Title = "Đang giao",
+                            Description = $"Bưu tá {carrier} đang giao kiện hàng #{trackCode} đến người nhận.",
+                            TrackingCode = trackCode,
+                            CarrierName = carrier,
+                            ChangedByName = carrier,
+                            CreatedAt = ord.CreatedAt.AddHours(3)
+                        });
+                    }
+
+                    if (ord.OrderStatus == "COMPLETED")
+                    {
+                        var compTime = ord.UpdatedAt ?? ord.CreatedAt.AddHours(8);
+                        if (compTime <= ord.CreatedAt.AddHours(3)) compTime = ord.CreatedAt.AddHours(5);
+                        historyList.Add(new OrderStatusHistory
+                        {
+                            OrderId = ord.Id,
+                            Status = "COMPLETED",
+                            Title = "Giao thành công",
+                            Description = "Kiện hàng đã giao tận tay khách hàng thành công & cộng điểm thưởng Beauty Club.",
+                            TrackingCode = trackCode,
+                            CarrierName = carrier,
+                            ChangedByName = carrier,
+                            CreatedAt = compTime
+                        });
+                    }
+                }
+
+                if (historyList.Any())
+                {
+                    await context.OrderStatusHistories.AddRangeAsync(historyList);
+                    await context.SaveChangesAsync();
+                }
+
+                // Seed 1 yêu cầu đổi trả mẫu đang chờ duyệt (PENDING) trên đơn COMPLETED gần đây
+                if (!await context.OrderReturnRequests.AnyAsync())
+                {
+                    var completedOrder = recentOrders.FirstOrDefault(o => o.OrderStatus == "COMPLETED");
+                    if (completedOrder != null)
+                    {
+                        var sampleReturn = new OrderReturnRequest
+                        {
+                            OrderId = completedOrder.Id,
+                            UserId = completedOrder.UserId,
+                            RequestCode = $"RET-{now:yyyyMMdd}-DEMO",
+                            Reason = "Vỏ hộp bị móp nhẹ trong quá trình vận chuyển",
+                            Description = "Nhờ shop hỗ trợ kiểm tra đổi hộp mới giúp mình để làm quà tặng sinh nhật ạ.",
+                            EvidenceUrlsJson = "[\"/images/products/serum-b5.jpg\"]",
+                            Status = "PENDING",
+                            CreatedAt = now.AddHours(-3)
+                        };
+                        await context.OrderReturnRequests.AddAsync(sampleReturn);
+                        await context.SaveChangesAsync();
+                    }
+                }
+            }
+
+            // 6. UI Sections (Storefront Dynamic Sections Builder)
+            var standardSections = new Dictionary<string, (string Title, string Subtitle, int Order, string Layout)>
+            {
+                ["HERO_SLIDER"] = ("Banner Slider", "Bộ sưu tập mỹ phẩm dẫn đầu xu hướng làm đẹp 2026", 1, "CAROUSEL"),
+                ["FLASH_SALE"] = ("Deal Chớp Nhoáng (Flash Sale)", "Cơ hội săn mỹ phẩm cao cấp chuẩn hạn dùng FEFO với giá ưu đãi cực lớn", 2, "GRID_4"),
+                ["FEATURED_CATEGORIES"] = ("Danh Mục Nổi Bật", "Khám phá vẻ đẹp thuần khiết theo từng phân nhóm da liễu", 3, "GRID_6"),
+                ["BEST_SELLERS"] = ("Sản Phẩm Bán Chạy", "Top mỹ phẩm được các tín đồ làm đẹp tin chọn nhiều nhất", 4, "GRID_4"),
+                ["MID_BANNER"] = ("Banner Giữa Trang", "Chiến dịch ưu đãi nổi bật giữa trang", 5, "BANNER_FULL"),
+                ["BEAUTY_BLOG"] = ("Bài Viết Làm Đẹp", "Cẩm nang làm đẹp khoa học và xu hướng mỹ phẩm mới nhất", 6, "GRID_3")
+            };
+
+            var existingSections = await context.UiSections.ToListAsync();
+            if (!existingSections.Any())
+            {
+                foreach (var kvp in standardSections)
+                {
+                    context.UiSections.Add(new UiSection
+                    {
+                        SectionCode = kvp.Key,
+                        Title = kvp.Value.Title,
+                        Subtitle = kvp.Value.Subtitle,
+                        DisplayOrder = kvp.Value.Order,
+                        IsVisible = true,
+                        LayoutType = kvp.Value.Layout
+                    });
+                }
+                await context.SaveChangesAsync();
+            }
+            else
+            {
+                bool hasUpdates = false;
+                foreach (var sec in existingSections)
+                {
+                    if (standardSections.TryGetValue(sec.SectionCode, out var std))
+                    {
+                        // Auto-repair any mojibake characters or missing accents
+                        if (sec.Title.Contains("»") || sec.Title.Contains("›") || sec.Title.Contains("Ã") || sec.Title.Contains("á»") || sec.Title.Contains("áº") ||
+                            (sec.Subtitle != null && (sec.Subtitle.Contains("»") || sec.Subtitle.Contains("›") || sec.Subtitle.Contains("Ã") || sec.Subtitle.Contains("á»"))))
+                        {
+                            sec.Title = std.Title;
+                            sec.Subtitle = std.Subtitle;
+                            hasUpdates = true;
+                        }
+                    }
+                }
+                if (hasUpdates)
+                {
+                    await context.SaveChangesAsync();
+                }
             }
         }
 
@@ -3670,7 +4018,7 @@ namespace Omnichannel.Infrastructure.Data
         // =========================================================================
         // ENSURE FEFO EXTENSION COLUMNS ON PRODUCTBATCHES
         // =========================================================================
-        private static async Task EnsureProductBatchFefoColumnsExistAsync(ApplicationDbContext context)
+        private static async Task EnsureProductBatchFefoColumnsExistAsync(ApplicationDbContext context, ILogger? logger = null)
         {
             try
             {
@@ -3689,7 +4037,7 @@ namespace Omnichannel.Infrastructure.Data
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[EnsureProductBatchFefoColumnsExistAsync] Note: {ex.Message}");
+                LogWarning(logger, $"[EnsureProductBatchFefoColumnsExistAsync] Note: {ex.Message}");
             }
         }
 
@@ -4017,7 +4365,7 @@ namespace Omnichannel.Infrastructure.Data
             return "OBE";
         }
 
-        private static async Task EnsureWishlistAndStockAlertTablesExistAsync(ApplicationDbContext context)
+        private static async Task EnsureWishlistAndStockAlertTablesExistAsync(ApplicationDbContext context, ILogger? logger = null)
         {
             var sql = @"
                 IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='WishlistItems' AND xtype='U')
@@ -4061,11 +4409,11 @@ namespace Omnichannel.Infrastructure.Data
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[DbInitializer] EnsureWishlistAndStockAlertTablesExistAsync error: {ex.Message}");
+                LogError(logger, ex, $"[DbInitializer] EnsureWishlistAndStockAlertTablesExistAsync error: {ex.Message}");
             }
         }
 
-        private static async Task EnsureProductReviewColumnsAndSeedAsync(ApplicationDbContext context)
+        private static async Task EnsureProductReviewColumnsAndSeedAsync(ApplicationDbContext context, ILogger? logger = null)
         {
             var sql = @"
                 IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('ProductReviews') AND name = 'Scent')
@@ -4096,7 +4444,7 @@ namespace Omnichannel.Infrastructure.Data
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[DbInitializer] EnsureProductReviewColumns error: {ex.Message}");
+                LogError(logger, ex, $"[DbInitializer] EnsureProductReviewColumns error: {ex.Message}");
             }
 
             // Seed dữ liệu mẫu đánh giá chất lượng cao nếu chưa có đủ
@@ -4200,18 +4548,90 @@ namespace Omnichannel.Infrastructure.Data
 
                         context.ProductReviews.AddRange(reviewsToSeed);
                         await context.SaveChangesAsync();
-                        Console.WriteLine($"[DbInitializer] Đã seed thành công {reviewsToSeed.Count} đánh giá mẫu cao cấp có hình ảnh & phản hồi CSKH.");
+                        LogInfo(logger, $"[DbInitializer] Đã seed thành công {reviewsToSeed.Count} đánh giá mẫu cao cấp có hình ảnh & phản hồi CSKH.");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[DbInitializer] Seed reviews error: {ex.Message}");
+                LogError(logger, ex, $"[DbInitializer] Seed reviews error: {ex.Message}");
             }
         }
 
-        public static async Task MigrateStaticImagesToDatabaseAsync(ApplicationDbContext context, IWebHostEnvironment env)
+        private static async Task EnsureRowVersionColumnsExistAsync(ApplicationDbContext context, ILogger? logger = null)
         {
+            var sql = @"
+                IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Coupons') AND name = 'RowVersion')
+                    ALTER TABLE Coupons ADD RowVersion ROWVERSION NOT NULL;
+
+                IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('StoreInventories') AND name = 'RowVersion')
+                    ALTER TABLE StoreInventories ADD RowVersion ROWVERSION NOT NULL;
+
+                IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('ProductBatches') AND name = 'RowVersion')
+                    ALTER TABLE ProductBatches ADD RowVersion ROWVERSION NOT NULL;
+
+                IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('LoyaltyWallets') AND name = 'RowVersion')
+                    ALTER TABLE LoyaltyWallets ADD RowVersion ROWVERSION NOT NULL;
+
+                IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('PosShifts') AND name = 'RowVersion')
+                    ALTER TABLE PosShifts ADD RowVersion ROWVERSION NOT NULL;
+
+                IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Orders') AND name = 'RowVersion')
+                    ALTER TABLE Orders ADD RowVersion ROWVERSION NOT NULL;
+            ";
+
+            try
+            {
+                await context.Database.ExecuteSqlRawAsync(sql);
+            }
+            catch (Exception ex)
+            {
+                LogError(logger, ex, $"[DbInitializer] EnsureRowVersionColumnsExistAsync error: {ex.Message}");
+            }
+        }
+
+        public static async Task EnsureIndexesExistAsync(ApplicationDbContext context, ILogger? logger = null)
+        {
+            try
+            {
+                var sql = @"
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Products_BrandId' AND object_id = OBJECT_ID('Products'))
+                        CREATE NONCLUSTERED INDEX IX_Products_BrandId ON Products(BrandId) WHERE BrandId IS NOT NULL;
+
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Products_Slug' AND object_id = OBJECT_ID('Products'))
+                        CREATE UNIQUE NONCLUSTERED INDEX IX_Products_Slug ON Products(Slug) WHERE Slug IS NOT NULL;
+
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Products_CategoryId_IsActive' AND object_id = OBJECT_ID('Products'))
+                        CREATE NONCLUSTERED INDEX IX_Products_CategoryId_IsActive ON Products(CategoryId, IsActive);
+
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_ProductBatches_ExpDate' AND object_id = OBJECT_ID('ProductBatches'))
+                        CREATE NONCLUSTERED INDEX IX_ProductBatches_ExpDate ON ProductBatches(ExpDate);
+
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_StoreInventories_Store_Batch' AND object_id = OBJECT_ID('StoreInventories'))
+                        CREATE UNIQUE NONCLUSTERED INDEX IX_StoreInventories_Store_Batch ON StoreInventories(StoreId, ProductBatchId);
+                ";
+                await context.Database.ExecuteSqlRawAsync(sql);
+            }
+            catch (Exception ex)
+            {
+                LogError(logger, ex, $"[DbInitializer] EnsureIndexesExistAsync error: {ex.Message}");
+            }
+        }
+
+        public static async Task MigrateStaticImagesToDatabaseAsync(ApplicationDbContext context, IWebHostEnvironment env, ILogger? logger = null)
+        {
+            // Kiểm tra cờ/bản ghi: Nếu CSDL đã có MediaAssets và đã có sản phẩm gắn ảnh thì bỏ qua 100% quét đĩa để tối ưu khởi động
+            int existingMediaCount = await context.MediaAssets.CountAsync();
+            if (existingMediaCount > 0)
+            {
+                int mappedProductCount = await context.Products.CountAsync(p => p.ThumbnailMediaId != null);
+                if (mappedProductCount > 0)
+                {
+                    LogInfo(logger, $"[DbInitializer] CSDL đã có sẵn {existingMediaCount} MediaAssets và {mappedProductCount} sản phẩm đã gắn ảnh thực tế 1-1. Bỏ qua quét đĩa & nạp lại.");
+                    return;
+                }
+            }
+
             var imagesPath = !string.IsNullOrEmpty(env?.WebRootPath) ? Path.Combine(env.WebRootPath, "images") : "";
             if (string.IsNullOrEmpty(imagesPath) || !Directory.Exists(imagesPath))
             {
@@ -4227,7 +4647,7 @@ namespace Omnichannel.Infrastructure.Data
             }
             if (!Directory.Exists(imagesPath)) return;
 
-            Console.WriteLine($"[DbInitializer] Bắt đầu quét nạp toàn bộ ảnh tĩnh từ: {imagesPath}");
+            LogInfo(logger, $"[DbInitializer] Bắt đầu quét nạp toàn bộ ảnh tĩnh từ: {imagesPath}");
 
             var imageFiles = Directory.GetFiles(imagesPath, "*.*", SearchOption.AllDirectories)
                 .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
@@ -4236,17 +4656,23 @@ namespace Omnichannel.Infrastructure.Data
                             f.EndsWith(".webp", StringComparison.OrdinalIgnoreCase) ||
                             f.EndsWith(".svg", StringComparison.OrdinalIgnoreCase)).ToList();
 
-            Console.WriteLine($"[DbInitializer] Đã phát hiện {imageFiles.Count} tệp ảnh trên hệ thống.");
+            LogInfo(logger, $"[DbInitializer] Đã phát hiện {imageFiles.Count} tệp ảnh trên hệ thống.");
 
-            var existingMediaList = await context.MediaAssets.ToListAsync();
-            var existingDict = new Dictionary<string, MediaAsset>(StringComparer.OrdinalIgnoreCase);
-            foreach (var m in existingMediaList)
+            existingMediaCount = await context.MediaAssets.CountAsync();
+            int mappedProdCount = await context.Products.CountAsync(p => p.ThumbnailMediaId != null);
+            if (existingMediaCount >= imageFiles.Count && mappedProdCount >= 80)
             {
-                if (!existingDict.ContainsKey(m.FileName))
-                {
-                    existingDict[m.FileName] = m;
-                }
+                LogInfo(logger, $"[DbInitializer] CSDL đã có đầy đủ {existingMediaCount} MediaAssets và {mappedProdCount} sản phẩm đã gắn ảnh thực tế 1-1. Bỏ qua nạp lại.");
+                return;
             }
+
+            var existingMediaMetas = await context.MediaAssets
+                .Select(m => new { m.Id, m.FileName, m.ChecksumHash, m.Category })
+                .ToListAsync();
+
+            var existingMetaDict = existingMediaMetas
+                .GroupBy(m => m.FileName, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
 
             int newCount = 0;
             int updatedCount = 0;
@@ -4262,7 +4688,7 @@ namespace Omnichannel.Infrastructure.Data
                 // Kiểm tra Magic Bytes
                 if (!ValidateImageMagicBytes(bytes, ext))
                 {
-                    Console.WriteLine($"[DbInitializer] Cảnh báo: Tệp {fileName} không đạt Magic Bytes hợp lệ. Bỏ qua.");
+                    LogWarning(logger, $"[DbInitializer] Cảnh báo: Tệp {fileName} không đạt Magic Bytes hợp lệ. Bỏ qua.");
                     continue;
                 }
                 
@@ -4295,7 +4721,7 @@ namespace Omnichannel.Infrastructure.Data
 
                 var contentType = DetectImageContentType(bytes, ext);
 
-                if (!existingDict.TryGetValue(fileName, out var existing))
+                if (!existingMetaDict.TryGetValue(fileName, out var existing))
                 {
                     var media = new MediaAsset
                     {
@@ -4308,51 +4734,58 @@ namespace Omnichannel.Infrastructure.Data
                         CreatedAt = DateTime.UtcNow
                     };
                     context.MediaAssets.Add(media);
-                    existingDict[fileName] = media;
                     newCount++;
                 }
-                else
+                else if (existing.ChecksumHash != hash || existing.Category != category)
                 {
-                    bool modified = false;
-                    if (existing.ChecksumHash != hash || existing.Data == null || existing.Data.Length == 0)
+                    var entityToUpdate = await context.MediaAssets.FirstOrDefaultAsync(m => m.Id == existing.Id);
+                    if (entityToUpdate != null)
                     {
-                        existing.Data = bytes;
-                        existing.FileSize = bytes.Length;
-                        existing.ChecksumHash = hash;
-                        existing.ContentType = contentType;
-                        modified = true;
+                        entityToUpdate.Data = bytes;
+                        entityToUpdate.FileSize = bytes.Length;
+                        entityToUpdate.ChecksumHash = hash;
+                        entityToUpdate.ContentType = contentType;
+                        entityToUpdate.Category = category;
+                        updatedCount++;
                     }
-                    if (existing.Category != category)
-                    {
-                        existing.Category = category;
-                        modified = true;
-                    }
-                    if (modified) updatedCount++;
                 }
             }
 
-            Console.WriteLine($"[DbInitializer] Đang lưu {newCount} ảnh mới và {updatedCount} ảnh cập nhật vào bảng MediaAssets...");
-            await context.SaveChangesAsync();
-            Console.WriteLine($"[DbInitializer] Đã lưu thành công dữ liệu nhị phân MediaAssets vào CSDL.");
+            if (newCount > 0 || updatedCount > 0)
+            {
+                LogInfo(logger, $"[DbInitializer] Đang lưu {newCount} ảnh mới và {updatedCount} ảnh cập nhật vào bảng MediaAssets...");
+                await context.SaveChangesAsync();
+                LogInfo(logger, $"[DbInitializer] Đã lưu thành công dữ liệu nhị phân MediaAssets vào CSDL.");
+            }
 
             // =========================================================================
-            // THUẬT TOÁN LIÊN KẾT 1-1 CHÍNH XÁC (STRICT MAPPING)
+            // THUẬT TOÁN LIÊN KẾT 1-1 CHÍNH XÁC (STRICT MAPPING - DÙNG METADATA PROJECTION)
             // =========================================================================
 
             // 1. Ánh xạ Logo và Favicon vào ThemeConfigs
-            var logoMedia = await context.MediaAssets.FirstOrDefaultAsync(m => m.FileName.Contains("logo-full"))
-                         ?? await context.MediaAssets.FirstOrDefaultAsync(m => m.FileName.Contains("logo-circle"));
-            var faviconMedia = await context.MediaAssets.FirstOrDefaultAsync(m => m.FileName.Contains("favicon-32x32"));
-            var theme = await context.ThemeConfigs.FirstOrDefaultAsync();
+            var logoMediaId = await context.MediaAssets
+                .Where(m => m.FileName.Contains("logo-full") || m.FileName.Contains("logo-circle"))
+                .OrderBy(m => m.Id)
+                .Select(m => (int?)m.Id)
+                .FirstOrDefaultAsync();
+            var faviconMediaId = await context.MediaAssets
+                .Where(m => m.FileName.Contains("favicon-32x32"))
+                .OrderBy(m => m.Id)
+                .Select(m => (int?)m.Id)
+                .FirstOrDefaultAsync();
+            var theme = await context.ThemeConfigs.OrderBy(t => t.Id).FirstOrDefaultAsync();
             if (theme != null)
             {
-                if (logoMedia != null) theme.LogoMediaId = logoMedia.Id;
-                if (faviconMedia != null) theme.FaviconMediaId = faviconMedia.Id;
+                if (logoMediaId.HasValue) theme.LogoMediaId = logoMediaId.Value;
+                if (faviconMediaId.HasValue) theme.FaviconMediaId = faviconMediaId.Value;
             }
 
             // 2. Ánh xạ Banner vào bảng Banners
             var allBanners = await context.Banners.ToListAsync();
-            var bannerMedias = await context.MediaAssets.Where(m => m.Category == "BANNER").ToListAsync();
+            var bannerMedias = await context.MediaAssets
+                .Where(m => m.Category == "BANNER")
+                .Select(m => new { m.Id, m.FileName })
+                .ToListAsync();
             if (bannerMedias.Any())
             {
                 foreach (var b in allBanners)
@@ -4374,7 +4807,10 @@ namespace Omnichannel.Infrastructure.Data
 
             // 3. Ánh xạ 1-1 Danh mục sản phẩm (Category.MediaAssetId)
             var allCategories = await context.Categories.ToListAsync();
-            var categoryMedias = await context.MediaAssets.Where(m => m.Category == "CATEGORY").ToListAsync();
+            var categoryMedias = await context.MediaAssets
+                .Where(m => m.Category == "CATEGORY")
+                .Select(m => new { m.Id, m.FileName })
+                .ToListAsync();
             foreach (var cat in allCategories)
             {
                 var matched = categoryMedias.FirstOrDefault(m =>
@@ -4390,7 +4826,10 @@ namespace Omnichannel.Infrastructure.Data
 
             // 4. Ánh xạ 1-1 Logo thương hiệu (Brand.LogoMediaId)
             var allBrands = await context.Brands.ToListAsync();
-            var brandMedias = await context.MediaAssets.Where(m => m.Category == "THEME" && (m.FileName.EndsWith(".png") || m.FileName.Contains("brand-"))).ToListAsync();
+            var brandMedias = await context.MediaAssets
+                .Where(m => m.Category == "THEME" && (m.FileName.EndsWith(".png") || m.FileName.Contains("brand-")))
+                .Select(m => new { m.Id, m.FileName })
+                .ToListAsync();
             foreach (var br in allBrands)
             {
                 var matched = brandMedias.FirstOrDefault(m =>
@@ -4405,9 +4844,12 @@ namespace Omnichannel.Infrastructure.Data
 
             // 5. Ánh xạ 1-1 Sản phẩm (Product.ThumbnailMediaId) dựa trên Slug hoặc SKU
             var allProducts = await context.Products.ToListAsync();
-            var productMedias = await context.MediaAssets.Where(m => m.Category == "PRODUCT" && m.FileName != "hero-banner.png" && m.FileName != "product-placeholder.svg").ToListAsync();
+            var productMedias = await context.MediaAssets
+                .Where(m => m.Category == "PRODUCT" && m.FileName != "hero-banner.png" && m.FileName != "product-placeholder.svg")
+                .Select(m => new { m.Id, m.FileName })
+                .ToListAsync();
 
-            Console.WriteLine($"[DbInitializer] Đang ánh xạ 1-1 hình ảnh cho {allProducts.Count} sản phẩm từ {productMedias.Count} tệp ảnh...");
+            LogInfo(logger, $"[DbInitializer] Đang ánh xạ 1-1 hình ảnh cho {allProducts.Count} sản phẩm từ {productMedias.Count} tệp ảnh...");
 
             int mappedCount = 0;
             foreach (var prod in allProducts)
@@ -4426,7 +4868,7 @@ namespace Omnichannel.Infrastructure.Data
                         .ToList();
 
                     int bestScore = 0;
-                    MediaAsset? bestMedia = null;
+                    int? bestMediaId = null;
 
                     foreach (var media in productMedias)
                     {
@@ -4435,13 +4877,15 @@ namespace Omnichannel.Infrastructure.Data
                         if (score > bestScore && score >= 3)
                         {
                             bestScore = score;
-                            bestMedia = media;
+                            bestMediaId = media.Id;
                         }
                     }
 
-                    if (bestMedia != null)
+                    if (bestMediaId.HasValue)
                     {
-                        matchedMedia = bestMedia;
+                        prod.ThumbnailMediaId = bestMediaId.Value;
+                        mappedCount++;
+                        continue;
                     }
                 }
 
@@ -4458,7 +4902,7 @@ namespace Omnichannel.Infrastructure.Data
             }
 
             await context.SaveChangesAsync();
-            Console.WriteLine($"[DbInitializer] Hoàn tất ánh xạ: {mappedCount}/{allProducts.Count} sản phẩm đã gắn ảnh thực tế 1-1.");
+            LogInfo(logger, $"[DbInitializer] Hoàn tất ánh xạ: {mappedCount}/{allProducts.Count} sản phẩm đã gắn ảnh thực tế 1-1.");
         }
 
         private static bool ValidateImageMagicBytes(byte[] data, string ext)
@@ -4504,6 +4948,938 @@ namespace Omnichannel.Infrastructure.Data
                 ".svg" => "image/svg+xml",
                 _ => "image/jpeg"
             };
+        }
+
+        public static async Task EnsureDynamicCmsDataSeededAsync(ApplicationDbContext context, ILogger? logger = null)
+        {
+            try
+            {
+                // 1. Seed hoặc Cập nhật Theme "Rose Gold Beauty"
+                var defaultTheme = await context.ThemeConfigs.FirstOrDefaultAsync();
+                var logoMedia = await context.MediaAssets
+                    .Where(m => m.FileName.Contains("logo-full") || m.FileName.Contains("logo-circle"))
+                    .OrderBy(m => m.Id)
+                    .FirstOrDefaultAsync();
+                var faviconMedia = await context.MediaAssets
+                    .Where(m => m.FileName.Contains("favicon-32x32"))
+                    .OrderBy(m => m.Id)
+                    .FirstOrDefaultAsync();
+
+                if (defaultTheme == null)
+                {
+                    defaultTheme = new ThemeConfig
+                    {
+                        ThemeName = "Rose Gold Beauty",
+                        BrandName = "OMNI BEAUTY",
+                        Slogan = "Hệ Thống Bán Lẻ Mỹ Phẩm Cao Cấp Tiên Phong Công Nghệ FEFO",
+                        PrimaryColor = "#E11D48",
+                        SecondaryColor = "#BE185D",
+                        AccentColor = "#F59E0B",
+                        FontHeading = "'Playfair Display', serif",
+                        FontBody = "'Inter', sans-serif",
+                        FontFamily = "'Inter', sans-serif",
+                        LogoMediaId = logoMedia?.Id,
+                        LogoMediaAssetId = logoMedia?.Id,
+                        FaviconMediaId = faviconMedia?.Id,
+                        FaviconMediaAssetId = faviconMedia?.Id,
+                        AnnouncementBarText = "✨ Chào mừng bạn đến với OMNI BEAUTY - Miễn phí vận chuyển cho đơn hàng từ 300K ✨",
+                        AnnouncementBarActive = true,
+                        AnnouncementBarBgColor = "#881337",
+                        Hotline = "1900 8888",
+                        ContactEmail = "hotro@omnibeauty.vn",
+                        IsActive = true
+                    };
+                    context.ThemeConfigs.Add(defaultTheme);
+                    await context.SaveChangesAsync();
+                    LogInfo(logger, "[DbInitializer] Đã khởi tạo ThemeConfig 'Rose Gold Beauty'.");
+                }
+                else
+                {
+                    bool themeUpdated = false;
+                    if (string.IsNullOrEmpty(defaultTheme.ThemeName)) { defaultTheme.ThemeName = "Rose Gold Beauty"; themeUpdated = true; }
+                    if (string.IsNullOrEmpty(defaultTheme.FontHeading)) { defaultTheme.FontHeading = "'Playfair Display', serif"; themeUpdated = true; }
+                    if (string.IsNullOrEmpty(defaultTheme.FontBody)) { defaultTheme.FontBody = "'Inter', sans-serif"; themeUpdated = true; }
+                    if (!defaultTheme.LogoMediaAssetId.HasValue && defaultTheme.LogoMediaId.HasValue) { defaultTheme.LogoMediaAssetId = defaultTheme.LogoMediaId; themeUpdated = true; }
+                    if (!defaultTheme.FaviconMediaAssetId.HasValue && defaultTheme.FaviconMediaId.HasValue) { defaultTheme.FaviconMediaAssetId = defaultTheme.FaviconMediaId; themeUpdated = true; }
+                    if (themeUpdated)
+                    {
+                        await context.SaveChangesAsync();
+                        LogInfo(logger, "[DbInitializer] Đã đồng bộ các Tokens mới cho ThemeConfig hiện tại.");
+                    }
+                }
+
+                // 2. Seed PageLayout "home_page"
+                var homeLayout = await context.PageLayouts.FirstOrDefaultAsync(p => p.PageKey == "home_page");
+                if (homeLayout == null)
+                {
+                    homeLayout = new PageLayout
+                    {
+                        PageKey = "home_page",
+                        Title = "Trang Chủ - OMNI BEAUTY",
+                        MetaDescription = "Hệ Thống Bán Lẻ Mỹ Phẩm Cao Cấp Tiên Phong Công Nghệ FEFO",
+                        IsPublished = true,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    context.PageLayouts.Add(homeLayout);
+                    await context.SaveChangesAsync();
+                    LogInfo(logger, "[DbInitializer] Đã khởi tạo PageLayout 'home_page'.");
+                }
+
+                // 3. Seed LayoutSections & SectionItems
+                if (!await context.LayoutSections.AnyAsync(s => s.PageLayoutId == homeLayout.Id))
+                {
+                    // Lấy các banner media hiện có để liên kết
+                    var bannerMedias = await context.MediaAssets
+                        .Where(m => m.Category == "BANNER")
+                        .OrderBy(m => m.Id)
+                        .ToListAsync();
+
+                    // Section 1: Hero Banner Slider (OrderIndex = 1, 3 items)
+                    var heroSection = new LayoutSection
+                    {
+                        PageLayoutId = homeLayout.Id,
+                        SectionKey = "hero_banner",
+                        DisplayName = "Hero Banner Slider",
+                        OrderIndex = 1,
+                        IsVisible = true,
+                        CustomStylesJson = "{\"height\":\"620px\",\"autoplay\":true,\"interval\":5000}"
+                    };
+                    context.LayoutSections.Add(heroSection);
+                    await context.SaveChangesAsync();
+
+                    var heroItem1 = new SectionItem
+                    {
+                        LayoutSectionId = heroSection.Id,
+                        Title = "Đại Tiệc Skincare Mùa Hè 2026",
+                        Subtitle = "Ưu đãi đến 50% cho toàn bộ tinh chất cấp ẩm & phục hồi da",
+                        TargetUrl = "/catalog?category=serum",
+                        MediaAssetId = bannerMedias.Count > 0 ? bannerMedias[0].Id : null,
+                        OrderIndex = 1,
+                        PayloadJson = "{\"badgeText\":\"HOT PROMO\",\"buttonText\":\"Khám Phá Ngay\"}"
+                    };
+                    var heroItem2 = new SectionItem
+                    {
+                        LayoutSectionId = heroSection.Id,
+                        Title = "Son Lì Thuần Chay Dưỡng Ẩm",
+                        Subtitle = "Bộ sưu tập son dưỡng hữu cơ chiết xuất hoa hồng Damask",
+                        TargetUrl = "/catalog?category=son-moi",
+                        MediaAssetId = bannerMedias.Count > 1 ? bannerMedias[1].Id : null,
+                        OrderIndex = 2,
+                        PayloadJson = "{\"badgeText\":\"NEW ARRIVAL\",\"buttonText\":\"Mua Ngay\"}"
+                    };
+                    var heroItem3 = new SectionItem
+                    {
+                        LayoutSectionId = heroSection.Id,
+                        Title = "Liệu Trình Chống Lão Hóa Chuẩn Da Liễu",
+                        Subtitle = "Công nghệ Retinol vi nang giải phóng chậm, an toàn cho da nhạy cảm",
+                        TargetUrl = "/catalog?category=anti-aging",
+                        MediaAssetId = bannerMedias.Count > 2 ? bannerMedias[2].Id : null,
+                        OrderIndex = 3,
+                        PayloadJson = "{\"badgeText\":\"EXCLUSIVE\",\"buttonText\":\"Xem Phác Đồ\"}"
+                    };
+                    context.SectionItems.AddRange(heroItem1, heroItem2, heroItem3);
+
+                    // Section 2: Flash Sale Giờ Vàng (OrderIndex = 2, 2 items)
+                    var flashSaleSection = new LayoutSection
+                    {
+                        PageLayoutId = homeLayout.Id,
+                        SectionKey = "flash_sale",
+                        DisplayName = "Flash Sale Độc Quyền Giờ Vàng",
+                        OrderIndex = 2,
+                        IsVisible = true,
+                        CustomStylesJson = "{\"theme\":\"fire_deal\",\"showCountdown\":true}"
+                    };
+                    context.LayoutSections.Add(flashSaleSection);
+                    await context.SaveChangesAsync();
+
+                    var fsItem1 = new SectionItem
+                    {
+                        LayoutSectionId = flashSaleSection.Id,
+                        Title = "Kem Chống Nắng Phổ Rộng SPF50+ PA++++",
+                        Subtitle = "Bảo vệ màng tế bào, kiềm dầu 8H",
+                        TargetUrl = "/catalog?category=sunscreen",
+                        OrderIndex = 1,
+                        PayloadJson = "{\"originalPrice\":450000,\"salePrice\":299000,\"stockLimit\":100,\"soldCount\":68}"
+                    };
+                    var fsItem2 = new SectionItem
+                    {
+                        LayoutSectionId = flashSaleSection.Id,
+                        Title = "Nước Cân Bằng Cấp Ẩm Hyaluronic Acid",
+                        Subtitle = "Thẩm thấu 5 tầng biểu bì, dịu da tức thì",
+                        TargetUrl = "/catalog?category=toner",
+                        OrderIndex = 2,
+                        PayloadJson = "{\"originalPrice\":380000,\"salePrice\":245000,\"stockLimit\":80,\"soldCount\":52}"
+                    };
+                    context.SectionItems.AddRange(fsItem1, fsItem2);
+
+                    // Section 3: Routine Quiz Cá Nhân Hóa (OrderIndex = 3, 2 items)
+                    var quizSection = new LayoutSection
+                    {
+                        PageLayoutId = homeLayout.Id,
+                        SectionKey = "routine_quiz",
+                        DisplayName = "Trắc Nghiệm Routine Làn Da Cá Nhân Hóa",
+                        OrderIndex = 3,
+                        IsVisible = true,
+                        CustomStylesJson = "{\"layout\":\"interactive_cards\",\"gradient\":\"rose_blush\"}"
+                    };
+                    context.LayoutSections.Add(quizSection);
+                    await context.SaveChangesAsync();
+
+                    var quizItem1 = new SectionItem
+                    {
+                        LayoutSectionId = quizSection.Id,
+                        Title = "Khám Phá Phác Đồ Skincare 4 Bước Trong 30 Giây",
+                        Subtitle = "AI Beauty Advisor phân tích loại da & gợi ý combo chuẩn da liễu",
+                        TargetUrl = "/tu-van-da",
+                        OrderIndex = 1,
+                        PayloadJson = "{\"ctaText\":\"Bắt Đầu Trắc Nghiệm\",\"badge\":\"AI BeautyTech\"}"
+                    };
+                    var quizItem2 = new SectionItem
+                    {
+                        LayoutSectionId = quizSection.Id,
+                        Title = "Combo Routine Tiết Kiệm 15% 1-Click",
+                        Subtitle = "Tự động áp dụng chiết khấu combo khi mua trọn bộ 4 bước",
+                        TargetUrl = "/tu-van-da/combo",
+                        OrderIndex = 2,
+                        PayloadJson = "{\"ctaText\":\"Xem Combo Gợi Ý\",\"discountPercent\":15}"
+                    };
+                    context.SectionItems.AddRange(quizItem1, quizItem2);
+
+                    await context.SaveChangesAsync();
+                    LogInfo(logger, "[DbInitializer] Đã seed thành công 3 LayoutSections (Hero Banner, Flash Sale, Routine Quiz) và các SectionItems tương ứng.");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError(logger, ex, "[DbInitializer] Lỗi trong quá trình Seed Dynamic CMS & Enterprise Theme.");
+            }
+        }
+
+        private static async Task EnsureRoutineStepAndComboSeededAsync(ApplicationDbContext context, ILogger? logger)
+        {
+            try
+            {
+                // 1. Đảm bảo cột RoutineStep tồn tại trong bảng Products (nếu dùng cơ sở dữ liệu quan hệ SQL Server)
+                if (context.Database.IsRelational())
+                {
+                    const string sql = @"
+                        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='Products' AND COLUMN_NAME='RoutineStep')
+                        BEGIN
+                            ALTER TABLE [Products] ADD [RoutineStep] VARCHAR(50) NULL;
+                        END;";
+                    await context.Database.ExecuteSqlRawAsync(sql);
+                }
+
+                // 2. Đảm bảo Coupon COMBO15 tồn tại
+                if (!await context.Coupons.AnyAsync(c => c.CouponCode == "COMBO15"))
+                {
+                    var comboCoupon = new Coupon
+                    {
+                        CouponCode = "COMBO15",
+                        Description = "Ưu đãi Combo Routine 4 bước chăm sóc da - Giảm 15% trọn bộ",
+                        DiscountType = "PERCENTAGE",
+                        DiscountValue = 15m,
+                        MinOrderValue = 0m,
+                        MaxDiscountAmount = 1000000m,
+                        ValidFrom = DateTime.UtcNow.AddDays(-30),
+                        ValidTo = DateTime.UtcNow.AddYears(2),
+                        UsageLimit = 10000,
+                        UsageCount = 0,
+                        IsActive = true,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    await context.Coupons.AddAsync(comboCoupon);
+                    await context.SaveChangesAsync();
+                    LogInfo(logger, "[DbInitializer] Đã tạo mã coupon COMBO15 (giảm 15% trọn bộ Routine).");
+                }
+
+                // 3. Cập nhật RoutineStep cho các sản phẩm hiện có nếu đang null
+                var productsWithoutStep = await context.Products
+                    .Include(p => p.Category)
+                    .Where(p => p.RoutineStep == null)
+                    .ToListAsync();
+
+                if (productsWithoutStep.Any())
+                {
+                    foreach (var p in productsWithoutStep)
+                    {
+                        var cat = p.Category?.Slug?.ToLowerInvariant() ?? string.Empty;
+                        var name = p.Name.ToLowerInvariant();
+
+                        if (cat.Contains("sua-rua-mat") || cat.Contains("nuoc-tay-trang") || name.Contains("rửa mặt") || name.Contains("cleanser") || name.Contains("tẩy trang"))
+                        {
+                            p.RoutineStep = "1_Cleanser";
+                        }
+                        else if (cat.Contains("toner") || name.Contains("toner") || name.Contains("hoa hồng") || name.Contains("cân bằng"))
+                        {
+                            p.RoutineStep = "2_Toner";
+                        }
+                        else if (cat.Contains("serum") || name.Contains("serum") || name.Contains("tinh chất") || name.Contains("ampoule"))
+                        {
+                            p.RoutineStep = "3_Serum";
+                        }
+                        else if (cat.Contains("kem-duong-am") || name.Contains("kem dưỡng") || name.Contains("moisturizer") || name.Contains("khóa ẩm"))
+                        {
+                            p.RoutineStep = "4_Moisturizer";
+                        }
+                    }
+
+                    await context.SaveChangesAsync();
+                    LogInfo(logger, $"[DbInitializer] Đã gán phân loại RoutineStep cho {productsWithoutStep.Count} sản phẩm.");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError(logger, ex, "[DbInitializer] Lỗi trong quá trình khởi tạo RoutineStep và Coupon COMBO15.");
+            }
+        }
+
+        private static async Task EnsureOrderStatusHistoriesAndReturnsSeededAsync(ApplicationDbContext context, ILogger? logger)
+        {
+            try
+            {
+                if (!await context.OrderStatusHistories.AnyAsync())
+                {
+                    var now = DateTime.UtcNow;
+                    var recentOrders = await context.Orders
+                        .OrderByDescending(o => o.CreatedAt)
+                        .Take(40)
+                        .ToListAsync();
+
+                    var historyList = new List<OrderStatusHistory>();
+                    foreach (var ord in recentOrders)
+                    {
+                        string trackCode = $"GHN{ord.CreatedAt:yyMMdd}{(ord.OrderCode.Length >= 6 ? ord.OrderCode[^6..].Replace("-", "").ToUpperInvariant() : ord.Id.ToString("D6"))}";
+                        string carrier = ord.ShippingFee == 45000m ? "Giao Hàng Hỏa Tốc 2H (Omni VIP Express)" : "Giao Hàng Nhanh (GHN Express)";
+
+                        historyList.Add(new OrderStatusHistory
+                        {
+                            OrderId = ord.Id,
+                            Status = "PENDING",
+                            Title = "Đặt hàng",
+                            Description = $"Hệ thống tiếp nhận đơn hàng #{ord.OrderCode} từ kênh {ord.OrderSource}.",
+                            ChangedByUserId = ord.UserId,
+                            ChangedByName = ord.CustomerName,
+                            CreatedAt = ord.CreatedAt
+                        });
+
+                        if (ord.OrderStatus == "CANCELLED")
+                        {
+                            historyList.Add(new OrderStatusHistory
+                            {
+                                OrderId = ord.Id,
+                                Status = "CANCELLED",
+                                Title = "Đã hủy đơn hàng & Hoàn tồn FEFO",
+                                Description = !string.IsNullOrWhiteSpace(ord.Note) ? ord.Note : "Khách hàng yêu cầu hủy đơn • Đã hoàn trả tồn kho đúng lô FEFO.",
+                                ChangedByName = ord.CustomerName,
+                                CreatedAt = ord.CreatedAt.AddMinutes(20)
+                            });
+                            continue;
+                        }
+
+                        if (ord.OrderStatus == "CONFIRMED" || ord.OrderStatus == "PROCESSING" || ord.OrderStatus == "SHIPPING" || ord.OrderStatus == "COMPLETED")
+                        {
+                            historyList.Add(new OrderStatusHistory
+                            {
+                                OrderId = ord.Id,
+                                Status = "CONFIRMED",
+                                Title = "Xác nhận",
+                                Description = "Bộ phận CSKH đã xác nhận đơn hàng & giữ chỗ lô FEFO.",
+                                ChangedByName = "CSKH Omni Beauty",
+                                CreatedAt = ord.CreatedAt.AddMinutes(15)
+                            });
+                        }
+
+                        if (ord.OrderStatus == "PROCESSING" || ord.OrderStatus == "SHIPPING" || ord.OrderStatus == "COMPLETED")
+                        {
+                            historyList.Add(new OrderStatusHistory
+                            {
+                                OrderId = ord.Id,
+                                Status = "PROCESSING",
+                                Title = "Đóng gói (Lô FEFO đã cấp phát)",
+                                Description = "Kho GSP đã cấp phát lô mỹ phẩm theo chuẩn FEFO và đóng gói chống sốc.",
+                                ChangedByName = "Kho Điều Phối FEFO",
+                                CreatedAt = ord.CreatedAt.AddMinutes(50)
+                            });
+                        }
+
+                        if (ord.OrderStatus == "SHIPPING" || ord.OrderStatus == "COMPLETED")
+                        {
+                            historyList.Add(new OrderStatusHistory
+                            {
+                                OrderId = ord.Id,
+                                Status = "HANDED_OVER",
+                                Title = "Bàn giao vận chuyển",
+                                Description = $"Đã bàn giao kiện hàng cho {carrier}. Mã vận đơn: {trackCode}.",
+                                TrackingCode = trackCode,
+                                CarrierName = carrier,
+                                ChangedByName = "Điều Phối Logistics",
+                                CreatedAt = ord.CreatedAt.AddHours(2)
+                            });
+
+                            historyList.Add(new OrderStatusHistory
+                            {
+                                OrderId = ord.Id,
+                                Status = "SHIPPING",
+                                Title = "Đang giao",
+                                Description = $"Bưu tá {carrier} đang giao kiện hàng #{trackCode} đến người nhận.",
+                                TrackingCode = trackCode,
+                                CarrierName = carrier,
+                                ChangedByName = carrier,
+                                CreatedAt = ord.CreatedAt.AddHours(3)
+                            });
+                        }
+
+                        if (ord.OrderStatus == "COMPLETED")
+                        {
+                            var compTime = ord.UpdatedAt ?? ord.CreatedAt.AddHours(8);
+                            if (compTime <= ord.CreatedAt.AddHours(3)) compTime = ord.CreatedAt.AddHours(5);
+                            historyList.Add(new OrderStatusHistory
+                            {
+                                OrderId = ord.Id,
+                                Status = "COMPLETED",
+                                Title = "Giao thành công",
+                                Description = "Kiện hàng đã giao tận tay khách hàng thành công & cộng điểm thưởng Beauty Club.",
+                                TrackingCode = trackCode,
+                                CarrierName = carrier,
+                                ChangedByName = carrier,
+                                CreatedAt = compTime
+                            });
+                        }
+                    }
+
+                    if (historyList.Any())
+                    {
+                        await context.OrderStatusHistories.AddRangeAsync(historyList);
+                        await context.SaveChangesAsync();
+                        LogInfo(logger, $"[DbInitializer] Đã khởi tạo {historyList.Count} mốc OrderStatusHistory cho 40 đơn hàng gần nhất.");
+                    }
+                }
+
+                if (!await context.OrderReturnRequests.AnyAsync())
+                {
+                    var now = DateTime.UtcNow;
+                    var completedOrder = await context.Orders
+                        .Where(o => o.OrderStatus == "COMPLETED")
+                        .OrderByDescending(o => o.CreatedAt)
+                        .FirstOrDefaultAsync();
+
+                    if (completedOrder != null)
+                    {
+                        var sampleReturn = new OrderReturnRequest
+                        {
+                            OrderId = completedOrder.Id,
+                            UserId = completedOrder.UserId,
+                            RequestCode = $"RET-{now:yyyyMMdd}-DEMO",
+                            Reason = "Vỏ hộp bị móp nhẹ trong quá trình vận chuyển",
+                            Description = "Nhờ shop hỗ trợ kiểm tra đổi hộp mới giúp mình để làm quà tặng sinh nhật ạ.",
+                            EvidenceUrlsJson = "[\"/images/products/serum-b5.jpg\"]",
+                            Status = "PENDING",
+                            CreatedAt = now.AddHours(-3)
+                        };
+                        await context.OrderReturnRequests.AddAsync(sampleReturn);
+                        await context.SaveChangesAsync();
+                        LogInfo(logger, "[DbInitializer] Đã khởi tạo 1 yêu cầu Đổi/Trả mẫu (OrderReturnRequest).");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError(logger, ex, "[DbInitializer] Lỗi khi seed OrderStatusHistories & OrderReturnRequests.");
+            }
+        }
+
+        private static async Task EnsureLoyaltyGamificationSeededAsync(ApplicationDbContext context, ILogger? logger)
+        {
+            try
+            {
+                var walletsWithoutCode = await context.LoyaltyWallets
+                    .Where(w => w.ReferralCode == null || w.ReferralCode == "")
+                    .ToListAsync();
+
+                if (walletsWithoutCode.Any())
+                {
+                    foreach (var w in walletsWithoutCode)
+                    {
+                        w.ReferralCode = $"OMNI-REF-{w.UserId:D4}";
+                    }
+                    await context.SaveChangesAsync();
+                    LogInfo(logger, $"[DbInitializer] Đã cấp mã giới thiệu (ReferralCode) cho {walletsWithoutCode.Count} ví thành viên.");
+                }
+
+                // Đảm bảo khách hàng mẫu (customer01) có ví điểm >= 850 điểm và sổ cái PointTransactions khớp số dư
+                var demoCustomer = await context.Users
+                    .FirstOrDefaultAsync(u => u.Username == "customer01" || u.Email == "phuonganh@omnibeauty.vn" || u.UserType == 1);
+
+                if (demoCustomer != null)
+                {
+                    var wallet = await context.LoyaltyWallets
+                        .Include(w => w.Transactions)
+                        .FirstOrDefaultAsync(w => w.UserId == demoCustomer.Id);
+
+                    if (wallet == null)
+                    {
+                        var goldTier = await context.MemberTiers.FirstOrDefaultAsync(t => t.TierName == "Gold")
+                                    ?? await context.MemberTiers.OrderBy(t => t.SortOrder).FirstOrDefaultAsync();
+                        if (goldTier != null)
+                        {
+                            wallet = new LoyaltyWallet
+                            {
+                                UserId = demoCustomer.Id,
+                                CurrentTierId = goldTier.Id,
+                                CurrentBalance = 850,
+                                TotalPointsEarned = 850,
+                                TotalSpend12Months = 8550000m,
+                                ReferralCode = $"OMNI-REF-{demoCustomer.Id:D4}",
+                                CurrentStreak = 0,
+                                QrCodeData = $"BEAUTY-MEM-{demoCustomer.Id:D6}",
+                                CreatedAt = DateTime.UtcNow.AddMonths(-6)
+                            };
+                            await context.LoyaltyWallets.AddAsync(wallet);
+                            await context.SaveChangesAsync();
+                        }
+                    }
+
+                    if (wallet != null && !wallet.Transactions.Any())
+                    {
+                        wallet.CurrentBalance = 850;
+                        wallet.TotalPointsEarned = 850;
+                        wallet.TotalSpend12Months = Math.Max(wallet.TotalSpend12Months, 8550000m);
+
+                        var now = DateTime.UtcNow;
+                        await context.PointTransactions.AddRangeAsync(new[]
+                        {
+                            new PointTransaction
+                            {
+                                WalletId = wallet.Id,
+                                TransactionType = "BONUS",
+                                Points = 100,
+                                BalanceBefore = 0,
+                                BalanceAfter = 100,
+                                Description = "Thưởng chào mừng thành viên mới Omni Beauty Club (+100 điểm)",
+                                CreatedAt = now.AddDays(-30)
+                            },
+                            new PointTransaction
+                            {
+                                WalletId = wallet.Id,
+                                TransactionType = "EARN",
+                                Points = 450,
+                                BalanceBefore = 100,
+                                BalanceAfter = 550,
+                                Description = "Tích điểm đơn hàng Nước hoa & Serum cao cấp (+450 điểm)",
+                                CreatedAt = now.AddDays(-14)
+                            },
+                            new PointTransaction
+                            {
+                                WalletId = wallet.Id,
+                                TransactionType = "EARN",
+                                Points = 300,
+                                BalanceBefore = 550,
+                                BalanceAfter = 850,
+                                Description = "Tích điểm đơn hàng Bộ đôi Kem chống nắng & Dưỡng ẩm (+300 điểm)",
+                                CreatedAt = now.AddDays(-4)
+                            }
+                        });
+                        await context.SaveChangesAsync();
+                    }
+
+                    // Seed 1 lượt giới thiệu bạn bè mẫu nếu bảng LoyaltyReferrals đang trống
+                    if (!await context.LoyaltyReferrals.AnyAsync() && wallet != null)
+                    {
+                        var friendUser = await context.Users
+                            .Where(u => u.Id != demoCustomer.Id && u.UserType == 1)
+                            .OrderByDescending(u => u.Id)
+                            .FirstOrDefaultAsync();
+
+                        if (friendUser != null)
+                        {
+                            await context.LoyaltyReferrals.AddAsync(new LoyaltyReferral
+                            {
+                                ReferrerUserId = demoCustomer.Id,
+                                ReferredUserId = friendUser.Id,
+                                ReferralCode = wallet.ReferralCode ?? $"OMNI-REF-{demoCustomer.Id:D4}",
+                                Status = "REWARDED",
+                                ReferrerPointsAwarded = 100,
+                                ReferredPointsAwarded = 50,
+                                RewardVoucherCode = "REF50K-VIP01",
+                                CreatedAt = DateTime.UtcNow.AddDays(-10),
+                                RewardedAt = DateTime.UtcNow.AddDays(-9)
+                            });
+                            await context.SaveChangesAsync();
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError(logger, ex, "[DbInitializer] Lỗi khi seed dữ liệu Gamification Loyalty.");
+            }
+        }
+
+        private static async Task EnsureCleanBeautyColumnsExistAsync(ApplicationDbContext context, ILogger? logger)
+        {
+            try
+            {
+                // 1. Đảm bảo các cột Clean Beauty tồn tại trong bảng Products (SQL Server Relational)
+                if (context.Database.IsRelational())
+                {
+                    const string sql = @"
+                        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='Products' AND COLUMN_NAME='IsAlcoholFree')
+                        BEGIN
+                            ALTER TABLE [Products] ADD [IsAlcoholFree] BIT NOT NULL CONSTRAINT DF_Products_IsAlcoholFree DEFAULT 0;
+                        END;
+                        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='Products' AND COLUMN_NAME='IsFragranceFree')
+                        BEGIN
+                            ALTER TABLE [Products] ADD [IsFragranceFree] BIT NOT NULL CONSTRAINT DF_Products_IsFragranceFree DEFAULT 0;
+                        END;
+                        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='Products' AND COLUMN_NAME='IsPregnancySafe')
+                        BEGIN
+                            ALTER TABLE [Products] ADD [IsPregnancySafe] BIT NOT NULL CONSTRAINT DF_Products_IsPregnancySafe DEFAULT 0;
+                        END;
+                        IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME='Products' AND COLUMN_NAME='FullIngredients')
+                        BEGIN
+                            ALTER TABLE [Products] ADD [FullIngredients] NVARCHAR(MAX) NULL;
+                        END;";
+                    await context.Database.ExecuteSqlRawAsync(sql);
+                }
+
+                // 2. Nạp dữ liệu chuỗi thành phần INCI và các cờ an toàn cho các sản phẩm chưa có
+                var productsWithoutIngredients = await context.Products
+                    .Where(p => string.IsNullOrWhiteSpace(p.FullIngredients))
+                    .ToListAsync();
+
+                if (productsWithoutIngredients.Any())
+                {
+                    foreach (var p in productsWithoutIngredients)
+                    {
+                        var name = p.Name.ToLowerInvariant();
+
+                        if (name.Contains("b5") || name.Contains("la roche") || name.Contains("effaclar") || name.Contains("phục hồi"))
+                        {
+                            p.FullIngredients = "Aqua / Water, Glycerin, Dimethicone, Panthenol (Vitamin B5 5%), Niacinamide (Vitamin B3 2%), Pentylene Glycol, Centella Asiatica (Madecassoside 1%), Sodium Hyaluronate (HA), Zinc Gluconate, Citric Acid, Phenoxyethanol";
+                            p.IsAlcoholFree = true;
+                            p.IsFragranceFree = true;
+                            p.IsPregnancySafe = true;
+                        }
+                        else if (name.Contains("bha") || name.Contains("obagi") || name.Contains("salicylic") || name.Contains("mụn"))
+                        {
+                            p.FullIngredients = "Water, Salicylic Acid (BHA 2%), Benzyl Alcohol, Ethoxydiglycol, Chamomilla Recutita (Chamomile) Flower Extract, Aloe Barbadensis (Nha Đam) Leaf Juice, Camellia Sinensis (Trà Xanh) Leaf Extract, Glycerin, Sodium Hydroxide";
+                            p.IsAlcoholFree = true;
+                            p.IsFragranceFree = true;
+                            p.IsPregnancySafe = false; // BHA nồng độ cao khuyến cáo không dùng cho phụ nữ mang thai
+                        }
+                        else if (name.Contains("retinol") || name.Contains("lão hóa") || name.Contains("collagen"))
+                        {
+                            p.FullIngredients = "Water, Dimethicone, Retinol 1%, Niacinamide, Ceramide NP, Ceramide AP, Sodium Hyaluronate, Tocopherol (Vitamin E), Allantoin, Xanthan Gum, Phenoxyethanol";
+                            p.IsAlcoholFree = true;
+                            p.IsFragranceFree = true;
+                            p.IsPregnancySafe = false; // Retinol chống chỉ định thai kỳ
+                        }
+                        else if (name.Contains("cerave") || name.Contains("kem dưỡng") || name.Contains("ẩm") || name.Contains("moisturiz"))
+                        {
+                            p.FullIngredients = "Aqua / Water, Glycerin, Cetearyl Alcohol, Caprylic/Capric Triglyceride, Ceramide NP, Ceramide AP, Ceramide EOP, Hyaluronic Acid (HA), Cholesterol, Tocopherol (Vitamin E), Carbomer, Phenoxyethanol, Ethylhexylglycerin";
+                            p.IsAlcoholFree = true;
+                            p.IsFragranceFree = true;
+                            p.IsPregnancySafe = true;
+                        }
+                        else if (name.Contains("chống nắng") || name.Contains("anessa") || name.Contains("sunscreen"))
+                        {
+                            p.FullIngredients = "Water, Dimethicone, Zinc Oxide, Ethylhexyl Methoxycinnamate, Alcohol Denat, Octocrylene, Titanium Dioxide, Camellia Sinensis (Trà Xanh) Leaf Extract, Sodium Hyaluronate, Collagen Thủy Phân, Fragrance";
+                            p.IsAlcoholFree = false;
+                            p.IsFragranceFree = false;
+                            p.IsPregnancySafe = true;
+                        }
+                        else if (name.Contains("son") || name.Contains("dior") || name.Contains("lipstick"))
+                        {
+                            p.FullIngredients = "Polyglyceryl-2 Triisostearate, Hydrogenated Polyisobutene, Octyldodecanol, Synthetic Wax, Punica Granatum Flower Extract, Butyrospermum Parkii (Shea) Butter, Fragrance, CI 77891, CI 15850";
+                            p.IsAlcoholFree = true;
+                            p.IsFragranceFree = false;
+                            p.IsPregnancySafe = true;
+                        }
+                        else
+                        {
+                            // Công thức chuẩn an toàn da liễu mặc định
+                            p.FullIngredients = "Water, Butylene Glycol, Glycerin, Niacinamide 2%, Panthenol (Vitamin B5), Centella Asiatica (Rau Má) Extract, Sodium Hyaluronate, Allantoin, Carbomer, Arginine, 1,2-Hexanediol, Ethylhexylglycerin";
+                            p.IsAlcoholFree = true;
+                            p.IsFragranceFree = true;
+                            p.IsPregnancySafe = true;
+                        }
+                    }
+
+                    await context.SaveChangesAsync();
+                    LogInfo(logger, $"[DbInitializer] Đã nạp thành phần FullIngredients và Clean Beauty flags cho {productsWithoutIngredients.Count} sản phẩm.");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError(logger, ex, "[DbInitializer] Lỗi trong quá trình khởi tạo cột Clean Beauty và FullIngredients.");
+            }
+        }
+
+        private static async Task EnsureFlashSaleAndShowroomStockSeededAsync(ApplicationDbContext context, ILogger? logger)
+        {
+            try
+            {
+                // 1. Tìm Showroom Ba Đình / Cầu Giấy (Hà Nội)
+                var cgStore = await context.Stores.FirstOrDefaultAsync(s => s.Code == "SH-BD" || s.Code == "SH-CG");
+
+                // 2. Đảm bảo Chiến dịch Flash Sale hoạt động có hạn dùng tương lai
+                var flashPromo = await context.Promotions
+                    .Include(p => p.PromotionItems)
+                    .FirstOrDefaultAsync(p => p.PromotionType == "FLASH_SALE" || p.PromotionCode == "PROMO-FLASH20");
+
+                if (flashPromo != null)
+                {
+                    if (flashPromo.ValidTo <= DateTime.UtcNow)
+                    {
+                        flashPromo.ValidTo = DateTime.UtcNow.AddDays(7);
+                        flashPromo.IsActive = true;
+                        await context.SaveChangesAsync();
+                        LogInfo(logger, "[DbInitializer] Đã gia hạn chiến dịch Flash Sale PROMO-FLASH20 thêm 7 ngày.");
+                    }
+                }
+                else
+                {
+                    flashPromo = new Promotion
+                    {
+                        PromotionCode = "PROMO-FLASH20",
+                        Name = "Flash Sale Deal Sốc Giờ Vàng - Giảm 20%",
+                        Description = "Cơ hội săn mỹ phẩm cao cấp chuẩn hạn dùng FEFO với giá ưu đãi cực lớn",
+                        PromotionType = "FLASH_SALE",
+                        DiscountValue = 20m,
+                        MinOrderValue = 200000m,
+                        MaxDiscountAmount = 150000m,
+                        ValidFrom = DateTime.UtcNow.AddDays(-1),
+                        ValidTo = DateTime.UtcNow.AddDays(7),
+                        IsActive = true,
+                        AppliesTo = "ALL"
+                    };
+                    await context.Promotions.AddAsync(flashPromo);
+                    await context.SaveChangesAsync();
+                    LogInfo(logger, "[DbInitializer] Đã khởi tạo chiến dịch Flash Sale PROMO-FLASH20.");
+                }
+
+                // 3. Đảm bảo StoreInventories phân bổ tồn kho khả dụng cho Showroom Ba Đình / Cầu Giấy
+                if (cgStore != null)
+                {
+                    var batches = await context.ProductBatches.Take(40).ToListAsync();
+                    if (batches.Any())
+                    {
+                        var existingInvKeys = await context.StoreInventories
+                            .Where(si => si.StoreId == cgStore.Id)
+                            .Select(si => si.ProductBatchId)
+                            .ToListAsync();
+
+                        var missingBatches = batches.Where(b => !existingInvKeys.Contains(b.Id)).ToList();
+                        if (missingBatches.Any())
+                        {
+                            var newInventories = missingBatches.Select(b => new StoreInventory
+                            {
+                                StoreId = cgStore.Id,
+                                ProductBatchId = b.Id,
+                                PhysicalQuantity = 18,
+                                ReservedQuantity = 2,
+                                LastUpdated = DateTime.UtcNow
+                            }).ToList();
+
+                            await context.StoreInventories.AddRangeAsync(newInventories);
+                            await context.SaveChangesAsync();
+                            LogInfo(logger, $"[DbInitializer] Đã phân bổ tồn kho {newInventories.Count} lô hàng cho Showroom {cgStore.Name}.");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogError(logger, ex, "[DbInitializer] Lỗi trong quá trình khởi tạo tồn kho Showroom và Flash Sale.");
+            }
+        }
+
+        private static async Task EnsureFefoBatchesSynchronizedAsync(ApplicationDbContext context, ILogger? logger)
+        {
+            var strategy = context.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
+            {
+                using var transaction = await context.Database.BeginTransactionAsync();
+                try
+                {
+                    var now = DateTime.UtcNow;
+                    var minFarDate = now.AddMonths(14);
+                    var activeProducts = await context.Products
+                        .Include(p => p.Batches)
+                        .Where(p => p.IsActive)
+                        .OrderByDescending(p => p.IsFeatured)
+                        .ThenBy(p => p.Id)
+                        .ToListAsync();
+
+                    if (!activeProducts.Any())
+                    {
+                        await transaction.CommitAsync();
+                        return;
+                    }
+
+                    var newBatches = new List<ProductBatch>();
+                    bool hasBatchUpdates = false;
+
+                    // 1. Đảm bảo toàn bộ sản phẩm IsActive = true đều có ít nhất 1 lô Date xa (> 14 tháng) với tồn kho > 0
+                    foreach (var product in activeProducts)
+                    {
+                        var existingFarBatch = product.Batches
+                            .Where(b => b.ExpDate > minFarDate)
+                            .OrderByDescending(b => b.ExpDate)
+                            .FirstOrDefault();
+
+                        if (existingFarBatch == null)
+                        {
+                            string standardBatchNo = $"LOT-2028-{product.Id:D3}";
+                            var existingByNo = product.Batches.FirstOrDefault(b => b.BatchNumber == standardBatchNo);
+                            if (existingByNo != null)
+                            {
+                                existingByNo.ExpDate = now.AddMonths(22).AddDays(product.Id % 25);
+                                existingByNo.CurrentQuantity = Math.Max(120, existingByNo.CurrentQuantity);
+                                existingByNo.InitialQuantity = Math.Max(150, existingByNo.InitialQuantity);
+                                existingByNo.Status = "ACTIVE";
+                                existingByNo.ClearanceDiscountPercent = 0m;
+                                hasBatchUpdates = true;
+                            }
+                            else
+                            {
+                                var farBatch = new ProductBatch
+                                {
+                                    ProductId = product.Id,
+                                    BatchNumber = standardBatchNo,
+                                    ManufacturingDate = now.AddMonths(-2),
+                                    ExpDate = now.AddMonths(22).AddDays(product.Id % 25),
+                                    ImportCost = product.CostPrice > 0 ? product.CostPrice : Math.Round(product.SellingPrice * 0.55m, 0),
+                                    InitialQuantity = 150,
+                                    CurrentQuantity = 120,
+                                    Status = "ACTIVE",
+                                    AlertDaysThreshold = 90,
+                                    ClearanceDiscountPercent = 0m,
+                                    CreatedAt = now.AddMonths(-2)
+                                };
+                                newBatches.Add(farBatch);
+                            }
+                        }
+                        else if (existingFarBatch.CurrentQuantity <= 0 || existingFarBatch.Status != "ACTIVE")
+                        {
+                            existingFarBatch.CurrentQuantity = 120;
+                            existingFarBatch.InitialQuantity = Math.Max(150, existingFarBatch.InitialQuantity);
+                            existingFarBatch.Status = "ACTIVE";
+                            hasBatchUpdates = true;
+                        }
+                    }
+
+                    // 2. Đảm bảo ít nhất 20 sản phẩm chủ lực có thêm 1 bản ghi ProductBatch cận date thật (4-6 tháng, NEAR_EXPIRATION, giảm 45%, tồn 8)
+                    var flagshipProducts = activeProducts.Take(Math.Max(20, activeProducts.Count)).ToList();
+                    int syncedNearCount = 0;
+
+                    foreach (var product in flagshipProducts)
+                    {
+                        var nearBatch = product.Batches
+                            .Where(b => b.Status == "NEAR_EXPIRATION" || (b.ClearanceDiscountPercent.HasValue && b.ClearanceDiscountPercent.Value > 0) || (b.ExpDate > now && b.ExpDate <= now.AddMonths(7)))
+                            .OrderBy(b => b.ExpDate)
+                            .FirstOrDefault();
+
+                        if (nearBatch != null)
+                        {
+                            bool updated = false;
+                            if (nearBatch.ExpDate <= now.AddMonths(3) || nearBatch.ExpDate > now.AddMonths(8))
+                            {
+                                nearBatch.ExpDate = now.AddMonths(4).AddDays(15 + (product.Id % 35));
+                                updated = true;
+                            }
+                            if (nearBatch.CurrentQuantity <= 0)
+                            {
+                                nearBatch.CurrentQuantity = 8;
+                                nearBatch.InitialQuantity = Math.Max(30, nearBatch.InitialQuantity);
+                                updated = true;
+                            }
+                            if (nearBatch.Status != "NEAR_EXPIRATION")
+                            {
+                                nearBatch.Status = "NEAR_EXPIRATION";
+                                updated = true;
+                            }
+                            if (!nearBatch.ClearanceDiscountPercent.HasValue || nearBatch.ClearanceDiscountPercent.Value <= 0)
+                            {
+                                nearBatch.ClearanceDiscountPercent = 45m;
+                                updated = true;
+                            }
+                            if (updated)
+                            {
+                                hasBatchUpdates = true;
+                            }
+                            syncedNearCount++;
+                        }
+                        else if (syncedNearCount < 25)
+                        {
+                            string nearBatchNo = $"LOT-2027-EXP-{product.Id:D3}";
+                            var createdNearBatch = new ProductBatch
+                            {
+                                ProductId = product.Id,
+                                BatchNumber = nearBatchNo,
+                                ManufacturingDate = now.AddMonths(-19),
+                                ExpDate = now.AddMonths(4).AddDays(15 + (product.Id % 35)),
+                                ImportCost = product.CostPrice > 0 ? Math.Round(product.CostPrice * 0.9m, 0) : Math.Round(product.SellingPrice * 0.5m, 0),
+                                InitialQuantity = 30,
+                                CurrentQuantity = 8,
+                                Status = "NEAR_EXPIRATION",
+                                AlertDaysThreshold = 90,
+                                ClearanceDiscountPercent = 45m,
+                                CreatedAt = now.AddMonths(-19)
+                            };
+                            newBatches.Add(createdNearBatch);
+                            syncedNearCount++;
+                        }
+                    }
+
+                    if (newBatches.Any())
+                    {
+                        await context.ProductBatches.AddRangeAsync(newBatches);
+                        await context.SaveChangesAsync();
+                        LogInfo(logger, $"[DbInitializer] Đã tạo mới {newBatches.Count} bản ghi ProductBatch FEFO thật vào CSDL.");
+
+                        // Phân bổ StoreInventories cho các lô hàng mới tại các chi nhánh đang hoạt động
+                        var activeStores = await context.Stores.Where(s => s.IsActive).ToListAsync();
+                        if (activeStores.Any())
+                        {
+                            var newStoreInventories = new List<StoreInventory>();
+                            foreach (var batch in newBatches)
+                            {
+                                foreach (var store in activeStores)
+                                {
+                                    int storeQty = batch.Status == "NEAR_EXPIRATION"
+                                        ? Math.Max(2, batch.CurrentQuantity / activeStores.Count)
+                                        : Math.Max(25, batch.CurrentQuantity / activeStores.Count);
+
+                                    newStoreInventories.Add(new StoreInventory
+                                    {
+                                        StoreId = store.Id,
+                                        ProductBatchId = batch.Id,
+                                        PhysicalQuantity = storeQty,
+                                        ReservedQuantity = 0,
+                                        LastUpdated = now
+                                    });
+                                }
+                            }
+                            await context.StoreInventories.AddRangeAsync(newStoreInventories);
+                            await context.SaveChangesAsync();
+                        }
+                    }
+                    else if (hasBatchUpdates)
+                    {
+                        await context.SaveChangesAsync();
+                        LogInfo(logger, "[DbInitializer] Đã cập nhật đồng bộ hạn dùng & tồn kho FEFO thật cho các lô hiện có.");
+                    }
+
+                    await transaction.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    LogError(logger, ex, "[DbInitializer] Lỗi trong quá trình đồng bộ lô hàng FEFO thật (EnsureFefoBatchesSynchronizedAsync).");
+                }
+            });
         }
     }
 }

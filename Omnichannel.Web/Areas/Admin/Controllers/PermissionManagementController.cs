@@ -34,6 +34,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [HasPermission("PERMISSION_MANAGE")]
         public async Task<IActionResult> Index(int? roleId)
         {
             var roles = await _context.Roles
@@ -84,6 +85,12 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 .Where(rp => rp.RoleId == selectedRoleId)
                 .Select(rp => rp.PermissionId)
                 .ToListAsync();
+
+            var allRolePermissions = await _context.RolePermissions.AsNoTracking().ToListAsync();
+            var rolePermissionMap = allRolePermissions
+                .GroupBy(rp => rp.RoleId)
+                .ToDictionary(g => g.Key, g => g.Select(rp => rp.PermissionId).ToHashSet());
+            ViewBag.RolePermissionMap = rolePermissionMap;
 
             var vm = new PermissionMatrixViewModel
             {

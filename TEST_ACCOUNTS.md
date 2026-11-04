@@ -7,6 +7,10 @@ Tài liệu này tổng hợp toàn bộ danh sách tài khoản, mật khẩu, 
 
 ## 1. Bảng Tra Cứu Nhanh Tài Khoản (Quick Reference)
 
+> [!TIP]
+> **THUYẾT TRÌNH 1-CLICK VỚI DEMO PRESENTER HUD (`Alt + D`):**  
+> Khi `DemoMode:Enabled == true`, bạn có thể bấm tổ hợp phím **`Alt + D`** (hoặc nút tròn góc trái dưới) trên bất kỳ màn hình nào để chuyển vai tức thì giữa **Khách VIP (Lê Ngọc Linh)**, **Thu ngân Showroom 1 (cashier01)**, và **SuperAdmin** trong **< 50ms** mà không cần gõ tài khoản hay mật khẩu!
+
 > **Mật khẩu mặc định toàn hệ thống:** `Admin@123`  
 > *(Riêng tài khoản `admin` có thể sử dụng cả `Admin@123456` và có nút **Điền nhanh** tại trang đăng nhập).*
 
@@ -94,14 +98,53 @@ Tài liệu này tổng hợp toàn bộ danh sách tài khoản, mật khẩu, 
 
 ---
 
-### 2.6. Khách Hàng Mua Sắm (Customer)
-Hệ thống tích hợp sẵn 3 khách hàng với 3 hạng thành viên khác nhau để kiểm thử tích điểm và khuyến mãi:
+### 2.6. Khách Hàng Mua Sắm & Demo Thuyết Trình (Customer)
+Hệ thống tích hợp sẵn hơn 30 khách hàng với đầy đủ hồ sơ da (Skin Profile), lịch sử tích điểm và các hạng thành viên từ Bronze đến Diamond:
 
-| Username | Mật khẩu | Hạng thành viên | Điểm tích lũy hiện có | Chi tiêu 12 tháng qua | Mã QR Loyalty |
-|:---|:---|:---:|:---:|:---:|:---|
-| `customer01` | `Admin@123` | **Silver** (Bạc) | 50 điểm | 500,000 đ | `LOYALTY-X-SILVER` |
-| `customer02` | `Admin@123` | **Gold** (Vàng) | 400 điểm | 5,000,000 đ | `LOYALTY-X-GOLD` |
-| `customer_vip` | `Admin@123` | **Diamond** (Kim Cương VIP) | 1,800 điểm | 15,000,000 đ | `LOYALTY-X-DIAMOND` |
+| Username | Mật khẩu | Họ và tên | Sinh nhật | Loại da & Tình trạng | Hạng & Điểm | Chi tiêu 12T |
+|:---|:---|:---|:---:|:---|:---:|:---:|
+| `customer01` | `Admin@123` | Ngọc Khách Hàng 01 | 15/06 | Da hỗn hợp thiên dầu | **Silver** (50 pts) | 500,000 đ |
+| `customer02` | `Admin@123` | Mai Khách Hàng 02 | 20/09 | Da dầu mụn | **Gold** (400 pts) | 5,000,000 đ |
+| `customer_vip` | `Admin@123` | Linh VIP Diamond | 10/04 | Da lão hóa | **Diamond** (1,800 pts) | 15,000,000 đ |
+| `customer03` | `Admin@123` | Lê Thị Mai Anh | **05/11 (Tháng này)** | Da dầu mụn, bít tắc | **Gold** (680 pts) | 6,800,000 đ |
+| `customer04` | `Admin@123` | Nguyễn Thu Hà | **12/11 (Tháng này)** | Da nhạy cảm đỏ rát | **Silver** (340 pts) | 3,400,000 đ |
+| `customer05` | `Admin@123` | Phạm Hoàng Yến | **18/11 (Tháng này)** | Da khô bong tróc | **Platinum** (1,250 pts) | 12,500,000 đ |
+| `customer06` | `Admin@123` | Vũ Mỹ Linh | **22/11 (Tháng này)** | Da hỗn hợp thiên dầu | **Diamond** (2,400 pts) | 24,000,000 đ |
+| `customer07` | `Admin@123` | Đỗ Hương Giang | **08/11 (Tháng này)** | Da dầu mụn viêm | **Gold** (590 pts) | 5,900,000 đ |
+| `customer08` | `Admin@123` | Hoàng Kim Ngân | **15/11 (Tháng này)** | Da thường, làm sáng | **Bronze** (120 pts) | 1,200,000 đ |
+| `customer09` | `Admin@123` | Bùi Bích Phương | **27/11 (Tháng này)** | Da khô thiếu ẩm | **Silver** (280 pts) | 2,800,000 đ |
+| `customer10` | `Admin@123` | Đặng Thùy Dung | **03/11 (Tháng này)** | Da nhạy cảm dễ nổi mụn | **Bronze** (95 pts) | 950,000 đ |
+| `customer25` | `Admin@123` | Trịnh Kim Chi | **01/11 (Tháng này)** | Da dầu mụn dai dẳng | **Diamond** (2,650 pts) | 26,500,000 đ |
+| `customer26` | `Admin@123` | Chu Thúy Nga | **30/11 (Tháng này)** | Da khô nứt nẻ | **Silver** (380 pts) | 3,800,000 đ |
+| *(và customer11 -> customer24)* | `Admin@123` | Đa dạng khách hàng | Rải rác các tháng | Đa dạng loại da | Bronze/Silver/Gold | 500k - 15.8M |
+
+> **Ghi chú đặc biệt cho Demo:** Có sẵn **10 khách hàng có ngày sinh nhật rơi vào tháng hiện tại (Tháng 11)** để trình diễn tính năng *Chiến dịch sinh nhật (Birthday Campaign)* và *Tặng điểm nhân đôi/Voucher sinh nhật*.
+
+---
+
+### 2.7. Mã Giảm Giá Khuyến Mãi Demo (Active Demo Coupons)
+
+Hệ thống có sẵn các mã giảm giá không hết hạn để thực hiện demo đặt hàng nhanh:
+
+| Mã Coupon | Loại giảm giá | Giá trị ưu đãi | Điều kiện áp dụng | Mô tả kịch bản demo |
+|:---|:---|:---:|:---|:---|
+| `DEMO10` | Phần trăm (%) | **10%** (Tối đa 100k) | Đơn bất kỳ (MinOrder = 0đ) | Mã demo phổ thông cho khách mới |
+| `FREESHIP` | Số tiền cố định | **30,000 đ** | Miễn phí tiền ship toàn quốc | Test luồng miễn phí vận chuyển O2O |
+| `COMBO15` | Phần trăm (%) | **15%** (Tối đa 250k) | Combo Routine 4 bước chăm sóc da | Test mua trọn bộ Skincare Routine |
+
+---
+
+### 2.8. Cơ Chế Khôi Phục Dữ Liệu Demo Chuẩn (Reset State)
+
+Sau mỗi lần diễn tập thuyết trình hoặc thử nghiệm luồng mua sắm/bán hàng POS:
+1. Đăng nhập tài khoản `superadmin` / `Admin@123`.
+2. Truy cập: `/Admin/Settings`.
+3. Nhấp nút **"Khôi Phục Dữ Liệu Demo"** (hoặc thẻ *Demo Ready* ở cuối trang).
+4. Hệ thống hiển thị hộp thoại xác nhận SweetAlert2. Khi xác nhận:
+   - Tự động xóa sạch toàn bộ các đơn hàng diễn tập tạo mới (`!ORD-SEED-*`).
+   - Hoàn nguyên tồn kho vật lý của các lô hàng FEFO về mức chuẩn.
+   - Dọn sạch giỏ hàng tạm vãng lai.
+   - Bảo toàn nguyên vẹn 150+ đơn hàng chuẩn, biểu đồ doanh thu 90 ngày và 210 đánh giá sản phẩm.
 
 * **Kịch bản kiểm thử khuyến nghị:**
   - Đăng nhập Storefront mua sắm tại trang chủ (`/`).

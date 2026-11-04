@@ -98,7 +98,7 @@
     --text-muted: #94a3b8;
 
     /* --- TYPOGRAPHY SCALE --- */
-    --font-serif: 'Playfair Display', 'Cormorant Garamond', 'Georgia', serif;
+    --font-serif: 'Playfair Display', 'Lora', 'Georgia', serif;
     --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
 

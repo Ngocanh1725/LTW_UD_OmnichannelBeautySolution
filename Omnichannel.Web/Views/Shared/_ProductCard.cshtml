@@ -1,165 +1,258 @@
-@model Omnichannel.Domain.Entities.ProductBatch
+@model Omnichannel.Domain.Entities.Product
 
 @{
-    if (Model == null || Model.Product == null)
+    if (Model == null) return;
+
+    // Chuẩn hóa đường dẫn chi tiết sản phẩm: Ưu tiên slug, nếu rỗng fallback về /Product/Detail/{Id}
+    var productUrl = !string.IsNullOrEmpty(Model.Slug) 
+        ? $"/san-pham/{Model.Slug}" 
+        : $"/Product/Detail/{Model.Id}";
+
+    // Xử lý ảnh đại diện có fallback chuẩn SVG: Ưu tiên ảnh tĩnh ngữ nghĩa /images/ phục vụ nhanh và chuẩn SEO
+    var imageUrl = (!string.IsNullOrEmpty(Model.ThumbnailUrl) && Model.ThumbnailUrl.StartsWith("/images/"))
+        ? Model.ThumbnailUrl
+        : (Model.ThumbnailMediaId.HasValue 
+            ? $"/media/{Model.ThumbnailMediaId}" 
+            : (!string.IsNullOrEmpty(Model.ThumbnailUrl) 
+                ? Model.ThumbnailUrl 
+                : "/images/product-placeholder.svg"));
+
+    // Lấy lô hạn dùng FEFO gần nhất còn hàng
+    var bestBatch = Model.Batches?.Where(b => b.CurrentQuantity > 0).OrderBy(b => b.ExpDate).FirstOrDefault()
+        ?? Model.Batches?.OrderBy(b => b.ExpDate).FirstOrDefault();
+    var daysLeft = bestBatch != null ? Math.Max(0, (bestBatch.ExpDate - DateTime.UtcNow).Days) : 720;
+    var firstVariant = Model.Variants?.FirstOrDefault();
+
+    var originalPrice = Model.SellingPrice;
+    var hasDiscount = Model.DiscountPrice.HasValue && Model.DiscountPrice.Value < originalPrice;
+    var finalPrice = hasDiscount && Model.DiscountPrice.HasValue ? Model.DiscountPrice.Value : originalPrice;
+
+    // Tự động tính giá xả kho cận date FEFO nếu lô có chiết khấu hoặc <180 ngày
+    if (bestBatch != null)
     {
-        return;
+        if (bestBatch.ClearanceDiscountPercent.HasValue && bestBatch.ClearanceDiscountPercent.Value > 0)
+        {
+            var clDisc = bestBatch.ClearanceDiscountPercent.Value;
+            var clPrice = Math.Round(originalPrice * (1m - (clDisc / 100m)));
+            if (clPrice < finalPrice)
+            {
+                finalPrice = clPrice;
+                hasDiscount = true;
+            }
+        }
+        else if (daysLeft < 180 && !hasDiscount && originalPrice > 0)
+        {
+            finalPrice = Math.Round(originalPrice * 0.6m);
+            hasDiscount = true;
+        }
     }
 
-    var p = Model.Product;
-    var now = DateTime.UtcNow;
-    var daysLeft = Math.Max(0, (Model.ExpDate - now).Days);
-    
-    // Phân loại mốc thời gian và chiết khấu chuẩn CRO
-    int discountPercent;
-    string timeBucket; // 3m, 6m, 9m
-    string timeLabel;
+    var discountPercent = hasDiscount && originalPrice > 0 
+        ? (int)Math.Round((1 - (finalPrice / originalPrice)) * 100) 
+        : 0;
 
-    if (daysLeft <= 90)
+    // Chuẩn hóa nhãn hạn dùng FEFO:
+    // - Xanh: Chuẩn date > 18 tháng (> 540 ngày)
+    // - Cam: Date ổn định 6 - 12 (hoặc 18) tháng (180 - 540 ngày)
+    // - Đỏ: Cận date < 6 tháng (< 180 ngày)
+    string fefoBadgeClass;
+    string fefoText;
+    string fefoIcon;
+
+    if (bestBatch != null)
     {
-        discountPercent = Model.ClearanceDiscountPercent.HasValue && Model.ClearanceDiscountPercent > 0 
-            ? (int)Model.ClearanceDiscountPercent.Value 
-            : 70;
-        timeBucket = "3m";
-        timeLabel = "Còn dưới 3 tháng";
-    }
-    else if (daysLeft <= 180)
-    {
-        discountPercent = Model.ClearanceDiscountPercent.HasValue && Model.ClearanceDiscountPercent > 0 
-            ? (int)Model.ClearanceDiscountPercent.Value 
-            : 50;
-        timeBucket = "6m";
-        timeLabel = "Còn dưới 6 tháng";
+        if (daysLeft < 180)
+        {
+            fefoBadgeClass = "bg-rose-500/15 border-rose-500/40 text-rose-600";
+            fefoText = $"Cận date • HSD {bestBatch.ExpDate:MM/yyyy}";
+            fefoIcon = "fa-solid fa-triangle-exclamation text-rose-500";
+        }
+        else if (daysLeft <= 540)
+        {
+            fefoBadgeClass = "bg-amber-400/15 border-amber-400/40 text-amber-600";
+            fefoText = $"HSD {bestBatch.ExpDate:MM/yyyy}";
+            fefoIcon = "fa-solid fa-clock text-amber-500";
+        }
+        else
+        {
+            fefoBadgeClass = "bg-emerald-500/15 border-emerald-500/40 text-emerald-600";
+            fefoText = $"Chuẩn date • HSD {bestBatch.ExpDate:MM/yyyy}";
+            fefoIcon = "fa-solid fa-circle-check text-emerald-500";
+        }
     }
     else
     {
-        discountPercent = Model.ClearanceDiscountPercent.HasValue && Model.ClearanceDiscountPercent > 0 
-            ? (int)Model.ClearanceDiscountPercent.Value 
-            : 35;
-        timeBucket = "9m";
-        timeLabel = "Còn dưới 9 tháng";
+        fefoBadgeClass = "bg-emerald-500/15 border-emerald-500/40 text-emerald-600";
+        fefoText = "Date mới 100%";
+        fefoIcon = "fa-solid fa-shield-check text-emerald-500";
     }
 
-    var salePrice = Math.Round(p.SellingPrice * (100 - discountPercent) / 100m / 1000m) * 1000m;
-    var originalPrice = p.SellingPrice;
-
-    // Tính toán tiến độ tiêu thụ thực tế & mô phỏng CRO
-    int progressPercent = 78;
-    if (Model.InitialQuantity > 0 && Model.InitialQuantity >= Model.CurrentQuantity)
-    {
-        progressPercent = (int)Math.Round((Model.InitialQuantity - Model.CurrentQuantity) * 100.0 / Model.InitialQuantity);
-    }
-    progressPercent = Math.Clamp(progressPercent, 62, 94);
-
-    int remainingQty = Model.CurrentQuantity > 0 ? Model.CurrentQuantity : 5;
-    if (remainingQty > 15) remainingQty = 5; // Hiển thị mức khan hiếm tăng chuyển đổi
-
-    var pImg = !string.IsNullOrEmpty(p.ThumbnailUrl) 
-        ? p.ThumbnailUrl 
-        : "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop";
+    var brandOrCategory = !string.IsNullOrEmpty(Model.Brand?.Name) 
+        ? Model.Brand.Name 
+        : (Model.Supplier?.Name ?? Model.Category?.Name ?? "Dược Mỹ Phẩm");
 }
 
-<!-- Flash Sale Product Card with CRO Boosters -->
-<div x-show="activeFilter === 'all' || activeFilter === '@timeBucket'"
-     x-transition:enter="transition ease-out duration-300"
-     x-transition:enter-start="opacity-0 scale-95"
-     x-transition:enter-end="opacity-100 scale-100"
-     class="fefo-flash-card bg-white/5 rounded-3xl border border-white/10 p-4.5 flex flex-col justify-between hover:border-amber-400/60 hover:bg-white/[0.08] transition-all duration-300 group relative overflow-hidden shadow-xl hover:shadow-amber-500/10"
-     data-bucket="@timeBucket">
+<!-- THẺ SẢN PHẨM CHUẨN HÓA DÙNG CHUNG TOÀN HỆ THỐNG -->
+<article class="product-card-luxury group bg-white rounded-3xl border border-soft-border/80 shadow-xs hover:shadow-xl hover:border-pink-300 transition-all duration-300 flex flex-col justify-between overflow-hidden cursor-pointer" 
+         data-product-url="@productUrl" 
+         itemscope itemtype="https://schema.org/Product">
 
-    <!-- Top Glow Effect on Hover -->
-    <div class="absolute -top-12 -right-12 w-28 h-28 bg-gradient-to-br from-amber-500/20 via-rose-500/20 to-transparent rounded-full blur-xl pointer-events-none group-hover:scale-150 transition-transform duration-500"></div>
+    <!-- 1. THUMBNAIL CONTAINER -->
+    <div class="product-thumb-container relative aspect-square overflow-hidden bg-slate-50 flex items-center justify-center p-3" style="aspect-ratio: 1/1;">
+        <!-- Ảnh bọc trong thẻ <a> đến trang chi tiết -->
+        <a href="@productUrl" class="block w-full h-full relative z-10" title="@Model.Name">
+            <img src="@imageUrl" 
+                 alt="@Model.Name" 
+                 width="400" 
+                 height="400" 
+                 loading="lazy" 
+                 decoding="async" 
+                 onerror="this.onerror=null;this.src='/images/product-placeholder.svg';" 
+                 class="product-thumb-img w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 will-change-transform" 
+                 itemprop="image" />
+        </a>
 
-    <div>
-        <!-- Product Thumbnail with Badges -->
-        <div class="relative aspect-square rounded-2xl overflow-hidden bg-black/40 mb-3.5 cursor-pointer" onclick="openQuickView(@p.Id)">
-            <img src="@pImg" 
-                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-108" 
-                 alt="@p.Name" 
-                 loading="lazy" />
-            
-            <!-- Discount Badge -->
-            <div class="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start">
-                <span class="bg-gradient-to-r from-red-600 to-rose-600 text-white text-[11px] font-black px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 tracking-wide">
-                    <i class="fa-solid fa-bolt text-amber-300 text-[10px]"></i>
+        <!-- Badges Stack (Sale, Hot, FEFO) -->
+        <div class="absolute top-2.5 left-2.5 flex flex-col gap-1 items-start pointer-events-none z-20">
+            @if (hasDiscount)
+            {
+                <span class="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold tracking-wider shadow-sm flex items-center gap-1">
+                    <i class="fa-solid fa-bolt text-[9px] text-amber-300"></i>
                     <span>-@discountPercent%</span>
                 </span>
-                <span class="bg-charcoal/80 backdrop-blur-md text-amber-300 text-[9px] font-bold px-2 py-0.5 rounded-full border border-amber-400/30">
-                    @timeLabel
+            }
+            @if (Model.IsFeatured)
+            {
+                <span class="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-bold tracking-wider shadow-sm flex items-center gap-1">
+                    <i class="fa-solid fa-crown text-[8px]"></i> HOT
                 </span>
+            }
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold shadow-2xs border @fefoBadgeClass backdrop-blur-xs">
+                <i class="@fefoIcon text-[8px]"></i>
+                <span>@fefoText</span>
+            </span>
+        </div>
+
+        <!-- Nút So Sánh Nhanh góc trên phải ảnh (GAP-03: Phiên C3) -->
+        <button type="button"
+                data-action="compare-badge"
+                data-product-id="@Model.Id"
+                onclick="event.stopPropagation(); event.preventDefault(); window.omniCompare && window.omniCompare.toggle(@Model.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.Name))', @Model.CategoryId, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.Category?.Name ?? ""))')"
+                class="absolute top-2.5 right-2.5 z-25 w-7 h-7 rounded-full bg-white/90 hover:bg-magenta-accent hover:text-white text-slate-500 flex items-center justify-center shadow-xs transition active:scale-95 cursor-pointer border border-slate-100"
+                title="So sánh mỹ phẩm"
+                aria-label="So sánh">
+            <i class="fa-solid fa-scale-balanced text-[11px]"></i>
+        </button>
+
+        <!-- 2. ACTION OVERLAY: Nút Thêm Giỏ Hàng & Xem Nhanh (Desktop Hover) -->
+        <div class="product-action-overlay z-30">
+            <button type="button" 
+                    data-action="add-to-cart"
+                    data-product-id="@Model.Id"
+                    data-variant-id="@(firstVariant?.Id)"
+                    data-batch-id="@(bestBatch?.Id)"
+                    data-title="@Model.Name"
+                    data-price="@finalPrice"
+                    data-image="@imageUrl"
+                    onclick="event.stopPropagation(); event.preventDefault(); addToCart(@Model.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.Name))', @finalPrice, '@imageUrl', 1, @(bestBatch?.Id ?? 0), @(firstVariant?.Id ?? 0))"
+                    class="btn-card-action btn-cart-primary active:scale-95 transition-transform cursor-pointer"
+                    aria-label="Thêm vào giỏ hàng">
+                <i class="fa-solid fa-cart-shopping text-xs"></i>
+                <span>Thêm Giỏ Hàng</span>
+            </button>
+            <button type="button" 
+                    data-action="compare"
+                    data-product-id="@Model.Id"
+                    onclick="event.stopPropagation(); event.preventDefault(); window.omniCompare && window.omniCompare.toggle(@Model.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.Name))', @Model.CategoryId, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.Category?.Name ?? ""))')"
+                    class="btn-card-action active:scale-95 transition-transform cursor-pointer" 
+                    title="So sánh mỹ phẩm"
+                    aria-label="So sánh">
+                <i class="fa-solid fa-scale-balanced text-xs"></i>
+            </button>
+            <button type="button" 
+                    data-action="quick-view"
+                    data-product-id="@Model.Id"
+                    onclick="event.stopPropagation(); event.preventDefault(); openQuickView(@Model.Id)"
+                    class="btn-card-action active:scale-95 transition-transform cursor-pointer" 
+                    title="Xem nhanh chi tiết"
+                    aria-label="Xem nhanh">
+                <i class="fa-solid fa-eye text-xs"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 3. BODY INFORMATION -->
+    <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
+        <div>
+            <!-- Brand / Category & Đánh giá sao -->
+            <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[10px] font-bold uppercase tracking-wider text-rose-gold truncate max-w-[150px]">
+                    @brandOrCategory
+                </span>
+                <div class="flex text-amber-400 text-[10px]" title="Đánh giá 5 sao">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                </div>
             </div>
 
-            <!-- Guarantee Seal Badge -->
-            <span class="absolute top-2.5 right-2.5 bg-emerald-950/80 backdrop-blur-md text-emerald-300 text-[9px] font-bold px-2 py-0.5 rounded-full border border-emerald-400/40 shadow-xs flex items-center gap-1">
-                <i class="fa-solid fa-shield-check text-[9px]"></i> Nguyên Seal
-            </span>
+            <!-- Tên sản phẩm bọc trong thẻ <a> -->
+            <h3 class="font-bold text-xs sm:text-sm text-slate-800 line-clamp-2 leading-snug group-hover:text-magenta-accent transition-colors" itemprop="name">
+                <a href="@productUrl">@Model.Name</a>
+            </h3>
+        </div>
 
-            <!-- Quick View Overlay Action -->
-            <div class="absolute inset-0 bg-charcoal/40 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center backdrop-blur-2xs">
+        <!-- 4. PRICE & ACTION BUTTONS -->
+        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <div>
+                <div class="text-sm sm:text-base font-bold text-charcoal font-mono" itemprop="price">
+                    @finalPrice.ToString("N0") ₫
+                </div>
+                @if (hasDiscount)
+                {
+                    <div class="text-[10px] text-slate-400 line-through font-mono">
+                        @originalPrice.ToString("N0") ₫
+                    </div>
+                }
+            </div>
+            
+            <!-- Nút hành động nhanh (tối ưu tiện dụng trên Mobile & Desktop) -->
+            <div class="flex items-center gap-1.5">
                 <button type="button" 
-                        onclick="event.stopPropagation(); openQuickView(@p.Id)"
-                        class="px-4 py-2 rounded-full bg-white/95 text-charcoal text-[11px] font-bold hover:bg-magenta-accent hover:text-white transition shadow-lg transform translate-y-2 group-hover:translate-y-0">
-                    <i class="fa-regular fa-eye mr-1"></i> Xem Nhanh
+                        data-action="compare"
+                        data-product-id="@Model.Id"
+                        onclick="event.stopPropagation(); event.preventDefault(); window.omniCompare && window.omniCompare.toggle(@Model.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.Name))', @Model.CategoryId, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.Category?.Name ?? ""))')"
+                        class="h-8 w-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-magenta-accent hover:text-white flex items-center justify-center transition shadow-2xs active:scale-95 cursor-pointer"
+                        title="Thêm vào so sánh mỹ phẩm"
+                        aria-label="So sánh">
+                    <i class="fa-solid fa-scale-balanced text-xs"></i>
+                </button>
+                <button type="button" 
+                        data-action="quick-view"
+                        data-product-id="@Model.Id"
+                        onclick="event.stopPropagation(); event.preventDefault(); openQuickView(@Model.Id)"
+                        class="h-8 w-8 rounded-xl bg-slate-100 text-slate-600 hover:bg-magenta-accent hover:text-white flex items-center justify-center transition shadow-2xs active:scale-95 cursor-pointer"
+                        title="Xem nhanh chi tiết"
+                        aria-label="Xem nhanh">
+                    <i class="fa-solid fa-eye text-xs"></i>
+                </button>
+                <button type="button" 
+                        data-action="add-to-cart"
+                        data-product-id="@Model.Id"
+                        data-variant-id="@(firstVariant?.Id)"
+                        data-batch-id="@(bestBatch?.Id)"
+                        data-title="@Model.Name"
+                        data-price="@finalPrice"
+                        data-image="@imageUrl"
+                        onclick="event.stopPropagation(); event.preventDefault(); addToCart(@Model.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(Model.Name))', @finalPrice, '@imageUrl', 1, @(bestBatch?.Id ?? 0), @(firstVariant?.Id ?? 0))" 
+                        class="h-8 w-8 rounded-xl bg-magenta-accent text-white hover:bg-rose-700 flex items-center justify-center transition shadow-xs active:scale-95 cursor-pointer" 
+                        title="Thêm vào giỏ hàng"
+                        aria-label="Thêm vào giỏ hàng">
+                    <i class="fa-solid fa-cart-shopping text-xs"></i>
                 </button>
             </div>
         </div>
-
-        <!-- Precise FEFO Expiry Badge (Yêu cầu: Badge hiển thị HSD chính xác đến từng ngày) -->
-        <div class="mb-2">
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-400/10 border border-amber-400/30 text-amber-300 text-[11px] font-bold tracking-wide shadow-2xs">
-                <i class="fa-solid fa-clock-rotate-left text-amber-400 text-xs"></i>
-                <span>HSD: @Model.ExpDate.ToString("dd/MM/yyyy")</span>
-                <span class="text-white/60 font-normal text-[10px]">• Còn @daysLeft ngày</span>
-            </div>
-        </div>
-
-        <!-- Brand & Name -->
-        <div class="text-[10px] text-rose-300/80 font-bold uppercase tracking-wider mb-1 truncate">
-            @(string.IsNullOrEmpty(p.ManufacturerName) ? (p.Category?.Name ?? "Dược Mỹ Phẩm") : p.ManufacturerName)
-        </div>
-        <h4 class="text-sm font-bold text-white line-clamp-1 group-hover:text-amber-300 transition-colors" title="@p.Name">
-            <a href="/san-pham/@p.Slug">@p.Name</a>
-        </h4>
-
-        <!-- Pricing with Discount Comparison -->
-        <div class="flex items-baseline gap-2 mt-2">
-            <span class="text-xl font-black text-amber-300 font-mono-numeric tracking-tight">
-                @salePrice.ToString("N0") ₫
-            </span>
-            <span class="text-xs text-slate-400 line-through font-mono-numeric">
-                @originalPrice.ToString("N0") ₫
-            </span>
-        </div>
     </div>
-
-    <!-- Stock Progress Bar & CTA Button (Yêu cầu CRO) -->
-    <div class="mt-4 pt-3 border-t border-white/10 space-y-2.5">
-        <!-- Stock Progress Text (Yêu cầu: 'Đã bán 78% • Chỉ còn 5 sản phẩm cuối cùng') -->
-        <div class="flex items-center justify-between text-[11px] font-bold">
-            <span class="text-slate-300 flex items-center gap-1">
-                <i class="fa-solid fa-fire text-amber-400 text-[10px]"></i>
-                Đã bán @progressPercent%
-            </span>
-            <span class="text-amber-300 animate-pulse">
-                Chỉ còn @remainingQty sản phẩm cuối cùng
-            </span>
-        </div>
-
-        <!-- Visual Progress Bar with Shimmer Animation -->
-        <div class="h-2 w-full rounded-full bg-white/10 overflow-hidden p-0.5 relative">
-            <div class="h-full rounded-full bg-gradient-to-r from-amber-400 via-rose-500 to-red-600 transition-all duration-500 relative" 
-                 style="width: @progressPercent%;">
-                <div class="absolute inset-0 bg-white/25 w-full animate-shimmer"></div>
-            </div>
-        </div>
-
-        <!-- Nút 'Săn Ngay' kèm hiệu ứng rung nhẹ (pulse shake) kích thích mua hàng -->
-        <button type="button" 
-                onclick="addToCart(@p.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Name))', @salePrice, '@pImg')" 
-                class="btn-flash-hunt w-full py-3 px-4 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-pink-600 hover:from-red-500 hover:to-rose-500 text-white font-extrabold text-xs uppercase tracking-wider shadow-lg hover:shadow-red-500/30 transition-all duration-300 flex items-center justify-center gap-2 animate-pulse-shake active:scale-95 cursor-pointer">
-            <i class="fa-solid fa-bolt text-amber-300 text-sm"></i>
-            <span>Săn Ngay</span>
-            <i class="fa-solid fa-arrow-right text-[10px] text-white/80"></i>
-        </button>
-    </div>
-</div>
+</article>

@@ -7,9 +7,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Omnichannel.Application.DTOs.Catalog;
 using Omnichannel.Application.DTOs.Cms;
+using Omnichannel.Application.DTOs.Inventory;
+using Omnichannel.Application.Interfaces.Catalog;
 using Omnichannel.Application.Interfaces.Cms;
+using Omnichannel.Application.Interfaces.Inventory;
 using Omnichannel.Application.Interfaces.Sales;
 using Omnichannel.Domain.Entities;
 using Omnichannel.Infrastructure.Data;
@@ -21,17 +25,29 @@ namespace Omnichannel.Web.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IProductReviewService _reviewService;
+        private readonly IStoreInventoryService _storeInventoryService;
         private readonly ICartService? _cartService;
+        private readonly IMemoryCache? _cache;
+        private readonly IRecommendationService? _recommendationService;
+        private readonly IProductComparisonService? _comparisonService;
         private const string CartCookieKey = "OmnichannelBeauty_CartId";
 
         public ProductController(
             ApplicationDbContext context, 
             IProductReviewService reviewService,
-            ICartService? cartService = null)
+            IStoreInventoryService storeInventoryService,
+            ICartService? cartService = null,
+            IMemoryCache? cache = null,
+            IRecommendationService? recommendationService = null,
+            IProductComparisonService? comparisonService = null)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _reviewService = reviewService ?? throw new ArgumentNullException(nameof(reviewService));
+            _storeInventoryService = storeInventoryService ?? throw new ArgumentNullException(nameof(storeInventoryService));
             _cartService = cartService;
+            _cache = cache;
+            _recommendationService = recommendationService;
+            _comparisonService = comparisonService;
         }
 
         private string GetOrCreateCartId()
@@ -53,6 +69,36 @@ namespace Omnichannel.Web.Controllers
             return newCartId;
         }
 
+        /// <summary>
+        /// Action So Sánh Sản Phẩm theo chuẩn: GET /Product/Compare?ids=1,2,3
+        /// Trả về PartialView Modal hoặc chuyển hướng tới trang so sánh chi tiết
+        /// </summary>
+        [HttpGet("Product/Compare")]
+        public async Task<IActionResult> Compare(string? ids, [FromQuery] bool isModal = false, CancellationToken ct = default)
+        {
+            var parsedIds = (ids ?? "")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => int.TryParse(s.Trim(), out int val) ? val : 0)
+                .Where(v => v > 0)
+                .Distinct()
+                .Take(3)
+                .ToList();
+
+            if (_comparisonService == null)
+            {
+                return Redirect($"/so-sanh?ids={string.Join(',', parsedIds)}");
+            }
+
+            var matrix = await _comparisonService.GetDetailedComparisonAsync(parsedIds, ct);
+
+            if (isModal || Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView("_CompareMatrixModalContent", matrix);
+            }
+
+            return View("~/Views/Compare/Index.cshtml", matrix);
+        }
+
         [HttpGet("Product/SmartFilter")]
         [HttpGet("ai-beauty-advisor")]
         public IActionResult SmartFilter()
@@ -62,18 +108,21 @@ namespace Omnichannel.Web.Controllers
             return View();
         }
 
-        [HttpGet("Product/Detail/{slugOrId}")]
-        [HttpGet("san-pham/{slugOrId}")]
-        public async Task<IActionResult> Detail(string slugOrId)
+        [HttpGet("Product/Detail/{slugOrId?}")]
+        [HttpGet("san-pham/{slugOrId?}")]
+        public async Task<IActionResult> Detail(string? slugOrId)
         {
             if (string.IsNullOrWhiteSpace(slugOrId))
             {
-                return RedirectToAction("Index", "Home");
+                Response.StatusCode = 404;
+                return View("~/Views/Home/NotFound404.cshtml");
             }
 
             int.TryParse(slugOrId, out int parsedId);
 
             var product = await _context.Products
+                .AsNoTracking()
+                .AsSplitQuery()
                 .Include(p => p.Category)
                 .Include(p => p.Batches)
                 .Include(p => p.ProductSkinTypes)
@@ -82,131 +131,59 @@ namespace Omnichannel.Web.Controllers
                     .ThenInclude(pi => pi.ActiveIngredient)
                 .Include(p => p.Variants.Where(v => v.IsActive))
                     .ThenInclude(v => v.Swatches)
-                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Slug == slugOrId || (parsedId > 0 && p.Id == parsedId));
 
             if (product == null)
             {
-                return NotFound("Sản phẩm không tồn tại hoặc đã ngừng kinh doanh.");
+                Response.StatusCode = 404;
+                return View("~/Views/Home/NotFound404.cshtml");
             }
 
-            // Find active FEFO batches
+            // Find active FEFO batches from real database records
             var now = DateTime.UtcNow;
-            var activeBatches = product.Batches.Where(b => b.CurrentQuantity > 0).ToList();
+            var activeBatches = product.Batches
+                .Where(b => b.CurrentQuantity > 0 && b.ExpDate > now)
+                .ToList();
 
             var bestBatch = activeBatches
                 .OrderBy(b => b.ExpDate)
-                .FirstOrDefault();
+                .FirstOrDefault()
+                ?? product.Batches.OrderByDescending(b => b.ExpDate).FirstOrDefault();
 
             int daysLeft = bestBatch != null ? (int)Math.Max(0, (bestBatch.ExpDate - now).TotalDays) : 365;
 
-            // 1. FEFO Fresh Batch (Lô Mới Nhất 100% Date Xa)
+            // 1. FEFO Fresh Batch (Lô Mới Nhất 100% Date Xa - Truy vấn trực tiếp từ CSDL)
             var freshBatch = activeBatches
                 .OrderByDescending(b => b.ExpDate)
-                .FirstOrDefault();
+                .FirstOrDefault()
+                ?? bestBatch;
 
-            if (freshBatch == null || (freshBatch.ExpDate - now).TotalDays < 365)
-            {
-                freshBatch = new ProductBatch
-                {
-                    Id = 99991,
-                    ProductId = product.Id,
-                    BatchNumber = "LOT-2028-V01",
-                    ManufacturingDate = now.AddMonths(-2),
-                    ExpDate = new DateTime(2028, 8, 30),
-                    CurrentQuantity = 150,
-                    InitialQuantity = 200,
-                    Status = "ACTIVE",
-                    ClearanceDiscountPercent = 0
-                };
-            }
-
-            // 2. FEFO Clearance Batch (Lô Cận Date 6 Tháng - Tiết Kiệm 45%)
+            // 2. FEFO Clearance Batch (Lô Cận Date Thực Tế trong CSDL - Nếu không có thì truyền null)
             int clearanceDiscountPercent = 45;
             var clearanceBatch = activeBatches
-                .Where(b => (b.ClearanceDiscountPercent.HasValue && b.ClearanceDiscountPercent.Value > 0) || (b.ExpDate - now).TotalDays <= 240)
+                .Where(b => (freshBatch == null || b.Id != freshBatch.Id) &&
+                            (b.Status == "NEAR_EXPIRATION" ||
+                             (b.ClearanceDiscountPercent.HasValue && b.ClearanceDiscountPercent.Value > 0) ||
+                             (b.ExpDate - now).TotalDays <= 240))
                 .OrderBy(b => b.ExpDate)
                 .FirstOrDefault();
 
-            if (clearanceBatch == null)
+            if (clearanceBatch != null && clearanceBatch.ClearanceDiscountPercent.HasValue && clearanceBatch.ClearanceDiscountPercent.Value > 0)
             {
-                clearanceBatch = new ProductBatch
-                {
-                    Id = 99992,
-                    ProductId = product.Id,
-                    BatchNumber = "LOT-2026-EXP6M",
-                    ManufacturingDate = now.AddYears(-2),
-                    ExpDate = new DateTime(2026, 10, 28),
-                    CurrentQuantity = 4,
-                    InitialQuantity = 50,
-                    Status = "NEAR_EXPIRATION",
-                    ClearanceDiscountPercent = clearanceDiscountPercent
-                };
-            }
-            else if (clearanceBatch.ClearanceDiscountPercent.HasValue && clearanceBatch.ClearanceDiscountPercent.Value > 0)
-            {
-                clearanceDiscountPercent = (int)clearanceBatch.ClearanceDiscountPercent.Value;
+                clearanceDiscountPercent = (int)Math.Round(clearanceBatch.ClearanceDiscountPercent.Value);
             }
 
             decimal clearancePrice = Math.Round(product.SellingPrice * (1m - clearanceDiscountPercent / 100m) / 1000m) * 1000m;
 
-            // 3. Showroom Stock Availability List
-            var stores = await _context.Stores
-                .AsNoTracking()
-                .Where(s => s.IsActive)
-                .OrderBy(s => s.Id)
-                .Take(4)
-                .ToListAsync();
+            // 3. Showroom Stock Availability List (O2O Realtime)
+            var showroomAvailability = await _storeInventoryService.GetShowroomAvailabilityAsync(product.Id);
 
-            var showroomStocks = new List<ShowroomStockDto>();
-            if (stores.Any())
-            {
-                foreach (var s in stores)
-                {
-                    int qty = product.Batches
-                        .SelectMany(b => b.StoreInventories)
-                        .Where(si => si.StoreId == s.Id)
-                        .Sum(si => si.PhysicalQuantity - si.ReservedQuantity);
+            // 4. Video Swatch Demo (Chỉ kích hoạt khi có file video nội bộ, triệt tiêu rủi ro hỏng media khi mất mạng)
+            string localVideoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "videos", "swatch-demo.mp4");
+            string? swatchVideoUrl = System.IO.File.Exists(localVideoPath) ? "/videos/swatch-demo.mp4" : null;
 
-                    if (qty <= 0)
-                    {
-                        qty = s.IsHeadquarters ? 88 : (s.Code.Contains("Q1") || s.Address.Contains("Quận 1") ? 12 : 5);
-                    }
-
-                    showroomStocks.Add(new ShowroomStockDto
-                    {
-                        StoreId = s.Id,
-                        StoreName = s.Name,
-                        Address = s.Address,
-                        Phone = s.PhoneNumber ?? "1900 8888",
-                        StockQuantity = qty,
-                        HasTester = true,
-                        DeliveryBadge = s.IsHeadquarters ? "Giao tốc hành 2H toàn quốc" : "Nhận tại quầy trong 30 phút"
-                    });
-                }
-            }
-            else
-            {
-                showroomStocks = new List<ShowroomStockDto>
-                {
-                    new() { StoreId = 1, StoreName = "Showroom Flagship Quận 1 (TP.HCM)", Address = "128 Lê Thánh Tôn, P. Bến Nghé, Quận 1, TP.HCM", Phone = "028 3822 8888", StockQuantity = 12, HasTester = true, DeliveryBadge = "Nhận tại quầy trong 30 phút" },
-                    new() { StoreId = 2, StoreName = "Showroom Cầu Giấy (Hà Nội)", Address = "68 Cầu Giấy, P. Quan Hoa, Cầu Giấy, Hà Nội", Phone = "024 3766 8888", StockQuantity = 5, HasTester = true, DeliveryBadge = "Nhận tại quầy trong 30 phút" },
-                    new() { StoreId = 3, StoreName = "Kho Tổng Giao Tốc Hành 2H", Address = "Khu Công Nghệ Cao, P. Tăng Nhơn Phú B, TP. Thủ Đức", Phone = "1900 8888", StockQuantity = 88, HasTester = false, DeliveryBadge = "Giao tốc hành 2H nội thành" }
-                };
-            }
-
-            // 4. Video Swatch Demo
-            string swatchVideoUrl = "https://assets.mixkit.co/videos/preview/mixkit-putting-on-lipstick-42777-large.mp4";
-
-            // 5. Ingredient Breakdowns
-            var ingredientBreakdowns = new List<IngredientDetailDto>
-            {
-                new() { Name = "Hyaluronic Acid (HA Đa Tầng)", Percentage = "2.5%", Function = "Cấp ẩm sâu qua 5 tầng biểu bì da, giữ ẩm 72H, ngăn ngừa nếp nhăn vi mô", EwgScore = 1, EwgRating = "Xanh lá (Cực kỳ an toàn)", Source = "Nhập khẩu Pháp" },
-                new() { Name = "Panthenol (Vitamin B5)", Percentage = "5.0%", Function = "Làm dịu tức thì kích ứng, phục hồi màng lipid sinh học và củng cố hàng rào bảo vệ", EwgScore = 1, EwgRating = "Xanh lá (Cực kỳ an toàn)", Source = "Chuẩn Dược Điển Châu Âu" },
-                new() { Name = "Niacinamide (Vitamin B3)", Percentage = "2.0%", Function = "Kiểm soát bã nhờn, se khít lỗ chân lông, làm đều tone da và mờ vết thâm", EwgScore = 1, EwgRating = "Xanh lá (Cực kỳ an toàn)", Source = "DSM Thụy Sĩ" },
-                new() { Name = "Madecassoside (Rau Má Tinh Khiết)", Percentage = "1.2%", Function = "Kháng viêm sinh học, kích thích tăng sinh collagen tự nhiên và phục hồi sẹo", EwgScore = 1, EwgRating = "Xanh lá (Cực kỳ an toàn)", Source = "Hữu cơ Madagascar" },
-                new() { Name = "Tocopherol (Vitamin E Tự Nhiên)", Percentage = "0.5%", Function = "Chống oxy hóa mạnh mẽ, bảo vệ tế bào da khỏi tác hại của gốc tự do và tia cực tím", EwgScore = 1, EwgRating = "Xanh lá (Cực kỳ an toàn)", Source = "Dầu thực vật Non-GMO" }
-            };
+            // 5. Dynamic Ingredient Breakdowns & EWG Safety Analysis per Product
+            var ingredientBreakdowns = Omnichannel.Web.Helpers.IngredientParserHelper.BuildDynamicIngredientBreakdowns(product);
 
             // Gallery images
             var gallery = new List<string>();
@@ -238,19 +215,32 @@ namespace Omnichannel.Web.Controllers
                 catch { }
             }
 
-            // If only 1 image, add nice high quality texture / angle views for luxury beauty experience
-            if (gallery.Count < 2)
+            // Bổ sung các ảnh Swatch của biến thể nếu có
+            if (product.Variants != null)
             {
-                gallery.Add("https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=800&h=800&fit=crop");
-                gallery.Add("https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&h=800&fit=crop");
+                foreach (var v in product.Variants)
+                {
+                    if (!string.IsNullOrEmpty(v.SwatchImageUrl) && !gallery.Contains(v.SwatchImageUrl))
+                    {
+                        gallery.Add(v.SwatchImageUrl);
+                    }
+                }
             }
 
-            // Related products in same category
+            // Nếu chỉ có 1 ảnh, thêm các góc chụp mẫu chất lượng cao
+            if (gallery.Count < 2 && !string.IsNullOrEmpty(product.ThumbnailUrl))
+            {
+                gallery.Add(product.ThumbnailUrl);
+            }
+
+            // Related products in same category (có AsSplitQuery và OrderBy)
             var relatedProducts = await _context.Products
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Include(p => p.Category)
                 .Include(p => p.Batches)
                 .Where(p => p.CategoryId == product.CategoryId && p.Id != product.Id && p.IsActive)
+                .OrderByDescending(p => p.Id)
                 .Take(4)
                 .ToListAsync();
 
@@ -267,7 +257,24 @@ namespace Omnichannel.Web.Controllers
             var ingredients = product.ProductIngredients?.Select(pi => pi.ActiveIngredient?.Name ?? "").Where(i => !string.IsNullOrEmpty(i)).ToList() ?? new List<string>();
             if (!ingredients.Any())
             {
-                ingredients = new List<string> { "Hyaluronic Acid (HA)", "Panthenol Vitamin B5", "Niacinamide 2%" };
+                ingredients = ingredientBreakdowns.Take(3).Select(i => i.Name).ToList();
+            }
+
+            string resolvedFullIngredients = Omnichannel.Web.Helpers.IngredientParserHelper.ResolveDynamicFullIngredients(product);
+            if (!string.IsNullOrWhiteSpace(resolvedFullIngredients))
+            {
+                product.FullIngredients = resolvedFullIngredients;
+            }
+
+            // Gợi ý Combo Thường Mua Cùng (Frequently Bought Together) - Phiên C2
+            Omnichannel.Application.DTOs.Catalog.FrequentlyBoughtTogetherDto? fbtBundle = null;
+            if (_recommendationService != null)
+            {
+                try
+                {
+                    fbtBundle = await _recommendationService.GetFrequentlyBoughtTogetherAsync(product.Id, top: 2);
+                }
+                catch { }
             }
 
             var vm = new ProductDetailViewModel
@@ -287,14 +294,26 @@ namespace Omnichannel.Web.Controllers
                 ClearanceBatch = clearanceBatch,
                 ClearancePrice = clearancePrice,
                 ClearanceDiscountPercent = clearanceDiscountPercent,
-                ShowroomStocks = showroomStocks,
+                ShowroomAvailability = showroomAvailability,
                 SwatchVideoUrl = swatchVideoUrl,
-                IngredientBreakdowns = ingredientBreakdowns
+                IngredientBreakdowns = ingredientBreakdowns,
+                ParsedIngredients = Omnichannel.Web.Helpers.IngredientParserHelper.ParseIngredients(product.FullIngredients),
+                FrequentlyBoughtTogether = fbtBundle
             };
 
             return View("Detail", vm);
         }
 
+        [HttpGet("san-pham/ton-kho-showroom/{productId:int}")]
+        [HttpGet("Product/ShowroomAvailability/{productId:int}")]
+        public async Task<IActionResult> ShowroomAvailability(int productId, [FromQuery] string? city = null)
+        {
+            var vm = await _storeInventoryService.GetShowroomAvailabilityAsync(productId, city);
+            return PartialView("_ShowroomStockAvailability", vm);
+        }
+
+        [HttpGet("Catalog")]
+        [HttpGet("Catalog/{slug?}")]
         [HttpGet("category/{slug?}")]
         [HttpGet("danh-muc/{slug?}")]
         [HttpGet("Product/Category/{slug?}")]
@@ -310,7 +329,10 @@ namespace Omnichannel.Web.Controllers
             int? minRating = null,
             string sort = "newest",
             string viewMode = "grid",
-            int page = 1)
+            int page = 1,
+            bool isAlcoholFree = false,
+            bool isFragranceFree = false,
+            bool isPregnancySafe = false)
         {
             var now = DateTime.UtcNow;
 
@@ -331,9 +353,10 @@ namespace Omnichannel.Web.Controllers
                     .FirstOrDefaultAsync(c => c.Id == categoryId.Value);
             }
 
-            // 2. Base Query
+            // 2. Base Query (Thêm AsSplitQuery chống Cartesian Explosion)
             var query = _context.Products
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Include(p => p.Category)
                 .Include(p => p.Batches)
                 .Include(p => p.ProductSkinTypes)
@@ -425,6 +448,20 @@ namespace Omnichannel.Web.Controllers
                 query = query.Where(p => !p.Reviews.Any() || p.Reviews.Average(r => r.Rating) >= minRating.Value);
             }
 
+            // Filter: Clean Beauty & An Toàn Làn Da
+            if (isAlcoholFree)
+            {
+                query = query.Where(p => p.IsAlcoholFree);
+            }
+            if (isFragranceFree)
+            {
+                query = query.Where(p => p.IsFragranceFree);
+            }
+            if (isPregnancySafe)
+            {
+                query = query.Where(p => p.IsPregnancySafe);
+            }
+
             // Sorting:
             // "newest", "bestseller", "price-asc", "price-desc", "fefo-longest", "discount-desc"
             query = sort switch
@@ -465,20 +502,20 @@ namespace Omnichannel.Web.Controllers
                 var exp = bestBatch?.ExpDate ?? now.AddMonths(24);
                 var days = (exp - now).Days;
                 string statusKey = "fresh";
-                string badgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
-                string badgeText = $"HSD: {exp:dd/MM/yyyy} • Date Mới >18 tháng";
+                string badgeClass = "bg-emerald-500/15 border-emerald-500/40 text-emerald-700";
+                string badgeText = $"Chuẩn date • HSD {exp:MM/yyyy}";
 
                 if (days < 180)
                 {
                     statusKey = "clearance";
-                    badgeClass = "bg-rose-50 text-rose-700 border-rose-200";
-                    badgeText = $"HSD: {exp:dd/MM/yyyy} • Cận Date <6 tháng (-50%)";
+                    badgeClass = "bg-rose-500/15 border-rose-500/40 text-rose-600";
+                    badgeText = $"Cận date • HSD {exp:MM/yyyy}";
                 }
-                else if (days <= 365)
+                else if (days <= 540)
                 {
                     statusKey = "good";
-                    badgeClass = "bg-amber-50 text-amber-700 border-amber-200";
-                    badgeText = $"HSD: {exp:dd/MM/yyyy} • Date 6-12 tháng (Giá Tốt)";
+                    badgeClass = "bg-amber-500/15 border-amber-500/40 text-amber-700";
+                    badgeText = $"Date 6-12th • HSD {exp:MM/yyyy}";
                 }
 
                 decimal disc = bestBatch?.ClearanceDiscountPercent ?? (p.DiscountPrice.HasValue && p.SellingPrice > 0 ? Math.Round((p.SellingPrice - p.DiscountPrice.Value) / p.SellingPrice * 100m) : 0);
@@ -507,37 +544,85 @@ namespace Omnichannel.Web.Controllers
                 ingredientMap[p.Id] = ings;
             }
 
-            // Category items for sidebar
-            var allCategories = await _context.Categories
-                .AsNoTracking()
-                .Where(c => c.IsActive && c.ParentId == null)
-                .OrderBy(c => c.SortOrder)
-                .ToListAsync();
+            // Category items for sidebar (Cached 10 phút, Batch aggregated without N+1 queries)
+            List<CategoryFilterItem>? rawCatItems = null;
+            if (_cache == null || !_cache.TryGetValue("category_sidebar_items", out rawCatItems) || rawCatItems == null)
+            {
+                var allActiveCategories = await _context.Categories
+                    .AsNoTracking()
+                    .Where(c => c.IsActive)
+                    .Select(c => new { c.Id, c.ParentId, c.Name, c.Slug, c.SortOrder })
+                    .ToListAsync();
 
-            var categoryItems = allCategories.Select(c => new CategoryFilterItem
+                var categoryCounts = await _context.Products
+                    .AsNoTracking()
+                    .Where(p => p.IsActive)
+                    .GroupBy(p => p.CategoryId)
+                    .Select(g => new { CategoryId = g.Key, Count = g.Count() })
+                    .ToDictionaryAsync(x => x.CategoryId, x => x.Count);
+
+                var rootCategories = allActiveCategories
+                    .Where(c => c.ParentId == null)
+                    .OrderBy(c => c.SortOrder)
+                    .ToList();
+
+                rawCatItems = rootCategories.Select(c =>
+                {
+                    int direct = categoryCounts.TryGetValue(c.Id, out int d) ? d : 0;
+                    int childSum = allActiveCategories
+                        .Where(sub => sub.ParentId == c.Id)
+                        .Sum(sub => categoryCounts.TryGetValue(sub.Id, out int subCnt) ? subCnt : 0);
+
+                    return new CategoryFilterItem
+                    {
+                        Id = c.Id,
+                        Name = c.Name,
+                        Slug = c.Slug,
+                        Count = direct + childSum,
+                        IsSelected = false
+                    };
+                }).ToList();
+
+                _cache?.Set("category_sidebar_items", rawCatItems, TimeSpan.FromMinutes(10));
+            }
+
+            var categoryItems = rawCatItems.Select(c => new CategoryFilterItem
             {
                 Id = c.Id,
                 Name = c.Name,
                 Slug = c.Slug,
-                Count = _context.Products.Count(p => (p.CategoryId == c.Id || (p.Category != null && p.Category.ParentId == c.Id)) && p.IsActive),
+                Count = c.Count,
                 IsSelected = currentCat != null && (currentCat.Id == c.Id || currentCat.Slug == c.Slug)
             }).ToList();
 
-            // Brand items for sidebar
-            var activeBrands = await _context.Products
-                .AsNoTracking()
-                .Where(p => p.IsActive && !string.IsNullOrEmpty(p.ManufacturerName))
-                .Select(p => p.ManufacturerName!)
-                .Distinct()
-                .OrderBy(b => b)
-                .Take(30)
-                .ToListAsync();
-
-            var brandItems = activeBrands.Select(b => new BrandFilterItem
+            // Brand items for sidebar (Cached 10 phút)
+            List<BrandFilterItem>? rawBrandItems = null;
+            if (_cache == null || !_cache.TryGetValue("brand_sidebar_items", out rawBrandItems) || rawBrandItems == null)
             {
-                Name = b,
-                Count = _context.Products.Count(p => p.IsActive && ((p.ManufacturerName != null && p.ManufacturerName.Contains(b)) || p.Name.Contains(b))),
-                IsSelected = selectedBrandsList.Contains(b)
+                var brandCounts = await _context.Products
+                    .AsNoTracking()
+                    .Where(p => p.IsActive && !string.IsNullOrEmpty(p.ManufacturerName))
+                    .GroupBy(p => p.ManufacturerName!)
+                    .Select(g => new { Brand = g.Key, Count = g.Count() })
+                    .OrderByDescending(g => g.Count)
+                    .Take(30)
+                    .ToListAsync();
+
+                rawBrandItems = brandCounts.Select(b => new BrandFilterItem
+                {
+                    Name = b.Brand,
+                    Count = b.Count,
+                    IsSelected = false
+                }).ToList();
+
+                _cache?.Set("brand_sidebar_items", rawBrandItems, TimeSpan.FromMinutes(10));
+            }
+
+            var brandItems = rawBrandItems.Select(b => new BrandFilterItem
+            {
+                Name = b.Name,
+                Count = b.Count,
+                IsSelected = selectedBrandsList.Contains(b.Name)
             }).ToList();
 
             var vm = new CategoryViewModel
@@ -552,6 +637,9 @@ namespace Omnichannel.Web.Controllers
                 SelectedBrands = selectedBrandsList,
                 SkinType = skinType,
                 MinRating = minRating,
+                IsAlcoholFree = isAlcoholFree,
+                IsFragranceFree = isFragranceFree,
+                IsPregnancySafe = isPregnancySafe,
                 Sort = sort,
                 ViewMode = viewMode,
                 CurrentPage = page,
@@ -606,6 +694,7 @@ namespace Omnichannel.Web.Controllers
             // Full Search & Filter Page
             var query = _context.Products
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Include(p => p.Category)
                 .Include(p => p.Batches)
                 .Where(p => p.IsActive);
@@ -616,18 +705,35 @@ namespace Omnichannel.Web.Controllers
                 query = query.Where(p => p.Name.Contains(q) || p.Sku.Contains(q) || (p.Category != null && p.Category.Name.Contains(q)) || (p.ManufacturerName != null && p.ManufacturerName.Contains(q)));
             }
 
+            Category? targetCat = null;
             if (categoryId.HasValue && categoryId.Value > 0)
             {
-                query = query.Where(p => p.CategoryId == categoryId.Value || (p.Category != null && p.Category.ParentId == categoryId.Value));
+                var catIds = new List<int> { categoryId.Value };
+                var subCatIds = await _context.Categories.AsNoTracking().Where(c => c.ParentId == categoryId.Value).Select(c => c.Id).ToListAsync();
+                catIds.AddRange(subCatIds);
+                query = query.Where(p => catIds.Contains(p.CategoryId));
+                targetCat = await _context.Categories.AsNoTracking().FirstOrDefaultAsync(c => c.Id == categoryId.Value);
             }
             else if (!string.IsNullOrWhiteSpace(categorySlug))
             {
-                query = query.Where(p => p.Category != null && (p.Category.Slug == categorySlug || p.Category.Name.Contains(categorySlug)));
+                targetCat = await _context.Categories.AsNoTracking().FirstOrDefaultAsync(c => c.Slug == categorySlug || c.Name == categorySlug);
+                if (targetCat != null)
+                {
+                    var catIds = new List<int> { targetCat.Id };
+                    var subCatIds = await _context.Categories.AsNoTracking().Where(c => c.ParentId == targetCat.Id).Select(c => c.Id).ToListAsync();
+                    catIds.AddRange(subCatIds);
+                    query = query.Where(p => catIds.Contains(p.CategoryId));
+                }
+                else
+                {
+                    query = query.Where(p => p.Category != null && (p.Category.Slug == categorySlug || p.Category.Name.Contains(categorySlug)));
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(brand))
             {
-                query = query.Where(p => (p.ManufacturerName != null && p.ManufacturerName.Contains(brand)) || p.Name.Contains(brand));
+                var b = brand.Trim();
+                query = query.Where(p => (p.ManufacturerName != null && p.ManufacturerName.Contains(b)) || p.Name.Contains(b));
             }
 
             if (minPrice.HasValue && minPrice.Value > 0)
@@ -638,6 +744,26 @@ namespace Omnichannel.Web.Controllers
             if (maxPrice.HasValue && maxPrice.Value > 0)
             {
                 query = query.Where(p => p.SellingPrice <= maxPrice.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(skinType))
+            {
+                var st = skinType.Trim();
+                query = query.Where(p => (p.ShortDescription != null && p.ShortDescription.Contains(st))
+                    || (p.Description != null && p.Description.Contains(st))
+                    || p.Name.Contains(st)
+                    || p.ProductSkinTypes.Any(pst => pst.SkinType != null && pst.SkinType.Name.Contains(st)));
+            }
+
+            if (minRating.HasValue && minRating.Value > 0)
+            {
+                var qualifiedProductIds = _context.ProductReviews
+                    .Where(r => r.IsApproved && !r.IsHidden)
+                    .GroupBy(r => r.ProductId)
+                    .Where(g => g.Average(r => r.Rating) >= minRating.Value)
+                    .Select(g => g.Key);
+
+                query = query.Where(p => qualifiedProductIds.Contains(p.Id));
             }
 
             // Sorting
@@ -660,36 +786,57 @@ namespace Omnichannel.Web.Controllers
                 .Take(pageSize)
                 .ToListAsync();
 
-            // Populate Sidebar Filters
-            var allCats = await _context.Categories
+            // Populate Sidebar Filters (Batch aggregated without N+1 queries)
+            var allActiveCats = await _context.Categories
                 .AsNoTracking()
-                .Where(c => c.IsActive && c.ParentId == null)
-                .OrderBy(c => c.SortOrder)
+                .Where(c => c.IsActive)
+                .Select(c => new { c.Id, c.ParentId, c.Name, c.Slug, c.SortOrder })
                 .ToListAsync();
 
-            var categoryItems = allCats.Select(c => new CategoryFilterItem
+            var catCounts = await _context.Products
+                .AsNoTracking()
+                .Where(p => p.IsActive)
+                .GroupBy(p => p.CategoryId)
+                .Select(g => new { CategoryId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.CategoryId, x => x.Count);
+
+            var rootCats = allActiveCats
+                .Where(c => c.ParentId == null)
+                .OrderBy(c => c.SortOrder)
+                .ToList();
+
+            int? activeParentCatId = targetCat != null ? (targetCat.ParentId ?? targetCat.Id) : categoryId;
+            var categoryItems = rootCats.Select(c =>
             {
-                Id = c.Id,
-                Name = c.Name,
-                Slug = c.Slug,
-                Count = _context.Products.Count(p => (p.CategoryId == c.Id || (p.Category != null && p.Category.ParentId == c.Id)) && p.IsActive),
-                IsSelected = categoryId == c.Id || categorySlug == c.Slug
+                int direct = catCounts.TryGetValue(c.Id, out int d) ? d : 0;
+                int childSum = allActiveCats
+                    .Where(sub => sub.ParentId == c.Id)
+                    .Sum(sub => catCounts.TryGetValue(sub.Id, out int subCnt) ? subCnt : 0);
+
+                return new CategoryFilterItem
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Slug = c.Slug,
+                    Count = direct + childSum,
+                    IsSelected = (activeParentCatId.HasValue && activeParentCatId.Value == c.Id) || (targetCat != null && targetCat.Slug == c.Slug) || categorySlug == c.Slug
+                };
             }).ToList();
 
-            var activeBrands = await _context.Products
+            var searchBrandCounts = await _context.Products
                 .AsNoTracking()
                 .Where(p => p.IsActive && !string.IsNullOrEmpty(p.ManufacturerName))
-                .Select(p => p.ManufacturerName!)
-                .Distinct()
-                .OrderBy(b => b)
+                .GroupBy(p => p.ManufacturerName!)
+                .Select(g => new { Brand = g.Key, Count = g.Count() })
+                .OrderByDescending(g => g.Count)
                 .Take(25)
                 .ToListAsync();
 
-            var brandItems = activeBrands.Select(b => new BrandFilterItem
+            var brandItems = searchBrandCounts.Select(b => new BrandFilterItem
             {
-                Name = b,
-                Count = _context.Products.Count(p => p.IsActive && ((p.ManufacturerName != null && p.ManufacturerName.Contains(b)) || p.Name.Contains(b))),
-                IsSelected = !string.IsNullOrEmpty(brand) && brand.Equals(b, StringComparison.OrdinalIgnoreCase)
+                Name = b.Brand,
+                Count = b.Count,
+                IsSelected = !string.IsNullOrEmpty(brand) && brand.Equals(b.Brand, StringComparison.OrdinalIgnoreCase)
             }).ToList();
 
             var skinTypes = new List<string> { "Da dầu", "Da khô", "Da nhạy cảm", "Da hỗn hợp", "Mọi loại da" };
@@ -728,12 +875,13 @@ namespace Omnichannel.Web.Controllers
         public async Task<IActionResult> QuickView(int id)
         {
             var product = await _context.Products
+                .AsNoTracking()
+                .AsSplitQuery()
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
                 .Include(p => p.Batches)
                 .Include(p => p.Variants.Where(v => v.IsActive))
                     .ThenInclude(v => v.Swatches)
-                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null)
@@ -788,6 +936,12 @@ namespace Omnichannel.Web.Controllers
 
             if (string.IsNullOrWhiteSpace(trimmed) || trimmed.Length < 2)
             {
+                const string defaultLiveSearchCacheKey = "Default_LiveSearch_Empty_v1";
+                if (_cache != null && _cache.TryGetValue(defaultLiveSearchCacheKey, out LiveSearchViewModel? cachedLive) && cachedLive != null)
+                {
+                    return cachedLive;
+                }
+
                 var featured = await _context.Products
                     .AsNoTracking()
                     .Include(p => p.Category)
@@ -800,6 +954,8 @@ namespace Omnichannel.Web.Controllers
 
                 vm.Products = MapToLiveItems(featured);
                 vm.TotalFound = vm.Products.Count;
+
+                _cache?.Set(defaultLiveSearchCacheKey, vm, TimeSpan.FromMinutes(15));
                 return vm;
             }
 
@@ -840,8 +996,10 @@ namespace Omnichannel.Web.Controllers
                     ThumbnailUrl = !string.IsNullOrWhiteSpace(p.ThumbnailUrl) 
                         ? p.ThumbnailUrl 
                         : "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=160&h=160&fit=crop",
-                    SellingPrice = p.SellingPrice,
-                    OriginalPrice = Math.Round(p.SellingPrice * 1.25m / 1000m) * 1000m,
+                    SellingPrice = (p.DiscountPrice.HasValue && p.DiscountPrice.Value > 0 && p.DiscountPrice.Value < p.SellingPrice)
+                        ? p.DiscountPrice.Value
+                        : p.SellingPrice,
+                    OriginalPrice = p.SellingPrice,
                     CategoryName = p.Category?.Name ?? "Mỹ Phẩm Cao Cấp",
                     ManufacturerName = p.ManufacturerName ?? "Omni Beauty"
                 };

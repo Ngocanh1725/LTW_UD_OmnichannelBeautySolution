@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Omnichannel.Application.DTOs.Cms;
+using Omnichannel.Application.DTOs.Inventory;
 using Omnichannel.Domain.Entities;
 
 namespace Omnichannel.Web.Models
@@ -33,23 +34,22 @@ namespace Omnichannel.Web.Models
         // 2. Swatch Video Support
         public string? SwatchVideoUrl { get; set; }
 
-        // 3. Showroom Stock Availability List
-        public List<ShowroomStockDto> ShowroomStocks { get; set; } = new();
+        // 3. Showroom Stock Availability List (O2O)
+        public ShowroomAvailabilityViewModel ShowroomAvailability { get; set; } = new();
+        public List<ShowroomStockDto> ShowroomStocks
+        {
+            get => ShowroomAvailability.Stores;
+            set => ShowroomAvailability.Stores = value;
+        }
 
         // 4. Detailed Ingredients Breakdown
         public List<IngredientDetailDto> IngredientBreakdowns { get; set; } = new();
-    }
 
-    public class ShowroomStockDto
-    {
-        public int StoreId { get; set; }
-        public string StoreName { get; set; } = string.Empty;
-        public string Address { get; set; } = string.Empty;
-        public string Phone { get; set; } = string.Empty;
-        public int StockQuantity { get; set; }
-        public bool HasTester { get; set; } = true;
-        public string StatusText => StockQuantity > 5 ? "Còn hàng" : (StockQuantity > 0 ? "Chỉ còn vài sản phẩm" : "Tạm hết hàng");
-        public string DeliveryBadge { get; set; } = "Nhận tại quầy trong 30 phút";
+        // 5. Clean Beauty & Parsed INCI Ingredients
+        public List<Omnichannel.Application.DTOs.BeautyTech.ParsedIngredientDto> ParsedIngredients { get; set; } = new();
+
+        // 6. Frequently Bought Together (FBT) - Phiên C2
+        public Omnichannel.Application.DTOs.Catalog.FrequentlyBoughtTogetherDto? FrequentlyBoughtTogether { get; set; }
     }
 
     public class IngredientDetailDto

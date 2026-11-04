@@ -28,7 +28,8 @@
   </PropertyGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="taskkill /F /IM dotnet.exe /FI &quot;STATUS eq RUNNING&quot; 2&gt;nul 1&gt;nul" />
+    <Exec Command="taskkill /F /IM Omnichannel.Web.exe 2&gt;nul 1&gt;nul || exit 0" ContinueOnError="true" />
+    <Exec Command="taskkill /F /IM dotnet.exe /FI &quot;STATUS eq RUNNING&quot; 2&gt;nul 1&gt;nul || exit 0" ContinueOnError="true" />
   </Target>
 
 </Project>

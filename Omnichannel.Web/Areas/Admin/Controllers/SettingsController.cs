@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Omnichannel.Application.DTOs.Settings;
 using Omnichannel.Application.Interfaces.Settings;
 using Omnichannel.Infrastructure.Security;
@@ -18,10 +19,17 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
     public class SettingsController : Controller
     {
         private readonly ISettingsService _settingsService;
+        private readonly IDemoResetService _demoResetService;
+        private readonly IConfiguration _configuration;
 
-        public SettingsController(ISettingsService settingsService)
+        public SettingsController(
+            ISettingsService settingsService,
+            IDemoResetService demoResetService,
+            IConfiguration configuration)
         {
             _settingsService = settingsService;
+            _demoResetService = demoResetService;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -108,6 +116,34 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             await _settingsService.InvalidateCacheAsync(null, cancellationToken);
             TempData["SuccessMessage"] = "Đã làm mới sạch toàn bộ bộ đệm Cache Cài đặt hệ thống!";
             return RedirectToAction(nameof(Index), new { group });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "SuperAdmin,SUPER_ADMIN")]
+        public async Task<IActionResult> ResetDemoData(CancellationToken cancellationToken = default)
+        {
+            var isDemoMode = _configuration.GetValue<bool>("DemoMode:Enabled");
+            if (!isDemoMode)
+            {
+                TempData["ErrorMessage"] = "Chức năng khôi phục dữ liệu chỉ khả dụng khi DemoMode được kích hoạt trong cấu hình hệ thống.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var userId = GetCurrentUserId();
+            var username = User.Identity?.Name ?? "SuperAdmin";
+
+            var result = await _demoResetService.ResetDemoDataAsync(userId, username, cancellationToken);
+            if (result.Success)
+            {
+                TempData["SuccessMessage"] = $"{result.Message} (Đã dọn {result.DeletedOrdersCount} đơn diễn tập, hoàn kho {result.RestoredBatchesCount} lô hàng, dọn {result.PurgedCartsCount} giỏ hàng)";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = $"Khôi phục thất bại: {result.Message}";
+            }
+
+            return RedirectToAction(nameof(Index));
         }
 
         private int? GetCurrentUserId()

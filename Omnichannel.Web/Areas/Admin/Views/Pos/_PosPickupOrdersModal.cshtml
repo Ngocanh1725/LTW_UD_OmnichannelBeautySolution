@@ -1,0 +1,302 @@
+@{
+    var currentStore = ViewBag.CurrentStore as Omnichannel.Domain.Entities.Store;
+    var currentShift = ViewBag.CurrentShift as Omnichannel.Application.DTOs.Sales.PosShiftSummaryDto;
+    int activeStoreId = currentStore?.Id ?? 1;
+    int activeShiftId = currentShift?.Id ?? 0;
+}
+
+<!-- MODAL ĐƠN NHẬN TẠI QUẦY O2O (CLICK & COLLECT POS HANDOVER - PHIÊN D1) -->
+<div class="modal fade" id="posPickupOrdersModal" tabindex="-1" aria-labelledby="posPickupOrdersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden">
+            <!-- Header -->
+            <div class="modal-header bg-dark text-white border-0 px-4 py-3">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="rounded-3 bg-danger d-inline-flex align-items-center justify-content-center text-white" style="width:40px;height:40px;">
+                        <i class="fa-solid fa-store fs-5"></i>
+                    </span>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0" id="posPickupOrdersModalLabel">
+                            Đơn Nhận Tại Quầy O2O (Click &amp; Collect) — @(currentStore?.Name ?? "Showroom")
+                        </h5>
+                        <small class="text-white-50">
+                            Tra cứu theo Mã PIN 6 số / Mã đơn / SĐT • Kiểm tra lô hàng FEFO đã giữ • Xác nhận bàn giao &amp; In hóa đơn
+                        </small>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button"
+                            onclick="window.OmniPosPickup.runExpiredJob()"
+                            class="btn btn-sm btn-outline-warning rounded-pill px-3 fw-semibold"
+                            title="Mô phỏng chạy tác vụ tự động hủy các đơn Click & Collect giữ hàng quá 48h">
+                        <i class="fa-solid fa-clock-rotate-left me-1"></i>Chạy Job Hết Hạn 48h
+                    </button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body p-4 bg-light">
+                <!-- Search & Quick QR Input Bar -->
+                <div class="row g-2 align-items-center mb-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fa-solid fa-qrcode text-danger"></i>
+                            </span>
+                            <input type="text"
+                                   id="posPickupSearchInput"
+                                   class="form-control border-start-0"
+                                   placeholder="Nhập Mã PIN 6 số (VD: 849201), Mã đơn (ORD-...), SĐT khách hàng hoặc quét mã QR Vé nhận hàng..."
+                                   onkeydown="if(event.key==='Enter'){ window.OmniPosPickup.loadOrders(); }" />
+                            <button type="button" class="btn btn-danger fw-bold px-4" onclick="window.OmniPosPickup.loadOrders()">
+                                <i class="fa-solid fa-magnifying-glass me-1"></i>Tra cứu
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3" onclick="document.getElementById('posPickupSearchInput').value=''; window.OmniPosPickup.loadOrders();">
+                            <i class="fa-solid fa-rotate me-1"></i>Làm mới danh sách
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Feedback Alert Banner -->
+                <div id="posPickupAlertBox" class="alert d-none rounded-3 small fw-semibold mb-3" role="alert"></div>
+
+                <!-- Orders List Container -->
+                <div id="posPickupOrdersContainer" class="row g-3">
+                    <div class="col-12 text-center py-5 text-muted">
+                        <i class="fa-solid fa-spinner fa-spin fs-3 mb-2"></i>
+                        <p class="mb-0 small">Đang tải danh sách đơn Click &amp; Collect tại @(currentStore?.Name ?? "Showroom")...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.OmniPosPickup = (function () {
+        const currentStoreId = @activeStoreId;
+        const currentShiftId = @activeShiftId;
+        let lastKnownCount = @(ViewBag.PendingPickupCount ?? 0);
+
+        function showAlert(type, htmlMessage) {
+            const box = document.getElementById('posPickupAlertBox');
+            if (!box) return;
+            box.className = `alert alert-${type} rounded-3 small fw-semibold mb-3 d-flex align-items-center justify-content-between`;
+            box.innerHTML = htmlMessage;
+            box.classList.remove('d-none');
+        }
+
+        function hideAlert() {
+            const box = document.getElementById('posPickupAlertBox');
+            if (box) box.classList.add('d-none');
+        }
+
+        function updateBadgeCount(count) {
+            const badge = document.getElementById('posPickupCountBadge');
+            if (badge) {
+                badge.textContent = count;
+                badge.className = count > 0
+                    ? 'badge rounded-pill bg-danger ms-1'
+                    : 'badge rounded-pill bg-secondary ms-1';
+            }
+        }
+
+        async function loadOrders(silent = false) {
+            const kwInput = document.getElementById('posPickupSearchInput');
+            const keyword = kwInput ? kwInput.value.trim() : '';
+            const container = document.getElementById('posPickupOrdersContainer');
+
+            try {
+                const url = `/Admin/Pos/PendingPickupOrders?storeId=${currentStoreId}&keyword=${encodeURIComponent(keyword)}`;
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (!data.success) {
+                    if (!silent && container) {
+                        container.innerHTML = `<div class="col-12"><div class="alert alert-danger mb-0">${data.message || 'Không thể tải danh sách đơn.'}</div></div>`;
+                    }
+                    return;
+                }
+
+                const orders = data.orders || [];
+                if (!keyword) {
+                    if (silent && orders.length > lastKnownCount) {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'info',
+                                title: `🏬 Có đơn Click & Collect mới tại quầy (${orders[0].orderCode})!`,
+                                showConfirmButton: false,
+                                timer: 4500
+                            });
+                        }
+                    }
+                    lastKnownCount = orders.length;
+                    updateBadgeCount(orders.length);
+                }
+
+                if (silent) return;
+                if (!container) return;
+
+                if (orders.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-12 text-center py-5 bg-white rounded-4 border">
+                            <i class="fa-solid fa-box-open fs-1 text-secondary opacity-50 mb-2"></i>
+                            <h6 class="fw-bold text-dark mb-1">Chưa có đơn nhận tại quầy nào đang chờ</h6>
+                            <p class="text-muted small mb-0">Khi khách đặt đơn chọn "Nhận tại cửa hàng" thuộc chi nhánh này, đơn sẽ hiển thị tức thì tại đây.</p>
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = orders.map(o => {
+                    const itemsHtml = (o.items || []).map(item => `
+                        <div class="d-flex justify-content-between align-items-center small py-1 border-bottom border-light">
+                            <div>
+                                <span class="fw-semibold text-dark">${item.productName}</span>
+                                <span class="badge bg-secondary-subtle text-secondary ms-1 font-monospace">Lô FEFO: ${item.batchNumber || 'FEFO'}</span>
+                            </div>
+                            <span class="font-monospace fw-bold">x${item.quantity} (${Number(item.lineTotal).toLocaleString('vi-VN')} đ)</span>
+                        </div>
+                    `).join('');
+
+                    const paidBadge = o.paymentStatus === 'PAID'
+                        ? '<span class="badge bg-success-subtle text-success border border-success-subtle">Đã thanh toán Online</span>'
+                        : '<span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">Thu tiền tại quầy: ' + Number(o.totalAmount).toLocaleString('vi-VN') + ' đ</span>';
+
+                    return `
+                        <div class="col-12">
+                            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 pb-2 mb-2 border-bottom">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-danger font-monospace fs-6">${o.orderCode}</span>
+                                        <strong class="text-dark">${o.customerName}</strong>
+                                        <span class="text-muted font-monospace small"><i class="fa-solid fa-phone me-1"></i>${o.customerPhone}</span>
+                                        ${paidBadge}
+                                    </div>
+                                    <div class="small text-muted">
+                                        <i class="fa-solid fa-store text-danger me-1"></i><strong>${o.pickupStoreName}</strong>
+                                        <span class="ms-2"><i class="fa-regular fa-clock me-1"></i>PIN gợi ý: <code>${o.maskedPickupCode}</code></span>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 align-items-center">
+                                    <div class="col-lg-7">
+                                        <div class="bg-light rounded-3 p-2.5">
+                                            <div class="text-uppercase text-muted fw-bold mb-1" style="font-size:10px;">Danh sách hàng giữ theo lô FEFO:</div>
+                                            ${itemsHtml}
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-5">
+                                        <div class="p-3 rounded-3 border bg-danger-subtle bg-opacity-10">
+                                            <label class="form-label small fw-bold text-dark mb-1">
+                                                <i class="fa-solid fa-key text-danger me-1"></i>Nhập Mã PIN 6 số từ Vé QR của khách:
+                                            </label>
+                                            <div class="input-group">
+                                                <input type="text"
+                                                       id="pinInput_${o.orderId}"
+                                                       maxlength="12"
+                                                       class="form-control font-monospace fw-bold text-center"
+                                                       placeholder="VD: 849201" />
+                                                <button type="button"
+                                                        onclick="window.OmniPosPickup.handoverOrder(${o.orderId}, '${o.orderCode}')"
+                                                        class="btn btn-success fw-bold px-3">
+                                                    <i class="fa-solid fa-check-double me-1"></i>Bàn giao
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (e) {
+                console.error('Error loading pickup orders:', e);
+            }
+        }
+
+        async function handoverOrder(orderId, orderCode) {
+            hideAlert();
+            const pinEl = document.getElementById(`pinInput_${orderId}`);
+            const pin = pinEl ? pinEl.value.trim() : '';
+            if (!pin) {
+                showAlert('danger', '<span><i class="fa-solid fa-circle-exclamation me-1"></i>Vui lòng nhập Mã PIN 6 số của khách hàng để xác thực bàn giao!</span>');
+                pinEl?.focus();
+                return;
+            }
+
+            try {
+                const res = await fetch('/Admin/Pos/HandoverPickupOrder', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderId: orderId,
+                        orderCode: orderCode,
+                        pickupCode: pin,
+                        storeId: currentStoreId,
+                        shiftId: currentShiftId
+                    })
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    showAlert('danger', `<span><i class="fa-solid fa-triangle-exclamation me-1"></i>${data.message}</span>`);
+                    return;
+                }
+
+                showAlert('success', `
+                    <span><i class="fa-solid fa-circle-check me-1"></i>${data.message}</span>
+                    <a href="${data.receiptUrl}" target="_blank" class="btn btn-sm btn-dark rounded-pill px-3 fw-bold">
+                        <i class="fa-solid fa-print me-1"></i>In hóa đơn K80
+                    </a>
+                `);
+                await loadOrders(false);
+            } catch (e) {
+                showAlert('danger', '<span>Lỗi kết nối khi bàn giao đơn hàng: ' + e.message + '</span>');
+            }
+        }
+
+        async function runExpiredJob() {
+            hideAlert();
+            try {
+                const res = await fetch('/Admin/Pos/RunExpiredPickupJob', { method: 'POST' });
+                const data = await res.json();
+                showAlert('info', `<span><i class="fa-solid fa-bolt me-1"></i>${data.message}</span>`);
+                await loadOrders(false);
+            } catch (e) {
+                showAlert('danger', '<span>Không thể chạy Job hết hạn 48h.</span>');
+            }
+        }
+
+        function openModal() {
+            hideAlert();
+            const modalEl = document.getElementById('posPickupOrdersModal');
+            if (!modalEl) return;
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+            loadOrders(false);
+        }
+
+        // Poll every 5 seconds for live Click & Collect notifications at this store
+        setInterval(() => loadOrders(true), 5000);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('openPickup') === '1') {
+                setTimeout(openModal, 400);
+            }
+        });
+
+        return {
+            openModal,
+            loadOrders,
+            handoverOrder,
+            runExpiredJob
+        };
+    })();
+</script>
+

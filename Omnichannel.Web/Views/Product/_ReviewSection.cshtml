@@ -15,9 +15,16 @@
      class="max-w-5xl mx-auto space-y-8" 
      x-data="{
         activeFilter: 'all',
+        selectedSkinType: 'all',
+        sortBy: 'newest',
         reviewModalOpen: false,
         zoomModalOpen: false,
         zoomImageUrl: '',
+        qnaModalOpen: false,
+        questionContent: '',
+        isSubmittingQuestion: false,
+        qnaQuestions: [],
+        isUserLoggedIn: @(User.Identity?.IsAuthenticated == true ? "true" : "false"),
         reviewRating: 5,
         reviewTitle: '',
         reviewContent: '',
@@ -74,6 +81,94 @@
         openZoom(url) {
             this.zoomImageUrl = url;
             this.zoomModalOpen = true;
+        },
+
+        init() {
+            this.loadQna();
+        },
+
+        loadQna() {
+            fetch('/api/qna/product/@p.Id')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.questions) {
+                        this.qnaQuestions = data.questions;
+                    }
+                })
+                .catch(err => console.debug('[Q&A] Error loading Q&A:', err));
+        },
+
+        openAskModal() {
+            if (!this.isUserLoggedIn) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Yêu cầu đăng nhập',
+                        text: 'Vui lòng đăng nhập tài khoản để đặt câu hỏi cho Chuyên viên Dược Mỹ Phẩm Omni Beauty.',
+                        confirmButtonText: 'Đăng nhập ngay',
+                        showCancelButton: true,
+                        cancelButtonText: 'Để sau',
+                        confirmButtonColor: '#9d2162'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+                        }
+                    });
+                } else {
+                    window.location.href = '/Account/Login?returnUrl=' + encodeURIComponent(window.location.pathname);
+                }
+                return;
+            }
+            this.questionContent = '';
+            this.qnaModalOpen = true;
+        },
+
+        submitQuestion() {
+            if (!this.questionContent || this.questionContent.trim().length < 5) {
+                if (typeof showStorefrontToast === 'function') {
+                    showStorefrontToast('Vui lòng nhập câu hỏi tối thiểu 5 ký tự.', 'warning');
+                }
+                return;
+            }
+
+            this.isSubmittingQuestion = true;
+            fetch('/api/qna/ask', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    productId: @p.Id,
+                    content: this.questionContent.trim()
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                this.isSubmittingQuestion = false;
+                if (data.success) {
+                    this.qnaModalOpen = false;
+                    this.questionContent = '';
+                    if (typeof showStorefrontToast === 'function') {
+                        showStorefrontToast(data.message, 'success');
+                    } else if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Đã gửi câu hỏi!',
+                            text: data.message,
+                            confirmButtonColor: '#9d2162'
+                        });
+                    }
+                    this.loadQna();
+                } else {
+                    if (typeof showStorefrontToast === 'function') {
+                        showStorefrontToast(data.message || 'Có lỗi xảy ra', 'error');
+                    }
+                }
+            })
+            .catch(err => {
+                this.isSubmittingQuestion = false;
+                if (typeof showStorefrontToast === 'function') {
+                    showStorefrontToast('Lỗi gửi câu hỏi, vui lòng thử lại.', 'error');
+                }
+            });
         },
 
         voteHelpful(reviewId, event) {
@@ -266,7 +361,51 @@
     </div>
 
     <!-- =========================================================================
-         2. BỘ LỌC ĐÁNH GIÁ NHANH (QUICK FILTER TABS)
+         1.1. LƯỚI ẢNH CHỤP THỰC TẾ TỪ KHÁCH HÀNG (CUSTOMER REAL PHOTOS GALLERY)
+         ========================================================================= -->
+    @{
+        var allCustomerPhotos = Model.Reviews?
+            .Where(r => r.Images != null && r.Images.Any())
+            .SelectMany(r => r.Images.Select(img => new { Image = img, Rating = r.Rating, User = r.UserName, Skin = r.SkinType }))
+            .Take(12)
+            .ToList();
+    }
+    @if (allCustomerPhotos != null && allCustomerPhotos.Any())
+    {
+        <div class="p-6 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-xl bg-pastel-rose text-magenta-accent flex items-center justify-center text-sm shadow-xs font-bold">
+                        <i class="fa-solid fa-camera"></i>
+                    </span>
+                    <div>
+                        <h4 class="font-serif font-bold text-sm text-charcoal">Ảnh Thực Tế Từ Khách Hàng (UGC Swatch Gallery)</h4>
+                        <p class="text-[11px] text-slate-400">Hình ảnh chụp cận cảnh màu son, chất kem và bao bì từ người mua thực tế</p>
+                    </div>
+                </div>
+                <span class="text-xs font-bold text-magenta-accent">@allCustomerPhotos.Count ảnh</span>
+            </div>
+
+            <!-- Dải ảnh cuộn ngang mượt mà -->
+            <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+                @foreach (var photo in allCustomerPhotos)
+                {
+                    <button type="button"
+                            @@click="openZoom('@photo.Image')"
+                            class="shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border border-slate-200 hover:border-magenta-accent hover:shadow-md transition-all group relative">
+                        <img src="@photo.Image" alt="Ảnh review swatch" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <div class="absolute inset-0 bg-charcoal/30 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-1 text-center">
+                            <i class="fa-solid fa-magnifying-glass-plus text-sm mb-1"></i>
+                            <span class="text-[9px] font-bold truncate max-w-full">@photo.User</span>
+                        </div>
+                    </button>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- =========================================================================
+         2. BỘ LỌC ĐÁNH GIÁ NHANH (QUICK FILTER TABS) & BỘ LỌC SKIN TWIN
          ========================================================================= -->
     <div class="flex flex-wrap items-center gap-2 pb-2 border-b border-slate-200">
         <span class="text-xs font-bold text-slate-500 mr-2 flex items-center gap-1.5">
@@ -319,6 +458,35 @@
         </button>
     </div>
 
+    <!-- 2.1 BỘ LỌC SKIN TWIN (LOẠI DA TƯƠNG ĐỒNG) -->
+    <div class="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-pastel-rose/20 border border-magenta-accent/20">
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="text-xs font-bold text-magenta-accent flex items-center gap-1.5">
+                <i class="fa-solid fa-sparkles text-rose-gold"></i> Bộ Lọc Skin Twin (Loại da của bạn):
+            </span>
+            <div class="flex flex-wrap gap-1.5">
+                <template x-for="st in [
+                    { id: 'all', label: 'Tất cả loại da' },
+                    { id: 'dầu', label: '✨ Da Dầu / Mụn' },
+                    { id: 'khô', label: '✨ Da Khô' },
+                    { id: 'hỗn hợp', label: '✨ Da Hỗn Hợp' },
+                    { id: 'nhạy cảm', label: '✨ Da Nhạy Cảm' }
+                ]" :key="st.id">
+                    <button type="button"
+                            @@click="selectedSkinType = st.id"
+                            :class="selectedSkinType === st.id ? 'bg-magenta-accent text-white font-bold shadow-xs' : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'"
+                            class="px-3 py-1 rounded-full text-[11px] font-medium transition"
+                            x-text="st.label">
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <div class="text-[11px] text-slate-500 font-medium">
+            <span x-show="selectedSkinType !== 'all'">Đang ưu tiên các bài đánh giá có cùng loại da với bạn</span>
+        </div>
+    </div>
+
     <!-- =========================================================================
          3. DANH SÁCH BÌNH LUẬN & ĐÁNH GIÁ (REVIEW CARDS)
          ========================================================================= -->
@@ -337,10 +505,11 @@
                      data-rating="@r.Rating"
                      data-has-image="@(hasImages ? "true" : "false")"
                      data-is-verified="@(r.IsVerifiedPurchase ? "true" : "false")"
-                     x-show="(activeFilter === 'all') || 
-                             (activeFilter === 'images' && @(hasImages ? "true" : "false")) || 
-                             (activeFilter === 'verified' && @(r.IsVerifiedPurchase ? "true" : "false")) || 
-                             (activeFilter === '5star' && @(r.Rating == 5 ? "true" : "false"))">
+                     x-show="((activeFilter === 'all') || 
+                              (activeFilter === 'images' && @(hasImages ? "true" : "false")) || 
+                              (activeFilter === 'verified' && @(r.IsVerifiedPurchase ? "true" : "false")) || 
+                              (activeFilter === '5star' && @(r.Rating == 5 ? "true" : "false"))) &&
+                             (selectedSkinType === 'all' || '@(r.SkinType ?? "")'.toLowerCase().includes(selectedSkinType.toLowerCase()))">
                     
                     <!-- Header người đánh giá: Avatar, Tên, Ngày, Rating & Huy Hiệu Verified -->
                     <div class="flex flex-wrap items-start justify-between gap-3">
@@ -360,6 +529,16 @@
                                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                                             <i class="fa-solid fa-circle-check text-emerald-600"></i>
                                             <span>Đã mua hàng từ Omni Beauty (Verified Buyer)</span>
+                                        </span>
+                                    }
+
+                                    <!-- HUY HIỆU SKIN TWIN MATCH -->
+                                    @if (!string.IsNullOrEmpty(r.SkinType))
+                                    {
+                                        <span x-show="selectedSkinType !== 'all' && '@r.SkinType'.toLowerCase().includes(selectedSkinType.toLowerCase())"
+                                              class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-magenta-accent border border-magenta-accent/30 shadow-2xs animate-pulse">
+                                            <i class="fa-solid fa-sparkles text-rose-gold"></i>
+                                            <span>Skin Twin Match (@r.SkinType)</span>
                                         </span>
                                     }
                                 </div>
@@ -502,6 +681,143 @@
                 </button>
             </div>
         }
+    </div>
+
+    <!-- =========================================================================
+         3.1. KHỐI HỎI & ĐÁP SẢN PHẨM VỚI DƯỢC SĨ (PRODUCT Q&A COMMUNITY)
+         ========================================================================= -->
+    <div class="p-6 sm:p-8 rounded-3xl bg-white border border-slate-200/80 shadow-xs space-y-6" id="productQnaSection">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-purple-500 to-magenta-accent text-white flex items-center justify-center text-lg shadow-sm">
+                    <i class="fa-solid fa-circle-question"></i>
+                </div>
+                <div>
+                    <h3 class="font-serif font-bold text-base sm:text-lg text-charcoal">Hỏi & Đáp Về Sản Phẩm</h3>
+                    <p class="text-xs text-slate-500">Đặt câu hỏi chuyên môn để được Dược Sĩ & Chuyên Viên CSKH Omni Beauty giải đáp chi tiết</p>
+                </div>
+            </div>
+
+            <button type="button"
+                    @@click="openAskModal()"
+                    id="btnOpenAskModal"
+                    class="px-6 py-2.5 rounded-full bg-charcoal text-white font-bold text-xs uppercase tracking-wider hover:bg-magenta-accent transition-all duration-300 flex items-center gap-2 group shadow-xs">
+                <i class="fa-solid fa-pen text-rose-gold group-hover:rotate-12 transition-transform"></i>
+                <span>Đặt Câu Hỏi</span>
+            </button>
+        </div>
+
+        <!-- Danh sách câu hỏi & câu trả lời -->
+        <div class="space-y-4">
+            <template x-if="qnaQuestions.length === 0">
+                <div class="py-8 text-center text-slate-400 text-xs">
+                    <i class="fa-regular fa-comments text-2xl mb-2 text-slate-300 block"></i>
+                    <span>Chưa có câu hỏi nào. Hãy là người đầu tiên đặt câu hỏi về sản phẩm này!</span>
+                </div>
+            </template>
+
+            <template x-for="q in qnaQuestions" :key="q.id">
+                <div class="p-4 sm:p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-3">
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-xl bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">Q</span>
+                            <div>
+                                <strong class="text-xs font-bold text-charcoal" x-text="q.authorName"></strong>
+                                <span class="text-[10px] text-slate-400 ml-2" x-text="new Date(q.createdAt).toLocaleDateString('vi-VN')"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="text-xs sm:text-sm font-semibold text-slate-800 pl-9" x-text="q.content"></p>
+
+                    <!-- Khối câu trả lời chính thức từ CSKH -->
+                    <template x-if="q.answers && q.answers.length > 0">
+                        <div class="space-y-2 mt-2 pt-2 border-t border-slate-200/60">
+                            <template x-for="ans in q.answers" :key="ans.id">
+                                <div class="p-3.5 rounded-xl border space-y-1"
+                                     :class="ans.isOfficial ? 'bg-gradient-to-br from-pastel-rose/40 via-white to-pastel-rose/20 border-magenta-accent/25' : 'bg-white border-slate-200'">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-6 h-6 rounded-lg text-white font-bold text-[10px] flex items-center justify-center"
+                                                  :class="ans.isOfficial ? 'bg-magenta-accent' : 'bg-slate-400'">A</span>
+                                            <span class="text-xs font-bold"
+                                                  :class="ans.isOfficial ? 'text-magenta-accent' : 'text-charcoal'"
+                                                  x-text="ans.authorName"></span>
+                                            <template x-if="ans.isOfficial">
+                                                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-charcoal text-rose-gold uppercase tracking-wider">
+                                                    CHUYÊN VIÊN OMNI BEAUTY
+                                                </span>
+                                            </template>
+                                        </div>
+                                        <span class="text-[10px] text-slate-400" x-text="new Date(ans.createdAt).toLocaleDateString('vi-VN')"></span>
+                                    </div>
+                                    <p class="text-xs text-slate-700 leading-relaxed pl-8" x-text="ans.content"></p>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Modal Đặt Câu Hỏi Mới -->
+    <div x-show="qnaModalOpen" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         style="display: none;" 
+         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-charcoal/60 backdrop-blur-sm">
+        
+        <div @@click.away="qnaModalOpen = false" 
+             class="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-soft-border space-y-5">
+            
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-purple-50 text-magenta-accent flex items-center justify-center text-base">
+                        <i class="fa-solid fa-circle-question"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-serif font-bold text-base text-charcoal">Đặt Câu Hỏi Về Sản Phẩm</h3>
+                        <p class="text-xs text-slate-400 line-clamp-1">@p.Name</p>
+                    </div>
+                </div>
+                <button type="button" @@click="qnaModalOpen = false" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-charcoal flex items-center justify-center transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Nội dung thắc mắc của bạn:</label>
+                    <textarea x-model="questionContent" 
+                              rows="4" 
+                              placeholder="Ví dụ: Sản phẩm này có dùng chung được với Retinol không? Phù hợp với da đang có mụn viêm không?..." 
+                              class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-magenta-accent text-xs leading-relaxed"></textarea>
+                </div>
+
+                <div class="p-3 rounded-xl bg-pastel-rose/30 text-[11px] text-magenta-accent flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Câu hỏi sẽ được Dược Sĩ & Chuyên Viên Omni Beauty giải đáp trong vòng 2-4 giờ làm việc.</span>
+                </div>
+
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" @@click="qnaModalOpen = false" class="px-5 py-2.5 rounded-full border border-slate-200 text-slate-600 font-bold hover:bg-slate-50">
+                        Hủy
+                    </button>
+                    <button type="button" 
+                            @@click="submitQuestion()" 
+                            :disabled="isSubmittingQuestion"
+                            class="px-6 py-2.5 rounded-full bg-magenta-accent text-white font-bold hover:bg-[#b0276a] transition flex items-center gap-2">
+                        <span x-show="!isSubmittingQuestion"><i class="fa-solid fa-paper-plane mr-1"></i> Gửi Câu Hỏi</span>
+                        <span x-show="isSubmittingQuestion"><i class="fa-solid fa-spinner fa-spin mr-1"></i> Đang gửi...</span>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- =========================================================================

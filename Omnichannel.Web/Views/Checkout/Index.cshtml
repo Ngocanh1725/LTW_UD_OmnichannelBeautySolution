@@ -48,8 +48,11 @@
     <form asp-action="PlaceOrder" method="post" id="checkoutForm">
         @Html.AntiForgeryToken()
 
-        <!-- Dữ liệu ẩn đồng bộ cho Loyalty & Shipping -->
-        <input type="hidden" name="ShippingMethod" :value="shippingMethod" />
+        <!-- Dữ liệu ẩn đồng bộ cho Loyalty & Shipping & Voucher & Click & Collect -->
+        <input type="hidden" name="CouponCode" :value="appliedCouponCode" />
+        <input type="hidden" name="ShippingMethod" :value="deliveryMethod === 'STORE_PICKUP' ? 'STORE_PICKUP' : shippingMethod" />
+        <input type="hidden" name="DeliveryMethod" :value="deliveryMethod" />
+        <input type="hidden" name="PickupStoreId" :value="pickupStoreId" />
         <input type="hidden" name="UseLoyaltyPoints" :value="useLoyaltyPoints ? 'true' : 'false'" />
         <input type="hidden" name="LoyaltyPointsToRedeem" :value="loyaltyPointsToRedeem" />
         <input type="hidden" name="LoyaltyDiscountAmount" :value="currentLoyaltyDiscount" />
@@ -113,60 +116,156 @@
                         </div>
                     </div>
 
-                    <!-- Tỉnh / Quận / Phường -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div>
-                            <label for="ProvinceId" class="block text-xs font-bold text-slate-700 mb-1.5">
-                                Tỉnh / Thành Phố <span class="text-rose-500">*</span>
-                            </label>
-                            <select name="ProvinceId" id="ProvinceId" x-model="selectedProvince" x-on:change="loadDistricts()" class="w-full rounded-xl border border-soft-border text-xs focus:ring-magenta-accent focus:border-magenta-accent bg-white px-3 py-2.5" required>
-                                <option value="">-- Chọn Tỉnh / Thành --</option>
-                                <template x-for="p in provinces" :key="p.provinceID || p.provinceId">
-                                    <option x-bind:value="p.provinceID || p.provinceId" x-text="p.provinceName"></option>
-                                </template>
-                            </select>
-                            <span asp-validation-for="ProvinceId" class="text-red-500 text-[11px] mt-1 block"></span>
+                    <!-- BỘ CHUYỂN ĐỔI 2 TAB O2O: GIAO TẬN NƠI vs NHẬN TẠI CỬA HÀNG (CLICK & COLLECT) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5 p-1.5 rounded-2xl bg-slate-100/90 border border-slate-200/80">
+                        <button type="button"
+                                id="tabBtnHomeDelivery"
+                                @@click="deliveryMethod = 'HOME_DELIVERY'"
+                                :class="deliveryMethod === 'HOME_DELIVERY' ? 'bg-white text-charcoal shadow-sm ring-1 ring-magenta-accent/40' : 'text-slate-600 hover:text-charcoal'"
+                                class="py-3 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer">
+                            <i class="fa-solid fa-truck-fast text-magenta-accent"></i>
+                            <span>Giao tận nơi (Home Delivery)</span>
+                        </button>
+                        <button type="button"
+                                id="tabBtnStorePickup"
+                                @@click="deliveryMethod = 'STORE_PICKUP'"
+                                :class="deliveryMethod === 'STORE_PICKUP' ? 'bg-gradient-to-r from-rose-600 to-pink-600 text-white shadow-sm' : 'text-slate-600 hover:text-charcoal'"
+                                class="py-3 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer">
+                            <i class="fa-solid fa-store"></i>
+                            <span>Nhận tại cửa hàng (Click &amp; Collect • 0₫)</span>
+                        </button>
+                    </div>
+
+                    <!-- KHỐI TAB 1: ĐỊA CHỈ GIAO TẬN NƠI -->
+                    <div x-show="deliveryMethod === 'HOME_DELIVERY'" x-transition>
+                        <!-- Tỉnh / Quận / Phường -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <label for="ProvinceId" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Tỉnh / Thành Phố <span class="text-rose-500">*</span>
+                                </label>
+                                <select name="ProvinceId" id="ProvinceId" x-model="selectedProvince" x-on:change="loadDistricts()" class="w-full rounded-xl border border-soft-border text-xs focus:ring-magenta-accent focus:border-magenta-accent bg-white px-3 py-2.5">
+                                    <option value="">-- Chọn Tỉnh / Thành --</option>
+                                    <template x-for="p in provinces" :key="p.provinceID || p.provinceId">
+                                        <option x-bind:value="p.provinceID || p.provinceId" x-text="p.provinceName"></option>
+                                    </template>
+                                </select>
+                                <span asp-validation-for="ProvinceId" class="text-red-500 text-[11px] mt-1 block"></span>
+                            </div>
+
+                            <div>
+                                <label for="DistrictId" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Quận / Huyện <span class="text-rose-500">*</span>
+                                </label>
+                                <select name="DistrictId" id="DistrictId" x-model="selectedDistrict" x-on:change="loadWards()" class="w-full rounded-xl border border-soft-border text-xs focus:ring-magenta-accent focus:border-magenta-accent bg-white px-3 py-2.5" x-bind:disabled="!selectedProvince">
+                                    <option value="">-- Chọn Quận / Huyện --</option>
+                                    <template x-for="d in districts" :key="d.districtID || d.districtId">
+                                        <option x-bind:value="d.districtID || d.districtId" x-text="d.districtName"></option>
+                                    </template>
+                                </select>
+                                <span asp-validation-for="DistrictId" class="text-red-500 text-[11px] mt-1 block"></span>
+                            </div>
+
+                            <div>
+                                <label for="WardCode" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Phường / Xã <span class="text-rose-500">*</span>
+                                </label>
+                                <select name="WardCode" id="WardCode" x-model="selectedWard" x-on:change="calculateFee()" class="w-full rounded-xl border border-soft-border text-xs focus:ring-magenta-accent focus:border-magenta-accent bg-white px-3 py-2.5" x-bind:disabled="!selectedDistrict">
+                                    <option value="">-- Chọn Phường / Xã --</option>
+                                    <template x-for="w in wards" :key="w.wardCode || w.WardCode">
+                                        <option x-bind:value="w.wardCode || w.WardCode" x-text="w.wardName || w.WardName"></option>
+                                    </template>
+                                </select>
+                                <span asp-validation-for="WardCode" class="text-red-500 text-[11px] mt-1 block"></span>
+                            </div>
                         </div>
 
-                        <div>
-                            <label for="DistrictId" class="block text-xs font-bold text-slate-700 mb-1.5">
-                                Quận / Huyện <span class="text-rose-500">*</span>
+                        <!-- Địa chỉ số nhà cụ thể -->
+                        <div class="mb-4">
+                            <label asp-for="ShippingAddress" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Địa chỉ chi tiết (Số nhà, tên đường, toà nhà/căn hộ) <span class="text-rose-500">*</span>
                             </label>
-                            <select name="DistrictId" id="DistrictId" x-model="selectedDistrict" x-on:change="loadWards()" class="w-full rounded-xl border border-soft-border text-xs focus:ring-magenta-accent focus:border-magenta-accent bg-white px-3 py-2.5" required x-bind:disabled="!selectedProvince">
-                                <option value="">-- Chọn Quận / Huyện --</option>
-                                <template x-for="d in districts" :key="d.districtID || d.districtId">
-                                    <option x-bind:value="d.districtID || d.districtId" x-text="d.districtName"></option>
-                                </template>
-                            </select>
-                            <span asp-validation-for="DistrictId" class="text-red-500 text-[11px] mt-1 block"></span>
-                        </div>
-
-                        <div>
-                            <label for="WardCode" class="block text-xs font-bold text-slate-700 mb-1.5">
-                                Phường / Xã <span class="text-rose-500">*</span>
-                            </label>
-                            <select name="WardCode" id="WardCode" x-model="selectedWard" x-on:change="calculateFee()" class="w-full rounded-xl border border-soft-border text-xs focus:ring-magenta-accent focus:border-magenta-accent bg-white px-3 py-2.5" required x-bind:disabled="!selectedDistrict">
-                                <option value="">-- Chọn Phường / Xã --</option>
-                                <template x-for="w in wards" :key="w.wardCode || w.WardCode">
-                                    <option x-bind:value="w.wardCode || w.WardCode" x-text="w.wardName || w.WardName"></option>
-                                </template>
-                            </select>
-                            <span asp-validation-for="WardCode" class="text-red-500 text-[11px] mt-1 block"></span>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">
+                                    <i class="fa-solid fa-house-chimney"></i>
+                                </span>
+                                <input asp-for="ShippingAddress"
+                                       x-bind:required="deliveryMethod === 'HOME_DELIVERY'"
+                                       class="w-full pl-8 pr-3 py-2.5 rounded-xl border border-soft-border text-xs focus:ring-magenta-accent focus:border-magenta-accent"
+                                       placeholder="Số 123 Đường Nguyễn Huệ, Phường Bến Nghé..." />
+                            </div>
+                            <span asp-validation-for="ShippingAddress" class="text-red-500 text-[11px] mt-1 block"></span>
                         </div>
                     </div>
 
-                    <!-- Địa chỉ số nhà cụ thể -->
-                    <div class="mb-4">
-                        <label asp-for="ShippingAddress" class="block text-xs font-bold text-slate-700 mb-1.5">
-                            Địa chỉ chi tiết (Số nhà, tên đường, toà nhà/căn hộ) <span class="text-rose-500">*</span>
-                        </label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 text-xs">
-                                <i class="fa-solid fa-house-chimney"></i>
-                            </span>
-                            <input asp-for="ShippingAddress" class="w-full pl-8 pr-3 py-2.5 rounded-xl border border-soft-border text-xs focus:ring-magenta-accent focus:border-magenta-accent" placeholder="Số 123 Đường Nguyễn Huệ, Phường Bến Nghé..." required />
+                    <!-- KHỐI TAB 2: DANH SÁCH SHOWROOM NHẬN HÀNG (CLICK & COLLECT - FEFO RESERVE 48H) -->
+                    <div x-show="deliveryMethod === 'STORE_PICKUP'" x-transition class="mb-4 space-y-3">
+                        <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-start gap-2.5">
+                            <i class="fa-solid fa-bolt text-emerald-600 text-sm mt-0.5"></i>
+                            <div>
+                                <strong class="font-bold">Đặc quyền Click &amp; Collect O2O:</strong>
+                                Miễn phí vận chuyển <strong>0 ₫</strong> • Khóa giữ sẵn lô hàng FEFO mới nhất tại Showroom trong <strong>48 giờ</strong> • Nhận Vé QR &amp; Mã PIN 6 số lấy hàng ngay trong 1 giờ!
+                            </div>
                         </div>
-                        <span asp-validation-for="ShippingAddress" class="text-red-500 text-[11px] mt-1 block"></span>
+
+                        <div class="space-y-2.5">
+                            @if (Model.PickupStores != null && Model.PickupStores.Any())
+                            {
+                                foreach (var st in Model.PickupStores)
+                                {
+                                    <label class="relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl border-2 transition-all @(st.HasFullCartStock ? "cursor-pointer" : "opacity-60 cursor-not-allowed bg-slate-50")"
+                                           :class="pickupStoreId === @st.StoreId ? 'border-rose-600 bg-rose-50/40 ring-2 ring-rose-500/20' : 'border-slate-200 hover:border-rose-300 bg-white'">
+                                        <div class="flex items-start gap-3">
+                                            <input type="radio"
+                                                   name="pickupStoreRadio"
+                                                   value="@st.StoreId"
+                                                   x-model.number="pickupStoreId"
+                                                   @(st.HasFullCartStock ? "" : "disabled")
+                                                   class="mt-1 text-rose-600 focus:ring-rose-500 h-4 w-4" />
+                                            <div class="space-y-1">
+                                                <div class="flex flex-wrap items-center gap-2">
+                                                    <span class="text-xs font-bold text-charcoal">@st.StoreName</span>
+                                                    <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-mono text-[10px]">@st.StoreCode</span>
+                                                    @if (st.HasFullCartStock)
+                                                    {
+                                                        <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                                                            <i class="fa-solid fa-check-circle mr-0.5"></i> Còn đủ hàng cho cả giỏ (@st.TotalAvailableUnitsForCart SP)
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold">
+                                                            Tạm thiếu: @string.Join(", ", st.MissingProductNames)
+                                                        </span>
+                                                    }
+                                                </div>
+                                                <p class="text-[11px] text-slate-600">
+                                                    <i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>@st.Address
+                                                </p>
+                                                <div class="flex flex-wrap items-center gap-3 text-[11px] text-slate-500">
+                                                    <span><i class="fa-regular fa-clock text-rose-500 mr-1"></i>@st.OpeningHours</span>
+                                                    <span><i class="fa-solid fa-phone text-rose-500 mr-1"></i>@st.PhoneNumber</span>
+                                                    @if (!string.IsNullOrEmpty(st.EarliestFefoBatchCode))
+                                                    {
+                                                        <span class="text-emerald-700 font-semibold">
+                                                            <i class="fa-solid fa-shield-halved mr-0.5"></i>Lô FEFO: @st.EarliestFefoBatchCode (HSD: @(st.EarliestFefoExpDate?.ToString("dd/MM/yyyy")))
+                                                        </span>
+                                                    }
+                                                    <a href="@st.GoogleMapsUrl" target="_blank" rel="noopener" class="text-rose-600 hover:underline font-semibold" onclick="event.stopPropagation();">
+                                                        <i class="fa-solid fa-map-location-dot mr-0.5"></i>Xem bản đồ
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="sm:text-right shrink-0">
+                                            <span class="inline-block px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
+                                                Phí ship: 0 ₫
+                                            </span>
+                                        </div>
+                                    </label>
+                                }
+                            }
+                        </div>
                     </div>
 
                     <!-- Ghi chú đơn hàng -->
@@ -178,8 +277,8 @@
                     </div>
                 </div>
 
-                <!-- 2. Phương Thức Vận Chuyển -->
-                <div class="bg-white p-6 sm:p-7 rounded-3xl border border-soft-border shadow-sm">
+                <!-- 2. Phương Thức Vận Chuyển (Chỉ hiện khi chọn Giao tận nơi) -->
+                <div x-show="deliveryMethod === 'HOME_DELIVERY'" x-transition class="bg-white p-6 sm:p-7 rounded-3xl border border-soft-border shadow-sm">
                     <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
                         <h3 class="text-sm font-bold text-charcoal m-0 flex items-center gap-2.5">
                             <span class="w-7 h-7 rounded-xl bg-pastel-rose text-magenta-accent flex items-center justify-center text-xs">
@@ -413,7 +512,7 @@
                         </label>
                         <div class="flex gap-2">
                             <input type="text" 
-                                   name="CouponCode"
+                                   id="voucherCouponInput"
                                    x-model="inputCouponCode" 
                                    placeholder="Nhập mã voucher (vd: BEAUTY10)" 
                                    class="flex-1 rounded-xl border border-slate-300 text-xs px-3 py-2 font-mono uppercase focus:ring-magenta-accent focus:border-magenta-accent"
@@ -522,11 +621,11 @@
                         <!-- Phí Vận Chuyển -->
                         <div class="flex justify-between items-center text-slate-600">
                             <span class="flex items-center gap-1">
-                                <i class="fa-solid fa-truck text-slate-400"></i> Phí giao hàng (<span x-text="shippingMethod === 'EXPRESS_2H' ? 'Tốc hành 2H' : 'Tiêu chuẩn'"></span>):
+                                <i class="fa-solid fa-truck text-slate-400"></i> Phí giao hàng (<span x-text="deliveryMethod === 'STORE_PICKUP' ? 'Nhận tại Showroom' : (shippingMethod === 'EXPRESS_2H' ? 'Tốc hành 2H' : 'Tiêu chuẩn')"></span>):
                             </span>
                             <span class="font-mono-numeric font-bold" 
                                   :class="calculatedShippingFee === 0 ? 'text-emerald-600 font-bold' : 'text-slate-800'" 
-                                  x-text="calculatedShippingFee === 0 ? 'Miễn phí (Freeship)' : calculatedShippingFee.toLocaleString('vi-VN') + ' ₫'">
+                                  x-text="calculatedShippingFee === 0 ? 'Miễn phí (0 ₫)' : calculatedShippingFee.toLocaleString('vi-VN') + ' ₫'">
                             </span>
                         </div>
                     </div>
@@ -577,6 +676,8 @@
             return {
                 paymentMethod: @Model.PaymentMethod,
                 shippingMethod: '@Model.ShippingMethod', // 'STANDARD' hoặc 'EXPRESS_2H'
+                deliveryMethod: '@(string.IsNullOrEmpty(Model.DeliveryMethod) ? "HOME_DELIVERY" : Model.DeliveryMethod)',
+                pickupStoreId: @(Model.PickupStoreId ?? 1),
                 provinces: [],
                 districts: [],
                 wards: [],
@@ -618,6 +719,9 @@
                 },
 
                 get calculatedShippingFee() {
+                    if (this.deliveryMethod === 'STORE_PICKUP') {
+                        return 0;
+                    }
                     if (this.shippingMethod === 'EXPRESS_2H') {
                         return 45000;
                     }
@@ -691,6 +795,12 @@
                         const res = await fetch('/api/location/provinces');
                         if (res.ok) {
                             this.provinces = await res.json();
+                            if (!this.selectedProvince && this.provinces && this.provinces.length > 0) {
+                                const hcm = this.provinces.find(p => (p.provinceName || p.ProvinceName || '').includes('Hồ Chí Minh'));
+                                const target = hcm || this.provinces[0];
+                                this.selectedProvince = String(target.provinceID || target.ProvinceId || target.provinceId || target.id || target.Id);
+                                await this.loadDistricts();
+                            }
                         }
                     } catch (e) {
                         console.error('Error loading provinces:', e);
@@ -698,14 +808,22 @@
                 },
 
                 async loadDistricts() {
-                    this.selectedDistrict = '';
-                    this.selectedWard = '';
-                    this.wards = [];
-                    if (!this.selectedProvince) return;
+                    if (!this.selectedProvince) {
+                        this.selectedDistrict = '';
+                        this.selectedWard = '';
+                        this.districts = [];
+                        this.wards = [];
+                        return;
+                    }
                     try {
                         const res = await fetch('/api/location/districts/' + this.selectedProvince);
                         if (res.ok) {
                             this.districts = await res.json();
+                            if (!this.selectedDistrict && this.districts && this.districts.length > 0) {
+                                const target = this.districts[0];
+                                this.selectedDistrict = String(target.districtID || target.DistrictId || target.districtId || target.id || target.Id);
+                                await this.loadWards();
+                            }
                         }
                     } catch (e) {
                         console.error('Error loading districts:', e);
@@ -713,12 +831,19 @@
                 },
 
                 async loadWards() {
-                    this.selectedWard = '';
-                    if (!this.selectedDistrict) return;
+                    if (!this.selectedDistrict) {
+                        this.selectedWard = '';
+                        this.wards = [];
+                        return;
+                    }
                     try {
                         const res = await fetch('/api/location/wards/' + this.selectedDistrict);
                         if (res.ok) {
                             this.wards = await res.json();
+                            if (!this.selectedWard && this.wards && this.wards.length > 0) {
+                                const target = this.wards[0];
+                                this.selectedWard = String(target.wardCode || target.WardCode || target.id || target.Id);
+                            }
                         }
                     } catch (e) {
                         console.error('Error loading wards:', e);

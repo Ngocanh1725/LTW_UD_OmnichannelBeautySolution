@@ -15,11 +15,12 @@
         <label for="sortSelect" class="text-slate-500 font-medium shrink-0">Sắp xếp:</label>
         <select id="sortSelect" 
                 name="sort" 
-                class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white text-charcoal focus:border-magenta-accent focus:outline-none"
-                hx-get="/Product/Search"
+                class="px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-white text-charcoal focus:border-magenta-accent focus:outline-none cursor-pointer"
+                hx-get="/tim-kiem"
                 hx-include="#filterForm"
                 hx-target="#searchProductsGrid"
-                hx-indicator="#searchSkeleton">
+                hx-indicator="#searchSkeleton"
+                hx-push-url="true">
             <option value="newest" selected="@(Model.Sort == "newest")">Mới nhất</option>
             <option value="price-asc" selected="@(Model.Sort == "price-asc")">Giá: Thấp đến Cao</option>
             <option value="price-desc" selected="@(Model.Sort == "price-desc")">Giá: Cao đến Thấp</option>
@@ -38,7 +39,7 @@
         <h4 class="font-bold text-slate-700 text-sm">Không tìm thấy sản phẩm phù hợp</h4>
         <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Vui lòng thử tìm kiếm bằng từ khóa khác hoặc xóa bớt các bộ lọc đang chọn.</p>
         <button type="button" 
-                onclick="window.location.href='/Product/Search'" 
+                onclick="window.location.href='/tim-kiem'" 
                 class="mt-4 px-6 py-2.5 rounded-full bg-charcoal text-white font-bold text-xs hover:bg-magenta-accent transition">
             Xem tất cả sản phẩm
         </button>
@@ -49,74 +50,7 @@ else
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
         @foreach (var p in Model.Products)
         {
-            var bestBatch = p.Batches?.Where(b => b.CurrentQuantity > 0).OrderBy(b => b.ExpDate).FirstOrDefault();
-            var pImg = !string.IsNullOrEmpty(p.ThumbnailUrl) 
-                ? p.ThumbnailUrl 
-                : "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop";
-
-            <article class="product-card-luxury group">
-                <div class="product-thumb-container">
-                    <img src="@pImg" class="product-thumb-img absolute inset-0 z-10" alt="@p.Name" loading="lazy" />
-                    
-                    <div class="product-badges-stack">
-                        @if (bestBatch != null)
-                        {
-                            <span class="badge-fefo-fresh">
-                                <i class="fa-solid fa-clock-rotate-left mr-1 text-[8px]"></i> HSD: @bestBatch.ExpDate.ToString("MM/yyyy")
-                            </span>
-                        }
-                    </div>
-
-                    <div class="product-action-overlay">
-                        <button type="button" 
-                                class="btn-card-action btn-cart-primary" 
-                                onclick="addToCart(@p.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Name))', @p.SellingPrice, '@pImg')">
-                            <i class="fa-solid fa-cart-shopping"></i> Thêm Giỏ
-                        </button>
-                        <button type="button" 
-                                class="btn-card-action" 
-                                onclick="openQuickView(@p.Id)" 
-                                title="Xem nhanh">
-                            <i class="fa-solid fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between mb-1.5">
-                            <span class="text-[10px] uppercase font-bold tracking-widest text-slate-400 truncate max-w-[140px]">
-                                @(p.Category?.Name ?? "Mỹ phẩm")
-                            </span>
-                            <div class="flex text-amber-400 text-[10px]">
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                                <i class="fa-solid fa-star"></i>
-                            </div>
-                        </div>
-
-                        <a href="/Product/Detail/@p.Slug" class="block">
-                            <h3 class="font-serif font-bold text-charcoal text-sm leading-snug line-clamp-2 hover:text-magenta-accent transition">
-                                @p.Name
-                            </h3>
-                        </a>
-                    </div>
-
-                    <div class="mt-4 pt-3 border-t border-soft-border/60 flex items-center justify-between">
-                        <span class="font-mono-numeric font-bold text-base text-charcoal">
-                            @p.SellingPrice.ToString("N0") ₫
-                        </span>
-                        @if (bestBatch != null)
-                        {
-                            <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
-                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span> Sẵn hàng
-                            </span>
-                        }
-                    </div>
-                </div>
-            </article>
+            <partial name="_ProductCard" model="p" />
         }
     </div>
 
@@ -127,11 +61,12 @@ else
             @for (int i = 1; i <= Model.TotalPages; i++)
             {
                 <button type="button"
-                        hx-get="/Product/Search?page=@i"
-                        hx-include="#filterForm"
+                        hx-get="/tim-kiem?page=@i"
+                        hx-include="#filterForm, #sortSelect"
                         hx-target="#searchProductsGrid"
                         hx-indicator="#searchSkeleton"
-                        class="h-9 w-9 rounded-xl font-bold text-xs flex items-center justify-center transition @(i == Model.CurrentPage ? "bg-magenta-accent text-white shadow-sm" : "bg-white text-slate-600 border border-slate-200 hover:border-magenta-accent")">
+                        hx-push-url="true"
+                        class="h-9 w-9 rounded-xl font-bold text-xs flex items-center justify-center transition cursor-pointer @(i == Model.CurrentPage ? "bg-magenta-accent text-white shadow-sm" : "bg-white text-slate-600 border border-slate-200 hover:border-magenta-accent")">
                     @i
                 </button>
             }

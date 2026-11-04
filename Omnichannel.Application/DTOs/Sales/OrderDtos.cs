@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Omnichannel.Application.DTOs.Sales
@@ -32,7 +33,13 @@ namespace Omnichannel.Application.DTOs.Sales
         public string WardCode { get; set; } = string.Empty;
 
         [Display(Name = "Phương thức vận chuyển")]
-        public string ShippingMethod { get; set; } = "STANDARD"; // "STANDARD" (30k/Freeship) hoặc "EXPRESS_2H" (45k)
+        public string ShippingMethod { get; set; } = "STANDARD"; // "STANDARD" (30k/Freeship), "EXPRESS_2H" (45k), hoặc "STORE_PICKUP" (0đ)
+
+        [Display(Name = "Hình thức nhận hàng")]
+        public string DeliveryMethod { get; set; } = "HOME_DELIVERY"; // "HOME_DELIVERY" hoặc "STORE_PICKUP"
+
+        [Display(Name = "Showroom nhận hàng")]
+        public int? PickupStoreId { get; set; }
 
         [Display(Name = "Ghi chú đơn hàng")]
         public string? Notes { get; set; }
@@ -54,6 +61,23 @@ namespace Omnichannel.Application.DTOs.Sales
         public decimal PointConversionRate { get; set; } = 1000; // 1 điểm = 1.000₫
 
         public CartViewModel Cart { get; set; } = new();
+        public List<StorePickupCandidateDto> PickupStores { get; set; } = new();
+    }
+
+    public class StorePickupCandidateDto
+    {
+        public int StoreId { get; set; }
+        public string StoreCode { get; set; } = string.Empty;
+        public string StoreName { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
+        public string OpeningHours { get; set; } = "08:30 – 22:00 (Tất cả các ngày)";
+        public bool HasFullCartStock { get; set; }
+        public int TotalAvailableUnitsForCart { get; set; }
+        public string? EarliestFefoBatchCode { get; set; }
+        public DateTime? EarliestFefoExpDate { get; set; }
+        public List<string> MissingProductNames { get; set; } = new();
+        public string GoogleMapsUrl => $"https://www.google.com/maps/search/?api=1&query={Uri.EscapeDataString($"{StoreName} {Address}")}";
     }
 
     public class OrderSuccessViewModel
@@ -69,19 +93,58 @@ namespace Omnichannel.Application.DTOs.Sales
         public DateTime CreatedAt { get; set; }
         public VietQrPaymentDto? VietQr { get; set; }
         public string ShippingMethod { get; set; } = "STANDARD";
+        public string DeliveryMethod { get; set; } = "HOME_DELIVERY";
+        public int? PickupStoreId { get; set; }
+        public string? PickupStoreName { get; set; }
+        public string? PickupStoreAddress { get; set; }
+        public string? PickupStorePhone { get; set; }
+        public string? PickupCode { get; set; }
+        public DateTime? PickupExpiresAt { get; set; }
+        public DateTime? PickedUpAt { get; set; }
         public string EstimatedDeliveryTime { get; set; } = string.Empty;
         public string? CustomerEmail { get; set; }
         public string? Notes { get; set; }
         public int OrderDbId { get; set; }
         public string? MomoPayUrl { get; set; }
         public string? MomoQrUrl { get; set; }
-        public System.Collections.Generic.List<OrderDetailItemDto> Items { get; set; } = new();
+        public List<OrderDetailItemDto> Items { get; set; } = new();
+    }
+
+    public class PosPickupOrderDto
+    {
+        public int OrderId { get; set; }
+        public string OrderCode { get; set; } = string.Empty;
+        public int PickupStoreId { get; set; }
+        public string PickupStoreName { get; set; } = string.Empty;
+        public string CustomerName { get; set; } = string.Empty;
+        public string CustomerPhone { get; set; } = string.Empty;
+        public string OrderStatus { get; set; } = string.Empty;
+        public string PaymentStatus { get; set; } = string.Empty;
+        public string PaymentMethod { get; set; } = string.Empty;
+        public decimal TotalAmount { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? PickupExpiresAt { get; set; }
+        public bool IsExpired => PickupExpiresAt.HasValue && DateTime.UtcNow > PickupExpiresAt.Value;
+        public string MaskedPickupCode { get; set; } = "******";
+        public List<OrderDetailItemDto> Items { get; set; } = new();
+    }
+
+    public class HandoverPickupOrderRequestDto
+    {
+        public int OrderId { get; set; }
+        public string OrderCode { get; set; } = string.Empty;
+        public string PickupCode { get; set; } = string.Empty;
+        public int CashierStoreId { get; set; }
+        public int? CashierUserId { get; set; }
+        public string? CashierName { get; set; }
+        public int? PosShiftId { get; set; }
     }
 
     public class OrderDetailItemDto
     {
         public string ProductName { get; set; } = string.Empty;
         public string? VariantName { get; set; }
+        public string? BatchNumber { get; set; }
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal LineTotal { get; set; }

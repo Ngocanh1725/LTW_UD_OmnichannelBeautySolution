@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Omnichannel.Domain.Entities
 {
     [Table("ThemeConfigs")]
-    public class ThemeConfig
+    public partial class ThemeConfig
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

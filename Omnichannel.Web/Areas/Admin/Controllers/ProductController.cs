@@ -16,6 +16,8 @@ using Omnichannel.Web.Extensions;
 using Microsoft.AspNetCore.SignalR;
 using Omnichannel.Web.Hubs;
 
+using Microsoft.Extensions.Caching.Memory;
+
 namespace Omnichannel.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
@@ -26,17 +28,20 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IHubContext<SystemHub> _hubContext;
         private readonly IWebHostEnvironment _env;
+        private readonly IMemoryCache? _cache;
 
         public ProductController(
             IProductService productService, 
             ApplicationDbContext context, 
             IHubContext<SystemHub> hubContext,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env,
+            IMemoryCache? cache = null)
         {
             _productService = productService;
             _context = context;
             _hubContext = hubContext;
             _env = env;
+            _cache = cache;
         }
 
         [HttpGet]
@@ -132,6 +137,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             var success = await _productService.CreateProductAsync(model);
             if (success)
             {
+                InvalidateCatalogCache();
                 await _hubContext.Clients.All.SendAsync("ReceiveNotification", $"Đã thêm mới mỹ phẩm '{model.ProductName}' thành công!", "success");
                 TempData["SuccessMessage"] = $"Đã thêm mới mỹ phẩm '{model.ProductName}' thành công!";
                 return RedirectToAction(nameof(Index));
@@ -201,6 +207,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             var success = await _productService.UpdateProductAsync(model);
             if (success)
             {
+                InvalidateCatalogCache();
                 await _hubContext.Clients.All.SendAsync("ReceiveNotification", $"Đã cập nhật mỹ phẩm '{model.ProductName}' thành công!", "success");
                 TempData["SuccessMessage"] = $"Đã cập nhật mỹ phẩm '{model.ProductName}' thành công!";
                 return RedirectToAction(nameof(Details), new { id = model.Id });
@@ -229,6 +236,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             var success = await _productService.SoftDeleteProductAsync(id);
             if (success)
             {
+                InvalidateCatalogCache();
                 await _hubContext.Clients.All.SendAsync("ReceiveNotification", $"Đã xóa mềm mỹ phẩm '{product.Name}'!", "warning");
 
                 if (Request.IsHtmx())
@@ -258,6 +266,8 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             var result = await _productService.ToggleProductStatusAsync(id);
             if (!result.Success) return NotFound();
 
+            InvalidateCatalogCache();
+
             var message = result.NewStatus == 1
                 ? $"Đã mở bán lại sản phẩm {result.ProductName}."
                 : $"Đã tạm ngừng kinh doanh sản phẩm {result.ProductName}.";
@@ -272,6 +282,14 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             TempData["SuccessMessage"] = message;
             return RedirectToAction(nameof(Index));
+        }
+
+        private void InvalidateCatalogCache()
+        {
+            _cache?.Remove("HomeSections_Composite_Model_v1");
+            _cache?.Remove("home_ui_sections");
+            _cache?.Remove("category_sidebar_items");
+            _cache?.Remove("brand_sidebar_items");
         }
 
         [HttpPost]

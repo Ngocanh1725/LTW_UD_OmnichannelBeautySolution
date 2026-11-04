@@ -63,30 +63,7 @@
 </style>
 
 <div class="bg-[#FFFDFD] min-h-screen py-8 sm:py-12" 
-     x-data="{
-        mobileFilterOpen: false,
-        brandSearchQuery: '',
-        minPriceVal: @Model.MinPrice,
-        maxPriceVal: @Model.MaxPrice,
-        currentViewMode: '@Model.ViewMode',
-        get minPercent() {
-            return Math.min(100, Math.max(0, ((this.minPriceVal - 50000) / (10000000 - 50000)) * 100));
-        },
-        get maxPercent() {
-            return Math.min(100, Math.max(0, ((this.maxPriceVal - 50000) / (10000000 - 50000)) * 100));
-        },
-        formatPrice(val) {
-            return new Intl.NumberFormat('vi-VN').format(val) + ' ₫';
-        },
-        onPriceSliderChange() {
-            if (this.minPriceVal > this.maxPriceVal) {
-                let temp = this.minPriceVal;
-                this.minPriceVal = this.maxPriceVal;
-                this.maxPriceVal = temp;
-            }
-            submitFacetedFilter();
-        }
-     }">
+     x-data="categoryFilterComponent({ minPrice: @Model.MinPrice, maxPrice: @Model.MaxPrice, viewMode: '@Model.ViewMode' })">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -162,7 +139,8 @@
                 <!-- Form Controls (HTMX driven) -->
                 <form id="facetedFilterForm" 
                       hx-get="/category/@Model.CategorySlug" 
-                      hx-trigger="change delay:150ms" 
+                      hx-push-url="true"
+                      hx-trigger="change delay:300ms, input delay:300ms" 
                       hx-target="#categoryProductsContainer" 
                       hx-indicator="#filterSkeletonLoader"
                       class="space-y-6 text-xs">
@@ -240,25 +218,25 @@
                             
                             <!-- Left Min Thumb Input -->
                             <input type="range" 
-                                   min="50000" 
-                                   max="10000000" 
-                                   step="50000" 
-                                   x-model.number="minPriceVal" 
-                                   name="minPrice" 
-                                   @@input="if (minPriceVal > maxPriceVal) minPriceVal = maxPriceVal"
-                                   @@change="onPriceSliderChange()"
-                                   class="dual-range-input" />
+                                    min="50000" 
+                                    max="10000000" 
+                                    step="50000" 
+                                    x-model.number.debounce.300ms="minPriceVal" 
+                                    name="minPrice" 
+                                    @@input="if (minPriceVal > maxPriceVal) minPriceVal = maxPriceVal"
+                                    @@change="onPriceSliderChange()"
+                                    class="dual-range-input" />
 
                             <!-- Right Max Thumb Input -->
                             <input type="range" 
-                                   min="50000" 
-                                   max="10000000" 
-                                   step="50000" 
-                                   x-model.number="maxPriceVal" 
-                                   name="maxPrice" 
-                                   @@input="if (maxPriceVal < minPriceVal) maxPriceVal = minPriceVal"
-                                   @@change="onPriceSliderChange()"
-                                   class="dual-range-input" />
+                                    min="50000" 
+                                    max="10000000" 
+                                    step="50000" 
+                                    x-model.number.debounce.300ms="maxPriceVal" 
+                                    name="maxPrice" 
+                                    @@input="if (maxPriceVal < minPriceVal) maxPriceVal = minPriceVal"
+                                    @@change="onPriceSliderChange()"
+                                    class="dual-range-input" />
                         </div>
 
                         <!-- Min & Max Badges Indicator -->
@@ -284,7 +262,7 @@
                         <div class="relative">
                             <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-[10px]"></i>
                             <input type="text" 
-                                   x-model="brandSearchQuery" 
+                                   x-model.debounce.300ms="brandSearchQuery" 
                                    placeholder="Tìm thương hiệu..." 
                                    class="w-full pl-8 pr-3 py-1.5 rounded-xl border border-soft-border text-xs focus:outline-none focus:border-magenta-accent focus:ring-1 focus:ring-magenta-accent/20 bg-slate-50/50" />
                         </div>
@@ -293,7 +271,7 @@
                         <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
                             @foreach (var b in Model.Brands)
                             {
-                                <div x-show="!brandSearchQuery || '@b.Name.ToLowerInvariant()'.includes(brandSearchQuery.toLowerCase())">
+                                <div data-brand="@b.Name.ToLowerInvariant()" x-show="!brandSearchQuery || $el.dataset.brand.includes(brandSearchQuery.toLowerCase())">
                                     <label class="flex items-center justify-between p-1.5 rounded-xl hover:bg-slate-50 cursor-pointer transition group">
                                         <div class="flex items-center gap-2">
                                             <input type="checkbox" 
@@ -399,6 +377,62 @@
                         </div>
                     </div>
 
+                    <div class="border-t border-slate-100"></div>
+
+                    <!-- 6. LỌC CLEAN BEAUTY & AN TOÀN LÀN DA (Huy hiệu an toàn quốc tế) -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                                <i class="fa-solid fa-leaf text-emerald-600"></i> Tiêu Chuẩn Clean Beauty
+                            </h4>
+                            <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">100% Thuần Khiết</span>
+                        </div>
+
+                        <div class="space-y-2">
+                            <!-- Không cồn khô -->
+                            <label class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-emerald-50/50 cursor-pointer transition">
+                                <input type="checkbox" 
+                                       name="isAlcoholFree" 
+                                       value="true" 
+                                       @(Model.IsAlcoholFree ? "checked" : "")
+                                       @@change="submitFacetedFilter()"
+                                       class="rounded text-emerald-600 focus:ring-emerald-500 border-slate-300" />
+                                <span class="text-slate-700 font-medium text-xs flex items-center gap-1.5">
+                                    <i class="fa-solid fa-shield-check text-emerald-600 text-xs"></i>
+                                    <span>Không Cồn Khô (Alcohol-Free)</span>
+                                </span>
+                            </label>
+
+                            <!-- Không hương liệu -->
+                            <label class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-pink-50/50 cursor-pointer transition">
+                                <input type="checkbox" 
+                                       name="isFragranceFree" 
+                                       value="true" 
+                                       @(Model.IsFragranceFree ? "checked" : "")
+                                       @@change="submitFacetedFilter()"
+                                       class="rounded text-magenta-accent focus:ring-magenta-accent border-slate-300" />
+                                <span class="text-slate-700 font-medium text-xs flex items-center gap-1.5">
+                                    <i class="fa-solid fa-feather text-pink-500 text-xs"></i>
+                                    <span>Không Hương Liệu (Fragrance-Free)</span>
+                                </span>
+                            </label>
+
+                            <!-- An toàn mẹ bầu -->
+                            <label class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-purple-50/50 cursor-pointer transition">
+                                <input type="checkbox" 
+                                       name="isPregnancySafe" 
+                                       value="true" 
+                                       @(Model.IsPregnancySafe ? "checked" : "")
+                                       @@change="submitFacetedFilter()"
+                                       class="rounded text-purple-600 focus:ring-purple-500 border-slate-300" />
+                                <span class="text-slate-700 font-medium text-xs flex items-center gap-1.5">
+                                    <i class="fa-solid fa-baby text-purple-500 text-xs"></i>
+                                    <span>An Toàn Mẹ Bầu (Pregnancy-Safe)</span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+
                     <!-- Nút Áp Dụng Lọc -->
                     <button type="submit" 
                             class="w-full py-3 rounded-2xl bg-gradient-to-r from-magenta-accent to-rose-600 text-white font-extrabold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition">
@@ -472,7 +506,7 @@
                 <!-- RELATIVE CONTAINER FOR PRODUCTS & HTMX SKELETON LOADER -->
                 <div class="relative min-h-[500px]">
                     <!-- Skeleton Indicator during filter changes -->
-                    <div id="filterSkeletonLoader" class="htmx-indicator absolute inset-0 z-20 bg-white/80 backdrop-blur-2xs flex items-center justify-center rounded-3xl">
+                    <div id="filterSkeletonLoader" class="htmx-indicator pointer-events-none absolute inset-0 z-20 bg-white/80 backdrop-blur-2xs flex items-center justify-center rounded-3xl" style="display: none;">
                         <div class="flex flex-col items-center gap-3">
                             <i class="fa-solid fa-circle-notch fa-spin text-magenta-accent text-3xl"></i>
                             <span class="text-xs font-bold text-charcoal uppercase tracking-wider">Đang cập nhật sản phẩm theo tiêu chí...</span>
@@ -554,6 +588,27 @@
                         <option value="4" selected="@(Model.MinRating == 4)">Từ 4 sao trở lên</option>
                         <option value="5" selected="@(Model.MinRating == 5)">5 sao tuyệt đối</option>
                     </select>
+                </div>
+
+                <!-- Clean Beauty Standards -->
+                <div>
+                    <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] mb-2 flex items-center gap-1.5">
+                        <i class="fa-solid fa-leaf text-emerald-600"></i> Clean Beauty
+                    </h4>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-50">
+                            <input type="checkbox" name="isAlcoholFree" value="true" @(Model.IsAlcoholFree ? "checked" : "") class="rounded text-emerald-600" />
+                            <span class="text-xs text-slate-700">Không cồn khô (Alcohol-Free)</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-50">
+                            <input type="checkbox" name="isFragranceFree" value="true" @(Model.IsFragranceFree ? "checked" : "") class="rounded text-magenta-accent" />
+                            <span class="text-xs text-slate-700">Không hương liệu (Fragrance-Free)</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-50">
+                            <input type="checkbox" name="isPregnancySafe" value="true" @(Model.IsPregnancySafe ? "checked" : "") class="rounded text-purple-600" />
+                            <span class="text-xs text-slate-700">An toàn mẹ bầu (Pregnancy-Safe)</span>
+                        </label>
+                    </div>
                 </div>
 
                 <button type="submit" class="w-full py-3 bg-magenta-accent text-white font-bold text-xs uppercase rounded-xl shadow-md">

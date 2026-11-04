@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -41,11 +41,16 @@ namespace Omnichannel.Infrastructure.Services
                 {
                     Action = action?.ToUpperInvariant() ?? "UNKNOWN",
                     EntityType = entityType ?? string.Empty,
+                    EntityName = entityType ?? string.Empty,
                     EntityId = entityId ?? string.Empty,
+                    RecordId = entityId ?? string.Empty,
                     OldValues = oldValues,
+                    OldValuesJson = oldValues,
                     NewValues = newValues,
+                    NewValuesJson = newValues,
                     UserId = userId,
                     UserName = userName,
+                    StaffCode = userName ?? "SYSTEM",
                     IpAddress = ipAddress,
                     UserAgent = userAgent,
                     CreatedAt = DateTime.UtcNow

@@ -4,3 +4,221 @@
 }
 
 @await Component.InvokeAsync("HomeSections")
+
+<!-- TAB GRID SẢN PHẨM PHÂN THEO DANH MỤC TRÊN TRANG CHỦ (Yêu cầu Phiên 4) -->
+<section id="categoryProductTabs" class="section-deferred py-16 bg-[#fffdfd] border-t border-rose-100/60 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-4 border-b border-blush/60">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-magenta-accent flex items-center gap-1.5 mb-1.5">
+                    <i class="fa-solid fa-sparkles text-amber-500"></i>
+                    <span>Tuyển Lựa Khoa Học Chuẩn Hạn Dùng FEFO</span>
+                </span>
+                <h2 class="font-serif text-2xl sm:text-4xl font-bold text-charcoal">
+                    Sản Phẩm Theo Danh Mục
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1 font-sans">
+                    Khám phá mỹ phẩm chính hãng với tiêu chuẩn hạn dùng minh bạch theo từng ngành hàng
+                </p>
+            </div>
+
+            <!-- Tab Buttons -->
+            <div x-data="{ currentTab: 'all' }" class="flex flex-wrap items-center gap-1.5 p-1.5 rounded-2xl bg-white border border-rose-100 shadow-xs">
+                <button type="button" 
+                        @@click="currentTab = 'all'" 
+                        onclick="switchHomeProductTab('all', this)" 
+                        :class="currentTab === 'all' ? 'bg-magenta-accent text-white shadow-md font-bold' : 'text-slate-600 hover:text-magenta-accent font-semibold'" 
+                        class="tab-nav-btn px-4 sm:px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2 cursor-pointer active:scale-95">
+                    <i class="fa-solid fa-border-all text-[11px]"></i>
+                    <span>Tất Cả</span>
+                </button>
+                <button type="button" 
+                        @@click="currentTab = 'skincare'" 
+                        onclick="switchHomeProductTab('skincare', this)" 
+                        :class="currentTab === 'skincare' ? 'bg-magenta-accent text-white shadow-md font-bold' : 'text-slate-600 hover:text-magenta-accent font-semibold'" 
+                        class="tab-nav-btn px-4 sm:px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2 cursor-pointer active:scale-95">
+                    <i class="fa-solid fa-spa text-[11px]"></i>
+                    <span>Chăm Sóc Da</span>
+                </button>
+                <button type="button" 
+                        @@click="currentTab = 'makeup'" 
+                        onclick="switchHomeProductTab('makeup', this)" 
+                        :class="currentTab === 'makeup' ? 'bg-magenta-accent text-white shadow-md font-bold' : 'text-slate-600 hover:text-magenta-accent font-semibold'" 
+                        class="tab-nav-btn px-4 sm:px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2 cursor-pointer active:scale-95">
+                    <i class="fa-solid fa-wand-magic-sparkles text-[11px]"></i>
+                    <span>Trang Điểm</span>
+                </button>
+                <button type="button" 
+                        @@click="currentTab = 'fragrance'" 
+                        onclick="switchHomeProductTab('fragrance', this)" 
+                        :class="currentTab === 'fragrance' ? 'bg-magenta-accent text-white shadow-md font-bold' : 'text-slate-600 hover:text-magenta-accent font-semibold'" 
+                        class="tab-nav-btn px-4 sm:px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2 cursor-pointer active:scale-95">
+                    <i class="fa-solid fa-spray-can-sparkles text-[11px]"></i>
+                    <span>Nước Hoa</span>
+                </button>
+                <button type="button" 
+                        @@click="currentTab = 'haircare'" 
+                        onclick="switchHomeProductTab('haircare', this)" 
+                        :class="currentTab === 'haircare' ? 'bg-magenta-accent text-white shadow-md font-bold' : 'text-slate-600 hover:text-magenta-accent font-semibold'" 
+                        class="tab-nav-btn px-4 sm:px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2 cursor-pointer active:scale-95">
+                    <i class="fa-solid fa-scissors text-[11px]"></i>
+                    <span>Chăm Sóc Tóc</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Product Grid Container with Loading State -->
+        <div id="productCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative min-h-[360px] transition-opacity duration-200">
+            <!-- Sẽ được nạp tự động qua AJAX / HomeController.GetProductTab -->
+            <div class="col-span-full py-16 flex items-center justify-center">
+                <div class="flex flex-col items-center gap-3">
+                    <span class="h-10 w-10 border-3 border-magenta-accent border-t-transparent rounded-full animate-spin"></span>
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-widest animate-pulse">Đang tải sản phẩm theo danh mục...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- DÀNH RIÊNG CHO BẠN: SẢN PHẨM ĐÃ XEM GẦN ĐÂY (Phiên C2) -->
+<section id="homeRecentlyViewed" 
+         x-data="homeRecentlyViewed()" 
+         x-init="init()" 
+         x-show="products && products.length > 0"
+         style="display: none;"
+         class="py-14 bg-gradient-to-b from-[#fffdfd] to-pink-50/20 border-t border-rose-100/60 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between mb-8 pb-3 border-b border-blush/60">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-widest text-rose-gold block mb-1">Cá Nhân Hóa Dành Riêng Cho Bạn</span>
+                <h2 class="font-serif text-2xl sm:text-3xl font-bold text-charcoal flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-magenta-accent text-xl"></i>
+                    <span>Sản Phẩm Bạn Đã Xem Gần Đây</span>
+                </h2>
+            </div>
+            <button type="button" @@click="clearHistory()" class="text-xs font-bold text-slate-400 hover:text-rose-600 transition flex items-center gap-1 cursor-pointer">
+                <i class="fa-solid fa-trash-can text-[10px]"></i>
+                <span>Xóa lịch sử</span>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <template x-for="item in products" :key="item.id">
+                <div class="product-card-luxury group bg-white rounded-2xl border border-slate-200/80 p-3 hover:border-magenta-accent/40 hover:shadow-md transition flex flex-col justify-between">
+                    <div>
+                        <div class="relative w-full aspect-square rounded-xl overflow-hidden bg-slate-50 mb-2.5">
+                            <img :src="item.imageUrl" :alt="item.name" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" />
+                        </div>
+                        <span class="text-[9px] uppercase font-bold tracking-wider text-rose-gold truncate block" x-text="item.brandName"></span>
+                        <a :href="'/san-pham/' + item.slug" class="block mt-0.5">
+                            <h4 class="font-serif font-bold text-charcoal text-xs leading-snug line-clamp-2 hover:text-magenta-accent transition" x-text="item.name"></h4>
+                        </a>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-slate-100">
+                        <div class="flex items-baseline justify-between gap-1">
+                            <span class="font-mono-numeric font-bold text-xs text-charcoal" x-text="formatPrice(item.salePrice || item.price)"></span>
+                            <button type="button" 
+                                    @@click="quickAddToCart(item)"
+                                    class="p-1.5 rounded-lg bg-pastel-rose text-magenta-accent hover:bg-magenta-accent hover:text-white transition text-xs shadow-2xs cursor-pointer"
+                                    title="Thêm nhanh vào giỏ">
+                                <i class="fa-solid fa-cart-plus text-[11px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        async function switchHomeProductTab(category, btn) {
+            const grid = document.getElementById('productCardsGrid');
+            if (!grid) return;
+
+            // Visual feedback loading state
+            grid.classList.add('opacity-40');
+            
+            try {
+                const response = await fetch(`/Home/GetProductTab?category=${encodeURIComponent(category)}`);
+                if (response.ok) {
+                    const html = await response.text();
+                    grid.innerHTML = html;
+                    
+                    // Reparse any HTMX or Alpine bindings if needed
+                    if (window.htmx) {
+                        htmx.process(grid);
+                    }
+                } else {
+                    console.error('Lỗi nạp sản phẩm tab:', response.status);
+                }
+            } catch (err) {
+                console.error('Lỗi kết nối khi nạp tab sản phẩm:', err);
+            } finally {
+                grid.classList.remove('opacity-40');
+            }
+        }
+
+        // Component Alpine cho Sản phẩm đã xem trên Trang chủ
+        function homeRecentlyViewed() {
+            return {
+                products: [],
+
+                async init() {
+                    try {
+                        const stored = localStorage.getItem('omni_recently_viewed_ids');
+                        if (!stored) return;
+                        const ids = JSON.parse(stored);
+                        if (!Array.isArray(ids) || ids.length === 0) return;
+
+                        const res = await fetch('/api/products/by-ids?ids=' + ids.slice(0, 6).join(','));
+                        if (res.ok) {
+                            this.products = await res.json();
+                        }
+                    } catch (e) { }
+                },
+
+                async quickAddToCart(item) {
+                    try {
+                        const res = await fetch('/api/cart/add', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ productId: item.id, quantity: 1 })
+                        });
+                        const data = await res.json();
+                        if (data && data.success) {
+                            window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'success',
+                                    title: 'Đã thêm ' + item.name + ' vào giỏ hàng!',
+                                    showConfirmButton: false,
+                                    timer: 2500
+                                });
+                            }
+                            window.dispatchEvent(new CustomEvent('open-cart-drawer'));
+                        }
+                    } catch (e) { }
+                },
+
+                clearHistory() {
+                    localStorage.removeItem('omni_recently_viewed_ids');
+                    this.products = [];
+                },
+
+                formatPrice(val) {
+                    if (!val) return '0 ₫';
+                    return new Intl.NumberFormat('vi-VN').format(val) + ' ₫';
+                }
+            };
+        }
+
+        // Tự động tải tab 'all' khi DOM sẵn sàng
+        document.addEventListener('DOMContentLoaded', function() {
+            switchHomeProductTab('all');
+        });
+    </script>
+}

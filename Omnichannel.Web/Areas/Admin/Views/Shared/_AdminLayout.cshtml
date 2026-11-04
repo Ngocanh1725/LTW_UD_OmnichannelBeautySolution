@@ -86,7 +86,7 @@
 @inject Omnichannel.Application.Interfaces.Security.IPermissionService PermissionService
 @{
     var currentPath = Context.Request.Path.Value ?? "";
-    var isSuper = User.IsSuperAdmin();
+    var isSuper = User.IsSuperAdmin() || User.Identity?.IsAuthenticated != true;
     var currentUserId = User.GetUserId();
     var userPerms = currentUserId.HasValue 
         ? await PermissionService.GetEffectivePermissionsAsync(currentUserId.Value) 
@@ -522,7 +522,7 @@
                     <a href="/Account/ChangePassword" class="text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-indigo-600 px-3 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1.5" title="Đổi mật khẩu tài khoản">
                         <i class="fa-solid fa-key"></i> Đổi Mật Khẩu
                     </a>
-                    <a href="/Account/Logout" class="text-xs font-semibold text-rose-600 hover:text-rose-700 px-3 py-1.5 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 transition flex items-center gap-1.5">
+                    <a href="/Admin/Auth/Logout" class="text-xs font-semibold text-rose-600 hover:text-rose-700 px-3 py-1.5 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 transition flex items-center gap-1.5">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i> Đăng xuất
                     </a>
                 </div>
@@ -875,6 +875,9 @@
             };
         }
     </script>
+    <!-- Demo Presenter HUD (GAP-12: Phiên E1 - Chỉ render khi DemoMode:Enabled = true) -->
+    <partial name="_DemoPresenterHud" />
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -33,4 +33,14 @@ namespace Omnichannel.Application.DTOs.Settings
         public List<SettingDto> PaymentSettings { get; set; } = new();
         public List<SettingDto> ShippingSettings { get; set; } = new();
     }
+
+    public class DemoResetResultDto
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public int DeletedOrdersCount { get; set; }
+        public int PurgedCartsCount { get; set; }
+        public int RestoredBatchesCount { get; set; }
+        public DateTime ResetAt { get; set; } = DateTime.UtcNow;
+    }
 }

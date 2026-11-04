@@ -68,6 +68,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         // POST: /Admin/UiSection/ToggleVisibility or /admin/ui-section/toggle-visibility
         [HttpPost("ToggleVisibility")]
         [HttpPost("toggle-visibility")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleVisibility([FromBody] ToggleVisibilityModel? bodyModel, [FromForm] int? id, [FromForm] bool? isVisible)
         {
             int targetId = bodyModel?.Id ?? id ?? 0;
@@ -84,26 +85,32 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 return Json(new { success = false, message = "Không tìm thấy khối giao diện yêu cầu." });
             }
 
-            section.IsVisible = targetVisible;
-            await _context.SaveChangesAsync();
-
-            // Xóa cache để Storefront làm mới tức thì
-            _cache.Remove(HomeSectionsViewComponent.CacheKey);
-            _logger.LogInformation("Khối giao diện '{SectionCode}' (ID: {Id}) đã được cập nhật hiển thị: {IsVisible}", section.SectionCode, section.Id, section.IsVisible);
-
-            return Json(new
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
             {
-                success = true,
-                id = section.Id,
-                sectionCode = section.SectionCode,
-                isVisible = section.IsVisible,
-                message = section.IsVisible ? $"Đã bật hiển thị khối '{section.Title}'." : $"Đã ẩn khối '{section.Title}' khỏi Storefront."
+                section.IsVisible = targetVisible;
+                await _context.SaveChangesAsync();
+
+                // Xóa cache để Storefront làm mới tức thì
+                _cache.Remove(HomeSectionsViewComponent.CacheKey);
+                _cache.Remove(HomeSectionsViewComponent.CompositeModelCacheKey);
+                _logger.LogInformation("Khối giao diện '{SectionCode}' (ID: {Id}) đã được cập nhật hiển thị: {IsVisible}", section.SectionCode, section.Id, section.IsVisible);
+
+                return Json(new
+                {
+                    success = true,
+                    id = section.Id,
+                    sectionCode = section.SectionCode,
+                    isVisible = section.IsVisible,
+                    message = section.IsVisible ? $"Đã bật hiển thị khối '{section.Title}'." : $"Đã ẩn khối '{section.Title}' khỏi Storefront."
+                });
             });
         }
 
         // POST: /Admin/UiSection/UpdateOrder or /admin/ui-section/update-order
         [HttpPost("UpdateOrder")]
         [HttpPost("update-order")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateOrder([FromBody] UpdateOrderModel? bodyModel, [FromForm] List<int>? orderedIds)
         {
             var ids = bodyModel?.OrderedIds ?? orderedIds ?? new List<int>();
@@ -113,28 +120,33 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 return Json(new { success = false, message = "Danh sách thứ tự khối rỗng." });
             }
 
-            var allSections = await _context.UiSections.ToListAsync();
-            var sectionMap = allSections.ToDictionary(s => s.Id);
-
-            for (int i = 0; i < ids.Count; i++)
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync(async () =>
             {
-                var sectionId = ids[i];
-                if (sectionMap.TryGetValue(sectionId, out var section))
+                var allSections = await _context.UiSections.ToListAsync();
+                var sectionMap = allSections.ToDictionary(s => s.Id);
+
+                for (int i = 0; i < ids.Count; i++)
                 {
-                    section.DisplayOrder = i + 1;
+                    var sectionId = ids[i];
+                    if (sectionMap.TryGetValue(sectionId, out var section))
+                    {
+                        section.DisplayOrder = i + 1;
+                    }
                 }
-            }
 
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
 
-            // Xóa cache để Storefront làm mới tức thì
-            _cache.Remove(HomeSectionsViewComponent.CacheKey);
-            _logger.LogInformation("Đã cập nhật lại thứ tự hiển thị cho {Count} khối giao diện Storefront.", ids.Count);
+                // Xóa cache để Storefront làm mới tức thì
+                _cache.Remove(HomeSectionsViewComponent.CacheKey);
+                _cache.Remove(HomeSectionsViewComponent.CompositeModelCacheKey);
+                _logger.LogInformation("Đã cập nhật lại thứ tự hiển thị cho {Count} khối giao diện Storefront.", ids.Count);
 
-            return Json(new
-            {
-                success = true,
-                message = "Cập nhật thứ tự bố cục trang chủ thành công! Storefront đã được cập nhật tức thì."
+                return Json(new
+                {
+                    success = true,
+                    message = "Cập nhật thứ tự bố cục trang chủ thành công! Storefront đã được cập nhật tức thì."
+                });
             });
         }
     }

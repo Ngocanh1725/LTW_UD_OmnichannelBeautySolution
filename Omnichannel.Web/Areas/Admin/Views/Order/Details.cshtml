@@ -24,7 +24,7 @@
 
 @Html.AntiForgeryToken()
 
-<div class="max-w-7xl mx-auto space-y-6">
+<div class="max-w-7xl mx-auto space-y-6" style="zoom: 0.83;">
     <!-- Header & Breadcrumb & Action Toolbar -->
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-sm">
         <div>
@@ -172,6 +172,81 @@
             }
         </div>
     </div>
+
+    <!-- Xử Lý Yêu Cầu Đổi / Trả Hàng (GAP-07 - Phiên C6) -->
+    @if (Model.ReturnRequests != null && Model.ReturnRequests.Any())
+    {
+        <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border-2 border-amber-300 dark:border-amber-700 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+                <h2 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-left text-amber-500"></i>
+                    <span>Yêu Cầu Đổi / Trả Hàng Từ Khách Hàng (@Model.ReturnRequests.Count)</span>
+                </h2>
+                <span class="text-xs font-semibold text-amber-600">Chính sách bảo vệ 7 ngày sau giao hàng</span>
+            </div>
+
+            <div class="space-y-4">
+                @foreach (var req in Model.ReturnRequests)
+                {
+                    <div class="p-4 rounded-xl bg-amber-50/40 dark:bg-slate-800/70 border border-amber-200/80 dark:border-slate-700 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div class="space-y-1.5">
+                            <div class="flex items-center gap-2.5 flex-wrap">
+                                <span class="font-mono font-extrabold text-xs text-rose-600 dark:text-rose-400">#@req.RequestCode</span>
+                                <span class="text-xs font-bold px-2.5 py-0.5 rounded-full border @req.StatusBadgeClass">
+                                    @req.StatusDisplayName
+                                </span>
+                                <span class="text-[11px] font-mono text-slate-500">Gửi lúc: @req.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                            </div>
+                            <div class="text-xs font-bold text-slate-800 dark:text-slate-100">
+                                Lý do: @req.Reason
+                            </div>
+                            @if (!string.IsNullOrWhiteSpace(req.Description))
+                            {
+                                <div class="text-xs text-slate-600 dark:text-slate-300">
+                                    Chi tiết: @req.Description
+                                </div>
+                            }
+                            @if (req.EvidenceUrls != null && req.EvidenceUrls.Any())
+                            {
+                                <div class="flex items-center gap-2 pt-1">
+                                    @foreach (var img in req.EvidenceUrls)
+                                    {
+                                        <a href="@img" target="_blank" class="w-12 h-12 rounded-lg overflow-hidden border border-slate-200 block">
+                                            <img src="@img" alt="Evidence" class="w-full h-full object-cover" onerror="this.src='/images/product-placeholder.svg'" />
+                                        </a>
+                                    }
+                                </div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(req.AdminNote))
+                            {
+                                <div class="text-xs text-indigo-700 dark:text-indigo-300 font-semibold pt-1">
+                                    Phản hồi Admin: @req.AdminNote
+                                </div>
+                            }
+                        </div>
+
+                        @if (req.Status == "PENDING")
+                        {
+                            <div class="flex items-center gap-2 shrink-0">
+                                <button type="button"
+                                        onclick="promptProcessReturn(@req.Id, @Model.Id, true, '@Html.Raw(JavaScriptEncoder.Default.Encode(req.RequestCode))')"
+                                        class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-check"></i>
+                                    <span>Duyệt Đổi/Trả & Hoàn Kho</span>
+                                </button>
+                                <button type="button"
+                                        onclick="promptProcessReturn(@req.Id, @Model.Id, false, '@Html.Raw(JavaScriptEncoder.Default.Encode(req.RequestCode))')"
+                                        class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-sm transition flex items-center gap-1.5">
+                                    <i class="fa-solid fa-xmark"></i>
+                                    <span>Từ Chối</span>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
 
     <!-- Quy Trình Vận Hành 5 Giai Đoạn (Workflow Stepper Timeline) -->
     <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm">
@@ -639,12 +714,88 @@
                     }
                 </div>
             </div>
+
+            <!-- Nhật Ký Lịch Sử Trạng Thái Thực Tế (OrderStatusHistories) -->
+            @if (Model.StatusHistories != null && Model.StatusHistories.Any())
+            {
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-3">
+                    <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                        <i class="fa-solid fa-list-check text-rose-500"></i>
+                        <span>Nhật Ký Lịch Sử Trạng Thái (@Model.StatusHistories.Count mốc)</span>
+                    </h3>
+                    <div class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
+                        @foreach (var h in Model.StatusHistories)
+                        {
+                            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700 text-xs">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="font-bold text-slate-800 dark:text-slate-200">@h.Title</span>
+                                    <span class="font-mono text-[10px] text-slate-400">@h.FormattedTime</span>
+                                </div>
+                                @if (!string.IsNullOrWhiteSpace(h.Description))
+                                {
+                                    <p class="text-[11px] text-slate-600 dark:text-slate-300 mt-1">@h.Description</p>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(h.ChangedByName))
+                                {
+                                    <div class="text-[10px] text-slate-400 mt-1">Thực hiện bởi: @h.ChangedByName</div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
+        function promptProcessReturn(returnRequestId, orderId, isApproved, requestCode) {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+            Swal.fire({
+                title: isApproved ? `Duyệt đổi/trả #${requestCode}?` : `Từ chối đổi/trả #${requestCode}?`,
+                html: isApproved
+                    ? 'Hệ thống sẽ hoàn lại tồn kho về đúng lô FEFO và gửi thông báo realtime cho khách hàng.'
+                    : 'Nhập lý do từ chối để gửi thông báo realtime cho khách hàng.',
+                icon: isApproved ? 'question' : 'warning',
+                input: 'text',
+                inputPlaceholder: isApproved ? 'Ghi chú phản hồi cho khách (tùy chọn)...' : 'Nhập lý do từ chối (bắt buộc)...',
+                showCancelButton: true,
+                confirmButtonColor: isApproved ? '#059669' : '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: isApproved ? 'Xác nhận Duyệt' : 'Xác nhận Từ chối',
+                cancelButtonText: 'Đóng',
+                inputValidator: (val) => {
+                    if (!isApproved && (!val || !val.trim())) {
+                        return 'Vui lòng nhập lý do từ chối yêu cầu đổi/trả!';
+                    }
+                },
+                customClass: { popup: 'rounded-2xl dark:bg-slate-900 dark:text-slate-100' }
+            }).then((res) => {
+                if (res.isConfirmed) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/Admin/Order/ProcessReturnRequest';
+
+                    const addHidden = (name, value) => {
+                        const inp = document.createElement('input');
+                        inp.type = 'hidden';
+                        inp.name = name;
+                        inp.value = value;
+                        form.appendChild(inp);
+                    };
+
+                    addHidden('__RequestVerificationToken', token);
+                    addHidden('returnRequestId', returnRequestId);
+                    addHidden('orderId', orderId);
+                    addHidden('isApproved', isApproved ? 'true' : 'false');
+                    addHidden('adminNote', res.value || '');
+
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            });
+        }
         function confirmUpdateStatus(orderId, newStatus, confirmText) {
             const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
 

@@ -245,6 +245,9 @@
             <a href="/Wishlist" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
                 <i class="fa-solid fa-heart text-magenta-accent"></i> Danh Sách Yêu Thích
             </a>
+            <a href="/Customer/Subscriptions" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-bell text-purple-500"></i> Sản Phẩm Theo Dõi
+            </a>
         </div>
 
         <!-- ===================================================
@@ -320,7 +323,7 @@
                             <!-- Điểm khả dụng góc thẻ -->
                             <div class="text-right">
                                 <span class="text-[10px] uppercase font-bold tracking-wider opacity-75 block text-card-muted">Điểm Khả Dụng</span>
-                                <span class="text-2xl font-serif font-bold tracking-tight">@Model.CurrentPoints.ToString("N0") <span class="text-xs font-sans font-medium">điểm</span></span>
+                                <span class="text-2xl font-serif font-bold tracking-tight"><span id="cardPointsBalance">@Model.CurrentPoints.ToString("N0")</span> <span class="text-xs font-sans font-medium">điểm</span></span>
                             </div>
                         </div>
 
@@ -409,12 +412,12 @@
                                         </p>
                                     </div>
                                 </div>
-                                <span class="text-sm font-bold text-magenta-accent font-mono flex-shrink-0">@Model.ProgressPercentage%</span>
+                                <span id="tierProgressPercent" class="text-sm font-bold text-magenta-accent font-mono flex-shrink-0">@Model.ProgressPercentage%</span>
                             </div>
 
                             <!-- Animated Visual Progress Bar -->
                             <div class="w-full bg-slate-200/80 h-3.5 rounded-full overflow-hidden p-0.5 shadow-inner relative">
-                                <div class="bg-gradient-to-r from-amber-400 via-rose-500 to-magenta-accent h-full rounded-full transition-all duration-1000 ease-out shadow-sm relative overflow-hidden" 
+                                <div id="tierProgressBar" class="bg-gradient-to-r from-amber-400 via-rose-500 to-magenta-accent h-full rounded-full transition-all duration-1000 ease-out shadow-sm relative overflow-hidden" 
                                      style="width: @Model.ProgressPercentage%;">
                                     <div class="absolute inset-0 bg-white/30 animate-pulse"></div>
                                 </div>
@@ -449,11 +452,11 @@
                             </div>
                             <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
                                 <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Điểm quy đổi VNĐ</span>
-                                <span class="text-base sm:text-lg font-bold text-emerald-600 font-mono">@Model.AvailableDiscountVnd.ToString("N0")₫</span>
+                                <span id="statDiscountVnd" class="text-base sm:text-lg font-bold text-emerald-600 font-mono">@Model.AvailableDiscountVnd.ToString("N0")₫</span>
                             </div>
                             <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
                                 <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Voucher sẵn có</span>
-                                <span class="text-base sm:text-lg font-bold text-magenta-accent font-mono">@Model.AvailableVouchers.Count mã</span>
+                                <span id="statVoucherCount" class="text-base sm:text-lg font-bold text-magenta-accent font-mono">@Model.AvailableVouchers.Count mã</span>
                             </div>
                         </div>
                     </div>
@@ -474,6 +477,349 @@
 
             </div>
 
+        </div>
+
+        <!-- ===================================================
+             2.5. TRUNG TÂM OMNI REWARDS GAMIFICATION (GAP-08 - PHIÊN C7)
+             Điểm danh 7 ngày • Đổi điểm Rewards Bazaar • Nhiệm vụ • Giới thiệu bạn bè
+             =================================================== -->
+        <div id="omniRewardsSection" class="mb-12 space-y-8">
+            @Html.AntiForgeryToken()
+
+            <!-- A. LỊCH ĐIỂM DANH 7 NGÀY NHẬN XU (SHOPEE XU STYLE) -->
+            <div class="bg-gradient-to-br from-white via-pink-50/40 to-amber-50/40 rounded-3xl p-6 sm:p-8 border border-pink-100 shadow-sm relative overflow-hidden">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold uppercase tracking-wider mb-2">
+                            <i class="fa-solid fa-fire text-amber-600"></i>
+                            <span>Chuỗi điểm danh: <strong id="streakCountBadge">@Model.CheckInStatus.CurrentStreak</strong>/7 ngày liên tiếp</span>
+                        </div>
+                        <h2 class="text-xl sm:text-2xl font-serif font-bold text-charcoal">
+                            Điểm Danh Hằng Ngày – Săn Tới 220 Điểm/Tuần
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+                            Điểm danh đủ 7 ngày liên tiếp để mở rương Jackpot <strong>+100 điểm</strong> (tương đương <strong>100.000₫</strong>). Tính theo múi giờ Việt Nam (UTC+7).
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-3 self-start lg:self-auto">
+                        @if (Model.CheckInStatus.CheckedInToday)
+                        {
+                            <button type="button"
+                                    id="btnDailyCheckIn"
+                                    disabled
+                                    class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-emerald-100 text-emerald-700 font-bold text-sm cursor-not-allowed border border-emerald-200">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <span>Đã điểm danh hôm nay (@Model.CheckInStatus.TodayVietnamDate)</span>
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="button"
+                                    id="btnDailyCheckIn"
+                                    onclick="handleDailyCheckIn()"
+                                    class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-magenta-accent to-rose-gold text-white font-bold text-sm shadow-lg hover:opacity-95 hover:scale-[1.02] transition transform cursor-pointer">
+                                <i class="fa-solid fa-calendar-check"></i>
+                                <span id="btnDailyCheckInText">Điểm danh ngay (+@Model.CheckInStatus.NextPoints điểm)</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                <!-- 7-Day Check-In Slots Grid -->
+                <div id="checkInSlotsGrid" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+                    @{
+                        var checkInSlots = Model.CheckInStatus.Slots.Any()
+                            ? Model.CheckInStatus.Slots
+                            : new List<Omnichannel.Application.DTOs.Loyalty.DailyCheckInSlotDto>
+                            {
+                                new() { DayNumber = 1, Points = 10, IsTodaySlot = true },
+                                new() { DayNumber = 2, Points = 10 },
+                                new() { DayNumber = 3, Points = 20 },
+                                new() { DayNumber = 4, Points = 20 },
+                                new() { DayNumber = 5, Points = 30 },
+                                new() { DayNumber = 6, Points = 30 },
+                                new() { DayNumber = 7, Points = 100 }
+                            };
+                    }
+                    @foreach (var slot in checkInSlots)
+                    {
+                        string cardStyle = slot.IsCheckedIn
+                            ? "bg-emerald-50/90 border-emerald-300 text-emerald-800 shadow-xs"
+                            : (slot.IsTodaySlot
+                                ? "bg-white border-2 border-magenta-accent text-charcoal shadow-md ring-4 ring-pink-100"
+                                : (slot.IsJackpot
+                                    ? "bg-gradient-to-b from-amber-50 to-orange-50 border-amber-300 text-amber-900"
+                                    : "bg-white/80 border-slate-200 text-slate-600"));
+
+                        <div data-slot-day="@slot.DayNumber"
+                             class="checkin-slot rounded-2xl p-3.5 border text-center flex flex-col items-center justify-between transition-all @cardStyle">
+                            <span class="text-[11px] font-bold uppercase tracking-wider @(slot.IsTodaySlot ? "text-magenta-accent" : "opacity-75")">
+                                @(slot.IsJackpot ? "🔥 Ngày 7 (VIP)" : $"Ngày {slot.DayNumber}")
+                            </span>
+
+                            <div class="my-2.5 w-10 h-10 rounded-full flex items-center justify-center text-base font-bold
+                                        @(slot.IsCheckedIn ? "bg-emerald-500 text-white" : (slot.IsJackpot ? "bg-amber-400 text-white shadow-sm" : "bg-pink-50 text-magenta-accent"))">
+                                @if (slot.IsCheckedIn)
+                                {
+                                    <i class="fa-solid fa-check"></i>
+                                }
+                                else if (slot.IsJackpot)
+                                {
+                                    <i class="fa-solid fa-gift"></i>
+                                }
+                                else
+                                {
+                                    <i class="fa-solid fa-coins"></i>
+                                }
+                            </div>
+
+                            <div>
+                                <span class="font-mono font-bold text-sm block">+@slot.Points điểm</span>
+                                <span class="text-[10px] opacity-75 block">
+                                    @(slot.IsCheckedIn ? "Đã nhận" : (slot.IsTodaySlot ? "Hôm nay" : "Sắp tới"))
+                                </span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- B. OMNI REWARDS BAZAAR – ĐỔI ĐIỂM LẤY VOUCHER DÙNG NGAY TẠI CHECKOUT -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-magenta-accent">Sephora Beauty Insider Style</span>
+                        <h2 class="text-xl sm:text-2xl font-serif font-bold text-charcoal">
+                            Omni Rewards Bazaar – Đổi Điểm Lấy Voucher Đặc Quyền
+                        </h2>
+                        <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
+                            Tỷ lệ quy đổi chuẩn: <strong>1 điểm = 1.000₫</strong>. Voucher sau khi đổi được tự động gắn vào phiên Thanh toán (Checkout) để bạn dùng ngay!
+                        </p>
+                    </div>
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-pink-50 border border-pink-200 text-xs font-bold text-magenta-accent self-start sm:self-auto">
+                        <i class="fa-solid fa-wallet"></i>
+                        <span>Số dư khả dụng: <strong id="bazaarPointsBalance" class="font-mono text-sm">@Model.CurrentPoints.ToString("N0")</strong> điểm</span>
+                    </div>
+                </div>
+
+                <!-- Banner hiển thị mã Voucher vừa đổi thành công -->
+                <div id="redeemSuccessBanner" class="hidden mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center text-lg flex-shrink-0">
+                            <i class="fa-solid fa-ticket"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-emerald-950" id="redeemBannerTitle">Đổi điểm thành công!</h4>
+                            <p class="text-xs text-emerald-800 mt-0.5">
+                                Mã voucher của bạn: <strong id="redeemBannerCode" class="font-mono bg-white px-2 py-0.5 rounded border border-emerald-300">LOYALTY-XXXX</strong>
+                                (Đã lưu sẵn vào phiên Checkout)
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 self-end sm:self-auto">
+                        <button type="button"
+                                onclick="copyRedeemedCode()"
+                                class="px-3.5 py-2 rounded-xl bg-white border border-emerald-300 text-emerald-800 text-xs font-bold hover:bg-emerald-100 transition">
+                            <i class="fa-regular fa-copy mr-1"></i> Sao chép mã
+                        </button>
+                        <a id="redeemUseNowLink"
+                           href="/Checkout"
+                           class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 transition shadow-sm inline-flex items-center gap-1.5">
+                            <span>Dùng ngay ở Checkout</span>
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    @{
+                        var bazaarItems = Model.RewardsCatalog.Any()
+                            ? Model.RewardsCatalog
+                            : new List<Omnichannel.Application.DTOs.Loyalty.RewardCatalogItemDto>
+                            {
+                                new() { RewardCode = "BAZAAR_50K", Title = "Voucher Giảm 50.000₫", Description = "Áp dụng cho mọi đơn hàng từ 50.000₫ tại Website & POS.", BadgeText = "Phổ biến nhất", PointsCost = 50, DiscountValueVnd = 50000m, MinOrderValueVnd = 50000m, CanAfford = Model.CurrentPoints >= 50 },
+                                new() { RewardCode = "BAZAAR_100K", Title = "Voucher Giảm 100.000₫", Description = "Ưu đãi đặc quyền quy đổi điểm thưởng cho đơn hàng từ 100.000₫.", BadgeText = "Tiết kiệm", PointsCost = 100, DiscountValueVnd = 100000m, MinOrderValueVnd = 100000m, CanAfford = Model.CurrentPoints >= 100 },
+                                new() { RewardCode = "BAZAAR_200K", Title = "Voucher VIP Giảm 200.000₫", Description = "Siêu voucher Rewards Bazaar cho tín đồ Skincare & Nước hoa đơn từ 200.000₫.", BadgeText = "Hạng VIP", PointsCost = 200, DiscountValueVnd = 200000m, MinOrderValueVnd = 200000m, CanAfford = Model.CurrentPoints >= 200 }
+                            };
+                    }
+                    @foreach (var item in bazaarItems)
+                    {
+                        <div class="rounded-2xl border border-slate-200 p-5 flex flex-col justify-between hover:border-pink-300 hover:shadow-md transition bg-gradient-to-b from-white to-slate-50/60">
+                            <div>
+                                <div class="flex items-center justify-between gap-2 mb-3">
+                                    <span class="px-2.5 py-0.5 rounded-full bg-pink-100 text-magenta-accent text-[10px] font-bold uppercase tracking-wider">
+                                        @item.BadgeText
+                                    </span>
+                                    <span class="font-mono font-bold text-sm text-amber-600 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-200">
+                                        <i class="fa-solid fa-coins mr-1"></i>@item.PointsCost điểm
+                                    </span>
+                                </div>
+                                <h3 class="text-base font-serif font-bold text-charcoal">@item.Title</h3>
+                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">@item.Description</p>
+                            </div>
+
+                            <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+                                <span class="text-[11px] text-slate-400">Đơn tối thiểu: <strong class="text-slate-600">@item.MinOrderValueVnd.ToString("N0")₫</strong></span>
+                                <button type="button"
+                                        data-points-cost="@item.PointsCost"
+                                        onclick="handleRedeemReward(@item.PointsCost, '@item.Title')"
+                                        class="btn-redeem-bazaar px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer @(Model.CurrentPoints >= item.PointsCost ? "bg-charcoal text-white hover:bg-magenta-accent" : "bg-slate-200 text-slate-400 cursor-not-allowed")"
+                                        @(Model.CurrentPoints >= item.PointsCost ? "" : "disabled")>
+                                    Đổi @item.PointsCost điểm
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- C. NHIỆM VỤ SĂN ĐIỂM (BEAUTY MISSIONS) & GIỚI THIỆU BẠN BÈ (REFERRAL) -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+                <!-- Nhiệm Vụ Làm Đẹp (6 cols) -->
+                <div class="lg:col-span-6 bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-base">
+                                    <i class="fa-solid fa-list-check"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-serif font-bold text-lg text-charcoal">Nhiệm Vụ Săn Điểm Thưởng</h3>
+                                    <span class="text-[11px] text-slate-400 block">Hoàn thành thử thách nhận ngay điểm vào sổ cái</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3.5">
+                            @foreach (var m in Model.BeautyMissions)
+                            {
+                                <div id="mission-card-@m.MissionCode" class="p-4 rounded-2xl border border-slate-100 bg-slate-50/70 flex items-center justify-between gap-3 hover:border-purple-200 transition">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-white border border-slate-200 text-magenta-accent flex items-center justify-center text-sm flex-shrink-0 shadow-2xs">
+                                            <i class="@m.IconClass"></i>
+                                        </div>
+                                        <div>
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <h4 class="text-xs sm:text-sm font-bold text-charcoal">@m.Title</h4>
+                                                <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-mono text-[10px] font-bold">
+                                                    +@m.PointsReward điểm
+                                                </span>
+                                            </div>
+                                            <p class="text-[11px] text-slate-500 mt-0.5">@m.Description</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex-shrink-0">
+                                        @if (m.IsClaimed)
+                                        {
+                                            <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-700 text-xs font-bold">
+                                                <i class="fa-solid fa-check"></i> Đã nhận
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <button type="button"
+                                                    id="btn-mission-@m.MissionCode"
+                                                    onclick="handleClaimMission('@m.MissionCode')"
+                                                    class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-magenta-accent text-white text-xs font-bold hover:opacity-95 transition shadow-xs cursor-pointer">
+                                                Nhận +@m.PointsReward điểm
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center justify-between">
+                        <span><i class="fa-solid fa-shield-heart text-magenta-accent mr-1"></i> Điểm nhiệm vụ có hiệu lực 12 tháng</span>
+                        <a href="/SkinQuiz" class="text-magenta-accent font-bold hover:underline">Mở Trắc nghiệm Da AI →</a>
+                    </div>
+                </div>
+
+                <!-- Giới Thiệu Bạn Bè - Referral Program (6 cols) -->
+                <div class="lg:col-span-6 bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <div class="w-9 h-9 rounded-xl bg-pink-100 text-magenta-accent flex items-center justify-center text-base">
+                                    <i class="fa-solid fa-user-group"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-serif font-bold text-lg text-charcoal">Giới Thiệu Bạn Bè – Nhận Đôi Ưu Đãi</h3>
+                                    <span class="text-[11px] text-slate-400 block">Bạn nhận +100 điểm • Bạn mới nhận +50 điểm & Voucher 50K</span>
+                                </div>
+                            </div>
+                            <span class="text-xs font-mono font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+                                @Model.ReferralInfo.TotalReferredCount bạn bè
+                            </span>
+                        </div>
+
+                        <!-- Mã giới thiệu của tôi -->
+                        <div class="p-4 rounded-2xl bg-gradient-to-r from-pink-50 via-rose-50 to-amber-50 border border-pink-200 mb-4">
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">Mã Giới Thiệu Độc Quyền Của Bạn</span>
+                            <div class="flex items-center justify-between gap-2">
+                                <span id="myReferralCodeText" class="font-mono text-base sm:text-lg font-bold text-magenta-accent tracking-wider">
+                                    @(string.IsNullOrWhiteSpace(Model.ReferralInfo.MyReferralCode) ? $"OMNI-REF-{Model.UserId:D4}" : Model.ReferralInfo.MyReferralCode)
+                                </span>
+                                <button type="button"
+                                        onclick="copyVoucherCode(document.getElementById('myReferralCodeText').innerText.trim())"
+                                        class="px-3.5 py-1.5 rounded-xl bg-charcoal text-white text-xs font-bold hover:bg-magenta-accent transition cursor-pointer">
+                                    <i class="fa-regular fa-copy mr-1"></i> Sao chép mã
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Ô nhập mã giới thiệu từ bạn bè -->
+                        <div class="mb-4">
+                            <label class="text-xs font-bold text-slate-700 block mb-1.5">
+                                Bạn được bạn bè giới thiệu? Nhập mã tại đây:
+                            </label>
+                            <div class="flex items-center gap-2">
+                                <input type="text"
+                                       id="inputReferralCode"
+                                       value="@Model.ReferralInfo.AppliedReferralCode"
+                                       placeholder="VD: OMNI-REF-0002"
+                                       class="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-mono uppercase focus:outline-none focus:border-magenta-accent" />
+                                <button type="button"
+                                        onclick="handleApplyReferralCode()"
+                                        class="px-4 py-2 rounded-xl bg-magenta-accent text-white text-xs font-bold hover:opacity-95 transition cursor-pointer flex-shrink-0">
+                                    Áp dụng mã
+                                </button>
+                            </div>
+                            <p id="referralFeedbackMsg" class="text-[11px] mt-1.5 hidden"></p>
+                        </div>
+
+                        <!-- Danh sách bạn bè đã giới thiệu -->
+                        @if (Model.ReferralInfo.Referrals.Any())
+                        {
+                            <div class="space-y-2 mt-3">
+                                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Lịch sử giới thiệu thành công</span>
+                                @foreach (var r in Model.ReferralInfo.Referrals.Take(3))
+                                {
+                                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-xs">
+                                        <div>
+                                            <span class="font-bold text-charcoal">@r.ReferredUserName</span>
+                                            <span class="text-[10px] text-slate-400 block">@r.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                        </div>
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold @(r.Status == "REWARDED" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-800")">
+                                            @(r.Status == "REWARDED" ? $"+{r.PointsAwarded} điểm (Đã hoàn tất đơn)" : "Chờ đơn đầu tiên")
+                                        </span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-[11px] text-slate-400 flex items-center justify-between">
+                        <span><i class="fa-solid fa-user-shield text-emerald-600 mr-1"></i> Chống tự giới thiệu & giới thiệu vòng lặp</span>
+                        <span class="font-mono font-bold text-emerald-600">+@Model.ReferralInfo.TotalPointsEarnedFromReferrals điểm đã nhận</span>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
         <!-- ===================================================
@@ -651,7 +997,7 @@
                     <span class="text-xs font-semibold text-slate-400">@Model.AvailableVouchers.Count voucher khả dụng</span>
                 </div>
 
-                <div class="space-y-3">
+                <div id="myVouchersList" class="space-y-3">
                     @foreach (var v in Model.AvailableVouchers)
                     {
                         <div class="p-4 rounded-2xl border border-dashed border-pink-200 bg-pink-50/30 flex items-center justify-between gap-3 hover:bg-pink-50/60 transition group">
@@ -665,11 +1011,17 @@
                                 <p class="text-xs font-medium text-slate-700 mt-1.5 line-clamp-1">@v.Description</p>
                                 <span class="text-[10px] text-slate-400 block mt-0.5">HSD: @v.ValidTo.ToString("dd/MM/yyyy")</span>
                             </div>
-                            <button type="button" 
-                                    onclick="copyVoucherCode('@v.VoucherCode')"
-                                    class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-magenta-accent hover:text-white text-xs font-bold transition shadow-2xs flex-shrink-0">
-                                Sao Chép
-                            </button>
+                            <div class="flex items-center gap-1.5 flex-shrink-0">
+                                <button type="button" 
+                                        onclick="copyVoucherCode('@v.VoucherCode')"
+                                        class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-magenta-accent hover:text-white text-xs font-bold transition shadow-2xs">
+                                    Sao Chép
+                                </button>
+                                <a href="/Checkout?couponCode=@v.VoucherCode"
+                                   class="px-3 py-1.5 rounded-xl bg-magenta-accent text-white hover:opacity-90 text-xs font-bold transition shadow-2xs">
+                                    Dùng ngay
+                                </a>
+                            </div>
                         </div>
                     }
                 </div>
@@ -680,12 +1032,12 @@
                 <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
                     <div class="flex items-center gap-2">
                         <i class="fa-solid fa-clock-rotate-left text-amber-500 text-lg"></i>
-                        <h3 class="font-serif font-bold text-lg text-charcoal">Lịch Sử Biến Động Điểm</h3>
+                        <h3 class="font-serif font-bold text-lg text-charcoal">Lịch Sử Biến Động Điểm (Sổ Cái)</h3>
                     </div>
                     <span class="text-xs font-semibold text-slate-400">Giao dịch gần nhất</span>
                 </div>
 
-                <div class="space-y-3">
+                <div id="recentPointsList" class="space-y-3">
                     @foreach (var tx in Model.RecentTransactions)
                     {
                         <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-3">
@@ -803,6 +1155,297 @@
         toast.classList.remove('translate-y-20', 'opacity-0');
         setTimeout(() => {
             toast.classList.add('translate-y-20', 'opacity-0');
-        }, 2500);
+        }, 3000);
+    }
+
+    function getAntiForgeryToken() {
+        const el = document.querySelector('input[name="__RequestVerificationToken"]');
+        return el ? el.value : '';
+    }
+
+    function fireConfettiCelebration() {
+        const colors = ['#d81b60', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899'];
+        const container = document.createElement('div');
+        container.style.position = 'fixed';
+        container.style.inset = '0';
+        container.style.pointerEvents = 'none';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+
+        for (let i = 0; i < 65; i++) {
+            const p = document.createElement('div');
+            p.style.position = 'absolute';
+            p.style.left = Math.random() * 100 + 'vw';
+            p.style.top = '-12px';
+            p.style.width = (Math.random() * 8 + 6) + 'px';
+            p.style.height = (Math.random() * 12 + 6) + 'px';
+            p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            p.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+            p.style.opacity = '0.95';
+            p.style.transition = `transform ${1.4 + Math.random() * 1.2}s cubic-bezier(0.22, 1, 0.36, 1), opacity 2.2s ease`;
+            container.appendChild(p);
+
+            requestAnimationFrame(() => {
+                const driftX = (Math.random() - 0.5) * 260;
+                const fallY = window.innerHeight * (0.65 + Math.random() * 0.35);
+                const rot = Math.random() * 720 - 360;
+                p.style.transform = `translate(${driftX}px, ${fallY}px) rotate(${rot}deg)`;
+                p.style.opacity = '0';
+            });
+        }
+        setTimeout(() => container.remove(), 2600);
+    }
+
+    function updatePointsUi(newBalance, availableVnd, recentTxs) {
+        const fmt = new Intl.NumberFormat('vi-VN');
+        const cardPts = document.getElementById('cardPointsBalance');
+        if (cardPts) cardPts.innerText = fmt.format(newBalance);
+
+        const bazaarPts = document.getElementById('bazaarPointsBalance');
+        if (bazaarPts) bazaarPts.innerText = fmt.format(newBalance);
+
+        const statVnd = document.getElementById('statDiscountVnd');
+        if (statVnd) statVnd.innerText = fmt.format(availableVnd) + '₫';
+
+        // Nhích nhẹ thanh tiến độ hạng khi nhận điểm mới
+        const bar = document.getElementById('tierProgressBar');
+        const pct = document.getElementById('tierProgressPercent');
+        if (bar && pct) {
+            const cur = parseInt(pct.innerText.replace('%', ''), 10) || 85;
+            const nextPct = Math.min(100, cur + 1);
+            pct.innerText = nextPct + '%';
+            bar.style.width = nextPct + '%';
+        }
+
+        // Cập nhật trạng thái nút đổi điểm Bazaar
+        document.querySelectorAll('.btn-redeem-bazaar').forEach(btn => {
+            const cost = parseInt(btn.getAttribute('data-points-cost') || '0', 10);
+            if (newBalance >= cost) {
+                btn.disabled = false;
+                btn.className = 'btn-redeem-bazaar px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs cursor-pointer bg-charcoal text-white hover:bg-magenta-accent';
+            } else {
+                btn.disabled = true;
+                btn.className = 'btn-redeem-bazaar px-4 py-2 rounded-xl text-xs font-bold transition shadow-xs bg-slate-200 text-slate-400 cursor-not-allowed';
+            }
+        });
+
+        // Cập nhật danh sách lịch sử biến động điểm (Sổ cái)
+        if (Array.isArray(recentTxs) && recentTxs.length > 0) {
+            const listEl = document.getElementById('recentPointsList');
+            if (listEl) {
+                listEl.innerHTML = recentTxs.map(tx => {
+                    const isPositive = tx.points >= 0;
+                    const sign = isPositive ? '+' : '';
+                    const colorCls = isPositive ? 'text-emerald-600' : 'text-rose-600';
+                    const badgeCls = isPositive ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700';
+                    const iconCls = isPositive ? 'fa-plus' : 'fa-ticket';
+                    const dt = new Date(tx.createdAt);
+                    const dateStr = dt.toLocaleDateString('vi-VN') + ' ' + dt.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                    return `
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-sm shadow-2xs ${badgeCls}">
+                                    <i class="fa-solid ${iconCls}"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-bold text-charcoal line-clamp-1">${tx.description}</p>
+                                    <span class="text-[10px] text-slate-400">${dateStr}</span>
+                                </div>
+                            </div>
+                            <div class="text-right flex-shrink-0">
+                                <span class="text-sm font-bold font-mono ${colorCls}">${sign}${tx.points}</span>
+                                <span class="text-[10px] text-slate-400 block font-mono">Dư: ${tx.balanceAfter}</span>
+                            </div>
+                        </div>`;
+                }).join('');
+            }
+        }
+    }
+
+    async function handleDailyCheckIn() {
+        const btn = document.getElementById('btnDailyCheckIn');
+        if (!btn || btn.disabled) return;
+        btn.disabled = true;
+
+        try {
+            const formData = new URLSearchParams();
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+
+            const resp = await fetch('/Customer/CheckInDaily', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData.toString()
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+                fireConfettiCelebration();
+                showToast(data.message);
+                btn.className = 'inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-emerald-100 text-emerald-700 font-bold text-sm cursor-not-allowed border border-emerald-200';
+                btn.innerHTML = `<i class="fa-solid fa-circle-check"></i><span>Đã điểm danh hôm nay (+${data.pointsAwarded} điểm)</span>`;
+
+                const streakEl = document.getElementById('streakCountBadge');
+                if (streakEl) streakEl.innerText = data.currentStreak;
+
+                // Cập nhật ô ngày vừa điểm danh
+                const slotEl = document.querySelector(`.checkin-slot[data-slot-day="${data.currentStreak}"]`);
+                if (slotEl) {
+                    slotEl.className = 'checkin-slot rounded-2xl p-3.5 border text-center flex flex-col items-center justify-between transition-all bg-emerald-50/90 border-emerald-300 text-emerald-800 shadow-xs';
+                }
+
+                updatePointsUi(data.newBalance, data.availableDiscountVnd, data.recentTransactions);
+            } else {
+                showToast(data.message || 'Bạn đã điểm danh hôm nay rồi!');
+            }
+        } catch (err) {
+            showToast('Lỗi kết nối khi điểm danh.');
+            btn.disabled = false;
+        }
+    }
+
+    async function handleRedeemReward(points, title) {
+        try {
+            const formData = new URLSearchParams();
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+            formData.append('points', points);
+            formData.append('rewardTitle', title);
+
+            const resp = await fetch('/Customer/RedeemReward', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData.toString()
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+                fireConfettiCelebration();
+                showToast(data.message);
+
+                const banner = document.getElementById('redeemSuccessBanner');
+                const codeEl = document.getElementById('redeemBannerCode');
+                const linkEl = document.getElementById('redeemUseNowLink');
+                if (banner && codeEl && linkEl) {
+                    codeEl.innerText = data.voucherCode;
+                    linkEl.href = '/Checkout?couponCode=' + encodeURIComponent(data.voucherCode);
+                    banner.classList.remove('hidden');
+                }
+
+                // Thêm voucher mới vào đầu danh sách Kho Voucher Của Tôi
+                const vList = document.getElementById('myVouchersList');
+                if (vList && data.voucherCode) {
+                    const fmt = new Intl.NumberFormat('vi-VN');
+                    const cardHtml = `
+                        <div class="p-4 rounded-2xl border-2 border-emerald-300 bg-emerald-50/40 flex items-center justify-between gap-3 transition">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-mono font-bold text-xs px-2.5 py-1 rounded-lg bg-white border border-emerald-400 text-emerald-700 shadow-2xs">
+                                        ${data.voucherCode}
+                                    </span>
+                                    <span class="text-[10px] text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded-full">Vừa đổi • Sẵn sàng dùng</span>
+                                </div>
+                                <p class="text-xs font-medium text-slate-700 mt-1.5">Giảm trực tiếp ${fmt.format(data.discountAmountVnd)}₫ (Omni Rewards Bazaar)</p>
+                            </div>
+                            <div class="flex items-center gap-1.5 flex-shrink-0">
+                                <button type="button" onclick="copyVoucherCode('${data.voucherCode}')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-magenta-accent hover:text-white text-xs font-bold transition">
+                                    Sao Chép
+                                </button>
+                                <a href="/Checkout?couponCode=${encodeURIComponent(data.voucherCode)}" class="px-3 py-1.5 rounded-xl bg-magenta-accent text-white hover:opacity-90 text-xs font-bold transition">
+                                    Dùng ngay
+                                </a>
+                            </div>
+                        </div>`;
+                    vList.insertAdjacentHTML('afterbegin', cardHtml);
+                }
+
+                const vCount = document.getElementById('statVoucherCount');
+                if (vCount && data.vouchersCount !== undefined) {
+                    vCount.innerText = data.vouchersCount + ' mã';
+                }
+
+                updatePointsUi(data.newBalance, data.availableDiscountVnd, data.recentTransactions);
+            } else {
+                showToast(data.message || 'Không thể đổi điểm.');
+            }
+        } catch (err) {
+            showToast('Lỗi kết nối khi đổi điểm.');
+        }
+    }
+
+    function copyRedeemedCode() {
+        const codeEl = document.getElementById('redeemBannerCode');
+        if (codeEl) copyVoucherCode(codeEl.innerText.trim());
+    }
+
+    async function handleClaimMission(missionCode) {
+        const btn = document.getElementById('btn-mission-' + missionCode);
+        if (btn) btn.disabled = true;
+
+        try {
+            const formData = new URLSearchParams();
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+            formData.append('missionCode', missionCode);
+
+            const resp = await fetch('/Customer/ClaimMission', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData.toString()
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+                fireConfettiCelebration();
+                showToast(data.message);
+                if (btn) {
+                    btn.outerHTML = `<span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-emerald-100 text-emerald-700 text-xs font-bold"><i class="fa-solid fa-check"></i> Đã nhận</span>`;
+                }
+                updatePointsUi(data.newBalance, data.availableDiscountVnd, data.recentTransactions);
+            } else {
+                showToast(data.message || 'Không thể nhận thưởng nhiệm vụ.');
+                if (btn) btn.disabled = false;
+            }
+        } catch (err) {
+            showToast('Lỗi kết nối khi nhận thưởng nhiệm vụ.');
+            if (btn) btn.disabled = false;
+        }
+    }
+
+    async function handleApplyReferralCode() {
+        const input = document.getElementById('inputReferralCode');
+        const msgEl = document.getElementById('referralFeedbackMsg');
+        if (!input || !input.value.trim()) {
+            showToast('Vui lòng nhập mã giới thiệu!');
+            return;
+        }
+
+        try {
+            const formData = new URLSearchParams();
+            formData.append('__RequestVerificationToken', getAntiForgeryToken());
+            formData.append('referralCode', input.value.trim());
+
+            const resp = await fetch('/Customer/ApplyReferralCode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData.toString()
+            });
+            const data = await resp.json();
+
+            if (msgEl) {
+                msgEl.classList.remove('hidden');
+                msgEl.className = 'text-[11px] mt-1.5 font-semibold ' + (data.success ? 'text-emerald-600' : 'text-rose-600');
+                msgEl.innerText = data.message;
+            }
+
+            if (data.success) {
+                fireConfettiCelebration();
+                showToast(data.message);
+                if (data.newBalance !== undefined) {
+                    updatePointsUi(data.newBalance, data.availableDiscountVnd, data.recentTransactions);
+                }
+            } else {
+                showToast(data.message);
+            }
+        } catch (err) {
+            showToast('Lỗi kết nối khi kiểm tra mã giới thiệu.');
+        }
     }
 </script>

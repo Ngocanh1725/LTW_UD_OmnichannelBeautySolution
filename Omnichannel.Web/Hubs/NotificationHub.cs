@@ -40,17 +40,24 @@ namespace Omnichannel.Web.Hubs
                     }
                 }
 
-                // 3. Group theo Store / Chi nhánh
+                // 3. Phân luồng Group "Managers" cho nhân sự quản lý nội bộ
+                if (user.IsInRole("Admin") || user.IsInRole("SuperAdmin") || 
+                    user.IsInRole("StoreManager") || user.IsInRole("WarehouseStaff"))
+                {
+                    await Groups.AddToGroupAsync(Context.ConnectionId, "Managers");
+                }
+
+                // 4. Group theo Store / Chi nhánh
                 var storeId = user.FindFirst("StoreId")?.Value;
                 if (!string.IsNullOrEmpty(storeId))
                 {
                     await Groups.AddToGroupAsync(Context.ConnectionId, $"Store_{storeId}");
                 }
 
-                // 4. Group cho tất cả người dùng đã đăng nhập
+                // 5. Group cho tất cả người dùng đã đăng nhập (loại bỏ khách vãng lai chưa xác thực)
                 await Groups.AddToGroupAsync(Context.ConnectionId, "AllAuthenticated");
 
-                _logger.LogInformation("Client SignalR kết nối thành công: ConnectionId={ConnId}, UserId={UserId}", Context.ConnectionId, userId);
+                _logger.LogInformation("[NotificationHub] Client SignalR kết nối thành công: ConnectionId={ConnId}, UserId={UserId}", Context.ConnectionId, userId);
             }
 
             await base.OnConnectedAsync();
@@ -58,7 +65,7 @@ namespace Omnichannel.Web.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            _logger.LogInformation("Client SignalR ngắt kết nối: ConnectionId={ConnId}", Context.ConnectionId);
+            _logger.LogDebug("[NotificationHub] Client SignalR ngắt kết nối: ConnectionId={ConnId}", Context.ConnectionId);
             await base.OnDisconnectedAsync(exception);
         }
 
@@ -89,11 +96,11 @@ namespace Omnichannel.Web.Hubs
         }
 
         /// <summary>
-        /// Gửi thông báo tới toàn bộ người dùng
+        /// Gửi thông báo tới toàn bộ người dùng đã xác thực (tránh bắn tới khách vãng lai)
         /// </summary>
         public async Task SendToAll(string message)
         {
-            await Clients.All.SendAsync("ReceiveNotification", new
+            await Clients.Group("AllAuthenticated").SendAsync("ReceiveNotification", new
             {
                 title = "Thông báo chung",
                 message = message,
@@ -102,7 +109,7 @@ namespace Omnichannel.Web.Hubs
         }
 
         /// <summary>
-        /// Gửi đối tượng thông báo có cấu trúc đầy đủ
+        /// Gửi đối tượng thông báo có cấu trúc đầy đủ, tự động phân nhóm chính xác
         /// </summary>
         public async Task SendNotificationPayload(NotificationDto payload)
         {
@@ -118,9 +125,15 @@ namespace Omnichannel.Web.Hubs
             {
                 await Clients.Group($"Store_{payload.StoreId.Value}").SendAsync("ReceiveNotification", payload);
             }
+            else if (string.Equals(payload.Type, "ALERT", StringComparison.OrdinalIgnoreCase))
+            {
+                // Cảnh báo nội bộ: Chỉ gửi tới các tài khoản quản lý trong nhóm "Managers"
+                await Clients.Group("Managers").SendAsync("ReceiveNotification", payload);
+            }
             else
             {
-                await Clients.All.SendAsync("ReceiveNotification", payload);
+                // Thông báo chung hệ thống: Gửi tới các tài khoản đã đăng nhập
+                await Clients.Group("AllAuthenticated").SendAsync("ReceiveNotification", payload);
             }
         }
     }

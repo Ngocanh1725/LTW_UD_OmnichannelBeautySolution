@@ -9,6 +9,9 @@ using Omnichannel.Domain.Entities;
 using Omnichannel.Infrastructure.Data;
 using Omnichannel.Infrastructure.Security;
 
+using Microsoft.Extensions.Caching.Memory;
+using Omnichannel.Web.ViewComponents;
+
 namespace Omnichannel.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
@@ -16,10 +19,12 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
     public class BannerController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IMemoryCache? _cache;
 
-        public BannerController(ApplicationDbContext context)
+        public BannerController(ApplicationDbContext context, IMemoryCache? cache = null)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _cache = cache;
         }
 
         private static int MapPositionStringToInt(string? position)
@@ -123,6 +128,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             await _context.Banners.AddAsync(banner);
             await _context.SaveChangesAsync();
+            InvalidateBannerCache();
 
             TempData["SuccessMessage"] = $"Đã tạo mới Banner '{banner.Title}' thành công!";
             return RedirectToAction(nameof(Index));
@@ -204,6 +210,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             banner.IsActive = model.IsActive;
 
             await _context.SaveChangesAsync();
+            InvalidateBannerCache();
 
             TempData["SuccessMessage"] = $"Đã cập nhật Banner '{banner.Title}' thành công!";
             return RedirectToAction(nameof(Index));
@@ -219,6 +226,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             banner.IsActive = !banner.IsActive;
             await _context.SaveChangesAsync();
+            InvalidateBannerCache();
 
             TempData["SuccessMessage"] = banner.IsActive
                 ? $"Đã bật hiển thị Banner '{banner.Title}'."
@@ -237,9 +245,17 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             _context.Banners.Remove(banner);
             await _context.SaveChangesAsync();
+            InvalidateBannerCache();
 
             TempData["SuccessMessage"] = "Đã gỡ bỏ Banner khỏi hệ thống!";
             return RedirectToAction(nameof(Index));
+        }
+
+        private void InvalidateBannerCache()
+        {
+            _cache?.Remove(HomeSectionsViewComponent.CompositeModelCacheKey);
+            _cache?.Remove(HomeSectionsViewComponent.CacheKey);
+            _cache?.Remove("home_hero_banners");
         }
 
         [HttpPost]

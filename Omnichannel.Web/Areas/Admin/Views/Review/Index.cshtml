@@ -106,6 +106,11 @@
                     Bị ẩn <span class="badge rounded-pill bg-light text-danger ms-1">@hiddenCount</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link px-3 py-1.5 rounded-pill @(currentTab == "qna" ? "active bg-purple text-white" : "text-secondary")" href="@Url.Action("Index", new { tab = "qna" })">
+                    <i class="fa-solid fa-circle-question me-1"></i> Hỏi Đáp Q&A <span class="badge rounded-pill @(currentTab == "qna" ? "bg-white text-purple" : "bg-purple-light text-purple") ms-1">@ViewBag.QnaCount</span>
+                </a>
+            </li>
         </ul>
 
         <!-- Quick Filters -->
@@ -130,6 +135,114 @@
     </div>
 </div>
 
+@if (currentTab == "qna")
+{
+    var questions = ViewBag.Questions as List<Omnichannel.Application.DTOs.Cms.ProductQuestionDto> ?? new List<Omnichannel.Application.DTOs.Cms.ProductQuestionDto>();
+    <div class="beauty-card overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr class="text-secondary small text-uppercase">
+                        <th style="width: 220px;" class="ps-4">Sản Phẩm</th>
+                        <th style="width: 180px;">Khách Hàng</th>
+                        <th>Nội Dung Câu Hỏi & Câu Trả Lời</th>
+                        <th style="width: 120px;">Trạng Thái</th>
+                        <th style="width: 130px;">Thời Gian</th>
+                        <th style="width: 180px;" class="text-end pe-4">Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!questions.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-circle-question fs-1 text-pink-border mb-2" style="color: var(--accent-pink-border);"></i>
+                                <div>Chưa có câu hỏi nào từ khách hàng.</div>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var q in questions)
+                        {
+                            <tr id="questionRow-@q.Id">
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark text-truncate" style="max-width: 210px;" title="@q.ProductName">
+                                        @q.ProductName
+                                    </div>
+                                    <div class="small text-muted">
+                                        ID: <code>#@q.ProductId</code>
+                                        <a href="/Product/Detail/@q.ProductId" target="_blank" class="text-purple ms-1" title="Xem trên storefront">
+                                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">@q.AuthorName</div>
+                                    <div class="small text-muted">User ID: @(q.UserId.HasValue ? $"#{q.UserId}" : "Khách")</div>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark mb-1">
+                                        <i class="fa-regular fa-comment-dots text-purple me-1"></i> @q.Content
+                                    </div>
+                                    @if (q.Answers != null && q.Answers.Any())
+                                    {
+                                        <div class="mt-2 p-2 rounded-3 bg-light border border-dashed">
+                                            @foreach (var ans in q.Answers)
+                                            {
+                                                <div class="small mb-1 pb-1 border-bottom last:border-0">
+                                                    @if (ans.IsOfficial)
+                                                    {
+                                                        <span class="badge bg-purple text-white me-1"><i class="fa-solid fa-user-doctor me-1"></i>Dược Sĩ Omni Beauty</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary me-1">Cộng đồng</span>
+                                                    }
+                                                    <span class="fw-medium text-dark">@ans.Content</span>
+                                                    <span class="text-muted ms-1" style="font-size: 10px;">(@ans.CreatedAt.ToString("dd/MM/yyyy HH:mm"))</span>
+                                                </div>
+                                            }
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    @if (q.IsApproved && !q.IsHidden)
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">Đã duyệt</span>
+                                    }
+                                    else if (q.IsHidden)
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Bị ẩn</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Chờ duyệt</span>
+                                    }
+                                </td>
+                                <td class="small text-muted">
+                                    @q.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-purple" onclick="openAnswerModal(@q.Id, '@Html.Raw(Html.Encode(q.Content))')" title="Trả lời chính thức">
+                                            <i class="fa-solid fa-reply"></i> Trả lời
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger" onclick="deleteQuestion(@q.Id)" title="Xóa câu hỏi">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
 <!-- Reviews Table -->
 <div class="beauty-card overflow-hidden">
     <div class="table-responsive">
@@ -314,6 +427,38 @@
         </table>
     </div>
 </div>
+}
+
+<!-- Modal Trả Lời Câu Hỏi Q&A Chính Thức -->
+<div class="modal fade" id="answerQuestionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold text-dark">
+                    <i class="fa-solid fa-user-doctor text-purple me-2"></i>Phản Hồi Chính Thức Từ Dược Sĩ / CSKH
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="answerQuestionId" />
+                <div class="mb-3">
+                    <label class="form-label small text-muted">Câu hỏi của khách hàng:</label>
+                    <div id="displayQuestionContent" class="p-3 rounded-3 bg-light border text-dark fw-medium small"></div>
+                </div>
+                <div class="mb-3">
+                    <label for="answerContentInput" class="form-label small fw-semibold text-dark">Nội dung giải đáp chuyên môn:</label>
+                    <textarea class="form-control rounded-3" id="answerContentInput" rows="4" placeholder="Nhập tư vấn chi tiết về công dụng, cách dùng và bảo quản sản phẩm..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-top">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Đóng</button>
+                <button type="button" class="btn btn-purple rounded-pill px-4" onclick="submitQuestionAnswer()">
+                    <i class="fa-solid fa-paper-plane me-1"></i> Gửi Câu Trả Lời
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Admin Note Modal -->
 <div class="modal fade" id="adminNoteModal" tabindex="-1">
@@ -463,6 +608,78 @@
             } catch (err) {
                 console.error(err);
                 showToast('Lỗi lưu ghi chú.', 'error');
+            }
+        }
+
+        function openAnswerModal(questionId, content) {
+            document.getElementById('answerQuestionId').value = questionId;
+            document.getElementById('displayQuestionContent').innerText = content;
+            document.getElementById('answerContentInput').value = '';
+            const modal = new bootstrap.Modal(document.getElementById('answerQuestionModal'));
+            modal.show();
+        }
+
+        async function submitQuestionAnswer() {
+            const questionId = document.getElementById('answerQuestionId').value;
+            const answerContent = document.getElementById('answerContentInput').value;
+
+            if (!answerContent || answerContent.trim().length < 2) {
+                alert('Vui lòng nhập nội dung câu trả lời.');
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('questionId', questionId);
+                formData.append('answerContent', answerContent.trim());
+                formData.append('__RequestVerificationToken', getCsrfToken());
+
+                const res = await fetch('/Admin/Review/AnswerQuestion', {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Đã gửi câu trả lời chính thức thành công!', 'success');
+                    setTimeout(() => location.reload(), 600);
+                } else {
+                    showToast(data.message || 'Lỗi gửi câu trả lời', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi xử lý yêu cầu.', 'error');
+            }
+        }
+
+        async function deleteQuestion(questionId) {
+            if (!confirm('Bạn có chắc chắn muốn xóa vĩnh viễn câu hỏi này không?')) {
+                return;
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('questionId', questionId);
+                formData.append('__RequestVerificationToken', getCsrfToken());
+
+                const res = await fetch('/Admin/Review/DeleteQuestion', {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    const row = document.getElementById(`questionRow-${questionId}`);
+                    if (row) row.remove();
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi xử lý yêu cầu.', 'error');
             }
         }
 

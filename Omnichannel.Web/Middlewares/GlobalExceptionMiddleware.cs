@@ -50,15 +50,26 @@ namespace Omnichannel.Web.Middlewares
 
         private static bool IsApiOrAjaxRequest(HttpRequest request)
         {
+            // 1. Tuyến đường API chuyên biệt
             if (request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
                 return true;
 
+            // 2. Yêu cầu từ HTMX (Header HX-Request)
+            if (request.Headers.ContainsKey("HX-Request"))
+                return true;
+
+            // 3. Yêu cầu AJAX truyền thống (jQuery, Fetch có X-Requested-With)
+            var xRequestedWith = request.Headers["X-Requested-With"].ToString();
+            if (string.Equals(xRequestedWith, "XMLHttpRequest", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            // 4. Header Accept mong muốn JSON
             var acceptHeader = request.Headers["Accept"].ToString();
             if (acceptHeader.Contains("application/json", StringComparison.OrdinalIgnoreCase))
                 return true;
 
-            var xRequestedWith = request.Headers["X-Requested-With"].ToString();
-            if (string.Equals(xRequestedWith, "XMLHttpRequest", StringComparison.OrdinalIgnoreCase))
+            // 5. Payload gửi lên là JSON
+            if (request.ContentType != null && request.ContentType.Contains("application/json", StringComparison.OrdinalIgnoreCase))
                 return true;
 
             return false;
@@ -66,20 +77,23 @@ namespace Omnichannel.Web.Middlewares
 
         private static async Task HandleApiExceptionAsync(HttpContext context, Exception exception, string traceId)
         {
-            context.Response.ContentType = "application/json";
+            context.Response.ContentType = "application/json; charset=utf-8";
             context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
             var response = new
             {
                 success = false,
-                message = "Đã xảy ra sự cố nội bộ trong quá trình xử lý yêu cầu. Vui lòng thử lại sau.",
+                status = (int)HttpStatusCode.InternalServerError,
+                title = "Lỗi máy chủ nội bộ (Internal Server Error)",
+                message = "Hệ thống đang bận hoặc gặp sự cố xử lý. Vui lòng thử lại sau giây lát.",
                 traceId = traceId,
                 timestamp = DateTime.UtcNow
             };
 
             var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                WriteIndented = false
             });
 
             await context.Response.WriteAsync(json);

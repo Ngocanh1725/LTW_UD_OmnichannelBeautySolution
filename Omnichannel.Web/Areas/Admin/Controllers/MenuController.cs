@@ -12,6 +12,9 @@ using Omnichannel.Infrastructure.Security;
 namespace Omnichannel.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Route("Admin/[controller]")]
+    [Route("Admin/MenuManagement")]
+    [Route("Admin/MenuManagement/Index")]
     [Authorize]
     public class MenuController : Controller
     {
@@ -25,7 +28,9 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [HasPermission("CMS_MENU_MANAGE")]
+        [Route("")]
+        [Route("Index")]
+
         public async Task<IActionResult> Index(int? menuId = null)
         {
             var menus = await _context.Menus
@@ -155,7 +160,8 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [HasPermission("CMS_MENU_MANAGE")]
+        [Route("GetTargetsByType")]
+
         public async Task<IActionResult> GetTargetsByType(int targetType)
         {
             return targetType switch

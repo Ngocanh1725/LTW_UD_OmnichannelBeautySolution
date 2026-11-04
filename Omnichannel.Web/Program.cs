@@ -1,3 +1,4 @@
+using Omnichannel.Web.Filters;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -8,6 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Omnichannel.Application.Interfaces.Cms;
+using Omnichannel.Application.Interfaces.Notifications;
+using Omnichannel.Infrastructure.Services.Notifications;
 using Omnichannel.Application.Interfaces.Crm;
 using Omnichannel.Application.Interfaces.Loyalty;
 using Omnichannel.Application.Interfaces.Inventory;
@@ -27,6 +30,7 @@ using Omnichannel.Web.Middlewares;
 using System;
 
 
+using Omnichannel.Application.Common;
 using Omnichannel.Infrastructure.Data.Interceptors;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,18 +40,22 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' không được tìm thấy.");
 
 builder.Services.AddSingleton<DomainEventDispatchInterceptor>();
+builder.Services.AddScoped<AuditSaveChangesInterceptor>();
+builder.Services.AddScoped<BlockAdminShoppingAttribute>();
 
 builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
 {
     var interceptor = sp.GetRequiredService<DomainEventDispatchInterceptor>();
+    var auditInterceptor = sp.GetRequiredService<AuditSaveChangesInterceptor>();
     options.UseSqlServer(connectionString, sqlOptions =>
     {
         sqlOptions.EnableRetryOnFailure(
             maxRetryCount: 5,
             maxRetryDelay: TimeSpan.FromSeconds(30),
             errorNumbersToAdd: null);
+        sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
     })
-    .AddInterceptors(interceptor);
+    .AddInterceptors(interceptor, auditInterceptor);
 });
 
 // 2. Cấu hình Caching (MemoryCache L1 sẵn sàng + IDistributedCache L2)
@@ -65,8 +73,12 @@ builder.Services.AddScoped<IStepUpElevationService, StepUpElevationService>();
 // Đăng ký Service CMS & Menu Đa hình vào DI Container:
 builder.Services.AddScoped<IMenuEngineService, MenuEngineService>();
 builder.Services.AddScoped<IProductReviewService, ProductReviewService>();
+builder.Services.AddScoped<IProductQnaService, ProductQnaService>();
+builder.Services.AddScoped<IInventoryNotificationService, InventoryNotificationService>();
 builder.Services.AddScoped<IMediaService, MediaService>();
 builder.Services.AddScoped<IThemeService, ThemeService>();
+builder.Services.AddScoped<Omnichannel.Application.Interfaces.Cms.ILayoutEngineService, Omnichannel.Infrastructure.Services.Cms.LayoutEngineService>();
+builder.Services.AddScoped<Omnichannel.Infrastructure.Services.Cms.MediaStorageService>();
 // Đăng ký Service Động cơ Phân bổ Kho FEFO:
 builder.Services.AddScoped<IInventoryAllocationEngine, InventoryAllocationEngine>();
 //  Đăng ký Session & Caching
@@ -104,14 +116,32 @@ builder.Services.AddScoped<IPromotionEngine, PromotionEngine>();
 builder.Services.AddScoped<IStockTransferService, StockTransferService>();
 // Đăng ký Service Cài đặt động toàn hệ thống:
 builder.Services.AddScoped<ISettingsService, SettingsService>();
+builder.Services.AddScoped<Omnichannel.Application.Interfaces.Settings.IDemoResetService, Omnichannel.Infrastructure.Services.DemoResetService>();
 // Đăng ký Service Quản lý Tài chính & Sổ cái:
 builder.Services.AddScoped<IFinanceService, FinanceService>();
 // Đăng ký Service AI Chatbot hỗ trợ khách hàng:
 builder.Services.AddScoped<IChatbotService, ChatbotService>();
 // Đăng ký Service AI Beauty Advisor - Smart Filter:
 builder.Services.AddScoped<Omnichannel.Application.Interfaces.Catalog.ISmartFilterService, Omnichannel.Infrastructure.Services.Catalog.SmartFilterService>();
+// Đăng ký Service Tìm kiếm gợi ý tức thì chuẩn Sephora/Hasaki (Phiên C1):
+builder.Services.AddScoped<Omnichannel.Application.Interfaces.Catalog.ISearchSuggestService, Omnichannel.Infrastructure.Services.Catalog.SearchSuggestService>();
+// Đăng ký Service Gợi ý FBT & Đã xem gần đây chuẩn Sephora/Olive Young (Phiên C2):
+builder.Services.AddScoped<Omnichannel.Application.Interfaces.Catalog.IRecommendationService, Omnichannel.Infrastructure.Services.Catalog.RecommendationService>();
+// Đăng ký Service Khay So Sánh Mỹ Phẩm Chuyên Sâu Side-by-Side (Phiên C3 - GAP-03):
+builder.Services.AddScoped<Omnichannel.Application.Interfaces.Catalog.IProductComparisonService, Omnichannel.Infrastructure.Services.Catalog.ProductComparisonService>();
 // Đăng ký Động cơ Phân tích Tương kỵ & Hiệp đồng Hoạt chất Da liễu AI:
 builder.Services.AddScoped<Omnichannel.Application.Interfaces.BeautyTech.ISkincareIngredientInteractionEngine, Omnichannel.Infrastructure.Services.BeautyTech.SkincareIngredientInteractionEngine>();
+// Đăng ký Service Chuyên gia Da liễu AI & Routine Quiz:
+builder.Services.AddScoped<Omnichannel.Application.Interfaces.Beauty.ISkincareConsultantService, Omnichannel.Infrastructure.Services.Beauty.SkincareConsultantService>();
+// Đăng ký Service Phân tích Da bằng Ảnh AI Vision + Deterministic Fallback (Phiên C8):
+builder.Services.AddHttpClient("GeminiVisionClient", client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(15);
+});
+builder.Services.AddScoped<Omnichannel.Infrastructure.Services.Beauty.MockSkinAnalysisService>();
+builder.Services.AddScoped<Omnichannel.Application.Interfaces.Beauty.ISkinAnalysisService, Omnichannel.Infrastructure.Services.Beauty.AiVisionSkinAnalysisService>();
+// Đăng ký Service Tồn kho Đa Kênh Showroom (O2O) & Flash Sale:
+builder.Services.AddScoped<Omnichannel.Application.Interfaces.Inventory.IStoreInventoryService, Omnichannel.Infrastructure.Services.Inventory.StoreInventoryService>();
 // Đăng ký Service AI Cảnh Báo Tự Động & Background Worker:
 builder.Services.AddScoped<Omnichannel.Application.Interfaces.Alerts.IAlertService, Omnichannel.Infrastructure.Services.AlertService>();
 builder.Services.AddHostedService<Omnichannel.Web.BackgroundServices.AlertBackgroundWorker>();
@@ -124,20 +154,49 @@ builder.Services.AddScoped<Omnichannel.Application.Interfaces.Messages.IInternal
 // Cấu hình AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-// 4. Cấu hình Xác thực bằng Cookie (Cookie Authentication)
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
+// 4. Cấu hình Xác thực Multi-Scheme Cookie Authentication Độc Lập
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = AuthConstants.DynamicScheme;
+    options.DefaultAuthenticateScheme = AuthConstants.DynamicScheme;
+    options.DefaultChallengeScheme = AuthConstants.DynamicScheme;
+})
+.AddPolicyScheme(AuthConstants.DynamicScheme, "Dynamic Admin/Customer Scheme Forwarder", options =>
+{
+    options.ForwardDefaultSelector = context =>
     {
-        options.Cookie.Name = "OmnichannelBeauty.AuthCookie";
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-        options.Cookie.SameSite = SameSiteMode.Strict;
-        options.LoginPath = "/Account/Login";
-        options.LogoutPath = "/Account/Logout";
-        options.AccessDeniedPath = "/Account/AccessDenied";
-        options.SlidingExpiration = true;
-        options.ExpireTimeSpan = TimeSpan.FromHours(8);
-    });
+        var path = context.Request.Path;
+        if (path.StartsWithSegments("/admin", StringComparison.OrdinalIgnoreCase))
+        {
+            return AuthConstants.AdminCookieScheme;
+        }
+        return AuthConstants.CustomerCookieScheme;
+    };
+})
+.AddCookie(AuthConstants.CustomerCookieScheme, options =>
+{
+    options.Cookie.Name = AuthConstants.CustomerCookieName;
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.LoginPath = AuthConstants.CustomerLoginPath;
+    options.LogoutPath = AuthConstants.CustomerLogoutPath;
+    options.AccessDeniedPath = AuthConstants.CustomerAccessDeniedPath;
+    options.SlidingExpiration = true;
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+})
+.AddCookie(AuthConstants.AdminCookieScheme, options =>
+{
+    options.Cookie.Name = AuthConstants.AdminCookieName;
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.LoginPath = AuthConstants.AdminLoginPath;
+    options.LogoutPath = AuthConstants.AdminLogoutPath;
+    options.AccessDeniedPath = AuthConstants.AdminAccessDeniedPath;
+    options.SlidingExpiration = true;
+    options.ExpireTimeSpan = TimeSpan.FromHours(8);
+});
 
 // 5. Cấu hình Ủy quyền (Authorization)
 builder.Services.AddAuthorization();
@@ -151,10 +210,20 @@ if (builder.Environment.IsDevelopment())
 }
 builder.Services.AddSignalR();
 
-// Tối ưu hiệu năng: Nén Response (Gzip & Brotli)
+// Tối ưu hiệu năng: Nén Response (Gzip & Brotli với CompressionLevel.Fastest)
 builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProvider>();
+    options.Providers.Add<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProvider>();
+});
+builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = System.IO.Compression.CompressionLevel.Fastest;
+});
+builder.Services.Configure<Microsoft.AspNetCore.ResponseCompression.GzipCompressionProviderOptions>(options =>
+{
+    options.Level = System.IO.Compression.CompressionLevel.Fastest;
 });
 
 var app = builder.Build();
@@ -166,8 +235,9 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
-        await DbInitializer.SeedAsync(context);
-        await DbInitializer.MigrateStaticImagesToDatabaseAsync(context, app.Environment);
+        var dbInitLogger = services.GetService<ILogger<ApplicationDbContext>>();
+        await DbInitializer.SeedAsync(context, dbInitLogger);
+        await DbInitializer.MigrateStaticImagesToDatabaseAsync(context, app.Environment, dbInitLogger);
     }
     catch (Exception ex)
     {
@@ -184,6 +254,7 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error500");
     app.UseHsts();
+    app.UseHttpsRedirection();
 }
 else
 {
@@ -196,8 +267,14 @@ app.UseStatusCodePagesWithReExecute("/Home/ErrorStatusCode", "?statusCode={0}");
 // Kích hoạt nén dữ liệu Response
 app.UseResponseCompression();
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // Cache các file tĩnh (CSS, JS, hình ảnh, webp, svg, woff2) trong 7 ngày (604800 giây)
+        ctx.Context.Response.Headers.Append("Cache-Control", "public, max-age=604800");
+    }
+});
 app.UseRouting();
 
 // Middleware xử lý SEO 301 Redirect cho các URL/Slug cũ
