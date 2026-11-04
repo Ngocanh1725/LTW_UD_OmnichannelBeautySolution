@@ -267,8 +267,12 @@
                         <div class="divide-y divide-slate-100" id="cartItemsList">
                             @foreach (var item in vm.Items)
                             {
-                                var imgUrl = Omnichannel.Infrastructure.Data.ProductImageSourceRegistry.ResolveProductImageUrl(
+                                var imgUrl = ProductImageResolver.GetThumbnailImageUrl(
                                     item.ProductImageUrl, item.ProductSku, null, item.ProductName);
+                                var webpUrl = ProductImageResolver.GetWebpImageUrl(
+                                    imgUrl, item.ProductSku, null, item.ProductName);
+                                var altText = ProductImageResolver.GetAltText(
+                                    item.ProductName, null, null, item.ProductSku, null);
 
                                 <div class="p-3 sm:p-3.5 flex flex-col sm:flex-row items-start sm:items-center gap-3.5 transition hover:bg-slate-50/40 relative group" 
                                      id="cart-row-@item.ProductId"
@@ -276,7 +280,10 @@
                                     
                                     <!-- Thumbnail -->
                                     <div class="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-slate-200 shrink-0 bg-white p-1 shadow-2xs">
-                                        <img src="@imgUrl" alt="@item.ProductName" class="w-full h-full object-contain transition-transform group-hover:scale-105 duration-300" />
+                                        <picture class="block w-full h-full">
+                                            <source srcset="@webpUrl" type="image/webp" />
+                                            <img src="@imgUrl" alt="@altText" width="80" height="80" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" class="w-full h-full object-contain transition-transform group-hover:scale-105 duration-300" />
+                                        </picture>
                                     </div>
 
                                     <!-- Name, Variant & FEFO Expiry -->
@@ -478,10 +485,16 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             @foreach (var cs in vm.CrossSellItems)
                             {
+                                var csImg = ProductImageResolver.GetPrimaryImageUrl(cs.ImageUrl, null, null, cs.ProductName);
+                                var csWebp = ProductImageResolver.GetWebpImageUrl(csImg, null, null, cs.ProductName);
+                                var csAlt = ProductImageResolver.GetAltText(cs.ProductName);
                                 <div class="p-4 rounded-2xl border border-slate-200/90 hover:border-magenta-accent/60 bg-gradient-to-b from-white to-slate-50/50 hover:shadow-md transition-all flex flex-col justify-between space-y-3 group">
                                     <div>
                                         <div class="relative aspect-square rounded-xl overflow-hidden bg-slate-100 mb-2.5">
-                                            <img src="@cs.ImageUrl" alt="@cs.ProductName" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                            <picture class="block w-full h-full">
+                                                <source srcset="@csWebp" type="image/webp" />
+                                                <img src="@csImg" alt="@csAlt" width="240" height="240" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                            </picture>
                                             <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-magenta-accent text-white text-[10px] font-bold shadow-2xs">
                                                 @cs.BadgeText
                                             </span>

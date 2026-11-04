@@ -94,8 +94,8 @@ namespace Omnichannel.Web.ViewComponents
                                     {
                                         Title = "Bừng Sáng Nhan Sắc Mùa Hè 2026",
                                         Subtitle = "Ưu đãi độc quyền đến 40% cho bộ sưu tập làm đẹp cao cấp",
-                                        DesktopImageUrl = "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&q=80",
-                                        ImageUrl = "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&q=80",
+                                        DesktopImageUrl = "/images/banners/hero-banner-summer-beauty.jpg",
+                                        ImageUrl = "/images/banners/hero-banner-summer-beauty.jpg",
                                         LinkUrl = "/category/cham-soc-da",
                                         ButtonText = "Khám Phá Ngay"
                                     },
@@ -103,8 +103,8 @@ namespace Omnichannel.Web.ViewComponents
                                     {
                                         Title = "Chu Trình K-Beauty Chuẩn Spa",
                                         Subtitle = "Nuôi dưỡng làn da căng mọng ngậm nước với tinh chất quý giá",
-                                        DesktopImageUrl = "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=1600&q=80",
-                                        ImageUrl = "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=1600&q=80",
+                                        DesktopImageUrl = "/images/banners/banner-routine-kbeauty.jpg",
+                                        ImageUrl = "/images/banners/banner-routine-kbeauty.jpg",
                                         LinkUrl = "/category/trang-diem",
                                         ButtonText = "Mua Ngay"
                                     }

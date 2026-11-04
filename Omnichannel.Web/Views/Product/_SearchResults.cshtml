@@ -55,13 +55,23 @@
             <div class="space-y-1.5 max-h-[380px] overflow-y-auto pr-1 divide-y divide-slate-100/80">
                 @foreach (var p in Model.Products)
                 {
+                    var pImg = ProductImageResolver.GetThumbnailImageUrl(p.ThumbnailUrl, null, p.Slug, p.Name);
+                    var pWebp = ProductImageResolver.GetWebpImageUrl(pImg, null, p.Slug, p.Name);
+                    var pAlt = ProductImageResolver.GetAltText(p.Name, p.ManufacturerName, p.CategoryName, null, p.Slug);
                     <a href="/san-pham/@p.Slug" class="flex items-center gap-3.5 p-2.5 rounded-xl hover:bg-pastel-rose/80 transition group border border-transparent hover:border-pink-100">
                         <!-- Product Thumbnail -->
                         <div class="relative shrink-0">
-                            <img src="@p.ThumbnailUrl" 
-                                 alt="@p.Name" 
-                                 class="w-14 h-14 rounded-xl object-cover border border-slate-200/80 group-hover:border-magenta-accent/40 shadow-xs transition duration-200 group-hover:scale-105" 
-                                 loading="lazy" />
+                            <picture>
+                                <source srcset="@pWebp" type="image/webp" />
+                                <img src="@pImg" 
+                                     alt="@pAlt" 
+                                     width="56"
+                                     height="56"
+                                     decoding="async"
+                                     loading="lazy"
+                                     onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';"
+                                     class="w-14 h-14 rounded-xl object-cover border border-slate-200/80 group-hover:border-magenta-accent/40 shadow-xs transition duration-200 group-hover:scale-105" />
+                            </picture>
                             <span class="absolute -top-1 -left-1 text-[8px] bg-charcoal text-white font-bold px-1 rounded-sm shadow-xs">
                                 FEFO
                             </span>

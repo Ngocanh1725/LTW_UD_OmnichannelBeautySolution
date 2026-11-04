@@ -753,3 +753,53 @@ Dưới đây là danh sách toàn bộ các sản phẩm đang bị hiển th�
 | **Sửa toàn bộ tham chiếu gãy trong Code & Views** | 19 chỗ `/images/default-product.png`, 9 chỗ `/images/branding/default-product.png`, 2 chỗ `/images/placeholder-product.png`, 9 ảnh demo 404 trong `CustomerController` & `WishlistController` | Thay thế toàn bộ bằng lời gọi qua Helper/Resolver chuẩn hoặc hằng số `ProductImageSourceRegistry.PlaceholderUrl` (`/images/product-placeholder.svg`), và cập nhật 9 ảnh demo sang đúng đường dẫn thật trong `/images/products/{category}/...`. |
 | **Đồng bộ `DbInitializer.cs` & Dữ liệu SQL (`OmnichannelBeautyDb`)** | `Products.ThumbnailUrl` trỏ vào `/images/real_products/...` (97 dòng, 6 dòng 404, 1 dòng placeholder `Id=98`); `MediaAssets` bị ghi đè bởi thư mục B; `OrderReturnRequests` trỏ `/images/products/serum-b5.jpg` (404) | Cập nhật logic seed idempotent trong `DbInitializer.cs` (chỉ quét `/images/products/**`, không bao giờ quét `real_products`); cập nhật `Products.ThumbnailUrl` của cả **98/98 sản phẩm** (kể cả `Id=98` Silcot và 6 SP bị 404) về đúng `/images/products/{category}/{fileName}`; đồng bộ lại `MediaAssets.BinaryData` từ đúng file chuẩn trong A; sửa `OrderReturnRequests.EvidenceImagesJson` về ảnh thật. |
 
+
+---
+
+## VI. KẾT QUẢ SAU HỢP NHẤT & TỐI ƯU HÓA (PHIÊN 2 & PHIÊN 3)
+
+### 6.1. Bảng so sánh Trước và Sau hợp nhất & chuẩn hóa hình ảnh
+
+| Chỉ tiêu đo lường | Trước khi thực hiện (Phiên 1) | Sau hợp nhất & tối ưu (Phiên 2 & Phiên 3) | Đánh giá kết quả |
+| :--- | :--- | :--- | :--- |
+| **Số thư mục chứa ảnh sản phẩm** | **3 thư mục** (`wwwroot/images/products/**`, `wwwroot/images/real_products/`, `Real_Products_Images/`) | **DUY NHẤT 1 thư mục chuẩn:** `Omnichannel.Web\wwwroot\images\products\{skincare\|makeup\|perfume\|hair-body}\` (Đã xóa hoàn toàn 2 thư mục trùng lặp B & C) | ✅ **Đạt 100%** |
+| **Tổng số file ảnh trên đĩa** | **258 file** ảnh sản phẩm (rải rác ở 3 thư mục, nhiều bản trùng lặp & ảnh giả Unsplash) | **173 file** trong `wwwroot/images/products/**`:<br>• **84 ảnh gốc chuẩn** (`.jpg`/`.png`)<br>• **84 bản `.webp` song hành**<br>• **2 file `_placeholder.webp` (`5.73 KB`) & `_placeholder.jpg` (`35.29 KB`)**<br>• **3 file mồ côi** đang chờ xác nhận xóa tại Điểm dừng Phiên 3 | ✅ **Chuẩn hóa 1:1 + WebP** |
+| **Dung lượng mỗi ảnh & Độ phân giải** | Có ảnh nặng `310.56 KB` (`2560x2560`), 8 ảnh cạnh ngắn `< 600px`, 48/90 ảnh lệch tỷ lệ chữ nhật (`3:4`, `9:16`), 16 ảnh lệch Magic Bytes | • **100% ảnh sản phẩm chuẩn tỷ lệ 1:1 (`1000×1000px`), nền sáng `#FFFFFF`**<br>• **100% ảnh sản phẩm, banner, category `≤ 150 KB`** (lớn nhất `142.34 KB`, trung bình `.webp` chỉ `~32 KB`/ảnh)<br>• **100% đúng định dạng Magic Bytes** | ✅ **Đạt 100%** |
+| **Tổng dung lượng ảnh sản phẩm** | `22.90 MB` (3 thư mục A + B + C) | **`6.19 MB` cho bộ 85 ảnh chuẩn (`.jpg`/`.png`)** + **`2.79 MB` cho bộ 85 ảnh `.webp`** (Tổng cả 2 định dạng + 3 ảnh mồ côi: `9.16 MB`, giảm **60%** dung lượng lưu trữ) | ✅ **Tối ưu hiệu năng cao** |
+| **Tham chiếu ảnh `real_products` / `Real_Products_Images` trong code** | Hàng trăm tham chiếu trong `DbInitializer.cs`, `CartController.cs`, `product_image_registry.json`, `scripts/*.ps1` | **`0` kết quả** (`git grep -i "real_products\|Real_Products_Images"` trả về 0 trong toàn bộ code & script) | ✅ **Sạch 100%** |
+| **Số tham chiếu ảnh gãy (HTTP 404)** | **24 nhóm URL gãy (404)** tại 58 vị trí trong DB và mã nguồn | **`0` ảnh trả về 404** trên toàn bộ DB và các trang Storefront/Admin | ✅ **0 lỗi 404** |
+| **Số ảnh sai nội dung thương hiệu / dùng chung sai** | **42 sản phẩm** hiển thị sai ảnh (do lấy từ `real_products`), **13 ảnh** bị dùng chung cho 27 sản phẩm | **`0` ảnh sai nội dung thương hiệu, `0` ảnh thực tế bị dùng chung cho nhiều sản phẩm**:<br>• **84 sản phẩm** có ảnh thật riêng biệt 1–1 đúng sản phẩm<br>• **14 sản phẩm** chưa có ảnh riêng được tách sang dùng `/images/products/_placeholder.webp` | ✅ **Chính xác 100%** |
+| **Nguồn sự thật duy nhất (Single Source of Truth)** | Ghép chuỗi thủ công rải rác, 4 đường dẫn fallback khác nhau (`/images/default-product.png`, `/images/product-placeholder.svg`...) | Duy nhất **`IProductImageResolver`** (`ProductImageResolver` + `ProductImageSourceRegistry`) + **`product_image_registry.json`** (đồng bộ đủ 98 SKU) + fallback `/images/products/_placeholder.webp` | ✅ **Kiến trúc chuẩn Clean Architecture** |
+| **Tối ưu hiển thị WebP, CLS & SEO** | Thẻ `<img>` đơn thuần, thiếu `.webp`, thiếu `width`/`height` ở nhiều nơi, `alt` chỉ có tên sản phẩm | • Thẻ `<picture>` (`<source type="image/webp">` + `<img>` fallback)<br>• `fetchpriority="high"` cho ảnh LCP (Hero Banner, ảnh chính PDP), `loading="lazy" decoding="async"` cho ảnh dưới màn hình đầu, đầy đủ `width`/`height` chống CLS<br>• Alt text tiếng Việt chuẩn SEO (`"{Tên sản phẩm} - Chính hãng {Thương hiệu}"`) & Schema.org Product `image` URL tuyệt đối | ✅ **Chuẩn Core Web Vitals & SEO** |
+
+---
+
+### 6.2. Danh sách 3 ảnh mồ côi trong `wwwroot/images/products/skincare/` (Trình duyệt xóa tại Điểm dừng Phiên 3)
+
+| # | Đường dẫn tương đối trong `wwwroot/images/products/` | Kích thước | Độ phân giải | Lý do trở thành ảnh mồ côi |
+| :---: | :--- | :---: | :---: | :--- |
+| 1 | `skincare/dung-dich-duong-am-hada-labo-advanced-nourish-170ml.jpg` | `61.24 KB` | `1000×1000` | Ảnh chai Lotion dưỡng ẩm 170ml trắng, trong khi sản phẩm `Id=8` (`ROH-HDL-100`) trong DB là *Kem Rửa Mặt Hada Labo Advanced Nourish 80g* (dạng tuýp) và `Id=25` (`SKU-SKIN-HDL-009`) dùng ảnh chai vàng *Gokujyun Premium 170ml*. |
+| 2 | `skincare/kem-duong-phuc-hoi-la-roche-posay-cicaplast-baume-b5-plus.jpg` | `81.91 KB` | `736×736` | Bản trùng sản phẩm của `kem-duong-phuc-hoi-la-roche-posay-cicaplast-baume-b5-plus-40ml.jpg` (đã gắn cho `SKU-SKIN-LRP-010`), tên file thiếu dung tích `-40ml`. |
+| 3 | `skincare/tay-te-bao-chet-paulas-choice-2-bha-liquid-118ml.png` | `42.60 KB` | `735×919` | Bản trùng sản phẩm của `dung-dich-tay-te-bao-chet-paulas-choice-skin-perfecting-2-bha-118ml.png` (đã gắn cho `SKU-SKIN-PAU-008`), tên file rút gọn cũ. |
+
+---
+
+### 6.3. Danh sách 14 sản phẩm đang dùng ảnh dự phòng `/images/products/_placeholder.webp` (Cần bổ sung ảnh thật)
+
+#### Nhóm A — 7 sản phẩm độc lập chưa có ảnh chụp thực tế riêng trong kho ảnh:
+1. **`Id=4` | `AMO-INN-AIR`** — *Son Kem Siêu Nhẹ Môi Innisfree Airy Matte Tint 3.8g* (`Innisfree`, slug: `son-kem-innisfree-airy-matte-tint`) — trước đây dùng nhầm ảnh son Rom&nd Zero Velvet Tint.
+2. **`Id=7` | `LOR-MCL-400`** — *Nước Tẩy Trang L'Oréal Paris Micellar Water 3-in-1 400ml* (`L'Oréal Paris`, slug: `nuoc-tay-trang-loreal-micellar-water-3in1`) — trước đây dùng nhầm ảnh nước tẩy trang Bioderma Sensibio H2O.
+3. **`Id=8` | `ROH-HDL-100`** — *Kem Rửa Mặt Dưỡng Ẩm Chuyên Sâu Hada Labo Advanced Nourish 80g* (`Hada Labo`, slug: `kem-rua-mat-hada-labo-advanced-nourish-80g`) — sản phẩm là tuýp kem rửa mặt 80g, chưa có ảnh tuýp 80g (trước đây dùng ảnh chai lotion 170ml).
+4. **`Id=10` | `ROH-ACNES-WASH`** — *Gel Rửa Mặt Ngừa Khuẩn Mụn Acnes Creamy Wash 100g* (`Acnes`, slug: `gel-rua-mat-ngua-khuan-mun-acnes-creamy-wash`) — trước đây dùng nhầm ảnh gel rửa mặt COSRX Low pH.
+5. **`Id=14` | `ROH-SS-SKINA`** — *Sữa Chống Nắng Kiềm Dầu Skin Aqua Tone Up UV Milk SPF50+ 50g* (`Skin Aqua`, slug: `sua-chong-nang-skin-aqua-tone-up-uv-milk`) — trước đây dùng nhầm ảnh sữa chống nắng Anessa 60ml.
+6. **`Id=15` | `LOR-LRP-ANTHE`** — *Kem Chống Nắng Kiểm Soát Dầu La Roche-Posay Anthelios XL 50ml* (`La Roche-Posay`, slug: `kem-chong-nang-la-roche-posay-anthelios-xl`) — trước đây dùng chung ảnh bản Anthelios UVmune 400 với `Id=36` (`SKU-SKIN-LRP-020`).
+7. **`Id=16` | `SKU-PROD-3293`** — *Serum Rau Má Phục Hồi Da Nhạy Cảm Centella 50ml* (`Skin1004`, slug: `serum-rau-ma-phuc-hoi-da-nhay-cam-centella-50ml`) — bản dung tích 50ml, trước đây dùng chung ảnh bản 100ml với `Id=43` (`SKU-SKIN-S10-027`).
+
+#### Nhóm B — 7 bản ghi sản phẩm từ seed ban đầu (`Id=1..13`) trùng dòng sản phẩm với bộ Catalog chính (`Id=17..61`), đã tách sang `_placeholder.webp` để đảm bảo nguyên tắc 1 ảnh thật chỉ gắn cho 1 sản phẩm duy nhất:
+8. **`Id=1` | `AMO-ROM-VT02`** — *Son Kem Lì Rom&nd Zero Velvet Tint - #02 Joyful 5.5g* (trùng dòng với `Id=50` `SKU-LIP-ROM-034` đang giữ ảnh thật `son-kem-li-romand-zero-velvet-tint-02-joyful-55g.jpg`).
+9. **`Id=2` | `AMO-ROM-JLT`** — *Son Tint Bóng Mọng Nước Rom&nd Juicy Lasting Tint 5.5g (Bảng Màu Trái Cây)* (trùng dòng với `Id=51` `SKU-LIP-ROM-035` đang giữ ảnh thật `son-tint-bong-romand-juicy-lasting-tint-06-figfig-55g.jpg`).
+10. **`Id=6` | `LOR-HYA-B5`** — *Serum Phục Hồi Da La Roche-Posay Hyalu B5 Pure 30ml* (trùng dòng với `Id=18` `SKU-SKIN-LRP-002` đang giữ ảnh thật `serum-phuc-hoi-la-roche-posay-hyalu-b5-pure-30ml.jpg`).
+11. **`Id=9` | `AMO-LAN-WSLEEP`** — *Mặt Nạ Ngủ Cấp Ẩm Chuyên Sâu Laneige Water Sleeping Mask EX 70ml* (trùng dòng với `Id=37` `SKU-SKIN-LAN-021` đang giữ ảnh thật `mat-na-ngu-laneige-water-sleeping-mask-ex-70ml.jpg`).
+12. **`Id=11` | `AMO-LAN-CUSH21`** — *Phấn Nước Kiềm Dầu Laneige Neo Cushion Matte SPF42 15g #21N* (trùng dòng với `Id=57` `SKU-MAK-LAN-041` đang giữ ảnh thật `phan-nuoc-laneige-neo-cushion-matte-spf42-15g-x-2.jpg`).
+13. **`Id=12` | `LOR-INF-FND`** — *Kem Nền Siêu Bền Màu L'Oréal Infallible 32H Fresh Wear 30ml* (trùng dòng với `Id=60` `SKU-MAK-LOR-044` đang giữ ảnh thật `kem-nen-loreal-infallible-32h-fresh-wear-foundation-30ml.jpg`).
+14. **`Id=13` | `AMO-INN-POWDER`** — *Phấn Phủ Bột Kiềm Dầu Innisfree No-Sebum Mineral Powder 5g* (trùng dòng với `Id=61` `SKU-MAK-INN-045` đang giữ ảnh thật `phan-phu-bot-khoang-innisfree-no-sebum-mineral-powder-5g.jpg`).

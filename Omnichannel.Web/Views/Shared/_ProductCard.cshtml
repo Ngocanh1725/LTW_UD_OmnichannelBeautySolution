@@ -8,14 +8,10 @@
         ? $"/san-pham/{Model.Slug}" 
         : $"/Product/Detail/{Model.Id}";
 
-    // Xử lý ảnh đại diện có fallback chuẩn SVG: Ưu tiên ảnh tĩnh ngữ nghĩa /images/ phục vụ nhanh và chuẩn SEO
-    var imageUrl = (!string.IsNullOrEmpty(Model.ThumbnailUrl) && Model.ThumbnailUrl.StartsWith("/images/"))
-        ? Model.ThumbnailUrl
-        : (Model.ThumbnailMediaId.HasValue 
-            ? $"/media/{Model.ThumbnailMediaId}" 
-            : (!string.IsNullOrEmpty(Model.ThumbnailUrl) 
-                ? Model.ThumbnailUrl 
-                : "/images/product-placeholder.svg"));
+    // Phân giải đường dẫn ảnh chuẩn, bản WebP và Alt Text tiếng Việt chuẩn SEO qua IProductImageResolver duy nhất
+    var imageUrl = ProductImageResolver.GetPrimaryImageUrl(Model.ThumbnailUrl, Model.Sku, Model.Slug, Model.Name);
+    var webpUrl = ProductImageResolver.GetWebpImageUrl(imageUrl, Model.Sku, Model.Slug, Model.Name);
+    var altText = ProductImageResolver.GetAltText(Model.Name, Model.Brand?.Name, Model.Category?.Name, Model.Sku, Model.Slug);
 
     // Lấy lô hạn dùng FEFO gần nhất còn hàng
     var bestBatch = Model.Batches?.Where(b => b.CurrentQuantity > 0).OrderBy(b => b.ExpDate).FirstOrDefault()
@@ -100,16 +96,19 @@
     <!-- 1. THUMBNAIL CONTAINER -->
     <div class="product-thumb-container relative aspect-square overflow-hidden bg-slate-50 flex items-center justify-center p-3" style="aspect-ratio: 1/1;">
         <!-- Ảnh bọc trong thẻ <a> đến trang chi tiết -->
-        <a href="@productUrl" class="block w-full h-full relative z-10" title="@Model.Name">
-            <img src="@imageUrl" 
-                 alt="@Model.Name" 
-                 width="400" 
-                 height="400" 
-                 loading="lazy" 
-                 decoding="async" 
-                 onerror="this.onerror=null;this.src='/images/product-placeholder.svg';" 
-                 class="product-thumb-img w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 will-change-transform" 
-                 itemprop="image" />
+        <a href="@productUrl" class="block w-full h-full relative z-10" title="@altText">
+            <picture class="block w-full h-full">
+                <source srcset="@webpUrl" type="image/webp" />
+                <img src="@imageUrl" 
+                     alt="@altText" 
+                     width="400" 
+                     height="400" 
+                     loading="lazy" 
+                     decoding="async" 
+                     onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" 
+                     class="product-thumb-img w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 will-change-transform" 
+                     itemprop="image" />
+            </picture>
         </a>
 
         <!-- Badges Stack (Sale, Hot, FEFO) -->

@@ -301,10 +301,10 @@
                             <div class="flex items-start sm:items-center gap-4">
                                 <!-- Thumbnail -->
                                 <div class="w-16 h-16 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex-shrink-0 flex items-center justify-center">
-                                    <img src="@(string.IsNullOrWhiteSpace(item.ThumbnailUrl) ? "/images/product-placeholder.svg" : item.ThumbnailUrl)" 
+                                    <img src="@(string.IsNullOrWhiteSpace(item.ThumbnailUrl) ? "/images/products/_placeholder.webp" : item.ThumbnailUrl)" 
                                          alt="@item.ProductName" 
                                          class="w-full h-full object-cover"
-                                         onerror="this.onerror=null;this.src='/images/product-placeholder.svg';" />
+                                         onerror="this.onerror=null;this.src='/images/products/_placeholder.webp';" />
                                 </div>
 
                                 <!-- Name & SKU -->

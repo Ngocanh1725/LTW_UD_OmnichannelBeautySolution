@@ -90,20 +90,25 @@
                 @foreach (var prod in products)
                 {
                     var prodUrl = !string.IsNullOrEmpty(prod.Slug) ? $"/san-pham/{prod.Slug}" : $"/Product/Detail/{prod.ProductId}";
-                    var img = !string.IsNullOrEmpty(prod.ImageUrl) ? prod.ImageUrl : "/images/product-placeholder.svg";
+                    var img = ProductImageResolver.GetPrimaryImageUrl(prod.ImageUrl, null, prod.Slug, prod.ProductName);
+                    var webpImg = ProductImageResolver.GetWebpImageUrl(img, null, prod.Slug, prod.ProductName);
+                    var altText = ProductImageResolver.GetAltText(prod.ProductName, prod.BrandName, null, null, prod.Slug);
 
                     <article class="bg-white rounded-3xl border border-white/20 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between overflow-hidden group">
                         <!-- Top Thumbnail -->
                         <div class="relative aspect-square overflow-hidden bg-slate-50 p-3 flex items-center justify-center" style="aspect-ratio: 1/1;">
-                            <a href="@prodUrl" class="block w-full h-full relative z-10" title="@prod.ProductName">
-                                <img src="@img" 
-                                     alt="@prod.ProductName" 
-                                     width="400" 
-                                     height="400" 
-                                     loading="lazy" 
-                                     decoding="async"
-                                     onerror="this.onerror=null;this.src='/images/product-placeholder.svg';" 
-                                     class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
+                            <a href="@prodUrl" class="block w-full h-full relative z-10" title="@altText">
+                                <picture class="block w-full h-full">
+                                    <source srcset="@webpImg" type="image/webp" />
+                                    <img src="@img" 
+                                         alt="@altText" 
+                                         width="400" 
+                                         height="400" 
+                                         loading="lazy" 
+                                         decoding="async"
+                                         onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" 
+                                         class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
+                                </picture>
                             </a>
 
                             <!-- Badge Giảm Giá -->

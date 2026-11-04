@@ -3,161 +3,161 @@
     "sku": "AMO-ROM-VT02",
     "name": "Son Kem Lì Rom&nd Zero Velvet Tint - #02 Joyful 5.5g",
     "slug": "son-kem-li-romand-zero-velvet-tint-02-joyful",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "products/makeup",
-    "fileName": "son-kem-li-romand-zero-velvet-tint-02-joyful-55g.jpg",
-    "directImageUrl": "/images/products/makeup/son-kem-li-romand-zero-velvet-tint-02-joyful-55g.jpg",
-    "altText": "Son Kem Lì Rom&nd Zero Velvet Tint - #02 Joyful 5.5g chính hãng"
+    "brandName": "Rom&nd",
+    "categorySubfolder": "products",
+    "fileName": "_placeholder.webp",
+    "directImageUrl": "/images/products/_placeholder.webp",
+    "altText": "Son Kem Lì Rom&nd Zero Velvet Tint - #02 Joyful 5.5g - Chính hãng Rom&nd"
   },
   {
     "sku": "AMO-ROM-JLT",
     "name": "Son Tint Bóng Mọng Nước Rom&nd Juicy Lasting Tint 5.5g (Bảng Màu Trái Cây)",
     "slug": "son-bong-romand-juicy-lasting-tint",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "products/makeup",
-    "fileName": "son-tint-bong-romand-juicy-lasting-tint-06-figfig-55g.jpg",
-    "directImageUrl": "/images/products/makeup/son-tint-bong-romand-juicy-lasting-tint-06-figfig-55g.jpg",
-    "altText": "Son Tint Bóng Mọng Nước Rom&nd Juicy Lasting Tint 5.5g (Bảng Màu Trái Cây) chính hãng"
+    "brandName": "Rom&nd",
+    "categorySubfolder": "products",
+    "fileName": "_placeholder.webp",
+    "directImageUrl": "/images/products/_placeholder.webp",
+    "altText": "Son Tint Bóng Mọng Nước Rom&nd Juicy Lasting Tint 5.5g (Bảng Màu Trái Cây) - Chính hãng Rom&nd"
   },
   {
     "sku": "LOR-COL-666",
     "name": "Son Thỏi Mịn Mờ Cao Cấp L'Oréal Paris Color Riche 3.7g",
     "slug": "son-thoi-loreal-paris-color-riche",
-    "brandName": "L'Oréal",
+    "brandName": "L'Oréal Paris",
     "categorySubfolder": "products/makeup",
     "fileName": "son-thoi-loreal-paris-color-riche-matte-37g.jpg",
-    "directImageUrl": "https://media.hcdn.vn/wysiwyg/HaNguyen2/son-moi-l-oreal-min-li-cang-muot-1-7g-5.jpg",
-    "altText": "Son Thỏi Mịn Mờ Cao Cấp L'Oréal Paris Color Riche 3.7g chính hãng"
+    "directImageUrl": "/images/products/makeup/son-thoi-loreal-paris-color-riche-matte-37g.jpg",
+    "altText": "Son Thỏi Mịn Mờ Cao Cấp L'Oréal Paris Color Riche 3.7g - Chính hãng L'Oréal Paris"
   },
   {
     "sku": "AMO-INN-AIR",
     "name": "Son Kem Siêu Nhẹ Môi Innisfree Airy Matte Tint 3.8g",
     "slug": "son-kem-innisfree-airy-matte-tint",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "products/makeup",
-    "fileName": "son-kem-li-romand-zero-velvet-tint-02-joyful-55g.jpg",
-    "directImageUrl": "/images/products/makeup/son-kem-li-romand-zero-velvet-tint-02-joyful-55g.jpg",
-    "altText": "Son Kem Siêu Nhẹ Môi Innisfree Airy Matte Tint 3.8g chính hãng"
+    "brandName": "Innisfree",
+    "categorySubfolder": "products",
+    "fileName": "_placeholder.webp",
+    "directImageUrl": "/images/products/_placeholder.webp",
+    "altText": "Son Kem Siêu Nhẹ Môi Innisfree Airy Matte Tint 3.8g - Chính hãng Innisfree"
   },
   {
     "sku": "ROH-LIP-ICE",
     "name": "Son Dưỡng Chuyển Màu Tự Nhiên LipIce Sheer Color 2.4g",
     "slug": "son-duong-lipice-sheer-color",
-    "brandName": "Rohto",
+    "brandName": "LipIce",
     "categorySubfolder": "products/makeup",
     "fileName": "son-duong-chuyen-mau-lipice-sheer-color-24g.jpg",
-    "directImageUrl": "https://media.hcdn.vn/catalog/product/s/o/son-duong-co-mau-lipice-2-4g.jpg",
-    "altText": "Son Dưỡng Chuyển Màu Tự Nhiên LipIce Sheer Color 2.4g chính hãng"
+    "directImageUrl": "/images/products/makeup/son-duong-chuyen-mau-lipice-sheer-color-24g.jpg",
+    "altText": "Son Dưỡng Chuyển Màu Tự Nhiên LipIce Sheer Color 2.4g - Chính hãng LipIce"
   },
   {
     "sku": "LOR-HYA-B5",
     "name": "Serum Phục Hồi Da La Roche-Posay Hyalu B5 Pure 30ml",
     "slug": "serum-phuc-hoi-da-la-roche-posay-hyalu-b5-30ml",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "products/skincare",
-    "fileName": "serum-phuc-hoi-la-roche-posay-hyalu-b5-pure-30ml.jpg",
-    "directImageUrl": "/images/products/skincare/serum-phuc-hoi-la-roche-posay-hyalu-b5-pure-30ml.jpg",
-    "altText": "Serum Phục Hồi Da La Roche-Posay Hyalu B5 Pure 30ml chính hãng"
+    "brandName": "La Roche-Posay",
+    "categorySubfolder": "products",
+    "fileName": "_placeholder.webp",
+    "directImageUrl": "/images/products/_placeholder.webp",
+    "altText": "Serum Phục Hồi Da La Roche-Posay Hyalu B5 Pure 30ml - Chính hãng La Roche-Posay"
   },
   {
     "sku": "LOR-MCL-400",
     "name": "Nước Tẩy Trang L'Oréal Paris Micellar Water 3-in-1 400ml",
     "slug": "nuoc-tay-trang-loreal-paris-micellar-water-400ml",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "products/skincare",
-    "fileName": "nuoc-tay-trang-bioderma-sensibio-h2o-500ml.png",
-    "directImageUrl": "/images/products/skincare/nuoc-tay-trang-bioderma-sensibio-h2o-500ml.png",
-    "altText": "Nước Tẩy Trang L'Oréal Paris Micellar Water 3-in-1 400ml chính hãng"
+    "brandName": "L'Oréal Paris",
+    "categorySubfolder": "products",
+    "fileName": "_placeholder.webp",
+    "directImageUrl": "/images/products/_placeholder.webp",
+    "altText": "Nước Tẩy Trang L'Oréal Paris Micellar Water 3-in-1 400ml - Chính hãng L'Oréal Paris"
   },
   {
     "sku": "ROH-HDL-100",
     "name": "Kem Rửa Mặt Dưỡng Ẩm Chuyên Sâu Hada Labo Advanced Nourish 80g",
     "slug": "kem-rua-mat-hada-labo-advanced-nourish-80g",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "products/skincare",
-    "fileName": "dung-dich-duong-am-hada-labo-advanced-nourish-170ml.jpg",
-    "directImageUrl": "/images/products/skincare/dung-dich-duong-am-hada-labo-advanced-nourish-170ml.jpg",
-    "altText": "Kem Rửa Mặt Dưỡng Ẩm Chuyên Sâu Hada Labo Advanced Nourish 80g chính hãng"
+    "brandName": "Hada Labo",
+    "categorySubfolder": "products",
+    "fileName": "_placeholder.webp",
+    "directImageUrl": "/images/products/_placeholder.webp",
+    "altText": "Kem Rửa Mặt Dưỡng Ẩm Chuyên Sâu Hada Labo Advanced Nourish 80g - Chính hãng Hada Labo"
   },
   {
     "sku": "AMO-LAN-WSLEEP",
     "name": "Mặt Nạ Ngủ Cấp Ẩm Chuyên Sâu Laneige Water Sleeping Mask EX 70ml",
     "slug": "mat-na-ngu-laneige-water-sleeping-mask-70ml",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "products/skincare",
-    "fileName": "mat-na-ngu-laneige-water-sleeping-mask-ex-70ml.jpg",
-    "directImageUrl": "/images/products/skincare/mat-na-ngu-laneige-water-sleeping-mask-ex-70ml.jpg",
-    "altText": "Mặt Nạ Ngủ Cấp Ẩm Chuyên Sâu Laneige Water Sleeping Mask EX 70ml chính hãng"
+    "brandName": "Laneige",
+    "categorySubfolder": "products",
+    "fileName": "_placeholder.webp",
+    "directImageUrl": "/images/products/_placeholder.webp",
+    "altText": "Mặt Nạ Ngủ Cấp Ẩm Chuyên Sâu Laneige Water Sleeping Mask EX 70ml - Chính hãng Laneige"
   },
   {
     "sku": "ROH-ACNES-WASH",
     "name": "Gel Rửa Mặt Ngừa Khuẩn Mụn Acnes Creamy Wash 100g",
     "slug": "gel-rua-mat-ngua-mun-acnes-creamy-wash-100g",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "products/skincare",
-    "fileName": "gel-rua-mat-cosrx-low-ph-good-morning-gel-cleanser-150ml.jpg",
-    "directImageUrl": "/images/products/skincare/gel-rua-mat-cosrx-low-ph-good-morning-gel-cleanser-150ml.jpg",
-    "altText": "Gel Rửa Mặt Ngừa Khuẩn Mụn Acnes Creamy Wash 100g chính hãng"
+    "brandName": "Acnes",
+    "categorySubfolder": "products",
+    "fileName": "_placeholder.webp",
+    "directImageUrl": "/images/products/_placeholder.webp",
+    "altText": "Gel Rửa Mặt Ngừa Khuẩn Mụn Acnes Creamy Wash 100g - Chính hãng Acnes"
   },
   {
     "sku": "AMO-LAN-CUSH21",
     "name": "Phấn Nước Kiềm Dầu Laneige Neo Cushion Matte SPF42 15g #21N",
     "slug": "phan-nuoc-laneige-neo-cushion-matte-spf42-21n",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "products/makeup",
-    "fileName": "phan-nuoc-laneige-neo-cushion-matte-spf42-15g-x-2.jpg",
-    "directImageUrl": "/images/products/makeup/phan-nuoc-laneige-neo-cushion-matte-spf42-15g-x-2.jpg",
-    "altText": "Phấn Nước Kiềm Dầu Laneige Neo Cushion Matte SPF42 15g #21N chính hãng"
+    "brandName": "Laneige",
+    "categorySubfolder": "products",
+    "fileName": "_placeholder.webp",
+    "directImageUrl": "/images/products/_placeholder.webp",
+    "altText": "Phấn Nước Kiềm Dầu Laneige Neo Cushion Matte SPF42 15g #21N - Chính hãng Laneige"
   },
   {
     "sku": "LOR-INF-FND",
     "name": "Kem Nền Siêu Bền Màu L'Oréal Infallible 32H Fresh Wear 30ml",
     "slug": "kem-nen-loreal-infallible-32h-fresh-wear-30ml",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "products/makeup",
-    "fileName": "kem-nen-loreal-infallible-32h-fresh-wear-foundation-30ml.jpg",
-    "directImageUrl": "/images/products/makeup/kem-nen-loreal-infallible-32h-fresh-wear-foundation-30ml.jpg",
-    "altText": "Kem Nền Siêu Bền Màu L'Oréal Infallible 32H Fresh Wear 30ml chính hãng"
+    "brandName": "L'Oréal Paris",
+    "categorySubfolder": "products",
+    "fileName": "_placeholder.webp",
+    "directImageUrl": "/images/products/_placeholder.webp",
+    "altText": "Kem Nền Siêu Bền Màu L'Oréal Infallible 32H Fresh Wear 30ml - Chính hãng L'Oréal Paris"
   },
   {
     "sku": "AMO-INN-POWDER",
     "name": "Phấn Phủ Bột Kiềm Dầu Innisfree No-Sebum Mineral Powder 5g",
     "slug": "phan-phu-bot-innisfree-no-sebum-mineral-powder-5g",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "products/makeup",
-    "fileName": "phan-phu-bot-khoang-innisfree-no-sebum-mineral-powder-5g.jpg",
-    "directImageUrl": "/images/products/makeup/phan-phu-bot-khoang-innisfree-no-sebum-mineral-powder-5g.jpg",
-    "altText": "Phấn Phủ Bột Kiềm Dầu Innisfree No-Sebum Mineral Powder 5g chính hãng"
+    "brandName": "Innisfree",
+    "categorySubfolder": "products",
+    "fileName": "_placeholder.webp",
+    "directImageUrl": "/images/products/_placeholder.webp",
+    "altText": "Phấn Phủ Bột Kiềm Dầu Innisfree No-Sebum Mineral Powder 5g - Chính hãng Innisfree"
   },
   {
     "sku": "ROH-SS-SKINA",
     "name": "Sữa Chống Nắng Kiềm Dầu Skin Aqua Tone Up UV Milk SPF50+ 50g",
     "slug": "sua-chong-nang-skin-aqua-tone-up-uv-milk-50g",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "products/skincare",
-    "fileName": "sua-chong-nang-anessa-perfect-uv-sunscreen-skincare-milk-spf50-60ml.jpg",
-    "directImageUrl": "/images/products/skincare/sua-chong-nang-anessa-perfect-uv-sunscreen-skincare-milk-spf50-60ml.jpg",
-    "altText": "Sữa Chống Nắng Kiềm Dầu Skin Aqua Tone Up UV Milk SPF50+ 50g chính hãng"
+    "brandName": "Skin Aqua",
+    "categorySubfolder": "products",
+    "fileName": "_placeholder.webp",
+    "directImageUrl": "/images/products/_placeholder.webp",
+    "altText": "Sữa Chống Nắng Kiềm Dầu Skin Aqua Tone Up UV Milk SPF50+ 50g - Chính hãng Skin Aqua"
   },
   {
     "sku": "LOR-LRP-ANTHE",
     "name": "Kem Chống Nắng Kiểm Soát Dầu La Roche-Posay Anthelios XL 50ml",
     "slug": "kem-chong-nang-la-roche-posay-anthelios-xl-50ml",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "products/skincare",
-    "fileName": "kem-chong-nang-la-roche-posay-anthelios-uvmune-400-oil-control-50ml.jpg",
-    "directImageUrl": "/images/products/skincare/kem-chong-nang-la-roche-posay-anthelios-uvmune-400-oil-control-50ml.jpg",
-    "altText": "Kem Chống Nắng Kiểm Soát Dầu La Roche-Posay Anthelios XL 50ml chính hãng"
+    "brandName": "La Roche-Posay",
+    "categorySubfolder": "products",
+    "fileName": "_placeholder.webp",
+    "directImageUrl": "/images/products/_placeholder.webp",
+    "altText": "Kem Chống Nắng Kiểm Soát Dầu La Roche-Posay Anthelios XL 50ml - Chính hãng La Roche-Posay"
   },
   {
     "sku": "SKU-PROD-3293",
-    "name": "Serum Rau Ma Phuc Hoi Da Nhay Cam Centella 50ml",
+    "name": "Serum Rau Má Phục Hồi Da Nhạy Cảm Centella 50ml",
     "slug": "serum-rau-ma-phuc-hoi-da-nhay-cam-centella-50ml",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "products/skincare",
-    "fileName": "tinh-chat-rau-ma-skin1004-madagascar-centella-ampoule-100ml.jpg",
-    "directImageUrl": "/images/products/skincare/tinh-chat-rau-ma-skin1004-madagascar-centella-ampoule-100ml.jpg",
-    "altText": "Serum Rau Ma Phuc Hoi Da Nhay Cam Centella 50ml chính hãng"
+    "brandName": "Skin1004",
+    "categorySubfolder": "products",
+    "fileName": "_placeholder.webp",
+    "directImageUrl": "/images/products/_placeholder.webp",
+    "altText": "Serum Rau Má Phục Hồi Da Nhạy Cảm Centella 50ml - Chính hãng Skin1004"
   },
   {
     "sku": "SKU-SKIN-ANE-001",
@@ -166,8 +166,8 @@
     "brandName": "Anessa",
     "categorySubfolder": "products/skincare",
     "fileName": "sua-chong-nang-anessa-perfect-uv-sunscreen-skincare-milk-spf50-60ml.jpg",
-    "directImageUrl": "https://bizweb.dktcdn.net/thumb/1024x1024/100/525/087/products/anessa-6a8c873e-d033-413d-9639-e85776d0c805.jpg",
-    "altText": "Sữa Chống Nắng Kiềm Dầu Anessa Perfect UV Sunscreen Skincare Milk SPF50+ PA++++ 60ml chính hãng"
+    "directImageUrl": "/images/products/skincare/sua-chong-nang-anessa-perfect-uv-sunscreen-skincare-milk-spf50-60ml.jpg",
+    "altText": "Sữa Chống Nắng Kiềm Dầu Anessa Perfect UV Sunscreen Skincare Milk SPF50+ PA++++ 60ml - Chính hãng Anessa"
   },
   {
     "sku": "SKU-SKIN-LRP-002",
@@ -176,8 +176,8 @@
     "brandName": "La Roche-Posay",
     "categorySubfolder": "products/skincare",
     "fileName": "serum-phuc-hoi-la-roche-posay-hyalu-b5-pure-30ml.jpg",
-    "directImageUrl": "https://cdn.nhathuoclongchau.com.vn/unsafe/2560x0/filters:quality(90):format(webp)/00021995_la_roche_posay_hyalu_b5_serum_30ml_mb049200_duong_chat_ho_tro_tai_tao_lan_da_giup_da_san_chac_va_d_3350_60b0_large_85574eba54.jpg",
-    "altText": "Serum Phục Hồi Tái Tạo Hàng Rào Ẩm La Roche-Posay Hyalu B5 Pure 30ml chính hãng"
+    "directImageUrl": "/images/products/skincare/serum-phuc-hoi-la-roche-posay-hyalu-b5-pure-30ml.jpg",
+    "altText": "Serum Phục Hồi Tái Tạo Hàng Rào Ẩm La Roche-Posay Hyalu B5 Pure 30ml - Chính hãng La Roche-Posay"
   },
   {
     "sku": "SKU-SKIN-KLA-003",
@@ -186,8 +186,8 @@
     "brandName": "Klairs",
     "categorySubfolder": "products/skincare",
     "fileName": "nuoc-hoa-hong-klairs-supple-preparation-unscented-toner-180ml.webp",
-    "directImageUrl": "https://klairsvietnam.vn/wp-content/uploads/2020/07/nuoc-hoa-hong-Klairs-Supple-Preparation-Unscented-Toner-180ml.webp",
-    "altText": "Nước Hoa Hồng Cấp Ẩm Không Mùi Klairs Supple Preparation Unscented Toner 180ml chính hãng"
+    "directImageUrl": "/images/products/skincare/nuoc-hoa-hong-klairs-supple-preparation-unscented-toner-180ml.webp",
+    "altText": "Nước Hoa Hồng Cấp Ẩm Không Mùi Klairs Supple Preparation Unscented Toner 180ml - Chính hãng Klairs"
   },
   {
     "sku": "SKU-SKIN-CER-004",
@@ -196,8 +196,8 @@
     "brandName": "CeraVe",
     "categorySubfolder": "products/skincare",
     "fileName": "sua-rua-mat-cerave-foaming-facial-cleanser-236ml.jpg",
-    "directImageUrl": "https://cdn.nhathuoclongchau.com.vn/unsafe/2560x0/filters:quality(90):format(webp)/cerave_6f1f3f3ea7.jpg",
-    "altText": "Sữa Rửa Mặt Cho Da Thường Đến Dầu Mụn CeraVe Foaming Facial Cleanser 236ml chính hãng"
+    "directImageUrl": "/images/products/skincare/sua-rua-mat-cerave-foaming-facial-cleanser-236ml.jpg",
+    "altText": "Sữa Rửa Mặt Cho Da Thường Đến Dầu Mụn CeraVe Foaming Facial Cleanser 236ml - Chính hãng CeraVe"
   },
   {
     "sku": "SKU-SKIN-EST-005",
@@ -206,8 +206,8 @@
     "brandName": "Estée Lauder",
     "categorySubfolder": "products/skincare",
     "fileName": "tinh-chat-estee-lauder-advanced-night-repair-50ml.jpg",
-    "directImageUrl": "https://bizweb.dktcdn.net/100/514/727/products/advanced-night-repair-synchronized-multi-recovery-complex-100ml-fullbox.jpg?v=1727755585427",
-    "altText": "Tinh Chất Phục Hồi Ban Đêm Estée Lauder Advanced Night Repair Synchronized Multi-Recovery Complex chính hãng"
+    "directImageUrl": "/images/products/skincare/tinh-chat-estee-lauder-advanced-night-repair-50ml.jpg",
+    "altText": "Tinh Chất Phục Hồi Ban Đêm Estée Lauder Advanced Night Repair Synchronized Multi-Recovery Complex - Chính hãng Estée Lauder"
   },
   {
     "sku": "SKU-SKIN-BIO-006",
@@ -216,8 +216,8 @@
     "brandName": "Bioderma",
     "categorySubfolder": "products/skincare",
     "fileName": "nuoc-tay-trang-bioderma-sensibio-h2o-500ml.png",
-    "directImageUrl": "https://cdn.nhathuoclongchau.com.vn/unsafe/2560x0/filters:quality(90):format(webp)/nuoc_tay_trang_cho_da_nhay_cam_bioderma_sensibio_h2o_500ml_00032012_1_d3a18bb58f.png",
-    "altText": "Nước Tẩy Trang Làm Sạch Dịu Nhẹ Bioderma Sensibio H2O Micellar Water 500ml chính hãng"
+    "directImageUrl": "/images/products/skincare/nuoc-tay-trang-bioderma-sensibio-h2o-500ml.png",
+    "altText": "Nước Tẩy Trang Làm Sạch Dịu Nhẹ Bioderma Sensibio H2O Micellar Water 500ml - Chính hãng Bioderma"
   },
   {
     "sku": "SKU-SKIN-ORD-007",
@@ -226,8 +226,8 @@
     "brandName": "The Ordinary",
     "categorySubfolder": "products/skincare",
     "fileName": "tinh-chat-the-ordinary-niacinamide-10-zinc-1-30ml.png",
-    "directImageUrl": "https://product.hstatic.net/1000025647/product/the-ordinary-niacinamide-10-zinc-1_cf0ea884638c4e83917ce443ee6b9829.png",
-    "altText": "Tinh Chất Giảm Dầu Mụn & Mờ Thâm The Ordinary Niacinamide 10% + Zinc 1% 30ml chính hãng"
+    "directImageUrl": "/images/products/skincare/tinh-chat-the-ordinary-niacinamide-10-zinc-1-30ml.png",
+    "altText": "Tinh Chất Giảm Dầu Mụn & Mờ Thâm The Ordinary Niacinamide 10% + Zinc 1% 30ml - Chính hãng The Ordinary"
   },
   {
     "sku": "SKU-SKIN-PAU-008",
@@ -236,8 +236,8 @@
     "brandName": "Paula's Choice",
     "categorySubfolder": "products/skincare",
     "fileName": "dung-dich-tay-te-bao-chet-paulas-choice-skin-perfecting-2-bha-118ml.png",
-    "directImageUrl": "https://www.paulaschoice.com/dw/image/v2/BBNX_PRD/on/demandware.static/-/Sites-pc-catalog/default/dw954917ff/images/products/2-percent-bha-liquid-exfoliant-2010-L.png?sw=1000&sfrm=png",
-    "altText": "Dung Dịch Tẩy Tế Bào Chết Paula's Choice Skin Perfecting 2% BHA Liquid 118ml chính hãng"
+    "directImageUrl": "/images/products/skincare/dung-dich-tay-te-bao-chet-paulas-choice-skin-perfecting-2-bha-118ml.png",
+    "altText": "Dung Dịch Tẩy Tế Bào Chết Paula's Choice Skin Perfecting 2% BHA Liquid 118ml - Chính hãng Paula's Choice"
   },
   {
     "sku": "SKU-SKIN-HDL-009",
@@ -246,8 +246,8 @@
     "brandName": "Hada Labo",
     "categorySubfolder": "products/skincare",
     "fileName": "dung-dich-duong-am-hada-labo-gokujyun-premium-lotion-170ml.jpg",
-    "directImageUrl": "https://bizweb.dktcdn.net/thumb/large/100/353/847/products/ava-san-pham-tren-website-15-cb6c9ca7-39f1-44db-b9c1-c0423ebed982.jpg?v=1732425295387",
-    "altText": "Dung Dịch Dưỡng Ẩm Chuyên Sâu Hada Labo Gokujyun Premium Lotion 170ml chính hãng"
+    "directImageUrl": "/images/products/skincare/dung-dich-duong-am-hada-labo-gokujyun-premium-lotion-170ml.jpg",
+    "altText": "Dung Dịch Dưỡng Ẩm Chuyên Sâu Hada Labo Gokujyun Premium Lotion 170ml - Chính hãng Hada Labo"
   },
   {
     "sku": "SKU-SKIN-LRP-010",
@@ -256,8 +256,8 @@
     "brandName": "La Roche-Posay",
     "categorySubfolder": "products/skincare",
     "fileName": "kem-duong-phuc-hoi-la-roche-posay-cicaplast-baume-b5-plus-40ml.jpg",
-    "directImageUrl": "https://cdn.nhathuoclongchau.com.vn/unsafe/2560x0/filters:quality(90):format(webp)/IMG_9629_8628daed64.jpg",
-    "altText": "Kem Dưỡng Phục Hồi Làm Dịu Da La Roche-Posay Cicaplast Baume B5+ 40ml chính hãng"
+    "directImageUrl": "/images/products/skincare/kem-duong-phuc-hoi-la-roche-posay-cicaplast-baume-b5-plus-40ml.jpg",
+    "altText": "Kem Dưỡng Phục Hồi Làm Dịu Da La Roche-Posay Cicaplast Baume B5+ 40ml - Chính hãng La Roche-Posay"
   },
   {
     "sku": "SKU-SKIN-SKI-011",
@@ -266,8 +266,8 @@
     "brandName": "SK-II",
     "categorySubfolder": "products/skincare",
     "fileName": "nuoc-than-sk-ii-facial-treatment-essence-230ml.jpg",
-    "directImageUrl": "https://product.hstatic.net/200000977139/product/essence-chong-lao-hoa-sk-ii-facial-treatment-230ml-boshop_19c8df500f8b4f179c744c911b158c86_master.jpg",
-    "altText": "Nước Thần Trẻ Hóa Tái Tạo Làn Da Pha Lê SK-II Facial Treatment Essence 230ml chính hãng"
+    "directImageUrl": "/images/products/skincare/nuoc-than-sk-ii-facial-treatment-essence-230ml.jpg",
+    "altText": "Nước Thần Trẻ Hóa Tái Tạo Làn Da Pha Lê SK-II Facial Treatment Essence 230ml - Chính hãng SK-II"
   },
   {
     "sku": "SKU-SKIN-SUL-012",
@@ -276,8 +276,8 @@
     "brandName": "Sulwhasoo",
     "categorySubfolder": "products/skincare",
     "fileName": "tinh-chat-sulwhasoo-first-care-activating-serum-vi-60ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&h=800&fit=crop&q=80",
-    "altText": "Tinh Chất Khởi Nguồn Tái Sinh Da Sulwhasoo First Care Activating Serum VI 60ml chính hãng"
+    "directImageUrl": "/images/products/skincare/tinh-chat-sulwhasoo-first-care-activating-serum-vi-60ml.jpg",
+    "altText": "Tinh Chất Khởi Nguồn Tái Sinh Da Sulwhasoo First Care Activating Serum VI 60ml - Chính hãng Sulwhasoo"
   },
   {
     "sku": "SKU-SKIN-CER-013",
@@ -286,8 +286,8 @@
     "brandName": "CeraVe",
     "categorySubfolder": "products/skincare",
     "fileName": "kem-duong-am-cerave-moisturizing-cream-454g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=800&h=800&fit=crop&q=80",
-    "altText": "Kem Dưỡng Ẩm Chuyên Sâu Cho Da Khô Đến Rất Khô CeraVe Moisturizing Cream 454g chính hãng"
+    "directImageUrl": "/images/products/skincare/kem-duong-am-cerave-moisturizing-cream-454g.jpg",
+    "altText": "Kem Dưỡng Ẩm Chuyên Sâu Cho Da Khô Đến Rất Khô CeraVe Moisturizing Cream 454g - Chính hãng CeraVe"
   },
   {
     "sku": "SKU-SKIN-TOR-014",
@@ -296,8 +296,8 @@
     "brandName": "Torriden",
     "categorySubfolder": "products/skincare",
     "fileName": "serum-cap-nuoc-torriden-dive-in-low-molecular-ha-50ml.jpg",
-    "directImageUrl": "https://torriden.us/cdn/shop/files/DIVEINSerum1_631ac0e3-a77b-422a-a806-bf34477cac19.jpg?v=1753346213",
-    "altText": "Serum Cấp Nước Đa Tầng Torriden Dive-In Low Molecular Hyaluronic Acid 50ml chính hãng"
+    "directImageUrl": "/images/products/skincare/serum-cap-nuoc-torriden-dive-in-low-molecular-ha-50ml.jpg",
+    "altText": "Serum Cấp Nước Đa Tầng Torriden Dive-In Low Molecular Hyaluronic Acid 50ml - Chính hãng Torriden"
   },
   {
     "sku": "SKU-SKIN-COS-015",
@@ -306,8 +306,8 @@
     "brandName": "COSRX",
     "categorySubfolder": "products/skincare",
     "fileName": "tinh-chat-oc-sen-cosrx-advanced-snail-96-mucin-100ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800&h=800&fit=crop&q=80",
-    "altText": "Tinh Chất Dịch Nhầy Ốc Sên Tái Tạo Da COSRX Advanced Snail 96 Mucin Power 100ml chính hãng"
+    "directImageUrl": "/images/products/skincare/tinh-chat-oc-sen-cosrx-advanced-snail-96-mucin-100ml.jpg",
+    "altText": "Tinh Chất Dịch Nhầy Ốc Sên Tái Tạo Da COSRX Advanced Snail 96 Mucin Power 100ml - Chính hãng COSRX"
   },
   {
     "sku": "SKU-SKIN-SBM-016",
@@ -316,8 +316,8 @@
     "brandName": "Some By Mi",
     "categorySubfolder": "products/skincare",
     "fileName": "serum-some-by-mi-aha-bha-pha-30-days-miracle-50ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800&h=800&fit=crop&q=80",
-    "altText": "Serum Phục Hồi Làm Dịu Da Mụn Some By Mi AHA-BHA-PHA 30 Days Miracle 50ml chính hãng"
+    "directImageUrl": "/images/products/skincare/serum-some-by-mi-aha-bha-pha-30-days-miracle-50ml.jpg",
+    "altText": "Serum Phục Hồi Làm Dịu Da Mụn Some By Mi AHA-BHA-PHA 30 Days Miracle 50ml - Chính hãng Some By Mi"
   },
   {
     "sku": "SKU-SKIN-COS-017",
@@ -326,8 +326,8 @@
     "brandName": "COSRX",
     "categorySubfolder": "products/skincare",
     "fileName": "gel-rua-mat-cosrx-low-ph-good-morning-gel-cleanser-150ml.jpg",
-    "directImageUrl": "https://www.cosrx.com/cdn/shop/files/low-ph-good-morning-gel-cleanser-cosrx-official-1_2048x.jpg?v=1768785801",
-    "altText": "Gel Rửa Mặt Dịu Nhẹ Độ pH Chuẩn COSRX Low pH Good Morning Gel Cleanser 150ml chính hãng"
+    "directImageUrl": "/images/products/skincare/gel-rua-mat-cosrx-low-ph-good-morning-gel-cleanser-150ml.jpg",
+    "altText": "Gel Rửa Mặt Dịu Nhẹ Độ pH Chuẩn COSRX Low pH Good Morning Gel Cleanser 150ml - Chính hãng COSRX"
   },
   {
     "sku": "SKU-SKIN-SHI-018",
@@ -336,8 +336,8 @@
     "brandName": "Shiseido",
     "categorySubfolder": "products/skincare",
     "fileName": "tinh-chat-shiseido-ultimune-power-infusing-concentrate-50ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&h=800&fit=crop&q=80",
-    "altText": "Tinh Chất Tăng Cường Đề Kháng Da Shiseido Ultimune Power Infusing Concentrate 50ml chính hãng"
+    "directImageUrl": "/images/products/skincare/tinh-chat-shiseido-ultimune-power-infusing-concentrate-50ml.jpg",
+    "altText": "Tinh Chất Tăng Cường Đề Kháng Da Shiseido Ultimune Power Infusing Concentrate 50ml - Chính hãng Shiseido"
   },
   {
     "sku": "SKU-SKIN-DHC-019",
@@ -346,8 +346,8 @@
     "brandName": "DHC",
     "categorySubfolder": "products/skincare",
     "fileName": "dau-tay-trang-dhc-deep-cleansing-oil-200ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&h=800&fit=crop&q=80",
-    "altText": "Dầu Tẩy Trang Làm Sạch Sâu & Chống Oxy Hóa DHC Deep Cleansing Oil 200ml chính hãng"
+    "directImageUrl": "/images/products/skincare/dau-tay-trang-dhc-deep-cleansing-oil-200ml.jpg",
+    "altText": "Dầu Tẩy Trang Làm Sạch Sâu & Chống Oxy Hóa DHC Deep Cleansing Oil 200ml - Chính hãng DHC"
   },
   {
     "sku": "SKU-SKIN-LRP-020",
@@ -356,8 +356,8 @@
     "brandName": "La Roche-Posay",
     "categorySubfolder": "products/skincare",
     "fileName": "kem-chong-nang-la-roche-posay-anthelios-uvmune-400-oil-control-50ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=800&h=800&fit=crop&q=80",
-    "altText": "Kem Chống Nắng Kiềm Dầu La Roche-Posay Anthelios UVmune 400 Oil Control 50ml chính hãng"
+    "directImageUrl": "/images/products/skincare/kem-chong-nang-la-roche-posay-anthelios-uvmune-400-oil-control-50ml.jpg",
+    "altText": "Kem Chống Nắng Kiềm Dầu La Roche-Posay Anthelios UVmune 400 Oil Control 50ml - Chính hãng La Roche-Posay"
   },
   {
     "sku": "SKU-SKIN-LAN-021",
@@ -366,8 +366,8 @@
     "brandName": "Laneige",
     "categorySubfolder": "products/skincare",
     "fileName": "mat-na-ngu-laneige-water-sleeping-mask-ex-70ml.jpg",
-    "directImageUrl": "https://cdn.hstatic.net/products/1000006063/laneige_water_sleeping_mask_ex_2_7369f827a57f4cb3bcff427dea926f06_1024x1024.jpg",
-    "altText": "Mặt Nạ Ngủ Cấp Nước Thanh Lọc Da Laneige Water Sleeping Mask EX 70ml chính hãng"
+    "directImageUrl": "/images/products/skincare/mat-na-ngu-laneige-water-sleeping-mask-ex-70ml.jpg",
+    "altText": "Mặt Nạ Ngủ Cấp Nước Thanh Lọc Da Laneige Water Sleeping Mask EX 70ml - Chính hãng Laneige"
   },
   {
     "sku": "SKU-SKIN-EST-022",
@@ -376,8 +376,8 @@
     "brandName": "Estée Lauder",
     "categorySubfolder": "products/skincare",
     "fileName": "kem-duong-mat-estee-lauder-advanced-night-repair-eye-15ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800&h=800&fit=crop&q=80",
-    "altText": "Kem Dưỡng Vùng Da Mắt Chống Quầng Thâm Estée Lauder Advanced Night Repair Eye 15ml chính hãng"
+    "directImageUrl": "/images/products/skincare/kem-duong-mat-estee-lauder-advanced-night-repair-eye-15ml.jpg",
+    "altText": "Kem Dưỡng Vùng Da Mắt Chống Quầng Thâm Estée Lauder Advanced Night Repair Eye 15ml - Chính hãng Estée Lauder"
   },
   {
     "sku": "SKU-SKIN-INN-023",
@@ -386,8 +386,8 @@
     "brandName": "Innisfree",
     "categorySubfolder": "products/skincare",
     "fileName": "kem-duong-innisfree-cherry-blossom-glow-jelly-50ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=800&h=800&fit=crop&q=80",
-    "altText": "Kem Dưỡng Dạng Thạch Trắng Sáng Mờ Nám Innisfree Cherry Blossom Glow Jelly 50ml chính hãng"
+    "directImageUrl": "/images/products/skincare/kem-duong-innisfree-cherry-blossom-glow-jelly-50ml.jpg",
+    "altText": "Kem Dưỡng Dạng Thạch Trắng Sáng Mờ Nám Innisfree Cherry Blossom Glow Jelly 50ml - Chính hãng Innisfree"
   },
   {
     "sku": "SKU-SKIN-SBM-024",
@@ -396,8 +396,8 @@
     "brandName": "Some By Mi",
     "categorySubfolder": "products/skincare",
     "fileName": "nuoc-hoa-hong-some-by-mi-aha-bha-pha-miracle-toner-150ml.jpg",
-    "directImageUrl": "https://product.hstatic.net/1000361746/product/vn-11134207-7ra0g-m7dwz3qrrbzqa0_033fbc8ede044a23bd2491921878210c_1024x1024.jpg",
-    "altText": "Nước Hoa Hồng Giảm Mụn Làm Sạch Sâu Some By Mi Miracle Toner 150ml chính hãng"
+    "directImageUrl": "/images/products/skincare/nuoc-hoa-hong-some-by-mi-aha-bha-pha-miracle-toner-150ml.jpg",
+    "altText": "Nước Hoa Hồng Giảm Mụn Làm Sạch Sâu Some By Mi Miracle Toner 150ml - Chính hãng Some By Mi"
   },
   {
     "sku": "SKU-SKIN-INN-025",
@@ -406,8 +406,8 @@
     "brandName": "Innisfree",
     "categorySubfolder": "products/skincare",
     "fileName": "kem-khoa-am-innisfree-green-tea-seed-hyaluronic-cream-50ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=800&h=800&fit=crop&q=80",
-    "altText": "Kem Khóa Ẩm Trà Xanh Đảo Jeju Innisfree Green Tea Seed Hyaluronic Cream 50ml chính hãng"
+    "directImageUrl": "/images/products/skincare/kem-khoa-am-innisfree-green-tea-seed-hyaluronic-cream-50ml.jpg",
+    "altText": "Kem Khóa Ẩm Trà Xanh Đảo Jeju Innisfree Green Tea Seed Hyaluronic Cream 50ml - Chính hãng Innisfree"
   },
   {
     "sku": "SKU-SKIN-INN-026",
@@ -416,28 +416,28 @@
     "brandName": "Innisfree",
     "categorySubfolder": "products/skincare",
     "fileName": "mat-na-dat-set-innisfree-super-volcanic-pore-clay-mask-100ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&h=800&fit=crop&q=80",
-    "altText": "Mặt Nạ Đất Sét Tro Núi Lửa Hút Bã Nhờn Innisfree Super Volcanic Pore Clay Mask 100ml chính hãng"
+    "directImageUrl": "/images/products/skincare/mat-na-dat-set-innisfree-super-volcanic-pore-clay-mask-100ml.jpg",
+    "altText": "Mặt Nạ Đất Sét Tro Núi Lửa Hút Bã Nhờn Innisfree Super Volcanic Pore Clay Mask 100ml - Chính hãng Innisfree"
   },
   {
     "sku": "SKU-SKIN-S10-027",
     "name": "Tinh Chất Rau Má Phục Hồi Dịu Da Skin1004 Madagascar Centella Ampoule 100ml",
     "slug": "tinh-chat-rau-ma-skin1004-madagascar-centella-ampoule-100ml",
-    "brandName": "COSRX",
+    "brandName": "Skin1004",
     "categorySubfolder": "products/skincare",
     "fileName": "tinh-chat-rau-ma-skin1004-madagascar-centella-ampoule-100ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800&h=800&fit=crop&q=80",
-    "altText": "Tinh Chất Rau Má Phục Hồi Dịu Da Skin1004 Madagascar Centella Ampoule 100ml chính hãng"
+    "directImageUrl": "/images/products/skincare/tinh-chat-rau-ma-skin1004-madagascar-centella-ampoule-100ml.jpg",
+    "altText": "Tinh Chất Rau Má Phục Hồi Dịu Da Skin1004 Madagascar Centella Ampoule 100ml - Chính hãng Skin1004"
   },
   {
     "sku": "SKU-SKIN-S10-028",
     "name": "Kem Chống Nắng Vật Lý Chiết Xuất Rau Má Skin1004 Centella Air-Fit Plus SPF50+ 50ml",
     "slug": "kem-chong-nang-skin1004-centella-air-fit-suncream-plus-spf50-50ml",
-    "brandName": "COSRX",
+    "brandName": "Skin1004",
     "categorySubfolder": "products/skincare",
     "fileName": "kem-chong-nang-skin1004-centella-air-fit-suncream-plus-spf50-50ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=800&h=800&fit=crop&q=80",
-    "altText": "Kem Chống Nắng Vật Lý Chiết Xuất Rau Má Skin1004 Centella Air-Fit Plus SPF50+ 50ml chính hãng"
+    "directImageUrl": "/images/products/skincare/kem-chong-nang-skin1004-centella-air-fit-suncream-plus-spf50-50ml.jpg",
+    "altText": "Kem Chống Nắng Vật Lý Chiết Xuất Rau Má Skin1004 Centella Air-Fit Plus SPF50+ 50ml - Chính hãng Skin1004"
   },
   {
     "sku": "SKU-SKIN-LAN-029",
@@ -446,8 +446,8 @@
     "brandName": "Lancôme",
     "categorySubfolder": "products/skincare",
     "fileName": "tinh-chat-lancome-advanced-genifique-concentrate-50ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=800&h=800&fit=crop&q=80",
-    "altText": "Tinh Chất Trẻ Hóa Tái Tạo Tế Bào Lancôme Advanced Génifique Youth Activating 50ml chính hãng"
+    "directImageUrl": "/images/products/skincare/tinh-chat-lancome-advanced-genifique-concentrate-50ml.jpg",
+    "altText": "Tinh Chất Trẻ Hóa Tái Tạo Tế Bào Lancôme Advanced Génifique Youth Activating 50ml - Chính hãng Lancôme"
   },
   {
     "sku": "SKU-SKIN-LAN-030",
@@ -456,8 +456,8 @@
     "brandName": "Lancôme",
     "categorySubfolder": "products/skincare",
     "fileName": "kem-mat-lancome-advanced-genifique-eye-cream-15ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800&h=800&fit=crop&q=80",
-    "altText": "Kem Dưỡng Mắt Chống Lão Hóa & Sáng Quầng Thâm Lancôme Advanced Génifique Eye Cream 15ml chính hãng"
+    "directImageUrl": "/images/products/skincare/kem-mat-lancome-advanced-genifique-eye-cream-15ml.jpg",
+    "altText": "Kem Dưỡng Mắt Chống Lão Hóa & Sáng Quầng Thâm Lancôme Advanced Génifique Eye Cream 15ml - Chính hãng Lancôme"
   },
   {
     "sku": "SKU-LIP-MAC-031",
@@ -466,8 +466,8 @@
     "brandName": "MAC Cosmetics",
     "categorySubfolder": "products/makeup",
     "fileName": "son-thoi-mac-retro-matte-lipstick-707-ruby-woo-3g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&h=800&fit=crop&q=80",
-    "altText": "Son Thỏi Siêu Lì MAC Retro Matte Lipstick - #707 Ruby Woo (Đỏ Cổ Điển) 3g chính hãng"
+    "directImageUrl": "/images/products/makeup/son-thoi-mac-retro-matte-lipstick-707-ruby-woo-3g.jpg",
+    "altText": "Son Thỏi Siêu Lì MAC Retro Matte Lipstick - #707 Ruby Woo (Đỏ Cổ Điển) 3g - Chính hãng MAC Cosmetics"
   },
   {
     "sku": "SKU-LIP-MAC-032",
@@ -476,8 +476,8 @@
     "brandName": "MAC Cosmetics",
     "categorySubfolder": "products/makeup",
     "fileName": "son-thoi-mac-matte-lipstick-602-chili-3g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&h=800&fit=crop&q=80",
-    "altText": "Son Thỏi Lì MAC Matte Lipstick 3g (Bảng Màu Đa Sắc Điêu Khắc) chính hãng"
+    "directImageUrl": "/images/products/makeup/son-thoi-mac-matte-lipstick-602-chili-3g.jpg",
+    "altText": "Son Thỏi Lì MAC Matte Lipstick 3g (Bảng Màu Đa Sắc Điêu Khắc) - Chính hãng MAC Cosmetics"
   },
   {
     "sku": "SKU-LIP-MAC-033",
@@ -486,8 +486,8 @@
     "brandName": "MAC Cosmetics",
     "categorySubfolder": "products/makeup",
     "fileName": "son-thoi-mac-powder-kiss-lipstick-316-devoted-to-chili-3g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&h=800&fit=crop&q=80",
-    "altText": "Son Thỏi Mờ Lì Mịn Mượt MAC Powder Kiss Lipstick - #316 Devoted To Chili 3g chính hãng"
+    "directImageUrl": "/images/products/makeup/son-thoi-mac-powder-kiss-lipstick-316-devoted-to-chili-3g.jpg",
+    "altText": "Son Thỏi Mờ Lì Mịn Mượt MAC Powder Kiss Lipstick - #316 Devoted To Chili 3g - Chính hãng MAC Cosmetics"
   },
   {
     "sku": "SKU-LIP-ROM-034",
@@ -496,8 +496,8 @@
     "brandName": "Rom&nd",
     "categorySubfolder": "products/makeup",
     "fileName": "son-kem-li-romand-zero-velvet-tint-02-joyful-55g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&h=800&fit=crop&q=80",
-    "altText": "Son Kem Lì Xốp Mịn Rom&nd Zero Velvet Tint - #02 Joyful (Đỏ Cam Đất) 5.5g chính hãng"
+    "directImageUrl": "/images/products/makeup/son-kem-li-romand-zero-velvet-tint-02-joyful-55g.jpg",
+    "altText": "Son Kem Lì Xốp Mịn Rom&nd Zero Velvet Tint - #02 Joyful (Đỏ Cam Đất) 5.5g - Chính hãng Rom&nd"
   },
   {
     "sku": "SKU-LIP-ROM-035",
@@ -506,8 +506,8 @@
     "brandName": "Rom&nd",
     "categorySubfolder": "products/makeup",
     "fileName": "son-tint-bong-romand-juicy-lasting-tint-06-figfig-55g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&h=800&fit=crop&q=80",
-    "altText": "Son Tint Bóng Mọng Nước Rom&nd Juicy Lasting Tint - #06 Figfig (Hồng Quả Sung) 5.5g chính hãng"
+    "directImageUrl": "/images/products/makeup/son-tint-bong-romand-juicy-lasting-tint-06-figfig-55g.jpg",
+    "altText": "Son Tint Bóng Mọng Nước Rom&nd Juicy Lasting Tint - #06 Figfig (Hồng Quả Sung) 5.5g - Chính hãng Rom&nd"
   },
   {
     "sku": "SKU-LIP-ROM-036",
@@ -516,8 +516,8 @@
     "brandName": "Rom&nd",
     "categorySubfolder": "products/makeup",
     "fileName": "son-bong-romand-glasting-water-tint-04-vintage-ocean-4g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&h=800&fit=crop&q=80",
-    "altText": "Son Bóng Trong Suốt Ánh Nước Rom&nd Glasting Water Tint - #04 Vintage Ocean 4g chính hãng"
+    "directImageUrl": "/images/products/makeup/son-bong-romand-glasting-water-tint-04-vintage-ocean-4g.jpg",
+    "altText": "Son Bóng Trong Suốt Ánh Nước Rom&nd Glasting Water Tint - #04 Vintage Ocean 4g - Chính hãng Rom&nd"
   },
   {
     "sku": "SKU-LIP-DIO-037",
@@ -526,8 +526,8 @@
     "brandName": "Dior",
     "categorySubfolder": "products/makeup",
     "fileName": "son-thoi-rouge-dior-satin-lipstick-999-metallic-velvet-35g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&h=800&fit=crop&q=80",
-    "altText": "Son Thỏi Cao Cấp Rouge Dior Satin Lipstick - #999 Metallic Velvet Đỏ Cổ Điển 3.5g chính hãng"
+    "directImageUrl": "/images/products/makeup/son-thoi-rouge-dior-satin-lipstick-999-metallic-velvet-35g.jpg",
+    "altText": "Son Thỏi Cao Cấp Rouge Dior Satin Lipstick - #999 Metallic Velvet Đỏ Cổ Điển 3.5g - Chính hãng Dior"
   },
   {
     "sku": "SKU-LIP-YSL-038",
@@ -536,8 +536,8 @@
     "brandName": "Yves Saint Laurent",
     "categorySubfolder": "products/makeup",
     "fileName": "son-thoi-ysl-rouge-pur-couture-the-slim-21-rouge-paradoxe-22g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&h=800&fit=crop&q=80",
-    "altText": "Son Thỏi Vuông Cao Cấp YSL Rouge Pur Couture The Slim - #21 Rouge Paradoxe 2.2g chính hãng"
+    "directImageUrl": "/images/products/makeup/son-thoi-ysl-rouge-pur-couture-the-slim-21-rouge-paradoxe-22g.jpg",
+    "altText": "Son Thỏi Vuông Cao Cấp YSL Rouge Pur Couture The Slim - #21 Rouge Paradoxe 2.2g - Chính hãng Yves Saint Laurent"
   },
   {
     "sku": "SKU-LIP-CHA-039",
@@ -546,8 +546,8 @@
     "brandName": "Chanel",
     "categorySubfolder": "products/makeup",
     "fileName": "son-thoi-chanel-rouge-allure-velvet-58-rouge-vie-35g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&h=800&fit=crop&q=80",
-    "altText": "Son Thỏi Lì Nhung Xa Xỉ Chanel Rouge Allure Velvet - #58 Rouge Vie 3.5g chính hãng"
+    "directImageUrl": "/images/products/makeup/son-thoi-chanel-rouge-allure-velvet-58-rouge-vie-35g.jpg",
+    "altText": "Son Thỏi Lì Nhung Xa Xỉ Chanel Rouge Allure Velvet - #58 Rouge Vie 3.5g - Chính hãng Chanel"
   },
   {
     "sku": "SKU-LIP-LAN-040",
@@ -556,8 +556,8 @@
     "brandName": "Laneige",
     "categorySubfolder": "products/makeup",
     "fileName": "mat-na-ngu-moi-laneige-lip-sleeping-mask-berry-20g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=800&h=800&fit=crop&q=80",
-    "altText": "Mặt Nạ Ngủ Dưỡng Ẩm Môi Mềm Mọng Laneige Lip Sleeping Mask Berry 20g chính hãng"
+    "directImageUrl": "/images/products/makeup/mat-na-ngu-moi-laneige-lip-sleeping-mask-berry-20g.jpg",
+    "altText": "Mặt Nạ Ngủ Dưỡng Ẩm Môi Mềm Mọng Laneige Lip Sleeping Mask Berry 20g - Chính hãng Laneige"
   },
   {
     "sku": "SKU-MAK-LAN-041",
@@ -566,8 +566,8 @@
     "brandName": "Laneige",
     "categorySubfolder": "products/makeup",
     "fileName": "phan-nuoc-laneige-neo-cushion-matte-spf42-15g-x-2.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=800&h=800&fit=crop&q=80",
-    "altText": "Phấn Nước Kiềm Dầu Mỏng Nhẹ Laneige Neo Cushion Matte SPF42 PA++ (15g x 2) chính hãng"
+    "directImageUrl": "/images/products/makeup/phan-nuoc-laneige-neo-cushion-matte-spf42-15g-x-2.jpg",
+    "altText": "Phấn Nước Kiềm Dầu Mỏng Nhẹ Laneige Neo Cushion Matte SPF42 PA++ (15g x 2) - Chính hãng Laneige"
   },
   {
     "sku": "SKU-MAK-SUL-042",
@@ -576,8 +576,8 @@
     "brandName": "Sulwhasoo",
     "categorySubfolder": "products/makeup",
     "fileName": "phan-nuoc-sulwhasoo-perfecting-cushion-spf50-15g-x-2.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=800&h=800&fit=crop&q=80",
-    "altText": "Phấn Nước Hoàng Gia Tinh Chất Nhân Sâm Sulwhasoo Perfecting Cushion SPF50+ (15g x 2) chính hãng"
+    "directImageUrl": "/images/products/makeup/phan-nuoc-sulwhasoo-perfecting-cushion-spf50-15g-x-2.jpg",
+    "altText": "Phấn Nước Hoàng Gia Tinh Chất Nhân Sâm Sulwhasoo Perfecting Cushion SPF50+ (15g x 2) - Chính hãng Sulwhasoo"
   },
   {
     "sku": "SKU-MAK-EST-043",
@@ -586,8 +586,8 @@
     "brandName": "Estée Lauder",
     "categorySubfolder": "products/makeup",
     "fileName": "kem-nen-estee-lauder-double-wear-stay-in-place-30ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&h=800&fit=crop&q=80",
-    "altText": "Kem Nền Bền Màu Suốt 24H Estée Lauder Double Wear Stay-in-Place SPF10 30ml chính hãng"
+    "directImageUrl": "/images/products/makeup/kem-nen-estee-lauder-double-wear-stay-in-place-30ml.jpg",
+    "altText": "Kem Nền Bền Màu Suốt 24H Estée Lauder Double Wear Stay-in-Place SPF10 30ml - Chính hãng Estée Lauder"
   },
   {
     "sku": "SKU-MAK-LOR-044",
@@ -596,8 +596,8 @@
     "brandName": "L'Oréal Paris",
     "categorySubfolder": "products/makeup",
     "fileName": "kem-nen-loreal-infallible-32h-fresh-wear-foundation-30ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&h=800&fit=crop&q=80",
-    "altText": "Kem Nền Bắt Sáng Tự Nhiên L'Oréal Infallible 32H Fresh Wear Foundation 30ml chính hãng"
+    "directImageUrl": "/images/products/makeup/kem-nen-loreal-infallible-32h-fresh-wear-foundation-30ml.jpg",
+    "altText": "Kem Nền Bắt Sáng Tự Nhiên L'Oréal Infallible 32H Fresh Wear Foundation 30ml - Chính hãng L'Oréal Paris"
   },
   {
     "sku": "SKU-MAK-INN-045",
@@ -606,8 +606,8 @@
     "brandName": "Innisfree",
     "categorySubfolder": "products/makeup",
     "fileName": "phan-phu-bot-khoang-innisfree-no-sebum-mineral-powder-5g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=800&h=800&fit=crop&q=80",
-    "altText": "Phấn Phủ Bột Khoáng Hút Dầu Tức Thì Innisfree No-Sebum Mineral Powder 5g chính hãng"
+    "directImageUrl": "/images/products/makeup/phan-phu-bot-khoang-innisfree-no-sebum-mineral-powder-5g.jpg",
+    "altText": "Phấn Phủ Bột Khoáng Hút Dầu Tức Thì Innisfree No-Sebum Mineral Powder 5g - Chính hãng Innisfree"
   },
   {
     "sku": "SKU-MAK-CAN-046",
@@ -616,38 +616,38 @@
     "brandName": "Canmake",
     "categorySubfolder": "products/makeup",
     "fileName": "phan-phu-nen-canmake-marshmallow-finish-powder-spf50-10g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=800&h=800&fit=crop&q=80",
-    "altText": "Phấn Phủ Nén Kiềm Dầu Tự Nhiên Canmake Marshmallow Finish Powder SPF50+ 10g chính hãng"
+    "directImageUrl": "/images/products/makeup/phan-phu-nen-canmake-marshmallow-finish-powder-spf50-10g.jpg",
+    "altText": "Phấn Phủ Nén Kiềm Dầu Tự Nhiên Canmake Marshmallow Finish Powder SPF50+ 10g - Chính hãng Canmake"
   },
   {
     "sku": "SKU-MAK-MAY-047",
     "name": "Kem Lót Kiềm Dầu Che Mờ Lỗ Chân Lông Maybelline Baby Skin Pore Eraser 22ml",
     "slug": "kem-lot-maybelline-baby-skin-pore-eraser-22ml",
-    "brandName": "L'Oréal Paris",
+    "brandName": "Maybelline",
     "categorySubfolder": "products/makeup",
     "fileName": "kem-lot-maybelline-baby-skin-pore-eraser-22ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&h=800&fit=crop&q=80",
-    "altText": "Kem Lót Kiềm Dầu Che Mờ Lỗ Chân Lông Maybelline Baby Skin Pore Eraser 22ml chính hãng"
+    "directImageUrl": "/images/products/makeup/kem-lot-maybelline-baby-skin-pore-eraser-22ml.jpg",
+    "altText": "Kem Lót Kiềm Dầu Che Mờ Lỗ Chân Lông Maybelline Baby Skin Pore Eraser 22ml - Chính hãng Maybelline"
   },
   {
     "sku": "SKU-MAK-MAY-048",
     "name": "Mascara Chuốt Dài Mi Không Trôi Maybelline Lash Sensational Sky High Waterproof 6ml",
     "slug": "mascara-maybelline-lash-sensational-sky-high-waterproof-6ml",
-    "brandName": "L'Oréal Paris",
+    "brandName": "Maybelline",
     "categorySubfolder": "products/makeup",
     "fileName": "mascara-maybelline-lash-sensational-sky-high-waterproof-6ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=800&h=800&fit=crop&q=80",
-    "altText": "Mascara Chuốt Dài Mi Không Trôi Maybelline Lash Sensational Sky High Waterproof 6ml chính hãng"
+    "directImageUrl": "/images/products/makeup/mascara-maybelline-lash-sensational-sky-high-waterproof-6ml.jpg",
+    "altText": "Mascara Chuốt Dài Mi Không Trôi Maybelline Lash Sensational Sky High Waterproof 6ml - Chính hãng Maybelline"
   },
   {
     "sku": "SKU-MAK-MAY-049",
     "name": "Bút Kẻ Mắt Nước Sắc Nét Chống Nước Maybelline Hyper Sharp Liner 0.5g",
     "slug": "but-ke-mat-nuoc-maybelline-hyper-sharp-liner-05g",
-    "brandName": "L'Oréal Paris",
+    "brandName": "Maybelline",
     "categorySubfolder": "products/makeup",
     "fileName": "but-ke-mat-nuoc-maybelline-hyper-sharp-liner-05g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?w=800&h=800&fit=crop&q=80",
-    "altText": "Bút Kẻ Mắt Nước Sắc Nét Chống Nước Maybelline Hyper Sharp Liner 0.5g chính hãng"
+    "directImageUrl": "/images/products/makeup/but-ke-mat-nuoc-maybelline-hyper-sharp-liner-05g.jpg",
+    "altText": "Bút Kẻ Mắt Nước Sắc Nét Chống Nước Maybelline Hyper Sharp Liner 0.5g - Chính hãng Maybelline"
   },
   {
     "sku": "SKU-MAK-CAN-050",
@@ -656,8 +656,8 @@
     "brandName": "Canmake",
     "categorySubfolder": "products/makeup",
     "fileName": "ma-hong-kem-canmake-cream-cheek-cl01-clear-red-heart-22g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1583241800698-e8ab01830a07?w=800&h=800&fit=crop&q=80",
-    "altText": "Má Hồng Dạng Kem Trong Veo Canmake Cream Cheek - #CL01 Clear Red Heart 2.2g chính hãng"
+    "directImageUrl": "/images/products/makeup/ma-hong-kem-canmake-cream-cheek-cl01-clear-red-heart-22g.jpg",
+    "altText": "Má Hồng Dạng Kem Trong Veo Canmake Cream Cheek - #CL01 Clear Red Heart 2.2g - Chính hãng Canmake"
   },
   {
     "sku": "SKU-MAK-ROM-051",
@@ -666,18 +666,18 @@
     "brandName": "Rom&nd",
     "categorySubfolder": "products/makeup",
     "fileName": "bang-phan-mat-romand-better-than-eyes-01-dry-mango-tulip-65g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1583241800698-e8ab01830a07?w=800&h=800&fit=crop&q=80",
-    "altText": "Bảng Phấn Mắt 4 Ô Thuần Khiết Rom&nd Better Than Eyes - #01 Dry Mango Tulip 6.5g chính hãng"
+    "directImageUrl": "/images/products/makeup/bang-phan-mat-romand-better-than-eyes-01-dry-mango-tulip-65g.jpg",
+    "altText": "Bảng Phấn Mắt 4 Ô Thuần Khiết Rom&nd Better Than Eyes - #01 Dry Mango Tulip 6.5g - Chính hãng Rom&nd"
   },
   {
     "sku": "SKU-MAK-URB-052",
     "name": "Xịt Khóa Lớp Trang Điểm Kiềm Dầu 16H Urban Decay All Nighter Setting Spray 118ml",
     "slug": "xit-khoa-nen-urban-decay-all-nighter-setting-spray-118ml",
-    "brandName": "L'Oréal Paris",
+    "brandName": "Urban Decay",
     "categorySubfolder": "products/makeup",
     "fileName": "xit-khoa-nen-urban-decay-all-nighter-setting-spray-118ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=800&h=800&fit=crop&q=80",
-    "altText": "Xịt Khóa Lớp Trang Điểm Kiềm Dầu 16H Urban Decay All Nighter Setting Spray 118ml chính hãng"
+    "directImageUrl": "/images/products/makeup/xit-khoa-nen-urban-decay-all-nighter-setting-spray-118ml.jpg",
+    "altText": "Xịt Khóa Lớp Trang Điểm Kiềm Dầu 16H Urban Decay All Nighter Setting Spray 118ml - Chính hãng Urban Decay"
   },
   {
     "sku": "SKU-MAK-MAC-053",
@@ -686,8 +686,8 @@
     "brandName": "MAC Cosmetics",
     "categorySubfolder": "products/makeup",
     "fileName": "xit-co-dinh-nen-mac-prep-prime-fix-plus-100ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=800&h=800&fit=crop&q=80",
-    "altText": "Xịt Cố Định Nền Dưỡng Ẩm Bắt Sáng MAC Prep + Prime Fix+ 100ml chính hãng"
+    "directImageUrl": "/images/products/makeup/xit-co-dinh-nen-mac-prep-prime-fix-plus-100ml.jpg",
+    "altText": "Xịt Cố Định Nền Dưỡng Ẩm Bắt Sáng MAC Prep + Prime Fix+ 100ml - Chính hãng MAC Cosmetics"
   },
   {
     "sku": "SKU-MAK-DIO-054",
@@ -696,8 +696,8 @@
     "brandName": "Dior",
     "categorySubfolder": "products/makeup",
     "fileName": "kem-lot-dior-backstage-face-and-body-primer-50ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=800&h=800&fit=crop&q=80",
-    "altText": "Kem Lót Bắt Sáng Căng Mọng Dior Backstage Face & Body Primer 50ml chính hãng"
+    "directImageUrl": "/images/products/makeup/kem-lot-dior-backstage-face-and-body-primer-50ml.jpg",
+    "altText": "Kem Lót Bắt Sáng Căng Mọng Dior Backstage Face & Body Primer 50ml - Chính hãng Dior"
   },
   {
     "sku": "SKU-MAK-DIO-055",
@@ -706,8 +706,8 @@
     "brandName": "Dior",
     "categorySubfolder": "products/makeup",
     "fileName": "bang-phan-bat-sang-dior-backstage-glow-face-palette-001-universal-10g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1583241800698-e8ab01830a07?w=800&h=800&fit=crop&q=80",
-    "altText": "Bảng Phấn Bắt Sáng 4 Ô Ngọc Trai Dior Backstage Glow Face Palette - #001 Universal 10g chính hãng"
+    "directImageUrl": "/images/products/makeup/bang-phan-bat-sang-dior-backstage-glow-face-palette-001-universal-10g.jpg",
+    "altText": "Bảng Phấn Bắt Sáng 4 Ô Ngọc Trai Dior Backstage Glow Face Palette - #001 Universal 10g - Chính hãng Dior"
   },
   {
     "sku": "SKU-PERF-DIO-056",
@@ -716,8 +716,8 @@
     "brandName": "Dior",
     "categorySubfolder": "products/perfume",
     "fileName": "nuoc-hoa-nam-dior-sauvage-eau-de-parfum-100ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=800&h=800&fit=crop&q=80",
-    "altText": "Nước Hoa Nam Quyến Rũ Mạnh Mẽ Dior Sauvage Eau De Parfum 100ml chính hãng"
+    "directImageUrl": "/images/products/perfume/nuoc-hoa-nam-dior-sauvage-eau-de-parfum-100ml.jpg",
+    "altText": "Nước Hoa Nam Quyến Rũ Mạnh Mẽ Dior Sauvage Eau De Parfum 100ml - Chính hãng Dior"
   },
   {
     "sku": "SKU-PERF-CHA-057",
@@ -726,8 +726,8 @@
     "brandName": "Chanel",
     "categorySubfolder": "products/perfume",
     "fileName": "nuoc-hoa-nu-chanel-coco-mademoiselle-edp-100ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1547887537-6158d64c35b3?w=800&h=800&fit=crop&q=80",
-    "altText": "Nước Hoa Nữ Quý Tộc Chanel Coco Mademoiselle Eau De Parfum chính hãng"
+    "directImageUrl": "/images/products/perfume/nuoc-hoa-nu-chanel-coco-mademoiselle-edp-100ml.jpg",
+    "altText": "Nước Hoa Nữ Quý Tộc Chanel Coco Mademoiselle Eau De Parfum - Chính hãng Chanel"
   },
   {
     "sku": "SKU-PERF-CHA-058",
@@ -736,8 +736,8 @@
     "brandName": "Chanel",
     "categorySubfolder": "products/perfume",
     "fileName": "nuoc-hoa-nu-chanel-n5-eau-de-parfum-100ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1547887537-6158d64c35b3?w=800&h=800&fit=crop&q=80",
-    "altText": "Nước Hoa Nữ Biểu Tượng Kinh Điển Chanel N°5 Eau De Parfum 100ml chính hãng"
+    "directImageUrl": "/images/products/perfume/nuoc-hoa-nu-chanel-n5-eau-de-parfum-100ml.jpg",
+    "altText": "Nước Hoa Nữ Biểu Tượng Kinh Điển Chanel N°5 Eau De Parfum 100ml - Chính hãng Chanel"
   },
   {
     "sku": "SKU-PERF-YSL-059",
@@ -746,8 +746,8 @@
     "brandName": "Yves Saint Laurent",
     "categorySubfolder": "products/perfume",
     "fileName": "nuoc-hoa-nu-ysl-libre-eau-de-parfum-90ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=800&h=800&fit=crop&q=80",
-    "altText": "Nước Hoa Nữ Tự Do Nồng Nàn Yves Saint Laurent Libre Eau De Parfum 90ml chính hãng"
+    "directImageUrl": "/images/products/perfume/nuoc-hoa-nu-ysl-libre-eau-de-parfum-90ml.jpg",
+    "altText": "Nước Hoa Nữ Tự Do Nồng Nàn Yves Saint Laurent Libre Eau De Parfum 90ml - Chính hãng Yves Saint Laurent"
   },
   {
     "sku": "SKU-PERF-YSL-060",
@@ -756,8 +756,8 @@
     "brandName": "Yves Saint Laurent",
     "categorySubfolder": "products/perfume",
     "fileName": "nuoc-hoa-nu-ysl-black-opium-edp-90ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=800&h=800&fit=crop&q=80",
-    "altText": "Nước Hoa Nữ Gây Nghiện Ngọt Ngào Yves Saint Laurent Black Opium EDP 90ml chính hãng"
+    "directImageUrl": "/images/products/perfume/nuoc-hoa-nu-ysl-black-opium-edp-90ml.jpg",
+    "altText": "Nước Hoa Nữ Gây Nghiện Ngọt Ngào Yves Saint Laurent Black Opium EDP 90ml - Chính hãng Yves Saint Laurent"
   },
   {
     "sku": "SKU-PERF-DIO-061",
@@ -766,8 +766,8 @@
     "brandName": "Dior",
     "categorySubfolder": "products/perfume",
     "fileName": "nuoc-hoa-nu-dior-miss-dior-eau-de-parfum-100ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=800&h=800&fit=crop&q=80",
-    "altText": "Nước Hoa Nữ Tiểu Thư Ngọt Ngào Dior Miss Dior Eau De Parfum 100ml chính hãng"
+    "directImageUrl": "/images/products/perfume/nuoc-hoa-nu-dior-miss-dior-eau-de-parfum-100ml.jpg",
+    "altText": "Nước Hoa Nữ Tiểu Thư Ngọt Ngào Dior Miss Dior Eau De Parfum 100ml - Chính hãng Dior"
   },
   {
     "sku": "SKU-PERF-CHA-062",
@@ -776,8 +776,8 @@
     "brandName": "Chanel",
     "categorySubfolder": "products/perfume",
     "fileName": "nuoc-hoa-nam-chanel-bleu-de-chanel-edp-100ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=800&h=800&fit=crop&q=80",
-    "altText": "Nước Hoa Nam Lịch Lãm Đẳng Cấp Chanel Bleu De Chanel EDP 100ml chính hãng"
+    "directImageUrl": "/images/products/perfume/nuoc-hoa-nam-chanel-bleu-de-chanel-edp-100ml.jpg",
+    "altText": "Nước Hoa Nam Lịch Lãm Đẳng Cấp Chanel Bleu De Chanel EDP 100ml - Chính hãng Chanel"
   },
   {
     "sku": "SKU-PERF-YSL-063",
@@ -786,8 +786,8 @@
     "brandName": "Yves Saint Laurent",
     "categorySubfolder": "products/perfume",
     "fileName": "nuoc-hoa-nam-ysl-y-eau-de-parfum-100ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=800&h=800&fit=crop&q=80",
-    "altText": "Nước Hoa Nam Cá Tính Hiện Đại Yves Saint Laurent Y Eau De Parfum 100ml chính hãng"
+    "directImageUrl": "/images/products/perfume/nuoc-hoa-nam-ysl-y-eau-de-parfum-100ml.jpg",
+    "altText": "Nước Hoa Nam Cá Tính Hiện Đại Yves Saint Laurent Y Eau De Parfum 100ml - Chính hãng Yves Saint Laurent"
   },
   {
     "sku": "SKU-PERF-LAN-064",
@@ -796,8 +796,8 @@
     "brandName": "Lancôme",
     "categorySubfolder": "products/perfume",
     "fileName": "nuoc-hoa-nu-lancome-la-vie-est-belle-edp-100ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=800&h=800&fit=crop&q=80",
-    "altText": "Nước Hoa Nữ Nụ Cười Pha Lê Lancôme La Vie Est Belle EDP 100ml chính hãng"
+    "directImageUrl": "/images/products/perfume/nuoc-hoa-nu-lancome-la-vie-est-belle-edp-100ml.jpg",
+    "altText": "Nước Hoa Nữ Nụ Cười Pha Lê Lancôme La Vie Est Belle EDP 100ml - Chính hãng Lancôme"
   },
   {
     "sku": "SKU-PERF-JOM-065",
@@ -806,8 +806,8 @@
     "brandName": "Jo Malone London",
     "categorySubfolder": "products/perfume",
     "fileName": "nuoc-hoa-unisex-jo-malone-english-pear-and-freesia-100ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=800&h=800&fit=crop&q=80",
-    "altText": "Nước Hoa Unisex Thanh Lịch Jo Malone London English Pear & Freesia Cologne 100ml chính hãng"
+    "directImageUrl": "/images/products/perfume/nuoc-hoa-unisex-jo-malone-english-pear-and-freesia-100ml.jpg",
+    "altText": "Nước Hoa Unisex Thanh Lịch Jo Malone London English Pear & Freesia Cologne 100ml - Chính hãng Jo Malone London"
   },
   {
     "sku": "SKU-PERF-JOM-066",
@@ -816,18 +816,18 @@
     "brandName": "Jo Malone London",
     "categorySubfolder": "products/perfume",
     "fileName": "nuoc-hoa-unisex-jo-malone-wood-sage-and-sea-salt-100ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=800&h=800&fit=crop&q=80",
-    "altText": "Nước Hoa Unisex Gió Biển Jo Malone London Wood Sage & Sea Salt 100ml chính hãng"
+    "directImageUrl": "/images/products/perfume/nuoc-hoa-unisex-jo-malone-wood-sage-and-sea-salt-100ml.jpg",
+    "altText": "Nước Hoa Unisex Gió Biển Jo Malone London Wood Sage & Sea Salt 100ml - Chính hãng Jo Malone London"
   },
   {
     "sku": "SKU-PERF-TOM-067",
     "name": "Nước Hoa Unisex Quyền Lực Bí Ẩn Tom Ford Black Orchid EDP 50ml",
     "slug": "nuoc-hoa-unisex-tom-ford-black-orchid-edp-50ml",
-    "brandName": "Estée Lauder",
+    "brandName": "Tom Ford",
     "categorySubfolder": "products/perfume",
     "fileName": "nuoc-hoa-unisex-tom-ford-black-orchid-edp-50ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=800&h=800&fit=crop&q=80",
-    "altText": "Nước Hoa Unisex Quyền Lực Bí Ẩn Tom Ford Black Orchid EDP 50ml chính hãng"
+    "directImageUrl": "/images/products/perfume/nuoc-hoa-unisex-tom-ford-black-orchid-edp-50ml.jpg",
+    "altText": "Nước Hoa Unisex Quyền Lực Bí Ẩn Tom Ford Black Orchid EDP 50ml - Chính hãng Tom Ford"
   },
   {
     "sku": "SKU-PERF-DIO-068",
@@ -836,8 +836,8 @@
     "brandName": "Dior",
     "categorySubfolder": "products/perfume",
     "fileName": "bo-qua-tang-nuoc-hoa-dior-miss-dior-miniature-giftset-4x5ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=800&h=800&fit=crop&q=80",
-    "altText": "Bộ Quà Tặng Nước Hoa Nữ Cao Cấp Dior Miss Dior Miniature Giftset (4 x 5ml) chính hãng"
+    "directImageUrl": "/images/products/perfume/bo-qua-tang-nuoc-hoa-dior-miss-dior-miniature-giftset-4x5ml.jpg",
+    "altText": "Bộ Quà Tặng Nước Hoa Nữ Cao Cấp Dior Miss Dior Miniature Giftset (4 x 5ml) - Chính hãng Dior"
   },
   {
     "sku": "SKU-PERF-CHA-069",
@@ -846,98 +846,98 @@
     "brandName": "Chanel",
     "categorySubfolder": "products/perfume",
     "fileName": "nuoc-hoa-bo-tui-chanel-coco-mademoiselle-purse-spray-3x20ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=800&h=800&fit=crop&q=80",
-    "altText": "Nước Hoa Bỏ Túi Xa Xỉ Chanel Coco Mademoiselle Purse Spray (3 x 20ml) chính hãng"
+    "directImageUrl": "/images/products/perfume/nuoc-hoa-bo-tui-chanel-coco-mademoiselle-purse-spray-3x20ml.jpg",
+    "altText": "Nước Hoa Bỏ Túi Xa Xỉ Chanel Coco Mademoiselle Purse Spray (3 x 20ml) - Chính hãng Chanel"
   },
   {
     "sku": "SKU-PERF-MAI-070",
     "name": "Nước Hoa Unisex Hương Rượu Gỗ Maison Margiela Replica Jazz Club EDT 100ml",
     "slug": "nuoc-hoa-unisex-replica-jazz-club-edt-100ml",
-    "brandName": "L'Oréal Paris",
+    "brandName": "Maison Margiela",
     "categorySubfolder": "products/perfume",
     "fileName": "nuoc-hoa-unisex-replica-jazz-club-edt-100ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=800&h=800&fit=crop&q=80",
-    "altText": "Nước Hoa Unisex Hương Rượu Gỗ Maison Margiela Replica Jazz Club EDT 100ml chính hãng"
+    "directImageUrl": "/images/products/perfume/nuoc-hoa-unisex-replica-jazz-club-edt-100ml.jpg",
+    "altText": "Nước Hoa Unisex Hương Rượu Gỗ Maison Margiela Replica Jazz Club EDT 100ml - Chính hãng Maison Margiela"
   },
   {
     "sku": "SKU-HAIR-MOR-071",
     "name": "Tinh Dầu Dưỡng Tóc Phục Hồi Hư Tổn Moroccanoil Treatment Original 100ml",
     "slug": "tinh-dau-duong-toc-moroccanoil-treatment-original-100ml",
-    "brandName": "Shiseido",
+    "brandName": "Moroccanoil",
     "categorySubfolder": "products/hair-body",
     "fileName": "tinh-dau-duong-toc-moroccanoil-treatment-original-100ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=800&h=800&fit=crop&q=80",
-    "altText": "Tinh Dầu Dưỡng Tóc Phục Hồi Hư Tổn Moroccanoil Treatment Original 100ml chính hãng"
+    "directImageUrl": "/images/products/hair-body/tinh-dau-duong-toc-moroccanoil-treatment-original-100ml.jpg",
+    "altText": "Tinh Dầu Dưỡng Tóc Phục Hồi Hư Tổn Moroccanoil Treatment Original 100ml - Chính hãng Moroccanoil"
   },
   {
     "sku": "SKU-HAIR-MOR-072",
     "name": "Dầu Gội Dưỡng Ẩm Phục Hồi Tóc Khô Xơ Moroccanoil Hydrating Shampoo 250ml",
     "slug": "dau-goi-duong-am-moroccanoil-hydrating-shampoo-250ml",
-    "brandName": "Shiseido",
+    "brandName": "Moroccanoil",
     "categorySubfolder": "products/hair-body",
     "fileName": "dau-goi-duong-am-moroccanoil-hydrating-shampoo-250ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=800&h=800&fit=crop&q=80",
-    "altText": "Dầu Gội Dưỡng Ẩm Phục Hồi Tóc Khô Xơ Moroccanoil Hydrating Shampoo 250ml chính hãng"
+    "directImageUrl": "/images/products/hair-body/dau-goi-duong-am-moroccanoil-hydrating-shampoo-250ml.jpg",
+    "altText": "Dầu Gội Dưỡng Ẩm Phục Hồi Tóc Khô Xơ Moroccanoil Hydrating Shampoo 250ml - Chính hãng Moroccanoil"
   },
   {
     "sku": "SKU-HAIR-MOR-073",
     "name": "Dầu Xả Dưỡng Ẩm Phục Hồi Tóc Khô Xơ Moroccanoil Hydrating Conditioner 250ml",
     "slug": "dau-xa-duong-am-moroccanoil-hydrating-conditioner-250ml",
-    "brandName": "Shiseido",
+    "brandName": "Moroccanoil",
     "categorySubfolder": "products/hair-body",
     "fileName": "dau-xa-duong-am-moroccanoil-hydrating-conditioner-250ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1535585209827-a15fcdbc4c2d?w=800&h=800&fit=crop&q=80",
-    "altText": "Dầu Xả Dưỡng Ẩm Phục Hồi Tóc Khô Xơ Moroccanoil Hydrating Conditioner 250ml chính hãng"
+    "directImageUrl": "/images/products/hair-body/dau-xa-duong-am-moroccanoil-hydrating-conditioner-250ml.jpg",
+    "altText": "Dầu Xả Dưỡng Ẩm Phục Hồi Tóc Khô Xơ Moroccanoil Hydrating Conditioner 250ml - Chính hãng Moroccanoil"
   },
   {
     "sku": "SKU-HAIR-FIN-074",
     "name": "Kem Ủ Tóc Phục Hồi Tinh Chất Sữa Ong Chúa Fino Premium Touch Hair Mask 230g",
     "slug": "kem-u-toc-fino-premium-touch-hair-mask-230g",
-    "brandName": "Shiseido",
+    "brandName": "Fino",
     "categorySubfolder": "products/hair-body",
     "fileName": "kem-u-toc-fino-premium-touch-hair-mask-230g.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&h=800&fit=crop&q=80",
-    "altText": "Kem Ủ Tóc Phục Hồi Tinh Chất Sữa Ong Chúa Fino Premium Touch Hair Mask 230g chính hãng"
+    "directImageUrl": "/images/products/hair-body/kem-u-toc-fino-premium-touch-hair-mask-230g.jpg",
+    "altText": "Kem Ủ Tóc Phục Hồi Tinh Chất Sữa Ong Chúa Fino Premium Touch Hair Mask 230g - Chính hãng Fino"
   },
   {
     "sku": "SKU-BOD-LOC-075",
     "name": "Dầu Tắm Hạnh Nhân Dưỡng Ẩm Mịn Màng L'Occitane Almond Shower Oil 250ml",
     "slug": "dau-tam-hanh-nhan-loccitane-almond-shower-oil-250ml",
-    "brandName": "Bioderma",
+    "brandName": "L'Occitane",
     "categorySubfolder": "products/hair-body",
     "fileName": "dau-tam-hanh-nhan-loccitane-almond-shower-oil-250ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800&h=800&fit=crop&q=80",
-    "altText": "Dầu Tắm Hạnh Nhân Dưỡng Ẩm Mịn Màng L'Occitane Almond Shower Oil 250ml chính hãng"
+    "directImageUrl": "/images/products/hair-body/dau-tam-hanh-nhan-loccitane-almond-shower-oil-250ml.jpg",
+    "altText": "Dầu Tắm Hạnh Nhân Dưỡng Ẩm Mịn Màng L'Occitane Almond Shower Oil 250ml - Chính hãng L'Occitane"
   },
   {
     "sku": "SKU-BOD-SOL-076",
     "name": "Kem Dưỡng Thể Săn Chắc Thơm Ngọt Sol de Janeiro Brazilian Bum Bum Cream 240ml",
     "slug": "kem-duong-the-sol-de-janeiro-brazilian-bum-bum-cream-240ml",
-    "brandName": "CeraVe",
+    "brandName": "Sol de Janeiro",
     "categorySubfolder": "products/hair-body",
     "fileName": "kem-duong-the-sol-de-janeiro-brazilian-bum-bum-cream-240ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&h=800&fit=crop&q=80",
-    "altText": "Kem Dưỡng Thể Săn Chắc Thơm Ngọt Sol de Janeiro Brazilian Bum Bum Cream 240ml chính hãng"
+    "directImageUrl": "/images/products/hair-body/kem-duong-the-sol-de-janeiro-brazilian-bum-bum-cream-240ml.jpg",
+    "altText": "Kem Dưỡng Thể Săn Chắc Thơm Ngọt Sol de Janeiro Brazilian Bum Bum Cream 240ml - Chính hãng Sol de Janeiro"
   },
   {
     "sku": "SKU-BOD-COC-077",
     "name": "Tẩy Tế Bào Chết Body Cà Phê Đắk Lắk Thuần Chay Cocoon 200ml",
     "slug": "tay-te-bao-chet-body-ca-phe-dak-lak-cocoon-200ml",
-    "brandName": "Innisfree",
+    "brandName": "Cocoon",
     "categorySubfolder": "products/hair-body",
     "fileName": "tay-te-bao-chet-body-ca-phe-dak-lak-cocoon-200ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=800&h=800&fit=crop&q=80",
-    "altText": "Tẩy Tế Bào Chết Body Cà Phê Đắk Lắk Thuần Chay Cocoon 200ml chính hãng"
+    "directImageUrl": "/images/products/hair-body/tay-te-bao-chet-body-ca-phe-dak-lak-cocoon-200ml.jpg",
+    "altText": "Tẩy Tế Bào Chết Body Cà Phê Đắk Lắk Thuần Chay Cocoon 200ml - Chính hãng Cocoon"
   },
   {
     "sku": "SKU-BOD-BBW-078",
     "name": "Xịt Thơm Toàn Thân Quyến Rũ Bath & Body Works Into The Night Body Mist 236ml",
     "slug": "xit-thom-toan-than-bath-and-body-works-into-the-night-236ml",
-    "brandName": "L'Oréal Paris",
+    "brandName": "Bath & Body Works",
     "categorySubfolder": "products/hair-body",
     "fileName": "xit-thom-toan-than-bath-and-body-works-into-the-night-236ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=800&h=800&fit=crop&q=80",
-    "altText": "Xịt Thơm Toàn Thân Quyến Rũ Bath & Body Works Into The Night Body Mist 236ml chính hãng"
+    "directImageUrl": "/images/products/hair-body/xit-thom-toan-than-bath-and-body-works-into-the-night-236ml.jpg",
+    "altText": "Xịt Thơm Toàn Thân Quyến Rũ Bath & Body Works Into The Night Body Mist 236ml - Chính hãng Bath & Body Works"
   },
   {
     "sku": "SKU-NUT-SHI-079",
@@ -946,18 +946,18 @@
     "brandName": "Shiseido",
     "categorySubfolder": "products/hair-body",
     "fileName": "nuoc-uong-collagen-shiseido-the-collagen-enriched-10x50ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&h=800&fit=crop&q=80",
-    "altText": "Nước Uống Trắng Da Chống Lão Hóa Shiseido The Collagen Enriched (10 chai x 50ml) chính hãng"
+    "directImageUrl": "/images/products/hair-body/nuoc-uong-collagen-shiseido-the-collagen-enriched-10x50ml.jpg",
+    "altText": "Nước Uống Trắng Da Chống Lão Hóa Shiseido The Collagen Enriched (10 chai x 50ml) - Chính hãng Shiseido"
   },
   {
     "sku": "SKU-NUT-CKJ-080",
     "name": "Nước Hồng Sâm Hoàng Gia 6 Năm Tuổi Cheong Kwan Jang Everytime Balance (30 gói x 10ml)",
     "slug": "nuoc-hong-sam-cheong-kwan-jang-everytime-balance-30x10ml",
-    "brandName": "Sulwhasoo",
+    "brandName": "Cheong Kwan Jang",
     "categorySubfolder": "products/hair-body",
     "fileName": "nuoc-hong-sam-cheong-kwan-jang-everytime-balance-30x10ml.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1512069772995-ec65ed45afd6?w=800&h=800&fit=crop&q=80",
-    "altText": "Nước Hồng Sâm Hoàng Gia 6 Năm Tuổi Cheong Kwan Jang Everytime Balance (30 gói x 10ml) chính hãng"
+    "directImageUrl": "/images/products/hair-body/nuoc-hong-sam-cheong-kwan-jang-everytime-balance-30x10ml.jpg",
+    "altText": "Nước Hồng Sâm Hoàng Gia 6 Năm Tuổi Cheong Kwan Jang Everytime Balance (30 gói x 10ml) - Chính hãng Cheong Kwan Jang"
   },
   {
     "sku": "SKU-SKIN-CLI-081",
@@ -966,8 +966,8 @@
     "brandName": "Clinique",
     "categorySubfolder": "products/skincare",
     "fileName": "kem-duong-am-chuyen-sau-clinique-moisture-surge-100h-50ml.jpg",
-    "directImageUrl": "https://media.hcdn.vn/catalog/product/g/o/google-shopping-kem-duong-clinique-cap-am-chuyen-sau-50ml-1664528870_img_450x450_31d6f9_fit_center.jpg",
-    "altText": "Kem Dưỡng Ẩm Chuyên Sâu Clinique Moisture Surge 100H Auto-Replenishing Hydrator chính hãng"
+    "directImageUrl": "/images/products/skincare/kem-duong-am-chuyen-sau-clinique-moisture-surge-100h-50ml.jpg",
+    "altText": "Kem Dưỡng Ẩm Chuyên Sâu Clinique Moisture Surge 100H Auto-Replenishing Hydrator - Chính hãng Clinique"
   },
   {
     "sku": "SKU-CROSS-9001",
@@ -976,247 +976,7 @@
     "brandName": "Silcot",
     "categorySubfolder": "products/skincare",
     "fileName": "bong-tay-trang-cao-cap-silcot-huu-co-100-mieng.jpg",
-    "directImageUrl": "https://media.hcdn.vn/catalog/product/f/a/facebook-dynamic-bong-tay-trang-silcot-co-ban-82-mieng-1709017942_img_450x450_31d6f9_fit_center.jpg",
-    "altText": "Bông Tẩy Trang Cao Cấp Silcot Hữu Cơ (100 Miếng) chính hãng"
-  },
-  {
-    "sku": "BRAND-ANESSA",
-    "name": "Logo thuong hieu Anessa",
-    "slug": "brand-logo-anessa",
-    "brandName": "Anessa",
-    "categorySubfolder": "branding/brands",
-    "fileName": "anessa.png",
-    "directImageUrl": "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400&h=400&fit=crop&q=80",
-    "altText": "Logo thuong hieu Anessa chinh hang"
-  },
-  {
-    "sku": "BRAND-LA-ROCHE-POSAY",
-    "name": "Logo thuong hieu La Roche-Posay",
-    "slug": "brand-logo-la-roche-posay",
-    "brandName": "La Roche-Posay",
-    "categorySubfolder": "branding/brands",
-    "fileName": "la-roche-posay.png",
-    "directImageUrl": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop&q=80",
-    "altText": "Logo thuong hieu La Roche-Posay chinh hang"
-  },
-  {
-    "sku": "BRAND-PAULAS-CHOICE",
-    "name": "Logo thuong hieu Paulas Choice",
-    "slug": "brand-logo-paulas-choice",
-    "brandName": "Paulas Choice",
-    "categorySubfolder": "branding/brands",
-    "fileName": "paulas-choice.png",
-    "directImageUrl": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=400&fit=crop&q=80",
-    "altText": "Logo thuong hieu Paulas Choice chinh hang"
-  },
-  {
-    "sku": "BRAND-MAC",
-    "name": "Logo thuong hieu MAC",
-    "slug": "brand-logo-mac",
-    "brandName": "MAC",
-    "categorySubfolder": "branding/brands",
-    "fileName": "mac.png",
-    "directImageUrl": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop&q=80",
-    "altText": "Logo thuong hieu MAC chinh hang"
-  },
-  {
-    "sku": "BRAND-MAYBELLINE",
-    "name": "Logo thuong hieu Maybelline",
-    "slug": "brand-logo-maybelline",
-    "brandName": "Maybelline",
-    "categorySubfolder": "branding/brands",
-    "fileName": "maybelline.png",
-    "directImageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&h=400&fit=crop&q=80",
-    "altText": "Logo thuong hieu Maybelline chinh hang"
-  },
-  {
-    "sku": "BRAND-CHANEL",
-    "name": "Logo thuong hieu Chanel",
-    "slug": "brand-logo-chanel",
-    "brandName": "Chanel",
-    "categorySubfolder": "branding/brands",
-    "fileName": "chanel.png",
-    "directImageUrl": "https://images.unsplash.com/photo-1547887537-6158d64c35b3?w=400&h=400&fit=crop&q=80",
-    "altText": "Logo thuong hieu Chanel chinh hang"
-  },
-  {
-    "sku": "BRAND-DIOR",
-    "name": "Logo thuong hieu Dior",
-    "slug": "brand-logo-dior",
-    "brandName": "Dior",
-    "categorySubfolder": "branding/brands",
-    "fileName": "dior.png",
-    "directImageUrl": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&h=400&fit=crop&q=80",
-    "altText": "Logo thuong hieu Dior chinh hang"
-  },
-  {
-    "sku": "BRAND-ESTEE-LAUDER",
-    "name": "Logo thuong hieu Estee Lauder",
-    "slug": "brand-logo-estee-lauder",
-    "brandName": "Estee Lauder",
-    "categorySubfolder": "branding/brands",
-    "fileName": "estee-lauder.png",
-    "directImageUrl": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=400&fit=crop&q=80",
-    "altText": "Logo thuong hieu Estee Lauder chinh hang"
-  },
-  {
-    "sku": "BRAND-CERAVE",
-    "name": "Logo thuong hieu CeraVe",
-    "slug": "brand-logo-cerave",
-    "brandName": "CeraVe",
-    "categorySubfolder": "branding/brands",
-    "fileName": "cerave.png",
-    "directImageUrl": "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400&h=400&fit=crop&q=80",
-    "altText": "Logo thuong hieu CeraVe chinh hang"
-  },
-  {
-    "sku": "BRAND-BIODERMA",
-    "name": "Logo thuong hieu Bioderma",
-    "slug": "brand-logo-bioderma",
-    "brandName": "Bioderma",
-    "categorySubfolder": "branding/brands",
-    "fileName": "bioderma.png",
-    "directImageUrl": "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&h=400&fit=crop&q=80",
-    "altText": "Logo thuong hieu Bioderma chinh hang"
-  },
-  {
-    "sku": "BANNER-HERO-01",
-    "name": "Banner Khuyen Mai Mua He",
-    "slug": "hero-banner-summer-beauty",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "banners",
-    "fileName": "hero-banner-summer-beauty.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1920&h=600&fit=crop&q=85",
-    "altText": "Banner Khuyen Mai Mua He"
-  },
-  {
-    "sku": "BANNER-FLASH-02",
-    "name": "Banner Flash Sale Duoc My Pham",
-    "slug": "banner-flash-sale-skincare",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "banners",
-    "fileName": "banner-flash-sale-skincare.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=1200&h=500&fit=crop&q=85",
-    "altText": "Banner Flash Sale Duoc My Pham"
-  },
-  {
-    "sku": "BANNER-PERF-03",
-    "name": "Banner Nuoc Hoa Cao Cap",
-    "slug": "banner-luxury-fragrance",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "banners",
-    "fileName": "banner-luxury-fragrance.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=1200&h=500&fit=crop&q=85",
-    "altText": "Banner Nuoc Hoa Cao Cap"
-  },
-  {
-    "sku": "BANNER-ROUT-04",
-    "name": "Banner Routine Skincare Chuan Han",
-    "slug": "banner-routine-kbeauty",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "banners",
-    "fileName": "banner-routine-kbeauty.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=1200&h=500&fit=crop&q=85",
-    "altText": "Banner Routine Skincare Chuan Han"
-  },
-  {
-    "sku": "CAT-SUN-01",
-    "name": "Kem Chong Nang",
-    "slug": "kem-chong-nang",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "categories",
-    "fileName": "kem-chong-nang.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=600&h=600&fit=crop&q=80",
-    "altText": "Danh muc my pham Kem Chong Nang"
-  },
-  {
-    "sku": "CAT-SER-02",
-    "name": "Serum - Tinh Chat",
-    "slug": "serum-tinh-chat",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "categories",
-    "fileName": "serum-tinh-chat.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&h=600&fit=crop&q=80",
-    "altText": "Danh muc my pham Serum - Tinh Chat"
-  },
-  {
-    "sku": "CAT-CLN-03",
-    "name": "Sua Rua Mat",
-    "slug": "sua-rua-mat",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "categories",
-    "fileName": "sua-rua-mat.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&h=600&fit=crop&q=80",
-    "altText": "Danh muc my pham Sua Rua Mat"
-  },
-  {
-    "sku": "CAT-TON-04",
-    "name": "Toner - Nuoc Hoa Hong",
-    "slug": "toner-nuoc-hoa-hong",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "categories",
-    "fileName": "toner-nuoc-hoa-hong.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&h=600&fit=crop&q=80",
-    "altText": "Danh muc my pham Toner - Nuoc Hoa Hong"
-  },
-  {
-    "sku": "CAT-LIP-05",
-    "name": "Son Moi",
-    "slug": "son-moi",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "categories",
-    "fileName": "son-moi.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=600&h=600&fit=crop&q=80",
-    "altText": "Danh muc my pham Son Moi"
-  },
-  {
-    "sku": "CAT-FND-06",
-    "name": "Kem Nen - Cushion",
-    "slug": "kem-nen",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "categories",
-    "fileName": "kem-nen.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&h=600&fit=crop&q=80",
-    "altText": "Danh muc my pham Kem Nen - Cushion"
-  },
-  {
-    "sku": "CAT-PRF-07",
-    "name": "Nuoc Hoa Nu",
-    "slug": "nuoc-hoa-nu",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "categories",
-    "fileName": "nuoc-hoa-nu.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&h=600&fit=crop&q=80",
-    "altText": "Danh muc my pham Nuoc Hoa Nu"
-  },
-  {
-    "sku": "CAT-PRM-08",
-    "name": "Nuoc Hoa Nam",
-    "slug": "nuoc-hoa-nam",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "categories",
-    "fileName": "nuoc-hoa-nam.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1547887537-6158d64c35b3?w=600&h=600&fit=crop&q=80",
-    "altText": "Danh muc my pham Nuoc Hoa Nam"
-  },
-  {
-    "sku": "CAT-HAR-09",
-    "name": "Cham Soc Toc",
-    "slug": "cham-soc-toc",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "categories",
-    "fileName": "cham-soc-toc.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=600&h=600&fit=crop&q=80",
-    "altText": "Danh muc my pham Cham Soc Toc"
-  },
-  {
-    "sku": "CAT-BOD-10",
-    "name": "Cham Soc Co The",
-    "slug": "cham-soc-co-the",
-    "brandName": "Canmake Beauty",
-    "categorySubfolder": "categories",
-    "fileName": "cham-soc-co-the.jpg",
-    "directImageUrl": "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=600&h=600&fit=crop&q=80",
-    "altText": "Danh muc my pham Cham Soc Co The"
+    "directImageUrl": "/images/products/skincare/bong-tay-trang-cao-cap-silcot-huu-co-100-mieng.jpg",
+    "altText": "Bông Tẩy Trang Cao Cấp Silcot Hữu Cơ (100 Miếng) - Chính hãng Silcot"
   }
 ]

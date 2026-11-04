@@ -107,7 +107,7 @@
                 <div class="product-card-luxury group bg-white rounded-2xl border border-slate-200/80 p-3 hover:border-magenta-accent/40 hover:shadow-md transition flex flex-col justify-between">
                     <div>
                         <div class="relative w-full aspect-square rounded-xl overflow-hidden bg-slate-50 mb-2.5">
-                            <img :src="item.imageUrl" :alt="item.name" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" />
+                            <img :src="item.imageUrl" :alt="item.name" width="200" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
                         </div>
                         <span class="text-[9px] uppercase font-bold tracking-wider text-rose-gold truncate block" x-text="item.brandName"></span>
                         <a :href="'/san-pham/' + item.slug" class="block mt-0.5">

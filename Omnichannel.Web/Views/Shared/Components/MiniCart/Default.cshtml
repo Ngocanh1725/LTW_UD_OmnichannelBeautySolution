@@ -64,14 +64,23 @@
     {
         @foreach (var item in vm.Items)
         {
-            var itemImg = string.IsNullOrEmpty(item.ProductImageUrl) ? "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=120&h=120&fit=crop" : item.ProductImageUrl;
+            var itemImg = ProductImageResolver.GetThumbnailImageUrl(item.ProductImageUrl, item.ProductSku, null, item.ProductName);
+            var itemWebp = ProductImageResolver.GetWebpImageUrl(itemImg, item.ProductSku, null, item.ProductName);
+            var itemAlt = ProductImageResolver.GetAltText(item.ProductName, null, null, item.ProductSku, null);
             
             <div class="flex gap-3 items-center p-3 rounded-2xl bg-white border border-slate-100 shadow-xs relative group hover:border-pink-200 transition-all">
                 <!-- Thumbnail -->
-                <img src="@itemImg" 
-                     alt="@item.ProductName" 
-                     class="rounded-xl w-16 h-16 object-cover border border-slate-100 shrink-0 shadow-2xs" 
-                     loading="lazy" />
+                <picture class="shrink-0">
+                    <source srcset="@itemWebp" type="image/webp" />
+                    <img src="@itemImg" 
+                         alt="@itemAlt" 
+                         width="64"
+                         height="64"
+                         decoding="async"
+                         loading="lazy"
+                         onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';"
+                         class="rounded-xl w-16 h-16 object-cover border border-slate-100 shrink-0 shadow-2xs" />
+                </picture>
                 
                 <!-- Information -->
                 <div class="flex-1 min-w-0 pr-1">

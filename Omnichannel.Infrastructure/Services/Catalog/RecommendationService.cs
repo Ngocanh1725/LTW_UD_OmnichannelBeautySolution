@@ -135,9 +135,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
                                     Name = prod.Name,
                                     Slug = prod.Slug,
                                     Sku = prod.Sku,
-                                    ImageUrl = !string.IsNullOrEmpty(prod.ThumbnailUrl)
-                                        ? prod.ThumbnailUrl
-                                        : "/images/product-placeholder.svg",
+                                    ImageUrl = Data.ProductImageSourceRegistry.ResolveProductImageUrl(prod.ThumbnailUrl, prod.Sku, prod.Slug, prod.Name),
                                     Price = prod.SellingPrice,
                                     SalePrice = (prod.DiscountPrice.HasValue && prod.DiscountPrice.Value > 0 && prod.DiscountPrice.Value < prod.SellingPrice)
                                         ? prod.DiscountPrice.Value
@@ -184,9 +182,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
                         Name = p.Name,
                         Slug = p.Slug,
                         Sku = p.Sku,
-                        ImageUrl = !string.IsNullOrEmpty(p.ThumbnailUrl)
-                            ? p.ThumbnailUrl
-                            : "/images/product-placeholder.svg",
+                        ImageUrl = Data.ProductImageSourceRegistry.ResolveProductImageUrl(p.ThumbnailUrl, p.Sku, p.Slug, p.Name),
                         Price = p.SellingPrice,
                         SalePrice = (p.DiscountPrice.HasValue && p.DiscountPrice.Value > 0 && p.DiscountPrice.Value < p.SellingPrice)
                             ? p.DiscountPrice.Value
@@ -216,9 +212,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
                 Name = currentProduct.Name,
                 Slug = currentProduct.Slug,
                 Sku = currentProduct.Sku,
-                ImageUrl = !string.IsNullOrEmpty(currentProduct.ThumbnailUrl)
-                    ? currentProduct.ThumbnailUrl
-                    : "/images/product-placeholder.svg",
+                ImageUrl = Data.ProductImageSourceRegistry.ResolveProductImageUrl(currentProduct.ThumbnailUrl, currentProduct.Sku, currentProduct.Slug, currentProduct.Name),
                 Price = currentProduct.SellingPrice,
                 SalePrice = (currentProduct.DiscountPrice.HasValue && currentProduct.DiscountPrice.Value > 0 && currentProduct.DiscountPrice.Value < currentProduct.SellingPrice)
                     ? currentProduct.DiscountPrice.Value
@@ -310,9 +304,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
                         Name = p.Name,
                         Slug = p.Slug,
                         Sku = p.Sku,
-                        ImageUrl = !string.IsNullOrEmpty(p.ThumbnailUrl)
-                            ? p.ThumbnailUrl
-                            : "/images/product-placeholder.svg",
+                        ImageUrl = Data.ProductImageSourceRegistry.ResolveProductImageUrl(p.ThumbnailUrl, p.Sku, p.Slug, p.Name),
                         Price = p.SellingPrice,
                         SalePrice = salePrice,
                         BrandName = p.Brand?.Name ?? p.ManufacturerName ?? "Omni Beauty",

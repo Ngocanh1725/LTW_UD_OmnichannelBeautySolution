@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using Omnichannel.Application.Interfaces.Media;
+using Omnichannel.Infrastructure.Data;
 
 namespace Omnichannel.Web.Controllers
 {
@@ -27,7 +28,7 @@ namespace Omnichannel.Web.Controllers
                 var media = await _mediaService.GetMediaStreamAsync(id);
                 if (media == null || media.Data == null || media.Data.Length == 0)
                 {
-                    return Redirect("/images/product-placeholder.svg");
+                    return Redirect(ProductImageSourceRegistry.PlaceholderUrl);
                 }
 
                 var hash = !string.IsNullOrWhiteSpace(media.ChecksumHash)
@@ -58,7 +59,7 @@ namespace Omnichannel.Web.Controllers
             }
             catch
             {
-                return Redirect("/images/product-placeholder.svg");
+                return Redirect(ProductImageSourceRegistry.PlaceholderUrl);
             }
         }
 
@@ -66,6 +67,6 @@ namespace Omnichannel.Web.Controllers
         public Task<IActionResult> ViewMedia(int id) => GetMedia(id);
 
         [HttpGet("placeholder")]
-        public IActionResult GetPlaceholder() => Redirect("/images/product-placeholder.svg");
+        public IActionResult GetPlaceholder() => Redirect(ProductImageSourceRegistry.PlaceholderUrl);
     }
 }

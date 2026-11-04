@@ -180,7 +180,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 SellingPrice = p.SellingPrice,
                 DiscountPrice = p.DiscountPrice ?? 0m,
                 FinalPrice = (p.DiscountPrice.HasValue && p.DiscountPrice.Value > 0) ? p.DiscountPrice.Value : p.SellingPrice,
-                ImageUrl = p.ThumbnailUrl,
+                ImageUrl = Omnichannel.Infrastructure.Data.ProductImageSourceRegistry.ResolveProductImageUrl(p.ThumbnailUrl, p.Sku, p.Slug, p.Name),
                 CategoryName = p.Category?.Name ?? "Mỹ phẩm",
                 AvailableQuantity = stockDict.TryGetValue(p.Id, out var qty) ? qty : 0
             }).ToList();

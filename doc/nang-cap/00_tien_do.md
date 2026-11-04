@@ -34,6 +34,8 @@
 | **Giai đoạn E: Hoàn thiện & Demo** | **E1** | Demo Presenter HUD (Bảng điều khiển thuyết trình) | Code | ✅ Xong | 05/11/2026 | HUD ẩn 1-Click mở bằng Alt+D, đồng hồ đếm ngược 10p, 6 chặng kịch bản Persona "Lê Ngọc Linh", chuyển vai nhanh (Khách VIP, Thu ngân POS, SuperAdmin) không cần gõ mật khẩu, nạp giỏ hàng demo, 1-Click Reset Demo Data, test tăng 317/317 |
 | | **E2** | Nghiệm thu toàn hệ thống & Tài liệu thuyết trình | QA + Tài liệu | ✅ Xong | 05/11/2026 | Build Release 0 Warning 0 Error, 317/317 tests pass 100%, Smoke test 64 route 0 lỗi 500, TTFB < 50ms, Chạy 2 chu kỳ demo liên tiếp ổn định, hoàn thiện Kịch bản demo 10p, Bộ 16 câu hỏi phản biện, và Báo cáo nâng cấp 05_bao_cao_ket_qua_nang_cap.md |
 | **Giai đoạn F – Hình ảnh & Rebrand** | **F1** | Kiểm kê hình ảnh toàn hệ thống (Read-only) | Chỉ đọc | ✅ Xong | 05/11/2026 | Quét 258 file (138 SHA-256) trên 3 thư mục A/B/C, kiểm tra trực quan 100% ảnh, phát hiện 42 ảnh Unsplash giả ở B gây lỗi hiển thị (kể cả Bath & Body Works → Chanel Coco Mademoiselle) & 63 `MediaAssets` bị ghi đè, lập báo cáo `06_kiem_ke_hinh_anh.md` |
+| | **F2** | Hợp nhất ảnh về `wwwroot\images\products` & Xóa thư mục trùng lặp | Code + DB | ✅ Xong | 05/11/2026 | Copy ảnh Hada Labo đúng dòng vào `products/skincare/`, cập nhật toàn bộ tham chiếu sang `/images/products/{sub}/{file}`, cập nhật DB (`98` Products, `75` MediaAssets, `1` OrderReturnRequests), xóa `real_products` & `Real_Products_Images` (`0` match `git grep`), Build 0 Error & 317/317 tests pass |
+| | **F3** | Đồng bộ hình ảnh – dữ liệu & Tối ưu hiển thị (`IProductImageResolver`) | Code + Tối ưu | 🔄 Chờ duyệt DB/Xóa | 05/11/2026 | Tạo Single Source of Truth `IProductImageResolver` + ảnh fallback `/images/products/_placeholder.webp` tông hồng có logo mờ, chuẩn hóa 84 ảnh SP 1:1 `1000x1000px` `<= 150KB` + xuất 84 bản `.webp`, tối ưu `<picture>`/`lazy`/`fetchpriority`/CLS/SEO Alt, Build 0 Error & 317/317 tests pass |
 
 ---
 
@@ -421,3 +423,42 @@
      - **6 file mồ côi trong A**, **13 ảnh dùng chung cho 27 sản phẩm** (trong đó 3 SP khác thương hiệu là Cetaphil `Id=23`, Maybelline Fit Me `Id=32`, L'Oréal Micellar `Id=7`), **1 SP dùng placeholder** (`Id=98` Silcot 82 miếng).
      - **Chất lượng kỹ thuật:** 1 file trong A > 300 KB (`310.56 KB`), 8 file trong A có cạnh ngắn < 600px, 7 file trong A lệch đuôi mở rộng so với Magic Bytes (`WEBP` mang đuôi `.jpg`, `JPEG` mang đuôi `.png`/`.webp`).
 - **Tài liệu sinh ra:** [`doc/nang-cap/06_kiem_ke_hinh_anh.md`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/doc/nang-cap/06_kiem_ke_hinh_anh.md), cập nhật [`doc/nang-cap/00_tien_do.md`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/doc/nang-cap/00_tien_do.md).
+
+
+### Phiên F2 (Giai đoạn F – Hình ảnh & Rebrand): Hợp Nhất Ảnh Về `wwwroot\images\products` & Xóa Thư Mục Trùng Lặp (05/11/2026)
+- **Mục tiêu:** Đưa ảnh còn thiếu vào thư mục chuẩn `Omnichannel.Web\wwwroot\images\products\{skincare|makeup|perfume|hair-body}`, cập nhật toàn bộ tham chiếu trong code và CSDL sang đường dẫn chuẩn `/images/products/{sub}/{file}`, và xóa vĩnh viễn 2 thư mục trùng lặp (`Omnichannel.Web\wwwroot\images\real_products` và `Real_Products_Images`).
+- **Đã làm:**
+  1. **Đưa ảnh còn thiếu vào thư mục chuẩn A:**
+     - Copy ảnh chai trắng Hada Labo Advanced Nourish từ B vào `Omnichannel.Web\wwwroot\images\products\skincare\dung-dich-duong-am-hada-labo-advanced-nourish-170ml.jpg`.
+     - Quy chuẩn tên file theo slug tiếng Việt không dấu, chữ thường, gạch nối, khớp `Product.Slug`.
+  2. **Cập nhật toàn bộ tham chiếu trong Code, Registry & Script:**
+     - Loại bỏ toàn bộ chuỗi hardcode `/images/real_products/...` và đường dẫn phẳng cũ trong `CartController.cs`, `Views/Cart/Index.cshtml`, `CustomerController.cs`, `WishlistController.cs`, `DbInitializer.cs`, `ProductImageSourceRegistry.cs`, `product_image_registry.json`, `scripts/download_and_rename_products.ps1`, `scripts/verify_real_product_images_e2e.ps1`, và `Omnichannel.Tests/Services/AdminProductCrudTests.cs`.
+     - Đảm bảo `DbInitializer.cs` khi chạy lại không bao giờ ghi đè ngược về đường dẫn `/images/real_products/...`.
+  3. **Cập nhật CSDL Idempotent (sau khi được duyệt tại Điểm dừng 1):**
+     - Thực thi [`scripts/update_product_images_phien2.sql`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/scripts/update_product_images_phien2.sql) và [`scripts/sync_product_images_db_phien2.ps1`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/scripts/sync_product_images_db_phien2.ps1): cập nhật **98 dòng `dbo.Products`**, **75 dòng `dbo.MediaAssets`** (bao gồm đồng bộ lại `BinaryData`, `FileSize`, `MimeType` từ file chuẩn trong `wwwroot/images/products/**`), và **1 dòng `dbo.OrderReturnRequests.EvidenceUrlsJson`**.
+  4. **Xóa 2 thư mục trùng lặp (sau khi được duyệt tại Điểm dừng 2):**
+     - Xác nhận `git grep -i "real_products\|Real_Products_Images"` trong code trả về **0 kết quả**.
+     - Xóa hoàn toàn `Omnichannel.Web\wwwroot\images\real_products` (84 file) và `Real_Products_Images` (84 file).
+- **Kết quả nghiệm thu:**
+  + `dotnet build OmnichannelBeautySolution.sln -c Release`: **0 Warning, 0 Error**.
+  + `dotnet test OmnichannelBeautySolution.sln -c Release`: **317 / 317 tests PASSED (100%)**.
+  + Quét E2E HTTP 404 trên toàn bộ URL DB + 13 trang HTML render: **0 ảnh 404**.
+
+### Phiên F3 (Giai đoạn F – Hình ảnh & Rebrand): Đồng Bộ Hình Ảnh – Dữ Liệu & Tối Ưu Hiển Thị (05/11/2026)
+- **Mục tiêu:** Thiết lập một nguồn sự thật duy nhất (`IProductImageResolver`) cho toàn bộ đường dẫn ảnh sản phẩm kèm ảnh fallback `/images/products/_placeholder.webp` tông hồng nhạt có logo mờ; tách ảnh dùng chung sai bằng placeholder; chuẩn hóa kỹ thuật ảnh (1:1 `1000x1000px`, nền sáng `#FFFFFF`, `<= 150 KB`, xuất bản `.webp` song song giữ `.jpg`/`.png` làm `<picture>` fallback); và tối ưu Core Web Vitals (`loading="lazy"`, `decoding="async"`, `fetchpriority="high"`, `width`/`height`, SEO Alt text tiếng Việt, Schema.org Product `image` URL tuyệt đối).
+- **Đã làm:**
+  1. **Một nguồn sự thật duy nhất (`IProductImageResolver` & `_placeholder.webp`):**
+     - Thiết kế mới [`/images/products/_placeholder.webp`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/Omnichannel.Web/wwwroot/images/products/_placeholder.webp) (`5.73 KB`, `1000x1000px`, nền hồng phấn `#FFF8FA` → `#FBDCE6` với biểu tượng hoa/kim cương mờ `#E8618C`) và bản fallback [`/images/products/_placeholder.jpg`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/Omnichannel.Web/wwwroot/images/products/_placeholder.jpg).
+     - Tạo [`IProductImageResolver`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/Omnichannel.Application/Interfaces/Catalog/IProductImageResolver.cs) ở tầng Application và triển khai [`ProductImageResolver`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/Omnichannel.Infrastructure/Services/Catalog/ProductImageResolver.cs) ở tầng Infrastructure, cung cấp `GetPrimaryImageUrl`, `GetWebpImageUrl`, `GetThumbnailUrl`, `GetGalleryImageUrls`, `GetAltText`, `GetAbsoluteImageUrl`, và `FallbackImageUrl`.
+     - Đăng ký DI và tiêm `@inject IProductImageResolver ProductImageResolver` toàn cục trong `_ViewImports.cshtml` (Storefront & Admin); thay thế toàn bộ đoạn ghép chuỗi/fallback ảnh rải rác trên **38 file** Views, ViewComponents, Controllers và Services.
+  2. **Sửa lỗi nội dung, tách ảnh dùng chung & đồng bộ Registry 98 SKU:**
+     - Đồng bộ [`product_image_registry.json`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/Omnichannel.Infrastructure/Data/product_image_registry.json) và [`ProductImageSourceRegistry.cs`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/Omnichannel.Infrastructure/Data/ProductImageSourceRegistry.cs) cho đủ **98/98 SKU**: **84 sản phẩm** có ảnh thật khớp 1–1 tuyệt đối và **14 sản phẩm** (7 SP độc lập thiếu ảnh thật + 7 SP bản ghi trùng từ seed đầu) được tách sang `/images/products/_placeholder.webp`.
+     - Soạn thảo script SQL idempotent [`scripts/update_product_data_phien3.sql`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/scripts/update_product_data_phien3.sql) và lập danh sách **3 file ảnh mồ côi** + **14 sản phẩm cần bổ sung ảnh thật** trình duyệt tại Điểm dừng.
+  3. **Tối ưu hiệu năng & SEO ảnh (`scripts/optimize_images.ps1`):**
+     - Chuẩn hóa **84/84 ảnh sản phẩm chính tắc** về đúng tỷ lệ **1:1 (`1000x1000px`)**, nền sáng `#FFFFFF`, định dạng chuẩn khớp Magic Bytes, dung lượng **`<= 150 KB`** (max `118.21 KB`, trung bình `34.98 KB`), và xuất **84 bản `.webp` song song** (max `76.57 KB`, trung bình `21.22 KB`).
+     - Chuẩn hóa toàn bộ **4 ảnh `banners`** và **10 ảnh `categories`** (`<= 150 KB` + xuất `.webp` song song).
+     - Áp dụng `<picture><source type="image/webp" srcset="..."><img ...></picture>`, `loading="lazy" decoding="async"` cho ảnh dưới màn hình đầu, `fetchpriority="high"` cho ảnh LCP (Hero banner & ảnh chính PDP), khai báo tường minh `width`/`height` chống CLS, Alt text tiếng Việt chứa Tên sản phẩm + Thương hiệu, và Schema.org `Product.image` xuất URL tuyệt đối chuẩn.
+- **Kết quả nghiệm thu:**
+  + `dotnet build OmnichannelBeautySolution.sln -c Release`: **0 Warning, 0 Error**.
+  + `dotnet test OmnichannelBeautySolution.sln -c Release`: **317 / 317 tests PASSED (100%)**.
+- **Tài liệu cập nhật:** [`doc/nang-cap/06_kiem_ke_hinh_anh.md`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/doc/nang-cap/06_kiem_ke_hinh_anh.md) (Mục VI), [`doc/nang-cap/00_tien_do.md`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/doc/nang-cap/00_tien_do.md).

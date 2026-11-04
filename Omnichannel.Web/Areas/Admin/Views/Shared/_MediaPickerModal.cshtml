@@ -177,7 +177,7 @@
                     <div onclick="selectMediaItem(${JSON.stringify(item).replace(/"/g, '&quot;')})" 
                          id="media-card-${item.id}"
                          class="media-card group relative rounded-2xl overflow-hidden border-2 ${isSelected ? 'border-magenta-accent ring-2 ring-magenta-accent/30' : 'border-slate-100 hover:border-pink-300'} bg-white cursor-pointer transition-all duration-200 hover:shadow-lg flex flex-col aspect-square">
-                        <img src="${item.publicUrl}" alt="${item.fileName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='/images/product-placeholder.svg'" />
+                        <img src="${item.publicUrl}" alt="${item.fileName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='/images/products/_placeholder.webp'" />
                         <div class="absolute inset-x-0 bottom-0 p-1.5 bg-gradient-to-t from-black/80 via-black/40 to-transparent text-white text-[10px] truncate opacity-0 group-hover:opacity-100 transition">
                             ${item.fileName}
                         </div>

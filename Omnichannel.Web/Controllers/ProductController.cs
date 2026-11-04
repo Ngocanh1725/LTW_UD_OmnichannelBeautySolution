@@ -185,52 +185,25 @@ namespace Omnichannel.Web.Controllers
             // 5. Dynamic Ingredient Breakdowns & EWG Safety Analysis per Product
             var ingredientBreakdowns = Omnichannel.Web.Helpers.IngredientParserHelper.BuildDynamicIngredientBreakdowns(product);
 
-            // Gallery images
-            var gallery = new List<string>();
-            if (product.ThumbnailMediaId.HasValue)
-            {
-                gallery.Add($"/media/{product.ThumbnailMediaId.Value}");
-            }
-            else if (!string.IsNullOrEmpty(product.ThumbnailUrl))
-            {
-                gallery.Add(product.ThumbnailUrl);
-            }
-
-            if (!string.IsNullOrEmpty(product.ImagesJson))
-            {
-                try
-                {
-                    var extraImgs = JsonSerializer.Deserialize<List<string>>(product.ImagesJson);
-                    if (extraImgs != null)
-                    {
-                        foreach (var img in extraImgs)
-                        {
-                            if (!string.IsNullOrEmpty(img) && !gallery.Contains(img))
-                            {
-                                gallery.Add(img);
-                            }
-                        }
-                    }
-                }
-                catch { }
-            }
+            // Gallery images (Phân giải qua nguồn chuẩn duy nhất ProductImageSourceRegistry)
+            product.ThumbnailUrl = ProductImageSourceRegistry.ResolveProductImageUrl(product.ThumbnailUrl, product.Sku, product.Slug, product.Name);
+            var gallery = ProductImageSourceRegistry.ResolveGalleryImageUrls(product.ThumbnailUrl, product.ImagesJson, product.Sku, product.Slug, product.Name).ToList();
 
             // Bổ sung các ảnh Swatch của biến thể nếu có
             if (product.Variants != null)
             {
                 foreach (var v in product.Variants)
                 {
-                    if (!string.IsNullOrEmpty(v.SwatchImageUrl) && !gallery.Contains(v.SwatchImageUrl))
+                    if (!string.IsNullOrEmpty(v.SwatchImageUrl))
                     {
-                        gallery.Add(v.SwatchImageUrl);
+                        var resolvedSwatch = ProductImageSourceRegistry.ResolveProductImageUrl(v.SwatchImageUrl, v.Sku ?? product.Sku, product.Slug, product.Name);
+                        v.SwatchImageUrl = resolvedSwatch;
+                        if (!gallery.Contains(resolvedSwatch))
+                        {
+                            gallery.Add(resolvedSwatch);
+                        }
                     }
                 }
-            }
-
-            // Nếu chỉ có 1 ảnh, thêm các góc chụp mẫu chất lượng cao
-            if (gallery.Count < 2 && !string.IsNullOrEmpty(product.ThumbnailUrl))
-            {
-                gallery.Add(product.ThumbnailUrl);
             }
 
             // Related products in same category (có AsSplitQuery và OrderBy)
@@ -993,9 +966,7 @@ namespace Omnichannel.Web.Controllers
                     Id = p.Id,
                     Name = p.Name,
                     Slug = p.Slug,
-                    ThumbnailUrl = !string.IsNullOrWhiteSpace(p.ThumbnailUrl) 
-                        ? p.ThumbnailUrl 
-                        : "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=160&h=160&fit=crop",
+                    ThumbnailUrl = ProductImageSourceRegistry.ResolveProductImageUrl(p.ThumbnailUrl, p.Sku, p.Slug, p.Name),
                     SellingPrice = (p.DiscountPrice.HasValue && p.DiscountPrice.Value > 0 && p.DiscountPrice.Value < p.SellingPrice)
                         ? p.DiscountPrice.Value
                         : p.SellingPrice,

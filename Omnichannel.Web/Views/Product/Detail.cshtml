@@ -5,7 +5,7 @@
     ViewData["Description"] = p.ShortDescription ?? $"{p.Name} chính hãng chuẩn FEFO, giao hàng tốc hành 2H.";
     var mainImg = p.ThumbnailMediaId.HasValue 
         ? $"/media/{p.ThumbnailMediaId}" 
-        : (Model.GalleryImages.FirstOrDefault() ?? (!string.IsNullOrEmpty(p.ThumbnailUrl) ? p.ThumbnailUrl : "/images/product-placeholder.svg"));
+        : (Model.GalleryImages.FirstOrDefault() ?? (!string.IsNullOrEmpty(p.ThumbnailUrl) ? p.ThumbnailUrl : "/images/products/_placeholder.webp"));
     var hasDiscount = p.DiscountPrice.HasValue && p.DiscountPrice.Value > 0 && p.DiscountPrice.Value < p.SellingPrice;
     var originalPrice = p.SellingPrice;
     var isLipstickOrMakeup = p.Variants != null && p.Variants.Any(v => !string.IsNullOrEmpty(v.SwatchColorHex) || !string.IsNullOrEmpty(v.ColorHex));

@@ -196,7 +196,10 @@
 
                                             <!-- Thumbnail -->
                                             <div class="relative w-32 h-32 sm:w-36 sm:h-36 rounded-3xl bg-slate-50 p-3 border border-slate-100 mb-3 group">
-                                                <img src="@prod.ThumbnailUrl" alt="@prod.Name" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                                                <picture class="block w-full h-full">
+                                                    <source srcset="@ProductImageResolver.GetWebpImageUrl(prod.ThumbnailUrl, null, prod.Slug, prod.Name)" type="image/webp" />
+                                                    <img src="@ProductImageResolver.GetPrimaryImageUrl(prod.ThumbnailUrl, null, prod.Slug, prod.Name)" alt="@ProductImageResolver.GetAltText(prod.Name, prod.BrandName, prod.CategoryName, null, prod.Slug)" width="144" height="144" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                                                </picture>
                                                 
                                                 <!-- Badge Kinh tế nhất -->
                                                 @if (prod.IsBestValuePriceRatio)
@@ -557,7 +560,10 @@
                         <div class="p-3.5 rounded-2xl border border-slate-100 hover:border-pink-300 bg-slate-50/50 hover:bg-white transition flex flex-col justify-between group">
                             <div>
                                 <div class="w-full aspect-square rounded-xl bg-white p-2 border border-slate-100 mb-2 overflow-hidden flex items-center justify-center">
-                                    <img src="@item.ThumbnailUrl" alt="@item.Name" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                                    <picture class="block w-full h-full">
+                                        <source srcset="@ProductImageResolver.GetWebpImageUrl(item.ThumbnailUrl, null, item.Slug, item.Name)" type="image/webp" />
+                                        <img src="@ProductImageResolver.GetPrimaryImageUrl(item.ThumbnailUrl, null, item.Slug, item.Name)" alt="@ProductImageResolver.GetAltText(item.Name, item.BrandName, item.CategoryName, null, item.Slug)" width="160" height="160" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" />
+                                    </picture>
                                 </div>
                                 <span class="text-[9px] font-bold text-rose-gold uppercase tracking-wider">@item.BrandName</span>
                                 <h4 class="font-bold text-xs text-charcoal line-clamp-2 leading-tight mt-0.5">

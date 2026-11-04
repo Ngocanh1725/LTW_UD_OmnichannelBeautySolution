@@ -106,11 +106,9 @@ else
                 var rating = Model.Ratings.ContainsKey(p.Id) ? Model.Ratings[p.Id] : 4.9;
                 var ingredients = Model.ActiveIngredients.ContainsKey(p.Id) ? Model.ActiveIngredients[p.Id] : new List<string> { "Hyaluronic Acid", "Niacinamide" };
                 
-                var pImg = (!string.IsNullOrEmpty(p.ThumbnailUrl) && p.ThumbnailUrl.StartsWith("/images/"))
-                    ? p.ThumbnailUrl
-                    : (p.ThumbnailMediaId.HasValue 
-                        ? $"/media/{p.ThumbnailMediaId}" 
-                        : (!string.IsNullOrEmpty(p.ThumbnailUrl) ? p.ThumbnailUrl : "/images/product-placeholder.svg"));
+                var pImg = ProductImageResolver.GetPrimaryImageUrl(p.ThumbnailUrl, p.Sku, p.Slug, p.Name);
+                var pWebp = ProductImageResolver.GetWebpImageUrl(pImg, p.Sku, p.Slug, p.Name);
+                var pAlt = ProductImageResolver.GetAltText(p.Name, p.Brand?.Name, p.Category?.Name, p.Sku, p.Slug);
 
                 var productUrl = !string.IsNullOrEmpty(p.Slug) ? $"/san-pham/{p.Slug}" : $"/Product/Detail/{p.Id}";
 
@@ -118,8 +116,11 @@ else
                     
                     <!-- Left: Large Image Container -->
                     <div class="relative w-full md:w-56 shrink-0 aspect-square rounded-2xl overflow-hidden bg-slate-50 group/thumb">
-                        <a href="@productUrl" class="block w-full h-full relative" title="@p.Name">
-                            <img src="@pImg" alt="@p.Name" width="224" height="224" decoding="async" loading="lazy" onerror="this.onerror=null;this.src='/images/product-placeholder.svg';" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-106 will-change-transform" />
+                        <a href="@productUrl" class="block w-full h-full relative" title="@pAlt">
+                            <picture class="block w-full h-full">
+                                <source srcset="@pWebp" type="image/webp" />
+                                <img src="@pImg" alt="@pAlt" width="224" height="224" decoding="async" loading="lazy" onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-106 will-change-transform" />
+                            </picture>
                         </a>
 
                         <!-- Origin Badge -->

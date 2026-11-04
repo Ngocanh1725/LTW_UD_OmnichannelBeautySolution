@@ -16,7 +16,8 @@
                     @for (int i = 0; i < item.Banners.Count; i++)
                     {
                         var b = item.Banners[i];
-                        var bannerImg = b.DesktopMediaId.HasValue ? $"/media/{b.DesktopMediaId}" : (!string.IsNullOrEmpty(b.DesktopImageUrl) ? b.DesktopImageUrl : (!string.IsNullOrEmpty(b.ImageUrl) ? b.ImageUrl : "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&q=80"));
+                        var bannerImg = b.DesktopMediaId.HasValue ? $"/media/{b.DesktopMediaId}" : (!string.IsNullOrEmpty(b.DesktopImageUrl) ? b.DesktopImageUrl : (!string.IsNullOrEmpty(b.ImageUrl) ? b.ImageUrl : "/images/banners/hero-banner-summer-beauty.jpg"));
+                        var bannerWebp = ProductImageResolver.GetWebpImageUrl(bannerImg);
 
                         <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out"
                              x-show="activeSlide === @i"
@@ -29,14 +30,20 @@
                              style="@(i == 0 ? "" : "display: none;")">
                             
                             <!-- Background Image with Gradient Overlay & LCP Optimization -->
-                            @if (i == 0)
-                            {
-                                <img src="@bannerImg" alt="@b.Title" width="1600" height="620" fetchpriority="high" decoding="sync" class="w-full h-full object-cover object-center" onerror="this.src='https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&q=80'" />
-                            }
-                            else
-                            {
-                                <img src="@bannerImg" alt="@b.Title" width="1600" height="620" loading="lazy" decoding="async" class="w-full h-full object-cover object-center" onerror="this.src='https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&q=80'" />
-                            }
+                            <picture class="block w-full h-full">
+                                @if (!string.IsNullOrEmpty(bannerWebp))
+                                {
+                                    <source srcset="@bannerWebp" type="image/webp" />
+                                }
+                                @if (i == 0)
+                                {
+                                    <img src="@bannerImg" alt="@b.Title" width="1600" height="620" fetchpriority="high" decoding="async" class="w-full h-full object-cover object-center" onerror="this.onerror=null;this.src='/images/banners/hero-banner-summer-beauty.jpg';" />
+                                }
+                                else
+                                {
+                                    <img src="@bannerImg" alt="@b.Title" width="1600" height="620" loading="lazy" decoding="async" class="w-full h-full object-cover object-center" onerror="this.onerror=null;this.src='/images/banners/hero-banner-summer-beauty.jpg';" />
+                                }
+                            </picture>
                             <div class="absolute inset-0 bg-gradient-to-r from-charcoal/90 via-charcoal/60 to-transparent"></div>
 
                             <!-- Content Floating Overlay -->
@@ -123,11 +130,15 @@
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
                         @foreach (var cat in item.Categories)
                         {
-                            var catImg = cat.MediaAssetId.HasValue ? $"/media/{cat.MediaAssetId}" : (!string.IsNullOrEmpty(cat.ImageUrl) ? cat.ImageUrl : "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=300&h=300&fit=crop");
+                            var catImg = ProductImageResolver.GetCategoryImageUrl(cat.Slug, cat.ImageUrl);
+                            var catWebp = ProductImageResolver.GetWebpImageUrl(catImg);
 
                             <a href="/tim-kiem?categorySlug=@cat.Slug" class="group flex flex-col items-center text-center p-4 rounded-3xl bg-white border border-rose-100/80 shadow-xs hover:shadow-xl hover:border-pink-300 transition-all duration-300 hover:-translate-y-1">
                                 <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden mb-3 bg-pastel-rose/50 p-2 flex items-center justify-center" style="aspect-ratio: 1/1;">
-                                    <img src="@catImg" alt="@cat.Name" width="96" height="96" loading="lazy" decoding="async" class="w-full h-full object-cover rounded-xl group-hover:scale-110 transition duration-300 will-change-transform" onerror="this.src='/images/product-placeholder.svg'" />
+                                    <picture class="block w-full h-full">
+                                        <source srcset="@catWebp" type="image/webp" />
+                                        <img src="@catImg" alt="@cat.Name" width="96" height="96" loading="lazy" decoding="async" class="w-full h-full object-cover rounded-xl group-hover:scale-110 transition duration-300 will-change-transform" onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" />
+                                    </picture>
                                 </div>
                                 <h3 class="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-magenta-accent transition line-clamp-1">
                                     @cat.Name
@@ -185,7 +196,8 @@
         @if (code == "MID_BANNER")
         {
             var banner = item.MidBanners.FirstOrDefault();
-            var bgImg = banner != null && !string.IsNullOrEmpty(banner.DesktopImageUrl) ? banner.DesktopImageUrl : "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&q=80";
+            var bgImg = banner != null && !string.IsNullOrEmpty(banner.DesktopImageUrl) ? banner.DesktopImageUrl : "/images/banners/banner-routine-kbeauty.jpg";
+            var bgWebp = ProductImageResolver.GetWebpImageUrl(bgImg);
             var title = banner?.Title ?? item.Section.Title;
             var sub = banner?.Subtitle ?? item.Section.Subtitle ?? "Khám phá phong cách trang điểm chuẩn chuyên gia và các sản phẩm thuần chay";
             var link = banner?.LinkUrl ?? "/category/all";
@@ -194,7 +206,13 @@
             <section class="section-deferred py-10 bg-slate-50">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="relative rounded-3xl overflow-hidden min-h-[320px] sm:min-h-[380px] flex items-center shadow-2xl">
-                        <img src="@bgImg" alt="@title" width="1200" height="380" loading="lazy" decoding="async" class="absolute inset-0 w-full h-full object-cover object-center" />
+                        <picture class="absolute inset-0 block w-full h-full">
+                            @if (!string.IsNullOrEmpty(bgWebp))
+                            {
+                                <source srcset="@bgWebp" type="image/webp" />
+                            }
+                            <img src="@bgImg" alt="@title" width="1200" height="380" loading="lazy" decoding="async" class="w-full h-full object-cover object-center" />
+                        </picture>
                         <div class="absolute inset-0 bg-gradient-to-r from-charcoal/90 via-charcoal/60 to-transparent"></div>
                         <div class="relative max-w-xl p-8 sm:p-12 space-y-4 text-white">
                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-magenta-accent/30 border border-magenta-accent/40 text-pink-300 text-xs font-bold uppercase tracking-wider backdrop-blur-sm">

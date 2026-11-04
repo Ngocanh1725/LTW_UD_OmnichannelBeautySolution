@@ -1,30 +1,9 @@
 @model Omnichannel.Domain.Entities.Product
 @{
     var p = Model;
-    var gallery = new List<string>();
-    if (!string.IsNullOrEmpty(p.ThumbnailUrl)) gallery.Add(p.ThumbnailUrl);
-    if (!string.IsNullOrEmpty(p.ImagesJson))
-    {
-        try
-        {
-            var imgs = System.Text.Json.JsonSerializer.Deserialize<List<string>>(p.ImagesJson);
-            if (imgs != null)
-            {
-                foreach (var img in imgs)
-                {
-                    if (!string.IsNullOrEmpty(img) && !gallery.Contains(img)) gallery.Add(img);
-                }
-            }
-        }
-        catch { }
-    }
-    if (gallery.Count < 2)
-    {
-        gallery.Add("https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=600&h=600&fit=crop");
-        gallery.Add("https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&h=600&fit=crop");
-    }
-    var gallery3 = gallery.Take(3).ToList();
-    var firstImg = gallery3.FirstOrDefault() ?? "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&h=600&fit=crop";
+    var gallery3 = ProductImageResolver.GetGalleryImageUrls(p.ThumbnailUrl, p.ImagesJson, p.Sku, p.Slug, p.Name).Take(3).ToList();
+    var firstImg = gallery3.FirstOrDefault() ?? ProductImageResolver.PlaceholderUrl;
+    var altText = ProductImageResolver.GetAltText(p.Name, p.Brand?.Name, p.Category?.Name, p.Sku, p.Slug);
     var originalPrice = p.SellingPrice * 1.25m;
     var isColorVariant = p.Variants != null && p.Variants.Any(v => !string.IsNullOrEmpty(v.SwatchColorHex) || !string.IsNullOrEmpty(v.ColorHex));
     var bestBatch = p.Batches?.Where(b => b.CurrentQuantity > 0).OrderBy(b => b.ExpDate).FirstOrDefault();

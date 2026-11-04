@@ -855,7 +855,7 @@
                 itemDiv.style.cursor = 'pointer';
                 itemDiv.innerHTML = `
                     <div class="d-flex align-items-center gap-2">
-                        <img src="${p.imageUrl || '/images/product-placeholder.svg'}" class="rounded-2" style="width: 38px; height: 38px; object-fit: cover;" onerror="this.src='/images/product-placeholder.svg';" />
+                        <img src="${p.imageUrl || '/images/products/_placeholder.webp'}" class="rounded-2" style="width: 38px; height: 38px; object-fit: cover;" onerror="this.src='/images/products/_placeholder.webp';" />
                         <div>
                             <div class="fw-semibold text-dark small text-truncate" style="max-width: 200px;">${p.name}</div>
                             <div class="text-muted font-monospace" style="font-size: 11px;">SKU: ${p.sku} | Tồn: <span class="${p.availableQuantity > 0 ? 'text-success fw-bold' : 'text-danger fw-bold'}">${p.availableQuantity}</span></div>
@@ -938,7 +938,7 @@
                          style="transition: all 0.2s; ${isOutOfStock ? '' : 'cursor: pointer;'}"
                          title="${p.name} - SKU: ${p.sku}">
                         <div class="position-relative mb-1.5 overflow-hidden rounded-2 bg-light" style="height: 80px;">
-                            <img src="${p.imageUrl || '/images/product-placeholder.svg'}" 
+                            <img src="${p.imageUrl || '/images/products/_placeholder.webp'}" 
                                  class="w-100 h-100 object-fit-cover" 
                                  onerror="this.src='https://placehold.co/100x100?text=SP';" />
                             <span class="position-absolute top-0 end-0 badge ${isOutOfStock ? 'bg-danger' : 'bg-success'} m-1" style="font-size: 9px;">

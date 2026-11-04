@@ -372,10 +372,10 @@
                     <!-- Image preview box -->
                     <div id="imagePreviewContainer" class="relative w-full aspect-square rounded-2xl overflow-hidden border-2 border-dashed border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex flex-col items-center justify-center p-4 group">
                         <img id="imagePreview" 
-                             src="@(Model.ThumbnailMediaId.HasValue ? $"/media/{Model.ThumbnailMediaId}" : (string.IsNullOrWhiteSpace(Model.ThumbnailUrl) ? "/images/product-placeholder.svg" : Model.ThumbnailUrl))" 
+                             src="@(Model.ThumbnailMediaId.HasValue ? $"/media/{Model.ThumbnailMediaId}" : (string.IsNullOrWhiteSpace(Model.ThumbnailUrl) ? "/images/products/_placeholder.webp" : Model.ThumbnailUrl))" 
                              alt="Preview" 
                              class="w-full h-full object-contain rounded-xl transition group-hover:scale-105"
-                             onerror="this.onerror=null;this.src='/images/product-placeholder.svg';" />
+                             onerror="this.onerror=null;this.src='/images/products/_placeholder.webp';" />
                     </div>
 
                     <!-- Hidden Media Id from DB -->

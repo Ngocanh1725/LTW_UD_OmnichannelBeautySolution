@@ -275,9 +275,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
                     Slug = p.Slug,
                     Sku = p.Sku,
                     NormalizedSku = RemoveDiacritics(p.Sku),
-                    ImageUrl = !string.IsNullOrWhiteSpace(p.ThumbnailUrl)
-                        ? p.ThumbnailUrl
-                        : "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=160&h=160&fit=crop",
+                    ImageUrl = Data.ProductImageSourceRegistry.ResolveProductImageUrl(p.ThumbnailUrl, p.Sku, p.Slug, p.Name),
                     Price = price,
                     SalePrice = salePrice,
                     BrandName = brandName,

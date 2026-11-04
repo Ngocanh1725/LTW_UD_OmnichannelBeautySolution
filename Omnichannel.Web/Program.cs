@@ -105,6 +105,7 @@ builder.Services.AddScoped<IPosShiftService, PosShiftService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IExportService, ExportService>();
 builder.Services.AddScoped<Omnichannel.Application.Interfaces.Catalog.IProductService, Omnichannel.Infrastructure.Services.Catalog.ProductService>();
+builder.Services.AddSingleton<Omnichannel.Application.Interfaces.Catalog.IProductImageResolver, Omnichannel.Infrastructure.Services.Catalog.ProductImageResolver>();
 // Đăng ký Service CRM & Hồ Sơ Sắc Đẹp:
 builder.Services.AddScoped<ICustomerProfileService, CustomerProfileService>();
 builder.Services.AddScoped<Omnichannel.Application.Interfaces.Crm.ICustomerCrmService, Omnichannel.Infrastructure.Services.Crm.CustomerCrmService>();

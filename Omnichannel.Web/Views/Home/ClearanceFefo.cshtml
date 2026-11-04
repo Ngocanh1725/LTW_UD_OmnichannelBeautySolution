@@ -71,12 +71,24 @@
                     decimal originalPrice = product.SellingPrice;
                     decimal clearancePrice = Math.Round(originalPrice * (100m - discountPercent) / 100m / 1000m) * 1000m;
 
+                    var prodImg = ProductImageResolver.GetPrimaryImageUrl(product.ThumbnailUrl, product.Sku, product.Slug, product.Name);
+                    var prodWebp = ProductImageResolver.GetWebpImageUrl(prodImg, product.Sku, product.Slug, product.Name);
+                    var prodAlt = ProductImageResolver.GetAltText(product.Name, product.Brand?.Name, product.Category?.Name, product.Sku, product.Slug);
+
                     <div class="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200/80 overflow-hidden flex flex-col group">
                         <!-- TOP BADGE & THUMBNAIL -->
                         <div class="relative bg-slate-100 aspect-square overflow-hidden">
-                            <img src="@(string.IsNullOrEmpty(product.ThumbnailUrl) ? "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500" : product.ThumbnailUrl)" 
-                                 alt="@product.Name" 
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            <picture class="block w-full h-full">
+                                <source srcset="@prodWebp" type="image/webp" />
+                                <img src="@prodImg" 
+                                     alt="@prodAlt" 
+                                     width="400"
+                                     height="400"
+                                     loading="lazy"
+                                     decoding="async"
+                                     onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                            </picture>
 
                             <!-- DISCOUNT BADGE -->
                             <div class="absolute top-3 left-3 flex flex-col gap-1.5 items-start">

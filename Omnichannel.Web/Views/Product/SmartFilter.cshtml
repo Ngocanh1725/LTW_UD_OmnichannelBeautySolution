@@ -591,7 +591,7 @@
                                         <template x-if="step.product">
                                             <div class="flex items-center gap-3.5 bg-white rounded-xl border border-slate-200 p-2.5 shadow-2xs hover:shadow-sm transition">
                                                 <a :href="'/Product/Detail/' + step.product.id" class="w-16 h-16 rounded-lg overflow-hidden bg-slate-50 flex-shrink-0">
-                                                    <img :src="step.product.thumbnailUrl" :alt="step.product.name" class="w-full h-full object-cover" onError="this.src='/images/product-placeholder.svg'">
+                                                    <img :src="step.product.thumbnailUrl" :alt="step.product.name" class="w-full h-full object-cover" onError="this.src='/images/products/_placeholder.webp'">
                                                 </a>
                                                 <div class="flex-1 min-w-0">
                                                     <div class="flex items-center gap-1.5">
@@ -669,7 +669,7 @@
                                         <template x-if="step.product">
                                             <div class="flex items-center gap-3.5 bg-white rounded-xl border border-slate-200 p-2.5 shadow-2xs hover:shadow-sm transition">
                                                 <a :href="'/Product/Detail/' + step.product.id" class="w-16 h-16 rounded-lg overflow-hidden bg-slate-50 flex-shrink-0">
-                                                    <img :src="step.product.thumbnailUrl" :alt="step.product.name" class="w-full h-full object-cover" onError="this.src='/images/product-placeholder.svg'">
+                                                    <img :src="step.product.thumbnailUrl" :alt="step.product.name" class="w-full h-full object-cover" onError="this.src='/images/products/_placeholder.webp'">
                                                 </a>
                                                 <div class="flex-1 min-w-0">
                                                     <div class="flex items-center gap-1.5">
@@ -837,7 +837,7 @@
                             <div class="rounded-2xl border border-slate-200 p-3 bg-white hover:shadow-md transition flex flex-col justify-between">
                                 <div>
                                     <div class="h-44 rounded-xl overflow-hidden bg-slate-50 mb-2">
-                                        <img :src="p.thumbnailUrl" :alt="p.name" class="w-full h-full object-cover" onError="this.src='/images/product-placeholder.svg'">
+                                        <img :src="p.thumbnailUrl" :alt="p.name" class="w-full h-full object-cover" onError="this.src='/images/products/_placeholder.webp'">
                                     </div>
                                     <div class="text-[10px] text-slate-400 font-bold uppercase" x-text="p.categoryName"></div>
                                     <a :href="'/Product/Detail/' + p.id" class="text-xs font-bold text-charcoal hover:text-magenta-accent line-clamp-2 mt-0.5" x-text="p.name"></a>

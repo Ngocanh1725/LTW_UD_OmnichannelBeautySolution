@@ -151,7 +151,7 @@
                                                     <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
                                                         <div class="flex items-center gap-3">
                                                             <div class="relative w-14 h-14 rounded-lg overflow-hidden bg-slate-200 shrink-0 border border-slate-300">
-                                                                <img id="item-img-preview-@item.Id" src="@(!string.IsNullOrEmpty(item.ImageUrl) ? item.ImageUrl : "/images/product-placeholder.svg")" alt="@item.Title" class="w-full h-full object-cover" />
+                                                                <img id="item-img-preview-@item.Id" src="@(!string.IsNullOrEmpty(item.ImageUrl) ? item.ImageUrl : "/images/products/_placeholder.webp")" alt="@item.Title" class="w-full h-full object-cover" />
                                                             </div>
                                                             <div class="flex-1 min-w-0">
                                                                 <input type="text" value="@item.Title" oninput="updateItemTitle(@item.Id, this.value)" placeholder="Tiêu đề item..." class="w-full px-2 py-1 rounded-lg border border-slate-200 text-[11px] font-semibold mb-1 outline-hidden" />

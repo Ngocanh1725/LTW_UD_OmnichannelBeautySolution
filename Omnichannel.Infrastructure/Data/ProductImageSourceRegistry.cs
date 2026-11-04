@@ -31,7 +31,8 @@ namespace Omnichannel.Infrastructure.Data
     /// </summary>
     public static class ProductImageSourceRegistry
     {
-        public const string PlaceholderUrl = "/images/product-placeholder.svg";
+        public const string PlaceholderUrl = "/images/products/_placeholder.webp";
+        public const string LegacySvgPlaceholderUrl = "/images/product-placeholder.svg";
         public const string DefaultAvatarUrl = "/images/branding/logo-circle.png";
 
         private static readonly Lazy<RegistryLookupCache> _cache = new(BuildLookupCache, isThreadSafe: true);
@@ -42,8 +43,54 @@ namespace Omnichannel.Infrastructure.Data
             public Dictionary<string, string> BySku { get; init; } = new(StringComparer.OrdinalIgnoreCase);
             public Dictionary<string, string> BySlug { get; init; } = new(StringComparer.OrdinalIgnoreCase);
             public Dictionary<string, string> ByFileName { get; init; } = new(StringComparer.OrdinalIgnoreCase);
+            public Dictionary<string, ProductImageSourceItem> ItemBySku { get; init; } = new(StringComparer.OrdinalIgnoreCase);
+            public Dictionary<string, ProductImageSourceItem> ItemBySlug { get; init; } = new(StringComparer.OrdinalIgnoreCase);
             public HashSet<string> ValidCanonicalUrls { get; init; } = new(StringComparer.OrdinalIgnoreCase);
         }
+
+        private static readonly Dictionary<string, string> CategorySlugImageMap = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["trang-diem"] = "/images/categories/kem-nen.jpg",
+            ["cham-soc-da"] = "/images/categories/serum-tinh-chat.jpg",
+            ["nuoc-hoa"] = "/images/categories/nuoc-hoa-nu.jpg",
+            ["toc-co-the"] = "/images/categories/cham-soc-co-the.jpg",
+            ["son-moi"] = "/images/categories/son-moi.jpg",
+            ["kem-nen-cushion"] = "/images/categories/kem-nen.jpg",
+            ["phan-mat"] = "/images/categories/kem-nen.jpg",
+            ["sua-rua-mat"] = "/images/categories/sua-rua-mat.jpg",
+            ["serum-tinh-chat"] = "/images/categories/serum-tinh-chat.jpg",
+            ["kem-chong-nang"] = "/images/categories/kem-chong-nang.jpg",
+            ["nuoc-tay-trang"] = "/images/categories/toner-nuoc-hoa-hong.jpg",
+            ["cham-soc-toc"] = "/images/categories/cham-soc-toc.jpg",
+            ["cham-soc-co-the"] = "/images/categories/cham-soc-co-the.jpg",
+            ["dung-cu-lam-dep"] = "/images/categories/kem-nen.jpg",
+            ["set-qua-tang"] = "/images/categories/nuoc-hoa-nu.jpg",
+            ["toner-nuoc-hoa-hong"] = "/images/categories/toner-nuoc-hoa-hong.jpg",
+            ["kem-duong-am"] = "/images/categories/serum-tinh-chat.jpg",
+            ["mat-na-duong-da"] = "/images/categories/sua-rua-mat.jpg",
+            ["cham-soc-vung-mat"] = "/images/categories/serum-tinh-chat.jpg",
+            ["kem-lot-kem-nen"] = "/images/categories/kem-nen.jpg",
+            ["ma-hong-bat-sang"] = "/images/categories/son-moi.jpg",
+            ["trang-diem-mat-mascara"] = "/images/categories/kem-nen.jpg",
+            ["xit-khoa-nen"] = "/images/categories/toner-nuoc-hoa-hong.jpg",
+            ["nuoc-hoa-nu"] = "/images/categories/nuoc-hoa-nu.jpg",
+            ["nuoc-hoa-nam"] = "/images/categories/nuoc-hoa-nam.jpg",
+            ["nuoc-hoa-unisex"] = "/images/categories/nuoc-hoa-nam.jpg",
+            ["giftset-nuoc-hoa"] = "/images/categories/nuoc-hoa-nu.jpg",
+            ["nuoc-hoa-mini"] = "/images/categories/nuoc-hoa-nu.jpg",
+            ["dau-goi-dau-xa"] = "/images/categories/cham-soc-toc.jpg",
+            ["dau-duong-serum-toc"] = "/images/categories/cham-soc-toc.jpg",
+            ["mat-na-u-toc"] = "/images/categories/cham-soc-toc.jpg",
+            ["san-pham-tao-kieu"] = "/images/categories/cham-soc-toc.jpg",
+            ["sua-tam-duong-am"] = "/images/categories/cham-soc-co-the.jpg",
+            ["duong-the-body"] = "/images/categories/cham-soc-co-the.jpg",
+            ["tay-te-bao-chet-body"] = "/images/categories/cham-soc-co-the.jpg",
+            ["body-mist"] = "/images/categories/nuoc-hoa-nu.jpg",
+            ["thuc-pham-lam-dep"] = "/images/categories/serum-tinh-chat.jpg",
+            ["collagen-nuoc"] = "/images/categories/serum-tinh-chat.jpg",
+            ["vitamin-vien-uong"] = "/images/categories/serum-tinh-chat.jpg",
+            ["nuoc-hong-sam"] = "/images/categories/serum-tinh-chat.jpg"
+        };
 
         private static readonly Dictionary<string, string> LegacyShortAliasMap = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -103,6 +150,7 @@ namespace Omnichannel.Infrastructure.Data
                 // Bỏ qua các đường dẫn placeholder
                 if (trimmed.Contains("default-product", StringComparison.OrdinalIgnoreCase) ||
                     trimmed.Contains("placeholder-product", StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.Equals(LegacySvgPlaceholderUrl, StringComparison.OrdinalIgnoreCase) ||
                     trimmed.Equals(PlaceholderUrl, StringComparison.OrdinalIgnoreCase))
                 {
                     trimmed = string.Empty;
@@ -170,35 +218,228 @@ namespace Omnichannel.Infrastructure.Data
             return PlaceholderUrl;
         }
 
+        /// <summary>
+        /// Phân giải URL ảnh định dạng WebP (/images/products/{sub}/{file}.webp) phục vụ thẻ &lt;picture&gt;.
+        /// </summary>
+        public static string ResolveWebpImageUrl(
+            string? candidateUrl,
+            string? sku = null,
+            string? slug = null,
+            string? productName = null)
+        {
+            var primary = ResolveProductImageUrl(candidateUrl, sku, slug, productName);
+            if (string.IsNullOrWhiteSpace(primary) ||
+                primary.Equals(PlaceholderUrl, StringComparison.OrdinalIgnoreCase) ||
+                primary.Equals(LegacySvgPlaceholderUrl, StringComparison.OrdinalIgnoreCase))
+            {
+                return PlaceholderUrl;
+            }
+
+            if (primary.EndsWith(".webp", StringComparison.OrdinalIgnoreCase) ||
+                primary.EndsWith(".svg", StringComparison.OrdinalIgnoreCase) ||
+                primary.StartsWith("/media/image/", StringComparison.OrdinalIgnoreCase))
+            {
+                return primary;
+            }
+
+            if (primary.StartsWith("/images/products/", StringComparison.OrdinalIgnoreCase) ||
+                primary.StartsWith("/images/banners/", StringComparison.OrdinalIgnoreCase) ||
+                primary.StartsWith("/images/categories/", StringComparison.OrdinalIgnoreCase))
+            {
+                var ext = Path.GetExtension(primary);
+                if (!string.IsNullOrEmpty(ext))
+                {
+                    return primary.Substring(0, primary.Length - ext.Length) + ".webp";
+                }
+            }
+
+            return primary;
+        }
+
+        /// <summary>
+        /// Phân giải danh sách ảnh bộ sưu tập (Gallery) cho trang Chi tiết sản phẩm (PDP) và QuickView.
+        /// </summary>
+        public static IReadOnlyList<string> ResolveGalleryImageUrls(
+            string? primaryUrl,
+            string? imagesJson = null,
+            string? sku = null,
+            string? slug = null,
+            string? productName = null)
+        {
+            var primary = ResolveProductImageUrl(primaryUrl, sku, slug, productName);
+            var list = new List<string> { primary };
+
+            if (!string.IsNullOrWhiteSpace(imagesJson))
+            {
+                try
+                {
+                    var parsed = JsonSerializer.Deserialize<List<string>>(imagesJson);
+                    if (parsed != null)
+                    {
+                        foreach (var raw in parsed)
+                        {
+                            if (string.IsNullOrWhiteSpace(raw)) continue;
+                            var resolved = ResolveProductImageUrl(raw, sku, slug, productName);
+                            if (!string.IsNullOrWhiteSpace(resolved) &&
+                                !resolved.Equals(PlaceholderUrl, StringComparison.OrdinalIgnoreCase) &&
+                                !list.Contains(resolved, StringComparer.OrdinalIgnoreCase))
+                            {
+                                list.Add(resolved);
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    // Bỏ qua nếu JSON không hợp lệ, giữ nguyên ảnh chính
+                }
+            }
+
+            return list;
+        }
+
+        /// <summary>
+        /// Sinh văn bản thay thế (alt text) tiếng Việt chuẩn SEO chứa Tên sản phẩm + Thương hiệu.
+        /// </summary>
+        public static string ResolveAltText(
+            string? productName,
+            string? brandName = null,
+            string? categoryName = null,
+            string? sku = null,
+            string? slug = null)
+        {
+            var cache = _cache.Value;
+            if (!string.IsNullOrWhiteSpace(sku) && cache.ItemBySku.TryGetValue(sku.Trim(), out var itemBySku))
+            {
+                if (!string.IsNullOrWhiteSpace(itemBySku.AltText))
+                {
+                    return itemBySku.AltText;
+                }
+                if (string.IsNullOrWhiteSpace(brandName) && !string.IsNullOrWhiteSpace(itemBySku.BrandName))
+                {
+                    brandName = itemBySku.BrandName;
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(slug) && cache.ItemBySlug.TryGetValue(slug.Trim(), out var itemBySlug))
+            {
+                if (!string.IsNullOrWhiteSpace(itemBySlug.AltText))
+                {
+                    return itemBySlug.AltText;
+                }
+                if (string.IsNullOrWhiteSpace(brandName) && !string.IsNullOrWhiteSpace(itemBySlug.BrandName))
+                {
+                    brandName = itemBySlug.BrandName;
+                }
+            }
+
+            var cleanName = string.IsNullOrWhiteSpace(productName)
+                ? "Mỹ phẩm chính hãng"
+                : productName.Trim();
+
+            var cleanBrand = brandName?.Trim();
+            if (!string.IsNullOrWhiteSpace(cleanBrand))
+            {
+                if (cleanName.Contains(cleanBrand, StringComparison.OrdinalIgnoreCase))
+                {
+                    return $"{cleanName} - Chính hãng {cleanBrand}";
+                }
+                return $"{cleanName} - Thương hiệu {cleanBrand} chính hãng";
+            }
+
+            if (!string.IsNullOrWhiteSpace(categoryName))
+            {
+                return $"{cleanName} - {categoryName.Trim()} chính hãng";
+            }
+
+            return $"{cleanName} - Mỹ phẩm chính hãng";
+        }
+
+        /// <summary>
+        /// Chuyển đổi URL ảnh tương đối sang URL tuyệt đối (https://domain/images/products/...) cho Schema.org Product image và Open Graph.
+        /// </summary>
+        public static string ResolveAbsoluteImageUrl(
+            string? relativeOrAbsoluteUrl,
+            string? baseUrl,
+            string? sku = null,
+            string? slug = null,
+            string? productName = null)
+        {
+            var resolved = ResolveProductImageUrl(relativeOrAbsoluteUrl, sku, slug, productName);
+            if (resolved.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                resolved.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                return resolved;
+            }
+
+            var cleanBase = string.IsNullOrWhiteSpace(baseUrl)
+                ? "https://localhost:5001"
+                : baseUrl.Trim().TrimEnd('/');
+
+            return $"{cleanBase}/{resolved.TrimStart('/')}";
+        }
+
+        /// <summary>
+        /// Phân giải URL ảnh danh mục (/images/categories/{slug}.jpg) hoặc ảnh dự phòng, tránh link ngoài bị gãy.
+        /// </summary>
+        public static string ResolveCategoryImageUrl(string? categorySlug, string? candidateUrl = null)
+        {
+            if (!string.IsNullOrWhiteSpace(categorySlug) &&
+                CategorySlugImageMap.TryGetValue(categorySlug.Trim(), out var mapped))
+            {
+                return mapped;
+            }
+
+            if (!string.IsNullOrWhiteSpace(candidateUrl))
+            {
+                var trimmed = candidateUrl.Trim().Replace("\\", "/");
+                if (trimmed.StartsWith("/images/categories/", StringComparison.OrdinalIgnoreCase) ||
+                    trimmed.StartsWith("/media/image/", StringComparison.OrdinalIgnoreCase))
+                {
+                    return trimmed;
+                }
+            }
+
+            return "/images/categories/serum-tinh-chat.jpg";
+        }
+
         private static RegistryLookupCache BuildLookupCache()
         {
             var items = LoadRegistryItemsFromDiskOrFallback();
             var bySku = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             var bySlug = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             var byFileName = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            var validUrls = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var itemBySku = new Dictionary<string, ProductImageSourceItem>(StringComparer.OrdinalIgnoreCase);
+            var itemBySlug = new Dictionary<string, ProductImageSourceItem>(StringComparer.OrdinalIgnoreCase);
+            var validUrls = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { PlaceholderUrl };
 
             foreach (var item in items)
             {
                 if (string.IsNullOrWhiteSpace(item.CategorySubfolder) ||
-                    !item.CategorySubfolder.StartsWith("products/", StringComparison.OrdinalIgnoreCase) ||
+                    !item.CategorySubfolder.StartsWith("products", StringComparison.OrdinalIgnoreCase) ||
                     string.IsNullOrWhiteSpace(item.FileName))
                 {
                     continue;
                 }
 
-                var canonicalUrl = $"/images/{item.CategorySubfolder.Trim('/')}/{item.FileName.Trim('/')}";
+                var canonicalUrl = item.FileName.Equals("_placeholder.webp", StringComparison.OrdinalIgnoreCase)
+                    ? PlaceholderUrl
+                    : $"/images/{item.CategorySubfolder.Trim('/')}/{item.FileName.Trim('/')}";
                 validUrls.Add(canonicalUrl);
 
                 if (!string.IsNullOrWhiteSpace(item.Sku))
                 {
                     bySku[item.Sku.Trim()] = canonicalUrl;
+                    itemBySku[item.Sku.Trim()] = item;
                 }
                 if (!string.IsNullOrWhiteSpace(item.Slug))
                 {
                     bySlug[item.Slug.Trim()] = canonicalUrl;
+                    itemBySlug[item.Slug.Trim()] = item;
                 }
-                byFileName[item.FileName.Trim()] = canonicalUrl;
+                if (!canonicalUrl.Equals(PlaceholderUrl, StringComparison.OrdinalIgnoreCase))
+                {
+                    byFileName[item.FileName.Trim()] = canonicalUrl;
+                }
             }
 
             // Quét bổ sung thư mục vật lý wwwroot/images/products/** nếu có trên đĩa
@@ -236,6 +477,8 @@ namespace Omnichannel.Infrastructure.Data
                 BySku = bySku,
                 BySlug = bySlug,
                 ByFileName = byFileName,
+                ItemBySku = itemBySku,
+                ItemBySlug = itemBySlug,
                 ValidCanonicalUrls = validUrls
             };
         }
