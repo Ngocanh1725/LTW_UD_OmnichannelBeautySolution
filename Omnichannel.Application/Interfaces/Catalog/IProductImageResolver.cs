@@ -23,7 +23,7 @@ namespace Omnichannel.Application.Interfaces.Catalog
         /// Phân giải URL ảnh chính chuẩn (/images/products/{sub}/{file}) hoặc trả về PlaceholderUrl nếu sản phẩm chưa có ảnh thật riêng.
         /// </summary>
         string GetPrimaryImageUrl(
-            string? candidateUrl = null,
+            string? candidateUrl,
             string? sku = null,
             string? slug = null,
             string? productName = null);
@@ -32,7 +32,7 @@ namespace Omnichannel.Application.Interfaces.Catalog
         /// Phân giải URL ảnh định dạng WebP (/images/products/{sub}/{file}.webp) phục vụ thẻ &lt;picture&gt;.
         /// </summary>
         string GetWebpImageUrl(
-            string? candidateUrl = null,
+            string? candidateUrl,
             string? sku = null,
             string? slug = null,
             string? productName = null);
@@ -41,7 +41,7 @@ namespace Omnichannel.Application.Interfaces.Catalog
         /// Phân giải URL ảnh thu nhỏ (Thumbnail) cho Product Card, MiniCart, Cart, Checkout, POS, Search Suggest, Email/Print.
         /// </summary>
         string GetThumbnailUrl(
-            string? candidateUrl = null,
+            string? candidateUrl,
             string? sku = null,
             string? slug = null,
             string? productName = null);
@@ -50,7 +50,7 @@ namespace Omnichannel.Application.Interfaces.Catalog
         /// Phân giải URL ảnh thu nhỏ (Thumbnail) cho Product Card, MiniCart, Cart, Checkout, POS, Search Suggest, Email/Print.
         /// </summary>
         string GetThumbnailImageUrl(
-            string? candidateUrl = null,
+            string? candidateUrl,
             string? sku = null,
             string? slug = null,
             string? productName = null);

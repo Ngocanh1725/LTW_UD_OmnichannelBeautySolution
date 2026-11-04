@@ -14,7 +14,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
         public string PlaceholderUrl => ProductImageSourceRegistry.PlaceholderUrl;
 
         public string GetPrimaryImageUrl(
-            string? candidateUrl = null,
+            string? candidateUrl,
             string? sku = null,
             string? slug = null,
             string? productName = null)
@@ -23,7 +23,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
         }
 
         public string GetWebpImageUrl(
-            string? candidateUrl = null,
+            string? candidateUrl,
             string? sku = null,
             string? slug = null,
             string? productName = null)
@@ -32,7 +32,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
         }
 
         public string GetThumbnailUrl(
-            string? candidateUrl = null,
+            string? candidateUrl,
             string? sku = null,
             string? slug = null,
             string? productName = null)
@@ -41,7 +41,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
         }
 
         public string GetThumbnailImageUrl(
-            string? candidateUrl = null,
+            string? candidateUrl,
             string? sku = null,
             string? slug = null,
             string? productName = null)
