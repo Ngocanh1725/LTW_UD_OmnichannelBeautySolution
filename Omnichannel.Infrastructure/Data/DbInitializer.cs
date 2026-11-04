@@ -1414,6 +1414,13 @@ namespace Omnichannel.Infrastructure.Data
                     brandId = bId;
                 }
 
+                var resolvedThumb = ProductImageSourceRegistry.ResolveProductImageUrl(null, item.Sku, item.Slug, item.Name);
+                if (string.Equals(resolvedThumb, ProductImageSourceRegistry.PlaceholderUrl, StringComparison.OrdinalIgnoreCase))
+                {
+                    resolvedThumb = ProductImageSourceRegistry.ResolveProductImageUrl(item.ThumbnailUrl, item.Sku, item.Slug, item.Name);
+                }
+                var resolvedImages = new List<string> { resolvedThumb };
+
                 var product = await context.Products.FirstOrDefaultAsync(p => p.Sku == item.Sku);
                 if (product == null)
                 {
@@ -1436,8 +1443,8 @@ namespace Omnichannel.Infrastructure.Data
                         ProductType = "STANDARD",
                         ShortDescription = item.ShortDescription,
                         Description = item.Description,
-                        ThumbnailUrl = item.ThumbnailUrl,
-                        ImagesJson = JsonSerializer.Serialize(item.Images),
+                        ThumbnailUrl = resolvedThumb,
+                        ImagesJson = JsonSerializer.Serialize(resolvedImages),
                         CosmeticNotificationNumber = item.CosmeticNotificationNumber,
                         ImporterName = item.ImporterName,
                         IsActive = true,
@@ -1461,8 +1468,8 @@ namespace Omnichannel.Infrastructure.Data
                     product.Unit = item.Unit;
                     product.ShortDescription = item.ShortDescription;
                     product.Description = item.Description;
-                    product.ThumbnailUrl = item.ThumbnailUrl;
-                    product.ImagesJson = JsonSerializer.Serialize(item.Images);
+                    product.ThumbnailUrl = resolvedThumb;
+                    product.ImagesJson = JsonSerializer.Serialize(resolvedImages);
                     product.CosmeticNotificationNumber = item.CosmeticNotificationNumber;
                     product.ImporterName = item.ImporterName;
                     product.IsActive = true;
@@ -2954,7 +2961,7 @@ namespace Omnichannel.Infrastructure.Data
                             RequestCode = $"RET-{now:yyyyMMdd}-DEMO",
                             Reason = "Vỏ hộp bị móp nhẹ trong quá trình vận chuyển",
                             Description = "Nhờ shop hỗ trợ kiểm tra đổi hộp mới giúp mình để làm quà tặng sinh nhật ạ.",
-                            EvidenceUrlsJson = "[\"/images/products/serum-b5.jpg\"]",
+                            EvidenceUrlsJson = "[\"/images/products/skincare/serum-phuc-hoi-la-roche-posay-hyalu-b5-pure-30ml.jpg\"]",
                             Status = "PENDING",
                             CreatedAt = now.AddHours(-3)
                         };
@@ -4650,6 +4657,15 @@ namespace Omnichannel.Infrastructure.Data
             LogInfo(logger, $"[DbInitializer] Bắt đầu quét nạp toàn bộ ảnh tĩnh từ: {imagesPath}");
 
             var imageFiles = Directory.GetFiles(imagesPath, "*.*", SearchOption.AllDirectories)
+                .Where(f =>
+                {
+                    var norm = f.Replace("\\", "/");
+                    return norm.Contains("/images/products/", StringComparison.OrdinalIgnoreCase) ||
+                           norm.Contains("/images/banners/", StringComparison.OrdinalIgnoreCase) ||
+                           norm.Contains("/images/branding/", StringComparison.OrdinalIgnoreCase) ||
+                           norm.Contains("/images/categories/", StringComparison.OrdinalIgnoreCase) ||
+                           string.Equals(Path.GetDirectoryName(f), imagesPath, StringComparison.OrdinalIgnoreCase);
+                })
                 .Where(f => f.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
                             f.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
                             f.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
@@ -4660,7 +4676,11 @@ namespace Omnichannel.Infrastructure.Data
 
             existingMediaCount = await context.MediaAssets.CountAsync();
             int mappedProdCount = await context.Products.CountAsync(p => p.ThumbnailMediaId != null);
-            if (existingMediaCount >= imageFiles.Count && mappedProdCount >= 80)
+            bool hasLegacyProductPaths = await context.Products.AnyAsync(p =>
+                p.ThumbnailUrl == null ||
+                !p.ThumbnailUrl.StartsWith("/images/products/") ||
+                p.ThumbnailUrl == "/images/product-placeholder.svg");
+            if (existingMediaCount >= imageFiles.Count && mappedProdCount >= 80 && !hasLegacyProductPaths)
             {
                 LogInfo(logger, $"[DbInitializer] CSDL đã có đầy đủ {existingMediaCount} MediaAssets và {mappedProdCount} sản phẩm đã gắn ảnh thực tế 1-1. Bỏ qua nạp lại.");
                 return;
@@ -4854,8 +4874,32 @@ namespace Omnichannel.Infrastructure.Data
             int mappedCount = 0;
             foreach (var prod in allProducts)
             {
-                // Ưu tiên 1: Khớp chính xác tên file chứa Slug hoặc bắt đầu bằng Sku hoặc Slug chứa tên file không đuôi
+                var canonicalUrl = ProductImageSourceRegistry.ResolveProductImageUrl(null, prod.Sku, prod.Slug, prod.Name);
+                if (string.Equals(canonicalUrl, ProductImageSourceRegistry.PlaceholderUrl, StringComparison.OrdinalIgnoreCase))
+                {
+                    canonicalUrl = ProductImageSourceRegistry.ResolveProductImageUrl(prod.ThumbnailUrl, prod.Sku, prod.Slug, prod.Name);
+                }
+
+                if (!string.Equals(canonicalUrl, ProductImageSourceRegistry.PlaceholderUrl, StringComparison.OrdinalIgnoreCase))
+                {
+                    prod.ThumbnailUrl = canonicalUrl;
+                    if (string.IsNullOrWhiteSpace(prod.ImagesJson) ||
+                        !prod.ImagesJson.Contains("/images/products/", StringComparison.OrdinalIgnoreCase) ||
+                        prod.ImagesJson.Contains("unsplash.com", StringComparison.OrdinalIgnoreCase))
+                    {
+                        prod.ImagesJson = JsonSerializer.Serialize(new[] { canonicalUrl });
+                    }
+                }
+
+                var canonicalFileName = Path.GetFileName(canonicalUrl);
+
+                // Ưu tiên 0: Khớp 1-1 theo fileName chuẩn từ ProductImageSourceRegistry
                 var matchedMedia = productMedias.FirstOrDefault(m =>
+                    !string.IsNullOrEmpty(canonicalFileName) &&
+                    string.Equals(m.FileName, canonicalFileName, StringComparison.OrdinalIgnoreCase));
+
+                // Ưu tiên 1: Khớp chính xác tên file chứa Slug hoặc bắt đầu bằng Sku hoặc Slug chứa tên file không đuôi
+                matchedMedia ??= productMedias.FirstOrDefault(m =>
                     (!string.IsNullOrEmpty(prod.Slug) && m.FileName.Contains(prod.Slug, StringComparison.OrdinalIgnoreCase)) ||
                     (!string.IsNullOrEmpty(prod.Sku) && m.FileName.StartsWith(prod.Sku, StringComparison.OrdinalIgnoreCase)) ||
                     (!string.IsNullOrEmpty(prod.Slug) && prod.Slug.Contains(Path.GetFileNameWithoutExtension(m.FileName), StringComparison.OrdinalIgnoreCase)));
@@ -5373,7 +5417,7 @@ namespace Omnichannel.Infrastructure.Data
                             RequestCode = $"RET-{now:yyyyMMdd}-DEMO",
                             Reason = "Vỏ hộp bị móp nhẹ trong quá trình vận chuyển",
                             Description = "Nhờ shop hỗ trợ kiểm tra đổi hộp mới giúp mình để làm quà tặng sinh nhật ạ.",
-                            EvidenceUrlsJson = "[\"/images/products/serum-b5.jpg\"]",
+                            EvidenceUrlsJson = "[\"/images/products/skincare/serum-phuc-hoi-la-roche-posay-hyalu-b5-pure-30ml.jpg\"]",
                             Status = "PENDING",
                             CreatedAt = now.AddHours(-3)
                         };

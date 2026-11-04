@@ -10,7 +10,7 @@ namespace Omnichannel.Application.DTOs.Customer
         public string ProductName { get; set; } = string.Empty;
         public string Slug { get; set; } = string.Empty;
         public string Sku { get; set; } = string.Empty;
-        public string ThumbnailUrl { get; set; } = "/images/branding/default-product.png";
+        public string ThumbnailUrl { get; set; } = "/images/product-placeholder.svg";
         public decimal Price { get; set; }
         public decimal? OriginalPrice { get; set; }
         public int DiscountPercent { get; set; }

@@ -4,7 +4,7 @@
 # ==============================================================================
 
 param (
-    [string]$TargetDirectory = "Real_Products_Images"
+    [string]$TargetDirectory = "Omnichannel.Web\wwwroot\images"
 )
 
 [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
@@ -52,22 +52,21 @@ $index = 0
 foreach ($p in $products) {
     $index++
     $targetFileName = $p.fileName
-    $destinationPath = Join-Path $fullTargetDir $targetFileName
+    $subFolder = ($p.categorySubfolder -replace '/', '\')
+    $subTargetDir = Join-Path $fullTargetDir $subFolder
+    if (-not (Test-Path $subTargetDir)) {
+        New-Item -ItemType Directory -Path $subTargetDir -Force | Out-Null
+    }
+    $destinationPath = Join-Path $subTargetDir $targetFileName
     $url = $p.directImageUrl
     $prodName = $p.name
 
     Write-Host ("[$index/$($products.Count)] " + $prodName) -ForegroundColor White
     Write-Host ("      URL goc   : " + $url) -ForegroundColor DarkGray
-    Write-Host ("      Ten file  : " + $targetFileName) -ForegroundColor Cyan
+    Write-Host ("      Duong dan : /images/$($p.categorySubfolder)/$targetFileName") -ForegroundColor Cyan
 
     $downloaded = $false
     $retries = 3
-
-    # Kiem tra neu da co trong thu muc products hoac tren dia va dung luong hop le
-    $sourceInWeb = Join-Path $workspaceRoot ("Omnichannel.Web\wwwroot\images\" + $p.categorySubfolder + "\" + $targetFileName)
-    if (Test-Path $sourceInWeb) {
-        Copy-Item $sourceInWeb -Destination $destinationPath -Force -ErrorAction SilentlyContinue
-    }
 
     if (Test-Path $destinationPath) {
         $existingBytes = [System.IO.File]::ReadAllBytes($destinationPath)
@@ -137,13 +136,6 @@ foreach ($p in $products) {
     }
 }
 
-# Dong bo ban sao vao wwwroot/images/real_products
-$webDir = Join-Path $workspaceRoot "Omnichannel.Web\wwwroot\images\real_products"
-if (-not (Test-Path $webDir)) {
-    New-Item -ItemType Directory -Path $webDir -Force | Out-Null
-}
-Copy-Item (Join-Path $fullTargetDir "*.*") -Destination $webDir -Force -ErrorAction SilentlyContinue
-
 Write-Host ""
 Write-Host "=================================================================================" -ForegroundColor Magenta
 Write-Host "                         BANG TONG KET KET QUA                                   " -ForegroundColor Magenta
@@ -154,8 +146,7 @@ $passRate = [math]::Round(($successCount / [math]::Max(1, $products.Count)) * 10
 Write-Host "  Tong so san pham xu ly       : $($products.Count)" -ForegroundColor White
 Write-Host "  Tai va doi ten thanh cong    : $successCount ($passRate%)" -ForegroundColor Green
 Write-Host "  That bai                     : $failCount" -ForegroundColor $(if ($failCount -eq 0) { [ConsoleColor]::Green } else { [ConsoleColor]::Red })
-Write-Host "  Thu muc luu tru chinh        : $fullTargetDir" -ForegroundColor Cyan
-Write-Host "  Thu muc dong bo web          : $webDir" -ForegroundColor Cyan
+Write-Host "  Thu muc luu tru chuan        : $(Join-Path $fullTargetDir 'products')" -ForegroundColor Cyan
 Write-Host "=================================================================================" -ForegroundColor Magenta
 
 if ($failCount -eq 0) {

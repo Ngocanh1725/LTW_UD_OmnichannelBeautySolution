@@ -211,7 +211,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
                     CategoryName = p.Category?.Name ?? "Mỹ phẩm",
                     Price = effectivePrice,
                     OriginalPrice = p.DiscountPrice.HasValue ? p.SellingPrice : null,
-                    ThumbnailUrl = p.ThumbnailUrl ?? "/images/default-product.png",
+                    ThumbnailUrl = Data.ProductImageSourceRegistry.ResolveProductImageUrl(p.ThumbnailUrl, p.Sku, p.Slug, p.Name),
                     Rating = avgRating,
                     ReviewCount = p.Reviews.Count,
                     MatchScore = finalMatchPercent,

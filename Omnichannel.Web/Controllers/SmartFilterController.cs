@@ -420,7 +420,7 @@ namespace Omnichannel.Web.Controllers
                         CategoryName = p.Category?.Name ?? "Dược Mỹ Phẩm",
                         Price = effectivePrice,
                         OriginalPrice = p.DiscountPrice.HasValue ? p.SellingPrice : null,
-                        ThumbnailUrl = p.ThumbnailUrl ?? "/images/default-product.png",
+                        ThumbnailUrl = ProductImageSourceRegistry.ResolveProductImageUrl(p.ThumbnailUrl, p.Sku, p.Slug, p.Name),
                         Rating = p.Reviews.Any() ? Math.Round(p.Reviews.Average(r => r.Rating), 1) : 5.0,
                         ReviewCount = p.Reviews.Count,
                         MatchScore = finalPercent,

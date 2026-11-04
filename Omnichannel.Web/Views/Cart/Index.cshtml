@@ -267,11 +267,8 @@
                         <div class="divide-y divide-slate-100" id="cartItemsList">
                             @foreach (var item in vm.Items)
                             {
-                                var imgUrl = item.ProductId == 8 
-                                    ? "/images/real_products/dung-dich-tay-te-bao-chet-paulas-choice-skin-perfecting-2-bha-118ml.png"
-                                    : (item.ProductId == 99 
-                                        ? "/images/real_products/tinh-chat-estee-lauder-advanced-night-repair-50ml.jpg"
-                                        : (!string.IsNullOrEmpty(item.ProductImageUrl) ? item.ProductImageUrl : "/images/real_products/dung-dich-tay-te-bao-chet-paulas-choice-skin-perfecting-2-bha-118ml.png"));
+                                var imgUrl = Omnichannel.Infrastructure.Data.ProductImageSourceRegistry.ResolveProductImageUrl(
+                                    item.ProductImageUrl, item.ProductSku, null, item.ProductName);
 
                                 <div class="p-3 sm:p-3.5 flex flex-col sm:flex-row items-start sm:items-center gap-3.5 transition hover:bg-slate-50/40 relative group" 
                                      id="cart-row-@item.ProductId"

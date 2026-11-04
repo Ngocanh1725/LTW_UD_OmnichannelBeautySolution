@@ -102,7 +102,7 @@ namespace Omnichannel.Web.Controllers
             string fullName = user?.FullName ?? "Phương Anh Nguyễn";
             string phone = user?.PhoneNumber ?? "0908889999";
             string email = user?.Email ?? "phuonganh@omnibeauty.vn";
-            string avatar = user?.AvatarUrl ?? "/images/branding/default-avatar.png";
+            string avatar = user?.AvatarUrl ?? "/images/branding/logo-icon.svg";
             int activeUserId = user?.Id ?? 101;
 
             // 2. Lấy thông tin Ví thành viên
@@ -1048,8 +1048,8 @@ namespace Omnichannel.Web.Controllers
                     RemainingProductsCount = 1,
                     ProductThumbnails = new List<string>
                     {
-                        "/images/products/perfume-jazz-club.jpg",
-                        "/images/products/serum-b5.jpg"
+                        "/images/products/perfume/nuoc-hoa-unisex-maison-margiela-replica-jazz-club-100ml.jpg",
+                        "/images/products/skincare/serum-phuc-hoi-la-roche-posay-hyalu-b5-pure-30ml.jpg"
                     },
                     PaymentMethod = "VNPAY",
                     PaymentStatus = "PAID"
@@ -1068,9 +1068,9 @@ namespace Omnichannel.Web.Controllers
                     RemainingProductsCount = 2,
                     ProductThumbnails = new List<string>
                     {
-                        "/images/products/clinique-moisture.jpg",
-                        "/images/products/toner-bha.jpg",
-                        "/images/products/cleanser-cerave.jpg"
+                        "/images/products/skincare/gel-duong-am-clinique-moisture-surge-100h-50ml.jpg",
+                        "/images/products/skincare/dung-dich-tay-te-bao-chet-paulas-choice-skin-perfecting-2-bha-118ml.png",
+                        "/images/products/skincare/sua-rua-mat-cerave-hydrating-facial-cleanser-473ml.jpg"
                     },
                     PaymentMethod = "COD",
                     PaymentStatus = "UNPAID"
@@ -1089,7 +1089,7 @@ namespace Omnichannel.Web.Controllers
                     RemainingProductsCount = 0,
                     ProductThumbnails = new List<string>
                     {
-                        "/images/products/skinceuticals-b5.jpg"
+                        "/images/products/skincare/serum-phuc-hoi-la-roche-posay-hyalu-b5-pure-30ml.jpg"
                     },
                     PaymentMethod = "VNPAY",
                     PaymentStatus = "PAID"
@@ -1108,8 +1108,8 @@ namespace Omnichannel.Web.Controllers
                     RemainingProductsCount = 1,
                     ProductThumbnails = new List<string>
                     {
-                        "/images/products/mac-chili.jpg",
-                        "/images/products/sunscreen-anessa.jpg"
+                        "/images/products/makeup/son-thoi-li-mac-macximal-silky-matte-lipstick-ruby-woo-35g.jpg",
+                        "/images/products/skincare/sua-chong-nang-anessa-perfect-uv-sunscreen-skincare-milk-60ml.jpg"
                     },
                     PaymentMethod = "COD",
                     PaymentStatus = "PAID"
@@ -1128,7 +1128,7 @@ namespace Omnichannel.Web.Controllers
                     RemainingProductsCount = 0,
                     ProductThumbnails = new List<string>
                     {
-                        "/images/products/paulas-choice-bha.jpg"
+                        "/images/products/skincare/dung-dich-tay-te-bao-chet-paulas-choice-skin-perfecting-2-bha-118ml.png"
                     },
                     PaymentMethod = "COD",
                     PaymentStatus = "CANCELLED"
@@ -1185,7 +1185,7 @@ namespace Omnichannel.Web.Controllers
                 TotalItemsCount = details.Sum(d => d.Quantity),
                 PrimaryProductName = firstItem?.Product?.Name ?? "Sản phẩm mỹ phẩm cao cấp",
                 RemainingProductsCount = Math.Max(0, details.Count - 1),
-                ProductThumbnails = details.Take(4).Select(d => d.Product?.ThumbnailUrl ?? "/images/branding/default-product.png").ToList(),
+                ProductThumbnails = details.Take(4).Select(d => ProductImageSourceRegistry.ResolveProductImageUrl(d.Product?.ThumbnailUrl, d.Product?.Sku, d.Product?.Slug, d.Product?.Name)).ToList(),
                 PaymentMethod = o.PaymentMethod,
                 PaymentStatus = o.PaymentStatus
             };
@@ -1210,7 +1210,7 @@ namespace Omnichannel.Web.Controllers
                 ProductId = d.ProductId,
                 ProductName = d.Product?.Name ?? "Mỹ phẩm cao cấp",
                 Sku = d.Product?.Sku ?? "OMNI-SKU",
-                ThumbnailUrl = d.Product?.ThumbnailUrl ?? "/images/branding/default-product.png",
+                ThumbnailUrl = ProductImageSourceRegistry.ResolveProductImageUrl(d.Product?.ThumbnailUrl, d.Product?.Sku, d.Product?.Slug, d.Product?.Name),
                 VariantName = d.Product?.Unit ?? "Tiêu chuẩn",
                 FefoBatchNumber = d.ProductBatch?.BatchNumber ?? "FEFO-2026-HQ01",
                 FefoExpiryDate = d.ProductBatch?.ExpDate ?? DateTime.UtcNow.AddMonths(28),
@@ -1302,7 +1302,7 @@ namespace Omnichannel.Web.Controllers
                         ProductId = 1,
                         ProductName = "Nước hoa Maison Margiela Replica Jazz Club EDT",
                         Sku = "MM-REPLICA-JAZZ-100",
-                        ThumbnailUrl = "/images/products/perfume-jazz-club.jpg",
+                        ThumbnailUrl = "/images/products/perfume/nuoc-hoa-unisex-maison-margiela-replica-jazz-club-100ml.jpg",
                         VariantName = "Dung tích 100ml",
                         FefoBatchNumber = "LOT-2026-FRAG08",
                         FefoExpiryDate = DateTime.UtcNow.AddMonths(36),
@@ -1316,7 +1316,7 @@ namespace Omnichannel.Web.Controllers
                         ProductId = 2,
                         ProductName = "Kem Dưỡng Ẩm Chuyên Sâu Clinique Moisture Surge 100H Auto-Replenishing Hydrator",
                         Sku = "CLINIQUE-MS-50ML",
-                        ThumbnailUrl = "/images/products/clinique-moisture.jpg",
+                        ThumbnailUrl = "/images/products/skincare/gel-duong-am-clinique-moisture-surge-100h-50ml.jpg",
                         VariantName = "Hũ 50ml",
                         FefoBatchNumber = "FEFO-CLN-202611",
                         FefoExpiryDate = DateTime.UtcNow.AddMonths(26),

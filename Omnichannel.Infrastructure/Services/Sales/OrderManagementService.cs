@@ -1184,7 +1184,7 @@ namespace Omnichannel.Infrastructure.Services.Sales
                 ProductId = d.ProductId,
                 ProductName = d.Product?.Name ?? "Mỹ phẩm cao cấp",
                 Sku = d.Product?.Sku ?? "OMNI-SKU",
-                ThumbnailUrl = d.Product?.ThumbnailUrl ?? "/images/branding/default-product.png",
+                ThumbnailUrl = Data.ProductImageSourceRegistry.ResolveProductImageUrl(d.Product?.ThumbnailUrl, d.Product?.Sku, d.Product?.Slug, d.Product?.Name),
                 VariantName = d.Product?.Unit ?? "Tiêu chuẩn",
                 ProductBatchId = d.ProductBatchId,
                 FefoBatchNumber = d.ProductBatch?.BatchNumber ?? $"LOT-FEFO-{d.ProductId:D3}",

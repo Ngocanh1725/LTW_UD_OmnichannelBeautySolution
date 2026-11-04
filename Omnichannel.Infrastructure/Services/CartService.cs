@@ -282,7 +282,7 @@ namespace Omnichannel.Infrastructure.Services
                 ProductId = ci.ProductId,
                 ProductName = ci.Product?.Name ?? "Sản phẩm",
                 ProductSku = ci.Product?.Sku,
-                ProductImageUrl = ci.Product?.ThumbnailUrl,
+                ProductImageUrl = ProductImageSourceRegistry.ResolveProductImageUrl(ci.Product?.ThumbnailUrl, ci.Product?.Sku, ci.Product?.Slug, ci.Product?.Name),
                 ProductBatchId = null,
                 BatchNumber = null,
                 ExpDate = null,

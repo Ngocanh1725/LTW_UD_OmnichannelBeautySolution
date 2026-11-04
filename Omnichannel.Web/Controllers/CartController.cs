@@ -38,7 +38,7 @@ namespace Omnichannel.Web.Controllers
             {
                 ProductId = 9001,
                 ProductName = "Bông Tẩy Trang Cao Cấp Silcot Hữu Cơ (100 Miếng)",
-                ImageUrl = "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&h=400&fit=crop",
+                ImageUrl = "/images/products/skincare/bong-tay-trang-cao-cap-silcot-huu-co-100-mieng.jpg",
                 OriginalPrice = 65000,
                 SpecialPrice = 29000,
                 BadgeText = "Ưu đãi mua kèm +29K",
@@ -49,7 +49,7 @@ namespace Omnichannel.Web.Controllers
             {
                 ProductId = 9002,
                 ProductName = "Nước Hoa Mini Bỏ Túi Jo Malone English Pear (5ml)",
-                ImageUrl = "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=400&h=400&fit=crop",
+                ImageUrl = "/images/products/perfume/nuoc-hoa-unisex-jo-malone-english-pear-and-freesia-100ml.jpg",
                 OriginalPrice = 185000,
                 SpecialPrice = 29000,
                 BadgeText = "Ưu đãi mua kèm +29K",
@@ -60,7 +60,7 @@ namespace Omnichannel.Web.Controllers
             {
                 ProductId = 9003,
                 ProductName = "Mặt Nạ Dưỡng Da Sinh Học Hyaluronic Acid Bio-Cellulose",
-                ImageUrl = "https://images.unsplash.com/photo-1567928815116-f75471158609?w=400&h=400&fit=crop",
+                ImageUrl = "/images/products/skincare/mat-na-ngu-laneige-water-sleeping-mask-ex-70ml.jpg",
                 OriginalPrice = 75000,
                 SpecialPrice = 29000,
                 BadgeText = "Ưu đãi mua kèm +29K",
@@ -132,7 +132,7 @@ namespace Omnichannel.Web.Controllers
                     {
                         ProductId = 8,
                         ProductName = "Dung Dịch Tẩy Tế Bào Chết Hóa Học Paula's Choice Skin Perfecting 2% BHA Liquid 118ml",
-                        ProductImageUrl = "/images/real_products/dung-dich-tay-te-bao-chet-paulas-choice-skin-perfecting-2-bha-118ml.png",
+                        ProductImageUrl = "/images/products/skincare/dung-dich-tay-te-bao-chet-paulas-choice-skin-perfecting-2-bha-118ml.png",
                         UnitPrice = 829000m,
                         Quantity = 1,
                         LineTotal = 829000m,
@@ -146,7 +146,7 @@ namespace Omnichannel.Web.Controllers
                     {
                         ProductId = 99,
                         ProductName = "Tinh Chất Tái Tạo Da Chống Lão Hóa Ban Đêm Retinol Vi Nang 1.0% Expert Clinical Serum 30ml",
-                        ProductImageUrl = "/images/real_products/tinh-chat-estee-lauder-advanced-night-repair-50ml.jpg",
+                        ProductImageUrl = "/images/products/skincare/tinh-chat-estee-lauder-advanced-night-repair-50ml.jpg",
                         UnitPrice = 1250000m,
                         Quantity = 1,
                         LineTotal = 1250000m,
@@ -255,6 +255,8 @@ namespace Omnichannel.Web.Controllers
                                 item.ProductImageUrl = activeVariant.SwatchImageUrl;
                             }
                         }
+                        item.ProductImageUrl = ProductImageSourceRegistry.ResolveProductImageUrl(
+                            item.ProductImageUrl ?? prod.ThumbnailUrl, prod.Sku, prod.Slug, prod.Name);
                         if (string.IsNullOrEmpty(item.VariantName))
                         {
                             item.VariantName = "Phiên bản tiêu chuẩn";
