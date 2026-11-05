@@ -193,19 +193,7 @@ html.dark {
     --color-info-text: #38bdf8;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]):not(.light) {
-        --bg-page: #090d16;
-        --bg-surface: #111827;
-        --bg-surface-elevated: #1e293b;
-        --bg-surface-subtle: #1e1b2e;
-        --border-subtle: #2d2638;
-        --border-medium: #334155;
-        --text-primary: #f8fafc;
-        --text-secondary: #94a3b8;
-        --text-muted: #64748b;
-    }
-}
+/* Đã gỡ bỏ @media (prefers-color-scheme: dark) tự động để toàn bộ hệ thống đồng nhất nền trắng sáng (Light Mode) trừ khi người dùng chủ động bật class .dark */
 
 /* ============================================================================
    3. TYPOGRAPHY CLASSES & HELPERS
@@ -424,8 +412,8 @@ html.dark {
     width: 100%;
     overflow-x: auto;
     border-radius: var(--radius-xl);
-    border: 1px solid var(--border-subtle);
-    background: var(--bg-surface);
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
     box-shadow: var(--shadow-card);
 }
 
@@ -435,24 +423,26 @@ html.dark {
     border-spacing: 0;
     text-align: left;
     font-size: var(--text-body);
+    background: #ffffff;
 }
 
 .admin-table th {
-    background: var(--bg-surface-subtle);
-    color: var(--text-secondary);
+    background: #f8fafc;
+    color: #475569;
     font-weight: 700;
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     padding: var(--space-4) var(--space-5);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: 1px solid #e2e8f0;
     white-space: nowrap;
 }
 
 .admin-table td {
     padding: var(--space-4) var(--space-5);
-    color: var(--text-primary);
-    border-bottom: 1px solid var(--border-subtle);
+    background: #ffffff;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
     transition: background 0.15s ease;
 }
@@ -462,11 +452,11 @@ html.dark {
 }
 
 .admin-table tbody tr:hover td {
-    background: rgba(225, 29, 72, 0.02);
+    background: #fff4f7 !important;
 }
 
 .admin-table--striped tbody tr:nth-child(even) td {
-    background: var(--slate-50);
+    background: #ffffff;
 }
 
 .admin-table .col-numeric {

@@ -556,8 +556,7 @@
     <script>
         function initAdminTheme() {
             const saved = localStorage.getItem('admin_theme');
-            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (saved === 'dark' || (!saved && prefersDark)) {
+            if (saved === 'dark') {
                 document.documentElement.classList.add('dark');
                 updateThemeIcon(true);
             } else {

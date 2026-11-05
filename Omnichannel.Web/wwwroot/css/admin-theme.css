@@ -518,6 +518,50 @@ html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
     border-color: #1e293b !important;
 }
 
+html.dark .text-dark,
+.dark .text-dark {
+    color: #f8fafc !important;
+}
+
+html.dark .text-muted,
+.dark .text-muted,
+html.dark .text-secondary,
+.dark .text-secondary {
+    color: #94a3b8 !important;
+}
+
+html.dark .bg-light,
+.dark .bg-light {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+html.dark .admin-table-container,
+.dark .admin-table-container,
+html.dark .admin-table,
+.dark .admin-table,
+html.dark .admin-table td,
+.dark .admin-table td,
+html.dark .admin-table--striped tbody tr:nth-child(even) td,
+.dark .admin-table--striped tbody tr:nth-child(even) td {
+    background-color: #0f172a !important;
+    border-color: #1e293b !important;
+    color: #f8fafc !important;
+}
+
+html.dark .admin-table th,
+.dark .admin-table th {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #cbd5e1 !important;
+}
+
+html.dark .admin-table tbody tr:hover td,
+.dark .admin-table tbody tr:hover td {
+    background-color: #1e293b !important;
+}
+
 html.dark .hover\:bg-slate-50\/60:hover,
 .dark .hover\:bg-slate-50\/60:hover,
 html.dark .hover\:bg-slate-50:hover,
