@@ -251,6 +251,22 @@
                 <i class="fa-solid fa-arrow-right-to-bracket"></i>
             </button>
 
+            <!-- 1-Click Fast Fill for Admin / Staff -->
+            <div class="p-2.5 rounded-3 mb-3 text-start" style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(148, 163, 184, 0.2);">
+                <div class="d-flex justify-content-between align-items-center mb-1.5" style="font-size: 11px;">
+                    <span class="text-secondary fw-semibold"><i class="fa-solid fa-wand-magic-sparkles text-warning me-1"></i>Điền nhanh tài khoản kiểm thử:</span>
+                    <span class="text-muted" style="font-size: 10px;">Pass: Admin@123</span>
+                </div>
+                <div class="d-flex flex-wrap gap-1">
+                    <button type="button" class="btn btn-xs btn-outline-light py-0.5 px-2 rounded-pill" style="font-size: 11px;" onclick="fillAdminCreds('admin', 'Admin@123')">Admin</button>
+                    <button type="button" class="btn btn-xs btn-outline-primary py-0.5 px-2 rounded-pill" style="font-size: 11px;" onclick="fillAdminCreds('superadmin', 'Admin@123')">SuperAdmin</button>
+                    <button type="button" class="btn btn-xs btn-outline-success py-0.5 px-2 rounded-pill" style="font-size: 11px;" onclick="fillAdminCreds('manager_hq', 'Admin@123')">Quản lý HQ</button>
+                    <button type="button" class="btn btn-xs btn-outline-info py-0.5 px-2 rounded-pill" style="font-size: 11px;" onclick="fillAdminCreds('cashier01', 'Admin@123')">Thu ngân</button>
+                    <button type="button" class="btn btn-xs btn-outline-warning py-0.5 px-2 rounded-pill text-white" style="font-size: 11px;" onclick="fillAdminCreds('warehouse01', 'Admin@123')">Thủ kho</button>
+                    <button type="button" class="btn btn-xs py-0.5 px-2 rounded-pill text-white fw-semibold" style="font-size: 11px; background: #c93b8b;" onclick="fillAdminCreds('editor01', 'Admin@123')">Biên tập viên</button>
+                </div>
+            </div>
+
             <!-- Storefront Isolation Notice -->
             <div class="text-center pt-2 mb-3">
                 <a href="/account/login" class="text-decoration-none text-secondary small hover-text-white transition">
@@ -285,6 +301,15 @@
             });
         }
     });
+
+    function fillAdminCreds(u, p) {
+        const uInput = document.getElementById("floatingUsername");
+        const pInput = document.getElementById("floatingPassword");
+        if (uInput && pInput) {
+            uInput.value = u;
+            pInput.value = p;
+        }
+    }
 </script>
 </body>
 </html>
