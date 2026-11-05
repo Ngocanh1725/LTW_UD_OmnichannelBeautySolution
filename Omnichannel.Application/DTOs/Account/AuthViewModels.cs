@@ -10,7 +10,7 @@ namespace Omnichannel.Application.DTOs.Account
         public string FullName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Vui lòng nhập Số điện thoại.")]
-        [RegularExpression(@"^(03|05|07|08|09)[0-9]{8}$", ErrorMessage = "Số điện thoại Việt Nam không hợp lệ (gồm 10 số, bắt đầu bằng 03, 05, 07, 08, 09).")]
+        [RegularExpression(@"^0[0-9]{9,10}$", ErrorMessage = "Số điện thoại không hợp lệ (gồm 10-11 chữ số, bắt đầu bằng số 0).")]
         [Display(Name = "Số điện thoại (Mã tích điểm)")]
         public string PhoneNumber { get; set; } = string.Empty;
 
@@ -20,7 +20,7 @@ namespace Omnichannel.Application.DTOs.Account
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Vui lòng nhập Mật khẩu.")]
-        [StringLength(100, MinimumLength = 8, ErrorMessage = "Mật khẩu tối thiểu 8 ký tự, bao gồm chữ hoa, chữ thường và chữ số.")]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Mật khẩu tối thiểu 6 ký tự.")]
         [DataType(DataType.Password)]
         [Display(Name = "Mật khẩu")]
         public string Password { get; set; } = string.Empty;

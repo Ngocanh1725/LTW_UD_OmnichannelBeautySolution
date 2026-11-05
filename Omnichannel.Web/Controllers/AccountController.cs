@@ -488,11 +488,6 @@ namespace Omnichannel.Web.Controllers
         [AllowAnonymous]
         public IActionResult Register(string? returnUrl = null)
         {
-            if (User.Identity?.IsAuthenticated == true)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-
             ViewData["ReturnUrl"] = returnUrl;
             return View(new RegisterViewModel());
         }
@@ -530,11 +525,10 @@ namespace Omnichannel.Web.Controllers
                 return View(model);
             }
 
-            // 3. Kiểm tra chính sách mật khẩu bảo mật (tối thiểu 8 ký tự, hoa, thường, số)
-            var (isPolicyValid, policyError) = _passwordHasher.ValidatePasswordPolicy(model.Password);
-            if (!isPolicyValid)
+            // 3. Kiểm tra độ dài mật khẩu tối thiểu
+            if (string.IsNullOrWhiteSpace(model.Password) || model.Password.Length < 6)
             {
-                ModelState.AddModelError(nameof(model.Password), policyError ?? "Mật khẩu chưa đáp ứng tiêu chuẩn an toàn (tối thiểu 8 ký tự, gồm chữ hoa, chữ thường và chữ số).");
+                ModelState.AddModelError(nameof(model.Password), "Mật khẩu cần có độ dài tối thiểu 6 ký tự.");
                 return View(model);
             }
 
@@ -666,14 +660,18 @@ namespace Omnichannel.Web.Controllers
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, AuthConstants.CustomerCookieScheme);
-            await HttpContext.SignInAsync(
-                AuthConstants.CustomerCookieScheme,
-                new ClaimsPrincipal(claimsIdentity),
-                new AuthenticationProperties
-                {
-                    IsPersistent = true,
-                    ExpiresUtc = DateTimeOffset.UtcNow.AddDays(14)
-                });
+            if (HttpContext?.RequestServices?.GetService(typeof(IAuthenticationService)) != null)
+            {
+                await HttpContext.SignOutAsync(AuthConstants.AdminCookieScheme);
+                await HttpContext.SignInAsync(
+                    AuthConstants.CustomerCookieScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    new AuthenticationProperties
+                    {
+                        IsPersistent = true,
+                        ExpiresUtc = DateTimeOffset.UtcNow.AddDays(14)
+                    });
+            }
 
             TempData["SuccessMessage"] = $"🎉 Chào mừng {cleanFullName}! Bạn đã đăng ký thành công và nhận ngay 50 Điểm Thưởng cùng Voucher {welcomeVoucherCode} giảm 10%!";
 
