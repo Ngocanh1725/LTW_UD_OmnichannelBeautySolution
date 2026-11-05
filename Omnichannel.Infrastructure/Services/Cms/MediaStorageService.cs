@@ -29,15 +29,16 @@ namespace Omnichannel.Infrastructure.Services.Cms
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<MediaAsset> SaveUploadedFileAsync(IFormFile file, int? staffId = null)
+        public async Task<MediaAsset> SaveUploadedFileAsync(IFormFile file, int? staffId = null, string? category = null)
         {
             if (file == null || file.Length == 0)
             {
                 throw new ArgumentException("File rỗng hoặc không tồn tại.", nameof(file));
             }
 
-            // Tạo thư mục wwwroot/uploads/cms nếu chưa có
-            var uploadsFolder = Path.Combine(_env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "uploads", "cms");
+            // Tạo thư mục wwwroot/uploads/cms hoặc uploads/banners nếu là category BANNER
+            string subFolder = (!string.IsNullOrWhiteSpace(category) && category.Equals("BANNER", StringComparison.OrdinalIgnoreCase)) ? "banners" : "cms";
+            var uploadsFolder = Path.Combine(_env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "uploads", subFolder);
             if (!Directory.Exists(uploadsFolder))
             {
                 Directory.CreateDirectory(uploadsFolder);
@@ -66,7 +67,7 @@ namespace Omnichannel.Infrastructure.Services.Cms
             var physicalPath = Path.Combine(uploadsFolder, uniqueFileName);
             await File.WriteAllBytesAsync(physicalPath, fileBytes);
 
-            var publicUrl = $"/uploads/cms/{uniqueFileName}";
+            var publicUrl = $"/uploads/{subFolder}/{uniqueFileName}";
             var storagePath = publicUrl;
 
             var mediaAsset = new MediaAsset
@@ -79,7 +80,7 @@ namespace Omnichannel.Infrastructure.Services.Cms
                 FileSize = file.Length,
                 FileSizeBytes = file.Length,
                 ChecksumHash = hash,
-                Category = "CMS",
+                Category = !string.IsNullOrWhiteSpace(category) ? category.ToUpperInvariant() : "CMS",
                 StoragePath = storagePath,
                 PublicUrl = publicUrl,
                 UploadedByStaffId = staffId,

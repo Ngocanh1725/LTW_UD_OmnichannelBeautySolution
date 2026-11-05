@@ -62,3 +62,4 @@ namespace Omnichannel.Application.DTOs.Cms
         public string? BackgroundColor { get; set; }
     }
 }
+
