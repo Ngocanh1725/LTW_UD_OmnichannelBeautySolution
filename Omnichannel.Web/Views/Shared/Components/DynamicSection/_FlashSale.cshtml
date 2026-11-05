@@ -104,9 +104,8 @@
                                          alt="@altText" 
                                          width="400" 
                                          height="400" 
-                                         loading="lazy" 
                                          decoding="async"
-                                         onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" 
+                                         onerror="this.onerror=null;if(this.parentElement&&this.parentElement.tagName==='PICTURE'){this.parentElement.querySelectorAll('source').forEach(function(s){s.remove();});}this.src='@ProductImageResolver.PlaceholderUrl';" 
                                          class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
                                 </picture>
                             </a>

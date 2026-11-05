@@ -39,8 +39,7 @@
 
 /* Defer Rendering for Off-screen / Below-the-fold Sections to Boost First Load & INP */
 .section-deferred {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 500px;
+    position: relative;
 }
 
 .aspect-square {
