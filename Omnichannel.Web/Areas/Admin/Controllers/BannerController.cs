@@ -68,10 +68,31 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
         [HttpGet]
         [HasPermission("CMS_BANNER_MANAGE")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? status = "all")
         {
-            var rawBanners = await _context.Banners
-                .AsNoTracking()
+            var query = _context.Banners
+                .IgnoreQueryFilters()
+                .AsNoTracking();
+
+            var totalCount = await query.CountAsync();
+            var activeCount = await query.CountAsync(b => b.IsActive);
+            var hiddenCount = await query.CountAsync(b => !b.IsActive);
+
+            ViewBag.TotalCount = totalCount;
+            ViewBag.ActiveCount = activeCount;
+            ViewBag.HiddenCount = hiddenCount;
+            ViewBag.CurrentStatus = status?.ToLowerInvariant() ?? "all";
+
+            if (status == "active")
+            {
+                query = query.Where(b => b.IsActive);
+            }
+            else if (status == "hidden")
+            {
+                query = query.Where(b => !b.IsActive);
+            }
+
+            var rawBanners = await query
                 .OrderBy(b => b.Position)
                 .ThenBy(b => b.DisplayOrder)
                 .ToListAsync();
@@ -210,7 +231,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HasPermission("CMS_BANNER_MANAGE")]
         public async Task<IActionResult> Edit(int id)
         {
-            var banner = await _context.Banners.FindAsync(id);
+            var banner = await _context.Banners.IgnoreQueryFilters().FirstOrDefaultAsync(b => b.Id == id);
             if (banner == null) return NotFound();
 
             var styleConfig = await LoadBannerStyleConfigAsync(banner.Id);
@@ -257,7 +278,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 return View(model);
             }
 
-            var banner = await _context.Banners.FindAsync(model.BannerId);
+            var banner = await _context.Banners.IgnoreQueryFilters().FirstOrDefaultAsync(b => b.Id == model.BannerId);
             if (banner == null) return NotFound();
 
             banner.Title = string.IsNullOrWhiteSpace(model.Title) ? "Banner Quảng Cáo" : model.Title.Trim();
@@ -405,7 +426,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HasPermission("CMS_BANNER_MANAGE")]
         public async Task<IActionResult> ToggleStatus(int id)
         {
-            var banner = await _context.Banners.FindAsync(id);
+            var banner = await _context.Banners.IgnoreQueryFilters().FirstOrDefaultAsync(b => b.Id == id);
             if (banner == null) return NotFound();
 
             banner.IsActive = !banner.IsActive;
@@ -413,8 +434,36 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             InvalidateBannerCache();
 
             TempData["SuccessMessage"] = banner.IsActive
-                ? $"Đã bật hiển thị Banner '{banner.Title}'."
-                : $"Đã tạm ẩn Banner '{banner.Title}'.";
+                ? $"Đã bật hiển thị lại Banner '{banner.Title}'."
+                : $"Đã tạm ẩn Banner '{banner.Title}'. Bạn có thể bấm 'Hiện lại' hoặc chuyển sang tab 'Đã tạm ẩn' để khôi phục bất kỳ lúc nào.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [HasPermission("CMS_BANNER_MANAGE")]
+        public async Task<IActionResult> RestoreAllHidden()
+        {
+            var hiddenBanners = await _context.Banners
+                .IgnoreQueryFilters()
+                .Where(b => !b.IsActive)
+                .ToListAsync();
+
+            if (hiddenBanners.Any())
+            {
+                foreach (var b in hiddenBanners)
+                {
+                    b.IsActive = true;
+                }
+                await _context.SaveChangesAsync();
+                InvalidateBannerCache();
+                TempData["SuccessMessage"] = $"Đã khôi phục và bật hiển thị thành công {hiddenBanners.Count} Banner đã tạm ẩn!";
+            }
+            else
+            {
+                TempData["SuccessMessage"] = "Hiện không có Banner nào đang bị ẩn.";
+            }
 
             return RedirectToAction(nameof(Index));
         }
@@ -424,7 +473,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HasPermission("CMS_BANNER_MANAGE")]
         public async Task<IActionResult> Delete(int id)
         {
-            var banner = await _context.Banners.FindAsync(id);
+            var banner = await _context.Banners.IgnoreQueryFilters().FirstOrDefaultAsync(b => b.Id == id);
             if (banner == null) return NotFound();
 
             _context.Banners.Remove(banner);

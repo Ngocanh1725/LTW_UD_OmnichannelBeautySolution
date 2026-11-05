@@ -20,7 +20,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IMenuEngineService _menuService;
-
+//Hiển thị trang quản trị cây menu
         public MenuController(ApplicationDbContext context, IMenuEngineService menuService)
         {
             _context = context;

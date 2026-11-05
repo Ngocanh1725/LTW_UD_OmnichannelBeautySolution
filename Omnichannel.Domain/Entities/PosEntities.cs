@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Omnichannel.Domain.Common;
-
+//Quản lý Ca làm việc của Thu ngân tại cửa hàng (Tiền đầu ca, tiền thu trong ca, kết ca kiểm tiền).
 namespace Omnichannel.Domain.Entities
 {
     [Table("PosShifts")]

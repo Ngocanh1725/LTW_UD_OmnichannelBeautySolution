@@ -379,13 +379,6 @@
                 <i class="fa-solid fa-user-plus me-2"></i>Tạo tài khoản & Nhận 50 Điểm Thưởng
             </button>
 
-            <!-- Tiện ích điền nhanh thông tin mẫu phục vụ kiểm thử -->
-            <div class="text-center mb-3">
-                <button type="button" onclick="fillDemoRegistration()" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" style="font-size: 11.5px;">
-                    <i class="fa-solid fa-wand-magic-sparkles text-warning me-1"></i>Điền nhanh thông tin mẫu (1-Click Demo)
-                </button>
-            </div>
-
             <!-- Chuyển sang Đăng nhập -->
             <div class="text-center mt-2 mb-2">
                 <span class="text-muted small">Đã có tài khoản thành viên? </span>
@@ -421,20 +414,7 @@
         // 1. Kiểm tra định dạng số điện thoại Việt Nam realtime
         const phoneInput = document.getElementById('PhoneInput');
         const phoneFeedback = document.getElementById('phoneFeedback');
-        const vnPhoneRegex = /^0[0-9]{9,10}$/;
-
-        function fillDemoRegistration() {
-            const rand = Math.floor(100000 + Math.random() * 900000);
-            document.getElementById('FullNameInput').value = 'Nguyễn Ngọc Ánh';
-            phoneInput.value = '090' + String(rand) + '8';
-            document.getElementById('EmailInput').value = 'khachhang' + rand + '@@canmakebeauty.vn';
-            pwdInput.value = 'Admin@123';
-            confirmInput.value = 'Admin@123';
-            document.getElementById('acceptTermsCheck').checked = true;
-            phoneInput.dispatchEvent(new Event('input'));
-            pwdInput.dispatchEvent(new Event('input'));
-            confirmInput.dispatchEvent(new Event('input'));
-        }
+        const vnPhoneRegex = /^(03|05|07|08|09)[0-9]{8}$/;
 
         phoneInput.addEventListener('input', function () {
             const val = this.value.trim();
@@ -444,10 +424,10 @@
                 return;
             }
             if (vnPhoneRegex.test(val)) {
-                phoneFeedback.innerHTML = '<i class="fa-solid fa-circle-check text-success me-1"></i>Số điện thoại hợp lệ (Sẵn sàng tích điểm)';
+                phoneFeedback.innerHTML = '<i class="fa-solid fa-circle-check text-success me-1"></i>Số điện thoại Việt Nam hợp lệ (Sẵn sàng tích điểm)';
                 phoneFeedback.style.color = '#16a34a';
             } else {
-                phoneFeedback.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Số điện thoại cần gồm 10-11 chữ số, bắt đầu bằng số 0';
+                phoneFeedback.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-danger me-1"></i>Số điện thoại chưa đúng định dạng (10 số, bắt đầu bằng 03, 05, 07, 08, 09)';
                 phoneFeedback.style.color = '#dc2626';
             }
         });
@@ -551,7 +531,7 @@
             }
             if (!vnPhoneRegex.test(phone)) {
                 e.preventDefault();
-                alert('Số điện thoại không hợp lệ (cần gồm 10-11 chữ số, bắt đầu bằng số 0).');
+                alert('Số điện thoại không đúng định dạng di động Việt Nam (gồm 10 số, bắt đầu bằng 03, 05, 07, 08, 09).');
                 phoneInput.focus();
                 return;
             }
@@ -561,9 +541,9 @@
                 document.getElementById('EmailInput').focus();
                 return;
             }
-            if (pwd.length < 6) {
+            if (pwd.length < 8) {
                 e.preventDefault();
-                alert('Mật khẩu cần có độ dài tối thiểu 6 ký tự.');
+                alert('Mật khẩu cần có độ dài tối thiểu 8 ký tự.');
                 pwdInput.focus();
                 return;
             }

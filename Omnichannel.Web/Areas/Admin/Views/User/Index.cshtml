@@ -4,122 +4,126 @@
     Layout = "_AdminLayout";
 }
 
-<!-- Admin Page Header Component -->
-<div class="admin-page-header">
-    <div class="admin-page-header__left">
-        <h1 class="admin-page-title">
-            <i class="fa-solid fa-users text-rose-500"></i>
-            Danh Sách Nhân Sự & Tài Khoản
-        </h1>
-        <ul class="admin-breadcrumb">
-            <li><a href="/Admin/Dashboard">@Brand.DisplayName</a></li>
-            <li class="admin-breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></li>
-            <li class="text-rose-600 font-semibold">Nhân Sự & Phân Quyền</li>
-        </ul>
+<!-- Admin Page Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h4 class="fw-bold text-slate-900 mb-1 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-users text-rose-600"></i>
+            <span>Danh Sách Nhân Sự & Phân Quyền</span>
+        </h4>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb small text-muted mb-0">
+                <li class="breadcrumb-item"><a href="/Admin/Dashboard" class="text-decoration-none text-muted">@Brand.DisplayName</a></li>
+                <li class="breadcrumb-item active text-rose-600 fw-semibold" aria-current="page">Nhân Sự & Phân Quyền</li>
+            </ol>
+        </nav>
     </div>
-    <div class="admin-page-actions">
-        <a href="/Admin/User/Create" class="admin-btn admin-btn--primary">
-            <i class="fa-solid fa-user-plus me-1"></i> Thêm Mới Nhân Sự
+    <div class="d-flex gap-2">
+        <a href="/Admin/User/Create" class="btn btn-primary-gradient px-3 py-2 text-white fw-semibold rounded-xl shadow-xs">
+            <i class="fa-solid fa-user-plus me-1"></i>Thêm Mới Nhân Sự
         </a>
     </div>
 </div>
 
 @if (!Model.Any())
 {
-    <!-- Admin Empty State Component -->
-    <div class="admin-empty-state">
-        <div class="admin-empty-state__icon">
+    <div class="bg-white rounded-3 p-5 text-center border shadow-xs">
+        <div class="w-16 h-16 rounded-circle bg-rose-50 text-rose-600 d-inline-flex align-items-center justify-center fs-2 mb-3">
             <i class="fa-solid fa-user-xmark"></i>
         </div>
-        <h3 class="admin-empty-state__title">Chưa Có Nhân Sự Nào</h3>
-        <p class="admin-empty-state__description">
+        <h5 class="fw-bold text-dark">Chưa Có Nhân Sự Nào</h5>
+        <p class="text-muted small max-w-md mx-auto mb-3">
             Hệ thống hiện tại chưa ghi nhận hồ sơ nhân sự nào. Bấm nút bên dưới để tạo tài khoản đầu tiên cho chi nhánh hoặc trụ sở.
         </p>
-        <a href="/Admin/User/Create" class="admin-btn admin-btn--primary">
-            <i class="fa-solid fa-user-plus me-1"></i> Tạo Nhân Sự Đầu Tiên
+        <a href="/Admin/User/Create" class="btn btn-primary-gradient px-4 py-2 text-white fw-semibold rounded-xl">
+            <i class="fa-solid fa-user-plus me-1"></i>Tạo Nhân Sự Đầu Tiên
         </a>
     </div>
 }
 else
 {
-    <!-- Admin Data Table Component -->
-    <div class="admin-table-container">
-        <table class="admin-table admin-table--striped">
-            <thead>
-                <tr>
-                    <th style="width: 280px;">Họ Và Tên / Username</th>
-                    <th>Email & Số Điện Thoại</th>
-                    <th>Vai Trò Phân Bổ</th>
-                    <th>Trạng Thái</th>
-                    <th>Ngày Tạo</th>
-                    <th class="col-numeric" style="width: 120px;">Hành Động</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var user in Model)
-                {
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="user-avatar-badge" style="width: 40px; height: 40px; font-size: 15px; font-weight: 700; border-radius: var(--radius-lg);">
-                                    @(user.FullName.Length > 0 ? user.FullName[0].ToString().ToUpper() : "U")
+    <!-- Admin White Data Card & Table -->
+    <div class="bg-white rounded-3 border shadow-sm overflow-hidden" style="background-color: #ffffff !important;">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" style="background-color: #ffffff !important;">
+                <thead class="bg-light border-bottom">
+                    <tr style="background-color: #f8fafc !important;">
+                        <th class="py-3 px-4 text-slate-700 fw-bold small text-uppercase" style="width: 280px; letter-spacing: 0.05em;">Họ Và Tên / Username</th>
+                        <th class="py-3 text-slate-700 fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Email & Số Điện Thoại</th>
+                        <th class="py-3 text-slate-700 fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Vai Trò Phân Bổ</th>
+                        <th class="py-3 text-slate-700 fw-bold small text-uppercase text-center" style="letter-spacing: 0.05em;">Trạng Thái</th>
+                        <th class="py-3 text-slate-700 fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Ngày Tạo</th>
+                        <th class="py-3 px-4 text-slate-700 fw-bold small text-uppercase text-end" style="width: 120px; letter-spacing: 0.05em;">Hành Động</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach (var user in Model)
+                    {
+                        <tr class="bg-white border-bottom hover:bg-slate-50/60" style="background-color: #ffffff !important;">
+                            <td class="px-4 py-3" style="background-color: #ffffff !important;">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="d-inline-flex align-items-center justify-center rounded-3 fw-bold text-white shadow-xs" 
+                                         style="width: 40px; height: 40px; font-size: 15px; background: linear-gradient(135deg, #e11d48, #9333ea);">
+                                        @(user.FullName.Length > 0 ? user.FullName[0].ToString().ToUpper() : "U")
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-dark" style="font-size: 0.9375rem; color: #0f172a !important;">@user.FullName</div>
+                                        <div class="text-secondary font-monospace" style="font-size: 12px; color: #64748b !important;">@@@user.Username</div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <div class="fw-bold text-dark" style="font-size: 0.9375rem;">@user.FullName</div>
-                                    <div class="text-muted font-mono-numeric" style="font-size: 12px;">@@@user.Username</div>
+                            </td>
+                            <td class="py-3" style="background-color: #ffffff !important;">
+                                <div class="small fw-semibold text-dark" style="color: #1e293b !important;">@user.Email</div>
+                                <div class="text-muted small" style="font-size: 12px; color: #64748b !important;">@(user.PhoneNumber ?? "Chưa có SĐT")</div>
+                            </td>
+                            <td class="py-3" style="background-color: #ffffff !important;">
+                                <div class="d-flex flex-wrap gap-1">
+                                    @foreach (var role in user.AssignedRoles)
+                                    {
+                                        <span class="badge bg-slate-100 text-slate-800 border px-2 py-1 rounded-2" style="font-size: 11px; background-color: #f1f5f9 !important; color: #334155 !important;">
+                                            <i class="fa-solid fa-id-badge text-rose-500 me-1" style="font-size: 10px;"></i>@role
+                                        </span>
+                                    }
                                 </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="small fw-semibold text-dark">@user.Email</div>
-                            <div class="text-muted" style="font-size: 12px;">@(user.PhoneNumber ?? "Chưa có SĐT")</div>
-                        </td>
-                        <td>
-                            <div class="d-flex flex-wrap gap-1">
-                                @foreach (var role in user.AssignedRoles)
-                                {
-                                    <span class="admin-badge admin-badge--neutral">
-                                        <i class="fa-solid fa-id-badge text-rose-500" style="font-size: 10px;"></i>
-                                        @role
-                                    </span>
-                                }
-                            </div>
-                        </td>
-                        <td>
-                            @if (user.IsActive)
-                            {
-                                <span class="admin-badge admin-badge--success">
-                                    <span class="admin-badge__dot"></span> Hoạt động
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="admin-badge admin-badge--danger">
-                                    <span class="admin-badge__dot"></span> Đã khóa
-                                </span>
-                            }
-                        </td>
-                        <td class="small text-muted font-mono-numeric">@user.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td class="col-numeric">
-                            <form asp-action="ToggleStatus" asp-route-userId="@user.UserId" method="post" class="d-inline">
-                                @Html.AntiForgeryToken()
+                            </td>
+                            <td class="py-3 text-center" style="background-color: #ffffff !important;">
                                 @if (user.IsActive)
                                 {
-                                    <button type="submit" class="admin-btn admin-btn--ghost admin-btn--sm text-rose-600" title="Tạm khóa tài khoản" onclick="return confirm('Bạn có chắc chắn muốn khóa tài khoản này?')">
-                                        <i class="fa-solid fa-user-lock"></i>
-                                    </button>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1.5 rounded-pill shadow-xs">
+                                        <i class="fa-solid fa-circle-dot me-1"></i>Hoạt động
+                                    </span>
                                 }
                                 else
                                 {
-                                    <button type="submit" class="admin-btn admin-btn--ghost admin-btn--sm text-emerald-600" title="Mở khóa tài khoản">
-                                        <i class="fa-solid fa-lock-open"></i>
-                                    </button>
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1.5 rounded-pill shadow-xs">
+                                        <i class="fa-solid fa-lock me-1"></i>Đã khóa
+                                    </span>
                                 }
-                            </form>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                            </td>
+                            <td class="py-3 small text-muted font-monospace" style="background-color: #ffffff !important; color: #64748b !important;">
+                                @user.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                            </td>
+                            <td class="px-4 py-3 text-end" style="background-color: #ffffff !important;">
+                                <form asp-action="ToggleStatus" asp-route-userId="@user.UserId" method="post" class="d-inline m-0">
+                                    @Html.AntiForgeryToken()
+                                    @if (user.IsActive)
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-3 px-2 py-1" title="Tạm khóa tài khoản" onclick="return confirm('Bạn có chắc chắn muốn khóa tài khoản này?')">
+                                            <i class="fa-solid fa-user-lock"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit" class="btn btn-sm btn-outline-success rounded-3 px-2 py-1" title="Mở khóa tài khoản">
+                                            <i class="fa-solid fa-lock-open"></i>
+                                        </button>
+                                    }
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 }

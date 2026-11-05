@@ -537,6 +537,16 @@ html.dark .bg-light,
     color: #f1f5f9 !important;
 }
 
+.admin-table-container,
+.admin-table,
+.admin-table td,
+.admin-table th,
+.admin-table--striped tbody tr:nth-child(even) td,
+.admin-table--striped tbody tr:nth-child(odd) td {
+    background-color: #ffffff;
+    color: #1e293b;
+}
+
 html.dark .admin-table-container,
 .dark .admin-table-container,
 html.dark .admin-table,

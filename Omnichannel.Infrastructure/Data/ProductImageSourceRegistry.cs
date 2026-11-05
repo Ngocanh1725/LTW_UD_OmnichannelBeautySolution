@@ -152,10 +152,9 @@ namespace Omnichannel.Infrastructure.Data
                         trimmed.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase) ||
                         trimmed.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
                         trimmed.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
-                        cache.ValidCanonicalUrls.Contains(trimmed) ||
-                        trimmed.StartsWith("/images/banners/", StringComparison.OrdinalIgnoreCase) ||
-                        trimmed.StartsWith("/images/categories/", StringComparison.OrdinalIgnoreCase) ||
-                        trimmed.StartsWith("/images/branding/", StringComparison.OrdinalIgnoreCase))
+                        trimmed.StartsWith("/images/products/", StringComparison.OrdinalIgnoreCase) ||
+                        trimmed.StartsWith("/images/", StringComparison.OrdinalIgnoreCase) ||
+                        cache.ValidCanonicalUrls.Contains(trimmed))
                     {
                         return trimmed;
                     }

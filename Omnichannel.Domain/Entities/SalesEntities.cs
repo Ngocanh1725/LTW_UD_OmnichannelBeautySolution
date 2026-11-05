@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Omnichannel.Domain.Common;
-
+//Lưu giỏ hàng, thông tin đơn đặt hàng, chi tiết món hàng đã mua và hóa đơn thanh toán.
 namespace Omnichannel.Domain.Entities
 {
     [Table("Carts")]

@@ -513,6 +513,8 @@
             if (input.files && input.files[0]) {
                 const mediaIdInput = document.getElementById('ThumbnailMediaId');
                 if (mediaIdInput) mediaIdInput.value = '';
+                const urlInput = document.getElementById('thumbnailUrlInput');
+                if (urlInput) urlInput.value = '';
                 const reader = new FileReader();
                 reader.onload = function (e) {
                     const img = document.getElementById('imagePreview');

@@ -99,17 +99,12 @@ namespace Omnichannel.Web.Controllers
             if (targetRole == "customer")
             {
                 var customer = await _context.Users.AsNoTracking()
-                    .OrderByDescending(u => u.Username == "customer_vip")
-                    .ThenByDescending(u => u.Username == "customer01")
                     .FirstOrDefaultAsync(u => u.Username == "customer_vip" || u.Username == "customer01" || u.UserType == 1);
 
                 if (customer == null)
                 {
                     return BadRequest(new { success = false, message = "Không tìm thấy tài khoản khách hàng mẫu trong CSDL." });
                 }
-
-                // Đăng xuất phiên Admin/POS nếu đang tồn tại để không bị chặn bởi BlockAdminShoppingAttribute ở chu kỳ Demo tiếp theo
-                await HttpContext.SignOutAsync(AuthConstants.AdminCookieScheme);
 
                 var claims = new List<Claim>
                 {

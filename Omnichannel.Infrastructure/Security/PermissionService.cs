@@ -7,13 +7,14 @@ using Microsoft.Extensions.Caching.Memory;
 using Omnichannel.Application.DTOs.Security;
 using Omnichannel.Application.Interfaces.Security;
 using Omnichannel.Infrastructure.Data;
-
+//Giấu kín dữ liệu nội bộ bên trong, không cho bên ngoài tự tiện sửa linh tinh
 namespace Omnichannel.Infrastructure.Security
 {
     public class PermissionService : IPermissionService
-    {
-        private readonly ApplicationDbContext _context;
-        private readonly IMemoryCache _cache;
+    {//Em sử dụng phạm vi truy cập private để bảo vệ biến dữ liệu nhạy cảm như kết nối CSDL và Cache, đồng thời dùng { get; set; } trong các Entity để kiểm soát quyền đọc/ghi dữ liệu từ bên ngoài
+       
+        private readonly ApplicationDbContext _context;// Đặt 'private' để giấu kết nối CSDL
+        private readonly IMemoryCache _cache;// Không cho bên ngoài chọc thẳng vào
         private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(30);
 
         public PermissionService(ApplicationDbContext context, IMemoryCache cache)

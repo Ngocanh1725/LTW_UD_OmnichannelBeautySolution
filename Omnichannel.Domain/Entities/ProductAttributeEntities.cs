@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
+//Lưu biến thể màu son, dung tích, và thành phần hoạt chất để AI phát hiện tương kỵ da liễu.
 namespace Omnichannel.Domain.Entities
 {
     [Table("ProductVariants")]

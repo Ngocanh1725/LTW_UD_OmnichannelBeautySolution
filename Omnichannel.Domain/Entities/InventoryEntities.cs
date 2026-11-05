@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Omnichannel.Domain.Common;
-
+//Lưu thông tin sản phẩm, hạn sử dụng của từng lô hàng, và số lượng tồn kho của từng chi nhánh.
 namespace Omnichannel.Domain.Entities
 {
     [Table("Categories")]

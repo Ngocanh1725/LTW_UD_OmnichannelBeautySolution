@@ -13,24 +13,12 @@
             border-bottom-left-radius: 12px;
             border-bottom-right-radius: 12px;
             background: #fff;
-            min-height: 320px;
+            min-height: 280px;
         }
         .ql-toolbar {
             border-top-left-radius: 12px;
             border-top-right-radius: 12px;
             background: #f8fafc;
-        }
-        .ql-editor img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 12px;
-            margin: 10px 0;
-            cursor: pointer;
-            transition: box-shadow 0.2s ease, outline 0.2s ease;
-        }
-        .ql-editor img.selected-post-img {
-            outline: 3px solid #c93b8b;
-            box-shadow: 0 8px 25px rgba(201, 59, 139, 0.25);
         }
     </style>
 }
@@ -40,7 +28,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h4 class="fw-bold text-dark mb-1">Chỉnh Sửa Bài Viết</h4>
-                <p class="text-muted small mb-0">Cập nhật nội dung, hình ảnh minh họa, ảnh bìa và cấu hình SEO</p>
+                <p class="text-muted small mb-0">Cập nhật nội dung, thay đổi danh mục và cấu hình SEO</p>
             </div>
             <div class="d-flex gap-2">
                 <a href="/Blog/@Model.Slug" target="_blank" class="btn btn-outline-secondary btn-sm rounded-3">
@@ -52,10 +40,9 @@
             </div>
         </div>
 
-        <form asp-action="Edit" method="post" id="postEditForm" enctype="multipart/form-data">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data" id="postEditForm">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="PostId" />
-            <input type="hidden" asp-for="ThumbnailMediaId" id="ThumbnailMediaId" />
 
             <div class="row g-4">
                 <!-- Cột trái: Nội dung chính bài viết -->
@@ -82,54 +69,12 @@
                             <span asp-validation-for="Summary" class="text-danger small"></span>
                         </div>
 
-                        <!-- Rich Text Editor (Quill.js) + Công cụ chèn/chỉnh sửa ảnh trong bài -->
+                        <!-- Rich Text Editor (Quill.js) -->
                         <div class="mb-3">
-                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-                                <label class="form-label small fw-semibold mb-0">Nội dung bài viết chi tiết *</label>
-                                <div class="d-flex flex-wrap gap-1.5">
-                                    <input type="file" id="contentImageUploadInput" accept="image/*" multiple class="d-none" onchange="uploadAndInsertContentImages(this)" />
-                                    <button type="button" onclick="document.getElementById('contentImageUploadInput').click()" class="btn btn-sm btn-outline-primary rounded-3 py-1 px-2.5" style="font-size: 12px;">
-                                        <i class="fa-solid fa-cloud-arrow-up me-1"></i>Tải ảnh chèn vào bài
-                                    </button>
-                                    <button type="button" onclick="insertMediaLibraryImageToEditor()" class="btn btn-sm btn-outline-secondary rounded-3 py-1 px-2.5" style="font-size: 12px;">
-                                        <i class="fa-solid fa-photo-film me-1"></i>Chọn ảnh từ CSDL
-                                    </button>
-                                    <button type="button" onclick="insertImageByUrlToEditor()" class="btn btn-sm btn-outline-secondary rounded-3 py-1 px-2.5" style="font-size: 12px;">
-                                        <i class="fa-solid fa-link me-1"></i>Chèn ảnh bằng URL
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Thanh công cụ chỉnh sửa ảnh đang chọn trong bài viết -->
-                            <div id="inlineImageToolbar" class="d-none mb-2 p-2.5 rounded-3 border bg-light d-flex flex-wrap align-items-center justify-content-between gap-2">
-                                <div class="small fw-semibold text-dark">
-                                    <i class="fa-solid fa-wand-magic-sparkles me-1" style="color: var(--accent-pink);"></i>Tùy chỉnh ảnh đang chọn trong bài:
-                                </div>
-                                <div class="d-flex flex-wrap gap-1">
-                                    <button type="button" onclick="replaceSelectedEditorImageFromComputer()" class="btn btn-xs btn-outline-primary rounded-2 py-1 px-2" style="font-size: 11px;">
-                                        <i class="fa-solid fa-upload me-1"></i>Đổi ảnh từ máy
-                                    </button>
-                                    <button type="button" onclick="replaceSelectedEditorImageFromLibrary()" class="btn btn-xs btn-outline-secondary rounded-2 py-1 px-2" style="font-size: 11px;">
-                                        <i class="fa-solid fa-images me-1"></i>Đổi ảnh từ CSDL
-                                    </button>
-                                    <button type="button" onclick="resizeSelectedEditorImage('50%')" class="btn btn-xs btn-outline-dark rounded-2 py-1 px-2" style="font-size: 11px;">50%</button>
-                                    <button type="button" onclick="resizeSelectedEditorImage('75%')" class="btn btn-xs btn-outline-dark rounded-2 py-1 px-2" style="font-size: 11px;">75%</button>
-                                    <button type="button" onclick="resizeSelectedEditorImage('100%')" class="btn btn-xs btn-outline-dark rounded-2 py-1 px-2" style="font-size: 11px;">100%</button>
-                                    <button type="button" onclick="alignSelectedEditorImage('center')" class="btn btn-xs btn-outline-dark rounded-2 py-1 px-2" style="font-size: 11px;" title="Căn giữa">
-                                        <i class="fa-solid fa-align-center"></i>
-                                    </button>
-                                    <button type="button" onclick="removeSelectedEditorImage()" class="btn btn-xs btn-outline-danger rounded-2 py-1 px-2" style="font-size: 11px;" title="Xóa ảnh này">
-                                        <i class="fa-solid fa-trash-can"></i> Xóa
-                                    </button>
-                                </div>
-                            </div>
-
+                            <label class="form-label small fw-semibold">Nội dung bài viết chi tiết *</label>
                             <div id="quillEditor"></div>
                             <textarea asp-for="ContentHtml" id="contentHtml" class="d-none"></textarea>
                             <span asp-validation-for="ContentHtml" class="text-danger small"></span>
-                            <div class="text-muted mt-1" style="font-size: 11px;">
-                                <i class="fa-regular fa-lightbulb me-1 text-warning"></i>Mẹo: Nhấp vào bất kỳ ảnh nào bên trong khung soạn thảo để <strong>đổi ảnh khác, chỉnh kích thước (50% / 75% / 100%) hoặc xóa ảnh</strong>.
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -156,59 +101,34 @@
                             </select>
                         </div>
 
-                        <!-- Ảnh đại diện & Bộ công cụ Tải ảnh / Chọn từ CSDL / Dán URL -->
+                        <!-- Ảnh đại diện & Live Preview -->
                         <div class="mb-3">
-                            <label asp-for="ThumbnailUrl" class="form-label small fw-semibold">Ảnh đại diện bài viết (Thumbnail) *</label>
-
-                            <!-- Khung xem trước trực quan -->
-                            <div class="mb-2 text-center p-2.5 rounded-3 border bg-light position-relative">
-                                <img id="thumbnailPreview"
-                                     src="@(string.IsNullOrEmpty(Model.ThumbnailUrl) ? "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&fit=crop" : Model.ThumbnailUrl)"
-                                     class="img-fluid rounded-2 shadow-xs"
-                                     style="max-height: 170px; width: 100%; object-fit: cover;"
-                                     alt="Xem trước ảnh bìa" />
-                                <div id="thumbnailUploadStatus" class="text-muted mt-1.5" style="font-size: 11px;">Xem trước ảnh đại diện hiện tại</div>
-                            </div>
-
-                            <!-- Cách 1: Tải file ảnh từ máy tính -->
-                            <div class="p-2.5 rounded-3 border bg-white mb-2">
-                                <label class="form-label small fw-semibold mb-1 d-block" style="font-size: 12px;">
-                                    <i class="fa-solid fa-upload text-primary me-1"></i>Cách 1: Tải ảnh mới từ máy tính
-                                </label>
-                                <input type="file"
-                                       name="thumbnailFile"
-                                       id="thumbnailFileInput"
-                                       accept="image/*"
-                                       class="form-control form-control-sm rounded-3"
-                                       onchange="handleThumbnailFileSelect(this)" />
-                            </div>
-
-                            <!-- Cách 2: Chọn ảnh từ Thư viện CSDL -->
+                            <label class="form-label small fw-semibold text-dark mb-1">Ảnh đại diện bài viết (Thumbnail) *</label>
+                            
+                            <!-- 1. Tải ảnh từ máy -->
                             <div class="mb-2">
-                                <button type="button"
-                                        onclick="openPostThumbnailPicker()"
-                                        class="btn btn-sm btn-outline-primary w-100 rounded-3 py-2 fw-semibold">
-                                    <i class="fa-solid fa-photo-film me-1"></i>Cách 2: Chọn Ảnh Từ Thư Viện CSDL
+                                <label class="text-muted d-block" style="font-size: 11px;">1. Tải file ảnh mới từ máy tính:</label>
+                                <input type="file" name="thumbnailFile" id="thumbnailFileInput" accept=".jpg,.jpeg,.png,.webp,.gif" class="form-control form-control-sm rounded-2" onchange="handlePostFileSelect(this)" />
+                            </div>
+
+                            <!-- 2. Chọn từ CSDL Media -->
+                            <div class="mb-2">
+                                <label class="text-muted d-block" style="font-size: 11px;">2. Hoặc chọn ảnh có sẵn:</label>
+                                <button type="button" class="btn btn-outline-primary btn-sm w-100 rounded-2 btn-select-media" data-input="#thumbnailInput" data-preview="#thumbnailPreview" data-category="CMS">
+                                    <i class="fa-solid fa-photo-film me-1"></i>Chọn Từ Thư Viện Media CSDL
                                 </button>
                             </div>
 
-                            <!-- Cách 3: Nhập / Dán URL trực tiếp -->
+                            <!-- 3. Nhập URL trực tiếp -->
                             <div>
-                                <label class="form-label text-muted mb-1" style="font-size: 11px;">Cách 3: Hoặc nhập/dán đường dẫn URL ảnh</label>
-                                <div class="input-group input-group-sm">
-                                    <input asp-for="ThumbnailUrl"
-                                           id="thumbnailInput"
-                                           class="form-control rounded-start-3"
-                                           placeholder="https://... hoặc /media/..."
-                                           oninput="previewThumbnail(this.value)" />
-                                    <button type="button"
-                                            class="btn btn-outline-secondary rounded-end-3"
-                                            title="Xóa đường dẫn"
-                                            onclick="clearThumbnailUrl()">
-                                        <i class="fa-solid fa-xmark"></i>
-                                    </button>
-                                </div>
+                                <label class="text-muted d-block" style="font-size: 11px;">3. Hoặc dán đường dẫn URL ảnh:</label>
+                                <input asp-for="ThumbnailUrl" id="thumbnailInput" class="form-control form-control-sm rounded-2" placeholder="/uploads/posts/... hoặc https://..." oninput="previewThumbnail(this.value)" />
                                 <span asp-validation-for="ThumbnailUrl" class="text-danger small"></span>
+                            </div>
+
+                            <div class="mt-3 text-center p-2 rounded-3 border bg-light">
+                                <img id="thumbnailPreview" src="@(string.IsNullOrEmpty(Model.ThumbnailUrl) ? "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&fit=crop" : Model.ThumbnailUrl)" class="img-fluid rounded-2 shadow-xs" style="max-height: 160px; width: 100%; object-fit: cover;" alt="Xem trước ảnh bìa" onerror="this.src='/images/products/_placeholder.webp'" />
+                                <div class="text-muted mt-1" style="font-size: 10px;">Xem trước ảnh đại diện</div>
                             </div>
                         </div>
 
@@ -239,32 +159,24 @@
     </div>
 </div>
 
-<input type="file" id="replaceEditorImgInput" accept="image/*" class="d-none" onchange="handleReplaceEditorImageFile(this)" />
-
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <partial name="_MediaPickerModal" />
+    <script src="~/js/admin-media-picker.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
     <script>
-        let selectedEditorImg = null;
-
         const quill = new Quill('#quillEditor', {
             theme: 'snow',
             modules: {
-                toolbar: {
-                    container: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        ['blockquote', 'code-block'],
-                        ['link', 'image'],
-                        ['clean']
-                    ],
-                    handlers: {
-                        image: function() {
-                            document.getElementById('contentImageUploadInput').click();
-                        }
-                    }
-                }
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['blockquote', 'code-block'],
+                    ['link', 'image'],
+                    ['clean']
+                ]
             },
             placeholder: 'Nội dung bài viết...'
         });
@@ -275,204 +187,28 @@
             quill.root.innerHTML = initialHtml;
         }
 
-        // Sự kiện click vào ảnh bên trong bài viết để chỉnh sửa / thay ảnh / xóa
-        quill.root.addEventListener('click', function(e) {
-            const toolbar = document.getElementById('inlineImageToolbar');
-            if (e.target && e.target.tagName === 'IMG') {
-                quill.root.querySelectorAll('img').forEach(img => img.classList.remove('selected-post-img'));
-                selectedEditorImg = e.target;
-                selectedEditorImg.classList.add('selected-post-img');
-                toolbar.classList.remove('d-none');
-            } else {
-                if (selectedEditorImg) {
-                    selectedEditorImg.classList.remove('selected-post-img');
-                    selectedEditorImg = null;
-                }
-                toolbar.classList.add('d-none');
-            }
-        });
-
-        document.getElementById('postEditForm').addEventListener('submit', function() {
-            quill.root.querySelectorAll('img').forEach(img => img.classList.remove('selected-post-img'));
+        document.getElementById('postEditForm').addEventListener('submit', function(e) {
             const html = quill.root.innerHTML;
             document.getElementById('contentHtml').value = (html === '<p><br></p>') ? '' : html;
         });
 
         function previewThumbnail(url) {
-            if (url && url.trim().length > 1) {
+            if (url && url.trim().length > 3) {
                 document.getElementById('thumbnailPreview').src = url.trim();
             }
         }
 
-        function clearThumbnailUrl() {
-            document.getElementById('thumbnailInput').value = '';
-            document.getElementById('ThumbnailMediaId').value = '';
-            document.getElementById('thumbnailFileInput').value = '';
-            document.getElementById('thumbnailUploadStatus').textContent = 'Đã xóa đường dẫn ảnh. Hãy tải ảnh mới hoặc chọn từ thư viện.';
-        }
-
-        // 1. Tải ảnh đại diện từ máy tính (xem trước ngay + tự động upload lên server)
-        async function handleThumbnailFileSelect(input) {
-            if (!input.files || !input.files[0]) return;
-            const file = input.files[0];
-            const statusEl = document.getElementById('thumbnailUploadStatus');
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('thumbnailPreview').src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-
-            statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-primary me-1"></i>Đang tải ảnh bìa lên hệ thống...';
-
-            try {
-                const formData = new FormData();
-                formData.append('file', file);
-                const res = await fetch('/Admin/Post/UploadImage', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await res.json();
-                if (res.ok && data.success && data.url) {
-                    document.getElementById('thumbnailInput').value = data.url;
-                    if (data.mediaId) {
-                        document.getElementById('ThumbnailMediaId').value = data.mediaId;
-                    }
-                    document.getElementById('thumbnailPreview').src = data.url;
-                    statusEl.innerHTML = '<span class="text-success fw-semibold"><i class="fa-solid fa-circle-check me-1"></i>Đã tải ảnh lên thành công! Nhấn "Lưu Thay Đổi" để hoàn tất.</span>';
-                } else {
-                    statusEl.innerHTML = '<span class="text-primary">Đã chọn tệp: ' + file.name + ' (Sẽ lưu khi nhấn "Lưu Thay Đổi")</span>';
-                }
-            } catch (err) {
-                statusEl.innerHTML = '<span class="text-primary">Đã chọn tệp: ' + file.name + ' (Sẽ lưu khi nhấn "Lưu Thay Đổi")</span>';
+        function handlePostFileSelect(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById('thumbnailPreview');
+                    if (img) img.src = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+                const textInput = document.getElementById('thumbnailInput');
+                if (textInput) textInput.value = '';
             }
-        }
-
-        // 2. Chọn ảnh đại diện từ Thư viện Media CSDL
-        function openPostThumbnailPicker() {
-            if (typeof window.openMediaPicker === 'function') {
-                window.openMediaPicker(function(mediaId, mediaUrl) {
-                    document.getElementById('thumbnailInput').value = mediaUrl;
-                    document.getElementById('ThumbnailMediaId').value = mediaId || '';
-                    document.getElementById('thumbnailPreview').src = mediaUrl;
-                    document.getElementById('thumbnailUploadStatus').innerHTML =
-                        '<span class="text-success fw-semibold"><i class="fa-solid fa-circle-check me-1"></i>Đã chọn ảnh từ Thư viện CSDL (' + mediaUrl + ')</span>';
-                });
-            } else {
-                alert('Không tìm thấy bộ chọn Media. Vui lòng tải lại trang.');
-            }
-        }
-
-        // 3. Tải 1 hoặc nhiều ảnh từ máy tính và chèn vào nội dung bài viết
-        async function uploadAndInsertContentImages(input) {
-            if (!input.files || input.files.length === 0) return;
-            const files = Array.from(input.files);
-
-            for (const file of files) {
-                try {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    const res = await fetch('/Admin/Post/UploadImage', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    const data = await res.json();
-                    if (res.ok && data.success && data.url) {
-                        insertImageUrlIntoQuill(data.url);
-                    } else {
-                        alert(data.message || 'Lỗi tải ảnh: ' + file.name);
-                    }
-                } catch (err) {
-                    alert('Không thể tải ảnh ' + file.name + ' lên máy chủ.');
-                }
-            }
-            input.value = '';
-        }
-
-        // 4. Chọn ảnh từ Thư viện Media CSDL để chèn vào nội dung bài viết
-        function insertMediaLibraryImageToEditor() {
-            if (typeof window.openMediaPicker === 'function') {
-                window.openMediaPicker(function(mediaId, mediaUrl) {
-                    insertImageUrlIntoQuill(mediaUrl);
-                });
-            }
-        }
-
-        // 5. Chèn ảnh bằng URL vào nội dung bài viết
-        function insertImageByUrlToEditor() {
-            const url = prompt('Nhập đường dẫn URL hình ảnh cần chèn vào bài viết:', 'https://');
-            if (url && url.trim().length > 5 && url.trim() !== 'https://') {
-                insertImageUrlIntoQuill(url.trim());
-            }
-        }
-
-        function insertImageUrlIntoQuill(url) {
-            const range = quill.getSelection(true);
-            const index = range ? range.index : quill.getLength();
-            quill.insertEmbed(index, 'image', url, 'user');
-            quill.setSelection(index + 1);
-        }
-
-        // 6. Các thao tác chỉnh sửa trực tiếp ảnh đang chọn trong bài viết
-        function replaceSelectedEditorImageFromComputer() {
-            if (!selectedEditorImg) return;
-            document.getElementById('replaceEditorImgInput').click();
-        }
-
-        async function handleReplaceEditorImageFile(input) {
-            if (!selectedEditorImg || !input.files || !input.files[0]) return;
-            const file = input.files[0];
-            try {
-                const formData = new FormData();
-                formData.append('file', file);
-                const res = await fetch('/Admin/Post/UploadImage', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await res.json();
-                if (res.ok && data.success && data.url) {
-                    selectedEditorImg.src = data.url;
-                } else {
-                    alert(data.message || 'Không thể tải ảnh thay thế.');
-                }
-            } catch (e) {
-                alert('Lỗi kết nối khi tải ảnh thay thế.');
-            }
-            input.value = '';
-        }
-
-        function replaceSelectedEditorImageFromLibrary() {
-            if (!selectedEditorImg) return;
-            if (typeof window.openMediaPicker === 'function') {
-                window.openMediaPicker(function(mediaId, mediaUrl) {
-                    if (selectedEditorImg) {
-                        selectedEditorImg.src = mediaUrl;
-                    }
-                });
-            }
-        }
-
-        function resizeSelectedEditorImage(widthPercent) {
-            if (!selectedEditorImg) return;
-            selectedEditorImg.style.width = widthPercent;
-            selectedEditorImg.style.maxWidth = widthPercent;
-            selectedEditorImg.style.height = 'auto';
-        }
-
-        function alignSelectedEditorImage(mode) {
-            if (!selectedEditorImg) return;
-            if (mode === 'center') {
-                selectedEditorImg.style.display = 'block';
-                selectedEditorImg.style.marginLeft = 'auto';
-                selectedEditorImg.style.marginRight = 'auto';
-            }
-        }
-
-        function removeSelectedEditorImage() {
-            if (!selectedEditorImg) return;
-            selectedEditorImg.remove();
-            selectedEditorImg = null;
-            document.getElementById('inlineImageToolbar').classList.add('d-none');
         }
     </script>
 }

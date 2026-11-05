@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
+//Định nghĩa các thuộc tính mở rộng (Tone màu da, Nơi sản xuất, Mùi hương).
 namespace Omnichannel.Domain.Entities
 {
     [Table("ProductAttributes")]
