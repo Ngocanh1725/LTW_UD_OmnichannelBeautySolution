@@ -1,4 +1,6 @@
 @model List<Omnichannel.Domain.Entities.UiSection>
+@using System.Text.Json
+@using Omnichannel.Application.DTOs.Cms
 @{
     ViewData["Title"] = "Quản Lý Bố Cục Trang Chủ (UI Section Builder)";
     Layout = "_AdminLayout";
@@ -21,41 +23,66 @@
                 <span>Bố Cục Trang Chủ (UI Section Builder)</span>
             </h1>
             <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                Kéo thả sắp xếp thứ tự và bật/tắt hiển thị các khối nội dung trên Storefront theo thời gian thực.
+                Tùy biến nội dung, thêm ảnh, chỉnh sửa kích thước, sắp xếp thứ tự và ẩn/hiện các khối theo thời gian thực.
             </p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center flex-wrap gap-2.5">
+            <button type="button" 
+                    onclick="showAllSections()" 
+                    class="px-3.5 py-2.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-semibold text-xs hover:bg-emerald-100 transition flex items-center gap-1.5"
+                    title="Hiển thị lại tất cả các khối đang bị ẩn">
+                <i class="fa-solid fa-eye text-emerald-600"></i>
+                <span>Hiện Lại Tất Cả</span>
+            </button>
             <a href="/" target="_blank" 
-               class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center gap-2">
+               class="px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-xs hover:bg-slate-50 dark:hover:bg-slate-700 transition flex items-center gap-1.5">
                 <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
                 <span>Xem Storefront</span>
             </a>
             <button type="button" 
                     onclick="saveCurrentOrder()"
                     id="btnSaveOrder"
-                    class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-semibold text-sm shadow-md shadow-rose-500/25 transition flex items-center gap-2">
+                    class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-semibold text-xs shadow-md shadow-rose-500/25 transition flex items-center gap-1.5">
                 <i class="fa-solid fa-floppy-disk"></i>
                 <span>Lưu Thứ Tự Bố Cục</span>
             </button>
         </div>
     </div>
 
-    <!-- Instructions / Tips Banner -->
-    <div class="p-4 rounded-2xl bg-gradient-to-r from-rose-500/10 via-pink-500/10 to-amber-500/10 border border-rose-200/60 dark:border-rose-900/40 flex items-start gap-3">
-        <div class="h-8 w-8 rounded-xl bg-rose-500 text-white flex items-center justify-center shrink-0 text-sm shadow-sm">
-            <i class="fa-solid fa-wand-magic-sparkles"></i>
+    <!-- Filter Tabs (Tất cả, Đang hiển thị, Đang ẩn) & Tìm kiếm -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
+        <!-- Status Filter Tabs -->
+        <div class="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl w-fit">
+            <button type="button" 
+                    onclick="filterSections('all', this)" 
+                    class="filter-tab px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-white dark:bg-slate-900 text-rose-600 dark:text-rose-400 shadow-xs">
+                <span>Tất Cả</span>
+                <span id="badgeCountAll" class="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[10px] font-mono font-bold">@Model.Count</span>
+            </button>
+            <button type="button" 
+                    onclick="filterSections('active', this)" 
+                    class="filter-tab px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>Đang Hiển Thị</span>
+                <span id="badgeCountActive" class="px-1.5 py-0.5 rounded-md bg-slate-200/60 dark:bg-slate-700 text-[10px] font-mono">@Model.Count(s => s.IsVisible)</span>
+            </button>
+            <button type="button" 
+                    onclick="filterSections('hidden', this)" 
+                    class="filter-tab px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                <span>Đang Ẩn</span>
+                <span id="badgeCountHidden" class="px-1.5 py-0.5 rounded-md bg-slate-200/60 dark:bg-slate-700 text-[10px] font-mono">@Model.Count(s => !s.IsVisible)</span>
+            </button>
         </div>
-        <div class="text-xs text-slate-700 dark:text-slate-300 space-y-1">
-            <span class="font-bold text-slate-900 dark:text-white block text-sm">Hướng dẫn sắp xếp trực quan:</span>
-            <p>
-                • <strong>Kéo & thả (Drag and Drop):</strong> Giữ chuột vào biểu tượng <i class="fa-solid fa-grip-vertical text-slate-400"></i> để kéo khối đến vị trí mong muốn.
-            </p>
-            <p>
-                • <strong>Phím điều hướng:</strong> Bạn cũng có thể bấm nút mũi tên <i class="fa-solid fa-chevron-up text-slate-400"></i> hoặc <i class="fa-solid fa-chevron-down text-slate-400"></i> để di chuyển từng nấc một.
-            </p>
-            <p>
-                • <strong>Ẩn/Hiện tức thì:</strong> Nhấp vào công tắc Switch để bật hoặc tắt khối mà không làm mất cấu hình đã lưu.
-            </p>
+
+        <!-- Quick Search Filter -->
+        <div class="relative w-full sm:w-64">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" 
+                   id="searchSectionsInput" 
+                   placeholder="Tìm kiếm khối giao diện..." 
+                   oninput="onSearchSections(this.value)"
+                   class="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500" />
         </div>
     </div>
 
@@ -69,6 +96,12 @@
         @for (int i = 0; i < Model.Count; i++)
         {
             var item = Model[i];
+            UiSectionConfigDto config = new();
+            if (!string.IsNullOrWhiteSpace(item.ConfigurationJson))
+            {
+                try { config = JsonSerializer.Deserialize<UiSectionConfigDto>(item.ConfigurationJson) ?? new(); } catch { }
+            }
+
             var iconClass = item.SectionCode switch
             {
                 "HERO_SLIDER" => "fa-solid fa-images text-blue-500 bg-blue-50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-900",
@@ -80,13 +113,35 @@
                 _ => "fa-solid fa-layer-group text-slate-500 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800"
             };
 
-            <div class="section-card group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-default select-none"
+            var shortcutUrl = item.SectionCode switch
+            {
+                "HERO_SLIDER" => "/Admin/Banner",
+                "FEATURED_CATEGORIES" => "/Admin/Category",
+                "FLASH_SALE" => "/Admin/Product",
+                "BEST_SELLERS" => "/Admin/Product",
+                "BEAUTY_BLOG" => "/Admin/Post",
+                _ => null
+            };
+
+            var shortcutTitle = item.SectionCode switch
+            {
+                "HERO_SLIDER" => "Quản lý Banners",
+                "FEATURED_CATEGORIES" => "Quản lý Danh mục",
+                "FLASH_SALE" => "Quản lý Sản phẩm",
+                "BEST_SELLERS" => "Quản lý Sản phẩm",
+                "BEAUTY_BLOG" => "Quản lý Bài viết",
+                _ => null
+            };
+
+            <div class="section-card group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-default select-none @(!item.IsVisible ? "opacity-75 bg-slate-50/50 dark:bg-slate-900/50" : "")"
                  data-id="@item.Id"
                  data-code="@item.SectionCode"
+                 data-visible="@(item.IsVisible ? "true" : "false")"
+                 data-title="@item.Title.ToLowerInvariant()"
                  draggable="true">
                 
                 <!-- Left: Drag Handle, Number Badge, Icon, Info -->
-                <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+                <div class="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
                     <!-- Drag Handle -->
                     <div class="drag-handle cursor-grab active:cursor-grabbing p-2 -ml-2 text-slate-300 dark:text-slate-600 hover:text-rose-500 dark:hover:text-rose-400 transition"
                          title="Kéo thả để đổi thứ tự">
@@ -104,31 +159,78 @@
                     </div>
 
                     <!-- Section Metadata -->
-                    <div class="min-w-0 space-y-1">
+                    <div class="min-w-0 space-y-1 flex-1">
                         <div class="flex items-center gap-2 flex-wrap">
-                            <h3 class="text-sm sm:text-base font-bold text-slate-800 dark:text-white truncate">
+                            <h3 class="section-title text-sm sm:text-base font-bold text-slate-800 dark:text-white truncate">
                                 @item.Title
                             </h3>
-                            <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono text-[11px] font-semibold">
+                            <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono text-[10px] font-semibold">
                                 @item.SectionCode
                             </span>
                             @if (!string.IsNullOrEmpty(item.LayoutType))
                             {
-                                <span class="px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-[10px] font-semibold border border-rose-200/50 dark:border-rose-900/50">
+                                <span class="layout-badge px-2 py-0.5 rounded-md bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 text-[10px] font-semibold border border-rose-200/50 dark:border-rose-900/50">
                                     @item.LayoutType
                                 </span>
                             }
+
+                            <!-- Badges for Image / Dimensions if configured -->
+                            @if (!string.IsNullOrEmpty(config.ImageUrl))
+                            {
+                                <span class="px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 text-[10px] font-semibold flex items-center gap-1 border border-blue-200/50">
+                                    <i class="fa-regular fa-image"></i>
+                                    <span>Có ảnh</span>
+                                </span>
+                            }
+                            @if (!string.IsNullOrEmpty(config.Height))
+                            {
+                                <span class="px-2 py-0.5 rounded-md bg-purple-50 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 text-[10px] font-semibold">
+                                    Cao: @config.Height.ToUpperInvariant()
+                                </span>
+                            }
+                            @if (config.ItemCount.HasValue && config.ItemCount.Value > 0)
+                            {
+                                <span class="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 text-[10px] font-semibold">
+                                    @config.ItemCount mục
+                                </span>
+                            }
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
+                        <p class="section-subtitle text-xs text-slate-500 dark:text-slate-400 line-clamp-1">
                             @(item.Subtitle ?? "Khối hiển thị động nạp dữ liệu trực tiếp từ CSDL")
                         </p>
                     </div>
+
+                    <!-- Mini Image Preview if available -->
+                    @if (!string.IsNullOrEmpty(config.ImageUrl))
+                    {
+                        <div class="hidden md:block w-12 h-10 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 shrink-0 bg-slate-100">
+                            <img src="@config.ImageUrl" alt="@item.Title" class="w-full h-full object-cover" onerror="this.src='/images/products/_placeholder.webp';" />
+                        </div>
+                    }
                 </div>
 
-                <!-- Right: Status Toggle, Move Buttons -->
-                <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800">
+                <!-- Right: Action Buttons, Status Toggle, Move Buttons -->
+                <div class="flex items-center justify-between sm:justify-end gap-2.5 shrink-0 pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800">
+                    <!-- Edit Button -->
+                    <button type="button" 
+                            onclick="openEditModal(@item.Id)" 
+                            class="px-3 py-1.5 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/70 hover:bg-rose-100 dark:bg-rose-950/30 dark:hover:bg-rose-950/60 text-rose-600 dark:text-rose-300 font-semibold text-xs transition flex items-center gap-1.5 shadow-2xs">
+                        <i class="fa-solid fa-pen-to-square text-xs"></i>
+                        <span>Chỉnh sửa</span>
+                    </button>
+
+                    <!-- Shortcut link if available -->
+                    @if (!string.IsNullOrEmpty(shortcutUrl))
+                    {
+                        <a href="@shortcutUrl" 
+                           title="@shortcutTitle" 
+                           class="p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                            <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                        </a>
+                    }
+
                     <!-- Toggle Switch -->
-                    <div class="flex items-center gap-2.5 pr-2 sm:pr-4 border-r border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center gap-2 pl-1 pr-2 border-l border-slate-200 dark:border-slate-800">
                         <span class="status-label text-xs font-semibold @(item.IsVisible ? "text-emerald-600 dark:text-emerald-400" : "text-slate-400")">
                             @(item.IsVisible ? "Đang hiển thị" : "Đang ẩn")
                         </span>
@@ -138,22 +240,22 @@
                                    data-id="@item.Id"
                                    @(item.IsVisible ? "checked" : "")
                                    onchange="toggleSectionVisibility(@item.Id, this.checked, this)" />
-                            <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                            <div class="w-10 h-5.5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4.5 after:w-4.5 after:transition-all peer-checked:bg-emerald-500"></div>
                         </label>
                     </div>
 
                     <!-- Up / Down Reorder Buttons -->
-                    <div class="flex items-center gap-1">
+                    <div class="flex items-center gap-1 border-l border-slate-200 dark:border-slate-800 pl-2">
                         <button type="button" 
                                 onclick="moveSectionUp(this)" 
                                 title="Di chuyển lên"
-                                class="btn-move-up p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                                class="btn-move-up p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                             <i class="fa-solid fa-chevron-up text-xs"></i>
                         </button>
                         <button type="button" 
                                 onclick="moveSectionDown(this)" 
                                 title="Di chuyển xuống"
-                                class="btn-move-down p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                                class="btn-move-down p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition">
                             <i class="fa-solid fa-chevron-down text-xs"></i>
                         </button>
                     </div>
@@ -163,8 +265,261 @@
     </div>
 </div>
 
+<!-- ============================================================== -->
+<!-- MODAL CHỈNH SỬA / THÊM ẢNH & KÍCH THƯỚC KHỐI GIAO DIỆN -->
+<!-- ============================================================== -->
+<div id="editSectionModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        
+        <!-- Modal Header -->
+        <div class="px-6 py-4.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-rose-500/5 via-pink-500/5 to-transparent">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-rose-500 text-white flex items-center justify-center text-base shadow-sm shadow-rose-500/30">
+                    <i class="fa-solid fa-sliders"></i>
+                </div>
+                <div>
+                    <h3 id="modalSectionTitle" class="text-base font-bold text-slate-900 dark:text-white">
+                        Chỉnh Sửa Khối Giao Diện
+                    </h3>
+                    <p id="modalSectionCode" class="text-xs text-slate-400 font-mono">
+                        HERO_SLIDER
+                    </p>
+                </div>
+            </div>
+            <button type="button" onclick="closeEditModal()" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-white transition flex items-center justify-center">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Modal Form -->
+        <form id="editSectionForm" onsubmit="submitEditSection(event)" enctype="multipart/form-data" class="p-6 space-y-5">
+            <input type="hidden" id="editSectionId" name="Id" value="0" />
+            <input type="hidden" id="editMediaAssetId" name="MediaAssetId" value="" />
+
+            <!-- Row 1: Tiêu đề & Phụ đề -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                        Tiêu đề khối <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" 
+                           id="editTitle" 
+                           name="Title" 
+                           required 
+                           class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500" />
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                        Kiểu bố cục (Layout Type)
+                    </label>
+                    <select id="editLayoutType" name="LayoutType" class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500">
+                        <option value="GRID_4">Lưới 4 cột (GRID_4 - Chuẩn)</option>
+                        <option value="GRID_6">Lưới 6 cột (GRID_6 - Danh mục)</option>
+                        <option value="GRID_3">Lưới 3 cột (GRID_3 - Bài viết blog)</option>
+                        <option value="CAROUSEL">Băng chuyền trượt (CAROUSEL - Banner slider)</option>
+                        <option value="BANNER_FULL">Banner toàn cảnh tràn viền (BANNER_FULL)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Phụ đề / Tóm tắt -->
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                    Tiêu đề phụ / Mô tả ngắn
+                </label>
+                <input type="text" 
+                       id="editSubtitle" 
+                       name="Subtitle" 
+                       placeholder="Ví dụ: Cơ hội săn mỹ phẩm cao cấp với giá ưu đãi cực lớn..."
+                       class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-500" />
+            </div>
+
+            <!-- Row: Hình ảnh khối (Thêm / Upload / Thư viện) -->
+            <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/80 space-y-3">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                        <i class="fa-regular fa-image text-rose-500"></i>
+                        <span>Hình Ảnh Khối / Banner Nền</span>
+                    </label>
+                    <span class="text-[11px] text-slate-400">JPG, PNG, WEBP, SVG (tối đa 5MB)</span>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <!-- Preview Box -->
+                    <div class="relative w-28 h-20 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shrink-0 flex items-center justify-center">
+                        <img id="editImagePreview" src="/images/products/_placeholder.webp" alt="Preview" class="w-full h-full object-cover hidden" />
+                        <div id="editImageEmptyText" class="text-center p-2 text-slate-400 text-[10px]">
+                            <i class="fa-regular fa-image text-xl block mb-1"></i>
+                            <span>Chưa có ảnh</span>
+                        </div>
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="flex-1 space-y-2 w-full">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <!-- Upload file button -->
+                            <label class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-700 dark:text-slate-200 text-xs font-semibold cursor-pointer transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-arrow-up-from-bracket text-xs text-rose-500"></i>
+                                <span>Tải ảnh từ máy tính</span>
+                                <input type="file" id="editImageFile" name="imageFile" accept="image/*" class="hidden" onchange="onFileSelected(this)" />
+                            </label>
+
+                            <!-- Pick from media library -->
+                            <button type="button" 
+                                    onclick="pickImageFromMediaLibrary()" 
+                                    class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-700 dark:text-slate-200 text-xs font-semibold transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-photo-film text-xs text-indigo-500"></i>
+                                <span>Chọn từ Thư Viện Media</span>
+                            </button>
+
+                            <!-- Clear image -->
+                            <button type="button" 
+                                    onclick="clearSelectedImage()" 
+                                    id="btnClearImage" 
+                                    class="px-2.5 py-1.5 rounded-xl text-rose-600 hover:bg-rose-50 text-xs font-semibold transition hidden flex items-center gap-1">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                                <span>Xóa ảnh</span>
+                            </button>
+                        </div>
+
+                        <!-- Direct Image URL Input -->
+                        <input type="text" 
+                               id="editImageUrl" 
+                               name="ImageUrl" 
+                               placeholder="Hoặc nhập đường dẫn ảnh: /images/banners/... hoặc https://..." 
+                               oninput="onImageUrlInput(this.value)"
+                               class="w-full px-3 py-1.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/30" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 3: Kích thước, Chiều cao & Căn chỉnh ảnh -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <!-- Chiều cao (Height) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                        Chiều cao khối (Kích thước)
+                    </label>
+                    <select id="editHeight" name="Height" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
+                        <option value="auto">Tự động (Auto)</option>
+                        <option value="sm">Nhỏ gọn (~300px)</option>
+                        <option value="md" selected>Tiêu chuẩn (~380px)</option>
+                        <option value="lg">Rộng lớn (~500px)</option>
+                        <option value="xl">Toàn cảnh (~620px)</option>
+                    </select>
+                </div>
+
+                <!-- Tỉ lệ lấp đầy ảnh (Object Fit) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                        Tỉ lệ lấp đầy ảnh
+                    </label>
+                    <select id="editImageFit" name="ImageFit" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
+                        <option value="cover" selected>Phủ kín khung (Cover - Khuyên dùng)</option>
+                        <option value="contain">Vừa vặn không cắt (Contain)</option>
+                        <option value="fill">Kéo giãn đầy đủ (Fill)</option>
+                    </select>
+                </div>
+
+                <!-- Vị trí ảnh (Image Position) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                        Vị trí căn ảnh
+                    </label>
+                    <select id="editImagePosition" name="ImagePosition" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/30">
+                        <option value="center" selected>Chính giữa (Center)</option>
+                        <option value="top">Căn trên (Top)</option>
+                        <option value="bottom">Căn dưới (Bottom)</option>
+                        <option value="left">Căn trái (Left)</option>
+                        <option value="right">Căn phải (Right)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Row 4: Số lượng phần tử & Điều hướng -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <!-- Số lượng phần tử -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                        Số lượng mục hiển thị
+                    </label>
+                    <input type="number" 
+                           id="editItemCount" 
+                           name="ItemCount" 
+                           min="1" 
+                           max="30" 
+                           placeholder="Mặc định: 4, 8, 12..."
+                           class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/30" />
+                </div>
+
+                <!-- Đường dẫn liên kết (Link URL) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                        Đường dẫn khi nhấp (Link URL)
+                    </label>
+                    <input type="text" 
+                           id="editLinkUrl" 
+                           name="LinkUrl" 
+                           placeholder="Ví dụ: /category/cham-soc-da"
+                           class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/30" />
+                </div>
+
+                <!-- Chữ trên nút hành động -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+                        Chữ nút xem thêm (Button Text)
+                    </label>
+                    <input type="text" 
+                           id="editButtonText" 
+                           name="ButtonText" 
+                           placeholder="Ví dụ: Khám Phá Ngay, Xem Tất Cả"
+                           class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-rose-500/30" />
+                </div>
+            </div>
+
+            <!-- Row 5: Mục Ẩn hay Không (Visibility Toggle & Status) -->
+            <div class="p-4 rounded-2xl bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200/60 dark:border-rose-900/40 flex items-center justify-between">
+                <div>
+                    <span class="block text-xs font-bold text-slate-900 dark:text-white">
+                        Trạng thái hiển thị trên Storefront
+                    </span>
+                    <span class="text-[11px] text-slate-500 dark:text-slate-400">
+                        Bật để hiển thị khối trên trang chủ, Tắt để tạm ẩn khối mà không làm mất dữ liệu đã cấu hình.
+                    </span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer shrink-0 ml-4">
+                    <input type="checkbox" 
+                           id="editIsVisible" 
+                           name="IsVisible" 
+                           value="true" 
+                           class="sr-only peer" />
+                    <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                </label>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5">
+                <button type="button" 
+                        onclick="closeEditModal()" 
+                        class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-600 dark:text-slate-300 text-xs font-semibold transition">
+                    Hủy bỏ
+                </button>
+                <button type="submit" 
+                        id="btnSubmitEdit" 
+                        class="px-5 py-2 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white font-semibold text-xs shadow-md shadow-rose-500/25 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>Lưu Cấu Hình Khối</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Floating Toast Container -->
 <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+<!-- Media Picker Modal Partial -->
+<partial name="_MediaPickerModal" />
 
 @section Scripts {
     <script>
@@ -201,6 +556,70 @@
             }, 3500);
         }
 
+        // ==========================================
+        // BỘ LỌC TRẠNG THÁI (TẤT CẢ / ĐANG HIỂN THỊ / ĐANG ẨN)
+        // ==========================================
+        let currentFilter = 'all';
+
+        function filterSections(status, button) {
+            currentFilter = status;
+
+            // Highlight tab được chọn
+            document.querySelectorAll('.filter-tab').forEach(b => {
+                b.classList.remove('bg-white', 'dark:bg-slate-900', 'text-rose-600', 'dark:text-rose-400', 'shadow-xs');
+                b.classList.add('text-slate-600', 'dark:text-slate-400');
+            });
+            button.classList.add('bg-white', 'dark:bg-slate-900', 'text-rose-600', 'dark:text-rose-400', 'shadow-xs');
+            button.classList.remove('text-slate-600', 'dark:text-slate-400');
+
+            applyFilters();
+        }
+
+        function onSearchSections(query) {
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const query = (document.getElementById('searchSectionsInput').value || '').toLowerCase().trim();
+            const cards = document.querySelectorAll('#sectionCardsContainer .section-card');
+
+            cards.forEach(card => {
+                const isVisible = card.getAttribute('data-visible') === 'true';
+                const title = (card.getAttribute('data-title') || '').toLowerCase();
+                const code = (card.getAttribute('data-code') || '').toLowerCase();
+
+                let matchStatus = true;
+                if (currentFilter === 'active') matchStatus = isVisible;
+                if (currentFilter === 'hidden') matchStatus = !isVisible;
+
+                let matchQuery = true;
+                if (query) {
+                    matchQuery = title.includes(query) || code.includes(query);
+                }
+
+                if (matchStatus && matchQuery) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        // Cập nhật số lượng đếm trên 3 tab
+        function updateTabCounters() {
+            const cards = document.querySelectorAll('#sectionCardsContainer .section-card');
+            let active = 0;
+            let hidden = 0;
+            cards.forEach(c => {
+                if (c.getAttribute('data-visible') === 'true') active++;
+                else hidden++;
+            });
+
+            document.getElementById('badgeCountAll').textContent = cards.length;
+            document.getElementById('badgeCountActive').textContent = active;
+            document.getElementById('badgeCountHidden').textContent = hidden;
+        }
+
         // Cập nhật lại số thứ tự badge hiển thị (1, 2, 3...)
         function refreshOrderBadges() {
             const cards = document.querySelectorAll('#sectionCardsContainer .section-card');
@@ -212,7 +631,193 @@
             });
         }
 
-        // Di chuyển phần tử lên 1 nấc
+        // ==========================================
+        // MỞ VÀ ĐÓNG MODAL CHỈNH SỬA KHỐI
+        // ==========================================
+        async function openEditModal(id) {
+            const modal = document.getElementById('editSectionModal');
+            try {
+                const res = await fetch(`/admin/ui-section/detail/${id}`);
+                const result = await res.json();
+                if (!result.success || !result.data) {
+                    showToast(result.message || 'Không thể tải chi tiết khối.', false);
+                    return;
+                }
+
+                const d = result.data;
+                document.getElementById('editSectionId').value = d.id;
+                document.getElementById('modalSectionTitle').textContent = `Chỉnh Sửa Khối: ${d.title}`;
+                document.getElementById('modalSectionCode').textContent = `${d.sectionCode} (Thứ tự #${d.displayOrder})`;
+                document.getElementById('editTitle').value = d.title || '';
+                document.getElementById('editSubtitle').value = d.subtitle || '';
+                document.getElementById('editLayoutType').value = d.layoutType || 'GRID_4';
+                document.getElementById('editIsVisible').checked = d.isVisible === true;
+
+                // Config fields
+                const cfg = d.config || {};
+                document.getElementById('editImageUrl').value = cfg.imageUrl || '';
+                document.getElementById('editHeight').value = cfg.height || 'md';
+                document.getElementById('editImageFit').value = cfg.imageFit || 'cover';
+                document.getElementById('editImagePosition').value = cfg.imagePosition || 'center';
+                document.getElementById('editItemCount').value = cfg.itemCount || '';
+                document.getElementById('editLinkUrl').value = cfg.linkUrl || '';
+                document.getElementById('editButtonText').value = cfg.buttonText || '';
+                document.getElementById('editMediaAssetId').value = cfg.mediaAssetId || '';
+
+                // Reset file input
+                document.getElementById('editImageFile').value = '';
+
+                // Set preview
+                updateImagePreview(cfg.imageUrl);
+
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi nạp dữ liệu khối giao diện.', false);
+            }
+        }
+
+        function closeEditModal() {
+            const modal = document.getElementById('editSectionModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        // Preview ảnh khi chọn file hoặc nhập URL
+        function updateImagePreview(url) {
+            const img = document.getElementById('editImagePreview');
+            const emptyText = document.getElementById('editImageEmptyText');
+            const clearBtn = document.getElementById('btnClearImage');
+
+            if (url && url.trim()) {
+                img.src = url;
+                img.classList.remove('hidden');
+                emptyText.classList.add('hidden');
+                clearBtn.classList.remove('hidden');
+            } else {
+                img.src = '';
+                img.classList.add('hidden');
+                emptyText.classList.remove('hidden');
+                clearBtn.classList.add('hidden');
+            }
+        }
+
+        function onImageUrlInput(url) {
+            updateImagePreview(url);
+        }
+
+        function onFileSelected(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    updateImagePreview(e.target.result);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function clearSelectedImage() {
+            document.getElementById('editImageUrl').value = '';
+            document.getElementById('editImageFile').value = '';
+            document.getElementById('editMediaAssetId').value = '';
+            updateImagePreview(null);
+        }
+
+        // Chọn ảnh từ Thư viện Media CSDL
+        function pickImageFromMediaLibrary() {
+            if (typeof openMediaPicker === 'function') {
+                openMediaPicker(function(selectedAsset) {
+                    if (selectedAsset && selectedAsset.url) {
+                        document.getElementById('editImageUrl').value = selectedAsset.url;
+                        if (selectedAsset.id) {
+                            document.getElementById('editMediaAssetId').value = selectedAsset.id;
+                        }
+                        updateImagePreview(selectedAsset.url);
+                        showToast(`Đã chọn ảnh: ${selectedAsset.title || 'từ Thư viện'}`, true);
+                    }
+                });
+            } else {
+                alert('Modal thư viện Media đang được tải, vui lòng thử lại sau giây lát.');
+            }
+        }
+
+        // Submit form chỉnh sửa
+        async function submitEditSection(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmitEdit');
+            const origContent = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Đang Lưu...</span>';
+
+            const form = document.getElementById('editSectionForm');
+            const formData = new FormData(form);
+
+            // Set explicit boolean for isVisible
+            formData.set('IsVisible', document.getElementById('editIsVisible').checked ? 'true' : 'false');
+
+            try {
+                const res = await fetch('/admin/ui-section/save', {
+                    method: 'POST',
+                    headers: {
+                        'RequestVerificationToken': getCsrfToken()
+                    },
+                    body: formData
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'Lưu cấu hình khối thành công!', true);
+                    closeEditModal();
+
+                    // Cập nhật lại card tương ứng trên UI
+                    const card = document.querySelector(`.section-card[data-id="${data.data.id}"]`);
+                    if (card) {
+                        card.setAttribute('data-visible', data.data.isVisible ? 'true' : 'false');
+                        card.setAttribute('data-title', data.data.title.toLowerCase());
+
+                        const titleEl = card.querySelector('.section-title');
+                        if (titleEl) titleEl.textContent = data.data.title;
+
+                        const subEl = card.querySelector('.section-subtitle');
+                        if (subEl) subEl.textContent = data.data.subtitle || 'Khối hiển thị động nạp dữ liệu trực tiếp từ CSDL';
+
+                        const layoutBadge = card.querySelector('.layout-badge');
+                        if (layoutBadge) layoutBadge.textContent = data.data.layoutType;
+
+                        const chk = card.querySelector('.toggle-visibility-btn');
+                        if (chk) chk.checked = data.data.isVisible;
+
+                        const label = card.querySelector('.status-label');
+                        if (label) {
+                            label.textContent = data.data.isVisible ? 'Đang hiển thị' : 'Đang ẩn';
+                            label.className = `status-label text-xs font-semibold ${data.data.isVisible ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`;
+                        }
+
+                        if (!data.data.isVisible) {
+                            card.classList.add('opacity-75', 'bg-slate-50/50', 'dark:bg-slate-900/50');
+                        } else {
+                            card.classList.remove('opacity-75', 'bg-slate-50/50', 'dark:bg-slate-900/50');
+                        }
+                    }
+
+                    updateTabCounters();
+                    applyFilters();
+                } else {
+                    showToast(data.message || 'Lỗi khi lưu cấu hình khối.', false);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi kết nối khi lưu cấu hình.', false);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = origContent;
+            }
+        }
+
+        // ==========================================
+        // DI CHUYỂN VÀ SẮP XẾP BẰNG NÚT BẤM
+        // ==========================================
         function moveSectionUp(button) {
             const card = button.closest('.section-card');
             const prev = card.previousElementSibling;
@@ -223,7 +828,6 @@
             }
         }
 
-        // Di chuyển phần tử xuống 1 nấc
         function moveSectionDown(button) {
             const card = button.closest('.section-card');
             const next = card.nextElementSibling;
@@ -236,7 +840,8 @@
 
         // Bật / Tắt trạng thái hiển thị khối giao diện
         async function toggleSectionVisibility(id, isVisible, inputEl) {
-            const label = inputEl.closest('.section-card').querySelector('.status-label');
+            const card = inputEl.closest('.section-card');
+            const label = card.querySelector('.status-label');
             try {
                 const res = await fetch('/admin/ui-section/toggle-visibility', {
                     method: 'POST',
@@ -249,10 +854,20 @@
 
                 const data = await res.json();
                 if (data.success) {
+                    card.setAttribute('data-visible', isVisible ? 'true' : 'false');
                     if (label) {
                         label.textContent = isVisible ? 'Đang hiển thị' : 'Đang ẩn';
                         label.className = `status-label text-xs font-semibold ${isVisible ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`;
                     }
+
+                    if (!isVisible) {
+                        card.classList.add('opacity-75', 'bg-slate-50/50', 'dark:bg-slate-900/50');
+                    } else {
+                        card.classList.remove('opacity-75', 'bg-slate-50/50', 'dark:bg-slate-900/50');
+                    }
+
+                    updateTabCounters();
+                    applyFilters();
                     showToast(data.message, true);
                 } else {
                     inputEl.checked = !isVisible;
@@ -262,6 +877,44 @@
                 console.error(err);
                 inputEl.checked = !isVisible;
                 showToast('Lỗi mạng khi cập nhật trạng thái hiển thị.', false);
+            }
+        }
+
+        // Hiện lại tất cả các khối đã ẩn
+        async function showAllSections() {
+            if (!confirm('Bạn có chắc chắn muốn bật hiển thị lại tất cả các khối trên trang chủ Storefront?')) return;
+
+            try {
+                const res = await fetch('/admin/ui-section/show-all', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': getCsrfToken()
+                    }
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message, true);
+                    document.querySelectorAll('.section-card').forEach(card => {
+                        card.setAttribute('data-visible', 'true');
+                        card.classList.remove('opacity-75', 'bg-slate-50/50', 'dark:bg-slate-900/50');
+                        const chk = card.querySelector('.toggle-visibility-btn');
+                        if (chk) chk.checked = true;
+                        const label = card.querySelector('.status-label');
+                        if (label) {
+                            label.textContent = 'Đang hiển thị';
+                            label.className = 'status-label text-xs font-semibold text-emerald-600 dark:text-emerald-400';
+                        }
+                    });
+                    updateTabCounters();
+                    applyFilters();
+                } else {
+                    showToast(data.message || 'Lỗi khi khôi phục khối.', false);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Lỗi mạng khi thực hiện khôi phục.', false);
             }
         }
 

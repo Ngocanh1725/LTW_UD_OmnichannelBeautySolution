@@ -21,5 +21,6 @@ namespace Omnichannel.Web.Models
         public List<Product> BestSellers { get; set; } = new();
         public List<Banner> MidBanners { get; set; } = new();
         public List<Post> BlogPosts { get; set; } = new();
+        public UiSectionConfigDto? Config { get; set; }
     }
 }

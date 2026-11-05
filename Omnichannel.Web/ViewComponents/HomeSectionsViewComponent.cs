@@ -73,9 +73,23 @@ namespace Omnichannel.Web.ViewComponents
 
             foreach (var section in sections)
             {
+                UiSectionConfigDto? sectionConfig = null;
+                if (!string.IsNullOrWhiteSpace(section.ConfigurationJson))
+                {
+                    try
+                    {
+                        sectionConfig = JsonSerializer.Deserialize<UiSectionConfigDto>(section.ConfigurationJson);
+                    }
+                    catch
+                    {
+                        // Ignore malformed json
+                    }
+                }
+
                 var itemModel = new HomeSectionItemViewModel
                 {
-                    Section = section
+                    Section = section,
+                    Config = sectionConfig
                 };
 
                 switch (section.SectionCode.ToUpperInvariant())
@@ -159,35 +173,41 @@ namespace Omnichannel.Web.ViewComponents
                         break;
 
                     case "FEATURED_CATEGORIES":
-                        if (categories == null)
+                        int catCount = sectionConfig?.ItemCount ?? 12;
+                        if (catCount <= 0) catCount = 12;
+
+                        if (categories == null || categories.Count < catCount)
                         {
                             categories = await _context.Categories
                                 .AsNoTracking()
                                 .Where(c => c.IsActive && c.ParentId == null)
                                 .OrderBy(c => c.SortOrder)
-                                .Take(12)
+                                .Take(catCount)
                                 .ToListAsync();
 
-                            if (categories.Count < 6)
+                            if (categories.Count < catCount)
                             {
                                 var subCategories = await _context.Categories
                                     .AsNoTracking()
                                     .Where(c => c.IsActive && c.ParentId != null && !categories.Select(r => r.Id).Contains(c.Id))
                                     .OrderBy(c => c.SortOrder)
-                                    .Take(12 - categories.Count)
+                                    .Take(catCount - categories.Count)
                                     .ToListAsync();
 
                                 categories.AddRange(subCategories);
                             }
                         }
-                        itemModel.Categories = categories;
+                        itemModel.Categories = categories.Take(catCount).ToList();
                         break;
 
                     case "FLASH_SALE":
                         var flashCampaign = await _storeInventoryService.GetActiveFlashSaleAsync();
                         itemModel.FlashSaleCampaign = flashCampaign;
 
-                        if (flashSaleProducts == null)
+                        int flashCount = sectionConfig?.ItemCount ?? 8;
+                        if (flashCount <= 0) flashCount = 8;
+
+                        if (flashSaleProducts == null || flashSaleProducts.Count < flashCount)
                         {
                             flashSaleProducts = await _context.Products
                                 .AsNoTracking()
@@ -195,10 +215,10 @@ namespace Omnichannel.Web.ViewComponents
                                 .Include(p => p.Supplier)
                                 .Where(p => p.IsActive && p.DiscountPrice != null && p.DiscountPrice > 0)
                                 .OrderBy(p => p.Id)
-                                .Take(8)
+                                .Take(flashCount)
                                 .ToListAsync();
 
-                            if (flashSaleProducts.Count < 4)
+                            if (flashSaleProducts.Count < flashCount)
                             {
                                 var extra = await _context.Products
                                     .AsNoTracking()
@@ -206,17 +226,20 @@ namespace Omnichannel.Web.ViewComponents
                                     .Include(p => p.Supplier)
                                     .Where(p => p.IsActive && !flashSaleProducts.Select(f => f.Id).Contains(p.Id))
                                     .OrderByDescending(p => p.Id)
-                                    .Take(8 - flashSaleProducts.Count)
+                                    .Take(flashCount - flashSaleProducts.Count)
                                     .ToListAsync();
 
                                 flashSaleProducts.AddRange(extra);
                             }
                         }
-                        itemModel.FlashSaleProducts = flashSaleProducts;
+                        itemModel.FlashSaleProducts = flashSaleProducts.Take(flashCount).ToList();
                         break;
 
                     case "BEST_SELLERS":
-                        if (bestSellers == null)
+                        int bestSellerCount = sectionConfig?.ItemCount ?? 8;
+                        if (bestSellerCount <= 0) bestSellerCount = 8;
+
+                        if (bestSellers == null || bestSellers.Count < bestSellerCount)
                         {
                             bestSellers = await _context.Products
                                 .AsNoTracking()
@@ -225,54 +248,85 @@ namespace Omnichannel.Web.ViewComponents
                                 .Where(p => p.IsActive)
                                 .OrderByDescending(p => p.IsFeatured)
                                 .ThenByDescending(p => p.Id)
-                                .Take(8)
+                                .Take(bestSellerCount)
                                 .ToListAsync();
                         }
-                        itemModel.BestSellers = bestSellers;
+                        itemModel.BestSellers = bestSellers.Take(bestSellerCount).ToList();
                         break;
 
                     case "MID_BANNER":
-                        var midBanners = await _context.Banners
-                            .AsNoTracking()
-                            .Where(b => b.IsActive && (b.Position == "MID_PROMO" || b.Position == "MID_BANNER" || b.Position == "5"))
-                            .OrderBy(b => b.DisplayOrder)
-                            .ThenByDescending(b => b.SortOrder)
-                            .Take(1)
-                            .ToListAsync();
+                        List<Banner> midBanners;
+                        if (sectionConfig != null && !string.IsNullOrWhiteSpace(sectionConfig.ImageUrl))
+                        {
+                            var customMidBanner = new Banner
+                            {
+                                Id = -section.Id,
+                                Title = section.Title,
+                                Subtitle = section.Subtitle,
+                                ImageUrl = sectionConfig.ImageUrl,
+                                DesktopImageUrl = sectionConfig.ImageUrl,
+                                LinkUrl = !string.IsNullOrWhiteSpace(sectionConfig.LinkUrl) ? sectionConfig.LinkUrl : "/category/all",
+                                ButtonText = !string.IsNullOrWhiteSpace(sectionConfig.ButtonText) ? sectionConfig.ButtonText : "Khám Phá Ngay",
+                                IsActive = true
+                            };
+                            midBanners = new List<Banner> { customMidBanner };
 
-                        if (!midBanners.Any())
+                            if (bannerStyles == null)
+                            {
+                                bannerStyles = new Dictionary<int, BannerStyleConfigDto>();
+                            }
+                            bannerStyles[customMidBanner.Id] = new BannerStyleConfigDto
+                            {
+                                BannerHeight = !string.IsNullOrWhiteSpace(sectionConfig.Height) ? sectionConfig.Height : "md",
+                                ImageObjectFit = !string.IsNullOrWhiteSpace(sectionConfig.ImageFit) ? sectionConfig.ImageFit : "cover",
+                                ImagePosition = !string.IsNullOrWhiteSpace(sectionConfig.ImagePosition) ? sectionConfig.ImagePosition : "center",
+                                BadgeText = !string.IsNullOrWhiteSpace(sectionConfig.BadgeText) ? sectionConfig.BadgeText : "Bộ Sưu Tập Độc Quyền"
+                            };
+                        }
+                        else
                         {
                             midBanners = await _context.Banners
                                 .AsNoTracking()
-                                .Where(b => b.IsActive)
-                                .OrderByDescending(b => b.SortOrder)
+                                .Where(b => b.IsActive && (b.Position == "MID_PROMO" || b.Position == "MID_BANNER" || b.Position == "5"))
+                                .OrderBy(b => b.DisplayOrder)
+                                .ThenByDescending(b => b.SortOrder)
                                 .Take(1)
                                 .ToListAsync();
-                        }
 
-                        if (bannerStyles == null)
-                        {
-                            bannerStyles = new Dictionary<int, BannerStyleConfigDto>();
-                            var styleSettings = await _context.Settings
-                                .AsNoTracking()
-                                .Where(s => s.SettingKey.StartsWith("BANNER_STYLE_CONFIG_"))
-                                .ToListAsync();
-                            foreach (var s in styleSettings)
+                            if (!midBanners.Any())
                             {
-                                var idPart = s.SettingKey.Replace("BANNER_STYLE_CONFIG_", "");
-                                if (int.TryParse(idPart, out int bId) && !string.IsNullOrWhiteSpace(s.SettingValue))
+                                midBanners = await _context.Banners
+                                    .AsNoTracking()
+                                    .Where(b => b.IsActive)
+                                    .OrderByDescending(b => b.SortOrder)
+                                    .Take(1)
+                                    .ToListAsync();
+                            }
+
+                            if (bannerStyles == null)
+                            {
+                                bannerStyles = new Dictionary<int, BannerStyleConfigDto>();
+                                var styleSettings = await _context.Settings
+                                    .AsNoTracking()
+                                    .Where(s => s.SettingKey.StartsWith("BANNER_STYLE_CONFIG_"))
+                                    .ToListAsync();
+                                foreach (var s in styleSettings)
                                 {
-                                    try
+                                    var idPart = s.SettingKey.Replace("BANNER_STYLE_CONFIG_", "");
+                                    if (int.TryParse(idPart, out int bId) && !string.IsNullOrWhiteSpace(s.SettingValue))
                                     {
-                                        var parsed = JsonSerializer.Deserialize<BannerStyleConfigDto>(s.SettingValue);
-                                        if (parsed != null)
+                                        try
                                         {
-                                            bannerStyles[bId] = parsed;
+                                            var parsed = JsonSerializer.Deserialize<BannerStyleConfigDto>(s.SettingValue);
+                                            if (parsed != null)
+                                            {
+                                                bannerStyles[bId] = parsed;
+                                            }
                                         }
-                                    }
-                                    catch
-                                    {
-                                        // Ignore malformed json
+                                        catch
+                                        {
+                                            // Ignore malformed json
+                                        }
                                     }
                                 }
                             }
@@ -283,12 +337,15 @@ namespace Omnichannel.Web.ViewComponents
                         break;
 
                     case "BEAUTY_BLOG":
+                        int blogCount = sectionConfig?.ItemCount ?? 3;
+                        if (blogCount <= 0) blogCount = 3;
+
                         var blogPosts = await _context.Posts
                             .AsNoTracking()
                             .Include(p => p.PostCategory)
                             .Where(p => p.IsPublished)
                             .OrderByDescending(p => p.PublishedAt ?? p.CreatedAt)
-                            .Take(3)
+                            .Take(blogCount)
                             .ToListAsync();
                         itemModel.BlogPosts = blogPosts;
                         break;
