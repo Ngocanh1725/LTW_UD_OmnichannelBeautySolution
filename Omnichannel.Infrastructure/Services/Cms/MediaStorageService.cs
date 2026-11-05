@@ -112,16 +112,17 @@ namespace Omnichannel.Infrastructure.Services.Cms
                 .OrderByDescending(m => m.CreatedAt)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
-
-            // Đảm bảo PublicUrl luôn có giá trị để preview
-            foreach (var item in items)
-            {
-                if (string.IsNullOrWhiteSpace(item.PublicUrl))
+                .Select(m => new MediaAsset
                 {
-                    item.PublicUrl = $"/media/{item.Id}";
-                }
-            }
+                    Id = m.Id,
+                    FileName = m.FileName,
+                    Category = m.Category,
+                    FileSize = m.FileSize > 0 ? m.FileSize : (m.FileSizeBytes ?? 0L),
+                    PublicUrl = !string.IsNullOrEmpty(m.PublicUrl) ? m.PublicUrl : $"/media/{m.Id}",
+                    AltText = m.AltText,
+                    CreatedAt = m.CreatedAt
+                })
+                .ToListAsync();
 
             return (items, total);
         }

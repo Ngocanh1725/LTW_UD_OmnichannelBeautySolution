@@ -335,10 +335,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
             {
                 product.ThumbnailUrl = model.ThumbnailUrl.Trim();
             }
-            if (model.ThumbnailMediaId.HasValue)
-            {
-                product.ThumbnailMediaId = model.ThumbnailMediaId.Value;
-            }
+            product.ThumbnailMediaId = model.ThumbnailMediaId;
             product.Unit = string.IsNullOrWhiteSpace(model.Unit) ? "Chai" : model.Unit.Trim();
             product.IsActive = model.IsActive;
             product.IsFeatured = model.IsFeatured;

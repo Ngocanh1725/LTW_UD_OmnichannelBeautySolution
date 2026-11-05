@@ -110,6 +110,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 if (!string.IsNullOrEmpty(uploadedUrl))
                 {
                     model.ThumbnailUrl = uploadedUrl;
+                    model.ThumbnailMediaId = null;
                 }
             }
 
@@ -180,6 +181,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 if (!string.IsNullOrEmpty(uploadedUrl))
                 {
                     model.ThumbnailUrl = uploadedUrl;
+                    model.ThumbnailMediaId = null;
                 }
             }
 

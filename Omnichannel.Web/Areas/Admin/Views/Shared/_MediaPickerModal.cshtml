@@ -168,13 +168,27 @@
                 return;
             }
 
-            document.getElementById('mediaTotalCountText').textContent = `Tổng: ${data.total} ảnh (Trang ${data.page}/${Math.ceil(data.total / data.pageSize)})`;
+            const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
+            document.getElementById('mediaTotalCountText').textContent = `Tổng: ${data.total} ảnh (Trang ${data.page}/${totalPages})`;
+
+            const pageBtns = document.getElementById('mediaPageButtons');
+            if (pageBtns) {
+                let pageHtml = '';
+                if (totalPages > 1) {
+                    for (let p = 1; p <= totalPages; p++) {
+                        if (totalPages > 7 && Math.abs(p - data.page) > 2 && p !== 1 && p !== totalPages) continue;
+                        pageHtml += `<button type="button" onclick="loadMediaLibrary(${p})" class="px-2.5 py-1 rounded-lg text-xs font-semibold transition ${p === data.page ? 'bg-magenta-accent text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-600'}">${p}</button>`;
+                    }
+                }
+                pageBtns.innerHTML = pageHtml;
+            }
 
             let html = '';
             data.items.forEach(item => {
                 const isSelected = selectedMediaItem && selectedMediaItem.id === item.id;
                 html += `
                     <div onclick="selectMediaItem(${JSON.stringify(item).replace(/"/g, '&quot;')})" 
+                         ondblclick="selectMediaItem(${JSON.stringify(item).replace(/"/g, '&quot;')}); confirmMediaSelection();"
                          id="media-card-${item.id}"
                          class="media-card group relative rounded-2xl overflow-hidden border-2 ${isSelected ? 'border-magenta-accent ring-2 ring-magenta-accent/30' : 'border-slate-100 hover:border-pink-300'} bg-white cursor-pointer transition-all duration-200 hover:shadow-lg flex flex-col aspect-square">
                         <img src="${item.publicUrl}" alt="${item.fileName}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='/images/products/_placeholder.webp'" />

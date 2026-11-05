@@ -131,18 +131,7 @@ namespace Omnichannel.Infrastructure.Data
         {
             var cache = _cache.Value;
 
-            // 1. Ưu tiên tra cứu trực tiếp theo SKU hoặc Slug trong Registry chuẩn
-            if (!string.IsNullOrWhiteSpace(sku) && cache.BySku.TryGetValue(sku.Trim(), out var bySkuUrl))
-            {
-                return bySkuUrl;
-            }
-
-            if (!string.IsNullOrWhiteSpace(slug) && cache.BySlug.TryGetValue(slug.Trim(), out var bySlugUrl))
-            {
-                return bySlugUrl;
-            }
-
-            // 2. Xử lý candidateUrl nếu được truyền vào
+            // 1. Ưu tiên xử lý candidateUrl nếu là đường dẫn ảnh tùy chỉnh được Admin chọn/tải lên (/media/{id}, /uploads/..., http/https)
             if (!string.IsNullOrWhiteSpace(candidateUrl))
             {
                 var trimmed = candidateUrl.Trim().Replace("\\", "/");
@@ -158,23 +147,41 @@ namespace Omnichannel.Infrastructure.Data
 
                 if (!string.IsNullOrEmpty(trimmed))
                 {
-                    // Nếu đã là đường dẫn chuẩn hợp lệ trong /images/products/{sub}/{file}
-                    if (cache.ValidCanonicalUrls.Contains(trimmed))
-                    {
-                        return trimmed;
-                    }
-
-                    // Nếu là đường dẫn /media/{id}, /uploads/..., hoặc ảnh danh mục/banner/brand hợp lệ
+                    // Nếu là đường dẫn ảnh tùy chỉnh từ CSDL (/media/{id}), ảnh upload (/uploads/...), URL ngoài (http/https), hoặc đường dẫn chuẩn hợp lệ trong /images/products/{sub}/{file}
                     if (trimmed.StartsWith("/media/", StringComparison.OrdinalIgnoreCase) ||
                         trimmed.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase) ||
+                        trimmed.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                        trimmed.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
+                        cache.ValidCanonicalUrls.Contains(trimmed) ||
                         trimmed.StartsWith("/images/banners/", StringComparison.OrdinalIgnoreCase) ||
                         trimmed.StartsWith("/images/categories/", StringComparison.OrdinalIgnoreCase) ||
                         trimmed.StartsWith("/images/branding/", StringComparison.OrdinalIgnoreCase))
                     {
                         return trimmed;
                     }
+                }
+            }
 
-                    // Bóc tách fileName từ đường dẫn bất kỳ để ánh xạ về thư mục chuẩn /images/products/{sub}/{file}
+            // 2. Tra cứu trực tiếp theo SKU hoặc Slug trong Registry chuẩn (khi sản phẩm chưa gắn ảnh tùy chỉnh riêng)
+            if (!string.IsNullOrWhiteSpace(sku) && cache.BySku.TryGetValue(sku.Trim(), out var bySkuUrl))
+            {
+                return bySkuUrl;
+            }
+
+            if (!string.IsNullOrWhiteSpace(slug) && cache.BySlug.TryGetValue(slug.Trim(), out var bySlugUrl))
+            {
+                return bySlugUrl;
+            }
+
+            // 3. Nếu candidateUrl là đường dẫn cũ (đường dẫn phẳng), bóc tách fileName để ánh xạ về thư mục chuẩn /images/products/{sub}/{file}
+            if (!string.IsNullOrWhiteSpace(candidateUrl))
+            {
+                var trimmed = candidateUrl.Trim().Replace("\\", "/");
+                if (!trimmed.Contains("default-product", StringComparison.OrdinalIgnoreCase) &&
+                    !trimmed.Contains("placeholder-product", StringComparison.OrdinalIgnoreCase) &&
+                    !trimmed.Equals(LegacySvgPlaceholderUrl, StringComparison.OrdinalIgnoreCase) &&
+                    !trimmed.Equals(PlaceholderUrl, StringComparison.OrdinalIgnoreCase))
+                {
                     var fileName = Path.GetFileName(trimmed);
                     if (!string.IsNullOrWhiteSpace(fileName))
                     {
