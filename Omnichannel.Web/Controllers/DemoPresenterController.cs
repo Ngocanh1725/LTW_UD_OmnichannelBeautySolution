@@ -84,24 +84,32 @@ namespace Omnichannel.Web.Controllers
         }
 
         [HttpPost("quick-switch-persona")]
-        public async Task<IActionResult> QuickSwitchPersona([FromBody] QuickSwitchPersonaRequestDto request)
+        public async Task<IActionResult> QuickSwitchPersona([FromBody] QuickSwitchPersonaRequestDto? request = null, [FromQuery] string? persona = null)
         {
             if (!IsDemoModeActive())
             {
                 return NotFound(new { message = "Chế độ Demo không khả dụng." });
             }
 
-            string targetRole = (request?.Persona ?? "customer").Trim().ToLowerInvariant();
+            string rawPersona = !string.IsNullOrWhiteSpace(persona)
+                ? persona
+                : (request?.Persona ?? "customer");
+            string targetRole = rawPersona.Trim().ToLowerInvariant();
 
             if (targetRole == "customer")
             {
                 var customer = await _context.Users.AsNoTracking()
+                    .OrderByDescending(u => u.Username == "customer_vip")
+                    .ThenByDescending(u => u.Username == "customer01")
                     .FirstOrDefaultAsync(u => u.Username == "customer_vip" || u.Username == "customer01" || u.UserType == 1);
 
                 if (customer == null)
                 {
                     return BadRequest(new { success = false, message = "Không tìm thấy tài khoản khách hàng mẫu trong CSDL." });
                 }
+
+                // Đăng xuất phiên Admin/POS nếu đang tồn tại để không bị chặn bởi BlockAdminShoppingAttribute ở chu kỳ Demo tiếp theo
+                await HttpContext.SignOutAsync(AuthConstants.AdminCookieScheme);
 
                 var claims = new List<Claim>
                 {

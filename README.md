@@ -1,14 +1,22 @@
-# Omnichannel Beauty Solution 🌸💄
-> **Hệ Thống Thương Mại Điện Tử & Quản Trị Chuỗi Bán Lẻ Mỹ Phẩm Cao Cấp Đa Kênh**  
-> *Tiên phong công nghệ quản trị tồn kho FEFO (First-Expired, First-Out), Phân Quyền Hạt Nhân PBAC và Trải Nghiệm Mua Sắm Luxury.*
+# CANMAKE BEAUTY – Omnichannel Beauty Solution 🌸💄
+> **Canmake Beauty – Hệ Thống Thương Mại Điện Tử & Quản Trị Chuỗi Bán Lẻ Mỹ Phẩm Đa Kênh Chính Hãng**  
+> *Tiên phong công nghệ quản trị tồn kho FEFO (First-Expired, First-Out), Phân Quyền Hạt Nhân PBAC và Trải Nghiệm Mua Sắm Mỹ Phẩm Trẻ Trung – Chuẩn Khoa Học.*
+
+<p align="center">
+  <img src="Omnichannel.Web/wwwroot/images/branding/canmake-logo-horizontal.svg" alt="CANMAKE BEAUTY Logo" width="320" />
+</p>
 
 ---
 
-## 🌟 1. GIỚI THIỆU DỰ ÁN
-**Omnichannel Beauty Solution** là giải pháp phần mềm toàn diện dành cho chuỗi bán lẻ mỹ phẩm cao cấp đa kênh (Omnichannel Retail & E-commerce). Hệ thống kết nối liền mạch giữa:
-- **Khách hàng trực tuyến (Storefront Web)**: Trải nghiệm mua sắm sang trọng, tìm kiếm thông minh, tra cứu thành phần hoạt chất, giỏ hàng tức thì, tích điểm thành viên và thanh toán đa cổng (VNPay, MoMo, VietQR, COD).
-- **Điểm bán lẻ trực tiếp (POS Checkout)**: Thu ngân bán lẻ tốc hành, quét mã vạch Barcode/SKU, quản lý ca làm việc (Shift), in hóa đơn nhiệt.
-- **Hệ thống Quản trị & Vận hành (Admin Suite)**: Quản lý danh mục, đơn hàng, khách hàng, kho bãi FEFO theo lô & hạn dùng, điều chuyển kho liên chi nhánh, hộp thư nội bộ realtime, ma trận phân quyền hạt nhân và báo cáo tài chính P&L.
+## 🌟 1. GIỚI THIỆU DỰ ÁN & BỘ NHẬN DIỆN THƯƠNG HIỆU
+**CANMAKE BEAUTY** (tên định danh kỹ thuật dự án: `OmnichannelBeautySolution`) là giải pháp phần mềm toàn diện dành cho chuỗi bán lẻ mỹ phẩm đa kênh chính hãng (Omnichannel Retail & E-commerce).
+
+- **Thông điệp thương hiệu:** *"CAN MAKE = Bạn có thể tự tin tạo nên vẻ đẹp của riêng mình"*.
+- **Biểu tượng nhận diện (Blooming Heart Monogram `C × M`):** Sự lồng ghép tinh tế giữa chữ **C** (vòng cung cọ trang điểm/cánh hoa hồng) ôm trọn chữ **M** tạo thành hình trái tim & đóa hoa bung nở, điểm xuyết ngôi sao 4 cánh lấp lánh (*4-Point Sparkle*) trên bảng màu hồng chủ đạo (`Primary Rose #E8618C`, `Deep Berry #B8336A`, `Petal Cream #FFF4F7`, đạt chuẩn tương phản trợ năng **WCAG 2.1 AA/AAA**).
+- **Hệ sinh thái đa kênh kết nối liền mạch:**
+  - **Khách hàng trực tuyến (Storefront Web)**: Trải nghiệm mua sắm hiện đại, tìm kiếm tức thì, tra cứu thành phần hoạt chất, giỏ hàng thông minh, tích điểm thành viên **Canmake Rewards** và thanh toán đa cổng (VNPay, MoMo, VietQR, COD).
+  - **Điểm bán lẻ trực tiếp (POS Checkout)**: Thu ngân bán lẻ tốc hành, quét mã vạch Barcode/SKU, nhận bàn giao đơn Click & Collect 1H bằng QR/PIN, quản lý ca làm việc (Shift), in hóa đơn nhiệt 80mm.
+  - **Hệ thống Quản trị & Vận hành (Admin Suite)**: Quản lý danh mục, đơn hàng, khách hàng, kho bãi FEFO theo lô & hạn dùng, điều chuyển kho liên chi nhánh, hộp thư nội bộ realtime, ma trận phân quyền hạt nhân và báo cáo tài chính P&L.
 
 ---
 
@@ -62,9 +70,9 @@
    - Loại bỏ 100% số liệu hardcode: 6 KPI tăng trưởng ▲▼ % so với kỳ trước tính trực tiếp từ SQL Server.
    - Phễu chuyển đổi 5 bước, Ma trận Heatmap Giờ × Thứ săn sale, Phân khúc RFM 1–5 kèm Xuất CSV & 1-Click Tạo Voucher cá nhân hóa.
    - Cảnh báo điều phối tồn kho thông minh liên chi nhánh.
-7. **Gamification Khách Hàng Thân Thiết (Omni Rewards)**:
+7. **Gamification Khách Hàng Thân Thiết (Canmake Rewards)**:
    - Lịch điểm danh 7 ngày liên tiếp giờ Việt Nam (UTC+7) kèm hiệu ứng pháo hoa Confetti.
-   - Mã giới thiệu bạn bè chống vòng lặp, Nhiệm vụ làm đẹp (Beauty Missions), Quầy đổi voucher Rewards Bazaar dùng ngay tại Checkout.
+   - Mã giới thiệu bạn bè (`CANMAKE-REF-XXXX`) chống vòng lặp, Nhiệm vụ làm đẹp (Beauty Missions), Quầy đổi voucher **Canmake Rewards Bazaar** dùng ngay tại Checkout.
 8. **Tìm Kiếm Tức Thì (Instant Search Autocomplete)**:
    - Gợi ý sản phẩm, thương hiệu, danh mục dưới 15ms. Bóc tách tiếng Việt không dấu triệt để (`đ`/`Đ`).
 9. **Theo Dõi Đơn Hàng Timeline & Đổi Trả Tự Phục Vụ**:

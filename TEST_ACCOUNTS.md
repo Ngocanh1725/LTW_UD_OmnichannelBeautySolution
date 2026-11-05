@@ -1,7 +1,7 @@
 # DANH SÁCH TÀI KHOẢN VÀ MẬT KHẨU KIỂM THỬ HỆ THỐNG
-## Omnichannel Beauty Solution - Hệ Thống Bán Lẻ Mỹ Phẩm Đa Kênh
+## CANMAKE BEAUTY (`OmnichannelBeautySolution`) - Hệ Thống Bán Lẻ Mỹ Phẩm Đa Kênh Chính Hãng
 
-Tài liệu này tổng hợp toàn bộ danh sách tài khoản, mật khẩu, vai trò và phạm vi chi nhánh được khởi tạo sẵn (Seeded Data) trong hệ thống để phục vụ công tác kiểm thử (Manual Test, UAT, Integration Test).
+Tài liệu này tổng hợp toàn bộ danh sách tài khoản, mật khẩu, email (`@canmakebeauty.vn`), vai trò và phạm vi chi nhánh được khởi tạo sẵn (Seeded Data) trong hệ thống để phục vụ công tác kiểm thử (Manual Test, UAT, Integration Test).
 
 ---
 
@@ -12,22 +12,22 @@ Tài liệu này tổng hợp toàn bộ danh sách tài khoản, mật khẩu, 
 > Khi `DemoMode:Enabled == true`, bạn có thể bấm tổ hợp phím **`Alt + D`** (hoặc nút tròn góc trái dưới) trên bất kỳ màn hình nào để chuyển vai tức thì giữa **Khách VIP (Lê Ngọc Linh)**, **Thu ngân Showroom 1 (cashier01)**, và **SuperAdmin** trong **< 50ms** mà không cần gõ tài khoản hay mật khẩu!
 
 > **Mật khẩu mặc định toàn hệ thống:** `Admin@123`  
-> *(Riêng tài khoản `admin` có thể sử dụng cả `Admin@123456` và có nút **Điền nhanh** tại trang đăng nhập).*
+> *(Riêng tài khoản `admin` có thể sử dụng cả `Admin@123456` và có nút **Điền nhanh** tại trang đăng nhập. Toàn bộ tài khoản nhân sự sử dụng tên miền email chính thức `@canmakebeauty.vn` và hỗ trợ tương thích ngược khi đăng nhập bằng đuôi cũ `@omnichannelbeauty.vn`).*
 
-| STT | Username | Mật khẩu | Vai trò (Role) | Chi nhánh phân bổ | Họ và tên | Loại TK |
-|:---:|:---|:---|:---|:---|:---|:---:|
-| **1** | `superadmin` | `Admin@123` | **SuperAdmin** | Toàn hệ thống (Global) | Nguyễn Quản Trị | Quản trị |
-| **2** | `admin` | `Admin@123456` / `Admin@123` | **SuperAdmin** | Toàn hệ thống (Global) | Quản Trị Viên Kế Thừa | Quản trị |
-| **3** | `manager_hq` | `Admin@123` | **StoreManager** | `HQ-001` (Kho Tổng TP.HCM) | Trần Quản Lý HQ | Nhân viên |
-| **4** | `manager_cg` | `Admin@123` | **StoreManager** | `SH-CG` (Showroom Cầu Giấy) | Lê Quản Lý CG | Nhân viên |
-| **5** | `cashier01` | `Admin@123` | **Cashier** | `HQ-001` (Kho Tổng TP.HCM) | Phạm Thu Ngân 01 | Nhân viên |
-| **6** | `cashier02` | `Admin@123` | **Cashier** | `SH-CG` (Showroom Cầu Giấy) | Hoàng Thu Ngân 02 | Nhân viên |
-| **7** | `warehouse01` | `Admin@123` | **WarehouseStaff** | `HQ-001` (Kho Tổng TP.HCM) | Đặng Thủ Kho 01 | Nhân viên |
-| **8** | `warehouse02` | `Admin@123` | **WarehouseStaff** | `SH-CG` (Showroom Cầu Giấy) | Vũ Thủ Kho 02 | Nhân viên |
-| **9** | `editor01` | `Admin@123` | **ContentEditor** | Toàn hệ thống (CMS) | Bùi Biên Tập | Nhân viên |
-| **10** | `customer01` | `Admin@123` | **Customer** | Khách hàng cá nhân | Ngọc Khách Hàng 01 | Khách hàng |
-| **11** | `customer02` | `Admin@123` | **Customer** | Khách hàng cá nhân | Mai Khách Hàng 02 | Khách hàng |
-| **12** | `customer_vip` | `Admin@123` | **Customer** | Khách hàng cá nhân | Linh VIP Diamond | Khách hàng |
+| STT | Username | Email | Mật khẩu | Vai trò (Role) | Chi nhánh phân bổ | Họ và tên | Loại TK |
+|:---:|:---|:---|:---|:---|:---|:---|:---:|
+| **1** | `superadmin` | `superadmin@canmakebeauty.vn` | `Admin@123` | **SuperAdmin** | Toàn hệ thống (Global) | Nguyễn Quản Trị | Quản trị |
+| **2** | `admin` | `admin@canmakebeauty.vn` | `Admin@123456` / `Admin@123` | **SuperAdmin** | Toàn hệ thống (Global) | Quản Trị Viên Kế Thừa | Quản trị |
+| **3** | `manager_hq` | `manager.hq@canmakebeauty.vn` | `Admin@123` | **StoreManager** | `HQ-001` (Flagship Quận 1) | Trần Quản Lý HQ | Nhân viên |
+| **4** | `manager_cg` | `manager.cg@canmakebeauty.vn` | `Admin@123` | **StoreManager** | `SH-CG` (Showroom Cầu Giấy) | Lê Quản Lý CG | Nhân viên |
+| **5** | `cashier01` | `cashier01@canmakebeauty.vn` | `Admin@123` | **Cashier** | `HQ-001` (Flagship Quận 1) | Phạm Thu Ngân 01 | Nhân viên |
+| **6** | `cashier02` | `cashier02@canmakebeauty.vn` | `Admin@123` | **Cashier** | `SH-CG` (Showroom Cầu Giấy) | Hoàng Thu Ngân 02 | Nhân viên |
+| **7** | `warehouse01` | `warehouse01@canmakebeauty.vn` | `Admin@123` | **WarehouseStaff** | `HQ-001` (Flagship Quận 1) | Đặng Thủ Kho 01 | Nhân viên |
+| **8** | `warehouse02` | `warehouse02@canmakebeauty.vn` | `Admin@123` | **WarehouseStaff** | `SH-CG` (Showroom Cầu Giấy) | Vũ Thủ Kho 02 | Nhân viên |
+| **9** | `editor01` | `editor01@canmakebeauty.vn` | `Admin@123` | **ContentEditor** | Toàn hệ thống (CMS) | Bùi Biên Tập | Nhân viên |
+| **10** | `customer01` | `customer01@gmail.com` | `Admin@123` | **Customer** | Khách hàng cá nhân | Ngọc Khách Hàng 01 | Khách hàng |
+| **11** | `customer02` | `customer02@gmail.com` | `Admin@123` | **Customer** | Khách hàng cá nhân | Mai Khách Hàng 02 | Khách hàng |
+| **12** | `customer_vip` | `customer_vip@gmail.com` | `Admin@123` | **Customer** | Khách hàng cá nhân | Lê Ngọc Linh (VIP Diamond) | Khách hàng |
 
 ---
 
@@ -157,11 +157,11 @@ Sau mỗi lần diễn tập thuyết trình hoặc thử nghiệm luồng mua s
 
 ## 3. Danh Mục Chi Nhánh & Kho Hàng (Store Locations)
 
-| Mã chi nhánh | Tên chi nhánh | Địa chỉ | Vai trò |
-|:---:|:---|:---|:---:|
-| `HQ-001` | **Kho Tổng & Showroom Chính** | 123 Nguyễn Huệ, P. Bến Nghé, Quận 1, TP. Hồ Chí Minh | Trụ sở chính / Kho trung tâm |
-| `SH-CG` | **Showroom Cầu Giấy** | 45 Xuân Thủy, P. Dịch Vọng Hậu, Q. Cầu Giấy, Hà Nội | Showroom bán lẻ & Kho vệ tinh |
-| `SH-TD` | **Showroom Thủ Đức** | 78 Võ Văn Ngân, P. Bình Thọ, TP. Thủ Đức, TP. Hồ Chí Minh | Showroom bán lẻ |
+| Mã chi nhánh | Tên chi nhánh | Địa chỉ | Email liên hệ | Vai trò |
+|:---:|:---|:---|:---|:---:|
+| `HQ-001` | **CANMAKE BEAUTY Flagship Quận 1 (Kho Tổng)** | 123 Nguyễn Huệ, P. Bến Nghé, Quận 1, TP. Hồ Chí Minh | `hq.q1@canmakebeauty.vn` | Trụ sở chính / Kho trung tâm |
+| `SH-CG` | **CANMAKE BEAUTY Cầu Giấy** | 45 Xuân Thủy, P. Dịch Vọng Hậu, Q. Cầu Giấy, Hà Nội | `caugiay.hn@canmakebeauty.vn` | Showroom bán lẻ & Kho vệ tinh |
+| `SH-TD` | **CANMAKE BEAUTY Thủ Đức** | 78 Võ Văn Ngân, P. Bình Thọ, TP. Thủ Đức, TP. Hồ Chí Minh | `thuduc.hcm@canmakebeauty.vn` | Showroom bán lẻ |
 
 ---
 

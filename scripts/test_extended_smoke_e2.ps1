@@ -11,7 +11,7 @@ Add-Type -AssemblyName "System.Net.Http"
 $ErrorActionPreference = "Continue"
 
 Write-Host "================================================================================" -ForegroundColor Cyan
-Write-Host "  OMNICHANNEL BEAUTY SOLUTION - EXTENDED SMOKE TEST AND 2-CYCLE DEMO" -ForegroundColor Cyan
+Write-Host "  CANMAKE BEAUTY (OmnichannelBeautySolution) - EXTENDED SMOKE TEST & 2-CYCLE DEMO" -ForegroundColor Cyan
 Write-Host "  Target URL: $BaseUrl" -ForegroundColor Gray
 Write-Host "================================================================================" -ForegroundColor Cyan
 
@@ -99,7 +99,7 @@ for ($cycle = 1; $cycle -le 2; $cycle++) {
     Test-Endpoint "Switch to customer_vip" "/api/demo/quick-switch-persona?persona=customer" @(200) "POST"
     
     # Kiem tra quyen Khach hang
-    Test-Endpoint "Customer Dashboard & Omni Rewards (C7)" "/Customer/Dashboard"
+    Test-Endpoint "Customer Dashboard & Canmake Rewards (C7)" "/Customer/Dashboard"
     Test-Endpoint "Customer Orders" "/Customer/Orders"
     Test-Endpoint "Customer Wishlist" "/Customer/Wishlist"
 

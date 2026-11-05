@@ -39,6 +39,7 @@
 | | **F4** | Rà soát & Lập kế hoạch Rebrand `"OMNI BEAUTY"` → `"CANMAKE BEAUTY"` (Read-only) | Chỉ đọc | ✅ Xong | 05/11/2026 | Quét 6.373 vị trí trong code/doc và 584 bản ghi trên 28 cặp `Bảng.Cột` trong DB, phân loại 4 Nhóm (Nhóm 1: 332 dòng + 141 dòng DB; Nhóm 2: 5.055 dòng; Nhóm 3: 155 dòng + 236 dòng DB; Nhóm 4: 6 dòng active + 831 dòng lịch sử), liệt kê 12 file test ảnh hưởng, lập báo cáo `07_ke_hoach_rebrand_canmake.md` |
 | | **F5** | Thiết kế bộ nhận diện Logo `CANMAKE BEAUTY` (SVG/PNG/ICO/OG) | Thiết kế + Tài sản | ✅ Xong | 05/11/2026 | Phác thảo 3 phương án, chốt PA 1 (*Blooming Heart Monogram C × M*), xuất 5 file SVG thuần vector (chữ chuyển `<path>`, có `<title>`/`<desc>` a11y) + bộ Favicon/Maskable PNG & Multi-ICO + `og-image-1200x630.png` vào `wwwroot/images/branding/`, tạo `scripts/export_brand_assets.ps1` & `08_bo_nhan_dien_canmake.md` |
 | | **F6** | Triển khai Rebrand `CANMAKE BEAUTY` toàn diện | Code + Giao diện | ✅ Xong | 05/11/2026 | Tập trung cấu hình `BrandOptions` + `appsettings.json`, cập nhật 100% Views/Layouts, Domain/Application/Infrastructure/Tests, bộ token CSS hồng (#E8618C), 0 lỗi git grep, chụp 4 ảnh Before/After, Build 0 Error & 317/317 tests pass 100% |
+| | **F7** | Nghiệm thu hợp nhất ảnh & Rebrand `CANMAKE BEAUTY` | QA + Tài liệu | ✅ Xong | 05/11/2026 | Chạy `update_rebrand_canmake_phien6.sql` idempotent, Build Release 0 Warning 0 Error, 317/317 tests pass 100%, Smoke test 64 route + 2 vòng Demo HUD + Reset 0 lỗi 500, Quét 0 ảnh 404, 0 chữ `"Omni Beauty"` trên 13 trang, cập nhật `README.md`, `TEST_ACCOUNTS.md`, `KICH_BAN_DEMO_10_PHUT`, lập báo cáo `09_nghiem_thu_hinh_anh_va_rebrand_canmake.md` |
 
 ---
 
@@ -532,3 +533,25 @@
   + `dotnet build OmnichannelBeautySolution.sln -c Release`: **0 Warning, 0 Error**.
   + `dotnet test OmnichannelBeautySolution.sln -c Release`: **317 / 317 tests PASSED (100%)**.
 - **Tài liệu sinh ra:** [`scripts/update_rebrand_canmake_phien6.sql`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/scripts/update_rebrand_canmake_phien6.sql), [`Omnichannel.Application/Common/BrandOptions.cs`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/Omnichannel.Application/Common/BrandOptions.cs), 4 ảnh chụp `after_*.png`, cập nhật [`doc/nang-cap/00_tien_do.md`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/doc/nang-cap/00_tien_do.md).
+
+### Phiên F7 (Giai đoạn F – Hình ảnh & Rebrand): Nghiệm Thu Hợp Nhất Ảnh & Rebrand `CANMAKE BEAUTY` (05/11/2026)
+- **Mục tiêu:** Thực hiện tổng nghiệm thu kỹ thuật, cơ sở dữ liệu, trực quan đa khung hình (`375px` / `768px` / `1366px` / `1920px`, Light + Dark mode), SEO/Favicon/OG/Manifest, kịch bản Demo 10 phút (`Alt + D`) + Reset Demo Data, và hoàn thiện bộ tài liệu dự án (`README.md`, `TEST_ACCOUNTS.md`, `doc/KICH_BAN_DEMO_10_PHUT_VA_BO_HOI_DAP_PHAN_BIEN.md`, `doc/nang-cap/09_nghiem_thu_hinh_anh_va_rebrand_canmake.md`).
+- **Đã làm:**
+  1. **Thực thi cập nhật CSDL Idempotent (`scripts/update_rebrand_canmake_phien6.sql`):**
+     - Sau khi người dùng xác nhận duyệt Phiên 6, thực thi `scripts/update_rebrand_canmake_phien6.sql` trên `OmnichannelBeautyDb`: cập nhật `ThemeConfigs` (1), `PageLayouts` (1), `StaticPages` (2), `Stores` (3), `Settings` (4), `ChatMessages` (8), `ProductReviews` (73 AdminReply, 8 AdminReplyBy, 4 Content), `OrderStatusHistories` (40), `PointTransactions` (1), `Coupons` (1), `Vouchers` (1), `LoyaltyWallets` (41), `LoyaltyReferrals` (1), `Users` (14), `Orders` (16), `ProductSubscriptions` (2). Chạy lại lần 2 xác nhận idempotent 100% (0 dòng cần cập nhật thêm).
+  2. **Nghiệm thu Kỹ thuật (`dotnet build`, `dotnet test`, Smoke Test E2, Quét 404):**
+     - `dotnet build OmnichannelBeautySolution.sln -c Release`: **0 Error, 0 Warning**.
+     - `dotnet test OmnichannelBeautySolution.sln -c Release`: **317 / 317 tests PASSED (100%)**.
+     - Chạy `scripts/test_extended_smoke_e2.ps1`: **64 / 64 route/tác vụ đạt 200 OK (0 lỗi 500)** qua 2 vòng kịch bản Demo HUD (`Alt + D`) liên tiếp + 1-Click Reset Demo Data.
+     - Quét toàn bộ URL ảnh sản phẩm (`Products`, `MediaAssets`, `Banners`) và bộ tài sản thương hiệu (`branding/*`, `favicon.ico`, `site.webmanifest`, `_placeholder.webp`): **0 lỗi HTTP 404**.
+  3. **Nghiệm thu Trực quan Đa Khung Hình (`375 / 768 / 1366 / 1920px`, Light & Dark) & In Ấn:**
+     - Kiểm tra 13 trang trọng tâm (Trang chủ, Danh mục, PDP, Giỏ hàng, Checkout, OrderSuccess + Vé Click & Collect, Customer Dashboard, Login, Admin Dashboard, POS, Hóa đơn in POS `PrintReceipt`, Hóa đơn đơn hàng `Order/Print`, Nhãn vận chuyển `PrintShippingLabel`): **0 chữ `"Omni Beauty"`** xuất hiện trong HTML render; logo vector SVG (`horizontal`, `stacked`, `white`, `mono`, `icon`) hiển thị sắc nét tuyệt đối, không méo/vỡ; ảnh sản phẩm đúng nội dung 1–1, không còn ảnh trùng sai.
+  4. **Kiểm tra Favicon, Open Graph & Web Manifest:**
+     - Xác nhận `<link rel="icon">`, `<link rel="apple-touch-icon">`, `<meta property="og:image" content=".../images/branding/og-image-1200x630.png">` và `site.webmanifest` (`name: "CANMAKE BEAUTY"`, `short_name: "Canmake"`, `theme_color: "#E8618C"`) hợp lệ 100%.
+  5. **Cập nhật Hệ thống Tài liệu & Lập Báo cáo Nghiệm thu Cuối:**
+     - Cập nhật [`README.md`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/README.md), [`TEST_ACCOUNTS.md`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/TEST_ACCOUNTS.md), [`doc/KICH_BAN_DEMO_10_PHUT_VA_BO_HOI_DAP_PHAN_BIEN.md`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/doc/KICH_BAN_DEMO_10_PHUT_VA_BO_HOI_DAP_PHAN_BIEN.md) (bổ sung lời thuyết trình giới thiệu ý nghĩa logo CANMAKE).
+     - Lập báo cáo tổng kết [`doc/nang-cap/09_nghiem_thu_hinh_anh_va_rebrand_canmake.md`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/doc/nang-cap/09_nghiem_thu_hinh_anh_va_rebrand_canmake.md) kèm bảng đối chiếu Trước/Sau và danh sách lưu ý vận hành bàn giao.
+- **Kết quả nghiệm thu:**
+  + Chỉ còn duy nhất **1 thư mục ảnh sản phẩm** `Omnichannel.Web/wwwroot/images/products` (`3 → 1`).
+  + **0 ảnh 404**; **0 chữ `"Omni Beauty"`** hiển thị cho người dùng; **317 / 317 tests pass 100%**.
+  + Toàn bộ **Giai đoạn F (F1–F7)** hoàn thành **100% ✅**.

@@ -1,7 +1,7 @@
 # KỊCH BẢN TRÌNH DIỄN TRỰC TIẾP (10-MINUTE LIVE DEMO SCRIPT)
 ## VÀ BỘ HỎI ĐÁP PHẢN BIỆN CHINH PHỤC HỘI ĐỒNG BẢO VỆ
-### Hệ Thống Bán Lẻ Mỹ Phẩm Đa Kênh: `OmnichannelBeautySolution`
-**Phiên bản:** Hoàn thiện sau đợt nâng cấp toàn diện (C1–C8, D1–D2, E1–E2)  
+### Thương Hiệu Hiển Thị: **CANMAKE BEAUTY** (Giải pháp kỹ thuật: `OmnichannelBeautySolution`)
+**Phiên bản:** Hoàn thiện sau đợt nâng cấp toàn diện & Rebrand CANMAKE BEAUTY (C1–C8, D1–D2, E1–E2, F1–F7)  
 **Thời gian thuyết trình:** 10 phút chuẩn Persona "Lê Ngọc Linh"  
 **Công cụ hỗ trợ:** Demo Presenter HUD (`Alt + D`)
 
@@ -21,36 +21,37 @@
 | Vai trò | Tên đăng nhập / Email | Mật khẩu | 1-Click Persona HUD | Mục đích sử dụng trong Demo |
 | :--- | :--- | :--- | :---: | :--- |
 | **Khách VIP (Lê Ngọc Linh)** | `customer_vip` / `customer_vip@gmail.com` | `Admin@123` | Nút **"Khách VIP (Linh)"** | Hạng Kim Cương, 1.250 điểm, sinh nhật T11, Routine cá nhân |
-| **Thu ngân Showroom 1** | `cashier01` / `cashier01@omnichannelbeauty.vn` | `Admin@123` | Nút **"Thu ngân (Showroom 1)"** | Quầy POS, xác thực PIN & bàn giao đơn Click & Collect |
-| **SuperAdmin Toàn Chuỗi** | `superadmin` / `superadmin@omnichannelbeauty.vn` | `Admin@123` | Nút **"SuperAdmin"** | Executive Decision Center, RFM, Cảnh báo kho FEFO, 1-Click Reset |
+| **Thu ngân Showroom 1** | `cashier01` / `cashier01@canmakebeauty.vn` | `Admin@123` | Nút **"Thu ngân (Showroom 1)"** | Quầy POS, xác thực PIN & bàn giao đơn Click & Collect |
+| **SuperAdmin Toàn Chuỗi** | `superadmin` / `superadmin@canmakebeauty.vn` | `Admin@123` | Nút **"SuperAdmin"** | Executive Decision Center, RFM, Cảnh báo kho FEFO, 1-Click Reset |
 
 ---
 
 ## II. KỊCH BẢN TRÌNH DIỄN CHI TIẾT 10 PHÚT (PERSONA "LÊ NGỌC LINH")
 
 ```
-00:00 ─── [Chặng 1: 0:00 - 1:30] Khởi động & Nhận diện Khách hàng VIP
+00:00 ─── [Chặng 1: 0:00 - 1:30] Khởi động, Giới thiệu Thương hiệu CANMAKE BEAUTY & Nhận diện Khách hàng VIP
 01:30 ─── [Chặng 2: 1:30 - 3:30] Trợ lý AI Da liễu & Cảnh báo Tương kỵ Hoạt chất
 03:30 ─── [Chặng 3: 3:30 - 5:30] Trải nghiệm Storefront Đa kênh Chuyên sâu
-05:30 ─── [Chặng 4: 5:30 - 7:00] Gamification & Đổi thưởng Điểm tích lũy Omni Rewards
+05:30 ─── [Chặng 4: 5:30 - 7:00] Gamification & Đổi thưởng Điểm tích lũy Canmake Rewards
 07:00 ─── [Chặng 5: 7:00 - 8:30] Khép kín Vòng lặp O2O (Click & Collect) & Bàn giao tại POS
 08:30 ─── [Chặng 6: 8:30 - 10:00] Trung tâm Ra Quyết định & Bảng điều hành Chuỗi
 ```
 
 ---
 
-### CHẶNG 1 (0:00 – 1:30): KHỞI ĐỘNG & NHẬN DIỆN KHÁCH HÀNG VIP
+### CHẶNG 1 (0:00 – 1:30): KHỞI ĐỘNG, GIỚI THIỆU THƯƠNG HIỆU CANMAKE BEAUTY & NHẬN DIỆN KHÁCH HÀNG VIP
 
 * **Thao tác**:
-  1. Mở trang chủ `http://localhost:5116/`. Bấm **`Alt + D`**, bấm nút **"Bắt đầu (10:00)"** trên timer.
+  1. Mở trang chủ `http://localhost:5116/`. Chỉ vào cụm **Logo CANMAKE BEAUTY** ở thanh Header. Bấm **`Alt + D`**, bấm nút **"Bắt đầu (10:00)"** trên timer.
   2. Bấm nút **"Đăng nhập VIP (Lê Ngọc Linh)"** trên HUD. Trang tự động refresh sang tư cách VIP.
   3. Mở `/Customer/Dashboard`:
      - Thẻ thành viên 3D lấp lánh hạng **Kim Cương (Diamond)**.
      - Số dư điểm: **1.250 điểm** (tương đương 1.250.000₫ đổi thưởng).
      - Thông báo đặc quyền: **"Chúc mừng sinh nhật Tháng 11! Bạn nhận nhân 2 điểm thưởng và voucher sinh nhật VIP 25%."**
 * **Lời thuyết trình mẫu (Spoken Script)**:
-  > *"Kính thưa Thầy/Cô trong Hội đồng và các bạn. Em xin phép bắt đầu buổi thuyết trình bằng câu chuyện trải nghiệm đa kênh của khách hàng VIP Lê Ngọc Linh.
-  > Ngay khi Linh truy cập hệ thống, nền tảng nhận diện hạng thành viên Kim Cương cùng thông báo Birthday Bonus cá nhân hóa cho sinh nhật tháng 11. Hệ thống của chúng em được xây dựng trên .NET 8 Clean Architecture, đồng bộ xuyên suốt từ Website, Ứng dụng Khách hàng đến Quầy bán lẻ POS và Kho vận FEFO."*
+  > *"Kính thưa Thầy/Cô trong Hội đồng và các bạn. Em xin phép bắt đầu buổi thuyết trình hệ thống bán lẻ mỹ phẩm đa kênh mang thương hiệu **CANMAKE BEAUTY** — với thông điệp cốt lõi **'CAN MAKE: Bạn có thể tự tin tạo nên vẻ đẹp của riêng mình'**.
+  > Bộ nhận diện thương hiệu sử dụng biểu tượng **Blooming Heart Monogram (C × M)** — nét chữ C như đường cọ trang điểm ôm trọn chữ M tạo thành trái tim và đóa hoa bung nở cùng ngôi sao 4 cánh lấp lánh, phối trên bảng màu hồng Primary Rose `#E8618C` và Deep Berry `#B8336A` đạt chuẩn tương phản trợ năng quốc tế WCAG 2.1 AA.
+  > Đi vào câu chuyện trải nghiệm của khách hàng VIP Lê Ngọc Linh: ngay khi Linh truy cập, nền tảng nhận diện hạng Kim Cương cùng thông báo Birthday Bonus cá nhân hóa cho sinh nhật tháng 11. Hệ thống được xây dựng trên .NET 8 Clean Architecture, đồng bộ xuyên suốt từ Website, Ứng dụng Khách hàng đến Quầy bán lẻ POS và Kho vận FEFO."*
 
 ---
 
@@ -94,18 +95,18 @@
 
 ---
 
-### CHẶNG 4 (5:30 – 7:00): GAMIFICATION & ĐỔI THƯỞNG TÍCH LŨY OMNI REWARDS
+### CHẶNG 4 (5:30 – 7:00): GAMIFICATION & ĐỔI THƯỞNG TÍCH LŨY CANMAKE REWARDS
 
 * **Thao tác**:
-  1. Vào `/Customer/Dashboard` (khu vực Omni Rewards):
+  1. Vào `/Customer/Dashboard` (khu vực Canmake Rewards):
      - **Điểm danh 7 ngày**: Bấm **"Điểm danh hôm nay (+10 xu)"** $\rightarrow$ Hiệu ứng pháo hoa Confetti tung bay rực rỡ, chuỗi streak tăng lên, điểm thưởng lập tức tăng từ 1.250 lên 1.260.
      - Kiểm chứng chống gian lận: Bấm điểm danh lần 2 $\rightarrow$ Báo lỗi *"Bạn đã điểm danh ngày hôm nay rồi, hẹn gặp lại vào ngày mai!"*.
-  2. **Rewards Bazaar (Quầy Đổi Thưởng)**:
+  2. **Canmake Rewards Bazaar (Quầy Đổi Thưởng)**:
      - Bấm nút đổi voucher giảm 50k (sử dụng 50 điểm) $\rightarrow$ Sinh mã cá nhân `LOYALTY-XXXX` ghi nhận vào sổ cái `PointTransaction`.
   3. **Áp dụng tức thì tại Checkout**:
      - Vào `/checkout`, dán mã voucher vừa đổi $\rightarrow$ Đơn hàng tự động trừ 50.000₫ ngay lập tức.
 * **Lời thuyết trình mẫu**:
-  > *"Cơ chế Gamification giữ chân người dùng quay lại mỗi ngày theo chuẩn Shopee Xu và Sephora Rewards Bazaar. Toàn bộ biến động điểm thưởng được quản lý bằng cơ chế Sổ cái giao dịch kép (Point Ledger), đảm bảo tuyệt đối không có việc cộng trừ điểm thiếu căn cứ."*
+  > *"Cơ chế Gamification Canmake Rewards giữ chân người dùng quay lại mỗi ngày theo chuẩn Shopee Xu và Sephora Rewards Bazaar. Toàn bộ biến động điểm thưởng được quản lý bằng cơ chế Sổ cái giao dịch kép (Point Ledger), đảm bảo tuyệt đối không có việc cộng trừ điểm thiếu căn cứ."*
 
 ---
 
@@ -118,7 +119,7 @@
      - Đặt hàng thành công $\rightarrow$ Trang `/Checkout/OrderSuccess` xuất **"Vé Nhận Hàng Ưu Tiên (Click & Collect Pass)"** có QR Code động + Mã PIN bí mật 6 số (ví dụ: `849201`).
   2. **Bàn giao tại Màn hình Thu ngân POS (`/Admin/Pos`)**:
      - Bấm **`Alt + D`**, bấm nút **"Đăng nhập Thu ngân (Showroom 1)"** $\rightarrow$ Mở tab `/Admin/Pos`.
-     - Nhấp nút **"Đơn nhận tại quầy (n)"**: Nhập mã PIN `849201` (hoặc dán chuỗi quét QR `OMNI-PICKUP|ORD-...|849201`).
+     - Nhấp nút **"Đơn nhận tại quầy (n)"**: Nhập mã PIN `849201` (hoặc dán chuỗi quét QR `CANMAKE-PICKUP|ORD-...|849201`, đồng thời tương thích ngược mã `OMNI-PICKUP|`).
      - Bấm **"Kiểm tra & Bàn giao"**: Đơn hàng chuyển sang Hoàn tất, ghi nhận doanh thu vào ca thu ngân, cộng điểm Loyalty cho khách và kích hoạt SignalR cập nhật tức thì vé nhận hàng của khách mà không cần tải lại trang.
 * **Lời thuyết trình mẫu**:
   > *"Đây chính là tính năng thể hiện rõ rệt nhất tinh thần Đa kênh (Omnichannel) của đề tài. Khách hàng đặt mua trên mạng chỉ sau 1 giờ đã có thể ghé showroom nhận hàng bằng mã PIN an toàn, nhân viên POS bàn giao trong 10 giây, khép kín hoàn hảo vòng lặp trải nghiệm O2O."*
