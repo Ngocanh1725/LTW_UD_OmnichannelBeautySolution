@@ -48,9 +48,11 @@ namespace Omnichannel.Application.DTOs.Cms
         [Display(Name = "Nội dung bài viết (HTML)")]
         public string ContentHtml { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Ảnh bìa bài viết không được để trống")]
         [Display(Name = "Đường dẫn ảnh đại diện (Thumbnail URL)")]
         public string ThumbnailUrl { get; set; } = string.Empty;
+
+        [Display(Name = "ID Media Ảnh đại diện")]
+        public int? ThumbnailMediaId { get; set; }
 
         [Display(Name = "Trạng thái")]
         public int Status { get; set; } = 3; // 3: Xuất bản ngay

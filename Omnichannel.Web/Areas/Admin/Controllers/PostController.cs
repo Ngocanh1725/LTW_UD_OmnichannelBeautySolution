@@ -1,15 +1,19 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Omnichannel.Application.DTOs.Cms;
 using Omnichannel.Domain.Entities;
 using Omnichannel.Infrastructure.Data;
 using Omnichannel.Infrastructure.Security;
+using Omnichannel.Infrastructure.Services.Cms;
 
 namespace Omnichannel.Web.Areas.Admin.Controllers
 {
@@ -18,10 +22,18 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
     public class PostController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly MediaStorageService? _mediaService;
+        private readonly IMemoryCache? _cache;
+        private const string HomeCompositeCacheKey = "CMS_HOME_SECTIONS_COMPOSITE";
 
-        public PostController(ApplicationDbContext context)
+        public PostController(
+            ApplicationDbContext context,
+            MediaStorageService? mediaService = null,
+            IMemoryCache? cache = null)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _mediaService = mediaService;
+            _cache = cache;
         }
 
         [HttpGet]
@@ -67,8 +79,29 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [HasPermission("CMS_POST_MANAGE")]
-        public async Task<IActionResult> Create(CreatePostViewModel model)
+        public async Task<IActionResult> Create(CreatePostViewModel model, IFormFile? thumbnailFile)
         {
+            if (thumbnailFile != null && thumbnailFile.Length > 0)
+            {
+                var (uploadedUrl, mediaId) = await SavePostImageAsync(thumbnailFile, model.Title);
+                if (!string.IsNullOrWhiteSpace(uploadedUrl))
+                {
+                    model.ThumbnailUrl = uploadedUrl;
+                    model.ThumbnailMediaId = mediaId;
+                    ModelState.Remove(nameof(model.ThumbnailUrl));
+                }
+            }
+            else if (model.ThumbnailMediaId.HasValue && model.ThumbnailMediaId.Value > 0 && string.IsNullOrWhiteSpace(model.ThumbnailUrl))
+            {
+                model.ThumbnailUrl = $"/media/{model.ThumbnailMediaId.Value}";
+                ModelState.Remove(nameof(model.ThumbnailUrl));
+            }
+
+            if (string.IsNullOrWhiteSpace(model.ThumbnailUrl))
+            {
+                ModelState.AddModelError(nameof(model.ThumbnailUrl), "Vui lòng tải ảnh lên, chọn từ thư viện hoặc nhập URL ảnh đại diện.");
+            }
+
             if (!ModelState.IsValid)
             {
                 var categories = await _context.PostCategories.Where(c => c.IsActive).ToListAsync();
@@ -100,6 +133,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 Summary = model.Summary?.Trim(),
                 Content = model.ContentHtml,
                 ThumbnailUrl = model.ThumbnailUrl?.Trim(),
+                ThumbnailMediaId = model.ThumbnailMediaId,
                 PostCategoryId = model.CategoryId,
                 AuthorId = authorId,
                 IsPublished = isPublished,
@@ -110,6 +144,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             await _context.Posts.AddAsync(post);
             await _context.SaveChangesAsync();
+            _cache?.Remove(HomeCompositeCacheKey);
 
             TempData["SuccessMessage"] = $"Đã xuất bản bài viết '{post.Title}' thành công!";
             return RedirectToAction(nameof(Index));
@@ -138,6 +173,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 Summary = post.Summary,
                 ContentHtml = post.Content,
                 ThumbnailUrl = post.ThumbnailUrl ?? "",
+                ThumbnailMediaId = post.ThumbnailMediaId,
                 Status = post.IsPublished ? 3 : 1
             };
 
@@ -147,17 +183,43 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [HasPermission("CMS_POST_MANAGE")]
-        public async Task<IActionResult> Edit(EditPostViewModel model)
+        public async Task<IActionResult> Edit(EditPostViewModel model, IFormFile? thumbnailFile)
         {
+            var post = await _context.Posts.FindAsync(model.PostId);
+            if (post == null) return NotFound();
+
+            if (thumbnailFile != null && thumbnailFile.Length > 0)
+            {
+                var (uploadedUrl, mediaId) = await SavePostImageAsync(thumbnailFile, model.Title);
+                if (!string.IsNullOrWhiteSpace(uploadedUrl))
+                {
+                    model.ThumbnailUrl = uploadedUrl;
+                    model.ThumbnailMediaId = mediaId;
+                    ModelState.Remove(nameof(model.ThumbnailUrl));
+                }
+            }
+            else if (model.ThumbnailMediaId.HasValue && model.ThumbnailMediaId.Value > 0 && string.IsNullOrWhiteSpace(model.ThumbnailUrl))
+            {
+                model.ThumbnailUrl = $"/media/{model.ThumbnailMediaId.Value}";
+                ModelState.Remove(nameof(model.ThumbnailUrl));
+            }
+            else if (string.IsNullOrWhiteSpace(model.ThumbnailUrl) && !string.IsNullOrWhiteSpace(post.ThumbnailUrl))
+            {
+                model.ThumbnailUrl = post.ThumbnailUrl;
+                ModelState.Remove(nameof(model.ThumbnailUrl));
+            }
+
+            if (string.IsNullOrWhiteSpace(model.ThumbnailUrl))
+            {
+                ModelState.AddModelError(nameof(model.ThumbnailUrl), "Vui lòng tải ảnh lên, chọn từ thư viện hoặc nhập URL ảnh đại diện.");
+            }
+
             if (!ModelState.IsValid)
             {
                 var categories = await _context.PostCategories.Where(c => c.IsActive).ToListAsync();
                 ViewBag.Categories = new SelectList(categories, "Id", "Name", model.CategoryId);
                 return View(model);
             }
-
-            var post = await _context.Posts.FindAsync(model.PostId);
-            if (post == null) return NotFound();
 
             string cleanSlug = string.IsNullOrWhiteSpace(model.Slug)
                 ? Slugify(model.Title)
@@ -176,6 +238,10 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             post.Summary = model.Summary?.Trim();
             post.Content = model.ContentHtml;
             post.ThumbnailUrl = model.ThumbnailUrl?.Trim();
+            if (model.ThumbnailMediaId.HasValue && model.ThumbnailMediaId.Value > 0)
+            {
+                post.ThumbnailMediaId = model.ThumbnailMediaId;
+            }
             post.PostCategoryId = model.CategoryId;
             post.IsPublished = nowPublished;
             if (!wasPublished && nowPublished && post.PublishedAt == null)
@@ -184,6 +250,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             }
 
             await _context.SaveChangesAsync();
+            _cache?.Remove(HomeCompositeCacheKey);
 
             TempData["SuccessMessage"] = $"Đã cập nhật bài viết '{post.Title}' thành công!";
             return RedirectToAction(nameof(Index));
@@ -204,6 +271,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             }
 
             await _context.SaveChangesAsync();
+            _cache?.Remove(HomeCompositeCacheKey);
 
             TempData["SuccessMessage"] = post.IsPublished
                 ? $"Đã xuất bản bài viết '{post.Title}'."
@@ -222,6 +290,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             _context.Posts.Remove(post);
             await _context.SaveChangesAsync();
+            _cache?.Remove(HomeCompositeCacheKey);
 
             TempData["SuccessMessage"] = "Đã gỡ bài viết khỏi hệ thống!";
             return RedirectToAction(nameof(Index));
@@ -236,9 +305,8 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         [HasPermission("CMS_POST_MANAGE")]
-        public async Task<IActionResult> UploadImage(Microsoft.AspNetCore.Http.IFormFile file)
+        public async Task<IActionResult> UploadImage(IFormFile file)
         {
             if (file == null || file.Length == 0)
             {
@@ -246,33 +314,65 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             }
 
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
-            var ext = System.IO.Path.GetExtension(file.FileName).ToLowerInvariant();
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
             if (!allowedExtensions.Contains(ext))
             {
                 return BadRequest(new { success = false, message = "Định dạng không được hỗ trợ (chỉ nhận JPG, PNG, WEBP, GIF)." });
             }
 
-            if (file.Length > 5 * 1024 * 1024)
+            if (file.Length > 10 * 1024 * 1024)
             {
-                return BadRequest(new { success = false, message = "Dung lượng ảnh tối đa 5MB." });
+                return BadRequest(new { success = false, message = "Dung lượng ảnh tối đa 10MB." });
             }
 
-            var uploadsFolder = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "uploads", "posts");
-            if (!System.IO.Directory.Exists(uploadsFolder))
+            var (url, mediaId) = await SavePostImageAsync(file, Path.GetFileNameWithoutExtension(file.FileName));
+            return Json(new { success = true, url, mediaId });
+        }
+
+        private async Task<(string Url, int? MediaId)> SavePostImageAsync(IFormFile file, string? altText)
+        {
+            try
             {
-                System.IO.Directory.CreateDirectory(uploadsFolder);
+                if (_mediaService != null)
+                {
+                    int? uploadedBy = null;
+                    var uidClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                    if (int.TryParse(uidClaim, out var parsedUid))
+                    {
+                        uploadedBy = parsedUid;
+                    }
+
+                    var mediaAsset = await _mediaService.SaveUploadedFileAsync(file, uploadedBy);
+                    if (mediaAsset != null && mediaAsset.Id > 0)
+                    {
+                        var url = !string.IsNullOrWhiteSpace(mediaAsset.PublicUrl)
+                            ? mediaAsset.PublicUrl
+                            : $"/media/{mediaAsset.Id}";
+                        return (url, mediaAsset.Id);
+                    }
+                }
+            }
+            catch
+            {
+                // Fallback to physical file url if media service fails
             }
 
-            var uniqueFileName = $"{Guid.NewGuid():N}_{System.IO.Path.GetFileName(file.FileName)}";
-            var filePath = System.IO.Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var stream = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "posts");
+            if (!Directory.Exists(uploadsFolder))
             {
-                await file.CopyToAsync(stream);
+                Directory.CreateDirectory(uploadsFolder);
             }
 
-            var url = $"/uploads/posts/{uniqueFileName}";
-            return Json(new { success = true, url });
+            var safeName = Path.GetFileName(file.FileName);
+            var uniqueFileName = $"{Guid.NewGuid():N}_{safeName}";
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            await using (var fs = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(fs);
+            }
+
+            return ($"/uploads/posts/{uniqueFileName}", null);
         }
 
         private static string Slugify(string? text)
