@@ -1,6 +1,24 @@
+@using Microsoft.AspNetCore.Authentication
+@using System.Security.Claims
+@using Omnichannel.Application.Common
 @inject Omnichannel.Application.Interfaces.Cms.IThemeService ThemeService
 @{
     var theme = await ThemeService.GetCurrentThemeAsync();
+    var adminAuthResult = Context.RequestServices?.GetService(typeof(IAuthenticationService)) != null
+        ? await Context.AuthenticateAsync(AuthConstants.AdminCookieScheme)
+        : null;
+    var adminPrincipal = (adminAuthResult?.Succeeded == true && adminAuthResult.Principal?.Identity?.IsAuthenticated == true)
+        ? adminAuthResult.Principal
+        : null;
+
+    bool isStaffLogged = adminPrincipal != null ||
+        (User?.Identity?.IsAuthenticated == true &&
+         (User.HasClaim("IsStaff", "true") || User.IsInRole("SuperAdmin") || User.IsInRole("SUPER_ADMIN") || User.IsInRole("StoreManager") || User.IsInRole("STORE_MANAGER") || User.IsInRole("Cashier") || User.IsInRole("WarehouseStaff") || User.IsInRole("ContentEditor")));
+    bool isCustomerLogged = !isStaffLogged && User?.Identity?.IsAuthenticated == true;
+    var activePrincipal = adminPrincipal ?? User;
+    string displayUserName = activePrincipal?.FindFirst(ClaimTypes.GivenName)?.Value
+        ?? activePrincipal?.Identity?.Name
+        ?? "Tài Khoản";
 }
 @* Canmake Beauty - Storefront Header Partial *@
 <header class="w-full relative z-40" x-data="instantSearch()" x-init="init()">
@@ -498,38 +516,98 @@
 
                     <!-- Account Menu Dropdown -->
                     <div class="relative group" x-data="{ userMenuOpen: false }">
-                        <a href="/Account/Login" class="p-2.5 text-slate-700 hover:text-magenta-accent transition rounded-full hover:bg-pastel-rose flex items-center gap-1.5" title="Tài khoản">
-                            <i class="fa-regular fa-user text-lg"></i>
-                            <span class="hidden xl:inline text-xs font-semibold">Tài Khoản</span>
-                        </a>
-                        <div class="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 hidden group-hover:block hover:block transition animate-in fade-in z-50">
-                            <div class="px-3 py-2 border-b border-slate-100 mb-1">
-                                <div class="text-xs font-bold text-charcoal">Khách Hàng Thân Thiết</div>
-                                <div class="text-[10px] text-slate-400">Đăng nhập để tích điểm Loyalty</div>
+                        @if (isStaffLogged)
+                        {
+                            <a href="/Admin/Dashboard" class="p-2.5 text-magenta-accent hover:text-charcoal transition rounded-full bg-pastel-rose/80 hover:bg-pastel-rose flex items-center gap-1.5" title="Tài khoản vận hành: @displayUserName">
+                                <i class="fa-solid fa-user-shield text-base"></i>
+                                <span class="hidden xl:inline text-xs font-bold max-w-[120px] truncate">@displayUserName</span>
+                            </a>
+                            <div class="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-rose-100 p-2 hidden group-hover:block hover:block transition animate-in fade-in z-50">
+                                <div class="px-3 py-2 border-b border-slate-100 mb-1">
+                                    <div class="text-xs font-bold text-charcoal truncate">@displayUserName</div>
+                                    <div class="text-[10px] font-semibold text-magenta-accent">Nhân sự & Quản trị viên</div>
+                                </div>
+                                <a href="/Admin/Dashboard" class="block px-3 py-2 text-xs font-bold text-magenta-accent hover:bg-pastel-rose rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-gauge-high w-4 text-magenta-accent"></i> Bảng Điều Khiển Quản Trị
+                                </a>
+                                <a href="/Admin/Pos" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-cash-register w-4 text-emerald-600"></i> Quầy Thu Ngân POS
+                                </a>
+                                <a href="/Admin/Warehouse" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-boxes-stacked w-4 text-amber-500"></i> Quản Trị Kho & FEFO
+                                </a>
+                                <a href="/Admin/Banner" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-regular fa-images w-4 text-blue-500"></i> Quản Lý Banner & CMS
+                                </a>
+                                <div class="border-t border-slate-100 my-1"></div>
+                                <a href="/Account/Logout" class="block px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-right-from-bracket w-4"></i> Đăng Xuất
+                                </a>
                             </div>
-                            <a href="/Account/Login" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition">
-                                <i class="fa-solid fa-arrow-right-to-bracket mr-2 text-slate-400"></i> Đăng Nhập
+                        }
+                        else if (isCustomerLogged)
+                        {
+                            <a href="/Customer/Dashboard" class="p-2.5 text-slate-700 hover:text-magenta-accent transition rounded-full hover:bg-pastel-rose flex items-center gap-1.5" title="Tài khoản: @displayUserName">
+                                <i class="fa-solid fa-circle-user text-lg text-magenta-accent"></i>
+                                <span class="hidden xl:inline text-xs font-bold max-w-[120px] truncate">@displayUserName</span>
                             </a>
-                            <a href="/Account/Register" class="block px-3 py-2 text-xs font-bold text-magenta-accent hover:bg-pastel-rose rounded-xl transition">
-                                <i class="fa-solid fa-gift mr-2 text-warning"></i> Đăng Ký (+50 Điểm)
+                            <div class="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 hidden group-hover:block hover:block transition animate-in fade-in z-50">
+                                <div class="px-3 py-2 border-b border-slate-100 mb-1">
+                                    <div class="text-xs font-bold text-charcoal truncate">@displayUserName</div>
+                                    <div class="text-[10px] text-slate-400">Thành viên thân thiết Canmake</div>
+                                </div>
+                                <a href="/Customer/Dashboard" class="block px-3 py-2 text-xs font-bold text-amber-800 hover:bg-amber-50/70 rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-crown w-4 text-amber-500"></i> Thẻ VIP & Điểm Thưởng
+                                </a>
+                                <a href="/Customer/Orders" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-bag-shopping w-4 text-blue-500"></i> Đơn Hàng Của Tôi
+                                </a>
+                                <a href="/Customer/Addresses" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-location-dot w-4 text-rose-gold"></i> Sổ Địa Chỉ Nhận Hàng
+                                </a>
+                                <a href="/orders/tracking" class="block px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-truck-fast w-4 text-slate-400"></i> Tra cứu đơn hàng
+                                </a>
+                                <a href="/Account/ChangePassword" class="block px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-key w-4 text-slate-400"></i> Đổi Mật Khẩu
+                                </a>
+                                <div class="border-t border-slate-100 my-1"></div>
+                                <a href="/Account/Logout" class="block px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-right-from-bracket w-4"></i> Đăng Xuất
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <a href="/Account/Login" class="p-2.5 text-slate-700 hover:text-magenta-accent transition rounded-full hover:bg-pastel-rose flex items-center gap-1.5" title="Tài khoản">
+                                <i class="fa-regular fa-user text-lg"></i>
+                                <span class="hidden xl:inline text-xs font-semibold">Tài Khoản</span>
                             </a>
-                            <a href="/Customer/Dashboard" class="block px-3 py-2 text-xs font-bold text-amber-800 hover:bg-amber-50/70 rounded-xl transition flex items-center gap-2">
-                                <i class="fa-solid fa-crown text-amber-500"></i> Thẻ VIP & Điểm Thưởng
-                            </a>
-                            <a href="/Customer/Orders" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
-                                <i class="fa-solid fa-bag-shopping text-blue-500"></i> Đơn Hàng Của Tôi
-                            </a>
-                            <a href="/Customer/Addresses" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
-                                <i class="fa-solid fa-location-dot text-rose-gold"></i> Sổ Địa Chỉ Nhận Hàng
-                            </a>
-                            <a href="/orders/tracking" class="block px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition">
-                                <i class="fa-solid fa-truck-fast mr-2 text-slate-400"></i> Tra cứu đơn hàng
-                            </a>
-                            <div class="border-t border-slate-100 my-1"></div>
-                            <a href="/Admin/Dashboard" class="block px-3 py-2 text-xs font-bold text-magenta-accent hover:bg-pastel-rose rounded-xl transition flex items-center gap-2">
-                                <i class="fa-solid fa-shield-halved text-magenta-accent"></i> Quản Trị Hệ Thống
-                            </a>
-                        </div>
+                            <div class="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 hidden group-hover:block hover:block transition animate-in fade-in z-50">
+                                <div class="px-3 py-2 border-b border-slate-100 mb-1">
+                                    <div class="text-xs font-bold text-charcoal">Khách Hàng Thân Thiết</div>
+                                    <div class="text-[10px] text-slate-400">Đăng nhập để tích điểm Loyalty</div>
+                                </div>
+                                <a href="/Account/Login" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition">
+                                    <i class="fa-solid fa-arrow-right-to-bracket mr-2 text-slate-400"></i> Đăng Nhập
+                                </a>
+                                <a href="/Account/Register" class="block px-3 py-2 text-xs font-bold text-magenta-accent hover:bg-pastel-rose rounded-xl transition">
+                                    <i class="fa-solid fa-gift mr-2 text-warning"></i> Đăng Ký (+50 Điểm)
+                                </a>
+                                <a href="/Customer/Dashboard" class="block px-3 py-2 text-xs font-bold text-amber-800 hover:bg-amber-50/70 rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-crown text-amber-500"></i> Thẻ VIP & Điểm Thưởng
+                                </a>
+                                <a href="/Customer/Orders" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-bag-shopping text-blue-500"></i> Đơn Hàng Của Tôi
+                                </a>
+                                <a href="/Customer/Addresses" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-location-dot text-rose-gold"></i> Sổ Địa Chỉ Nhận Hàng
+                                </a>
+                                <a href="/orders/tracking" class="block px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition">
+                                    <i class="fa-solid fa-truck-fast mr-2 text-slate-400"></i> Tra cứu đơn hàng
+                                </a>
+                            </div>
+                        }
                     </div>
 
                     <!-- Mini Cart Trigger Button -->

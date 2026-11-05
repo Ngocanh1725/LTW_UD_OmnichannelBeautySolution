@@ -5064,6 +5064,21 @@ namespace Omnichannel.Infrastructure.Data
                     if (string.IsNullOrEmpty(defaultTheme.FontBody)) { defaultTheme.FontBody = "'Inter', sans-serif"; themeUpdated = true; }
                     if (!defaultTheme.LogoMediaAssetId.HasValue && defaultTheme.LogoMediaId.HasValue) { defaultTheme.LogoMediaAssetId = defaultTheme.LogoMediaId; themeUpdated = true; }
                     if (!defaultTheme.FaviconMediaAssetId.HasValue && defaultTheme.FaviconMediaId.HasValue) { defaultTheme.FaviconMediaAssetId = defaultTheme.FaviconMediaId; themeUpdated = true; }
+                    if (!string.IsNullOrEmpty(defaultTheme.AnnouncementBarText) && (defaultTheme.AnnouncementBarText.Contains("á»") || defaultTheme.AnnouncementBarText.Contains("âœ¨")))
+                    {
+                        defaultTheme.AnnouncementBarText = "✨ Chào mừng bạn đến với CANMAKE BEAUTY - Miễn phí vận chuyển cho đơn hàng từ 300K ✨";
+                        themeUpdated = true;
+                    }
+                    if (!string.IsNullOrEmpty(defaultTheme.Slogan) && (defaultTheme.Slogan.Contains("á»") || defaultTheme.Slogan.Contains("â€“")))
+                    {
+                        defaultTheme.Slogan = "Canmake Beauty – Hệ Thống Mỹ Phẩm Đa Kênh Chính Hãng";
+                        themeUpdated = true;
+                    }
+                    if (!string.IsNullOrEmpty(defaultTheme.FooterCopyright) && (defaultTheme.FooterCopyright.Contains("á»") || defaultTheme.FooterCopyright.Contains("Â©")))
+                    {
+                        defaultTheme.FooterCopyright = "© 2026 CANMAKE BEAUTY. Tất cả quyền được bảo lưu.";
+                        themeUpdated = true;
+                    }
                     if (themeUpdated)
                     {
                         await context.SaveChangesAsync();

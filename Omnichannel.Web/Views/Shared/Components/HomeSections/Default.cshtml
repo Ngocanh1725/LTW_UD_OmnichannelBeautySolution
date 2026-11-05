@@ -1,4 +1,14 @@
+@using Microsoft.AspNetCore.Authentication
+@using Omnichannel.Application.Common
 @model Omnichannel.Web.Models.HomeSectionsViewModel
+@{
+    var adminAuthResult = Context.RequestServices?.GetService(typeof(IAuthenticationService)) != null
+        ? await Context.AuthenticateAsync(AuthConstants.AdminCookieScheme)
+        : null;
+    bool isAdminOrStaff = (adminAuthResult?.Succeeded == true && adminAuthResult.Principal?.Identity?.IsAuthenticated == true) ||
+        (User?.Identity?.IsAuthenticated == true &&
+         (User.IsInRole("SuperAdmin") || User.IsInRole("SUPER_ADMIN") || User.HasClaim("IsStaff", "true")));
+}
 
 @if (Model != null && Model.Sections.Any())
 {
@@ -27,8 +37,7 @@
                         var bannerWebp = (bannerImg.StartsWith("/images/banners/", StringComparison.OrdinalIgnoreCase) && !bannerImg.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
                             ? System.IO.Path.ChangeExtension(bannerImg, ".webp")
                             : null;
-                        bool canEditBanner = User?.Identity?.IsAuthenticated == true &&
-                            (User.IsInRole("SuperAdmin") || User.IsInRole("SUPER_ADMIN") || User.HasClaim("IsStaff", "true"));
+                        bool canEditBanner = isAdminOrStaff;
 
                         <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out"
                              x-show="activeSlide === @i"
