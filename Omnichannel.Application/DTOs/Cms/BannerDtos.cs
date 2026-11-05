@@ -74,6 +74,32 @@ namespace Omnichannel.Application.DTOs.Cms
         /// rose-gradient | white-solid | dark-luxury | glass-outline
         /// </summary>
         public string ButtonStyle { get; set; } = "rose-gradient";
+
+        // 5. Tùy chọn Khung ngoài Banner, Cắt ảnh (ObjectFit), Điểm lấy nét (Focal Point) & Zoom ảnh
+        /// <summary>
+        /// auto | sm (300px) | md (380px) | lg (500px) | xl (620px)
+        /// </summary>
+        public string BannerHeight { get; set; } = "auto";
+
+        /// <summary>
+        /// none (0px) | xl (16px) | 3xl (24px)
+        /// </summary>
+        public string ContainerRadius { get; set; } = "3xl";
+
+        /// <summary>
+        /// cover (Cắt lấp đầy khung) | contain (Hiển thị trọn vẹn nguyên ảnh) | fill (Co giãn vừa khít khung)
+        /// </summary>
+        public string ImageObjectFit { get; set; } = "cover";
+
+        /// <summary>
+        /// center | top | bottom | left | right
+        /// </summary>
+        public string ImagePosition { get; set; } = "center";
+
+        /// <summary>
+        /// 100 | 105 | 110 | 115 | 125 (%)
+        /// </summary>
+        public int ImageScale { get; set; } = 100;
     }
 
     public class BannerItemViewModel
@@ -89,6 +115,7 @@ namespace Omnichannel.Application.DTOs.Cms
             2 => "Popup Khuyến mãi (Giữa màn hình)",
             3 => "Top Banner Danh mục",
             4 => "Footer Strip (Chân trang)",
+            5 => "Mid Banner (Giữa trang chủ)",
             _ => "Khác"
         };
         public string DesktopImageUrl { get; set; } = string.Empty;

@@ -234,11 +234,52 @@ namespace Omnichannel.Web.ViewComponents
                     case "MID_BANNER":
                         var midBanners = await _context.Banners
                             .AsNoTracking()
-                            .Where(b => b.IsActive)
-                            .OrderByDescending(b => b.SortOrder)
+                            .Where(b => b.IsActive && (b.Position == "MID_PROMO" || b.Position == "MID_BANNER" || b.Position == "5"))
+                            .OrderBy(b => b.DisplayOrder)
+                            .ThenByDescending(b => b.SortOrder)
                             .Take(1)
                             .ToListAsync();
+
+                        if (!midBanners.Any())
+                        {
+                            midBanners = await _context.Banners
+                                .AsNoTracking()
+                                .Where(b => b.IsActive)
+                                .OrderByDescending(b => b.SortOrder)
+                                .Take(1)
+                                .ToListAsync();
+                        }
+
+                        if (bannerStyles == null)
+                        {
+                            bannerStyles = new Dictionary<int, BannerStyleConfigDto>();
+                            var styleSettings = await _context.Settings
+                                .AsNoTracking()
+                                .Where(s => s.SettingKey.StartsWith("BANNER_STYLE_CONFIG_"))
+                                .ToListAsync();
+                            foreach (var s in styleSettings)
+                            {
+                                var idPart = s.SettingKey.Replace("BANNER_STYLE_CONFIG_", "");
+                                if (int.TryParse(idPart, out int bId) && !string.IsNullOrWhiteSpace(s.SettingValue))
+                                {
+                                    try
+                                    {
+                                        var parsed = JsonSerializer.Deserialize<BannerStyleConfigDto>(s.SettingValue);
+                                        if (parsed != null)
+                                        {
+                                            bannerStyles[bId] = parsed;
+                                        }
+                                    }
+                                    catch
+                                    {
+                                        // Ignore malformed json
+                                    }
+                                }
+                            }
+                        }
+
                         itemModel.MidBanners = midBanners;
+                        itemModel.BannerStyles = bannerStyles;
                         break;
 
                     case "BEAUTY_BLOG":

@@ -37,6 +37,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 "POPUP" or "2" => 2,
                 "CATEGORY_TOP" or "3" => 3,
                 "FOOTER" or "4" => 4,
+                "MID_PROMO" or "MID_BANNER" or "5" => 5,
                 _ => 1
             };
         }
@@ -49,6 +50,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 2 => "POPUP",
                 3 => "CATEGORY_TOP",
                 4 => "FOOTER",
+                5 => "MID_PROMO",
                 _ => "HERO_HOME"
             };
         }

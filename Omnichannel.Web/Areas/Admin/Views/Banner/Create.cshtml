@@ -216,17 +216,73 @@
                             <option value="glass-outline">Kính mờ viền Trắng</option>
                         </select>
                     </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small">Chiều cao khung Banner ngoài</label>
+                        <select asp-for="StyleConfig.BannerHeight" id="BannerHeightSelect" class="form-select" onchange="syncLivePreview()">
+                            <option value="auto">Tự động theo vị trí (380px / 620px)</option>
+                            <option value="sm">Thấp gọn (Compact - 300px)</option>
+                            <option value="md">Vừa phải (Medium - 380px)</option>
+                            <option value="lg">Cao nổi bật (Large - 500px)</option>
+                            <option value="xl">Siêu cao toàn cảnh (600px)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small">Bo góc viền ngoài của toàn Banner</label>
+                        <select asp-for="StyleConfig.ContainerRadius" id="ContainerRadiusSelect" class="form-select" onchange="syncLivePreview()">
+                            <option value="3xl">Bo tròn mềm mại (24px)</option>
+                            <option value="xl">Bo nhẹ vừa phải (16px)</option>
+                            <option value="none">Vuông tràn viền (0px)</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <!-- PHẦN 3: HÌNH ẢNH BANNER -->
+            <!-- PHẦN 3: HÌNH ẢNH BANNER & KÍCH THƯỚC CẮT ẢNH -->
             <div class="beauty-card p-4 mb-4">
                 <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">
-                    <i class="fa-solid fa-image text-primary me-2"></i>3. Hình ảnh Banner (Tải ảnh từ máy, Dán URL hoặc Chọn mẫu)
+                    <i class="fa-solid fa-crop-simple text-primary me-2"></i>3. Hình ảnh Banner & Tuỳ chỉnh Kích thước Cắt ảnh
                 </h6>
 
                 <input type="hidden" asp-for="DesktopMediaId" id="DesktopMediaIdInput" />
                 <input type="hidden" asp-for="MobileMediaId" id="MobileMediaIdInput" />
+
+                <div class="p-3 rounded-3 border bg-white mb-3">
+                    <div class="small fw-bold text-primary mb-2">
+                        <i class="fa-solid fa-sliders me-1"></i>Tùy chỉnh Cắt ảnh, Khung hiển thị ảnh & Điểm lấy nét:
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold mb-1">Chế độ cắt khung ảnh</label>
+                            <select asp-for="StyleConfig.ImageObjectFit" id="ImageObjectFitSelect" class="form-select form-select-sm" onchange="syncLivePreview()">
+                                <option value="cover">Cắt lấp đầy khung (Cover)</option>
+                                <option value="contain">Giữ nguyên 100% ảnh (Contain)</option>
+                                <option value="fill">Co giãn vừa khít khung (Fill)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold mb-1">Tâm điểm lấy nét khi cắt</label>
+                            <select asp-for="StyleConfig.ImagePosition" id="ImagePositionSelect" class="form-select form-select-sm" onchange="syncLivePreview()">
+                                <option value="center">Chính giữa ảnh (Center)</option>
+                                <option value="top">Ưu tiên phần Trên (Top)</option>
+                                <option value="bottom">Ưu tiên phần Dưới (Bottom)</option>
+                                <option value="left">Ưu tiên bên Trái (Left)</option>
+                                <option value="right">Ưu tiên bên Phải (Right)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-semibold mb-1">Thu phóng cắt ảnh (Zoom)</label>
+                            <select asp-for="StyleConfig.ImageScale" id="ImageScaleSelect" class="form-select form-select-sm" onchange="syncLivePreview()">
+                                <option value="100">100% (Nguyên bản)</option>
+                                <option value="105">105% (Phóng nhẹ 5%)</option>
+                                <option value="110">110% (Cắt cận 10%)</option>
+                                <option value="115">115% (Cắt cận 15%)</option>
+                                <option value="125">125% (Cắt cận 25%)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="p-3 rounded-3 border bg-light mb-3">
                     <label class="form-label fw-bold text-dark small mb-2">
@@ -289,6 +345,7 @@
                         <label asp-for="Position" class="form-label fw-semibold small">Vị trí hiển thị</label>
                         <select asp-for="Position" class="form-select">
                             <option value="1">1. Hero Slider (Đầu trang chủ)</option>
+                            <option value="5">5. Mid Banner (Banner lớn Giữa trang chủ)</option>
                             <option value="2">2. Popup Khuyến mãi</option>
                             <option value="3">3. Top Banner Danh mục</option>
                             <option value="4">4. Footer Strip (Chân trang)</option>
@@ -385,6 +442,24 @@
             const titleSize = document.getElementById('TitleSizeSelect').value;
             const textColor = document.getElementById('TextColorSelect').value;
             const btnStyle = document.getElementById('ButtonStyleSelect').value;
+
+            const containerRadius = document.getElementById('ContainerRadiusSelect') ? document.getElementById('ContainerRadiusSelect').value : '3xl';
+            const imgFit = document.getElementById('ImageObjectFitSelect') ? document.getElementById('ImageObjectFitSelect').value : 'cover';
+            const imgPos = document.getElementById('ImagePositionSelect') ? document.getElementById('ImagePositionSelect').value : 'center';
+            const imgScale = parseInt(document.getElementById('ImageScaleSelect') ? document.getElementById('ImageScaleSelect').value : '100', 10);
+
+            const stageEl = document.getElementById('liveBannerStage');
+            if (stageEl) {
+                stageEl.style.borderRadius = containerRadius === 'none' ? '0px' : (containerRadius === 'xl' ? '14px' : '24px');
+            }
+
+            const imgEl = document.getElementById('imgPreviewDesktop');
+            if (imgEl) {
+                imgEl.style.objectFit = imgFit;
+                imgEl.style.objectPosition = imgPos === 'top' ? 'center top' : (imgPos === 'bottom' ? 'center bottom' : (imgPos === 'left' ? 'left center' : (imgPos === 'right' ? 'right center' : 'center center')));
+                imgEl.style.transform = imgScale > 100 ? `scale(${imgScale / 100.0})` : 'none';
+                imgEl.style.transition = 'transform 0.3s ease';
+            }
 
             const overlayEl = document.getElementById('previewOverlayGradient');
             overlayEl.style.display = (showOverlay && overlayOpacity > 0) ? 'block' : 'none';
