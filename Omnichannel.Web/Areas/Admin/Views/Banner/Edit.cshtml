@@ -1,250 +1,577 @@
 @model Omnichannel.Application.DTOs.Cms.EditBannerViewModel
 @{
-    ViewData["Title"] = "Chỉnh Sửa Banner";
+    ViewData["Title"] = "Tùy chỉnh Banner & Khung nội dung";
     Layout = "_AdminLayout";
 }
 
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-            <div>
-                <h4 class="fw-bold text-dark mb-1">Chỉnh Sửa Banner Chiến Dịch #@Model.BannerId</h4>
-                <p class="text-muted small mb-0">Tải ảnh mới từ máy tính, chọn mẫu có sẵn hoặc dán URL ảnh tùy ý</p>
-            </div>
-            <div class="d-flex gap-2">
-                <a href="/" target="_blank" class="btn btn-outline-primary btn-sm rounded-3">
-                    <i class="fa-solid fa-up-right-from-square me-1"></i>Xem Trang Chủ
-                </a>
-                <a href="/Admin/Banner" class="btn btn-outline-secondary btn-sm rounded-3">
-                    <i class="fa-solid fa-arrow-left me-1"></i>Quay lại danh sách
-                </a>
-            </div>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1 small">
+                <li class="breadcrumb-item"><a href="/Admin/Banner" class="text-decoration-none text-muted">Chiến dịch Banner</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Tùy chỉnh #@Model.BannerId</li>
+            </ol>
+        </nav>
+        <h4 class="fw-bold text-dark mb-0">Studio Tùy Chỉnh Ảnh & Khung Nội Dung Banner #@Model.BannerId</h4>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/" target="_blank" class="btn btn-outline-primary">
+            <i class="fa-solid fa-up-right-from-square me-1"></i>Xem Trang Chủ
+        </a>
+        <a href="/Admin/Banner" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left me-1"></i>Quay lại
+        </a>
+    </div>
+</div>
 
-        <div class="beauty-card p-4">
-            <form asp-action="Edit" method="post" enctype="multipart/form-data">
-                @Html.AntiForgeryToken()
-                <input type="hidden" asp-for="BannerId" />
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="BannerId" />
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <!-- PHẦN 1: NỘI DUNG CHỮ & ẨN / HIỆN TỪNG THÀNH PHẦN -->
+            <div class="beauty-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                    <div>
+                        <h6 class="fw-bold text-dark mb-0">
+                            <i class="fa-solid fa-eye text-primary me-2"></i>1. Nội dung & Ẩn / Hiển thị từng phần
+                        </h6>
+                        <small class="text-muted">Bật/tắt tùy ý từng thành phần trên Banner hoặc ẩn toàn bộ chữ để chỉ hiện ảnh</small>
+                    </div>
+                    <div class="form-check form-switch mb-0">
+                        <input asp-for="StyleConfig.ShowContentBox" class="form-check-input" type="checkbox" id="chkShowContentBox" onchange="syncLivePreview()" />
+                        <label class="form-check-label fw-bold text-primary small" for="chkShowContentBox">Hiển thị Khung Nội Dung</label>
+                    </div>
+                </div>
+
+                <!-- Các công tắc bật/tắt nhanh từng phần tử -->
+                <div class="p-3 rounded-3 bg-light border mb-3">
+                    <div class="small fw-bold text-secondary mb-2">Tùy chọn hiển thị các phần tử trên Banner:</div>
+                    <div class="row g-2">
+                        <div class="col-sm-6 col-md-4">
+                            <div class="form-check form-switch">
+                                <input asp-for="StyleConfig.ShowBadge" class="form-check-input" type="checkbox" id="chkShowBadge" onchange="syncLivePreview()" />
+                                <label class="form-check-label small" for="chkShowBadge">Nhãn Badge nhỏ</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="form-check form-switch">
+                                <input asp-for="StyleConfig.ShowTitle" class="form-check-input" type="checkbox" id="chkShowTitle" onchange="syncLivePreview()" />
+                                <label class="form-check-label small" for="chkShowTitle">Tiêu đề chính</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="form-check form-switch">
+                                <input asp-for="StyleConfig.ShowSubtitle" class="form-check-input" type="checkbox" id="chkShowSubtitle" onchange="syncLivePreview()" />
+                                <label class="form-check-label small" for="chkShowSubtitle">Mô tả phụ</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="form-check form-switch">
+                                <input asp-for="StyleConfig.ShowPrimaryButton" class="form-check-input" type="checkbox" id="chkShowPrimaryBtn" onchange="syncLivePreview()" />
+                                <label class="form-check-label small" for="chkShowPrimaryBtn">Nút bấm chính</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="form-check form-switch">
+                                <input asp-for="StyleConfig.ShowSecondaryButton" class="form-check-input" type="checkbox" id="chkShowSecondaryBtn" onchange="syncLivePreview()" />
+                                <label class="form-check-label small" for="chkShowSecondaryBtn">Nút phụ thứ 2</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="form-check form-switch">
+                                <input asp-for="StyleConfig.ShowOverlayGradient" class="form-check-input" type="checkbox" id="chkShowOverlay" onchange="syncLivePreview()" />
+                                <label class="form-check-label small" for="chkShowOverlay">Lớp phủ tối mờ nền</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="row g-3">
-                    <div class="col-md-8">
-                        <label asp-for="Title" class="form-label small fw-semibold">Tiêu đề chiến dịch / Banner *</label>
-                        <input asp-for="Title" class="form-control rounded-3" placeholder="vd: Bừng Sáng Nhan Sắc Cùng CANMAKE BEAUTY" required autofocus />
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small">Nhãn Badge phía trên</label>
+                        <input asp-for="StyleConfig.BadgeText" id="BadgeTextInput" class="form-control" placeholder="VD: BỘ SƯU TẬP MỚI 2026" oninput="syncLivePreview()" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Title" class="form-label fw-semibold small">Tiêu đề chính (Heading)</label>
+                        <input asp-for="Title" id="TitleInput" class="form-control" placeholder="VD: SUMMER BEAUTY VIBES" oninput="syncLivePreview()" />
                         <span asp-validation-for="Title" class="text-danger small"></span>
                     </div>
 
-                    <div class="col-md-4">
-                        <label asp-for="Position" class="form-label small fw-semibold">Vị trí hiển thị *</label>
-                        <select asp-for="Position" class="form-select rounded-3">
-                            <option value="1">1. Hero Slider (Đầu trang chủ)</option>
-                            <option value="2">2. Popup Khuyến mãi / Mid Promo (Giữa trang)</option>
-                            <option value="3">3. Banner Danh mục (Catalog Top)</option>
-                            <option value="4">4. Footer Strip (Chân trang)</option>
+                    <div class="col-12">
+                        <label asp-for="Subtitle" class="form-label fw-semibold small">Mô tả phụ (Subtitle dưới tiêu đề)</label>
+                        <input asp-for="Subtitle" id="SubtitleInput" class="form-control" placeholder="VD: Bừng Sáng Nhan Sắc Mùa Hè - Ưu Đãi Đến 40%" oninput="syncLivePreview()" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ButtonText" class="form-label fw-semibold small">Chữ trên nút bấm chính</label>
+                        <input asp-for="ButtonText" id="ButtonTextInput" class="form-control" placeholder="Khám Phá Ngay" oninput="syncLivePreview()" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="LinkUrl" class="form-label fw-semibold small">Đường dẫn nút bấm chính (URL)</label>
+                        <input asp-for="LinkUrl" class="form-control font-monospace" placeholder="/category/trang-diem" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small">Chữ trên nút phụ thứ 2</label>
+                        <input asp-for="StyleConfig.SecondaryButtonText" id="SecondaryBtnTextInput" class="form-control" placeholder="Deal FEFO -50%" oninput="syncLivePreview()" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small">Đường dẫn nút phụ thứ 2 (URL)</label>
+                        <input asp-for="StyleConfig.SecondaryButtonUrl" class="form-control font-monospace" placeholder="/clearance-fefo" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- PHẦN 2: KIỂU KHUNG, KÍCH THƯỚC KHUNG, VỊ TRÍ & FONT CHỮ -->
+            <div class="beauty-card p-4 mb-4">
+                <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-primary me-2"></i>2. Tùy chọn Dạng khung, Kích thước khung & Font chữ
+                </h6>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small">Kiểu khung bao quanh chữ (Frame Style)</label>
+                        <select asp-for="StyleConfig.BoxStyle" id="BoxStyleSelect" class="form-select" onchange="syncLivePreview()">
+                            <option value="transparent">Trong suốt (Chữ nổi trực tiếp trên ảnh)</option>
+                            <option value="glass-dark">Khung Kính Mờ Tối (Dark Glassmorphism)</option>
+                            <option value="glass-light">Khung Kính Mờ Sáng (Light Frosted Glass)</option>
+                            <option value="rose-luxury">Khung Hồng Canmake Luxury</option>
+                            <option value="solid-dark">Khung Hộp Đen Charcoal Đậm</option>
+                            <option value="double-border">Khung Viền Đôi Nghệ Thuật (Editorial)</option>
                         </select>
                     </div>
 
-                    <div class="col-md-8">
-                        <label asp-for="Subtitle" class="form-label small fw-semibold">Mô tả phụ (Subtitle hiển thị dưới tiêu đề)</label>
-                        <input asp-for="Subtitle" class="form-control rounded-3" placeholder="vd: Ưu đãi độc quyền đến 40% mỹ phẩm chính hãng chuẩn hạn dùng FEFO" />
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small">Kích thước độ rộng khung (Frame Size)</label>
+                        <select asp-for="StyleConfig.BoxWidth" id="BoxWidthSelect" class="form-select" onchange="syncLivePreview()">
+                            <option value="sm">Nhỏ gọn (Compact - 448px)</option>
+                            <option value="md">Tiêu chuẩn (Medium - 576px)</option>
+                            <option value="lg">Rộng (Large - 672px)</option>
+                            <option value="xl">Siêu rộng (Extra Wide - 896px)</option>
+                        </select>
                     </div>
 
                     <div class="col-md-4">
-                        <label asp-for="ButtonText" class="form-label small fw-semibold">Chữ trên nút kêu gọi (CTA)</label>
-                        <input asp-for="ButtonText" class="form-control rounded-3" placeholder="vd: Khám Phá Ngay" />
-                    </div>
-
-                    <!-- Desktop Image Upload & URL -->
-                    <div class="col-12 mt-3">
-                        <div class="p-3 rounded-3 border bg-light-subtle">
-                            <div class="row g-3 align-items-center">
-                                <div class="col-md-7">
-                                    <label class="form-label small fw-bold text-dark mb-1">
-                                        <i class="fa-solid fa-desktop text-danger me-1"></i>Hình ảnh Banner Chính (Desktop 1600×620px) *
-                                    </label>
-                                    <div class="mb-2">
-                                        <label class="form-label small text-muted mb-1">Cách 1: Tải file ảnh trực tiếp từ máy tính (JPG, PNG, WEBP, SVG ≤ 10MB)</label>
-                                        <input type="file" name="desktopFile" id="desktopFileInput" accept="image/*" class="form-control form-control-sm rounded-3" onchange="handleLocalBannerFile(this, 'desktopImgInput', 'desktopMediaIdInput', 'desktopImgPreview', 'desktopUploadStatus')" />
-                                        <div id="desktopUploadStatus" class="small mt-1"></div>
-                                    </div>
-
-                                    <div class="mb-2">
-                                        <label asp-for="DesktopImageUrl" class="form-label small text-muted mb-1">Cách 2: Nhập / Dán đường dẫn URL ảnh bất kỳ</label>
-                                        <input asp-for="DesktopImageUrl" id="desktopImgInput" class="form-control rounded-3" placeholder="/images/banners/hero-banner-summer-beauty.jpg hoặc https://..." oninput="onCustomUrlInput('desktopImgInput', 'desktopMediaIdInput', 'desktopImgPreview')" />
-                                        <input type="hidden" asp-for="DesktopMediaId" id="desktopMediaIdInput" />
-                                        <span asp-validation-for="DesktopImageUrl" class="text-danger small"></span>
-                                    </div>
-
-                                    <!-- Quick Preset Picker -->
-                                    <div>
-                                        <span class="small text-muted d-block mb-1">Cách 3: Chọn nhanh mẫu Banner HD có sẵn (1-Click):</span>
-                                        <div class="d-flex flex-wrap gap-2">
-                                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2.5 py-1 small" onclick="applyPresetBanner('/images/banners/hero-banner-summer-beauty.jpg')">
-                                                🌸 Summer Beauty
-                                            </button>
-                                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2.5 py-1 small" onclick="applyPresetBanner('/images/banners/banner-routine-kbeauty.jpg')">
-                                                ✨ K-Beauty Glow
-                                            </button>
-                                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2.5 py-1 small" onclick="applyPresetBanner('/images/banners/banner-flash-sale-skincare.jpg')">
-                                                🔥 Flash Sale FEFO
-                                            </button>
-                                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill px-2.5 py-1 small" onclick="applyPresetBanner('/images/banners/banner-luxury-fragrance.jpg')">
-                                                💎 Luxury Fragrance
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-5">
-                                    <label class="form-label small fw-semibold d-block text-center">Xem trước Banner Desktop</label>
-                                    <div class="p-2 rounded-3 border bg-white text-center shadow-2xs">
-                                        <img id="desktopImgPreview"
-                                             src="@(!string.IsNullOrEmpty(Model.DesktopImageUrl) ? Model.DesktopImageUrl : (Model.DesktopMediaId.HasValue ? $"/media/{Model.DesktopMediaId}" : "/images/banners/hero-banner-summer-beauty.jpg"))"
-                                             alt="Xem trước Desktop"
-                                             class="img-fluid rounded-2"
-                                             style="width: 100%; height: 155px; object-fit: cover;"
-                                             onerror="this.onerror=null;this.src='/images/banners/hero-banner-summer-beauty.jpg';" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Mobile Image (Optional) -->
-                    <div class="col-md-8">
-                        <label asp-for="MobileImageUrl" class="form-label small fw-semibold">Ảnh điện thoại (Mobile – Tùy chọn)</label>
-                        <div class="row g-2">
-                            <div class="col-sm-6">
-                                <input type="file" name="mobileFile" accept="image/*" class="form-control form-control-sm rounded-3" onchange="handleLocalBannerFile(this, 'mobileImgInput', 'mobileMediaIdInput', 'mobileImgPreview', 'mobileUploadStatus')" />
-                                <div id="mobileUploadStatus" class="small mt-1"></div>
-                            </div>
-                            <div class="col-sm-6">
-                                <input asp-for="MobileImageUrl" id="mobileImgInput" class="form-control form-control-sm rounded-3" placeholder="URL ảnh Mobile (để trống sẽ tự dùng ảnh Desktop)" oninput="onCustomUrlInput('mobileImgInput', 'mobileMediaIdInput', 'mobileImgPreview')" />
-                                <input type="hidden" asp-for="MobileMediaId" id="mobileMediaIdInput" />
-                            </div>
-                        </div>
+                        <label class="form-label fw-semibold small">Vị trí đặt khung</label>
+                        <select asp-for="StyleConfig.BoxPosition" id="BoxPositionSelect" class="form-select" onchange="syncLivePreview()">
+                            <option value="left">Căn trái (Mặc định)</option>
+                            <option value="center">Căn giữa Banner</option>
+                            <option value="right">Căn phải Banner</option>
+                        </select>
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label small fw-semibold">Xem trước Mobile</label>
-                        <div class="p-2 rounded-3 border bg-light text-center">
-                            <img id="mobileImgPreview"
-                                 src="@(!string.IsNullOrEmpty(Model.MobileImageUrl) ? Model.MobileImageUrl : (!string.IsNullOrEmpty(Model.DesktopImageUrl) ? Model.DesktopImageUrl : "/images/banners/hero-banner-summer-beauty.jpg"))"
-                                 alt="Xem trước Mobile"
-                                 class="img-fluid rounded-2 shadow-xs"
-                                 style="max-height: 64px; object-fit: cover;"
-                                 onerror="this.onerror=null;this.src='/images/banners/hero-banner-summer-beauty.jpg';" />
-                        </div>
+                        <label class="form-label fw-semibold small">Độ bo góc khung</label>
+                        <select asp-for="StyleConfig.BoxRadius" id="BoxRadiusSelect" class="form-select" onchange="syncLivePreview()">
+                            <option value="3xl">Bo tròn mềm mại (24px)</option>
+                            <option value="xl">Bo vừa (16px)</option>
+                            <option value="md">Bo nhẹ (12px)</option>
+                            <option value="none">Vuông góc sắc sảo (0px)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold small">Độ đậm lớp phủ nền ảnh</label>
+                        <select asp-for="StyleConfig.OverlayOpacity" id="OverlayOpacitySelect" class="form-select" onchange="syncLivePreview()">
+                            <option value="0">0% (Ảnh sáng nguyên bản)</option>
+                            <option value="25">25% (Phủ mờ nhẹ)</option>
+                            <option value="45">45% (Phủ vừa phải)</option>
+                            <option value="65">65% (Tiêu chuẩn nổi chữ)</option>
+                            <option value="85">85% (Phủ tối đậm)</option>
+                        </select>
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="LinkUrl" class="form-label small fw-semibold">Liên kết điều hướng khi bấm vào Banner (Link URL)</label>
-                        <input asp-for="LinkUrl" class="form-control rounded-3 font-monospace" placeholder="/danh-muc/cham-soc-da hoặc /clearance-fefo" />
-                    </div>
-
-                    <div class="col-md-3">
-                        <label asp-for="DisplayOrder" class="form-label small fw-semibold">Thứ tự hiển thị</label>
-                        <input asp-for="DisplayOrder" type="number" class="form-control rounded-3 font-monospace" />
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label small fw-semibold d-block">Trạng thái kích hoạt</label>
-                        <div class="form-check form-switch mt-2">
-                            <input class="form-check-input" type="checkbox" asp-for="IsActive" id="activeSwitch">
-                            <label class="form-check-label small fw-semibold" for="activeSwitch">Hiển thị trên web</label>
-                        </div>
+                        <label class="form-label fw-semibold small">Font chữ tiêu đề (Typography)</label>
+                        <select asp-for="StyleConfig.TitleFont" id="TitleFontSelect" class="form-select" onchange="syncLivePreview()">
+                            <option value="serif">Playfair Display (Cổ điển sang trọng)</option>
+                            <option value="sans">Quicksand / Inter (Hiện đại trẻ trung)</option>
+                            <option value="editorial">Georgia Italic (Thời trang tạp chí)</option>
+                            <option value="mono">JetBrains Mono (Cá tính hiện đại)</option>
+                        </select>
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="ValidFrom" class="form-label small fw-semibold">Bắt đầu hiệu lực</label>
-                        <input asp-for="ValidFrom" type="datetime-local" class="form-control rounded-3" />
-                        <span asp-validation-for="ValidFrom" class="text-danger small"></span>
+                        <label class="form-label fw-semibold small">Cỡ chữ tiêu đề</label>
+                        <select asp-for="StyleConfig.TitleSize" id="TitleSizeSelect" class="form-select" onchange="syncLivePreview()">
+                            <option value="sm">Nhỏ vừa (36px)</option>
+                            <option value="md">Lớn vừa (48px)</option>
+                            <option value="lg">Tiêu chuẩn lớn (60px)</option>
+                            <option value="xl">Khổng lồ (72px)</option>
+                        </select>
                     </div>
 
                     <div class="col-md-6">
-                        <label asp-for="ValidTo" class="form-label small fw-semibold">Kết thúc hiệu lực</label>
-                        <input asp-for="ValidTo" type="datetime-local" class="form-control rounded-3" />
-                        <span asp-validation-for="ValidTo" class="text-danger small"></span>
+                        <label class="form-label fw-semibold small">Tông màu chữ</label>
+                        <select asp-for="StyleConfig.TextColorTheme" id="TextColorSelect" class="form-select" onchange="syncLivePreview()">
+                            <option value="white">Trắng Tinh Khôi (#FFFFFF)</option>
+                            <option value="cream">Kem Hồng Pastel (#FFF4F7)</option>
+                            <option value="gold">Vàng Champagne (#FDE68A)</option>
+                            <option value="dark">Đen Tím Ink (#2B1B24 - Cho nền sáng)</option>
+                        </select>
                     </div>
 
-                    <div class="col-12 text-end mt-4 pt-3 border-top">
-                        <a href="/Admin/Banner" class="btn btn-light rounded-3 px-4 me-2">Hủy</a>
-                        <button type="submit" class="btn btn-primary-gradient px-4">
-                            <i class="fa-solid fa-floppy-disk me-1"></i>Lưu Thay Đổi Banner
-                        </button>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold small">Kiểu nút bấm chính</label>
+                        <select asp-for="StyleConfig.ButtonStyle" id="ButtonStyleSelect" class="form-select" onchange="syncLivePreview()">
+                            <option value="rose-gradient">Hồng Canmake Gradient (Mặc định)</option>
+                            <option value="white-solid">Trắng Tinh Khôi chữ Đen</option>
+                            <option value="dark-luxury">Đen Charcoal viền Hồng</option>
+                            <option value="glass-outline">Kính mờ viền Trắng</option>
+                        </select>
                     </div>
                 </div>
-            </form>
+            </div>
+
+            <!-- PHẦN 3: HÌNH ẢNH BANNER (UPLOAD FILE / URL / MẪU CÓ SẴN) -->
+            <div class="beauty-card p-4 mb-4">
+                <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                    <i class="fa-solid fa-image text-primary me-2"></i>3. Hình ảnh Banner (Tải ảnh từ máy, Dán URL hoặc Chọn mẫu)
+                </h6>
+
+                <input type="hidden" asp-for="DesktopMediaId" id="DesktopMediaIdInput" />
+                <input type="hidden" asp-for="MobileMediaId" id="MobileMediaIdInput" />
+
+                <!-- 3.1. Ảnh Desktop -->
+                <div class="p-3 rounded-3 border bg-light mb-3">
+                    <label class="form-label fw-bold text-dark small mb-2">
+                        <i class="fa-solid fa-desktop text-primary me-1"></i>Ảnh Banner Chính (Desktop - Tỷ lệ khuyên dùng 1600×620px)
+                    </label>
+
+                    <div class="mb-2">
+                        <div class="input-group">
+                            <input type="file" name="desktopFile" id="desktopFileInput" accept=".jpg,.jpeg,.png,.webp,.avif,.gif" class="form-control" onchange="handleBannerFileSelect(this, 'DesktopImageUrlInput', 'DesktopMediaIdInput', 'desktopUploadStatus')" />
+                            <button type="button" class="btn btn-outline-primary fw-semibold" onclick="document.getElementById('desktopFileInput').click()">
+                                <i class="fa-solid fa-cloud-arrow-up me-1"></i>Tải ảnh từ máy
+                            </button>
+                        </div>
+                        <div id="desktopUploadStatus" class="small mt-1 text-success fw-semibold" style="display:none;"></div>
+                    </div>
+
+                    <div class="mb-2">
+                        <label asp-for="DesktopImageUrl" class="form-label text-muted small mb-1">Hoặc dán đường dẫn ảnh bất kỳ (URL):</label>
+                        <input asp-for="DesktopImageUrl" id="DesktopImageUrlInput" class="form-control form-control-sm font-monospace" oninput="onCustomUrlTyped('DesktopImageUrlInput', 'DesktopMediaIdInput')" />
+                    </div>
+
+                    <div>
+                        <span class="text-muted small d-block mb-1">Hoặc chọn nhanh mẫu Banner HD có sẵn:</span>
+                        <div class="d-flex flex-wrap gap-1.5">
+                            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px;" onclick="selectPresetBanner('/images/banners/hero-banner-summer-beauty.jpg')">
+                                🌸 Summer Beauty
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px;" onclick="selectPresetBanner('/images/banners/banner-routine-kbeauty.jpg')">
+                                ✨ K-Beauty Glow
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px;" onclick="selectPresetBanner('/images/banners/banner-flash-sale-skincare.jpg')">
+                                🔥 FEFO Clearance
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" style="font-size: 11px;" onclick="selectPresetBanner('/images/banners/banner-luxury-fragrance.jpg')">
+                                💎 Luxury Fragrance
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3.2. Ảnh Mobile -->
+                <div class="p-3 rounded-3 border bg-light">
+                    <label class="form-label fw-bold text-dark small mb-2">
+                        <i class="fa-solid fa-mobile-screen text-primary me-1"></i>Ảnh Banner Mobile (Tùy chọn - 800×1000px)
+                    </label>
+                    <div class="input-group input-group-sm mb-2">
+                        <input type="file" name="mobileFile" id="mobileFileInput" accept=".jpg,.jpeg,.png,.webp,.avif,.gif" class="form-control" onchange="handleBannerFileSelect(this, 'MobileImageUrlInput', 'MobileMediaIdInput', 'mobileUploadStatus')" />
+                    </div>
+                    <div id="mobileUploadStatus" class="small mb-1 text-success fw-semibold" style="display:none;"></div>
+                    <input asp-for="MobileImageUrl" id="MobileImageUrlInput" class="form-control form-control-sm font-monospace" placeholder="Để trống sẽ tự động co giãn từ ảnh Desktop" oninput="onCustomUrlTyped('MobileImageUrlInput', 'MobileMediaIdInput')" />
+                </div>
+            </div>
+
+            <!-- PHẦN 4: VỊ TRÍ, THỨ TỰ & LỊCH HIỂN THỊ -->
+            <div class="beauty-card p-4">
+                <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                    <i class="fa-regular fa-calendar-check text-primary me-2"></i>4. Vị trí, Thứ tự & Thời gian hiển thị
+                </h6>
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label asp-for="Position" class="form-label fw-semibold small">Vị trí hiển thị</label>
+                        <select asp-for="Position" class="form-select">
+                            <option value="1">1. Hero Slider (Đầu trang chủ)</option>
+                            <option value="2">2. Popup Khuyến mãi</option>
+                            <option value="3">3. Top Banner Danh mục</option>
+                            <option value="4">4. Footer Strip (Chân trang)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="DisplayOrder" class="form-label fw-semibold small">Thứ tự</label>
+                        <input asp-for="DisplayOrder" type="number" min="0" class="form-control font-monospace" />
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="form-check form-switch mb-2">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox" id="activeBannerSwitch" />
+                            <label class="form-check-label fw-semibold small" for="activeBannerSwitch">Đang kích hoạt</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ValidFrom" class="form-label fw-semibold small">Từ ngày</label>
+                        <input asp-for="ValidFrom" type="date" class="form-control" value="@Model.ValidFrom.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ValidTo" class="form-label fw-semibold small">Đến ngày</label>
+                        <input asp-for="ValidTo" type="date" class="form-control" value="@Model.ValidTo.ToString("yyyy-MM-dd")" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI: KHUNG XEM TRƯỚC TRỰC TIẾP (LIVE WYSIWYG PREVIEW) -->
+        <div class="col-lg-5">
+            <div class="beauty-card p-4 sticky-top" style="top: 90px; z-index: 10;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-dark mb-0">
+                        <i class="fa-solid fa-eye text-primary me-2"></i>Xem trước trực tiếp (Live Preview)
+                    </h6>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Realtime</span>
+                </div>
+
+                <!-- Khung mô phỏng Hero Banner -->
+                <div id="liveBannerStage" class="position-relative rounded-4 overflow-hidden border shadow-sm mb-3" style="height: 310px; background: #1e1b24;">
+                    <img id="imgPreviewDesktop" src="@Model.DesktopImageUrl" alt="Banner Preview" class="w-100 h-100" style="object-fit: cover;" onerror="this.src='/images/banners/hero-banner-summer-beauty.jpg'" />
+
+                    <!-- Lớp phủ tối mờ -->
+                    <div id="previewOverlayGradient" class="position-absolute top-0 start-0 w-100 h-100" style="background: linear-gradient(90deg, rgba(30,27,36,0.95) 0%, rgba(30,27,36,0.65) 55%, rgba(30,27,36,0.05) 100%); pointer-events: none;"></div>
+
+                    <!-- Khung nội dung mô phỏng -->
+                    <div id="previewOuterFlex" class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center p-3">
+                        <div id="previewContentBox" class="p-3 transition-all" style="max-width: 82%;">
+                            <div id="previewBadgeWrap" class="mb-2">
+                                <span id="previewBadge" class="d-inline-flex align-items-center gap-1 px-2.5 py-1 rounded-pill text-uppercase fw-bold" style="font-size: 9px; background: rgba(232,97,140,0.25); border: 1px solid rgba(232,97,140,0.5); color: #fecdd3; letter-spacing: 0.08em;">
+                                    ✨ <span id="previewBadgeText">BỘ SƯU TẬP MỚI 2026</span>
+                                </span>
+                            </div>
+                            <h3 id="previewTitle" class="fw-bold mb-1" style="font-size: 22px; line-height: 1.15; color: #ffffff; text-shadow: 0 2px 8px rgba(0,0,0,0.35);">
+                                @Model.Title
+                            </h3>
+                            <p id="previewSubtitle" class="mb-2" style="font-size: 11.5px; color: #e2e8f0; line-height: 1.4;">
+                                @Model.Subtitle
+                            </p>
+                            <div id="previewButtonsRow" class="d-flex flex-wrap gap-2 pt-1">
+                                <span id="previewPrimaryBtn" class="px-3 py-1.5 rounded-pill fw-bold d-inline-flex align-items-center gap-1" style="font-size: 10.5px; background: linear-gradient(90deg, #E8618C, #db2777); color: #fff;">
+                                    <span id="previewPrimaryBtnText">@Model.ButtonText</span> →
+                                </span>
+                                <span id="previewSecondaryBtn" class="px-2.5 py-1.5 rounded-pill fw-semibold d-inline-flex align-items-center" style="font-size: 10.5px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff;">
+                                    Deal FEFO -50%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-3 rounded-3 bg-light border small text-muted mb-3">
+                    <div class="fw-bold text-dark mb-1"><i class="fa-solid fa-lightbulb text-warning me-1"></i>Mẹo thiết kế nhanh:</div>
+                    <ul class="mb-0 ps-3" style="font-size: 12px;">
+                        <li>Nếu ảnh Banner của bạn <strong>đã thiết kế sẵn chữ</strong>: hãy tắt công tắc <strong>"Hiển thị Khung Nội Dung"</strong> và chọn độ đậm lớp phủ <strong>0%</strong>.</li>
+                        <li>Nếu muốn chữ nổi bật trên nền ảnh nhiều chi tiết: chọn kiểu khung <strong>Khung Kính Mờ Tối</strong> hoặc <strong>Khung Hồng Canmake Luxury</strong>.</li>
+                    </ul>
+                </div>
+
+                <button type="submit" class="btn btn-primary-gradient w-100 py-2.5 fw-bold shadow-sm">
+                    <i class="fa-solid fa-floppy-disk me-2"></i>Lưu Toàn Bộ Tùy Chỉnh Banner
+                </button>
+            </div>
         </div>
     </div>
-</div>
+</form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        function onCustomUrlInput(inputId, mediaIdInputId, previewId) {
-            const url = document.getElementById(inputId).value.trim();
-            document.getElementById(mediaIdInputId).value = '';
-            if (url.length > 3) {
-                document.getElementById(previewId).src = url;
+        function syncLivePreview() {
+            const showBox = document.getElementById('chkShowContentBox').checked;
+            const showBadge = document.getElementById('chkShowBadge').checked;
+            const showTitle = document.getElementById('chkShowTitle').checked;
+            const showSubtitle = document.getElementById('chkShowSubtitle').checked;
+            const showPrimaryBtn = document.getElementById('chkShowPrimaryBtn').checked;
+            const showSecondaryBtn = document.getElementById('chkShowSecondaryBtn').checked;
+            const showOverlay = document.getElementById('chkShowOverlay').checked;
+
+            const badgeText = document.getElementById('BadgeTextInput').value || 'BỘ SƯU TẬP MỚI 2026';
+            const titleText = document.getElementById('TitleInput').value || '';
+            const subtitleText = document.getElementById('SubtitleInput').value || '';
+            const primaryBtnText = document.getElementById('ButtonTextInput').value || 'Khám Phá Ngay';
+            const secondaryBtnText = document.getElementById('SecondaryBtnTextInput').value || 'Deal FEFO -50%';
+
+            const boxStyle = document.getElementById('BoxStyleSelect').value;
+            const boxWidth = document.getElementById('BoxWidthSelect').value;
+            const boxPos = document.getElementById('BoxPositionSelect').value;
+            const boxRadius = document.getElementById('BoxRadiusSelect').value;
+            const overlayOpacity = parseInt(document.getElementById('OverlayOpacitySelect').value || '65', 10);
+            const titleFont = document.getElementById('TitleFontSelect').value;
+            const titleSize = document.getElementById('TitleSizeSelect').value;
+            const textColor = document.getElementById('TextColorSelect').value;
+            const btnStyle = document.getElementById('ButtonStyleSelect').value;
+
+            // 1. Overlay
+            const overlayEl = document.getElementById('previewOverlayGradient');
+            overlayEl.style.display = (showOverlay && overlayOpacity > 0) ? 'block' : 'none';
+            overlayEl.style.opacity = (overlayOpacity / 100.0).toString();
+
+            // 2. Content Box visibility & position
+            const outerFlex = document.getElementById('previewOuterFlex');
+            const boxEl = document.getElementById('previewContentBox');
+            boxEl.style.display = showBox ? 'block' : 'none';
+
+            outerFlex.className = 'position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center p-3 ' +
+                (boxPos === 'center' ? 'justify-content-center text-center' : (boxPos === 'right' ? 'justify-content-end text-end' : 'justify-content-start text-start'));
+
+            boxEl.style.maxWidth = boxWidth === 'sm' ? '62%' : (boxWidth === 'lg' ? '88%' : (boxWidth === 'xl' ? '96%' : '76%'));
+            boxEl.style.borderRadius = boxRadius === 'none' ? '0px' : (boxRadius === 'md' ? '10px' : (boxRadius === 'xl' ? '16px' : '22px'));
+
+            // 3. Box frame style
+            boxEl.style.backdropFilter = 'none';
+            boxEl.style.border = 'none';
+            boxEl.style.padding = '14px 16px';
+            if (boxStyle === 'transparent') {
+                boxEl.style.background = 'transparent';
+                boxEl.style.padding = '4px';
+            } else if (boxStyle === 'glass-dark') {
+                boxEl.style.background = 'rgba(30, 27, 36, 0.62)';
+                boxEl.style.backdropFilter = 'blur(10px)';
+                boxEl.style.border = '1px solid rgba(255,255,255,0.25)';
+            } else if (boxStyle === 'glass-light') {
+                boxEl.style.background = 'rgba(255, 255, 255, 0.82)';
+                boxEl.style.backdropFilter = 'blur(10px)';
+                boxEl.style.border = '1px solid rgba(255,255,255,0.9)';
+            } else if (boxStyle === 'rose-luxury') {
+                boxEl.style.background = 'linear-gradient(135deg, rgba(184,51,106,0.82), rgba(43,27,36,0.82))';
+                boxEl.style.backdropFilter = 'blur(10px)';
+                boxEl.style.border = '1px solid rgba(247,198,212,0.6)';
+            } else if (boxStyle === 'solid-dark') {
+                boxEl.style.background = 'rgba(43, 27, 36, 0.95)';
+                boxEl.style.border = '1px solid rgba(232,97,140,0.5)';
+            } else if (boxStyle === 'double-border') {
+                boxEl.style.background = 'rgba(30, 27, 36, 0.52)';
+                boxEl.style.border = '4px double rgba(247,198,212,0.9)';
+            }
+
+            // 4. Elements text & visibility
+            document.getElementById('previewBadgeWrap').style.display = showBadge ? 'block' : 'none';
+            document.getElementById('previewBadgeText').textContent = badgeText;
+
+            const titleEl = document.getElementById('previewTitle');
+            titleEl.style.display = showTitle ? 'block' : 'none';
+            titleEl.textContent = titleText;
+            titleEl.style.fontFamily = titleFont === 'sans' ? "'Quicksand', 'Inter', sans-serif"
+                : (titleFont === 'editorial' ? "Georgia, serif" : (titleFont === 'mono' ? "monospace" : "'Playfair Display', Georgia, serif"));
+            titleEl.style.fontStyle = titleFont === 'editorial' ? 'italic' : 'normal';
+            titleEl.style.fontSize = titleSize === 'sm' ? '17px' : (titleSize === 'md' ? '20px' : (titleSize === 'xl' ? '26px' : '22px'));
+
+            const isDark = textColor === 'dark' || (boxStyle === 'glass-light' && textColor === 'white');
+            titleEl.style.color = textColor === 'cream' ? '#FFF4F7' : (textColor === 'gold' ? '#FDE68A' : (isDark ? '#2B1B24' : '#FFFFFF'));
+
+            const subEl = document.getElementById('previewSubtitle');
+            subEl.style.display = showSubtitle ? 'block' : 'none';
+            subEl.textContent = subtitleText;
+            subEl.style.color = textColor === 'cream' ? '#F7C6D4' : (textColor === 'gold' ? '#FEF3C7' : (isDark ? '#4A3040' : '#E2E8F0'));
+
+            const btnRow = document.getElementById('previewButtonsRow');
+            btnRow.className = 'd-flex flex-wrap gap-2 pt-1 ' +
+                (boxPos === 'center' ? 'justify-content-center' : (boxPos === 'right' ? 'justify-content-end' : 'justify-content-start'));
+
+            const pBtn = document.getElementById('previewPrimaryBtn');
+            pBtn.style.display = showPrimaryBtn ? 'inline-flex' : 'none';
+            document.getElementById('previewPrimaryBtnText').textContent = primaryBtnText;
+            if (btnStyle === 'white-solid') {
+                pBtn.style.background = '#ffffff';
+                pBtn.style.color = '#2B1B24';
+                pBtn.style.border = 'none';
+            } else if (btnStyle === 'dark-luxury') {
+                pBtn.style.background = '#2B1B24';
+                pBtn.style.color = '#ffffff';
+                pBtn.style.border = '1px solid rgba(247,198,212,0.6)';
+            } else if (btnStyle === 'glass-outline') {
+                pBtn.style.background = 'rgba(255,255,255,0.15)';
+                pBtn.style.color = '#ffffff';
+                pBtn.style.border = '1.5px solid #ffffff';
+            } else {
+                pBtn.style.background = 'linear-gradient(90deg, #E8618C, #db2777)';
+                pBtn.style.color = '#ffffff';
+                pBtn.style.border = 'none';
+            }
+
+            const sBtn = document.getElementById('previewSecondaryBtn');
+            sBtn.style.display = showSecondaryBtn ? 'inline-flex' : 'none';
+            sBtn.textContent = secondaryBtnText;
+        }
+
+        function onCustomUrlTyped(urlInputId, mediaIdInputId) {
+            const urlVal = document.getElementById(urlInputId).value;
+            const mediaIdEl = document.getElementById(mediaIdInputId);
+            if (mediaIdEl && mediaIdEl.value && urlVal !== ('/media/' + mediaIdEl.value)) {
+                mediaIdEl.value = '';
+            }
+            if (urlInputId === 'DesktopImageUrlInput' && urlVal) {
+                document.getElementById('imgPreviewDesktop').src = urlVal;
             }
         }
 
-        function applyPresetBanner(presetUrl) {
-            document.getElementById('desktopImgInput').value = presetUrl;
-            document.getElementById('desktopMediaIdInput').value = '';
-            document.getElementById('desktopImgPreview').src = presetUrl;
-            const fileInput = document.getElementById('desktopFileInput');
-            if (fileInput) fileInput.value = '';
-            const statusEl = document.getElementById('desktopUploadStatus');
-            if (statusEl) statusEl.innerHTML = '<span class="text-success fw-semibold"><i class="fa-solid fa-circle-check me-1"></i>Đã chọn mẫu: ' + presetUrl + '</span>';
+        function selectPresetBanner(presetUrl) {
+            document.getElementById('DesktopImageUrlInput').value = presetUrl;
+            document.getElementById('DesktopMediaIdInput').value = '';
+            document.getElementById('imgPreviewDesktop').src = presetUrl;
         }
 
-        async function handleLocalBannerFile(fileInput, urlInputId, mediaIdInputId, previewId, statusId) {
+        async function handleBannerFileSelect(fileInput, urlInputId, mediaIdInputId, statusId) {
             if (!fileInput.files || fileInput.files.length === 0) return;
             const file = fileInput.files[0];
             const statusEl = document.getElementById(statusId);
 
-            // Hiển thị xem trước ngay lập tức từ máy khách
-            const reader = new FileReader();
-            reader.onload = e => {
-                document.getElementById(previewId).src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+            if (urlInputId === 'DesktopImageUrlInput') {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('imgPreviewDesktop').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
 
-            // Tải lên máy chủ ngay lập tức qua AJAX để lấy URL tĩnh
             if (statusEl) {
-                statusEl.innerHTML = '<span class="text-primary"><i class="fa-solid fa-spinner fa-spin me-1"></i>Đang tải ảnh lên máy chủ...</span>';
+                statusEl.style.display = 'block';
+                statusEl.className = 'small mt-1 text-primary fw-semibold';
+                statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Đang tải ảnh lên máy chủ...';
             }
 
             const formData = new FormData();
             formData.append('file', file);
-            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+            const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
 
             try {
-                const res = await fetch('/Admin/Banner/UploadImage', {
+                const response = await fetch('/Admin/Banner/UploadImage', {
                     method: 'POST',
-                    headers: { 'RequestVerificationToken': token },
+                    headers: tokenInput ? { 'RequestVerificationToken': tokenInput.value } : {},
                     body: formData
                 });
-                const data = await res.json();
-                if (data.success && data.url) {
-                    document.getElementById(urlInputId).value = data.url;
-                    document.getElementById(mediaIdInputId).value = data.mediaId || '';
-                    document.getElementById(previewId).src = data.url;
-                    fileInput.value = ''; // Xóa file input vì đã upload thành công qua AJAX
-                    if (statusEl) {
-                        statusEl.innerHTML = '<span class="text-success fw-semibold"><i class="fa-solid fa-circle-check me-1"></i>Đã tải ảnh lên thành công (' + data.url + '). Nhấn "Lưu Thay Đổi Banner" để áp dụng!</span>';
+                const result = await response.json();
+                if (result && result.success && result.url) {
+                    document.getElementById(urlInputId).value = result.url;
+                    if (mediaIdInputId && result.mediaId) {
+                        document.getElementById(mediaIdInputId).value = result.mediaId;
                     }
-                } else {
+                    if (urlInputId === 'DesktopImageUrlInput') {
+                        document.getElementById('imgPreviewDesktop').src = result.url;
+                    }
                     if (statusEl) {
-                        statusEl.innerHTML = '<span class="text-warning"><i class="fa-solid fa-circle-info me-1"></i>Ảnh sẽ được tải lên khi nhấn Lưu Thay Đổi.</span>';
+                        statusEl.className = 'small mt-1 text-success fw-semibold';
+                        statusEl.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i>Đã tải ảnh lên: ' + result.url;
                     }
                 }
-            } catch {
+            } catch (err) {
                 if (statusEl) {
-                    statusEl.innerHTML = '<span class="text-muted"><i class="fa-solid fa-circle-info me-1"></i>Đã chọn file <strong>' + file.name + '</strong>. Nhấn "Lưu Thay Đổi Banner" để tải lên!</span>';
+                    statusEl.className = 'small mt-1 text-info fw-semibold';
+                    statusEl.innerHTML = '<i class="fa-solid fa-check me-1"></i>Ảnh sẽ được lưu khi bấm Lưu Toàn Bộ Tùy Chỉnh.';
                 }
             }
         }
+
+        document.addEventListener('DOMContentLoaded', syncLivePreview);
     </script>
 }

@@ -68,16 +68,100 @@
                                     <img src="@bannerImg" alt="@b.Title" width="1600" height="620" loading="lazy" decoding="async" class="w-full h-full object-cover object-center" onerror="this.onerror=null;this.src='/images/banners/hero-banner-summer-beauty.jpg';" />
                                 }
                             </picture>
-                            <div class="absolute inset-0 bg-gradient-to-r from-charcoal/90 via-charcoal/60 to-transparent"></div>
+                            @{
+                                var style = (item.BannerStyles != null && item.BannerStyles.TryGetValue(b.Id, out var customStyle) && customStyle != null)
+                                    ? customStyle
+                                    : new Omnichannel.Application.DTOs.Cms.BannerStyleConfigDto();
+
+                                string posFlexClass = style.BoxPosition switch
+                                {
+                                    "center" => "justify-center text-center items-center mx-auto",
+                                    "right" => "justify-end text-right items-end ml-auto",
+                                    _ => "justify-start text-left items-start"
+                                };
+
+                                string widthClass = style.BoxWidth switch
+                                {
+                                    "sm" => "max-w-md",
+                                    "lg" => "max-w-2xl",
+                                    "xl" => "max-w-4xl",
+                                    _ => "max-w-xl"
+                                };
+
+                                string radiusClass = style.BoxRadius switch
+                                {
+                                    "none" => "rounded-none",
+                                    "md" => "rounded-xl",
+                                    "xl" => "rounded-2xl",
+                                    _ => "rounded-3xl"
+                                };
+
+                                string frameStyleClass = style.BoxStyle switch
+                                {
+                                    "glass-dark" => $"bg-charcoal/60 backdrop-blur-md border border-white/25 p-6 sm:p-8 shadow-2xl {radiusClass}",
+                                    "glass-light" => $"bg-white/80 backdrop-blur-md border border-white/80 p-6 sm:p-8 shadow-2xl {radiusClass}",
+                                    "rose-luxury" => $"bg-gradient-to-br from-[#B8336A]/80 via-[#2B1B24]/80 to-[#E8618C]/70 backdrop-blur-md border border-[#F7C6D4]/60 p-6 sm:p-8 shadow-2xl {radiusClass}",
+                                    "solid-dark" => $"bg-[#2B1B24]/95 border border-[#E8618C]/50 p-6 sm:p-8 shadow-2xl {radiusClass}",
+                                    "double-border" => $"bg-charcoal/50 backdrop-blur-sm border-4 border-double border-[#F7C6D4]/90 p-6 sm:p-8 shadow-2xl {radiusClass}",
+                                    _ => "bg-transparent p-0"
+                                };
+
+                                string fontStyleInline = style.TitleFont switch
+                                {
+                                    "sans" => "font-family: 'Quicksand', 'Inter', sans-serif;",
+                                    "editorial" => "font-family: Georgia, 'Playfair Display', serif; font-style: italic;",
+                                    "mono" => "font-family: 'JetBrains Mono', monospace; letter-spacing: -0.02em;",
+                                    _ => "font-family: 'Playfair Display', Georgia, serif;"
+                                };
+
+                                string titleSizeClass = style.TitleSize switch
+                                {
+                                    "sm" => "text-2xl sm:text-4xl font-bold leading-tight",
+                                    "md" => "text-3xl sm:text-5xl font-bold leading-tight",
+                                    "xl" => "text-4xl sm:text-6xl lg:text-7xl font-extrabold leading-none",
+                                    _ => "text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight"
+                                };
+
+                                bool isDarkText = style.TextColorTheme == "dark" || (style.BoxStyle == "glass-light" && style.TextColorTheme == "white");
+                                string titleColorInline = style.TextColorTheme switch
+                                {
+                                    "cream" => "color: #FFF4F7;",
+                                    "gold" => "color: #FDE68A;",
+                                    "dark" => "color: #2B1B24;",
+                                    _ => isDarkText ? "color: #2B1B24;" : "color: #FFFFFF;"
+                                };
+
+                                string subtitleColorInline = style.TextColorTheme switch
+                                {
+                                    "cream" => "color: #F7C6D4;",
+                                    "gold" => "color: #FEF3C7;",
+                                    "dark" => "color: #4A3040;",
+                                    _ => isDarkText ? "color: #4A3040;" : "color: #E2E8F0;"
+                                };
+
+                                string btnPrimaryClass = style.ButtonStyle switch
+                                {
+                                    "white-solid" => "bg-white hover:bg-rose-50 text-charcoal shadow-xl",
+                                    "dark-luxury" => "bg-[#2B1B24] hover:bg-black text-white border border-[#F7C6D4]/50 shadow-xl",
+                                    "glass-outline" => "bg-white/15 hover:bg-white/30 text-white border-2 border-white backdrop-blur-md shadow-lg",
+                                    _ => "bg-gradient-to-r from-magenta-accent to-pink-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-xl shadow-magenta-accent/30"
+                                };
+                            }
+
+                            @if (style.ShowOverlayGradient && style.OverlayOpacity > 0)
+                            {
+                                <div class="absolute inset-0 bg-gradient-to-r from-charcoal via-charcoal/70 to-transparent pointer-events-none"
+                                     style="opacity: @((style.OverlayOpacity / 100.0).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));"></div>
+                            }
 
                             @if (canEditBanner)
                             {
                                 <div class="absolute top-4 right-4 z-30 flex items-center gap-2">
                                     @if (b.Id > 0)
                                     {
-                                        <a href="/Admin/Banner/Edit/@b.Id" class="px-3.5 py-2 rounded-full bg-white/90 hover:bg-white text-charcoal font-bold text-xs shadow-lg flex items-center gap-1.5 transition hover:scale-105">
-                                            <i class="fa-solid fa-camera-rotate text-magenta-accent"></i>
-                                            <span>Đổi Ảnh Banner Này</span>
+                                        <a href="/Admin/Banner/Edit/@b.Id" class="px-3.5 py-2 rounded-full bg-white/95 hover:bg-white text-charcoal font-bold text-xs shadow-lg flex items-center gap-1.5 transition hover:scale-105">
+                                            <i class="fa-solid fa-wand-magic-sparkles text-magenta-accent"></i>
+                                            <span>Tùy Chỉnh Ảnh & Khung Chữ</span>
                                         </a>
                                     }
                                     <a href="/Admin/Banner" class="px-3.5 py-2 rounded-full bg-charcoal/80 hover:bg-charcoal text-white border border-white/20 font-semibold text-xs shadow-lg flex items-center gap-1.5 backdrop-blur-md transition">
@@ -88,31 +172,58 @@
                             }
 
                             <!-- Content Floating Overlay -->
-                            <div class="absolute inset-0 flex items-center">
-                                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-                                    <div class="max-w-xl space-y-4">
-                                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-magenta-accent/20 border border-magenta-accent/40 text-rose-300 text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
-                                            <i class="fa-solid fa-sparkles text-amber-400"></i>
-                                            <span>Bộ Sưu Tập Mới 2026</span>
-                                        </div>
-                                        <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight text-white drop-shadow-md">
-                                            @b.Title
-                                        </h1>
-                                        <p class="text-sm sm:text-base text-slate-200 font-sans leading-relaxed line-clamp-3">
-                                            @(b.Subtitle ?? "Khám phá chu trình chăm sóc sắc đẹp đa tầng khoa học chuẩn spa và các dòng mỹ phẩm cao cấp.")
-                                        </p>
-                                        <div class="pt-2 flex items-center gap-4">
-                                            <a href="@(b.LinkUrl ?? "/category/all")" class="px-7 py-3.5 rounded-full bg-gradient-to-r from-magenta-accent to-pink-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold text-sm shadow-xl shadow-magenta-accent/30 hover:scale-105 transition-all duration-300 flex items-center gap-2">
-                                                <span>@(b.ButtonText ?? "Khám Phá Ngay")</span>
-                                                <i class="fa-solid fa-arrow-right text-xs"></i>
-                                            </a>
-                                            <a href="/clearance-fefo" class="px-5 py-3.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-sm backdrop-blur-md transition">
-                                                Deal FEFO -50%
-                                            </a>
+                            @if (style.ShowContentBox)
+                            {
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex @(style.BoxPosition == "center" ? "justify-center" : (style.BoxPosition == "right" ? "justify-end" : "justify-start"))">
+                                        <div class="@widthClass w-full space-y-4 @frameStyleClass @(style.BoxPosition == "center" ? "text-center" : (style.BoxPosition == "right" ? "text-right" : "text-left"))">
+                                            @if (style.ShowBadge && !string.IsNullOrWhiteSpace(style.BadgeText))
+                                            {
+                                                <div>
+                                                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full @(isDarkText ? "bg-magenta-accent/15 border border-magenta-accent/40 text-magenta-accent" : "bg-magenta-accent/25 border border-magenta-accent/50 text-rose-200") text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
+                                                        <i class="fa-solid fa-sparkles text-amber-400"></i>
+                                                        <span>@style.BadgeText</span>
+                                                    </div>
+                                                </div>
+                                            }
+                                            @if (style.ShowTitle && !string.IsNullOrWhiteSpace(b.Title))
+                                            {
+                                                <h1 class="@titleSizeClass drop-shadow-md" style="@fontStyleInline @titleColorInline">
+                                                    @b.Title
+                                                </h1>
+                                            }
+                                            @if (style.ShowSubtitle && !string.IsNullOrWhiteSpace(b.Subtitle))
+                                            {
+                                                <p class="text-sm sm:text-base font-sans leading-relaxed line-clamp-3" style="@subtitleColorInline">
+                                                    @b.Subtitle
+                                                </p>
+                                            }
+                                            @if (style.ShowPrimaryButton || style.ShowSecondaryButton)
+                                            {
+                                                <div class="pt-2 flex flex-wrap items-center gap-3.5 @(style.BoxPosition == "center" ? "justify-center" : (style.BoxPosition == "right" ? "justify-end" : "justify-start"))">
+                                                    @if (style.ShowPrimaryButton)
+                                                    {
+                                                        <a href="@(string.IsNullOrWhiteSpace(b.LinkUrl) ? "/category/all" : b.LinkUrl)" class="px-7 py-3.5 rounded-full @btnPrimaryClass font-bold text-sm hover:scale-105 transition-all duration-300 inline-flex items-center gap-2">
+                                                            <span>@(string.IsNullOrWhiteSpace(b.ButtonText) ? "Khám Phá Ngay" : b.ButtonText)</span>
+                                                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                                                        </a>
+                                                    }
+                                                    @if (style.ShowSecondaryButton && !string.IsNullOrWhiteSpace(style.SecondaryButtonText))
+                                                    {
+                                                        <a href="@(string.IsNullOrWhiteSpace(style.SecondaryButtonUrl) ? "/clearance-fefo" : style.SecondaryButtonUrl)" class="px-5 py-3.5 rounded-full @(isDarkText ? "bg-charcoal/10 hover:bg-charcoal/20 border border-charcoal/25 text-charcoal" : "bg-white/15 hover:bg-white/25 border border-white/30 text-white") font-semibold text-sm backdrop-blur-md transition inline-flex items-center">
+                                                            @style.SecondaryButtonText
+                                                        </a>
+                                                    }
+                                                </div>
+                                            }
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            }
+                            else if (!string.IsNullOrWhiteSpace(b.LinkUrl))
+                            {
+                                <a href="@b.LinkUrl" class="absolute inset-0 z-10" aria-label="@b.Title"></a>
+                            }
                         </div>
                     }
 

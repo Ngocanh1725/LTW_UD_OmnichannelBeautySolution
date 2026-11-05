@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -176,7 +177,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             var banner = new Banner
             {
-                Title = model.Title.Trim(),
+                Title = string.IsNullOrWhiteSpace(model.Title) ? "Banner Quảng Cáo" : model.Title.Trim(),
                 Subtitle = string.IsNullOrWhiteSpace(model.Subtitle) ? null : model.Subtitle.Trim(),
                 ButtonText = string.IsNullOrWhiteSpace(model.ButtonText) ? "Khám Phá Ngay" : model.ButtonText.Trim(),
                 Position = MapPositionIntToString(model.Position),
@@ -196,6 +197,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             await _context.Banners.AddAsync(banner);
             await _context.SaveChangesAsync();
+            await SaveBannerStyleConfigAsync(banner.Id, model.StyleConfig);
             InvalidateBannerCache();
 
             TempData["SuccessMessage"] = $"Đã tạo mới Banner '{banner.Title}' thành công!";
@@ -208,6 +210,8 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         {
             var banner = await _context.Banners.FindAsync(id);
             if (banner == null) return NotFound();
+
+            var styleConfig = await LoadBannerStyleConfigAsync(banner.Id);
 
             var vm = new EditBannerViewModel
             {
@@ -226,7 +230,8 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 DisplayOrder = banner.DisplayOrder,
                 ValidFrom = banner.ValidFrom ?? DateTime.UtcNow,
                 ValidTo = banner.ValidTo ?? DateTime.UtcNow.AddMonths(3),
-                IsActive = banner.IsActive
+                IsActive = banner.IsActive,
+                StyleConfig = styleConfig
             };
 
             return View(vm);
@@ -253,7 +258,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             var banner = await _context.Banners.FindAsync(model.BannerId);
             if (banner == null) return NotFound();
 
-            banner.Title = model.Title.Trim();
+            banner.Title = string.IsNullOrWhiteSpace(model.Title) ? "Banner Quảng Cáo" : model.Title.Trim();
             banner.Subtitle = string.IsNullOrWhiteSpace(model.Subtitle) ? null : model.Subtitle.Trim();
             banner.ButtonText = string.IsNullOrWhiteSpace(model.ButtonText) ? "Khám Phá Ngay" : model.ButtonText.Trim();
             banner.Position = MapPositionIntToString(model.Position);
@@ -333,10 +338,64 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             banner.IsActive = model.IsActive;
 
             await _context.SaveChangesAsync();
+            await SaveBannerStyleConfigAsync(banner.Id, model.StyleConfig);
             InvalidateBannerCache();
 
             TempData["SuccessMessage"] = $"Đã cập nhật Banner '{banner.Title}' thành công!";
             return RedirectToAction(nameof(Index));
+        }
+
+        private async Task<BannerStyleConfigDto> LoadBannerStyleConfigAsync(int bannerId)
+        {
+            string key = $"BANNER_STYLE_CONFIG_{bannerId}";
+            var setting = await _context.Settings
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.SettingKey == key);
+
+            if (setting != null && !string.IsNullOrWhiteSpace(setting.SettingValue))
+            {
+                try
+                {
+                    var parsed = JsonSerializer.Deserialize<BannerStyleConfigDto>(setting.SettingValue);
+                    if (parsed != null) return parsed;
+                }
+                catch
+                {
+                    // Fallback to default
+                }
+            }
+
+            return new BannerStyleConfigDto();
+        }
+
+        private async Task SaveBannerStyleConfigAsync(int bannerId, BannerStyleConfigDto? styleConfig)
+        {
+            if (bannerId <= 0) return;
+
+            var config = styleConfig ?? new BannerStyleConfigDto();
+            string key = $"BANNER_STYLE_CONFIG_{bannerId}";
+            string json = JsonSerializer.Serialize(config);
+
+            var existing = await _context.Settings.FirstOrDefaultAsync(s => s.SettingKey == key);
+            if (existing != null)
+            {
+                existing.SettingValue = json;
+                existing.UpdatedAt = DateTime.UtcNow;
+            }
+            else
+            {
+                await _context.Settings.AddAsync(new Setting
+                {
+                    SettingKey = key,
+                    SettingValue = json,
+                    SettingGroup = "CMS_BANNER",
+                    DataType = "JSON",
+                    Description = $"Cấu hình giao diện khung & chữ cho Banner #{bannerId}",
+                    UpdatedAt = DateTime.UtcNow
+                });
+            }
+
+            await _context.SaveChangesAsync();
         }
 
         [HttpPost]

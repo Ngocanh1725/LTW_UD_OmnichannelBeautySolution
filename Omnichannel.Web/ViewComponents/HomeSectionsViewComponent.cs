@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Omnichannel.Application.DTOs.Cms;
 using Omnichannel.Application.Interfaces.Inventory;
 using Omnichannel.Domain.Entities;
 using Omnichannel.Infrastructure.Data;
@@ -64,6 +66,7 @@ namespace Omnichannel.Web.ViewComponents
 
             // Lazy pre-fetch needed entities for efficiency
             List<Banner>? banners = null;
+            Dictionary<int, BannerStyleConfigDto>? bannerStyles = null;
             List<Category>? categories = null;
             List<Product>? flashSaleProducts = null;
             List<Product>? bestSellers = null;
@@ -122,7 +125,37 @@ namespace Omnichannel.Web.ViewComponents
                                 };
                             }
                         }
+
+                        if (bannerStyles == null)
+                        {
+                            bannerStyles = new Dictionary<int, BannerStyleConfigDto>();
+                            var styleSettings = await _context.Settings
+                                .AsNoTracking()
+                                .Where(s => s.SettingKey.StartsWith("BANNER_STYLE_CONFIG_"))
+                                .ToListAsync();
+                            foreach (var s in styleSettings)
+                            {
+                                var idPart = s.SettingKey.Replace("BANNER_STYLE_CONFIG_", "");
+                                if (int.TryParse(idPart, out int bId) && !string.IsNullOrWhiteSpace(s.SettingValue))
+                                {
+                                    try
+                                    {
+                                        var parsed = JsonSerializer.Deserialize<BannerStyleConfigDto>(s.SettingValue);
+                                        if (parsed != null)
+                                        {
+                                            bannerStyles[bId] = parsed;
+                                        }
+                                    }
+                                    catch
+                                    {
+                                        // Ignore malformed json
+                                    }
+                                }
+                            }
+                        }
+
                         itemModel.Banners = banners;
+                        itemModel.BannerStyles = bannerStyles;
                         break;
 
                     case "FEATURED_CATEGORIES":

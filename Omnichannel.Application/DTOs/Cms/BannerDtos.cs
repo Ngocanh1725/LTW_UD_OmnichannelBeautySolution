@@ -3,6 +3,79 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Omnichannel.Application.DTOs.Cms
 {
+    /// <summary>
+    /// Cấu hình tùy biến hiển thị nâng cao cho từng Banner (ẩn/hiện từng phần, kiểu khung, kích thước khung, font chữ, màu chữ, nút phụ...)
+    /// Lưu trữ linh hoạt trong bảng Settings dưới dạng JSON theo khóa BANNER_STYLE_CONFIG_{BannerId}.
+    /// </summary>
+    public class BannerStyleConfigDto
+    {
+        // 1. Ẩn / Hiển thị từng thành phần (Visibility Toggles)
+        public bool ShowContentBox { get; set; } = true;
+        public bool ShowOverlayGradient { get; set; } = true;
+        public bool ShowBadge { get; set; } = true;
+        public bool ShowTitle { get; set; } = true;
+        public bool ShowSubtitle { get; set; } = true;
+        public bool ShowPrimaryButton { get; set; } = true;
+        public bool ShowSecondaryButton { get; set; } = true;
+
+        // 2. Nội dung bổ sung (Badge & Nút phụ thứ 2)
+        [StringLength(80)]
+        public string BadgeText { get; set; } = "Bộ Sưu Tập Mới 2026";
+
+        [StringLength(60)]
+        public string SecondaryButtonText { get; set; } = "Deal FEFO -50%";
+
+        [StringLength(255)]
+        public string SecondaryButtonUrl { get; set; } = "/clearance-fefo";
+
+        // 3. Tùy chọn Khung nội dung (Kiểu khung, Kích thước khung, Vị trí, Bo góc, Lớp phủ nền)
+        /// <summary>
+        /// transparent | glass-dark | glass-light | rose-luxury | solid-dark | double-border
+        /// </summary>
+        public string BoxStyle { get; set; } = "transparent";
+
+        /// <summary>
+        /// sm (448px) | md (576px) | lg (672px) | xl (896px)
+        /// </summary>
+        public string BoxWidth { get; set; } = "md";
+
+        /// <summary>
+        /// left | center | right
+        /// </summary>
+        public string BoxPosition { get; set; } = "left";
+
+        /// <summary>
+        /// none | md | xl | 3xl
+        /// </summary>
+        public string BoxRadius { get; set; } = "3xl";
+
+        /// <summary>
+        /// 0 | 25 | 45 | 65 | 85
+        /// </summary>
+        public int OverlayOpacity { get; set; } = 65;
+
+        // 4. Tùy chọn Font chữ, Cỡ chữ, Màu chữ & Kiểu nút
+        /// <summary>
+        /// serif (Playfair Display) | sans (Inter/Quicksand) | editorial (Georgia Italic) | mono (Space Mono)
+        /// </summary>
+        public string TitleFont { get; set; } = "serif";
+
+        /// <summary>
+        /// sm | md | lg | xl
+        /// </summary>
+        public string TitleSize { get; set; } = "lg";
+
+        /// <summary>
+        /// white | cream | gold | dark
+        /// </summary>
+        public string TextColorTheme { get; set; } = "white";
+
+        /// <summary>
+        /// rose-gradient | white-solid | dark-luxury | glass-outline
+        /// </summary>
+        public string ButtonStyle { get; set; } = "rose-gradient";
+    }
+
     public class BannerItemViewModel
     {
         public int BannerId { get; set; }
@@ -28,11 +101,11 @@ namespace Omnichannel.Application.DTOs.Cms
         public bool IsActive { get; set; }
         public bool IsExpired => DateTime.UtcNow > ValidTo;
         public bool IsUpcoming => DateTime.UtcNow < ValidFrom;
+        public BannerStyleConfigDto StyleConfig { get; set; } = new();
     }
 
     public class CreateBannerViewModel
     {
-        [Required(ErrorMessage = "Tiêu đề banner không được để trống")]
         [StringLength(200, ErrorMessage = "Tiêu đề tối đa 200 ký tự")]
         [Display(Name = "Tiêu đề chiến dịch")]
         public string Title { get; set; } = string.Empty;
@@ -72,6 +145,8 @@ namespace Omnichannel.Application.DTOs.Cms
         [Required(ErrorMessage = "Ngày kết thúc không được để trống")]
         [Display(Name = "Hiệu lực đến ngày")]
         public DateTime ValidTo { get; set; } = DateTime.UtcNow.AddMonths(1);
+
+        public BannerStyleConfigDto StyleConfig { get; set; } = new();
     }
 
     public class EditBannerViewModel : CreateBannerViewModel
