@@ -1,4 +1,4 @@
-// ==========================================
+﻿// ==========================================
 // CANMAKE BEAUTY SOLUTION - OPTIMIZED STOREFRONT JS
 // Alpine.js Components, 60 FPS Event Loop & Passive Listeners
 // ==========================================
@@ -9,7 +9,15 @@ function storefrontApp() {
         quickViewOpen: false,
         mobileMenuOpen: false,
         init() {
-            window.addEventListener('open-cart-drawer', () => { this.cartOpen = true; });
+            this.$watch('cartOpen', (value) => {
+                if (value) {
+                    loadMiniCartContent();
+                }
+            });
+            window.addEventListener('open-cart-drawer', () => {
+                this.cartOpen = true;
+                loadMiniCartContent();
+            });
             window.addEventListener('close-cart-drawer', () => { this.cartOpen = false; });
             window.addEventListener('open-quickview-modal', () => { this.quickViewOpen = true; });
             window.addEventListener('close-quickview-modal', () => { this.quickViewOpen = false; });
@@ -325,6 +333,23 @@ function initMiniCartEvents() {
     }
 }
 
+function loadMiniCartContent() {
+    const container = document.getElementById('miniCartContent');
+    if (!container) return;
+
+    if (window.htmx) {
+        htmx.ajax('GET', '/Cart/MiniCart', { target: '#miniCartContent', swap: 'innerHTML' });
+    } else {
+        fetch('/Cart/MiniCart')
+            .then(r => r.text())
+            .then(html => {
+                container.innerHTML = html;
+            })
+            .catch(err => console.error('Lỗi tải MiniCart:', err));
+    }
+}
+window.loadMiniCartContent = loadMiniCartContent;
+
 // MiniCart Drawer: Hợp nhất duy nhất 1 hàm, hỗ trợ Alpine và CustomEvent fallback
 function openMiniCart() {
     try {
@@ -337,9 +362,7 @@ function openMiniCart() {
     } catch (e) {
         window.dispatchEvent(new CustomEvent('open-cart-drawer'));
     }
-    if (window.htmx) {
-        htmx.trigger('body', 'reloadMiniCart');
-    }
+    loadMiniCartContent();
 }
 window.openMiniCart = openMiniCart;
 
