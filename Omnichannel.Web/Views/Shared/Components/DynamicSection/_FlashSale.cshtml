@@ -90,9 +90,9 @@
                 @foreach (var prod in products)
                 {
                     var prodUrl = !string.IsNullOrEmpty(prod.Slug) ? $"/san-pham/{prod.Slug}" : $"/Product/Detail/{prod.ProductId}";
-                    var img = ProductImageResolver.GetPrimaryImageUrl(prod.ImageUrl, null, prod.Slug, prod.ProductName);
-                    var webpImg = ProductImageResolver.GetWebpImageUrl(img, null, prod.Slug, prod.ProductName);
-                    var altText = ProductImageResolver.GetAltText(prod.ProductName, prod.BrandName, null, null, prod.Slug);
+                    var img = ProductImageResolver.GetPrimaryImageUrl(prod.ImageUrl, prod.Sku, prod.Slug, prod.ProductName);
+                    var webpImg = ProductImageResolver.GetWebpImageUrl(img, prod.Sku, prod.Slug, prod.ProductName);
+                    var altText = ProductImageResolver.GetAltText(prod.ProductName, prod.BrandName, null, prod.Sku, prod.Slug);
 
                     <article class="bg-white rounded-3xl border border-white/20 shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col justify-between overflow-hidden group">
                         <!-- Top Thumbnail -->

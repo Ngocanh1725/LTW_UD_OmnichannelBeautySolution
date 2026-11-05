@@ -3,7 +3,10 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Omnichannel.Application.Interfaces.Security;
-
+// Là việc các đối tượng thuộc các lớp khác nhau (nhưng các 
+//lớp chung 1 cha) sử dụng phương thức của lớp cha đó theo 
+//các cách khác nhau.  
+//+ Ví dụ: Tính thuế: Hàng Điện Tử 8%, Hàng Mỹ Phẩm 10% chẳng hạn
 namespace Omnichannel.Infrastructure.Security
 {
     public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionRequirement>

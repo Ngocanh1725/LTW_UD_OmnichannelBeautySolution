@@ -206,6 +206,38 @@ namespace Omnichannel.Infrastructure.Data
             // 3. Fallback tìm kiếm thông minh theo tên sản phẩm nếu có
             if (!string.IsNullOrWhiteSpace(productName))
             {
+                if (productName.Contains("Rom&nd", StringComparison.OrdinalIgnoreCase) || productName.Contains("Romand", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (productName.Contains("Juicy", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return "/images/products/makeup/son-tint-bong-romand-juicy-lasting-tint-06-figfig-55g.jpg";
+                    }
+                    if (productName.Contains("Glasting", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return "/images/products/makeup/son-bong-romand-glasting-water-tint-04-vintage-ocean-4g.jpg";
+                    }
+                    return "/images/products/makeup/son-kem-li-romand-zero-velvet-tint-02-joyful-55g.jpg";
+                }
+                if (productName.Contains("Innisfree", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (productName.Contains("Airy", StringComparison.OrdinalIgnoreCase) || productName.Contains("Tint", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return "/images/products/makeup/son-kem-innisfree-airy-matte-tint-38g.jpg";
+                    }
+                    if (productName.Contains("No-Sebum", StringComparison.OrdinalIgnoreCase) || productName.Contains("Phấn Phủ", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return "/images/products/makeup/phan-phu-bot-khoang-innisfree-no-sebum-mineral-powder-5g.jpg";
+                    }
+                    if (productName.Contains("Cherry", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return "/images/products/skincare/kem-duong-innisfree-cherry-blossom-glow-jelly-50ml.jpg";
+                    }
+                    return "/images/products/skincare/kem-khoa-am-innisfree-green-tea-seed-hyaluronic-cream-50ml.jpg";
+                }
+                if (productName.Contains("Color Riche", StringComparison.OrdinalIgnoreCase) || productName.Contains("L'Oréal Paris Color", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "/images/products/makeup/son-thoi-loreal-paris-color-riche-matte-37g.jpg";
+                }
                 if (productName.Contains("BHA", StringComparison.OrdinalIgnoreCase) ||
                     productName.Contains("Paula", StringComparison.OrdinalIgnoreCase))
                 {
@@ -472,6 +504,31 @@ namespace Omnichannel.Infrastructure.Data
                         bySlug[baseSlug] = canonicalUrl;
                     }
                 }
+            }
+
+            // Bổ sung các mã SKU mock kế thừa trực tiếp
+            var legacySkuMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["AMO-ROM-VT02"] = "/images/products/makeup/son-kem-li-romand-zero-velvet-tint-02-joyful-55g.jpg",
+                ["AMO-ROM-JLT"] = "/images/products/makeup/son-tint-bong-romand-juicy-lasting-tint-06-figfig-55g.jpg",
+                ["LOR-COL-666"] = "/images/products/makeup/son-thoi-loreal-paris-color-riche-matte-37g.jpg",
+                ["AMO-INN-AIR"] = "/images/products/makeup/son-kem-innisfree-airy-matte-tint-38g.jpg",
+                ["AMO-INN-POWDER"] = "/images/products/makeup/phan-phu-bot-khoang-innisfree-no-sebum-mineral-powder-5g.jpg",
+                ["LOR-HYA-B5"] = "/images/products/skincare/serum-phuc-hoi-la-roche-posay-hyalu-b5-pure-30ml.jpg",
+                ["LOR-MCL-400"] = "/images/products/skincare/nuoc-tay-trang-bioderma-sensibio-h2o-500ml.png",
+                ["ROH-HDL-100"] = "/images/products/skincare/dung-dich-duong-am-hada-labo-advanced-nourish-170ml.jpg",
+                ["AMO-LAN-WSLEEP"] = "/images/products/skincare/mat-na-ngu-laneige-water-sleeping-mask-ex-70ml.jpg",
+                ["ROH-ACNES-WASH"] = "/images/products/skincare/gel-rua-mat-cosrx-low-ph-good-morning-gel-cleanser-150ml.jpg",
+                ["AMO-LAN-CUSH21"] = "/images/products/makeup/phan-nuoc-laneige-neo-cushion-matte-spf42-15g-x-2.jpg",
+                ["LOR-INF-FND"] = "/images/products/makeup/kem-nen-loreal-infallible-32h-fresh-wear-foundation-30ml.jpg",
+                ["ROH-SS-SKINA"] = "/images/products/skincare/sua-chong-nang-anessa-perfect-uv-sunscreen-skincare-milk-spf50-60ml.jpg",
+                ["LOR-LRP-ANTHE"] = "/images/products/skincare/kem-chong-nang-la-roche-posay-anthelios-uvmune-400-oil-control-50ml.jpg"
+            };
+
+            foreach (var kv in legacySkuMap)
+            {
+                bySku[kv.Key] = kv.Value;
+                validUrls.Add(kv.Value);
             }
 
             foreach (var kv in LegacyShortAliasMap)

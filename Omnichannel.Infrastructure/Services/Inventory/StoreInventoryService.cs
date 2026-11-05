@@ -234,7 +234,9 @@ namespace Omnichannel.Infrastructure.Services.Inventory
                     ProductName = p.Name,
                     Sku = p.Sku,
                     Slug = p.Slug,
-                    ImageUrl = p.ThumbnailUrl,
+                    ImageUrl = !string.IsNullOrWhiteSpace(p.ThumbnailUrl) && !p.ThumbnailUrl.Contains("placeholder")
+                        ? p.ThumbnailUrl
+                        : (p.ThumbnailMediaId.HasValue ? $"/media/{p.ThumbnailMediaId.Value}" : p.ThumbnailUrl),
                     BrandName = p.Brand?.Name ?? p.Supplier?.Name ?? "Canmake Beauty",
                     OriginalPrice = origPrice,
                     SalePrice = salePrice,
