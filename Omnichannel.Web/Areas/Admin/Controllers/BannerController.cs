@@ -1,15 +1,16 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Omnichannel.Application.DTOs.Cms;
 using Omnichannel.Domain.Entities;
 using Omnichannel.Infrastructure.Data;
 using Omnichannel.Infrastructure.Security;
-
-using Microsoft.Extensions.Caching.Memory;
 using Omnichannel.Web.ViewComponents;
 
 namespace Omnichannel.Web.Areas.Admin.Controllers
@@ -51,29 +52,45 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             };
         }
 
+        private static string ResolveBannerDisplayUrl(Banner b)
+        {
+            if (!string.IsNullOrWhiteSpace(b.DesktopImageUrl))
+                return b.DesktopImageUrl;
+            if (b.DesktopMediaId.HasValue)
+                return $"/media/{b.DesktopMediaId.Value}";
+            if (!string.IsNullOrWhiteSpace(b.ImageUrl))
+                return b.ImageUrl;
+            return "/images/banners/hero-banner-summer-beauty.jpg";
+        }
+
         [HttpGet]
         [HasPermission("CMS_BANNER_MANAGE")]
         public async Task<IActionResult> Index()
         {
-            var banners = await _context.Banners
+            var rawBanners = await _context.Banners
                 .AsNoTracking()
                 .OrderBy(b => b.Position)
                 .ThenBy(b => b.DisplayOrder)
-                .Select(b => new BannerItemViewModel
-                {
-                    BannerId = b.Id,
-                    Title = b.Title,
-                    Position = MapPositionStringToInt(b.Position),
-                    DesktopImageUrl = !string.IsNullOrEmpty(b.DesktopImageUrl) ? b.DesktopImageUrl : b.ImageUrl,
-                    MobileImageUrl = b.MobileImageUrl,
-                    LinkUrl = b.LinkUrl,
-                    DisplayOrder = b.DisplayOrder,
-                    ValidFrom = b.ValidFrom ?? DateTime.UtcNow,
-                    ValidTo = b.ValidTo ?? DateTime.UtcNow.AddMonths(1),
-                    TrackingClickCount = b.TrackingClickCount,
-                    IsActive = b.IsActive
-                })
                 .ToListAsync();
+
+            var banners = rawBanners.Select(b => new BannerItemViewModel
+            {
+                BannerId = b.Id,
+                Title = b.Title,
+                Subtitle = b.Subtitle,
+                ButtonText = b.ButtonText,
+                Position = MapPositionStringToInt(b.Position),
+                DesktopImageUrl = ResolveBannerDisplayUrl(b),
+                MobileImageUrl = !string.IsNullOrWhiteSpace(b.MobileImageUrl)
+                    ? b.MobileImageUrl
+                    : (b.MobileMediaId.HasValue ? $"/media/{b.MobileMediaId.Value}" : null),
+                LinkUrl = b.LinkUrl,
+                DisplayOrder = b.DisplayOrder,
+                ValidFrom = b.ValidFrom ?? DateTime.UtcNow,
+                ValidTo = b.ValidTo ?? DateTime.UtcNow.AddMonths(1),
+                TrackingClickCount = b.TrackingClickCount,
+                IsActive = b.IsActive
+            }).ToList();
 
             return View(banners);
         }
@@ -85,15 +102,20 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             return View(new CreateBannerViewModel
             {
                 ValidFrom = DateTime.UtcNow,
-                ValidTo = DateTime.UtcNow.AddMonths(1),
-                DisplayOrder = 1
+                ValidTo = DateTime.UtcNow.AddMonths(3),
+                DisplayOrder = 1,
+                ButtonText = "Khám Phá Ngay",
+                DesktopImageUrl = "/images/banners/hero-banner-summer-beauty.jpg"
             });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         [HasPermission("CMS_BANNER_MANAGE")]
-        public async Task<IActionResult> Create(CreateBannerViewModel model)
+        public async Task<IActionResult> Create(
+            CreateBannerViewModel model,
+            IFormFile? desktopFile = null,
+            IFormFile? mobileFile = null)
         {
             if (model.ValidTo < model.ValidFrom)
             {
@@ -105,18 +127,64 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 return View(model);
             }
 
-            string desktopUrl = model.DesktopMediaId.HasValue ? $"/media/{model.DesktopMediaId}" : (model.DesktopImageUrl?.Trim() ?? string.Empty);
-            string? mobileUrl = model.MobileMediaId.HasValue ? $"/media/{model.MobileMediaId}" : model.MobileImageUrl?.Trim();
+            string desktopUrl = model.DesktopImageUrl?.Trim() ?? string.Empty;
+            int? desktopMediaId = model.DesktopMediaId;
+
+            if (desktopFile != null && desktopFile.Length > 0)
+            {
+                var (savedUrl, savedMediaId) = await SaveUploadedBannerFileAsync(desktopFile);
+                if (!string.IsNullOrEmpty(savedUrl))
+                {
+                    desktopUrl = savedUrl;
+                    desktopMediaId = savedMediaId;
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(desktopUrl) && (!desktopMediaId.HasValue || desktopUrl != $"/media/{desktopMediaId.Value}"))
+            {
+                desktopMediaId = null;
+            }
+            else if (desktopMediaId.HasValue)
+            {
+                desktopUrl = $"/media/{desktopMediaId.Value}";
+            }
+
+            if (string.IsNullOrWhiteSpace(desktopUrl))
+            {
+                desktopUrl = "/images/banners/hero-banner-summer-beauty.jpg";
+            }
+
+            string? mobileUrl = model.MobileImageUrl?.Trim();
+            int? mobileMediaId = model.MobileMediaId;
+
+            if (mobileFile != null && mobileFile.Length > 0)
+            {
+                var (savedMobUrl, savedMobId) = await SaveUploadedBannerFileAsync(mobileFile);
+                if (!string.IsNullOrEmpty(savedMobUrl))
+                {
+                    mobileUrl = savedMobUrl;
+                    mobileMediaId = savedMobId;
+                }
+            }
+            else if (!string.IsNullOrWhiteSpace(mobileUrl) && (!mobileMediaId.HasValue || mobileUrl != $"/media/{mobileMediaId.Value}"))
+            {
+                mobileMediaId = null;
+            }
+            else if (mobileMediaId.HasValue)
+            {
+                mobileUrl = $"/media/{mobileMediaId.Value}";
+            }
 
             var banner = new Banner
             {
                 Title = model.Title.Trim(),
+                Subtitle = string.IsNullOrWhiteSpace(model.Subtitle) ? null : model.Subtitle.Trim(),
+                ButtonText = string.IsNullOrWhiteSpace(model.ButtonText) ? "Khám Phá Ngay" : model.ButtonText.Trim(),
                 Position = MapPositionIntToString(model.Position),
                 ImageUrl = desktopUrl,
                 DesktopImageUrl = desktopUrl,
-                DesktopMediaId = model.DesktopMediaId,
+                DesktopMediaId = desktopMediaId,
                 MobileImageUrl = mobileUrl,
-                MobileMediaId = model.MobileMediaId,
+                MobileMediaId = mobileMediaId,
                 LinkUrl = model.LinkUrl?.Trim(),
                 DisplayOrder = model.DisplayOrder,
                 SortOrder = model.DisplayOrder,
@@ -145,15 +213,19 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             {
                 BannerId = banner.Id,
                 Title = banner.Title,
+                Subtitle = banner.Subtitle,
+                ButtonText = banner.ButtonText ?? "Khám Phá Ngay",
                 Position = MapPositionStringToInt(banner.Position),
-                DesktopImageUrl = !string.IsNullOrEmpty(banner.DesktopImageUrl) ? banner.DesktopImageUrl : banner.ImageUrl,
+                DesktopImageUrl = ResolveBannerDisplayUrl(banner),
                 DesktopMediaId = banner.DesktopMediaId,
-                MobileImageUrl = banner.MobileImageUrl,
+                MobileImageUrl = !string.IsNullOrWhiteSpace(banner.MobileImageUrl)
+                    ? banner.MobileImageUrl
+                    : (banner.MobileMediaId.HasValue ? $"/media/{banner.MobileMediaId.Value}" : null),
                 MobileMediaId = banner.MobileMediaId,
                 LinkUrl = banner.LinkUrl,
                 DisplayOrder = banner.DisplayOrder,
                 ValidFrom = banner.ValidFrom ?? DateTime.UtcNow,
-                ValidTo = banner.ValidTo ?? DateTime.UtcNow.AddMonths(1),
+                ValidTo = banner.ValidTo ?? DateTime.UtcNow.AddMonths(3),
                 IsActive = banner.IsActive
             };
 
@@ -163,7 +235,10 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [HasPermission("CMS_BANNER_MANAGE")]
-        public async Task<IActionResult> Edit(EditBannerViewModel model)
+        public async Task<IActionResult> Edit(
+            EditBannerViewModel model,
+            IFormFile? desktopFile = null,
+            IFormFile? mobileFile = null)
         {
             if (model.ValidTo < model.ValidFrom)
             {
@@ -179,27 +254,75 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             if (banner == null) return NotFound();
 
             banner.Title = model.Title.Trim();
+            banner.Subtitle = string.IsNullOrWhiteSpace(model.Subtitle) ? null : model.Subtitle.Trim();
+            banner.ButtonText = string.IsNullOrWhiteSpace(model.ButtonText) ? "Khám Phá Ngay" : model.ButtonText.Trim();
             banner.Position = MapPositionIntToString(model.Position);
-            if (model.DesktopMediaId.HasValue)
+
+            // Xử lý ảnh Desktop: ưu tiên file tải lên trực tiếp -> URL nhập tay -> MediaId từ thư viện
+            if (desktopFile != null && desktopFile.Length > 0)
             {
-                banner.DesktopMediaId = model.DesktopMediaId;
-                banner.DesktopImageUrl = $"/media/{model.DesktopMediaId}";
-                banner.ImageUrl = $"/media/{model.DesktopMediaId}";
+                var (savedUrl, savedMediaId) = await SaveUploadedBannerFileAsync(desktopFile);
+                if (!string.IsNullOrEmpty(savedUrl))
+                {
+                    banner.DesktopImageUrl = savedUrl;
+                    banner.ImageUrl = savedUrl;
+                    banner.DesktopMediaId = savedMediaId;
+                }
             }
             else if (!string.IsNullOrWhiteSpace(model.DesktopImageUrl))
             {
-                banner.ImageUrl = model.DesktopImageUrl.Trim();
-                banner.DesktopImageUrl = model.DesktopImageUrl.Trim();
+                var trimmedDesktop = model.DesktopImageUrl.Trim();
+                banner.DesktopImageUrl = trimmedDesktop;
+                banner.ImageUrl = trimmedDesktop;
+
+                if (model.DesktopMediaId.HasValue && trimmedDesktop == $"/media/{model.DesktopMediaId.Value}")
+                {
+                    banner.DesktopMediaId = model.DesktopMediaId;
+                }
+                else
+                {
+                    banner.DesktopMediaId = null;
+                }
+            }
+            else if (model.DesktopMediaId.HasValue)
+            {
+                banner.DesktopMediaId = model.DesktopMediaId;
+                banner.DesktopImageUrl = $"/media/{model.DesktopMediaId.Value}";
+                banner.ImageUrl = $"/media/{model.DesktopMediaId.Value}";
             }
 
-            if (model.MobileMediaId.HasValue)
+            // Xử lý ảnh Mobile
+            if (mobileFile != null && mobileFile.Length > 0)
             {
-                banner.MobileMediaId = model.MobileMediaId;
-                banner.MobileImageUrl = $"/media/{model.MobileMediaId}";
+                var (savedMobUrl, savedMobId) = await SaveUploadedBannerFileAsync(mobileFile);
+                if (!string.IsNullOrEmpty(savedMobUrl))
+                {
+                    banner.MobileImageUrl = savedMobUrl;
+                    banner.MobileMediaId = savedMobId;
+                }
             }
             else if (!string.IsNullOrWhiteSpace(model.MobileImageUrl))
             {
-                banner.MobileImageUrl = model.MobileImageUrl.Trim();
+                var trimmedMob = model.MobileImageUrl.Trim();
+                banner.MobileImageUrl = trimmedMob;
+                if (model.MobileMediaId.HasValue && trimmedMob == $"/media/{model.MobileMediaId.Value}")
+                {
+                    banner.MobileMediaId = model.MobileMediaId;
+                }
+                else
+                {
+                    banner.MobileMediaId = null;
+                }
+            }
+            else if (model.MobileMediaId.HasValue)
+            {
+                banner.MobileMediaId = model.MobileMediaId;
+                banner.MobileImageUrl = $"/media/{model.MobileMediaId.Value}";
+            }
+            else
+            {
+                banner.MobileImageUrl = null;
+                banner.MobileMediaId = null;
             }
 
             banner.LinkUrl = model.LinkUrl?.Trim();
@@ -261,41 +384,89 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [HasPermission("CMS_BANNER_MANAGE")]
-        public async Task<IActionResult> UploadImage(Microsoft.AspNetCore.Http.IFormFile file)
+        public async Task<IActionResult> UploadImage(IFormFile file)
         {
             if (file == null || file.Length == 0)
             {
                 return BadRequest(new { success = false, message = "Vui lòng chọn tệp ảnh hợp lệ." });
             }
 
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
-            var ext = System.IO.Path.GetExtension(file.FileName).ToLowerInvariant();
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg" };
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
             if (!allowedExtensions.Contains(ext))
             {
-                return BadRequest(new { success = false, message = "Định dạng không được hỗ trợ (chỉ nhận JPG, PNG, WEBP, GIF)." });
+                return BadRequest(new { success = false, message = "Định dạng không được hỗ trợ (chỉ nhận JPG, PNG, WEBP, GIF, SVG)." });
             }
 
-            if (file.Length > 5 * 1024 * 1024)
+            if (file.Length > 10 * 1024 * 1024)
             {
-                return BadRequest(new { success = false, message = "Dung lượng ảnh tối đa 5MB." });
+                return BadRequest(new { success = false, message = "Dung lượng ảnh tối đa 10MB." });
             }
 
-            var uploadsFolder = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot", "uploads", "banners");
-            if (!System.IO.Directory.Exists(uploadsFolder))
+            var (url, mediaId) = await SaveUploadedBannerFileAsync(file);
+            InvalidateBannerCache();
+
+            return Json(new { success = true, url, mediaId });
+        }
+
+        private async Task<(string Url, int? MediaId)> SaveUploadedBannerFileAsync(IFormFile file)
+        {
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg" };
+            if (!allowedExtensions.Contains(ext))
             {
-                System.IO.Directory.CreateDirectory(uploadsFolder);
+                return (string.Empty, null);
             }
 
-            var uniqueFileName = $"{Guid.NewGuid():N}_{System.IO.Path.GetFileName(file.FileName)}";
-            var filePath = System.IO.Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var stream = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "banners");
+            if (!Directory.Exists(uploadsFolder))
             {
-                await file.CopyToAsync(stream);
+                Directory.CreateDirectory(uploadsFolder);
             }
 
-            var url = $"/uploads/banners/{uniqueFileName}";
-            return Json(new { success = true, url });
+            var safeOriginalName = Path.GetFileNameWithoutExtension(file.FileName);
+            safeOriginalName = System.Text.RegularExpressions.Regex.Replace(safeOriginalName, @"[^a-zA-Z0-9_\-]", "-");
+            var uniqueFileName = $"banner_{DateTime.UtcNow:yyyyMMddHHmmss}_{Guid.NewGuid().ToString("N")[..6]}_{safeOriginalName}{ext}";
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            byte[] bytes;
+            using (var ms = new MemoryStream())
+            {
+                await file.CopyToAsync(ms);
+                bytes = ms.ToArray();
+            }
+
+            await System.IO.File.WriteAllBytesAsync(filePath, bytes);
+            var publicUrl = $"/uploads/banners/{uniqueFileName}";
+
+            int? savedMediaId = null;
+            try
+            {
+                var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(bytes)).ToLowerInvariant();
+                var mediaAsset = new MediaAsset
+                {
+                    FileName = uniqueFileName,
+                    ContentType = file.ContentType ?? "image/jpeg",
+                    MimeType = file.ContentType ?? "image/jpeg",
+                    Data = bytes,
+                    FileSize = bytes.Length,
+                    FileSizeBytes = bytes.Length,
+                    ChecksumHash = hash,
+                    Category = "BANNER",
+                    PublicUrl = publicUrl,
+                    StoragePath = publicUrl,
+                    CreatedAt = DateTime.UtcNow
+                };
+                await _context.MediaAssets.AddAsync(mediaAsset);
+                await _context.SaveChangesAsync();
+                savedMediaId = mediaAsset.Id;
+            }
+            catch
+            {
+                // Nếu lưu MediaAssets gặp lỗi (ví dụ InMemory DB trong Unit Test), vẫn trả về URL file tĩnh bình thường
+            }
+
+            return (publicUrl, savedMediaId);
         }
     }
 }

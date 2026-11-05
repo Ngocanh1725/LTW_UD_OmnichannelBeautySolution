@@ -2549,12 +2549,16 @@ namespace Omnichannel.Infrastructure.Data
                     {
                         Title = "SUMMER BEAUTY VIBES",
                         Subtitle = "Bừng Sáng Nhan Sắc Mùa Hè - Ưu Đãi Đến 40%",
-                        ImageUrl = "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&h=600&fit=crop",
+                        ImageUrl = "/images/banners/hero-banner-summer-beauty.jpg",
+                        DesktopImageUrl = "/images/banners/hero-banner-summer-beauty.jpg",
                         LinkUrl = "/category/trang-diem",
                         ButtonText = "Khám Phá Ngay",
                         Position = "HERO_HOME",
+                        DisplayOrder = 1,
                         SortOrder = 1,
                         IsActive = true,
+                        ValidFrom = now.AddDays(-15),
+                        ValidTo = now.AddDays(90),
                         StartDate = now.AddDays(-15),
                         EndDate = now.AddDays(90)
                     },
@@ -2562,12 +2566,16 @@ namespace Omnichannel.Infrastructure.Data
                     {
                         Title = "K-BEAUTY GLOW SKIN",
                         Subtitle = "Bí Quyết Da Căng Bóng Chuẩn Hàn Cùng Laneige & Rom&nd",
-                        ImageUrl = "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=1600&h=600&fit=crop",
+                        ImageUrl = "/images/banners/banner-routine-kbeauty.jpg",
+                        DesktopImageUrl = "/images/banners/banner-routine-kbeauty.jpg",
                         LinkUrl = "/category/cham-soc-da",
                         ButtonText = "Mua Ngay",
                         Position = "HERO_HOME",
+                        DisplayOrder = 2,
                         SortOrder = 2,
                         IsActive = true,
+                        ValidFrom = now.AddDays(-10),
+                        ValidTo = now.AddDays(60),
                         StartDate = now.AddDays(-10),
                         EndDate = now.AddDays(60)
                     },
@@ -2575,12 +2583,16 @@ namespace Omnichannel.Infrastructure.Data
                     {
                         Title = "FEFO SMART CLEARANCE",
                         Subtitle = "Săn Mỹ Phẩm Chính Hãng Cận Date Giá Cực Hời - Cam Kết Hạn Sử Dụng Minh Bạch",
-                        ImageUrl = "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=1600&h=600&fit=crop",
+                        ImageUrl = "/images/banners/banner-flash-sale-skincare.jpg",
+                        DesktopImageUrl = "/images/banners/banner-flash-sale-skincare.jpg",
                         LinkUrl = "/clearance-fefo",
                         ButtonText = "Săn Deal Cận Date",
-                        Position = "MID_PROMO",
+                        Position = "HERO_HOME",
+                        DisplayOrder = 3,
                         SortOrder = 3,
                         IsActive = true,
+                        ValidFrom = now,
+                        ValidTo = now.AddDays(30),
                         StartDate = now,
                         EndDate = now.AddDays(30)
                     }
@@ -4811,17 +4823,23 @@ namespace Omnichannel.Infrastructure.Data
             {
                 foreach (var b in allBanners)
                 {
+                    // Chỉ tự động ánh xạ nếu banner chưa có ảnh tùy chỉnh của Admin
+                    if (!string.IsNullOrWhiteSpace(b.DesktopImageUrl) || b.DesktopMediaId.HasValue)
+                    {
+                        continue;
+                    }
+
                     var matched = bannerMedias.FirstOrDefault(m =>
                         (!string.IsNullOrEmpty(b.Title) && (
                             (b.Title.Contains("SUMMER", StringComparison.OrdinalIgnoreCase) && m.FileName.Contains("summer", StringComparison.OrdinalIgnoreCase)) ||
                             (b.Title.Contains("K-BEAUTY", StringComparison.OrdinalIgnoreCase) && m.FileName.Contains("kbeauty", StringComparison.OrdinalIgnoreCase)) ||
                             (b.Title.Contains("FEFO", StringComparison.OrdinalIgnoreCase) && m.FileName.Contains("flash-sale", StringComparison.OrdinalIgnoreCase)) ||
-                            m.FileName.Contains(b.Title, StringComparison.OrdinalIgnoreCase))) ||
-                        (!string.IsNullOrEmpty(b.DesktopImageUrl) && m.FileName.Contains(Path.GetFileNameWithoutExtension(b.DesktopImageUrl), StringComparison.OrdinalIgnoreCase)));
+                            m.FileName.Contains(b.Title, StringComparison.OrdinalIgnoreCase))));
 
                     if (matched != null)
                     {
                         b.DesktopMediaId = matched.Id;
+                        b.DesktopImageUrl = $"/images/banners/{matched.FileName}";
                     }
                 }
             }

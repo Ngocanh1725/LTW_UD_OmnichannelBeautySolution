@@ -82,9 +82,20 @@ namespace Omnichannel.Web.ViewComponents
                         {
                             banners = await _context.Banners
                                 .AsNoTracking()
-                                .Where(b => b.IsActive)
-                                .OrderBy(b => b.SortOrder)
+                                .Where(b => b.IsActive && (b.Position == "HERO_HOME" || b.Position == "1" || string.IsNullOrEmpty(b.Position)))
+                                .OrderBy(b => b.DisplayOrder)
+                                .ThenBy(b => b.SortOrder)
                                 .ToListAsync();
+
+                            if (!banners.Any())
+                            {
+                                banners = await _context.Banners
+                                    .AsNoTracking()
+                                    .Where(b => b.IsActive)
+                                    .OrderBy(b => b.DisplayOrder)
+                                    .ThenBy(b => b.SortOrder)
+                                    .ToListAsync();
+                            }
 
                             if (!banners.Any())
                             {

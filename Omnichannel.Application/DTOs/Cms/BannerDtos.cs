@@ -7,6 +7,8 @@ namespace Omnichannel.Application.DTOs.Cms
     {
         public int BannerId { get; set; }
         public string Title { get; set; } = string.Empty;
+        public string? Subtitle { get; set; }
+        public string? ButtonText { get; set; }
         public int Position { get; set; }
         public string PositionName => Position switch
         {
@@ -34,6 +36,14 @@ namespace Omnichannel.Application.DTOs.Cms
         [StringLength(200, ErrorMessage = "Tiêu đề tối đa 200 ký tự")]
         [Display(Name = "Tiêu đề chiến dịch")]
         public string Title { get; set; } = string.Empty;
+
+        [StringLength(255, ErrorMessage = "Mô tả phụ tối đa 255 ký tự")]
+        [Display(Name = "Mô tả phụ (Subtitle)")]
+        public string? Subtitle { get; set; }
+
+        [StringLength(50, ErrorMessage = "Chữ nút bấm tối đa 50 ký tự")]
+        [Display(Name = "Chữ nút bấm (Button Text)")]
+        public string? ButtonText { get; set; }
 
         [Required(ErrorMessage = "Vui lòng chọn vị trí hiển thị")]
         [Display(Name = "Vị trí banner")]

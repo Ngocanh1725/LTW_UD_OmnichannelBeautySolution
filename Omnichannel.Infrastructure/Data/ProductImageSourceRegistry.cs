@@ -164,8 +164,9 @@ namespace Omnichannel.Infrastructure.Data
                         return trimmed;
                     }
 
-                    // Nếu là đường dẫn /media/image/{id} hoặc ảnh danh mục/banner/brand hợp lệ
-                    if (trimmed.StartsWith("/media/image/", StringComparison.OrdinalIgnoreCase) ||
+                    // Nếu là đường dẫn /media/{id}, /uploads/..., hoặc ảnh danh mục/banner/brand hợp lệ
+                    if (trimmed.StartsWith("/media/", StringComparison.OrdinalIgnoreCase) ||
+                        trimmed.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase) ||
                         trimmed.StartsWith("/images/banners/", StringComparison.OrdinalIgnoreCase) ||
                         trimmed.StartsWith("/images/categories/", StringComparison.OrdinalIgnoreCase) ||
                         trimmed.StartsWith("/images/branding/", StringComparison.OrdinalIgnoreCase))
@@ -237,7 +238,8 @@ namespace Omnichannel.Infrastructure.Data
 
             if (primary.EndsWith(".webp", StringComparison.OrdinalIgnoreCase) ||
                 primary.EndsWith(".svg", StringComparison.OrdinalIgnoreCase) ||
-                primary.StartsWith("/media/image/", StringComparison.OrdinalIgnoreCase))
+                primary.StartsWith("/media/", StringComparison.OrdinalIgnoreCase) ||
+                primary.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase))
             {
                 return primary;
             }

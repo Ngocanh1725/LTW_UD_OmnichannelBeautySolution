@@ -16,8 +16,19 @@
                     @for (int i = 0; i < item.Banners.Count; i++)
                     {
                         var b = item.Banners[i];
-                        var bannerImg = b.DesktopMediaId.HasValue ? $"/media/{b.DesktopMediaId}" : (!string.IsNullOrEmpty(b.DesktopImageUrl) ? b.DesktopImageUrl : (!string.IsNullOrEmpty(b.ImageUrl) ? b.ImageUrl : "/images/banners/hero-banner-summer-beauty.jpg"));
-                        var bannerWebp = ProductImageResolver.GetWebpImageUrl(bannerImg);
+                        var bannerImg = !string.IsNullOrEmpty(b.DesktopImageUrl)
+                            ? b.DesktopImageUrl
+                            : (b.DesktopMediaId.HasValue
+                                ? $"/media/{b.DesktopMediaId}"
+                                : (!string.IsNullOrEmpty(b.ImageUrl) ? b.ImageUrl : "/images/banners/hero-banner-summer-beauty.jpg"));
+                        var mobileBannerImg = !string.IsNullOrEmpty(b.MobileImageUrl)
+                            ? b.MobileImageUrl
+                            : (b.MobileMediaId.HasValue ? $"/media/{b.MobileMediaId}" : null);
+                        var bannerWebp = (bannerImg.StartsWith("/images/banners/", StringComparison.OrdinalIgnoreCase) && !bannerImg.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
+                            ? System.IO.Path.ChangeExtension(bannerImg, ".webp")
+                            : null;
+                        bool canEditBanner = User?.Identity?.IsAuthenticated == true &&
+                            (User.IsInRole("SuperAdmin") || User.IsInRole("SUPER_ADMIN") || User.HasClaim("IsStaff", "true"));
 
                         <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out"
                              x-show="activeSlide === @i"
@@ -31,6 +42,10 @@
                             
                             <!-- Background Image with Gradient Overlay & LCP Optimization -->
                             <picture class="block w-full h-full">
+                                @if (!string.IsNullOrEmpty(mobileBannerImg))
+                                {
+                                    <source media="(max-width: 767px)" srcset="@mobileBannerImg" />
+                                }
                                 @if (!string.IsNullOrEmpty(bannerWebp))
                                 {
                                     <source srcset="@bannerWebp" type="image/webp" />
@@ -45,6 +60,23 @@
                                 }
                             </picture>
                             <div class="absolute inset-0 bg-gradient-to-r from-charcoal/90 via-charcoal/60 to-transparent"></div>
+
+                            @if (canEditBanner)
+                            {
+                                <div class="absolute top-4 right-4 z-30 flex items-center gap-2">
+                                    @if (b.Id > 0)
+                                    {
+                                        <a href="/Admin/Banner/Edit/@b.Id" class="px-3.5 py-2 rounded-full bg-white/90 hover:bg-white text-charcoal font-bold text-xs shadow-lg flex items-center gap-1.5 transition hover:scale-105">
+                                            <i class="fa-solid fa-camera-rotate text-magenta-accent"></i>
+                                            <span>Đổi Ảnh Banner Này</span>
+                                        </a>
+                                    }
+                                    <a href="/Admin/Banner" class="px-3.5 py-2 rounded-full bg-charcoal/80 hover:bg-charcoal text-white border border-white/20 font-semibold text-xs shadow-lg flex items-center gap-1.5 backdrop-blur-md transition">
+                                        <i class="fa-solid fa-sliders"></i>
+                                        <span>Quản Lý Tất Cả Banner</span>
+                                    </a>
+                                </div>
+                            }
 
                             <!-- Content Floating Overlay -->
                             <div class="absolute inset-0 flex items-center">
@@ -196,8 +228,16 @@
         @if (code == "MID_BANNER")
         {
             var banner = item.MidBanners.FirstOrDefault();
-            var bgImg = banner != null && !string.IsNullOrEmpty(banner.DesktopImageUrl) ? banner.DesktopImageUrl : "/images/banners/banner-routine-kbeauty.jpg";
-            var bgWebp = ProductImageResolver.GetWebpImageUrl(bgImg);
+            var bgImg = banner != null
+                ? (!string.IsNullOrEmpty(banner.DesktopImageUrl)
+                    ? banner.DesktopImageUrl
+                    : (banner.DesktopMediaId.HasValue
+                        ? $"/media/{banner.DesktopMediaId}"
+                        : (!string.IsNullOrEmpty(banner.ImageUrl) ? banner.ImageUrl : "/images/banners/banner-routine-kbeauty.jpg")))
+                : "/images/banners/banner-routine-kbeauty.jpg";
+            var bgWebp = (bgImg.StartsWith("/images/banners/", StringComparison.OrdinalIgnoreCase) && !bgImg.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
+                ? System.IO.Path.ChangeExtension(bgImg, ".webp")
+                : null;
             var title = banner?.Title ?? item.Section.Title;
             var sub = banner?.Subtitle ?? item.Section.Subtitle ?? "Khám phá phong cách trang điểm chuẩn chuyên gia và các sản phẩm thuần chay";
             var link = banner?.LinkUrl ?? "/category/all";

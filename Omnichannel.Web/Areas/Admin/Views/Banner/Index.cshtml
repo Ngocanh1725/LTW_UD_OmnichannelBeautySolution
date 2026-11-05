@@ -58,7 +58,7 @@
                         <tr>
                             <td class="px-4">
                                 <div class="position-relative d-inline-block">
-                                    <img src="@b.DesktopImageUrl" alt="@b.Title" class="rounded-3 shadow-sm border" style="width: 120px; height: 55px; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=240&fit=crop'" />
+                                    <img src="@b.DesktopImageUrl" alt="@b.Title" class="rounded-3 shadow-sm border" style="width: 120px; height: 55px; object-fit: cover;" onerror="this.src='/images/banners/hero-banner-summer-beauty.jpg'" />
                                     @if (!string.IsNullOrEmpty(b.MobileImageUrl))
                                     {
                                         <span class="position-absolute bottom-0 end-0 badge bg-dark text-white p-1" style="font-size: 8px;" title="Có ảnh Mobile riêng">
@@ -69,6 +69,10 @@
                             </td>
                             <td>
                                 <div class="fw-bold text-dark">@b.Title</div>
+                                @if (!string.IsNullOrEmpty(b.Subtitle))
+                                {
+                                    <div class="text-muted small text-truncate" style="max-width: 340px;">@b.Subtitle</div>
+                                }
                                 <span class="badge" style="background: var(--primary-purple-light); color: var(--primary-purple); font-size: 11px;">@b.PositionName</span>
                                 @if (!string.IsNullOrEmpty(b.LinkUrl))
                                 {
