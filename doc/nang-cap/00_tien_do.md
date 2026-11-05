@@ -37,6 +37,7 @@
 | | **F2** | Hợp nhất ảnh về `wwwroot\images\products` & Xóa thư mục trùng lặp | Code + DB | ✅ Xong | 05/11/2026 | Copy ảnh Hada Labo đúng dòng vào `products/skincare/`, cập nhật toàn bộ tham chiếu sang `/images/products/{sub}/{file}`, cập nhật DB (`98` Products, `75` MediaAssets, `1` OrderReturnRequests), xóa `real_products` & `Real_Products_Images` (`0` match `git grep`), Build 0 Error & 317/317 tests pass |
 | | **F3** | Đồng bộ hình ảnh – dữ liệu & Tối ưu hiển thị (`IProductImageResolver`) | Code + Tối ưu | ✅ Xong | 05/11/2026 | Tạo Single Source of Truth `IProductImageResolver` + ảnh fallback `/images/products/_placeholder.webp` tông hồng có logo mờ, chuẩn hóa 84 ảnh SP 1:1 `1000x1000px` `<= 150KB` + xuất 84 bản `.webp`, tối ưu `<picture>`/`lazy`/`fetchpriority`/CLS/SEO Alt, Build 0 Error & 317/317 tests pass |
 | | **F4** | Rà soát & Lập kế hoạch Rebrand `"OMNI BEAUTY"` → `"CANMAKE BEAUTY"` (Read-only) | Chỉ đọc | ✅ Xong | 05/11/2026 | Quét 6.373 vị trí trong code/doc và 584 bản ghi trên 28 cặp `Bảng.Cột` trong DB, phân loại 4 Nhóm (Nhóm 1: 332 dòng + 141 dòng DB; Nhóm 2: 5.055 dòng; Nhóm 3: 155 dòng + 236 dòng DB; Nhóm 4: 6 dòng active + 831 dòng lịch sử), liệt kê 12 file test ảnh hưởng, lập báo cáo `07_ke_hoach_rebrand_canmake.md` |
+| | **F5** | Thiết kế bộ nhận diện Logo `CANMAKE BEAUTY` (SVG/PNG/ICO/OG) | Thiết kế + Tài sản | ✅ Xong | 05/11/2026 | Phác thảo 3 phương án, chốt PA 1 (*Blooming Heart Monogram C × M*), xuất 5 file SVG thuần vector (chữ chuyển `<path>`, có `<title>`/`<desc>` a11y) + bộ Favicon/Maskable PNG & Multi-ICO + `og-image-1200x630.png` vào `wwwroot/images/branding/`, tạo `scripts/export_brand_assets.ps1` & `08_bo_nhan_dien_canmake.md` |
 
 ---
 
@@ -482,3 +483,20 @@
   3. **Lưu ý pháp lý nhãn hiệu `"CANMAKE"`:**
      - Nêu rõ cảnh báo sở hữu trí tuệ đối với nhãn hiệu *CANMAKE TOKYO* (IDA Laboratories Co., Ltd., Nhật Bản), nguyên tắc thiết kế logo độc lập 100% ở Phiên 5, và nội dung tuyên bố miễn trừ học thuật tại Footer & `README.md`.
 - **Tài liệu sinh ra:** [`doc/nang-cap/07_ke_hoach_rebrand_canmake.md`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/doc/nang-cap/07_ke_hoach_rebrand_canmake.md), cập nhật [`doc/nang-cap/00_tien_do.md`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/doc/nang-cap/00_tien_do.md).
+
+
+### Phiên F5 (Giai đoạn F – Hình ảnh & Rebrand): Thiết Kế Bộ Nhận Diện Logo `CANMAKE BEAUTY` (05/11/2026)
+- **Mục tiêu:** Thiết kế sáng tạo độc lập 100% bộ nhận diện thương hiệu và logo **CANMAKE BEAUTY** tông hồng chuẩn WCAG 2.1 AA/AAA, sản xuất đầy đủ 5 biến thể vector SVG sạch (không nhúng base64, chữ chuyển thành `<path>`, có `<title>`/`<desc>` hỗ trợ a11y), bộ Favicon/Maskable PNG & Multi-size `.ico`, ảnh Open Graph `1200×630px`, script tự động hóa `scripts/export_brand_assets.ps1` và tài liệu quy chuẩn `doc/nang-cap/08_bo_nhan_dien_canmake.md`.
+- **Đã làm:**
+  1. **Trình bày 3 phương án phác thảo & Chốt phương án tại Điểm dừng 1:**
+     - Phác thảo 3 concept độc lập (*PA 1: Blooming Heart Monogram C × M*, *PA 2: Velvet Brushstroke & Sparkle*, *PA 3: Pure Serum Drop & Petal*) kèm bảng kiểm tra độ tương phản màu WCAG 2.1 AA/AAA (`Primary Rose #E8618C`, `Deep Berry #B8336A`, `Blush #F7C6D4`, `Petal Cream #FFF4F7`, `Deep Ink #2B1B24`).
+     - Người dùng phê duyệt **Phương án 1: Blooming Heart Monogram (`C × M`) & 4-Point Sparkle**.
+  2. **Sản xuất trọn bộ tài sản thương hiệu vào `Omnichannel.Web\wwwroot\images\branding\` (`scripts/export_brand_assets.ps1`):**
+     - **5 file SVG thuần vector:** `canmake-logo-horizontal.svg`, `canmake-logo-stacked.svg`, `canmake-logo-icon.svg`, `canmake-logo-white.svg`, `canmake-logo-mono.svg` (chuyển hóa toàn bộ chữ `"CANMAKE"` và `"BEAUTY"` thành `<path>` hình học độc lập font, có `<title>` & `<desc>` chuẩn a11y).
+     - **Bộ Favicon, App Icons & Open Graph:** `favicon.ico` (đa kích thước `16×16`, `32×32`, `48×48` tại cả `wwwroot/images/branding/favicon.ico` và `wwwroot/favicon.ico`), `favicon-32x32.png`, `favicon-192x192.png`, `favicon-512x512.png`, `apple-touch-icon.png` (`180×180`), `maskable-512.png` (vùng an toàn `80%`), `og-image-1200x630.png`, và cập nhật đồng bộ 3 file tương thích ngược (`logo-circle.png`, `logo-full.jpg`, `logo-icon.jpg`).
+  3. **Tài liệu hóa Cẩm nang Nhận diện Thương hiệu:**
+     - Tạo mới [`doc/nang-cap/08_bo_nhan_dien_canmake.md`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/doc/nang-cap/08_bo_nhan_dien_canmake.md) đặc tả ý nghĩa biểu tượng, bảng màu HEX/RGB/HSL/WCAG, hệ thống Typography, kích thước tối thiểu, vùng an toàn `0.25×H`, quy tắc dùng Đúng/Sai và nhúng preview toàn bộ biến thể.
+- **Kết quả kiểm thử:**
+  + `dotnet build OmnichannelBeautySolution.sln -c Release`: **0 Warning, 0 Error**.
+  + `dotnet test OmnichannelBeautySolution.sln -c Release`: **317 / 317 tests PASSED (100%)**.
+- **Tài liệu sinh ra:** [`doc/nang-cap/08_bo_nhan_dien_canmake.md`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/doc/nang-cap/08_bo_nhan_dien_canmake.md), [`scripts/export_brand_assets.ps1`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/scripts/export_brand_assets.ps1), cập nhật [`doc/nang-cap/00_tien_do.md`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/doc/nang-cap/00_tien_do.md).
