@@ -32,7 +32,7 @@ namespace Omnichannel.Infrastructure.Services
             return utc.AddHours(7).Date;
         }
 
-        public static string BuildDefaultReferralCode(int userId) => $"OMNI-REF-{userId:D4}";
+        public static string BuildDefaultReferralCode(int userId) => $"CANMAKE-REF-{userId:D4}";
 
         public LoyaltyService(ApplicationDbContext context, ILogger<LoyaltyService> logger)
         {
@@ -875,7 +875,7 @@ namespace Omnichannel.Infrastructure.Services
                 Success = true,
                 Message = newStreak == 7
                     ? $"🎉 Tuyệt vời! Bạn đã cán mốc Chuỗi 7 Ngày Điểm Danh và nhận Jackpot +{pointsAwarded} điểm!"
-                    : $"🎉 Điểm danh Ngày {newStreak}/7 thành công! Bạn nhận được +{pointsAwarded} điểm Omni Xu.",
+                    : $"🎉 Điểm danh Ngày {newStreak}/7 thành công! Bạn nhận được +{pointsAwarded} điểm Canmake Xu.",
                 PointsAwarded = pointsAwarded,
                 CurrentStreak = newStreak,
                 NewBalance = balanceAfter,
@@ -939,15 +939,16 @@ namespace Omnichannel.Infrastructure.Services
             string cleanCode = referralCode.Trim().ToUpperInvariant();
             await GetOrCreateWalletAsync(referredUserId, cancellationToken);
 
-            // 1. Tìm người giới thiệu theo ReferralCode trên ví hoặc theo quy ước OMNI-REF-{id}
+            // 1. Tìm người giới thiệu theo ReferralCode trên ví hoặc theo quy ước CANMAKE-REF-{id} (hỗ trợ tương thích ngược OMNI-REF-{id})
             var referrerWallet = await _context.LoyaltyWallets
                 .AsNoTracking()
                 .FirstOrDefaultAsync(w => w.ReferralCode != null && w.ReferralCode.ToUpper() == cleanCode, cancellationToken);
 
             int referrerUserId = referrerWallet?.UserId ?? 0;
-            if (referrerUserId <= 0 && cleanCode.StartsWith("OMNI-REF-", StringComparison.OrdinalIgnoreCase))
+            if (referrerUserId <= 0 && (cleanCode.StartsWith("CANMAKE-REF-", StringComparison.OrdinalIgnoreCase) || cleanCode.StartsWith("OMNI-REF-", StringComparison.OrdinalIgnoreCase)))
             {
-                var suffix = cleanCode.Substring("OMNI-REF-".Length);
+                var prefixLen = cleanCode.StartsWith("CANMAKE-REF-", StringComparison.OrdinalIgnoreCase) ? "CANMAKE-REF-".Length : "OMNI-REF-".Length;
+                var suffix = cleanCode.Substring(prefixLen);
                 if (int.TryParse(suffix, out int parsedId) && parsedId > 0)
                 {
                     var referrerUserExists = await _context.Users.AnyAsync(u => u.Id == parsedId, cancellationToken);
@@ -1253,7 +1254,7 @@ namespace Omnichannel.Infrastructure.Services
                 {
                     MissionCode = "MISSION_FIRST_ORDER",
                     Title = "Mua & hoàn tất đơn hàng đầu tiên",
-                    Description = "Trải nghiệm mua sắm mỹ phẩm chính hãng lô date FEFO mới nhất tại Omni.",
+                    Description = "Trải nghiệm mua sắm mỹ phẩm chính hãng lô date FEFO mới nhất tại Canmake Beauty.",
                     IconClass = "fa-solid fa-bag-shopping",
                     PointsReward = 100,
                     IsConditionMet = hasFirstOrder,

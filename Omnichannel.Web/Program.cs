@@ -35,6 +35,15 @@ using Omnichannel.Infrastructure.Data.Interceptors;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// 0. Cấu hình Thương hiệu tập trung (Single Source of Truth cho CANMAKE BEAUTY)
+builder.Services.Configure<BrandOptions>(builder.Configuration.GetSection(BrandOptions.SectionName));
+builder.Services.AddSingleton(sp =>
+{
+    var opts = new BrandOptions();
+    builder.Configuration.GetSection(BrandOptions.SectionName).Bind(opts);
+    return opts;
+});
+
 // 1. Cấu hình DbContext kết nối SQL Server (sa / 12345678) & Domain Events Interceptor
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' không được tìm thấy.");

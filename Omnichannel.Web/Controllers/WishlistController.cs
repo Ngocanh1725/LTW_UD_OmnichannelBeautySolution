@@ -20,7 +20,7 @@ namespace Omnichannel.Web.Controllers
         private readonly ICartService? _cartService;
         private readonly ILogger<WishlistController> _logger;
 
-        private const string CartCookieKey = "OmnichannelBeauty_CartId";
+        private const string CartCookieKey = "CanmakeBeauty_CartId";
 
         public WishlistController(
             ApplicationDbContext dbContext,
@@ -317,7 +317,7 @@ namespace Omnichannel.Web.Controllers
                 return Json(new StockAlertResponse
                 {
                     Success = true,
-                    Message = "Bạn đã đăng ký nhận thông báo cho sản phẩm này rồi! Omni Beauty sẽ gửi tin nhắn đến bạn ngay khi kho vừa nhập hàng mới."
+                    Message = "Bạn đã đăng ký nhận thông báo cho sản phẩm này rồi! Canmake Beauty sẽ gửi tin nhắn đến bạn ngay khi kho vừa nhập hàng mới."
                 });
             }
 
@@ -343,7 +343,7 @@ namespace Omnichannel.Web.Controllers
             return Json(new StockAlertResponse
             {
                 Success = true,
-                Message = $"🎉 Đăng ký thành công! Omni Beauty sẽ tự động thông báo qua {(string.IsNullOrEmpty(email) ? "SMS" : "Email")} ngay khi \"{product.Name}\" có hàng trở lại."
+                Message = $"🎉 Đăng ký thành công! Canmake Beauty sẽ tự động thông báo qua {(string.IsNullOrEmpty(email) ? "SMS" : "Email")} ngay khi \"{product.Name}\" có hàng trở lại."
             });
         }
 
@@ -373,7 +373,7 @@ namespace Omnichannel.Web.Controllers
                 OriginalPrice = originalPrice,
                 DiscountPercent = discountPercent,
                 CategoryName = p.Category?.Name ?? "Mỹ phẩm cao cấp",
-                BrandName = p.Brand?.Name ?? "Omni Beauty",
+                BrandName = p.Brand?.Name ?? "Canmake Beauty",
                 IsInStock = inStock,
                 StockQuantity = totalStock,
                 Rating = 4.9,

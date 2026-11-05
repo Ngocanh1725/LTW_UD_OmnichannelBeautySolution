@@ -38,6 +38,7 @@
 | | **F3** | Đồng bộ hình ảnh – dữ liệu & Tối ưu hiển thị (`IProductImageResolver`) | Code + Tối ưu | ✅ Xong | 05/11/2026 | Tạo Single Source of Truth `IProductImageResolver` + ảnh fallback `/images/products/_placeholder.webp` tông hồng có logo mờ, chuẩn hóa 84 ảnh SP 1:1 `1000x1000px` `<= 150KB` + xuất 84 bản `.webp`, tối ưu `<picture>`/`lazy`/`fetchpriority`/CLS/SEO Alt, Build 0 Error & 317/317 tests pass |
 | | **F4** | Rà soát & Lập kế hoạch Rebrand `"OMNI BEAUTY"` → `"CANMAKE BEAUTY"` (Read-only) | Chỉ đọc | ✅ Xong | 05/11/2026 | Quét 6.373 vị trí trong code/doc và 584 bản ghi trên 28 cặp `Bảng.Cột` trong DB, phân loại 4 Nhóm (Nhóm 1: 332 dòng + 141 dòng DB; Nhóm 2: 5.055 dòng; Nhóm 3: 155 dòng + 236 dòng DB; Nhóm 4: 6 dòng active + 831 dòng lịch sử), liệt kê 12 file test ảnh hưởng, lập báo cáo `07_ke_hoach_rebrand_canmake.md` |
 | | **F5** | Thiết kế bộ nhận diện Logo `CANMAKE BEAUTY` (SVG/PNG/ICO/OG) | Thiết kế + Tài sản | ✅ Xong | 05/11/2026 | Phác thảo 3 phương án, chốt PA 1 (*Blooming Heart Monogram C × M*), xuất 5 file SVG thuần vector (chữ chuyển `<path>`, có `<title>`/`<desc>` a11y) + bộ Favicon/Maskable PNG & Multi-ICO + `og-image-1200x630.png` vào `wwwroot/images/branding/`, tạo `scripts/export_brand_assets.ps1` & `08_bo_nhan_dien_canmake.md` |
+| | **F6** | Triển khai Rebrand `CANMAKE BEAUTY` toàn diện | Code + Giao diện | ✅ Xong | 05/11/2026 | Tập trung cấu hình `BrandOptions` + `appsettings.json`, cập nhật 100% Views/Layouts, Domain/Application/Infrastructure/Tests, bộ token CSS hồng (#E8618C), 0 lỗi git grep, chụp 4 ảnh Before/After, Build 0 Error & 317/317 tests pass 100% |
 
 ---
 
@@ -500,3 +501,34 @@
   + `dotnet build OmnichannelBeautySolution.sln -c Release`: **0 Warning, 0 Error**.
   + `dotnet test OmnichannelBeautySolution.sln -c Release`: **317 / 317 tests PASSED (100%)**.
 - **Tài liệu sinh ra:** [`doc/nang-cap/08_bo_nhan_dien_canmake.md`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/doc/nang-cap/08_bo_nhan_dien_canmake.md), [`scripts/export_brand_assets.ps1`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/scripts/export_brand_assets.ps1), cập nhật [`doc/nang-cap/00_tien_do.md`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/doc/nang-cap/00_tien_do.md).
+
+### Phiên F6 (Giai đoạn F – Hình ảnh & Rebrand): Triển Khai Rebrand `CANMAKE BEAUTY` Toàn Diện (05/11/2026)
+- **Mục tiêu:** Thực thi chuyển đổi thương hiệu hiển thị toàn diện từ `"OMNI BEAUTY"` sang `"CANMAKE BEAUTY"` theo kế hoạch Phiên F4 và nhận diện Logo Phiên F5 đã duyệt: tập trung hóa cấu hình thương hiệu (`BrandOptions` + `appsettings.json`), cập nhật toàn bộ Views/Layouts, Domain/Application/Infrastructure, bộ token CSS màu hồng, cập nhật 12 file unit test, đảm bảo `0` lỗi `git grep`, chụp 4 ảnh đối chiếu Before/After (Header, Footer, Login, POS), và chuẩn bị sẵn script cập nhật CSDL an toàn `scripts/update_rebrand_canmake_phien6.sql`.
+- **Đã làm:**
+  1. **Lưu trữ Logo cũ & Bảo tồn nguyên tắc an toàn:**
+     - Lưu trữ nguyên vẹn 7 file ảnh logo cũ vào `wwwroot/images/branding/_archive/` trước khi thao tác.
+     - Khởi chạy Web và chụp trước bộ ảnh đối chiếu thực tế authentic: `before_header.png`, `before_footer.png`, `before_login.png`, `before_pos.png`.
+  2. **Tập trung hóa cấu hình thương hiệu (Single Source of Truth):**
+     - Tạo mới `Omnichannel.Application/Common/BrandOptions.cs` chứa đầy đủ tên thương hiệu (`Name`, `ShortName`, `DisplayName`), Slogan, pháp nhân, hotline, email, token màu, và các đường dẫn Logo chuẩn (`LogoUrl`, `LogoWhiteUrl`, `LogoStackedUrl`, `LogoMonoUrl`, `IconUrl`, `FaviconSvgUrl`, `ManifestUrl`).
+     - Bổ sung section `"Brand"` vào `appsettings.json` và đăng ký Singleton/Options trong `Program.cs`.
+     - Inject `@inject BrandOptions Brand` vào `_ViewImports.cshtml` (cả Storefront và Admin Area).
+  3. **Cập nhật toàn bộ các tầng kiến trúc (Clean Architecture):**
+     - **Domain & Application:** Chuẩn hóa hằng số phiên đa tầng `AuthConstants` (`CanmakeBeauty.Customer.Session`, `CanmakeBeauty.Admin.Session`), mô tả entity `ThemeEntities`, `CmsEntities`, `LoyaltyEntities`, và các DTOs.
+     - **Infrastructure Services:** Cập nhật 18 service (`ThemeService` với cơ chế in-memory fallback thông minh không làm bẩn DB, `LoyaltyService`, `PaymentService`, `OrderWorkflowService`, `GhnShippingService`, `ExportService`, `ChatbotService`, `ProductReviewService`, `PromotionEngine`, `AiVisionSkinAnalysisService`...).
+     - **Seed Data:** Cập nhật `DbInitializer.cs` và `DbInitializer.RealisticDemoData.cs`.
+     - **Database Script:** Soạn thảo script SQL idempotent an toàn `scripts/update_rebrand_canmake_phien6.sql` bao phủ 25 cặp Bảng.Cột (sẵn sàng thực thi sau khi người dùng xác nhận tại Điểm dừng theo Nguyên tắc 1).
+  4. **Cập nhật 100% Giao diện (Storefront & Admin Views):**
+     - Cập nhật toàn bộ Layouts: `_Layout.cshtml` (meta, Google Fonts Quicksand, schema.org), `_Header.cshtml`, `_Footer.cshtml` (tuyên bố học thuật), `_MobileMenu.cshtml`, `_AdminLayout.cshtml`, `_PosLayout.cshtml`, `_CmsLayout.cshtml`, `_WarehouseLayout.cshtml`.
+     - Cập nhật trang Xác thực: `Login.cshtml`, `Register.cshtml`, `ForgotPassword.cshtml`, `ResetPassword.cshtml`, `ChangePassword.cshtml`, `AccessDenied.cshtml`, Admin `Auth/Login.cshtml` sử dụng `canmake-logo-stacked.svg` và token màu hồng.
+     - Cập nhật quầy POS & in ấn: `Pos/Index.cshtml`, `Pos/PrintReceipt.cshtml`, `Order/Print.cshtml`, `Order/PrintShippingLabel.cshtml` sử dụng `canmake-logo-mono.svg`.
+     - Cập nhật tất cả các View thành viên, Giỏ hàng, Checkout (`CANMAKE-PICKUP|`), Khách hàng (`Canmake Club`, `CANMAKE-REF-`), Danh mục, PDP, SmartFilter, Chatbot.
+  5. **Đồng bộ Design Tokens & CSS sang tông hồng Canmake:**
+     - Cập nhật `design-tokens.css`, `design-system.css`, `theme.css`, `tailwind.config.js` sang bảng màu chính thức: Primary Rose `#E8618C`, Deep Berry `#B8336A`, Blush `#F7C6D4`, Petal Cream `#FFF4F7`, Ink `#2B1B24`.
+  6. **Cập nhật Unit Tests & Kiểm chứng toàn diện:**
+     - Cập nhật khẳng định thương hiệu/cookie trong 12 file test (`ThemeServiceTests`, `ThemeConfigControllerTests`, `MultiSchemeAuthTests`, `ProductQnaAndReviewEnhancementTests`, `StoreInventoryServiceTests`, `ClickAndCollectO2OTests`, `DemoPresenterControllerTests`, `OrderTrackingAndReturnTests`...).
+     - Quét `git grep`: **0 match** ngoài các tài liệu lịch sử.
+     - Chụp 4 ảnh đối chiếu thực tế "AFTER": `after_header.png`, `after_footer.png`, `after_login.png`, `after_pos.png`.
+- **Kết quả nghiệm thu:**
+  + `dotnet build OmnichannelBeautySolution.sln -c Release`: **0 Warning, 0 Error**.
+  + `dotnet test OmnichannelBeautySolution.sln -c Release`: **317 / 317 tests PASSED (100%)**.
+- **Tài liệu sinh ra:** [`scripts/update_rebrand_canmake_phien6.sql`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/scripts/update_rebrand_canmake_phien6.sql), [`Omnichannel.Application/Common/BrandOptions.cs`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/Omnichannel.Application/Common/BrandOptions.cs), 4 ảnh chụp `after_*.png`, cập nhật [`doc/nang-cap/00_tien_do.md`](file:///d:/L%E1%BA%ADp%20tr%C3%ACnh%20web/OmnichannelBeautySolution/doc/nang-cap/00_tien_do.md).

@@ -20,7 +20,7 @@ namespace Omnichannel.Tests.Services
             {
                 Id = 1,
                 Code = "SH-Q1",
-                Name = "OMNI BEAUTY Flagship Quận 1",
+                Name = "CANMAKE BEAUTY Flagship Quận 1",
                 Address = "128 Hai Bà Trưng, Quận 1, TP.HCM",
                 IsActive = true
             };
@@ -28,7 +28,7 @@ namespace Omnichannel.Tests.Services
             {
                 Id = 2,
                 Code = "SH-CG",
-                Name = "OMNI BEAUTY Cầu Giấy",
+                Name = "CANMAKE BEAUTY Cầu Giấy",
                 Address = "68 Cầu Giấy, Cầu Giấy, Hà Nội",
                 IsActive = true
             };

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -37,7 +37,7 @@ namespace Omnichannel.Web.Filters
                 }
             }
 
-            // 2. Kiểm tra nếu request mang phiên Admin Cookie (OmniBeauty.Admin.Session)
+            // 2. Kiểm tra nếu request mang phiên Admin Cookie (CanmakeBeauty.Admin.Session)
             if (!isAdminOrStaff && httpContext.RequestServices != null)
             {
                 var authService = httpContext.RequestServices.GetService(typeof(IAuthenticationService)) as IAuthenticationService;

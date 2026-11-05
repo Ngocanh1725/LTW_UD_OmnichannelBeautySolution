@@ -37,7 +37,7 @@ namespace Omnichannel.Web.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            ViewData["Title"] = "Chẩn Đoán Làn Da Cùng Chuyên Gia AI - OMNI BEAUTY";
+            ViewData["Title"] = "Chẩn Đoán Làn Da Cùng Chuyên Gia AI - CANMAKE BEAUTY";
             ViewData["Description"] = "Trợ lý da liễu AI phân tích chỉ số sinh học da, vẽ biểu đồ radar 5 trục và gợi ý phác đồ chăm sóc tương thích 100%.";
             return View();
         }

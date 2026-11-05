@@ -1,5 +1,5 @@
 // ==========================================
-// OMNICHANNEL BEAUTY SOLUTION - OPTIMIZED STOREFRONT JS
+// CANMAKE BEAUTY SOLUTION - OPTIMIZED STOREFRONT JS
 // Alpine.js Components, 60 FPS Event Loop & Passive Listeners
 // ==========================================
 

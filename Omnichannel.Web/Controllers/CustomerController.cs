@@ -29,7 +29,7 @@ namespace Omnichannel.Web.Controllers
         private readonly IOrderManagementService? _orderManagementService;
         private readonly Microsoft.AspNetCore.Hosting.IWebHostEnvironment? _env;
 
-        private const string CartCookieKey = "OmnichannelBeauty_CartId";
+        private const string CartCookieKey = "CanmakeBeauty_CartId";
 
         // Bộ lưu trữ địa chỉ khách hàng theo UserId
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<int, List<CustomerAddressViewModel>> _userAddresses = new();
@@ -101,8 +101,8 @@ namespace Omnichannel.Web.Controllers
             // Nếu DB chưa có user nào, tạo mô phỏng dữ liệu chuẩn VIP
             string fullName = user?.FullName ?? "Phương Anh Nguyễn";
             string phone = user?.PhoneNumber ?? "0908889999";
-            string email = user?.Email ?? "phuonganh@omnibeauty.vn";
-            string avatar = user?.AvatarUrl ?? "/images/branding/logo-icon.svg";
+            string email = user?.Email ?? "phuonganh@canmakebeauty.vn";
+            string avatar = user?.AvatarUrl ?? "/images/branding/canmake-logo-icon.svg";
             int activeUserId = user?.Id ?? 101;
 
             // 2. Lấy thông tin Ví thành viên
@@ -208,7 +208,7 @@ namespace Omnichannel.Web.Controllers
             string cleanPhoneDigits = new string(phone.Where(char.IsDigit).ToArray());
             if (cleanPhoneDigits.Length < 10) cleanPhoneDigits = cleanPhoneDigits.PadLeft(10, '0');
             string barcode = $"8938{cleanPhoneDigits.Substring(cleanPhoneDigits.Length - 9)}";
-            string qrData = $"OMNI-VIP-{currentTierName}-{cleanPhoneDigits}";
+            string qrData = $"CANMAKE-VIP-{currentTierName}-{cleanPhoneDigits}";
 
             // 4. Lấy danh sách Voucher khả dụng
             List<VoucherDto> vouchers = new();
@@ -288,7 +288,7 @@ namespace Omnichannel.Web.Controllers
                     Points = 50,
                     BalanceBefore = 680,
                     BalanceAfter = 730,
-                    Description = "Thưởng chào mừng thành viên mới Omni Beauty Club",
+                    Description = "Thưởng chào mừng thành viên mới Canmake Beauty Club",
                     CreatedAt = DateTime.UtcNow.AddDays(-15)
                 },
                 new()
@@ -470,15 +470,15 @@ namespace Omnichannel.Web.Controllers
             {
                 decimal vndAmount = points * 1000m;
                 string desc = !string.IsNullOrWhiteSpace(rewardTitle)
-                    ? $"Omni Rewards Bazaar: Đổi {points} điểm nhận {rewardTitle}"
-                    : $"Omni Rewards Bazaar: Đổi {points} điểm nhận Voucher giảm {vndAmount:N0}₫";
+                    ? $"Canmake Rewards Bazaar: Đổi {points} điểm nhận {rewardTitle}"
+                    : $"Canmake Rewards Bazaar: Đổi {points} điểm nhận Voucher giảm {vndAmount:N0}₫";
 
                 var redeemResult = await _loyaltyService.RedeemPointsAsync(userId, points, desc);
 
                 // Lưu sẵn mã voucher vào cookie để khách hàng bấm "Dùng ngay tại Checkout" được tự động áp mã
                 if (!string.IsNullOrWhiteSpace(redeemResult.VoucherCode))
                 {
-                    Response.Cookies.Append("OmnichannelBeauty_AppliedCoupon", redeemResult.VoucherCode, new CookieOptions
+                    Response.Cookies.Append("CanmakeBeauty_AppliedCoupon", redeemResult.VoucherCode, new CookieOptions
                     {
                         Expires = DateTimeOffset.UtcNow.AddDays(1),
                         HttpOnly = true,
@@ -772,7 +772,7 @@ namespace Omnichannel.Web.Controllers
             var (userId, user) = await GetCurrentCustomerUserAsync();
             string name = user?.FullName ?? "Nguyễn Phương Anh";
             string phone = user?.PhoneNumber ?? "0908889999";
-            string email = user?.Email ?? "phuonganh@omnibeauty.vn";
+            string email = user?.Email ?? "phuonganh@canmakebeauty.vn";
 
             var allOrders = await GetCustomerOrdersListAsync(userId, phone, email);
 
@@ -978,7 +978,7 @@ namespace Omnichannel.Web.Controllers
             return Json(new
             {
                 success = true,
-                message = "Yêu cầu xuất hóa đơn điện tử VAT (8%) đã được ghi nhận. Kế toán Omni Beauty sẽ gửi hóa đơn điện tử đến email của bạn trong 24h làm việc!"
+                message = "Yêu cầu xuất hóa đơn điện tử VAT (8%) đã được ghi nhận. Kế toán Canmake Beauty sẽ gửi hóa đơn điện tử đến email của bạn trong 24h làm việc!"
             });
         }
 
@@ -1209,7 +1209,7 @@ namespace Omnichannel.Web.Controllers
             {
                 ProductId = d.ProductId,
                 ProductName = d.Product?.Name ?? "Mỹ phẩm cao cấp",
-                Sku = d.Product?.Sku ?? "OMNI-SKU",
+                Sku = d.Product?.Sku ?? "CANMAKE-SKU",
                 ThumbnailUrl = ProductImageSourceRegistry.ResolveProductImageUrl(d.Product?.ThumbnailUrl, d.Product?.Sku, d.Product?.Slug, d.Product?.Name),
                 VariantName = d.Product?.Unit ?? "Tiêu chuẩn",
                 FefoBatchNumber = d.ProductBatch?.BatchNumber ?? "FEFO-2026-HQ01",
@@ -1293,7 +1293,7 @@ namespace Omnichannel.Web.Controllers
                 RecipientName = name,
                 RecipientPhone = phone,
                 ShippingAddress = "Căn hộ 12.08, Tháp Sapphire 1, Saigon Pearl, 92 Nguyễn Hữu Cảnh, Phường 22, Quận Bình Thạnh, TP. Hồ Chí Minh",
-                CarrierName = "Giao Hàng Hỏa Tốc 2H (Omni VIP Express)",
+                CarrierName = "Giao Hàng Hỏa Tốc 2H (Canmake VIP Express)",
                 TrackingCode = "GHN-VIP-89382026VN",
                 Items = new List<CustomerOrderItemDto>
                 {
@@ -1353,7 +1353,7 @@ namespace Omnichannel.Web.Controllers
                 {
                     StepIndex = 1,
                     Title = "Đặt hàng thành công",
-                    Description = "Hệ thống Omni Beauty đã tiếp nhận đơn hàng của bạn",
+                    Description = "Hệ thống Canmake Beauty đã tiếp nhận đơn hàng của bạn",
                     FormattedTime = orderDate.ToString("dd/MM/yyyy HH:mm"),
                     IsCompleted = currentStep >= 1,
                     IsCurrent = currentStep == 1
@@ -1389,7 +1389,7 @@ namespace Omnichannel.Web.Controllers
                 {
                     StepIndex = 5,
                     Title = "Giao thành công",
-                    Description = "Đơn hàng đã được giao tận tay quý khách. Điểm thưởng Omni Club đã được cộng vào ví!",
+                    Description = "Đơn hàng đã được giao tận tay quý khách. Điểm thưởng Canmake Club đã được cộng vào ví!",
                     FormattedTime = currentStep >= 5 ? orderDate.AddDays(1).ToString("dd/MM/yyyy HH:mm") : null,
                     IsCompleted = currentStep >= 5,
                     IsCurrent = currentStep == 5

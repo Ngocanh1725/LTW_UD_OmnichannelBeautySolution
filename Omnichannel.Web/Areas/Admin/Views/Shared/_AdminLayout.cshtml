@@ -3,7 +3,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Omni Beauty Suite</title>
+    <title>@ViewData["Title"] - @Brand.ShortName Suite</title>
+    <link rel="icon" type="image/svg+xml" href="~/images/branding/favicon.svg" />
+    <link rel="manifest" href="~/site.webmanifest" />
     <!-- Brand Identity & Multi-Resolution Favicons -->
     <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="~/images/branding/favicon-32x32.png" />
@@ -72,12 +74,12 @@
         <aside class="w-64 flex-shrink-0 bg-slate-900 text-slate-300 flex flex-col justify-between hidden md:flex">
             <div>
                 <!-- Brand Logo -->
-                <a href="/Admin/Dashboard" class="h-16 flex items-center px-5 border-b border-slate-800 gap-3 group transition hover:bg-slate-800/40" title="Omni Beauty Enterprise">
+                <a href="/Admin/Dashboard" class="h-16 flex items-center px-5 border-b border-slate-800 gap-3 group transition hover:bg-slate-800/40" title="@Brand.ShortName Enterprise">
                     <div class="brand-logo-badge relative shrink-0 p-[1.5px] rounded-full bg-gradient-to-tr from-rose-400 via-pink-500 to-purple-600 shadow-md">
-                        <img src="~/images/branding/logo-circle.png" alt="Omni Beauty Logo" class="h-9 w-9 rounded-full object-cover brand-logo-img" />
+                        <img src="@Brand.IconUrl" alt="@Brand.Name Logo" class="h-9 w-9 rounded-full object-contain bg-white p-0.5 brand-logo-img" />
                     </div>
                     <div class="min-w-0">
-                        <div class="font-bold text-white text-sm tracking-widest font-serif truncate group-hover:text-rose-400 transition-colors">OMNI BEAUTY</div>
+                        <div class="font-bold text-white text-sm tracking-widest font-serif truncate group-hover:text-rose-400 transition-colors">@Brand.Name</div>
                         <div class="text-[9px] text-pink-400 font-semibold tracking-widest uppercase">ENTERPRISE SUITE</div>
                     </div>
                 </a>

@@ -2,7 +2,7 @@
 @{
     var theme = await ThemeService.GetCurrentThemeAsync();
 }
-@* Omnichannel Beauty Suite - Storefront Header Partial *@
+@* Canmake Beauty - Storefront Header Partial *@
 <header class="w-full relative z-40" x-data="instantSearch()" x-init="init()">
     <style>
         @@keyframes tickerMarquee {
@@ -98,22 +98,13 @@
                     <i class="fa-solid fa-bars-staggered text-xl"></i>
                 </button>
 
-                <!-- Brand Logo (Omni Beauty - Dynamic Theme Engine) -->
-                <a href="/" class="brand-logo-wrapper flex items-center gap-2.5 sm:gap-3 group shrink-0" title="@theme.BrandName - @(theme.Slogan ?? "Luxury Cosmetics")">
-                    <div class="brand-logo-badge relative shrink-0">
-                        <img src="@theme.LogoUrl" 
-                             alt="@theme.BrandName Logo" 
-                             class="brand-logo-img h-10 w-10 sm:h-11 sm:w-11 object-cover rounded-full" 
-                             onerror="this.onerror=null; this.src='@theme.LogoUrl'" />
-                    </div>
-                    <div class="flex flex-col items-start leading-none">
-                        <span class="brand-logo-text text-lg sm:text-2xl font-serif font-bold text-charcoal tracking-[0.16em] transition group-hover:text-magenta-accent">
-                            @theme.BrandName
-                        </span>
-                        <span class="text-[8px] sm:text-[9.5px] font-bold tracking-[0.32em] text-magenta-accent uppercase mt-0.5">
-                            @(theme.Slogan ?? "LUXURY COSMETICS")
-                        </span>
-                    </div>
+                <!-- Brand Logo (Canmake Beauty - Horizontal SVG Identity) -->
+                <a href="/" class="brand-logo-wrapper flex items-center gap-2.5 sm:gap-3 group shrink-0" title="@theme.BrandName - @(theme.Slogan ?? Brand.Slogan)">
+                    <img src="@Brand.LogoUrl" 
+                         alt="@theme.BrandName Logo" 
+                         class="h-10 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]" 
+                         onerror="this.onerror=null; this.src='/images/branding/canmake-logo-horizontal.svg'" />
+                    <span class="sr-only">@theme.BrandName</span>
                 </a>
 
                 <!-- Live Sephora/Hasaki Instant Search Bar with Luxury Popover -->

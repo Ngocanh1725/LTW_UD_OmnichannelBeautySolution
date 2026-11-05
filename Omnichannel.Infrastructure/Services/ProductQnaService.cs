@@ -60,7 +60,7 @@ namespace Omnichannel.Infrastructure.Services
                         Id = a.Id,
                         QuestionId = a.QuestionId,
                         UserId = a.UserId,
-                        AuthorName = !string.IsNullOrWhiteSpace(a.AuthorName) ? a.AuthorName : (a.IsOfficial ? "Chuyên viên Dược Mỹ Phẩm Omni Beauty" : "Khách hàng"),
+                        AuthorName = !string.IsNullOrWhiteSpace(a.AuthorName) ? a.AuthorName : (a.IsOfficial ? "Chuyên viên Dược Mỹ Phẩm Canmake Beauty" : "Khách hàng"),
                         Content = a.Content,
                         IsOfficial = a.IsOfficial,
                         IsApproved = a.IsApproved,
@@ -147,7 +147,7 @@ namespace Omnichannel.Infrastructure.Services
             {
                 if (isOfficial)
                 {
-                    safeAuthor = "Chuyên viên Dược Mỹ Phẩm Omni Beauty";
+                    safeAuthor = "Chuyên viên Dược Mỹ Phẩm Canmake Beauty";
                 }
                 else if (userId.HasValue)
                 {

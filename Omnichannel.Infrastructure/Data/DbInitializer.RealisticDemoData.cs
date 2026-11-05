@@ -455,9 +455,9 @@ namespace Omnichannel.Infrastructure.Data
 
             var cskhReplies = new[]
             {
-                "Omni Beauty cảm ơn bạn đã tin yêu và đánh giá sản phẩm! Chúc bạn luôn có làn da rạng rỡ và khỏe đẹp. Nếu cần tư vấn thêm quy trình skincare chuyên sâu, đừng ngại nhắn tin cho chuyên viên Omni Beauty nhé ạ! ❤️",
-                "Cảm ơn phản hồi chi tiết của quý khách. Đội ngũ Omni Beauty rất vui vì sản phẩm đã mang lại hiệu quả tốt cho làn da của bạn. Chúc bạn luôn tự tin tỏa sáng!",
-                "Omni Beauty xin ghi nhận góp ý quý báu của quý khách về bao bì/dung tích sản phẩm để chuyển tiếp tới hãng nhằm cải tiến trải nghiệm mua sắm ngày một hoàn hảo hơn."
+                "Canmake Beauty cảm ơn bạn đã tin yêu và đánh giá sản phẩm! Chúc bạn luôn có làn da rạng rỡ và khỏe đẹp. Nếu cần tư vấn thêm quy trình skincare chuyên sâu, đừng ngại nhắn tin cho chuyên viên Canmake Beauty nhé ạ! ❤️",
+                "Cảm ơn phản hồi chi tiết của quý khách. Đội ngũ Canmake Beauty rất vui vì sản phẩm đã mang lại hiệu quả tốt cho làn da của bạn. Chúc bạn luôn tự tin tỏa sáng!",
+                "Canmake Beauty xin ghi nhận góp ý quý báu của quý khách về bao bì/dung tích sản phẩm để chuyển tiếp tới hãng nhằm cải tiến trải nghiệm mua sắm ngày một hoàn hảo hơn."
             };
 
             int neededReviews = 210 - existingReviewsCount;

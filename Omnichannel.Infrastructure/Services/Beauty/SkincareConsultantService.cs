@@ -115,7 +115,7 @@ namespace Omnichannel.Infrastructure.Services.Beauty
                             ThumbnailUrl = candidate.ThumbnailUrl,
                             Price = candidate.SellingPrice,
                             DiscountPrice = candidate.DiscountPrice,
-                            BrandName = candidate.Brand?.Name ?? candidate.ManufacturerName ?? "Omni Beauty",
+                            BrandName = candidate.Brand?.Name ?? candidate.ManufacturerName ?? "Canmake Beauty",
                             KeyIngredients = keyIngs,
                             SafetyBadges = safetyBadges,
                             StepCode = stepDef.Code

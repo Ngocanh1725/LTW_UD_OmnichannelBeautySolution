@@ -33,7 +33,7 @@ namespace Omnichannel.Web.Controllers
         private readonly IAuditLogService? _auditLogService;
         private readonly ILogger<DemoPresenterController> _logger;
 
-        private const string CartCookieKey = "OmnichannelBeauty_CartId";
+        private const string CartCookieKey = "CanmakeBeauty_CartId";
 
         public DemoPresenterController(
             IConfiguration configuration,
@@ -154,7 +154,7 @@ namespace Omnichannel.Web.Controllers
                     new Claim(ClaimTypes.NameIdentifier, cashier.Id.ToString()),
                     new Claim(ClaimTypes.Name, cashier.Username),
                     new Claim(ClaimTypes.GivenName, cashier.FullName ?? "Thu Ngân Showroom 01"),
-                    new Claim(ClaimTypes.Email, cashier.Email ?? "cashier01@omnichannelbeauty.vn"),
+                    new Claim(ClaimTypes.Email, cashier.Email ?? "cashier01@canmakebeauty.vn"),
                     new Claim(ClaimTypes.Role, "CASHIER"),
                     new Claim("UserType", cashier.UserType.ToString()),
                     new Claim("IsStaff", "true"),
@@ -202,7 +202,7 @@ namespace Omnichannel.Web.Controllers
                     new Claim(ClaimTypes.NameIdentifier, admin.Id.ToString()),
                     new Claim(ClaimTypes.Name, admin.Username),
                     new Claim(ClaimTypes.GivenName, admin.FullName ?? "Nguyễn Quản Trị (SuperAdmin)"),
-                    new Claim(ClaimTypes.Email, admin.Email ?? "superadmin@omnichannelbeauty.vn"),
+                    new Claim(ClaimTypes.Email, admin.Email ?? "superadmin@canmakebeauty.vn"),
                     new Claim(ClaimTypes.Role, "SuperAdmin"),
                     new Claim(ClaimTypes.Role, "SUPER_ADMIN"),
                     new Claim("UserType", admin.UserType.ToString()),

@@ -355,13 +355,13 @@ namespace Omnichannel.Infrastructure.Services
             return gallery;
         }
 
-        public async Task<bool> AddAdminReplyAsync(int reviewId, string replyContent, string replyBy = "Chuyên viên CSKH Omni Beauty", CancellationToken ct = default)
+        public async Task<bool> AddAdminReplyAsync(int reviewId, string replyContent, string replyBy = "Chuyên viên CSKH Canmake Beauty", CancellationToken ct = default)
         {
             var review = await _context.ProductReviews.FindAsync(new object[] { reviewId }, ct);
             if (review == null) return false;
 
             review.AdminReply = replyContent.Trim();
-            review.AdminReplyBy = string.IsNullOrWhiteSpace(replyBy) ? "Chuyên viên CSKH Omni Beauty" : replyBy.Trim();
+            review.AdminReplyBy = string.IsNullOrWhiteSpace(replyBy) ? "Chuyên viên CSKH Canmake Beauty" : replyBy.Trim();
             review.AdminRepliedAt = DateTime.UtcNow;
             review.UpdatedAt = DateTime.UtcNow;
 

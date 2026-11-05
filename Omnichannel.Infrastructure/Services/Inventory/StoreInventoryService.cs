@@ -235,7 +235,7 @@ namespace Omnichannel.Infrastructure.Services.Inventory
                     Sku = p.Sku,
                     Slug = p.Slug,
                     ImageUrl = p.ThumbnailUrl,
-                    BrandName = p.Brand?.Name ?? p.Supplier?.Name ?? "Omni Beauty",
+                    BrandName = p.Brand?.Name ?? p.Supplier?.Name ?? "Canmake Beauty",
                     OriginalPrice = origPrice,
                     SalePrice = salePrice,
                     StockLimit = stockLimit,

@@ -1,6 +1,6 @@
 @model Omnichannel.Application.DTOs.Loyalty.CustomerDashboardViewModel
 @{
-    ViewData["Title"] = "Thẻ Thành Viên VIP & Đặc Quyền Omni Club";
+    ViewData["Title"] = "Thẻ Thành Viên VIP & Đặc Quyền Canmake Club";
     Layout = "_Layout";
 }
 
@@ -207,12 +207,12 @@
                     <span>/</span>
                     <a href="/Customer/Dashboard" class="hover:text-magenta-accent transition">Khách Hàng</a>
                     <span>/</span>
-                    <span class="text-charcoal font-semibold">Omni Club VIP Loyalty</span>
+                    <span class="text-charcoal font-semibold">Canmake Club VIP Loyalty</span>
                 </nav>
                 <h1 class="text-2xl sm:text-3xl font-serif font-bold text-charcoal flex items-center gap-2.5">
                     <span>Thẻ Thành Viên VIP & Đặc Quyền</span>
                     <span class="inline-flex items-center gap-1 text-xs font-sans font-bold px-2.5 py-1 rounded-full bg-magenta-accent/10 text-magenta-accent border border-magenta-accent/20">
-                        <i class="fa-solid fa-crown text-amber-500"></i> Omni Club
+                        <i class="fa-solid fa-crown text-amber-500"></i> Canmake Club
                     </span>
                 </h1>
                 <p class="text-sm text-slate-500 mt-1">
@@ -290,10 +290,10 @@
                             <div>
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 rounded-full bg-white/20 p-1 flex items-center justify-center backdrop-blur-md border border-white/40">
-                                        <img src="~/images/branding/logo-circle.png" alt="Omni Logo" class="w-full h-full object-cover rounded-full" />
+                                        <img src="~/images/branding/canmake-logo-icon.svg" alt="Canmake Beauty Logo" class="w-full h-full object-cover rounded-full" />
                                     </div>
                                     <div>
-                                        <span class="text-xs uppercase tracking-[0.2em] font-serif font-bold opacity-90 block">OMNI BEAUTY</span>
+                                        <span class="text-xs uppercase tracking-[0.2em] font-serif font-bold opacity-90 block">CANMAKE BEAUTY</span>
                                         <span class="text-[9px] uppercase tracking-[0.15em] opacity-75 font-semibold">VIP PRIVILEGE CLUB</span>
                                     </div>
                                 </div>
@@ -480,7 +480,7 @@
         </div>
 
         <!-- ===================================================
-             2.5. TRUNG TÂM OMNI REWARDS GAMIFICATION (GAP-08 - PHIÊN C7)
+             2.5. TRUNG TÂM CANMAKE REWARDS GAMIFICATION (GAP-08 - PHIÊN C7)
              Điểm danh 7 ngày • Đổi điểm Rewards Bazaar • Nhiệm vụ • Giới thiệu bạn bè
              =================================================== -->
         <div id="omniRewardsSection" class="mb-12 space-y-8">
@@ -585,13 +585,13 @@
                 </div>
             </div>
 
-            <!-- B. OMNI REWARDS BAZAAR – ĐỔI ĐIỂM LẤY VOUCHER DÙNG NGAY TẠI CHECKOUT -->
+            <!-- B. CANMAKE REWARDS BAZAAR – ĐỔI ĐIỂM LẤY VOUCHER DÙNG NGAY TẠI CHECKOUT -->
             <div class="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm">
                 <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
                     <div>
                         <span class="text-xs font-bold uppercase tracking-wider text-magenta-accent">Sephora Beauty Insider Style</span>
                         <h2 class="text-xl sm:text-2xl font-serif font-bold text-charcoal">
-                            Omni Rewards Bazaar – Đổi Điểm Lấy Voucher Đặc Quyền
+                            Canmake Rewards Bazaar – Đổi Điểm Lấy Voucher Đặc Quyền
                         </h2>
                         <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
                             Tỷ lệ quy đổi chuẩn: <strong>1 điểm = 1.000₫</strong>. Voucher sau khi đổi được tự động gắn vào phiên Thanh toán (Checkout) để bạn dùng ngay!
@@ -762,7 +762,7 @@
                             <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">Mã Giới Thiệu Độc Quyền Của Bạn</span>
                             <div class="flex items-center justify-between gap-2">
                                 <span id="myReferralCodeText" class="font-mono text-base sm:text-lg font-bold text-magenta-accent tracking-wider">
-                                    @(string.IsNullOrWhiteSpace(Model.ReferralInfo.MyReferralCode) ? $"OMNI-REF-{Model.UserId:D4}" : Model.ReferralInfo.MyReferralCode)
+                                    @(string.IsNullOrWhiteSpace(Model.ReferralInfo.MyReferralCode) ? $"CANMAKE-REF-{Model.UserId:D4}" : Model.ReferralInfo.MyReferralCode)
                                 </span>
                                 <button type="button"
                                         onclick="copyVoucherCode(document.getElementById('myReferralCodeText').innerText.trim())"
@@ -781,7 +781,7 @@
                                 <input type="text"
                                        id="inputReferralCode"
                                        value="@Model.ReferralInfo.AppliedReferralCode"
-                                       placeholder="VD: OMNI-REF-0002"
+                                       placeholder="VD: CANMAKE-REF-0002"
                                        class="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-mono uppercase focus:outline-none focus:border-magenta-accent" />
                                 <button type="button"
                                         onclick="handleApplyReferralCode()"
@@ -831,7 +831,7 @@
                 <div>
                     <span class="text-xs font-bold uppercase tracking-wider text-magenta-accent">Quyền Lợi Đẳng Cấp</span>
                     <h2 class="text-xl sm:text-2xl font-serif font-bold text-charcoal">
-                        Bảng Đặc Quyền Thành Viên Omni Club
+                        Bảng Đặc Quyền Thành Viên Canmake Club
                     </h2>
                     <p class="text-xs sm:text-sm text-slate-500 mt-0.5">
                         Tích lũy chi tiêu đa kênh (Online & Offline Showroom) để mở khóa những trải nghiệm chăm sóc sắc đẹp đỉnh cao.
@@ -1083,7 +1083,7 @@
             <i class="fa-solid fa-qrcode"></i>
         </div>
 
-        <h3 class="text-lg font-serif font-bold text-charcoal mb-0.5">Mã Thành Viên Omni Club</h3>
+        <h3 class="text-lg font-serif font-bold text-charcoal mb-0.5">Mã Thành Viên Canmake Club</h3>
         <p class="text-xs text-slate-500 mb-4">Đưa mã này cho thu ngân tại quầy Showroom để quét tích điểm</p>
 
         <!-- QR Code Display Box -->
@@ -1343,7 +1343,7 @@
                                     </span>
                                     <span class="text-[10px] text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded-full">Vừa đổi • Sẵn sàng dùng</span>
                                 </div>
-                                <p class="text-xs font-medium text-slate-700 mt-1.5">Giảm trực tiếp ${fmt.format(data.discountAmountVnd)}₫ (Omni Rewards Bazaar)</p>
+                                <p class="text-xs font-medium text-slate-700 mt-1.5">Giảm trực tiếp ${fmt.format(data.discountAmountVnd)}₫ (Canmake Rewards Bazaar)</p>
                             </div>
                             <div class="flex items-center gap-1.5 flex-shrink-0">
                                 <button type="button" onclick="copyVoucherCode('${data.voucherCode}')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-magenta-accent hover:text-white text-xs font-bold transition">

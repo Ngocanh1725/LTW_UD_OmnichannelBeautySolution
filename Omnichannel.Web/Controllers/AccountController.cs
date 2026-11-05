@@ -1,4 +1,4 @@
-﻿using Omnichannel.Application.Common;
+using Omnichannel.Application.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -527,7 +527,7 @@ namespace Omnichannel.Web.Controllers
                 Points = 50,
                 BalanceBefore = 0,
                 BalanceAfter = 50,
-                Description = "Tặng 50 Điểm Thưởng Chào Mừng Thành Viên Mới Omni Beauty Club",
+                Description = "Tặng 50 Điểm Thưởng Chào Mừng Thành Viên Mới Canmake Beauty Club",
                 ExpiresAt = DateTime.UtcNow.AddMonths(12),
                 CreatedAt = DateTime.UtcNow
             };

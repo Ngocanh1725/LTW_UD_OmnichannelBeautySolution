@@ -2,7 +2,7 @@
 @{
     var theme = await ThemeService.GetCurrentThemeAsync();
 }
-@* Omnichannel Beauty Suite - Storefront Mobile Menu Off-Canvas Drawer *@
+@* Canmake Beauty - Storefront Mobile Menu Off-Canvas Drawer *@
 <div x-show="mobileMenuOpen" 
      style="display: none;" 
      class="relative z-50 lg:hidden" 
@@ -36,13 +36,8 @@
                     <!-- Drawer Header -->
                     <div class="p-5 border-b border-soft-border flex items-center justify-between bg-pastel-rose">
                         <a href="/" class="brand-logo-wrapper flex items-center gap-3 leading-none" @@click="mobileMenuOpen = false">
-                            <div class="brand-logo-badge relative shrink-0">
-                                <img src="@theme.LogoUrl" alt="@theme.BrandName Logo" class="brand-logo-img h-10 w-10 object-cover rounded-full" />
-                            </div>
-                            <div class="flex flex-col items-start leading-none">
-                                <span class="brand-logo-text text-lg font-serif font-bold text-charcoal tracking-[0.16em]">@theme.BrandName</span>
-                                <span class="text-[8.5px] font-bold tracking-[0.3em] text-magenta-accent uppercase mt-0.5">@(theme.Slogan ?? "LUXURY COSMETICS")</span>
-                            </div>
+                            <img src="@Brand.LogoUrl" alt="@theme.BrandName Logo" class="h-10 w-auto object-contain" />
+                            <span class="sr-only">@theme.BrandName</span>
                         </a>
                         <button type="button" 
                                 @@click="mobileMenuOpen = false" 

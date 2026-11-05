@@ -53,9 +53,9 @@ namespace Omnichannel.Application.Interfaces.Cms
         Task<List<ReviewPhotoGalleryDto>> GetCustomerReviewImagesAsync(int productId, int limit = 12, CancellationToken ct = default);
 
         /// <summary>
-        /// Thêm phản hồi chính thức từ Chuyên viên CSKH Omni Beauty
+        /// Thêm phản hồi chính thức từ Chuyên viên CSKH Canmake Beauty
         /// </summary>
-        Task<bool> AddAdminReplyAsync(int reviewId, string replyContent, string replyBy = "Chuyên viên CSKH Omni Beauty", CancellationToken ct = default);
+        Task<bool> AddAdminReplyAsync(int reviewId, string replyContent, string replyBy = "Chuyên viên CSKH Canmake Beauty", CancellationToken ct = default);
 
         /// <summary>
         /// Lấy danh sách các đánh giá đang chờ duyệt (Moderation Queue) cho Admin

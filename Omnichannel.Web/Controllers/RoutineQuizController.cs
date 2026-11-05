@@ -26,8 +26,8 @@ namespace Omnichannel.Web.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ILogger<RoutineQuizController> _logger;
 
-        private const string CartCookieKey = "OmnichannelBeauty_CartId";
-        private const string AppliedCouponCookieKey = "OmnichannelBeauty_AppliedCoupon";
+        private const string CartCookieKey = "CanmakeBeauty_CartId";
+        private const string AppliedCouponCookieKey = "CanmakeBeauty_AppliedCoupon";
 
         public RoutineQuizController(
             ISkincareConsultantService consultantService,
@@ -48,7 +48,7 @@ namespace Omnichannel.Web.Controllers
         [HttpGet("/tu-van-da")]
         public IActionResult Index()
         {
-            ViewData["Title"] = "Trắc Nghiệm Da & Tư Vấn Routine 4 Bước Chuẩn Y Khoa | Omni Beauty";
+            ViewData["Title"] = "Trắc Nghiệm Da & Tư Vấn Routine 4 Bước Chuẩn Y Khoa | Canmake Beauty";
             ViewData["Description"] = "Khám phá phác đồ chăm sóc sắc đẹp cá nhân hóa chuẩn Sephora & Hasaki. Nhận lộ trình 4 bước và ưu đãi mua trọn bộ tiết kiệm 15%.";
             return View();
         }
@@ -56,7 +56,7 @@ namespace Omnichannel.Web.Controllers
         [HttpGet("/phan-tich-da")]
         public IActionResult SkinAnalysis()
         {
-            ViewData["Title"] = "Phân Tích Da Bằng Ảnh AI (AI Skin Advisor) | Omni Beauty";
+            ViewData["Title"] = "Phân Tích Da Bằng Ảnh AI (AI Skin Advisor) | Canmake Beauty";
             ViewData["Description"] = "Chẩn đoán 5 chỉ số làn da (Dầu, Độ ẩm, Mụn, Sắc tố, Nhạy cảm) bằng công nghệ AI Vision chuẩn Olay Skin Advisor & Hasaki Clinic. Không lưu trữ ảnh cá nhân.";
             return View();
         }

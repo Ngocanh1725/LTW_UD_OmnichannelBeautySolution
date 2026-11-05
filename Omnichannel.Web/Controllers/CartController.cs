@@ -28,9 +28,9 @@ namespace Omnichannel.Web.Controllers
         private readonly ISkincareIngredientInteractionEngine _interactionEngine;
         private readonly ILogger<CartController> _logger;
 
-        private const string CartCookieKey = "OmnichannelBeauty_CartId";
-        private const string GiftWrapCookieKey = "OmnichannelBeauty_GiftWrap";
-        private const string GiftMessageCookieKey = "OmnichannelBeauty_GiftMessage";
+        private const string CartCookieKey = "CanmakeBeauty_CartId";
+        private const string GiftWrapCookieKey = "CanmakeBeauty_GiftWrap";
+        private const string GiftMessageCookieKey = "CanmakeBeauty_GiftMessage";
 
         private static readonly List<CrossSellItemDto> DefaultCrossSellItems = new()
         {
@@ -764,7 +764,7 @@ namespace Omnichannel.Web.Controllers
                     return Json(new { success = false, message = promoResult.Message ?? "Giỏ hàng chưa thỏa mãn điều kiện áp dụng mã voucher này." });
                 }
 
-                Response.Cookies.Append("OmnichannelBeauty_AppliedCoupon", coupon.CouponCode, new CookieOptions
+                Response.Cookies.Append("CanmakeBeauty_AppliedCoupon", coupon.CouponCode, new CookieOptions
                 {
                     Expires = DateTimeOffset.UtcNow.AddDays(1),
                     HttpOnly = true,

@@ -35,7 +35,7 @@ namespace Omnichannel.Tests.Services
             {
                 Id = 10,
                 Code = "SR-HN-CG",
-                Name = "Showroom Omni Beauty Cầu Giấy",
+                Name = "Showroom Canmake Beauty Cầu Giấy",
                 Address = "245 Cầu Giấy, Dịch Vọng, Cầu Giấy, Hà Nội",
                 PhoneNumber = "02439998888",
                 IsHeadquarters = false,
@@ -46,7 +46,7 @@ namespace Omnichannel.Tests.Services
             {
                 Id = 20,
                 Code = "SR-HCM-Q1",
-                Name = "Showroom Omni Beauty Quận 1",
+                Name = "Showroom Canmake Beauty Quận 1",
                 Address = "88 Nguyễn Huệ, Bến Nghé, Quận 1, TP.HCM",
                 PhoneNumber = "02839998888",
                 IsHeadquarters = false,

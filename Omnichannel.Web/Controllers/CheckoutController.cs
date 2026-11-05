@@ -1,4 +1,4 @@
-﻿using Omnichannel.Web.Filters;
+using Omnichannel.Web.Filters;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -24,10 +24,10 @@ namespace Omnichannel.Web.Controllers
         private readonly ApplicationDbContext _context;
         private readonly ILogger<CheckoutController> _logger;
 
-        private const string CartCookieKey = "OmnichannelBeauty_CartId";
-        private const string CouponCookieKey = "OmnichannelBeauty_AppliedCoupon";
-        private const string GiftWrapCookieKey = "OmnichannelBeauty_GiftWrap";
-        private const string GiftMessageCookieKey = "OmnichannelBeauty_GiftMessage";
+        private const string CartCookieKey = "CanmakeBeauty_CartId";
+        private const string CouponCookieKey = "CanmakeBeauty_AppliedCoupon";
+        private const string GiftWrapCookieKey = "CanmakeBeauty_GiftWrap";
+        private const string GiftMessageCookieKey = "CanmakeBeauty_GiftMessage";
 
         public CheckoutController(
             ICartService cartService,

@@ -83,7 +83,7 @@ namespace Omnichannel.Domain.Entities
 
         [MaxLength(30)]
         [Column(TypeName = "varchar(30)")]
-        public string? ReferralCode { get; set; } // Mã giới thiệu bạn bè (VD: OMNI-REF-0101)
+        public string? ReferralCode { get; set; } // Mã giới thiệu bạn bè (VD: CANMAKE-REF-0101)
 
         public int CurrentStreak { get; set; } = 0; // Chuỗi ngày điểm danh liên tiếp (0..7)
 

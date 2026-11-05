@@ -56,6 +56,10 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 .Where(s => s.IsActive)
                 .OrderBy(s => s.Name)
                 .ToListAsync();
+            foreach (var st in allStores)
+            {
+                if (!string.IsNullOrEmpty(st.Name)) st.Name = st.Name.Replace("OMNI ", "CANMAKE ");
+            }
 
             var currentStore = effectiveStoreId.HasValue
                 ? allStores.Find(s => s.Id == effectiveStoreId.Value)
@@ -417,7 +421,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             var printModel = new PosReceiptPrintViewModel
             {
                 OrderId = order.OrderCode,
-                StoreName = order.Store?.Name ?? "Omnichannel Beauty Solution",
+                StoreName = (order.Store?.Name ?? "Canmake Beauty").Replace("OMNI ", "CANMAKE "),
                 StoreAddress = order.Store?.Address ?? "Hồ Chí Minh, Việt Nam",
                 StorePhone = order.Store?.PhoneNumber ?? "1900 1234",
                 InvoiceSeries = "1C26TBB",
@@ -774,7 +778,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             if (!string.IsNullOrWhiteSpace(keyword))
             {
                 var kw = keyword.Trim();
-                if (kw.StartsWith("OMNI-PICKUP|", StringComparison.OrdinalIgnoreCase))
+                if (kw.StartsWith("CANMAKE-PICKUP|", StringComparison.OrdinalIgnoreCase) || kw.StartsWith("OMNI-PICKUP|", StringComparison.OrdinalIgnoreCase))
                 {
                     var parts = kw.Split('|', StringSplitOptions.RemoveEmptyEntries);
                     if (parts.Length >= 2) kw = parts[1].Trim();
@@ -801,7 +805,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 OrderId = o.Id,
                 OrderCode = o.OrderCode,
                 PickupStoreId = o.PickupStoreId ?? o.StoreId,
-                PickupStoreName = o.PickupStore?.Name ?? o.Store?.Name ?? $"Showroom #{o.StoreId}",
+                PickupStoreName = (o.PickupStore?.Name ?? o.Store?.Name ?? $"Showroom #{o.StoreId}").Replace("OMNI ", "CANMAKE "),
                 CustomerName = o.CustomerName,
                 CustomerPhone = o.CustomerPhone,
                 OrderStatus = o.OrderStatus,
@@ -848,8 +852,8 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             int parsedShiftId = Request.ResolveInt(body, "shiftId", 0);
             int? shiftId = parsedShiftId > 0 ? parsedShiftId : null;
 
-            // Hỗ trợ quét QR dạng OMNI-PICKUP|ORD-...|849201
-            if (!string.IsNullOrWhiteSpace(pickupCode) && pickupCode.StartsWith("OMNI-PICKUP|", StringComparison.OrdinalIgnoreCase))
+            // Hỗ trợ quét QR dạng CANMAKE-PICKUP|ORD-...|849201 (tương thích ngược OMNI-PICKUP|)
+            if (!string.IsNullOrWhiteSpace(pickupCode) && (pickupCode.StartsWith("CANMAKE-PICKUP|", StringComparison.OrdinalIgnoreCase) || pickupCode.StartsWith("OMNI-PICKUP|", StringComparison.OrdinalIgnoreCase)))
             {
                 var parts = pickupCode.Split('|', StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length >= 3)

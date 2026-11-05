@@ -30,7 +30,7 @@ namespace Omnichannel.Web.Controllers
         private readonly IMemoryCache? _cache;
         private readonly IRecommendationService? _recommendationService;
         private readonly IProductComparisonService? _comparisonService;
-        private const string CartCookieKey = "OmnichannelBeauty_CartId";
+        private const string CartCookieKey = "CanmakeBeauty_CartId";
 
         public ProductController(
             ApplicationDbContext context, 
@@ -972,7 +972,7 @@ namespace Omnichannel.Web.Controllers
                         : p.SellingPrice,
                     OriginalPrice = p.SellingPrice,
                     CategoryName = p.Category?.Name ?? "Mỹ Phẩm Cao Cấp",
-                    ManufacturerName = p.ManufacturerName ?? "Omni Beauty"
+                    ManufacturerName = p.ManufacturerName ?? "Canmake Beauty"
                 };
 
                 var bestBatch = p.Batches?

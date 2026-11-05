@@ -1,7 +1,7 @@
 @using System.Text.Encodings.Web
 @model List<Omnichannel.Application.DTOs.Notifications.CustomerSubscriptionDto>
 @{
-    ViewData["Title"] = "Sản Phẩm Đang Theo Dõi - Omni Beauty";
+    ViewData["Title"] = "Sản Phẩm Đang Theo Dõi - Canmake Beauty";
     Layout = "_Layout";
     var backInStockCount = Model.Count(s => s.Type == "BACK_IN_STOCK");
     var priceDropCount = Model.Count(s => s.Type == "PRICE_DROP");

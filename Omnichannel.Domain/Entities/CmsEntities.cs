@@ -291,7 +291,7 @@ namespace Omnichannel.Domain.Entities
 
         public int HelpfulCount { get; set; } = 0; // Số lượt bình chọn hữu ích (Helpful thumbs-up vote)
 
-        // Phản hồi chính thức từ Chuyên viên CSKH Omni Beauty
+        // Phản hồi chính thức từ Chuyên viên CSKH Canmake Beauty
         [MaxLength(1000)]
         public string? AdminReply { get; set; }
 
@@ -299,7 +299,7 @@ namespace Omnichannel.Domain.Entities
         public DateTime? AdminRepliedAt { get; set; }
 
         [MaxLength(100)]
-        public string? AdminReplyBy { get; set; } // Ví dụ: "Chuyên viên CSKH Omni Beauty"
+        public string? AdminReplyBy { get; set; } // Ví dụ: "Chuyên viên CSKH Canmake Beauty"
 
         [Column(TypeName = "datetime2(7)")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

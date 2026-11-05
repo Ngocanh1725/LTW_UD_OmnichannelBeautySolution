@@ -36,7 +36,7 @@ Tài liệu này tổng hợp toàn bộ danh sách tài khoản, mật khẩu, 
 ### 2.1. Quản Trị Viên Hệ Thống (SuperAdmin)
 * **Tài khoản chính:** `superadmin` / `Admin@123`
 * **Tài khoản thay thế:** `admin` / `Admin@123456` hoặc `Admin@123`
-* **Email:** `superadmin@omnichannelbeauty.vn`
+* **Email:** `superadmin@canmakebeauty.vn` (hỗ trợ đăng nhập cả `superadmin@omnichannelbeauty.vn`)
 * **Phạm vi (Scope):** Toàn quyền (God Mode Bypass). Xem và quản trị tất cả các chi nhánh mà không bị giới hạn `StoreId`.
 * **Kịch bản kiểm thử khuyến nghị:**
   - Truy cập Dashboard tổng quan toàn chuỗi (`/Admin/Dashboard`).
@@ -88,7 +88,7 @@ Tài liệu này tổng hợp toàn bộ danh sách tài khoản, mật khẩu, 
 
 ### 2.5. Biên Tập Viên Nội Dung (Content Editor - CMS)
 * **Tài khoản:** `editor01` / `Admin@123`
-* **Email:** `editor01@omnichannelbeauty.vn`
+* **Email:** `editor01@canmakebeauty.vn` (hỗ trợ đăng nhập cả `editor01@omnichannelbeauty.vn`)
 * **Phạm vi (Scope):** Giao diện CMS & Marketing.
 * **Kịch bản kiểm thử khuyến nghị:**
   - Đăng bài viết chia sẻ bí quyết làm đẹp, cẩm nang chăm sóc da (`/Admin/Post`).

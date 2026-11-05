@@ -1146,9 +1146,9 @@ namespace Omnichannel.Infrastructure.Services
         {
             string bankId = "MB";
             string accountNo = "0909999888";
-            string accountName = "CONG TY TNHH OMNICHANNEL BEAUTY";
+            string accountName = "CONG TY TNHH CANMAKE BEAUTY";
             string shortCode = orderId.Contains('-') ? orderId.Split('-')[^1] : orderId;
-            string memo = $"OB {shortCode}";
+            string memo = $"CB {shortCode}";
 
             // Link API VietQR chuẩn Napas 247 tạo ảnh QR động
             string qrUrl = $"https://img.vietqr.io/image/{bankId}-{accountNo}-compact2.png?amount={(long)amount}&addInfo={Uri.EscapeDataString(memo)}&accountName={Uri.EscapeDataString(accountName)}";
@@ -1157,7 +1157,7 @@ namespace Omnichannel.Infrastructure.Services
             {
                 BankName = "MBBank (Ngân Hàng Quân Đội)",
                 BankAccountNo = accountNo,
-                AccountName = "CÔNG TY TNHH OMNICHANNEL BEAUTY",
+                AccountName = "CÔNG TY TNHH CANMAKE BEAUTY",
                 Amount = amount,
                 OrderInfo = memo,
                 QrImageUrl = qrUrl,

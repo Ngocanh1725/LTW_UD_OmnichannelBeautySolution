@@ -83,7 +83,7 @@ namespace Omnichannel.Infrastructure.Services.Notifications
                     Success = true,
                     AlreadySubscribed = true,
                     SubscriptionId = existingSub.Id,
-                    Message = "Bạn đã đăng ký nhận thông báo cho sản phẩm này rồi! Omni Beauty sẽ báo ngay khi hàng về kho."
+                    Message = "Bạn đã đăng ký nhận thông báo cho sản phẩm này rồi! Canmake Beauty sẽ báo ngay khi hàng về kho."
                 };
             }
 
@@ -214,7 +214,7 @@ namespace Omnichannel.Infrastructure.Services.Notifications
             {
                 Success = true,
                 SubscriptionId = newSub.Id,
-                Message = $"📉 Đã kích hoạt theo dõi giá! Omni Beauty sẽ báo ngay khi \"{product.Name}\" giảm về {request.TargetPrice:N0} đ."
+                Message = $"📉 Đã kích hoạt theo dõi giá! Canmake Beauty sẽ báo ngay khi \"{product.Name}\" giảm về {request.TargetPrice:N0} đ."
             };
         }
 
@@ -315,7 +315,7 @@ namespace Omnichannel.Infrastructure.Services.Notifications
                             Type = "INVENTORY",
                             Severity = "SUCCESS",
                             Title = "Sản phẩm yêu thích đã có hàng trở lại! 🎉",
-                            Message = $"Mỹ phẩm '{product.Name}' vừa về thêm {newQuantity} sản phẩm tại Omni Beauty. Hãy nhanh tay đặt ngay kẻo hết!",
+                            Message = $"Mỹ phẩm '{product.Name}' vừa về thêm {newQuantity} sản phẩm tại Canmake Beauty. Hãy nhanh tay đặt ngay kẻo hết!",
                             Url = $"/san-pham/{product.Slug}"
                         };
 

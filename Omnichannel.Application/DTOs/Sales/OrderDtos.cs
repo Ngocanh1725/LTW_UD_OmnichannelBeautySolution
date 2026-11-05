@@ -154,7 +154,7 @@ namespace Omnichannel.Application.DTOs.Sales
     {
         public string BankName { get; set; } = "MBBank (Ngân Hàng Quân Đội)";
         public string BankAccountNo { get; set; } = "0909999888";
-        public string AccountName { get; set; } = "CONG TY TNHH OMNICHANNEL BEAUTY";
+        public string AccountName { get; set; } = "CONG TY TNHH CANMAKE BEAUTY";
         public decimal Amount { get; set; }
         public string OrderInfo { get; set; } = string.Empty;
         public string QrImageUrl { get; set; } = string.Empty;

@@ -15,7 +15,7 @@ namespace Omnichannel.Application.DTOs.Customer
         public decimal? OriginalPrice { get; set; }
         public int DiscountPercent { get; set; }
         public string CategoryName { get; set; } = "Mỹ Phẩm";
-        public string BrandName { get; set; } = "Omni Beauty";
+        public string BrandName { get; set; } = "Canmake Beauty";
         public bool IsInStock { get; set; } = true;
         public int StockQuantity { get; set; } = 10;
         public double Rating { get; set; } = 4.9;

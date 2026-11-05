@@ -14,23 +14,26 @@
     <link rel="canonical" href="@(ViewData["CanonicalUrl"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
     <meta name="robots" content="@(ViewData["Robots"] ?? "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1")" />
 
-    <!-- Brand Identity & Dynamic Favicon from Database -->
-    <link rel="icon" type="image/x-icon" href="@theme.FaviconUrl" />
-    <link rel="icon" type="image/png" sizes="32x32" href="@theme.FaviconUrl" />
-    <link rel="apple-touch-icon" sizes="180x180" href="@theme.FaviconUrl" />
+    <!-- Brand Identity & Favicon Suite (CANMAKE BEAUTY) -->
+    <link rel="icon" type="image/svg+xml" href="@Brand.FaviconSvgUrl" />
+    <link rel="icon" type="image/x-icon" href="@Brand.FaviconUrl" />
+    <link rel="icon" type="image/png" sizes="32x32" href="@Brand.Favicon32Url" />
+    <link rel="apple-touch-icon" sizes="180x180" href="@Brand.AppleTouchIconUrl" />
+    <link rel="manifest" href="@Brand.ManifestUrl" />
+    <meta name="theme-color" content="@Brand.ThemeColor" />
 
     <!-- Open Graph & Social Sharing -->
     <meta property="og:type" content="@(ViewData["OgType"] ?? "website")" />
-    <meta property="og:site_name" content="@theme.BrandName" />
-    <meta property="og:title" content="@(ViewData["Title"] != null ? $"{ViewData["Title"]} - Omni Beauty" : "Omni Beauty | Luxury Cosmetics & Skincare")" />
+    <meta property="og:site_name" content="@Brand.Name" />
+    <meta property="og:title" content="@(ViewData["Title"] != null ? $"{ViewData["Title"]} - {Brand.ShortName}" : $"{Brand.ShortName} | Luxury Cosmetics & Skincare")" />
     <meta property="og:description" content="@(ViewData["Description"] ?? "Hệ thống mua sắm mỹ phẩm cao cấp đa kênh tiên phong công nghệ hạn sử dụng FEFO. Cam kết 100% chính hãng, giao hàng tốc hành 2H.")" />
     <meta property="og:url" content="@(ViewData["CanonicalUrl"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
-    <meta property="og:image" content="@(ViewData["OgImage"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{theme.LogoUrl}")" />
+    <meta property="og:image" content="@(ViewData["OgImage"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Brand.OgImageUrl}")" />
     <meta property="og:locale" content="vi_VN" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="@(ViewData["Title"] != null ? $"{ViewData["Title"]} - Omni Beauty" : "Omni Beauty | Luxury Cosmetics & Skincare")" />
+    <meta name="twitter:title" content="@(ViewData["Title"] != null ? $"{ViewData["Title"]} - {Brand.ShortName}" : $"{Brand.ShortName} | Luxury Cosmetics & Skincare")" />
     <meta name="twitter:description" content="@(ViewData["Description"] ?? "Hệ thống mua sắm mỹ phẩm cao cấp đa kênh tiên phong công nghệ hạn sử dụng FEFO. Cam kết 100% chính hãng, giao hàng tốc hành 2H.")" />
-    <meta name="twitter:image" content="@(ViewData["OgImage"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{theme.LogoUrl}")" />
+    <meta name="twitter:image" content="@(ViewData["OgImage"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Brand.OgImageUrl}")" />
 
     <!-- Schema.org JSON-LD: Organization & WebSite (Google Rich Results Standard) -->
     <script type="application/ld+json">
@@ -40,19 +43,19 @@
         {
           "@@type": "Organization",
           "@@id": "@(Context.Request.Scheme)://@(Context.Request.Host)/#organization",
-          "name": "@theme.BrandName",
-          "alternateName": "Omnichannel Beauty Solution",
+          "name": "@Brand.Name",
+          "alternateName": "@Brand.ShortName",
           "url": "@(Context.Request.Scheme)://@(Context.Request.Host)/",
           "logo": {
             "@@type": "ImageObject",
             "@@id": "@(Context.Request.Scheme)://@(Context.Request.Host)/#logo",
-            "url": "@(Context.Request.Scheme)://@(Context.Request.Host)@theme.LogoUrl",
-            "caption": "@theme.BrandName - Luxury Cosmetics & Skincare"
+            "url": "@(Context.Request.Scheme)://@(Context.Request.Host)@Brand.LogoUrl",
+            "caption": "@Brand.Name - Luxury Cosmetics & Skincare"
           },
-          "image": "@(Context.Request.Scheme)://@(Context.Request.Host)@theme.LogoUrl",
+          "image": "@(Context.Request.Scheme)://@(Context.Request.Host)@Brand.OgImageUrl",
           "description": "Hệ thống mua sắm mỹ phẩm cao cấp đa kênh tiên phong công nghệ hạn sử dụng FEFO. Cam kết 100% chính hãng, giao hàng tốc hành 2H.",
-          "telephone": "1900 8888",
-          "email": "hotro@omnibeauty.vn",
+          "telephone": "@Brand.Hotline",
+          "email": "@Brand.Email",
           "address": {
             "@@type": "PostalAddress",
             "streetAddress": "68 Nguyễn Huệ, Phường Bến Nghé, Quận 1",
@@ -70,17 +73,17 @@
             }
           ],
           "sameAs": [
-            "https://www.facebook.com/omnibeauty.vn",
-            "https://www.instagram.com/omnibeauty.official",
-            "https://www.tiktok.com/@@omnibeauty.vn",
-            "https://www.youtube.com/@@omnibeautyvietnam"
+            "https://www.facebook.com/canmakebeauty.vn",
+            "https://www.instagram.com/canmakebeauty.official",
+            "https://www.tiktok.com/@@canmakebeauty.vn",
+            "https://www.youtube.com/@@canmakebeautyvietnam"
           ]
         },
         {
           "@@type": "WebSite",
           "@@id": "@(Context.Request.Scheme)://@(Context.Request.Host)/#website",
           "url": "@(Context.Request.Scheme)://@(Context.Request.Host)/",
-          "name": "OMNI BEAUTY",
+          "name": "@Brand.Name",
           "description": "Mỹ Phẩm & Dược Mỹ Phẩm Cao Cấp Chuẩn Hạn Dùng FEFO",
           "publisher": {
             "@@id": "@(Context.Request.Scheme)://@(Context.Request.Host)/#organization"
@@ -98,10 +101,10 @@
     }
     </script>
 
-    <!-- Google Fonts: Fully Certified Vietnamese Font Stack (Plus Jakarta Sans, Playfair Display, Lora, Inter, Montserrat) -->
+    <!-- Google Fonts: Fully Certified Vietnamese Font Stack (Quicksand, Plus Jakarta Sans, Playfair Display, Lora, Inter, Montserrat) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
 
     <!-- FontAwesome 6.5.1 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -110,16 +113,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" />
     <style>
         #nprogress .bar {
-            background: linear-gradient(90deg, #ec4899, #f43f5e, #8b5cf6) !important;
+            background: linear-gradient(90deg, #E8618C, #B8336A, #F7C6D4) !important;
             height: 3px !important;
-            box-shadow: 0 0 10px rgba(236, 72, 153, 0.7);
+            box-shadow: 0 0 10px rgba(232, 97, 140, 0.7);
         }
         #nprogress .peg {
-            box-shadow: 0 0 10px #ec4899, 0 0 5px #f43f5e !important;
+            box-shadow: 0 0 10px #E8618C, 0 0 5px #B8336A !important;
         }
         #nprogress .spinner-icon {
-            border-top-color: #ec4899 !important;
-            border-left-color: #ec4899 !important;
+            border-top-color: #E8618C !important;
+            border-left-color: #E8618C !important;
         }
     </style>
 
@@ -139,21 +142,26 @@
             theme: {
                 extend: {
                     colors: {
-                        'pastel-rose': '#fdf2f4',
-                        'pastel-nude': '#faecef',
-                        'pastel-cream': '#fff9f6',
-                        'rose-gold': '#b76e79',
+                        'pastel-rose': '#FFF4F7',
+                        'pastel-nude': '#FCE7EF',
+                        'pastel-cream': '#FFF4F7',
+                        'rose-gold': '#E8618C',
                         'nude-gold': '#C5A880',
                         'champagne-gold': '#d4af37',
-                        'charcoal': '#18181b',
-                        'dark-muted': '#3f3f46',
-                        'soft-border': '#f1d8dd',
-                        'blush': '#f5d6da',
-                        'magenta-accent': '#d63384'
+                        'charcoal': '#2B1B24',
+                        'dark-muted': '#4A3540',
+                        'soft-border': '#F7C6D4',
+                        'blush': '#F7C6D4',
+                        'magenta-accent': '#B8336A',
+                        'primary-rose': '#E8618C',
+                        'deep-berry': '#B8336A',
+                        'petal-cream': '#FFF4F7',
+                        'ink': '#2B1B24'
                     },
                     fontFamily: {
                         'serif': ['Playfair Display', 'Lora', 'Georgia', 'serif'],
                         'sans': ['Plus Jakarta Sans', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        'brand': ['Quicksand', 'Plus Jakarta Sans', 'sans-serif'],
                         'mono': ['JetBrains Mono', 'monospace']
                     }
                 }
@@ -212,7 +220,7 @@
         <i class="fa-solid fa-arrow-up text-xs text-rose-gold group-hover:text-white transition-colors"></i>
     </button>
 
-    <!-- AI Chatbot Assistant Widget phong cách OMNI BEAUTY -->
+    <!-- AI Chatbot Assistant Widget phong cách CANMAKE BEAUTY -->
     <partial name="_ChatbotWidget" />
 
     <!-- Mobile Bottom Navigation Bar -->

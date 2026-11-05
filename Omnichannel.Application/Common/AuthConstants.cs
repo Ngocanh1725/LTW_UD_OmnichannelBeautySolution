@@ -6,8 +6,8 @@ namespace Omnichannel.Application.Common
         public const string AdminCookieScheme = "AdminCookieScheme";
         public const string DynamicScheme = "DynamicAuth";
 
-        public const string CustomerCookieName = "OmniBeauty.Customer.Session";
-        public const string AdminCookieName = "OmniBeauty.Admin.Session";
+        public const string CustomerCookieName = "CanmakeBeauty.Customer.Session";
+        public const string AdminCookieName = "CanmakeBeauty.Admin.Session";
 
         public const string CustomerLoginPath = "/account/login";
         public const string CustomerAccessDeniedPath = "/account/access-denied";

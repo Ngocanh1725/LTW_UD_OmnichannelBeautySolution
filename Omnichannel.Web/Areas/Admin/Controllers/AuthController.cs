@@ -105,11 +105,23 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 }
             }
 
-            // 2. Tìm kiếm người dùng trong CSDL
+            // 2. Tìm kiếm người dùng trong CSDL (tương thích ngược email seed @canmakebeauty.vn <-> @omnichannelbeauty.vn)
+            string? altCanmakeEmail = null;
+            string? altLegacyEmail = null;
+            if (cleanInput.Contains('@'))
+            {
+                var localPart = cleanInput.Split('@')[0].ToUpperInvariant();
+                altCanmakeEmail = $"{localPart}@CANMAKEBEAUTY.VN";
+                altLegacyEmail = $"{localPart}@OMNICHANNELBEAUTY.VN";
+            }
+
             var user = await _dbContext.Users
                 .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.Username.ToUpper() == normalized || u.Email.ToUpper() == normalized || (u.PhoneNumber != null && u.PhoneNumber == cleanInput));
+                .FirstOrDefaultAsync(u => u.Username.ToUpper() == normalized
+                    || u.Email.ToUpper() == normalized
+                    || (altCanmakeEmail != null && (u.Email.ToUpper() == altCanmakeEmail || u.Email.ToUpper() == altLegacyEmail))
+                    || (u.PhoneNumber != null && u.PhoneNumber == cleanInput));
 
             if (user == null)
             {
@@ -197,7 +209,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
             }
 
-            // 7. Cấp Cookie Độc Lập cho Admin: OmniBeauty.Admin.Session (AdminCookieScheme)
+            // 7. Cấp Cookie Độc Lập cho Admin: CanmakeBeauty.Admin.Session (AdminCookieScheme)
             var claimsIdentity = new ClaimsIdentity(claims, AuthConstants.AdminCookieScheme);
             var authProperties = new AuthenticationProperties
             {
@@ -261,7 +273,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 );
             }
 
-            // Tiêu hủy Cookie Admin Scheme (OmniBeauty.Admin.Session)
+            // Tiêu hủy Cookie Admin Scheme (CanmakeBeauty.Admin.Session)
             await HttpContext.SignOutAsync(AuthConstants.AdminCookieScheme);
 
             return RedirectToAction("Login", "Auth", new { area = "Admin" });

@@ -16,8 +16,8 @@ namespace Omnichannel.Tests.Services
             Assert.Equal("AdminCookieScheme", AuthConstants.AdminCookieScheme);
             Assert.Equal("DynamicAuth", AuthConstants.DynamicScheme);
 
-            Assert.Equal("OmniBeauty.Customer.Session", AuthConstants.CustomerCookieName);
-            Assert.Equal("OmniBeauty.Admin.Session", AuthConstants.AdminCookieName);
+            Assert.Equal("CanmakeBeauty.Customer.Session", AuthConstants.CustomerCookieName);
+            Assert.Equal("CanmakeBeauty.Admin.Session", AuthConstants.AdminCookieName);
 
             Assert.Equal("/account/login", AuthConstants.CustomerLoginPath);
             Assert.Equal("/admin/auth/login", AuthConstants.AdminLoginPath);

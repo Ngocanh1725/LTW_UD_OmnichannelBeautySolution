@@ -260,7 +260,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
 
             var cachedProducts = productsRaw.Select(p =>
             {
-                var brandName = p.Brand?.Name ?? p.ManufacturerName ?? "Omni Beauty";
+                var brandName = p.Brand?.Name ?? p.ManufacturerName ?? "Canmake Beauty";
                 var catName = p.Category?.Name ?? "Mỹ Phẩm";
                 decimal price = p.SellingPrice;
                 decimal? salePrice = (p.DiscountPrice.HasValue && p.DiscountPrice.Value > 0 && p.DiscountPrice.Value < p.SellingPrice)

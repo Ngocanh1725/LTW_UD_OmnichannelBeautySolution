@@ -22,7 +22,7 @@ namespace Omnichannel.Application.DTOs.Cms
         public int Id { get; set; }
         public int QuestionId { get; set; }
         public int? UserId { get; set; }
-        public string AuthorName { get; set; } = "Chuyên viên Dược Mỹ Phẩm Omni Beauty";
+        public string AuthorName { get; set; } = "Chuyên viên Dược Mỹ Phẩm Canmake Beauty";
         public string Content { get; set; } = string.Empty;
         public bool IsOfficial { get; set; } = false;
         public bool IsApproved { get; set; }

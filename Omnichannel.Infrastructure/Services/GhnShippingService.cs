@@ -186,7 +186,7 @@ namespace Omnichannel.Infrastructure.Services
                     using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(2));
                     var reqBody = new
                     {
-                        from_district_id = 1442, // Quận 1 HCM (Kho trung tâm OmniBeauty)
+                        from_district_id = 1442, // Quận 1 HCM (Kho trung tâm Canmake Beauty)
                         service_type_id = 2, // Chuẩn E-Commerce
                         to_district_id = int.Parse(toDistrictId),
                         to_ward_code = toWardCode ?? "1A01",

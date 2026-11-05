@@ -1,7 +1,7 @@
 @model Omnichannel.Web.Models.BlogDetailViewModel
 @{
     var post = Model.Post;
-    ViewData["Title"] = $"{post.Title} - Cẩm Nang Làm Đẹp Omnichannel Beauty";
+    ViewData["Title"] = $"{post.Title} - Cẩm Nang Làm Đẹp Canmake Beauty";
     ViewData["Description"] = post.Summary ?? post.Title;
     var postImg = !string.IsNullOrEmpty(post.ThumbnailUrl) ? post.ThumbnailUrl : "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1200&fit=crop";
 }
@@ -47,7 +47,7 @@
                     <div class="w-7 h-7 rounded-full bg-charcoal text-white font-bold flex items-center justify-center text-[10px]">
                         @(post.Author?.FullName?.Substring(0, 1) ?? "B")
                     </div>
-                    <span class="font-bold text-charcoal">@(post.Author?.FullName ?? "Ban Biên Tập Omnichannel Beauty")</span>
+                    <span class="font-bold text-charcoal">@(post.Author?.FullName ?? "Ban Biên Tập Canmake Beauty")</span>
                 </div>
                 <span>•</span>
                 <span><i class="fa-regular fa-calendar me-1"></i>@(post.PublishedAt?.ToString("dd/MM/yyyy") ?? post.CreatedAt.ToString("dd/MM/yyyy"))</span>
@@ -84,7 +84,7 @@
                     @(post.Author?.FullName?.Substring(0, 1) ?? "B")
                 </div>
                 <div>
-                    <h4 class="font-serif font-bold text-charcoal text-sm">@(post.Author?.FullName ?? "Ban Biên Tập Omnichannel Beauty")</h4>
+                    <h4 class="font-serif font-bold text-charcoal text-sm">@(post.Author?.FullName ?? "Ban Biên Tập Canmake Beauty")</h4>
                     <p class="text-xs text-slate-500 mt-0.5">Chuyên gia cố vấn da liễu & biên tập viên làm đẹp chính ngạch</p>
                 </div>
             </div>

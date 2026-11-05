@@ -1,6 +1,6 @@
 @model Omnichannel.Application.DTOs.Customer.CustomerOrderDetailViewModel
 @{
-    ViewData["Title"] = $"Chi Tiết Đơn Hàng #{Model.OrderCode} - Omni Beauty";
+    ViewData["Title"] = $"Chi Tiết Đơn Hàng #{Model.OrderCode} - Canmake Beauty";
     Layout = "_Layout";
 }
 
@@ -111,7 +111,7 @@
                     </div>
 
                     <div class="p-3.5 rounded-2xl bg-white border border-slate-200/80">
-                        <div class="font-bold text-slate-500 uppercase tracking-wider text-[10px] mb-1">Phản hồi từ Quản trị viên Omni Beauty:</div>
+                        <div class="font-bold text-slate-500 uppercase tracking-wider text-[10px] mb-1">Phản hồi từ Quản trị viên Canmake Beauty:</div>
                         @if (!string.IsNullOrWhiteSpace(ret.AdminNote))
                         {
                             <div class="font-semibold text-charcoal leading-relaxed">@ret.AdminNote</div>
@@ -421,7 +421,7 @@
                         </div>
                         <div>
                             <div class="text-xs font-bold text-amber-950">
-                                +@Model.LoyaltyPointsEarned Điểm Thưởng Omni Club
+                                +@Model.LoyaltyPointsEarned Điểm Thưởng Canmake Club
                             </div>
                             <div class="text-[11px] text-amber-800">
                                 Điểm tự động cộng vào Ví VIP sau khi đơn hàng giao thành công.

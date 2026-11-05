@@ -47,7 +47,7 @@ namespace Omnichannel.Tests.Services
             {
                 Id = 10,
                 Username = "customerA",
-                Email = "a@omnibeauty.vn",
+                Email = "a@canmakebeauty.vn",
                 FullName = "Nguyễn Khách Hàng A",
                 PhoneNumber = "0901112222",
                 PasswordHash = "hash",
@@ -58,7 +58,7 @@ namespace Omnichannel.Tests.Services
             {
                 Id = 20,
                 Username = "customerB",
-                Email = "b@omnibeauty.vn",
+                Email = "b@canmakebeauty.vn",
                 FullName = "Trần Khách Hàng B",
                 PhoneNumber = "0908889999",
                 PasswordHash = "hash",

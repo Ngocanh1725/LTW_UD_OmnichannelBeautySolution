@@ -1,7 +1,7 @@
 @model Omnichannel.Web.Models.ProductDetailViewModel
 @{
     var p = Model.Product;
-    ViewData["Title"] = $"{p.Name} | OMNI BEAUTY";
+    ViewData["Title"] = $"{p.Name} | CANMAKE BEAUTY";
     ViewData["Description"] = p.ShortDescription ?? $"{p.Name} chính hãng chuẩn FEFO, giao hàng tốc hành 2H.";
     var mainImg = p.ThumbnailMediaId.HasValue 
         ? $"/media/{p.ThumbnailMediaId}" 
@@ -29,7 +29,7 @@
     }
 
     var finalPrice = (p.DiscountPrice.HasValue && p.DiscountPrice.Value > 0) ? p.DiscountPrice.Value : p.SellingPrice;
-    var rawDesc = p.Description ?? p.ShortDescription ?? $"{p.Name} chính hãng cao cấp tại OMNI BEAUTY chuẩn hạn dùng FEFO.";
+    var rawDesc = p.Description ?? p.ShortDescription ?? $"{p.Name} chính hãng cao cấp tại CANMAKE BEAUTY chuẩn hạn dùng FEFO.";
     var cleanDesc = System.Text.RegularExpressions.Regex.Replace(rawDesc, "<.*?>", string.Empty).Trim();
     if (cleanDesc.Length > 300) cleanDesc = cleanDesc.Substring(0, 300) + "...";
 
@@ -65,7 +65,7 @@
         ["brand"] = new Dictionary<string, object?>
         {
             ["@type"] = "Brand",
-            ["name"] = p.Brand?.Name ?? "OMNI BEAUTY"
+            ["name"] = p.Brand?.Name ?? "CANMAKE BEAUTY"
         },
         ["offers"] = new Dictionary<string, object?>
         {
@@ -79,7 +79,7 @@
             ["seller"] = new Dictionary<string, object?>
             {
                 ["@type"] = "Organization",
-                ["name"] = "OMNI BEAUTY",
+                ["name"] = "CANMAKE BEAUTY",
                 ["url"] = $"{baseUrl}/"
             }
         },
@@ -104,7 +104,7 @@
         productSchema["review"] = Model.Reviews.Take(5).Select(r => new Dictionary<string, object?>
         {
             ["@type"] = "Review",
-            ["author"] = new Dictionary<string, object?> { ["@type"] = "Person", ["name"] = !string.IsNullOrEmpty(r.UserName) ? r.UserName : "Khách hàng OMNI BEAUTY" },
+            ["author"] = new Dictionary<string, object?> { ["@type"] = "Person", ["name"] = !string.IsNullOrEmpty(r.UserName) ? r.UserName : "Khách hàng CANMAKE BEAUTY" },
             ["datePublished"] = r.CreatedAt.ToString("yyyy-MM-dd"),
             ["reviewBody"] = !string.IsNullOrEmpty(r.Content) ? r.Content : (!string.IsNullOrEmpty(r.Title) ? r.Title : "Sản phẩm chính hãng chất lượng cao, date mới tinh."),
             ["reviewRating"] = new Dictionary<string, object?>
@@ -420,7 +420,7 @@
                             </div>
                             <h3 class="text-xl font-serif font-bold text-charcoal">Báo Tôi Khi Có Hàng</h3>
                             <p class="text-xs text-slate-500 mt-1">
-                                Nhận chuông thông báo Realtime & Email ngay khi sản phẩm này về đợt hàng mới tại Omni Beauty.
+                                Nhận chuông thông báo Realtime & Email ngay khi sản phẩm này về đợt hàng mới tại Canmake Beauty.
                             </p>
                         </div>
 
@@ -646,7 +646,7 @@
                 <div class="flex items-center justify-between text-xs text-slate-500">
                     <div class="flex items-center gap-2">
                         <span class="font-bold text-rose-gold uppercase tracking-wider">
-                            @(p.ManufacturerName ?? "OMNICHANNEL BEAUTY")
+                            @(p.ManufacturerName ?? "CANMAKE BEAUTY")
                         </span>
                         <span>•</span>
                         <span>Xuất xứ: <strong class="text-charcoal">@(p.CountryOfOrigin ?? "Chính Ngạch")</strong></span>
@@ -1811,14 +1811,14 @@
                             <i class="fa-solid fa-shield-check"></i>
                         </div>
                         <div>
-                            <span class="text-xs font-bold text-rose-600 uppercase tracking-widest">Cam Kết Thép Từ Omnichannel Beauty</span>
+                            <span class="text-xs font-bold text-rose-600 uppercase tracking-widest">Cam Kết Thép Từ Canmake Beauty</span>
                             <h3 class="font-serif font-bold text-xl sm:text-2xl text-charcoal">
                                 Đền Bù 200% Giá Trị Nếu Phát Hiện Hàng Không Chính Hãng
                             </h3>
                         </div>
                     </div>
                     <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                        Tất cả sản phẩm tại Omnichannel Beauty đều có hợp đồng ủy quyền trực tiếp từ thương hiệu mẹ hoặc nhà nhập khẩu độc quyền tại Việt Nam. Từng lô hàng đều được lưu trữ theo quy trình FEFO nghiêm ngặt, có tem phụ Tiếng Việt và tem chống giả tích hợp mã QR xác thực.
+                        Tất cả sản phẩm tại Canmake Beauty đều có hợp đồng ủy quyền trực tiếp từ thương hiệu mẹ hoặc nhà nhập khẩu độc quyền tại Việt Nam. Từng lô hàng đều được lưu trữ theo quy trình FEFO nghiêm ngặt, có tem phụ Tiếng Việt và tem chống giả tích hợp mã QR xác thực.
                     </p>
                 </div>
 
@@ -1851,7 +1851,7 @@
                         </div>
                         <h4 class="font-bold text-charcoal text-sm">Đổi Trả Tại Mọi Showroom</h4>
                         <p class="text-slate-500 leading-relaxed">
-                            Bạn có thể mang sản phẩm đến bất kỳ showroom nào thuộc hệ thống Omnichannel Beauty (Q1, Cầu Giấy...) để được xử lý nhanh trong 5 phút.
+                            Bạn có thể mang sản phẩm đến bất kỳ showroom nào thuộc hệ thống Canmake Beauty (Q1, Cầu Giấy...) để được xử lý nhanh trong 5 phút.
                         </p>
                     </div>
 

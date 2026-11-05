@@ -112,7 +112,7 @@ namespace Omnichannel.Application.Interfaces.Loyalty
         Task<ClaimMissionResultDto> ClaimMissionRewardAsync(int userId, string missionCode, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Lấy danh mục đổi điểm lấy Voucher (Omni Rewards Bazaar)
+        /// Lấy danh mục đổi điểm lấy Voucher (Canmake Rewards Bazaar)
         /// </summary>
         Task<List<RewardCatalogItemDto>> GetRewardsCatalogAsync(int userId, CancellationToken cancellationToken = default);
     }

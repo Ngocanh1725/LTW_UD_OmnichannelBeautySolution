@@ -306,7 +306,7 @@ namespace Omnichannel.Infrastructure.Services.Sales
             string? latestTracking = histories.LastOrDefault(h => !string.IsNullOrWhiteSpace(h.TrackingCode))?.TrackingCode
                 ?? GenerateDeterministicTrackingCode(order);
             string? latestCarrier = histories.LastOrDefault(h => !string.IsNullOrWhiteSpace(h.CarrierName))?.CarrierName
-                ?? (order.ShippingFee == 45000m ? "Giao Hàng Hỏa Tốc 2H (Omni VIP Express)" : "Giao Hàng Nhanh (GHN Express)");
+                ?? (order.ShippingFee == 45000m ? "Giao Hàng Hỏa Tốc 2H (Canmake VIP Express)" : "Giao Hàng Nhanh (GHN Express)");
 
             // 3. Tiến trình Workflow
             var timeline = new List<AdminOrderStatusHistoryDto>();
@@ -612,7 +612,7 @@ namespace Omnichannel.Infrastructure.Services.Sales
                     Description = !string.IsNullOrWhiteSpace(note)
                         ? note
                         : $"Hệ thống & CSKH đã xác nhận đơn hàng #{order.OrderCode}, giữ chỗ lô FEFO: {string.Join(", ", assignedBatchSummaries.Distinct())}.",
-                    ChangedByName = "Quản trị viên Omni Beauty",
+                    ChangedByName = "Quản trị viên Canmake Beauty",
                     CreatedAt = now
                 }, cancellationToken);
             }
@@ -633,7 +633,7 @@ namespace Omnichannel.Infrastructure.Services.Sales
             else if (targetStatus == "SHIPPING")
             {
                 string trackingCode = GenerateDeterministicTrackingCode(order);
-                string carrierName = order.ShippingFee == 45000m ? "Giao Hàng Hỏa Tốc 2H (Omni VIP Express)" : "Giao Hàng Nhanh (GHN Express)";
+                string carrierName = order.ShippingFee == 45000m ? "Giao Hàng Hỏa Tốc 2H (Canmake VIP Express)" : "Giao Hàng Nhanh (GHN Express)";
 
                 if (_shippingService != null)
                 {
@@ -1025,7 +1025,7 @@ namespace Omnichannel.Infrastructure.Services.Sales
                 }
             }
 
-            return (true, $"Đã gửi yêu cầu đổi/trả hàng ({reqEntity.RequestCode}) thành công! Bộ phận CSKH Omni Beauty sẽ phản hồi trong vòng 24 giờ.", MapReturnRequestToViewModel(reqEntity, order.OrderCode));
+            return (true, $"Đã gửi yêu cầu đổi/trả hàng ({reqEntity.RequestCode}) thành công! Bộ phận CSKH Canmake Beauty sẽ phản hồi trong vòng 24 giờ.", MapReturnRequestToViewModel(reqEntity, order.OrderCode));
         }
 
         public async Task<(bool Success, string Message)> ProcessReturnRequestAsync(
@@ -1057,7 +1057,7 @@ namespace Omnichannel.Infrastructure.Services.Sales
                 {
                     returnReq.Status = isApproved ? "APPROVED" : "REJECTED";
                     returnReq.AdminNote = string.IsNullOrWhiteSpace(adminNote)
-                        ? (isApproved ? "Chấp thuận đổi/trả & hoàn tiền theo chính sách 7 ngày Omni Beauty." : "Yêu cầu chưa đủ điều kiện đổi/trả theo quy định.")
+                        ? (isApproved ? "Chấp thuận đổi/trả & hoàn tiền theo chính sách 7 ngày Canmake Beauty." : "Yêu cầu chưa đủ điều kiện đổi/trả theo quy định.")
                         : adminNote.Trim();
                     returnReq.ProcessedByUserId = adminUserId;
                     returnReq.ProcessedAt = now;
@@ -1110,7 +1110,7 @@ namespace Omnichannel.Infrastructure.Services.Sales
                             Title = "Đã duyệt Đổi/Trả & Hoàn tiền",
                             Description = $"Yêu cầu {returnReq.RequestCode} đã được CHẤP THUẬN. Phản hồi: {returnReq.AdminNote}",
                             ChangedByUserId = adminUserId,
-                            ChangedByName = "Quản trị viên Omni Beauty",
+                            ChangedByName = "Quản trị viên Canmake Beauty",
                             CreatedAt = now
                         }, cancellationToken);
                     }
@@ -1124,7 +1124,7 @@ namespace Omnichannel.Infrastructure.Services.Sales
                             Title = "Từ chối yêu cầu Đổi/Trả",
                             Description = $"Yêu cầu {returnReq.RequestCode} đã bị TỪ CHỐI. Lý do: {returnReq.AdminNote}",
                             ChangedByUserId = adminUserId,
-                            ChangedByName = "Quản trị viên Omni Beauty",
+                            ChangedByName = "Quản trị viên Canmake Beauty",
                             CreatedAt = now
                         }, cancellationToken);
                     }
@@ -1183,7 +1183,7 @@ namespace Omnichannel.Infrastructure.Services.Sales
             {
                 ProductId = d.ProductId,
                 ProductName = d.Product?.Name ?? "Mỹ phẩm cao cấp",
-                Sku = d.Product?.Sku ?? "OMNI-SKU",
+                Sku = d.Product?.Sku ?? "CANMAKE-SKU",
                 ThumbnailUrl = Data.ProductImageSourceRegistry.ResolveProductImageUrl(d.Product?.ThumbnailUrl, d.Product?.Sku, d.Product?.Slug, d.Product?.Name),
                 VariantName = d.Product?.Unit ?? "Tiêu chuẩn",
                 ProductBatchId = d.ProductBatchId,
@@ -1202,7 +1202,7 @@ namespace Omnichannel.Infrastructure.Services.Sales
             string trackingCode = histories.LastOrDefault(h => !string.IsNullOrWhiteSpace(h.TrackingCode))?.TrackingCode
                 ?? GenerateDeterministicTrackingCode(o);
             string carrierName = histories.LastOrDefault(h => !string.IsNullOrWhiteSpace(h.CarrierName))?.CarrierName
-                ?? (o.ShippingFee == 45000m ? "Giao Hàng Hỏa Tốc 2H (Omni VIP Express)" : "Giao Hàng Nhanh (GHN Express)");
+                ?? (o.ShippingFee == 45000m ? "Giao Hàng Hỏa Tốc 2H (Canmake VIP Express)" : "Giao Hàng Nhanh (GHN Express)");
 
             // Mapping OrderStatus -> 6-step index:
             // 1: Đặt hàng (PENDING)
@@ -1259,8 +1259,8 @@ namespace Omnichannel.Infrastructure.Services.Sales
 
             string displayPhone = isGuestLookup ? MaskPhone(o.CustomerPhone) : o.CustomerPhone;
             string displayAddress = isGuestLookup
-                ? MaskAddress(o.ShippingAddress ?? "Nhận tại Showroom Omni Beauty")
-                : (o.ShippingAddress ?? "Nhận tại Showroom Omni Beauty");
+                ? MaskAddress(o.ShippingAddress ?? "Nhận tại Showroom Canmake Beauty")
+                : (o.ShippingAddress ?? "Nhận tại Showroom Canmake Beauty");
 
             var cancelHistory = histories.LastOrDefault(h => h.Status == "CANCELLED");
 
@@ -1308,7 +1308,7 @@ namespace Omnichannel.Infrastructure.Services.Sales
                 SubTotal = o.SubTotal > 0 ? o.SubTotal : items.Sum(i => i.LineTotal),
                 ShippingFee = o.ShippingFee,
                 DiscountAmount = o.DiscountAmount,
-                AppliedVoucherCode = o.DiscountAmount > 0 ? "OMNI-VIP" : null,
+                AppliedVoucherCode = o.DiscountAmount > 0 ? "CANMAKE-VIP" : null,
                 TotalAmount = o.TotalAmount,
                 LoyaltyPointsEarned = (int)Math.Round(o.TotalAmount / 10000m * 1.5m),
                 HasVatRequested = o.Invoice != null,
@@ -1406,7 +1406,7 @@ namespace Omnichannel.Infrastructure.Services.Sales
                     StepIndex = 1,
                     StatusCode = "PENDING",
                     Title = "Đặt hàng",
-                    Description = h1?.Description ?? $"Hệ thống Omni Beauty đã tiếp nhận đơn hàng #{o.OrderCode}.",
+                    Description = h1?.Description ?? $"Hệ thống Canmake Beauty đã tiếp nhận đơn hàng #{o.OrderCode}.",
                     Timestamp = t1,
                     FormattedTime = t1.ToString("dd/MM/yyyy HH:mm:ss"),
                     ChangedByName = h1?.ChangedByName ?? o.CustomerName,
@@ -1421,7 +1421,7 @@ namespace Omnichannel.Infrastructure.Services.Sales
                     Description = h2?.Description ?? "Đã xác nhận thông tin đơn hàng, địa chỉ nhận và giữ chỗ lô hàng.",
                     Timestamp = t2,
                     FormattedTime = currentStep >= 2 ? t2?.ToString("dd/MM/yyyy HH:mm:ss") : null,
-                    ChangedByName = h2?.ChangedByName ?? "CSKH Omni Beauty",
+                    ChangedByName = h2?.ChangedByName ?? "CSKH Canmake Beauty",
                     IsCompleted = currentStep >= 2,
                     IsCurrent = currentStep == 2
                 },

@@ -255,7 +255,7 @@ namespace Omnichannel.Tests.Services
                     {
                         Id = 2,
                         QuestionId = 1,
-                        AuthorName = "Dược sĩ Omni Beauty",
+                        AuthorName = "Dược sĩ Canmake Beauty",
                         Content = "Chào bạn, dòng này nâng 0.5-1 tông tự nhiên nhé!",
                         IsOfficial = true,
                         IsApproved = true,
@@ -275,7 +275,7 @@ namespace Omnichannel.Tests.Services
             Assert.Single(list);
             Assert.Equal(2, list[0].Answers.Count);
             Assert.True(list[0].Answers[0].IsOfficial);
-            Assert.Equal("Dược sĩ Omni Beauty", list[0].Answers[0].AuthorName);
+            Assert.Equal("Dược sĩ Canmake Beauty", list[0].Answers[0].AuthorName);
         }
 
         [Fact]

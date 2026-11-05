@@ -20,7 +20,7 @@
             <span class="p-1.5 rounded-3 bg-danger-subtle text-danger me-2 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
                 <i class="fa-solid fa-cash-register fs-6"></i>
             </span>
-            <span>Omni Beauty POS</span>
+            <img src="@Brand.LogoMonoUrl" alt="Canmake Beauty POS" class="me-2" style="height: 28px; width: auto;" /><span>@Brand.DisplayName POS</span>
         </span>
 
         <!-- Store Selector Dropdown -->
@@ -1391,7 +1391,7 @@
             if (method === 'VIETQR') {
                 const bankId = "MB";
                 const accountNo = "0909999888";
-                const accountName = "OMNICHANNEL BEAUTY";
+                const accountName = "CANMAKE BEAUTY";
                 const qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.png?amount=${finalTotal}&addInfo=POS-${storeId}&accountName=${encodeURIComponent(accountName)}`;
                 document.getElementById('modalQrImage').src = qrUrl;
             }

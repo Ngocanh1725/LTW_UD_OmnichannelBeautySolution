@@ -63,7 +63,7 @@ namespace Omnichannel.Infrastructure.Services.Cms
                 return new PageLayoutDto
                 {
                     PageKey = pageKey,
-                    Title = "Trang Chủ - OMNI BEAUTY",
+                    Title = "Trang Chủ - CANMAKE BEAUTY",
                     IsPublished = true,
                     Theme = themeTokens
                 };
@@ -158,7 +158,7 @@ namespace Omnichannel.Infrastructure.Services.Cms
                 layout = new PageLayout
                 {
                     PageKey = pageKey,
-                    Title = "Trang Chủ - OMNI BEAUTY",
+                    Title = "Trang Chủ - CANMAKE BEAUTY",
                     IsPublished = false,
                     CreatedAt = DateTime.UtcNow
                 };

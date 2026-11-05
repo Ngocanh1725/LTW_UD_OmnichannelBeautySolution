@@ -139,7 +139,7 @@ namespace Omnichannel.Infrastructure.Services
             };
         }
 
-        // 4 Gợi ý câu hỏi nhanh trọng tâm Omnichannel Beauty
+        // 4 Gợi ý câu hỏi nhanh trọng tâm Canmake Beauty
         private static readonly List<string> StandardQuickReplies = new()
         {
             "Tôi cần tìm kem chống nắng cho da dầu mụn?",
@@ -222,7 +222,7 @@ namespace Omnichannel.Infrastructure.Services
             }
 
             // 7. ORDER / TRACKING / ĐƠN HÀNG (Tra cứu mã đơn cụ thể hoặc hướng dẫn)
-            var orderCodeMatch = System.Text.RegularExpressions.Regex.Match(rawMessage, @"(?i)(ORD[_-]?[A-Z0-9]+|OMNI[_-]?[A-Z0-9]+|\b\d{6,10}\b)");
+            var orderCodeMatch = System.Text.RegularExpressions.Regex.Match(rawMessage, @"(?i)(ORD[_-]?[A-Z0-9]+|CANMAKE[_-]?[A-Z0-9]+|OMNI[_-]?[A-Z0-9]+|\b\d{6,10}\b)");
             if (orderCodeMatch.Success)
             {
                 var candidateCode = orderCodeMatch.Value.ToUpperInvariant();
@@ -427,9 +427,9 @@ namespace Omnichannel.Infrastructure.Services
             {
                 return new ChatBotResponseDto
                 {
-                    Reply = "📞 **Hệ Thống Chăm Sóc Khách Hàng & Showroom Omnichannel:**\n\n" +
+                    Reply = "📞 **Hệ Thống Chăm Sóc Khách Hàng & Showroom Canmake Beauty:**\n\n" +
                             "☎️ **Hotline CSKH**: **1900 6868** *(Miễn phí cuộc gọi, 8:00 - 22:00 tất cả các ngày trong tuần)*\n" +
-                            "✉️ **Email CSKH**: support@omnichannelbeauty.vn\n\n" +
+                            "✉️ **Email CSKH**: support@canmakebeauty.vn\n\n" +
                             "🏬 **Hệ Thống Showroom Trải Nghiệm:**\n" +
                             "📍 **Showroom Hà Nội**: Tầng 1, Vincom Center Bà Triệu, Hai Bà Trưng, Hà Nội\n" +
                             "📍 **Showroom TP.HCM**: 72 Lê Thánh Tôn, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh\n" +
@@ -448,7 +448,7 @@ namespace Omnichannel.Infrastructure.Services
             {
                 return new ChatBotResponseDto
                 {
-                    Reply = "Xin chào quý khách! 👋 Mình là **AI Beauty Advisor** - trợ lý trí tuệ nhân tạo sắc đẹp độc quyền của **Omnichannel Beauty Solution**.\n\n" +
+                    Reply = "Xin chào quý khách! 👋 Mình là **AI Beauty Advisor** - trợ lý trí tuệ nhân tạo sắc đẹp độc quyền của **Canmake Beauty**.\n\n" +
                             "Rất hân hạnh được đồng hành cùng bạn chăm sóc làn da khỏe đẹp! Bạn có thể chọn ngay một trong các câu hỏi nhanh bên dưới hoặc gõ trực tiếp tên hoạt chất / sản phẩm bạn quan tâm nhé:",
                     Intent = "greeting",
                     QuickReplies = StandardQuickReplies
@@ -484,7 +484,7 @@ namespace Omnichannel.Infrastructure.Services
                         "✨ **Màng lọc phổ rộng SPF50+ PA++++**: Bảo vệ toàn diện trước tia UVA bước sóng dài và ánh sáng xanh.\n" +
                         "✨ **Công nghệ kiềm dầu Dry-Touch / Airlicium**: Hút sạch bã nhờn dư thừa, duy trì lớp finish lì mịn ráo thoáng suốt 8-12 tiếng.\n" +
                         "✨ **Non-comedogenic & Không cồn khô**: Kết cấu dạng sữa lỏng (Milk) hoặc Gel-cream mỏng nhẹ, không gây bết rít hay cay mắt.\n\n" +
-                        "👇 **Top kem chống nắng kiềm dầu mụn bán chạy nhất tại hệ thống Omnichannel Beauty:**",
+                        "👇 **Top kem chống nắng kiềm dầu mụn bán chạy nhất tại hệ thống Canmake Beauty:**",
                 Intent = "sunscreen_oily",
                 ActionUrl = "/category/kem-chong-nang",
                 ActionText = "Xem Tất Cả Kem Chống Nắng",
@@ -499,7 +499,7 @@ namespace Omnichannel.Infrastructure.Services
             return new ChatBotResponseDto
             {
                 Reply = "⚡ **CHƯƠNG TRÌNH FLASH SALE CẬN DATE - GIẢM SÂU 40% - 70%**\n\n" +
-                        "Omnichannel Beauty tự hào tiên phong triển khai hệ thống **Quản Trị Tồn Kho FEFO (First Expired, First Out)** chuẩn quốc tế:\n\n" +
+                        "Canmake Beauty tự hào tiên phong triển khai hệ thống **Quản Trị Tồn Kho FEFO (First Expired, First Out)** chuẩn quốc tế:\n\n" +
                         "🔥 **Mức giảm siêu khủng 40% - 70%**: Dành riêng cho các lô mỹ phẩm chính hãng có hạn dùng từ 3 đến 6 tháng.\n" +
                         "❄️ **Bảo quản dược phẩm nghiêm ngặt**: 100% sản phẩm lưu kho trong phòng mát nhiệt độ chuẩn 22°C - 25°C, độ ẩm < 60%, bảo toàn trọn vẹn chất lượng và độ hoạt tính.\n" +
                         "🔍 **Minh bạch thông tin**: Niêm yết rõ ràng mã lô sản xuất (Batch Number) và ngày hết hạn chính xác trên từng sản phẩm.\n" +
@@ -523,7 +523,7 @@ namespace Omnichannel.Infrastructure.Services
             return new ChatBotResponseDto
             {
                 Reply = "👑 **TRA CỨU HẠN SỬ DỤNG: SERUM ESTÉE LAUDER ADVANCED NIGHT REPAIR (ANR)**\n\n" +
-                        "Hệ thống quản lý kho vận thông minh FEFO của Omnichannel Beauty ghi nhận thông tin lô sản phẩm chính hãng như sau:\n\n" +
+                        "Hệ thống quản lý kho vận thông minh FEFO của Canmake Beauty ghi nhận thông tin lô sản phẩm chính hãng như sau:\n\n" +
                         $"📦 **Mã Lô Sản Xuất (Batch Code)**: `{batchCode}`\n" +
                         $"📅 **Ngày Sản Xuất (MFG)**: `{mfgDate}`\n" +
                         $"⏳ **Hạn Sử Dụng Niêm Yết (EXP)**: `{expDate}` *(Hạn dùng 36 tháng kể từ NSX)*\n" +
@@ -547,7 +547,7 @@ namespace Omnichannel.Infrastructure.Services
             return new ChatBotResponseDto
             {
                 Reply = "🛡️ **CHÍNH SÁCH ĐỔI TRẢ HÀNG TOÀN DIỆN (OMNICHANNEL RETURN POLICY)**\n\n" +
-                        "Omnichannel Beauty cam kết trải nghiệm mua sắm an tâm tuyệt đối 100% với chính sách đổi trả hàng đầu ngành:\n\n" +
+                        "Canmake Beauty cam kết trải nghiệm mua sắm an tâm tuyệt đối 100% với chính sách đổi trả hàng đầu ngành:\n\n" +
                         "1️⃣ **Thời Hạn Đổi Trả Vàng 14 Ngày**:\n" +
                         "   - Quý khách được quyền đổi/trả sản phẩm trong vòng **14 ngày** kể từ thời điểm nhận hàng thành công (áp dụng cho cả mua online lẫn tại showroom).\n\n" +
                         "2️⃣ **Điều Kiện Đổi Trả Linh Hoạt & An Tâm**:\n" +
@@ -957,7 +957,7 @@ namespace Omnichannel.Infrastructure.Services
                         model = "gpt-3.5-turbo",
                         messages = new[]
                         {
-                            new { role = "system", content = "Bạn là trợ lý AI chuyên nghiệp của Omnichannel Beauty Suite - hệ thống mỹ phẩm cao cấp. Hãy trả lời thân thiện, lịch sự bằng tiếng Việt, tập trung tư vấn mỹ phẩm, da liễu, khuyến mãi và đơn hàng ngắn gọn trong 1-2 đoạn." },
+                            new { role = "system", content = "Bạn là trợ lý AI chuyên nghiệp của Canmake Beauty - hệ thống mỹ phẩm cao cấp. Hãy trả lời thân thiện, lịch sự bằng tiếng Việt, tập trung tư vấn mỹ phẩm, da liễu, khuyến mãi và đơn hàng ngắn gọn trong 1-2 đoạn." },
                             new { role = "user", content = userMessage }
                         },
                         max_tokens = 300,

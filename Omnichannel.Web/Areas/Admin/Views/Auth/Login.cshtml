@@ -8,7 +8,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Omni Beauty Solution</title>
+    <title>@ViewData["Title"] - @Brand.TitleSuffix</title>
     
     <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -193,13 +193,13 @@
     <div class="admin-login-card">
         <!-- Logo & Header -->
         <div class="text-center mb-4">
-            <div class="portal-icon-container">
-                <i class="fa-solid fa-shield-halved"></i>
+            <div class="mb-3">
+                <img src="@Brand.LogoStackedUrl" alt="Canmake Beauty Admin Logo" style="height: 100px; width: auto; display: block; margin: 0 auto;" />
             </div>
             <div class="brand-badge">
                 <i class="fa-solid fa-server"></i> Enterprise Portal
             </div>
-            <h1 class="h4 fw-bold mb-1 tracking-tight">OMNI BEAUTY ADMIN</h1>
+            <h1 class="h4 fw-bold mb-1 tracking-tight">@Brand.Name ADMIN</h1>
             <p class="text-secondary small mb-0">Hệ thống Điều hành & Quản trị Bán lẻ Đa kênh</p>
         </div>
 

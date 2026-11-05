@@ -53,7 +53,7 @@ namespace Omnichannel.Tests.Controllers
                 Id = 2,
                 Username = "cashier01",
                 FullName = "Thu Ngân Showroom 01",
-                Email = "cashier01@omnichannelbeauty.vn",
+                Email = "cashier01@canmakebeauty.vn",
                 UserType = 3,
                 StoreId = 1,
                 IsActive = true
@@ -64,7 +64,7 @@ namespace Omnichannel.Tests.Controllers
                 Id = 3,
                 Username = "superadmin",
                 FullName = "Nguyễn Quản Trị (SuperAdmin)",
-                Email = "superadmin@omnichannelbeauty.vn",
+                Email = "superadmin@canmakebeauty.vn",
                 UserType = 5,
                 IsActive = true
             };

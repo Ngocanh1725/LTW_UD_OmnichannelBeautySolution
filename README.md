@@ -152,4 +152,6 @@
 ---
 
 ## 📄 6. GIẤY PHÉP & BẢN QUYỀN
-Dự án được xây dựng phục vụ môn học Lập trình Web và ứng dụng chuyển đổi số bán lẻ đa kênh. Mọi quyền sở hữu thuộc về nhóm phát triển.
+Dự án được xây dựng phục vụ nghiên cứu học thuật và đồ án tốt nghiệp công nghệ chuỗi bán lẻ đa kênh.
+- **Thương hiệu hiển thị:** CANMAKE BEAUTY (Bản quyền nhận diện thương hiệu học thuật thuộc về nhóm phát triển đồ án).
+- Mọi quyền sở hữu mã nguồn thuộc về nhóm phát triển.

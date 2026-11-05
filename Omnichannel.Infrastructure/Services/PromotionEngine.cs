@@ -454,7 +454,7 @@ namespace Omnichannel.Infrastructure.Services
                 };
             }
 
-            // Fallback sang bảng Vouchers (Kho Voucher cá nhân & Voucher đổi từ Omni Rewards Bazaar)
+            // Fallback sang bảng Vouchers (Kho Voucher cá nhân & Voucher đổi từ Canmake Rewards Bazaar)
             if (coupon == null)
             {
                 var voucher = await _context.Vouchers

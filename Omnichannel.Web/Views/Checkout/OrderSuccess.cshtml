@@ -1,6 +1,6 @@
 @model Omnichannel.Application.DTOs.Sales.OrderSuccessViewModel
 @{
-    ViewData["Title"] = "Đặt Hàng Thành Công - OMNI BEAUTY";
+    ViewData["Title"] = "Đặt Hàng Thành Công - CANMAKE BEAUTY";
     bool isPaid = Model.PaymentStatus == "PAID" || Model.PaymentStatus == "2";
 }
 
@@ -36,15 +36,15 @@
                 </div>
             </div>
 
-            <!-- Thư Tri Ân Haute Parfumerie OMNI BEAUTY -->
+            <!-- Thư Tri Ân Haute Parfumerie CANMAKE BEAUTY -->
             <div class="space-y-2 max-w-xl mx-auto">
                 <div class="flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-widest text-rose-gold">
-                    <span>OMNI BEAUTY</span>
+                    <span>CANMAKE BEAUTY</span>
                     <span>•</span>
                     <span>HAUTE PARFUMERIE & LUXURY COSMETICS</span>
                 </div>
                 <h1 class="font-serif text-2xl sm:text-4xl font-bold text-charcoal tracking-tight mt-1">
-                    Cảm Ơn Quý Khách Đã Lựa Chọn Omni Beauty
+                    Cảm Ơn Quý Khách Đã Lựa Chọn Canmake Beauty
                 </h1>
                 <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-serif italic pt-1">
                     "Chúng tôi vô cùng vinh hạnh được đồng hành cùng vẻ đẹp rạng ngời và phong cách thượng lưu của Bạn. 
@@ -90,7 +90,7 @@
                             </span>
                             <div>
                                 <span class="text-[10px] font-bold uppercase tracking-widest text-rose-300 block">
-                                    OMNI BEAUTY O2O CLICK &amp; COLLECT PASS
+                                    CANMAKE BEAUTY O2O CLICK &amp; COLLECT PASS
                                 </span>
                                 <h3 class="text-base sm:text-lg font-serif font-bold text-white">
                                     Vé Nhận Hàng Ưu Tiên Tại Showroom
@@ -108,7 +108,7 @@
                             <canvas id="pickupQrCanvas"
                                     width="160"
                                     height="160"
-                                    data-qr-payload="OMNI-PICKUP|@Model.OrderId|@Model.PickupCode"
+                                    data-qr-payload="CANMAKE-PICKUP|@Model.OrderId|@Model.PickupCode"
                                     class="w-36 h-36 rounded-lg"></canvas>
                             <span class="text-[10px] font-semibold text-slate-500 mt-1.5">
                                 Đưa mã QR này cho Thu ngân POS
@@ -136,7 +136,7 @@
                             <div class="space-y-1.5 text-xs text-rose-100/90">
                                 <div>
                                     <span class="text-rose-300 font-semibold">Showroom nhận hàng:</span>
-                                    <strong class="text-white block text-sm">@(Model.PickupStoreName ?? "Showroom Omni Beauty")</strong>
+                                    <strong class="text-white block text-sm">@(Model.PickupStoreName ?? "Showroom Canmake Beauty")</strong>
                                 </div>
                                 <div>
                                     <i class="fa-solid fa-location-dot text-rose-400 mr-1"></i>

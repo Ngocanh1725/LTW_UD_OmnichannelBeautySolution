@@ -45,7 +45,7 @@ namespace Omnichannel.Web.Controllers
 
         private string GetOrCreateAnonymousVoteKey()
         {
-            const string cookieName = "omni_anon_vote_key";
+            const string cookieName = "canmake_anon_vote_key";
             if (Request.Cookies.TryGetValue(cookieName, out var existingKey) && !string.IsNullOrWhiteSpace(existingKey))
             {
                 return existingKey;

@@ -75,7 +75,7 @@ namespace Omnichannel.Infrastructure.Services.Beauty
             {
                 var base64Image = Convert.ToBase64String(imageBytes);
                 var prompt =
-                    "Bạn là chuyên gia phân tích da liễu AI của OmniBeauty. Hãy phân tích ảnh khuôn mặt này và CHỈ trả về đúng một chuỗi JSON hợp lệ theo cấu trúc: " +
+                    "Bạn là chuyên gia phân tích da liễu AI của Canmake Beauty. Hãy phân tích ảnh khuôn mặt này và CHỈ trả về đúng một chuỗi JSON hợp lệ theo cấu trúc: " +
                     "{ \"skinType\": \"Da dầu | Da khô | Da hỗn hợp | Da nhạy cảm\", " +
                     "\"concerns\": [\"Vấn đề 1\", \"Vấn đề 2\", \"Vấn đề 3\"], " +
                     "\"scores\": { \"oil\": 0-100, \"hydration\": 0-100, \"acne\": 0-100, \"pigmentation\": 0-100, \"sensitivity\": 0-100 } }";

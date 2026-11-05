@@ -128,7 +128,7 @@ namespace Omnichannel.Web.Controllers
                 return Json(new
                 {
                     success = true,
-                    message = "Câu hỏi của bạn đã được gửi thành công! Chuyên viên Dược Mỹ Phẩm Omni Beauty sẽ giải đáp trong thời gian sớm nhất.",
+                    message = "Câu hỏi của bạn đã được gửi thành công! Chuyên viên Dược Mỹ Phẩm Canmake Beauty sẽ giải đáp trong thời gian sớm nhất.",
                     question
                 });
             }
@@ -165,8 +165,8 @@ namespace Omnichannel.Web.Controllers
             {
                 string safeContent = HtmlEncoder.Default.Encode(request.Content.Trim());
                 string authorName = isOfficial
-                    ? "Chuyên viên Dược Mỹ Phẩm Omni Beauty"
-                    : (User.Identity?.Name ?? "Thành viên Omni Beauty");
+                    ? "Chuyên viên Dược Mỹ Phẩm Canmake Beauty"
+                    : (User.Identity?.Name ?? "Thành viên Canmake Beauty");
 
                 var answer = await _qnaService.SubmitAnswerAsync(request.QuestionId, safeContent, userId, authorName, isOfficial);
 

@@ -104,7 +104,7 @@
                     Swal.fire({
                         icon: 'info',
                         title: 'Yêu cầu đăng nhập',
-                        text: 'Vui lòng đăng nhập tài khoản để đặt câu hỏi cho Chuyên viên Dược Mỹ Phẩm Omni Beauty.',
+                        text: 'Vui lòng đăng nhập tài khoản để đặt câu hỏi cho Chuyên viên Dược Mỹ Phẩm Canmake Beauty.',
                         confirmButtonText: 'Đăng nhập ngay',
                         showCancelButton: true,
                         cancelButtonText: 'Để sau',
@@ -521,14 +521,14 @@
 
                             <div>
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <strong class="text-sm font-bold text-charcoal">@(r.UserName ?? "Khách hàng Omni Beauty")</strong>
+                                    <strong class="text-sm font-bold text-charcoal">@(r.UserName ?? "Khách hàng Canmake Beauty")</strong>
                                     
                                     <!-- HUY HIỆU XANH VERIFIED BUYER -->
                                     @if (r.IsVerifiedPurchase)
                                     {
                                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
                                             <i class="fa-solid fa-circle-check text-emerald-600"></i>
-                                            <span>Đã mua hàng từ Omni Beauty (Verified Buyer)</span>
+                                            <span>Đã mua hàng từ Canmake Beauty (Verified Buyer)</span>
                                         </span>
                                     }
 
@@ -635,11 +635,11 @@
                         </button>
 
                         <span class="text-[11px] text-slate-400">
-                            <i class="fa-solid fa-shield-check text-emerald-500 mr-1"></i> Đã kiểm duyệt bởi Omni Beauty
+                            <i class="fa-solid fa-shield-check text-emerald-500 mr-1"></i> Đã kiểm duyệt bởi Canmake Beauty
                         </span>
                     </div>
 
-                    <!-- PHẢN HỒI CHÍNH THỨC TỪ CHUYÊN VIÊN CSKH OMNI BEAUTY -->
+                    <!-- PHẢN HỒI CHÍNH THỨC TỪ CHUYÊN VIÊN CSKH CANMAKE BEAUTY -->
                     @if (!string.IsNullOrEmpty(r.AdminReply))
                     {
                         <div class="mt-4 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-pastel-rose/30 via-slate-50 to-pastel-rose/20 border border-magenta-accent/20 space-y-2">
@@ -649,7 +649,7 @@
                                         <i class="fa-solid fa-gem text-[11px]"></i>
                                     </div>
                                     <div>
-                                        <span class="text-xs font-bold text-charcoal">@(r.AdminReplyBy ?? "Chuyên viên CSKH Omni Beauty")</span>
+                                        <span class="text-xs font-bold text-charcoal">@(r.AdminReplyBy ?? "Chuyên viên CSKH Canmake Beauty")</span>
                                         <span class="ml-2 px-2 py-0.5 rounded-full text-[9px] font-bold bg-charcoal text-rose-gold uppercase tracking-wider">OFFICIAL REPLY</span>
                                     </div>
                                 </div>
@@ -694,7 +694,7 @@
                 </div>
                 <div>
                     <h3 class="font-serif font-bold text-base sm:text-lg text-charcoal">Hỏi & Đáp Về Sản Phẩm</h3>
-                    <p class="text-xs text-slate-500">Đặt câu hỏi chuyên môn để được Dược Sĩ & Chuyên Viên CSKH Omni Beauty giải đáp chi tiết</p>
+                    <p class="text-xs text-slate-500">Đặt câu hỏi chuyên môn để được Dược Sĩ & Chuyên Viên CSKH Canmake Beauty giải đáp chi tiết</p>
                 </div>
             </div>
 
@@ -745,7 +745,7 @@
                                                   x-text="ans.authorName"></span>
                                             <template x-if="ans.isOfficial">
                                                 <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-charcoal text-rose-gold uppercase tracking-wider">
-                                                    CHUYÊN VIÊN OMNI BEAUTY
+                                                    CHUYÊN VIÊN CANMAKE BEAUTY
                                                 </span>
                                             </template>
                                         </div>
@@ -801,7 +801,7 @@
 
                 <div class="p-3 rounded-xl bg-pastel-rose/30 text-[11px] text-magenta-accent flex items-center gap-2">
                     <i class="fa-solid fa-shield-halved"></i>
-                    <span>Câu hỏi sẽ được Dược Sĩ & Chuyên Viên Omni Beauty giải đáp trong vòng 2-4 giờ làm việc.</span>
+                    <span>Câu hỏi sẽ được Dược Sĩ & Chuyên Viên Canmake Beauty giải đáp trong vòng 2-4 giờ làm việc.</span>
                 </div>
 
                 <div class="pt-2 flex justify-end gap-2">
@@ -1025,7 +1025,7 @@
             </button>
             <img :src="zoomImageUrl" alt="Ảnh phóng to" class="max-w-full max-h-[80vh] rounded-3xl object-contain shadow-2xl border border-white/20" />
             <p class="text-white/80 text-xs mt-3 flex items-center gap-1.5">
-                <i class="fa-solid fa-circle-check text-emerald-400"></i> Ảnh chụp thực tế của khách hàng tại Omni Beauty
+                <i class="fa-solid fa-circle-check text-emerald-400"></i> Ảnh chụp thực tế của khách hàng tại Canmake Beauty
             </p>
         </div>
     </div>

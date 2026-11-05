@@ -1,8 +1,8 @@
 /**
  * ============================================================================
- * OMNICHANNEL BEAUTY SOLUTION - DESIGN SYSTEM
- * Style: Luxury Beauty / Premium Cosmetics (Rose Gold, Champagne, Warm Nude)
- * Version: 2.0.0
+ * CANMAKE BEAUTY SOLUTION - DESIGN SYSTEM
+ * Style: Canmake Beauty Pink-Toned Palette (#E8618C, #B8336A, #F7C6D4, #FFF4F7, #2B1B24)
+ * Version: 2.1.0
  * ============================================================================
  */
 
@@ -11,25 +11,26 @@
    ============================================================================ */
 :root {
     /* --- COLOR PALETTE: Primary Rose / Pink --- */
-    --rose-50: #fff1f2;
-    --rose-100: #ffe4e6;
-    --rose-200: #fecdd3;
-    --rose-300: #fda4af;
-    --rose-400: #fb7185;
-    --rose-500: #f43f5e;
-    --rose-600: #e11d48; /* Primary Brand Rose */
-    --rose-700: #be123c;
-    --rose-800: #9f1239;
-    --rose-900: #881337;
+    --rose-50: #FFF4F7;
+    --rose-100: #FDE8EF;
+    --rose-200: #F7C6D4;
+    --rose-300: #F29BB5;
+    --rose-400: #ED7EA1;
+    --rose-500: #E8618C; /* Primary Rose */
+    --rose-600: #B8336A; /* Deep Berry */
+    --rose-700: #962353;
+    --rose-800: #7A1A42;
+    --rose-900: #5E1232;
 
     /* Metallic & Warm Beauty Accents */
-    --rose-gold: #b76e79;
-    --rose-gold-light: #e8b4b8;
-    --rose-gold-dark: #8c4f58;
-    --pastel-rose: #fdf2f4;
-    --pastel-nude: #faecef;
-    --blush: #f5d6da;
-    --magenta-accent: #d63384;
+    --rose-gold: #E8618C;
+    --rose-gold-light: #F7C6D4;
+    --rose-gold-dark: #B8336A;
+    --pastel-rose: #FFF4F7;
+    --pastel-nude: #FAECEF;
+    --blush: #F7C6D4;
+    --magenta-accent: #B8336A;
+    --ink: #2B1B24;
 
     /* --- COLOR PALETTE: Accent Gold --- */
     --gold-50: #fefce8;
@@ -1158,7 +1159,7 @@ html.dark {
 }
 
 /* ============================================================================
-   7. LUXURY BEAUTY REUSABLE UI COMPONENTS (OMNI BEAUTY DESIGN SYSTEM)
+   7. LUXURY BEAUTY REUSABLE UI COMPONENTS (CANMAKE BEAUTY DESIGN SYSTEM)
    ============================================================================ */
 
 /* --- 7.1 LUXURY GLASSMORPHISM CARD --- */

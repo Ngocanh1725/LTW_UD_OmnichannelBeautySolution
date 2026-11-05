@@ -1,35 +1,41 @@
 /**
  * DESIGN-TOKENS.CSS - Luxury Cosmetics Design Tokens & Design System
- * Omnichannel Beauty Solution - Luxury E-Commerce & Retail Experience
+ * Canmake Beauty Solution - Luxury E-Commerce & Retail Experience
  */
 
 :root {
-    /* --- Luxury Brand Color Palette --- */
-    --color-pastel-rose: #FFF5F5;
-    --color-pastel-rose-subtle: #FFF0F2;
-    --color-pastel-nude: #FAECEF;
-    --color-pastel-cream: #FFF9F6;
+    /* --- Canmake Beauty Pink-Toned Brand Color Palette --- */
+    --color-primary-rose: #E8618C;
+    --color-deep-berry: #B8336A;
+    --color-blush: #F7C6D4;
+    --color-petal-cream: #FFF4F7;
+    --color-ink: #2B1B24;
 
-    --color-charcoal: #1E293B;
-    --color-charcoal-dark: #0F172A;
-    --color-dark-slate: #1E293B;
-    --color-dark-muted: #475569;
+    --color-pastel-rose: #FFF4F7;
+    --color-pastel-rose-subtle: #FDE8EF;
+    --color-pastel-nude: #FAECEF;
+    --color-pastel-cream: #FFF4F7;
+
+    --color-charcoal: #2B1B24;
+    --color-charcoal-dark: #1A0F15;
+    --color-dark-slate: #2B1B24;
+    --color-dark-muted: #5C3A4D;
 
     --color-champagne-gold: #D4AF37;
     --color-champagne-gold-light: #F7E7B4;
     --color-champagne-gold-dark: #B89628;
-    --color-rose-gold: #B76E79;
-    --color-rose-gold-light: #F5D6DA;
+    --color-rose-gold: #E8618C;
+    --color-rose-gold-light: #F7C6D4;
 
-    --color-magenta-accent: #E11D48;
-    --color-magenta-hover: #BE123C;
-    --color-magenta-light: #FFE4E6;
-    --color-magenta-glow: rgba(225, 29, 72, 0.25);
+    --color-magenta-accent: #B8336A;
+    --color-magenta-hover: #962353;
+    --color-magenta-light: #F7C6D4;
+    --color-magenta-glow: rgba(232, 97, 140, 0.25);
 
     /* Neutral & Backgrounds */
-    --color-bg-body: #FFFDFD;
+    --color-bg-body: #FFF4F7;
     --color-bg-card: #FFFFFF;
-    --color-border-subtle: #F1E5E8;
+    --color-border-subtle: #F7C6D4;
     --color-border-gold: rgba(212, 175, 55, 0.35);
 
     /* --- Typography Tokens --- */

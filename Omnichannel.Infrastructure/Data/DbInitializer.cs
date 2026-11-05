@@ -360,7 +360,7 @@ namespace Omnichannel.Infrastructure.Data
         // =========================================================================
         private static async Task SeedStoresAsync(ApplicationDbContext context)
         {
-            // Chi nhánh 1: OMNI BEAUTY - Flagship Showroom Quận 1 (128 Hai Bà Trưng, P. Bến Nghé, Q.1, TP.HCM)
+            // Chi nhánh 1: CANMAKE BEAUTY - Flagship Showroom Quận 1 (128 Hai Bà Trưng, P. Bến Nghé, Q.1, TP.HCM)
             var store1 = await context.Stores.FirstOrDefaultAsync(s => s.Id == 1 || s.Code == "SH-Q1" || s.Code == "HQ-001");
             if (store1 == null)
             {
@@ -368,15 +368,15 @@ namespace Omnichannel.Infrastructure.Data
                 await context.Stores.AddAsync(store1);
             }
             store1.Code = "SH-Q1";
-            store1.Name = "OMNI BEAUTY - Flagship Showroom Quận 1";
+            store1.Name = "CANMAKE BEAUTY - Flagship Showroom Quận 1";
             store1.Address = "128 Hai Bà Trưng, P. Bến Nghé, Q.1, TP.HCM";
             store1.PhoneNumber = "02838221199";
-            store1.Email = "flagship.q1@omnichannelbeauty.vn";
+            store1.Email = "flagship.q1@canmakebeauty.vn";
             store1.Area = 250m;
             store1.IsHeadquarters = false;
             store1.IsActive = true;
 
-            // Chi nhánh 2: OMNI BEAUTY - Showroom Ba Đình (86 Trần Phú, Q. Ba Đình, Hà Nội)
+            // Chi nhánh 2: CANMAKE BEAUTY - Showroom Ba Đình (86 Trần Phú, Q. Ba Đình, Hà Nội)
             var store2 = await context.Stores.FirstOrDefaultAsync(s => s.Id == 2 || s.Code == "SH-BD" || s.Code == "SH-CG");
             if (store2 == null)
             {
@@ -384,15 +384,15 @@ namespace Omnichannel.Infrastructure.Data
                 await context.Stores.AddAsync(store2);
             }
             store2.Code = "SH-BD";
-            store2.Name = "OMNI BEAUTY - Showroom Ba Đình";
+            store2.Name = "CANMAKE BEAUTY - Showroom Ba Đình";
             store2.Address = "86 Trần Phú, Q. Ba Đình, Hà Nội";
             store2.PhoneNumber = "02437665588";
-            store2.Email = "badinh@omnichannelbeauty.vn";
+            store2.Email = "badinh@canmakebeauty.vn";
             store2.Area = 180m;
             store2.IsHeadquarters = false;
             store2.IsActive = true;
 
-            // Chi nhánh 3: OMNI BEAUTY - Tổng Kho Phân Phối Miền Nam (KCN Tân Bình, TP.HCM)
+            // Chi nhánh 3: CANMAKE BEAUTY - Tổng Kho Phân Phối Miền Nam (KCN Tân Bình, TP.HCM)
             var store3 = await context.Stores.FirstOrDefaultAsync(s => s.Id == 3 || s.Code == "WH-MN" || s.Code == "SH-TD");
             if (store3 == null)
             {
@@ -400,10 +400,10 @@ namespace Omnichannel.Infrastructure.Data
                 await context.Stores.AddAsync(store3);
             }
             store3.Code = "WH-MN";
-            store3.Name = "OMNI BEAUTY - Tổng Kho Phân Phối Miền Nam";
+            store3.Name = "CANMAKE BEAUTY - Tổng Kho Phân Phối Miền Nam";
             store3.Address = "KCN Tân Bình, TP.HCM";
             store3.PhoneNumber = "02838150000";
-            store3.Email = "tongkho.miennam@omnichannelbeauty.vn";
+            store3.Email = "tongkho.miennam@canmakebeauty.vn";
             store3.Area = 1500m;
             store3.IsHeadquarters = true;
             store3.IsActive = true;
@@ -432,7 +432,7 @@ namespace Omnichannel.Infrastructure.Data
                     new User
                     {
                         Username = "superadmin",
-                        Email = "superadmin@omnichannelbeauty.vn",
+                        Email = "superadmin@canmakebeauty.vn",
                         FullName = "Nguyễn Quản Trị",
                         PasswordHash = defaultPasswordHash,
                         PhoneNumber = "0909000001",
@@ -447,7 +447,7 @@ namespace Omnichannel.Infrastructure.Data
                     new User
                     {
                         Username = "manager_hq",
-                        Email = "manager.hq@omnichannelbeauty.vn",
+                        Email = "manager.hq@canmakebeauty.vn",
                         FullName = "Trần Quản Lý HQ",
                         PasswordHash = defaultPasswordHash,
                         PhoneNumber = "0909000002",
@@ -462,7 +462,7 @@ namespace Omnichannel.Infrastructure.Data
                     new User
                     {
                         Username = "manager_cg",
-                        Email = "manager.cg@omnichannelbeauty.vn",
+                        Email = "manager.cg@canmakebeauty.vn",
                         FullName = "Lê Quản Lý CG",
                         PasswordHash = defaultPasswordHash,
                         PhoneNumber = "0909000003",
@@ -477,7 +477,7 @@ namespace Omnichannel.Infrastructure.Data
                     new User
                     {
                         Username = "cashier01",
-                        Email = "cashier01@omnichannelbeauty.vn",
+                        Email = "cashier01@canmakebeauty.vn",
                         FullName = "Phạm Thu Ngân 01",
                         PasswordHash = defaultPasswordHash,
                         PhoneNumber = "0909000004",
@@ -492,7 +492,7 @@ namespace Omnichannel.Infrastructure.Data
                     new User
                     {
                         Username = "cashier02",
-                        Email = "cashier02@omnichannelbeauty.vn",
+                        Email = "cashier02@canmakebeauty.vn",
                         FullName = "Hoàng Thu Ngân 02",
                         PasswordHash = defaultPasswordHash,
                         PhoneNumber = "0909000005",
@@ -507,7 +507,7 @@ namespace Omnichannel.Infrastructure.Data
                     new User
                     {
                         Username = "warehouse01",
-                        Email = "warehouse01@omnichannelbeauty.vn",
+                        Email = "warehouse01@canmakebeauty.vn",
                         FullName = "Đặng Thủ Kho 01",
                         PasswordHash = defaultPasswordHash,
                         PhoneNumber = "0909000006",
@@ -522,7 +522,7 @@ namespace Omnichannel.Infrastructure.Data
                     new User
                     {
                         Username = "warehouse02",
-                        Email = "warehouse02@omnichannelbeauty.vn",
+                        Email = "warehouse02@canmakebeauty.vn",
                         FullName = "Vũ Thủ Kho 02",
                         PasswordHash = defaultPasswordHash,
                         PhoneNumber = "0909000007",
@@ -537,7 +537,7 @@ namespace Omnichannel.Infrastructure.Data
                     new User
                     {
                         Username = "editor01",
-                        Email = "editor01@omnichannelbeauty.vn",
+                        Email = "editor01@canmakebeauty.vn",
                         FullName = "Bùi Biên Tập",
                         PasswordHash = defaultPasswordHash,
                         PhoneNumber = "0909000008",
@@ -597,7 +597,7 @@ namespace Omnichannel.Infrastructure.Data
                     new User
                     {
                         Username = "customer_diamond",
-                        Email = "customer.diamond@omnichannelbeauty.vn",
+                        Email = "customer.diamond@canmakebeauty.vn",
                         FullName = "Linh VIP Kim Cương",
                         PasswordHash = defaultPasswordHash,
                         PhoneNumber = "0909111001",
@@ -612,7 +612,7 @@ namespace Omnichannel.Infrastructure.Data
                     new User
                     {
                         Username = "customer_platinum",
-                        Email = "customer.platinum@omnichannelbeauty.vn",
+                        Email = "customer.platinum@canmakebeauty.vn",
                         FullName = "Hoàng VIP Bạch Kim",
                         PasswordHash = defaultPasswordHash,
                         PhoneNumber = "0909111002",
@@ -627,7 +627,7 @@ namespace Omnichannel.Infrastructure.Data
                     new User
                     {
                         Username = "customer_gold",
-                        Email = "customer.gold@omnichannelbeauty.vn",
+                        Email = "customer.gold@canmakebeauty.vn",
                         FullName = "Trần Thành Viên Vàng",
                         PasswordHash = defaultPasswordHash,
                         PhoneNumber = "0909111003",
@@ -642,7 +642,7 @@ namespace Omnichannel.Infrastructure.Data
                     new User
                     {
                         Username = "customer_silver",
-                        Email = "customer.silver@omnichannelbeauty.vn",
+                        Email = "customer.silver@canmakebeauty.vn",
                         FullName = "Lê Thành Viên Bạc",
                         PasswordHash = defaultPasswordHash,
                         PhoneNumber = "0909111004",
@@ -657,7 +657,7 @@ namespace Omnichannel.Infrastructure.Data
                     new User
                     {
                         Username = "customer_bronze",
-                        Email = "customer.bronze@omnichannelbeauty.vn",
+                        Email = "customer.bronze@canmakebeauty.vn",
                         FullName = "Phạm Khách Mới Bronze",
                         PasswordHash = defaultPasswordHash,
                         PhoneNumber = "0909111005",
@@ -710,7 +710,7 @@ namespace Omnichannel.Infrastructure.Data
                 var legacyAdmin = new User
                 {
                     Username = "admin",
-                    Email = "admin@omnichannel.com",
+                    Email = "admin@canmakebeauty.vn",
                     FullName = "Quản Trị Viên Kế Thừa",
                     PasswordHash = HashPassword("Admin@123456"),
                     PhoneNumber = "0909999999",
@@ -2649,10 +2649,10 @@ namespace Omnichannel.Infrastructure.Data
                 await context.StaticPages.AddRangeAsync(
                     new StaticPage
                     {
-                        Title = "Giới Thiệu Hệ Thống Omnichannel Beauty",
+                        Title = "Giới Thiệu Hệ Thống Canmake Beauty",
                         Slug = "gioi-thieu",
-                        Content = "<h2>Về Chúng Tôi</h2><p>Omnichannel Beauty Solution là hệ thống bán lẻ mỹ phẩm chính hãng hàng đầu, áp dụng công nghệ thông minh FEFO quản lý hạn sử dụng minh bạch và đem lại trải nghiệm mua sắm đồng nhất từ Online đến Offline.</p>",
-                        MetaTitle = "Giới Thiệu - Omnichannel Beauty Solution",
+                        Content = "<h2>Về Chúng Tôi</h2><p>Canmake Beauty là hệ thống bán lẻ mỹ phẩm chính hãng hàng đầu, áp dụng công nghệ thông minh FEFO quản lý hạn sử dụng minh bạch và đem lại trải nghiệm mua sắm đồng nhất từ Online đến Offline.</p>",
+                        MetaTitle = "Giới Thiệu - Canmake Beauty",
                         MetaDescription = "Hệ thống phân phối mỹ phẩm chính hãng đa kênh với công nghệ quản lý date thông minh.",
                         IsActive = true
                     },
@@ -2661,7 +2661,7 @@ namespace Omnichannel.Infrastructure.Data
                         Title = "Chính Sách Đổi Trả & Cam Kết Date",
                         Slug = "chinh-sach-doi-tra",
                         Content = "<h2>Cam Kết Chất Lượng</h2><p>Chúng tôi cam kết 100% sản phẩm có nguồn gốc xuất xứ rõ ràng. Với hàng cận date trong mục FEFO Clearance, mọi thông tin hạn sử dụng đều được hiển thị công khai và đổi trả trong vòng 7 ngày nếu lỗi từ nhà sản xuất.</p>",
-                        MetaTitle = "Chính Sách Đổi Trả - Omnichannel Beauty Solution",
+                        MetaTitle = "Chính Sách Đổi Trả - Canmake Beauty",
                         MetaDescription = "Chính sách đổi trả minh bạch, bảo vệ quyền lợi người tiêu dùng tối đa.",
                         IsActive = true
                     }
@@ -2733,7 +2733,7 @@ namespace Omnichannel.Infrastructure.Data
                     {
                         new ProductAnswer
                         {
-                            AuthorName = "Chuyên viên Dược Mỹ Phẩm Omni Beauty",
+                            AuthorName = "Chuyên viên Dược Mỹ Phẩm Canmake Beauty",
                             Content = "Chào bạn Linh! Sản phẩm đạt tiêu chuẩn Clean Beauty 5 KHÔNG, lành tính và an toàn cho phụ nữ mang thai cũng như đang cho con bú theo chuẩn da liễu nhé.",
                             IsOfficial = true,
                             IsApproved = true,
@@ -2753,7 +2753,7 @@ namespace Omnichannel.Infrastructure.Data
                     {
                         new ProductAnswer
                         {
-                            AuthorName = "Chuyên viên Dược Mỹ Phẩm Omni Beauty",
+                            AuthorName = "Chuyên viên Dược Mỹ Phẩm Canmake Beauty",
                             Content = "Chào bạn Mai! Vì serum có nồng độ Hyaluronic Acid và B5 cao, bạn nên thoa khi da còn hơi ẩm sau bước Toner để phân tử hút ẩm hoạt động tối ưu và không bị hút ẩm ngược.",
                             IsOfficial = true,
                             IsApproved = true,
@@ -2773,7 +2773,7 @@ namespace Omnichannel.Infrastructure.Data
                     {
                         new ProductAnswer
                         {
-                            AuthorName = "Chuyên viên Dược Mỹ Phẩm Omni Beauty",
+                            AuthorName = "Chuyên viên Dược Mỹ Phẩm Canmake Beauty",
                             Content = "Chào bạn Hưng! Nếu da đang có mụn viêm cấp tính, bạn nên ưu tiên làm dịu và phục hồi hàng rào bảo vệ da trước. Không nên dùng đồng thời Retinol cùng buổi với BHA để tránh quá tải sừng. Bạn có thể áp dụng chu trình Skin Cycling cách ngày nhé!",
                             IsOfficial = true,
                             IsApproved = true,
@@ -2789,7 +2789,7 @@ namespace Omnichannel.Infrastructure.Data
             // 5.5. Product Subscriptions (Back-In-Stock & Price Drop - GAP-05)
             if (!await context.ProductSubscriptions.AnyAsync())
             {
-                var customerUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "customer@omnichannel.com");
+                var customerUser = await context.Users.FirstOrDefaultAsync(u => u.Email == "customer@canmakebeauty.vn");
                 int? cUserId = customerUser?.Id;
 
                 var p1 = await context.Products.FirstOrDefaultAsync(p => p.Id == 1);
@@ -2805,7 +2805,7 @@ namespace Omnichannel.Infrastructure.Data
                             UserId = cUserId,
                             Type = "BACK_IN_STOCK",
                             CustomerName = customerUser?.FullName ?? "Khách Hàng Thân Thiết",
-                            Email = "customer@omnichannel.com",
+                            Email = "customer@canmakebeauty.vn",
                             PhoneNumber = "0987654321",
                             Status = "ACTIVE",
                             CreatedAt = now.AddDays(-3),
@@ -2818,7 +2818,7 @@ namespace Omnichannel.Infrastructure.Data
                             Type = "PRICE_DROP",
                             TargetPrice = 450000m,
                             CustomerName = customerUser?.FullName ?? "Khách Hàng Thân Thiết",
-                            Email = "customer@omnichannel.com",
+                            Email = "customer@canmakebeauty.vn",
                             PhoneNumber = "0987654321",
                             Status = "ACTIVE",
                             CreatedAt = now.AddDays(-2),
@@ -2843,7 +2843,7 @@ namespace Omnichannel.Infrastructure.Data
                 foreach (var ord in recentOrders)
                 {
                     string trackCode = $"GHN{ord.CreatedAt:yyMMdd}{(ord.OrderCode.Length >= 6 ? ord.OrderCode[^6..].Replace("-", "").ToUpperInvariant() : ord.Id.ToString("D6"))}";
-                    string carrier = ord.ShippingFee == 45000m ? "Giao Hàng Hỏa Tốc 2H (Omni VIP Express)" : "Giao Hàng Nhanh (GHN Express)";
+                    string carrier = ord.ShippingFee == 45000m ? "Giao Hàng Hỏa Tốc 2H (Canmake VIP Express)" : "Giao Hàng Nhanh (GHN Express)";
 
                     // Mốc 1: Đặt hàng
                     historyList.Add(new OrderStatusHistory
@@ -2879,7 +2879,7 @@ namespace Omnichannel.Infrastructure.Data
                             Status = "CONFIRMED",
                             Title = "Xác nhận",
                             Description = "Bộ phận CSKH đã xác nhận đơn hàng & giữ chỗ lô FEFO.",
-                            ChangedByName = "CSKH Omni Beauty",
+                            ChangedByName = "CSKH Canmake Beauty",
                             CreatedAt = ord.CreatedAt.AddMinutes(15)
                         });
                     }
@@ -3158,22 +3158,22 @@ namespace Omnichannel.Infrastructure.Data
             var defaultSettings = new List<Setting>
             {
                 // GENERAL
-                new() { SettingKey = "SITE_NAME", SettingValue = "Omnichannel Beauty Solution", SettingGroup = "GENERAL", DataType = "STRING", Description = "Tên thương hiệu hệ thống cửa hàng" },
+                new() { SettingKey = "SITE_NAME", SettingValue = "Canmake Beauty", SettingGroup = "GENERAL", DataType = "STRING", Description = "Tên thương hiệu hệ thống cửa hàng" },
                 new() { SettingKey = "HOTLINE", SettingValue = "1900 6868", SettingGroup = "GENERAL", DataType = "STRING", Description = "Tổng đài hỗ trợ khách hàng đa kênh" },
-                new() { SettingKey = "SUPPORT_EMAIL", SettingValue = "support@omnichannelbeauty.vn", SettingGroup = "GENERAL", DataType = "STRING", Description = "Email nhận khiếu nại và phản hồi" },
+                new() { SettingKey = "SUPPORT_EMAIL", SettingValue = "support@canmakebeauty.vn", SettingGroup = "GENERAL", DataType = "STRING", Description = "Email nhận khiếu nại và phản hồi" },
                 new() { SettingKey = "CURRENCY_FORMAT", SettingValue = "VND", SettingGroup = "GENERAL", DataType = "STRING", Description = "Đơn vị tiền tệ chính" },
                 new() { SettingKey = "TIMEZONE", SettingValue = "SE Asia Standard Time", SettingGroup = "GENERAL", DataType = "STRING", Description = "Múi giờ vận hành hệ thống" },
 
                 // SMTP
                 new() { SettingKey = "SMTP_HOST", SettingValue = "smtp.gmail.com", SettingGroup = "SMTP", DataType = "STRING", Description = "Máy chủ gửi Email SMTP" },
                 new() { SettingKey = "SMTP_PORT", SettingValue = "587", SettingGroup = "SMTP", DataType = "INT", Description = "Cổng kết nối TLS/STARTTLS" },
-                new() { SettingKey = "SMTP_USER", SettingValue = "no-reply@omnichannelbeauty.vn", SettingGroup = "SMTP", DataType = "STRING", Description = "Tài khoản gửi Email" },
+                new() { SettingKey = "SMTP_USER", SettingValue = "no-reply@canmakebeauty.vn", SettingGroup = "SMTP", DataType = "STRING", Description = "Tài khoản gửi Email" },
                 new() { SettingKey = "SMTP_PASSWORD", SettingValue = "P@sswordEncrypted123", SettingGroup = "SMTP", DataType = "STRING", IsEncrypted = true, Description = "Mật khẩu máy chủ Email (được mã hóa)" },
                 new() { SettingKey = "SMTP_ENABLE_SSL", SettingValue = "true", SettingGroup = "SMTP", DataType = "BOOL", Description = "Kích hoạt giao thức bảo mật SSL/TLS" },
 
                 // PAYMENT
                 new() { SettingKey = "PAYMENT_COD_ENABLED", SettingValue = "true", SettingGroup = "PAYMENT", DataType = "BOOL", Description = "Bật/Tắt hình thức thanh toán khi nhận hàng (COD)" },
-                new() { SettingKey = "PAYMENT_VNPAY_TMN_CODE", SettingValue = "OMNICODE", SettingGroup = "PAYMENT", DataType = "STRING", Description = "Mã định danh Merchant cổng VNPAY" },
+                new() { SettingKey = "PAYMENT_VNPAY_TMN_CODE", SettingValue = "CANMAKECODE", SettingGroup = "PAYMENT", DataType = "STRING", Description = "Mã định danh Merchant cổng VNPAY" },
                 new() { SettingKey = "VNPAY_SECRET_KEY", SettingValue = "SECRETKEY123456789ABCXYZ", SettingGroup = "PAYMENT", DataType = "STRING", IsEncrypted = true, Description = "Khóa bí mật tạo chữ ký số VNPAY" },
 
                 // SHIPPING
@@ -3394,7 +3394,7 @@ namespace Omnichannel.Infrastructure.Data
                         SessionId = session2.Id,
                         SessionKey = session2.SessionKey,
                         Sender = "BOT",
-                        Content = "Tại khu vực nội thành Hà Nội và TP.HCM, Omnichannel Beauty Solution có dịch vụ giao hỏa tốc 2H hoặc giao tiêu chuẩn trong ngày. Đơn hàng từ 500.000đ được hoàn toàn miễn phí vận chuyển!",
+                        Content = "Tại khu vực nội thành Hà Nội và TP.HCM, Canmake Beauty có dịch vụ giao hỏa tốc 2H hoặc giao tiêu chuẩn trong ngày. Đơn hàng từ 500.000đ được hoàn toàn miễn phí vận chuyển!",
                         Intent = "shipping",
                         CreatedAt = session2.StartedAt.AddMinutes(3).AddSeconds(2)
                     },
@@ -3414,7 +3414,7 @@ namespace Omnichannel.Infrastructure.Data
                         SessionId = session3.Id,
                         SessionKey = session3.SessionKey,
                         Sender = "BOT",
-                        Content = "Hiện tại Omnichannel đang có các ưu đãi cực hot: Mã BEAUTY20 (Giảm 20% cho đơn từ 600K), Mã FREESHIP (Miễn phí vận chuyển toàn quốc cho đơn từ 500K) và Tích lũy x2 điểm thưởng Loyalty khi mua sắm các sản phẩm chống nắng mùa hè. Bạn có thể xem chi tiết tại trang [Chương Trình Khuyến Mãi](/Promotion) nhé!",
+                        Content = "Hiện tại Canmake Beauty đang có các ưu đãi cực hot: Mã BEAUTY20 (Giảm 20% cho đơn từ 600K), Mã FREESHIP (Miễn phí vận chuyển toàn quốc cho đơn từ 500K) và Tích lũy x2 điểm thưởng Loyalty khi mua sắm các sản phẩm chống nắng mùa hè. Bạn có thể xem chi tiết tại trang [Chương Trình Khuyến Mãi](/Promotion) nhé!",
                         Intent = "promotion",
                         CreatedAt = session3.StartedAt.AddSeconds(2)
                     }
@@ -4497,8 +4497,8 @@ namespace Omnichannel.Infrastructure.Data
                                 Longevity = "Cấp ẩm mịn suốt 8 tiếng",
                                 SkinFeel = "Mỏng nhẹ thoáng da, không nhờn rít",
                                 HelpfulCount = 28,
-                                AdminReply = "Dạ Omni Beauty xin chân thành cảm ơn chị đã dành sự tin tưởng trọn vẹn cho sản phẩm và quy trình kiểm định FEFO của hệ thống! Chúc chị luôn có làn da rạng ngời và tươi trẻ mỗi ngày ạ! ❤️",
-                                AdminReplyBy = "Chuyên viên CSKH Omni Beauty",
+                                AdminReply = "Dạ Canmake Beauty xin chân thành cảm ơn chị đã dành sự tin tưởng trọn vẹn cho sản phẩm và quy trình kiểm định FEFO của hệ thống! Chúc chị luôn có làn da rạng ngời và tươi trẻ mỗi ngày ạ! ❤️",
+                                AdminReplyBy = "Chuyên viên CSKH Canmake Beauty",
                                 AdminRepliedAt = now.AddDays(-2),
                                 CreatedAt = now.AddDays(-3)
                             });
@@ -4510,7 +4510,7 @@ namespace Omnichannel.Infrastructure.Data
                                 UserId = user2?.Id,
                                 Rating = 5,
                                 Title = "Đúng chuẩn hàng chính ngạch, bám màu và nâng tone tự nhiên",
-                                Content = "Đã dùng qua nhiều nơi nhưng mua tại Omni Beauty cảm giác yên tâm nhất vì cam kết nguồn gốc và hạn sử dụng rõ ràng. Sản phẩm lên da rất êm, không gây châm chích dù da mình thuộc loại nhạy cảm. Recommend mọi người nên dùng thử!",
+                                Content = "Đã dùng qua nhiều nơi nhưng mua tại Canmake Beauty cảm giác yên tâm nhất vì cam kết nguồn gốc và hạn sử dụng rõ ràng. Sản phẩm lên da rất êm, không gây châm chích dù da mình thuộc loại nhạy cảm. Recommend mọi người nên dùng thử!",
                                 ImagesJson = System.Text.Json.JsonSerializer.Serialize(new List<string>
                                 {
                                     "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&h=600&fit=crop"
@@ -4524,8 +4524,8 @@ namespace Omnichannel.Infrastructure.Data
                                 Longevity = "Lâu trôi bền màu 6-8 tiếng",
                                 SkinFeel = "Mát mịn, căng bóng tự nhiên",
                                 HelpfulCount = 19,
-                                AdminReply = "Cảm ơn bạn đã chia sẻ trải nghiệm tuyệt vời! Omni Beauty rất vui vì sản phẩm phù hợp hoàn hảo với làn da nhạy cảm của bạn.",
-                                AdminReplyBy = "Chuyên viên CSKH Omni Beauty",
+                                AdminReply = "Cảm ơn bạn đã chia sẻ trải nghiệm tuyệt vời! Canmake Beauty rất vui vì sản phẩm phù hợp hoàn hảo với làn da nhạy cảm của bạn.",
+                                AdminReplyBy = "Chuyên viên CSKH Canmake Beauty",
                                 AdminRepliedAt = now.AddDays(-4),
                                 CreatedAt = now.AddDays(-5)
                             });
@@ -4660,6 +4660,7 @@ namespace Omnichannel.Infrastructure.Data
                 .Where(f =>
                 {
                     var norm = f.Replace("\\", "/");
+                    if (norm.Contains("/_archive/", StringComparison.OrdinalIgnoreCase)) return false;
                     return norm.Contains("/images/products/", StringComparison.OrdinalIgnoreCase) ||
                            norm.Contains("/images/banners/", StringComparison.OrdinalIgnoreCase) ||
                            norm.Contains("/images/branding/", StringComparison.OrdinalIgnoreCase) ||
@@ -4784,7 +4785,7 @@ namespace Omnichannel.Infrastructure.Data
 
             // 1. Ánh xạ Logo và Favicon vào ThemeConfigs
             var logoMediaId = await context.MediaAssets
-                .Where(m => m.FileName.Contains("logo-full") || m.FileName.Contains("logo-circle"))
+                .Where(m => m.FileName.Contains("canmake-logo-horizontal"))
                 .OrderBy(m => m.Id)
                 .Select(m => (int?)m.Id)
                 .FirstOrDefaultAsync();
@@ -5001,7 +5002,7 @@ namespace Omnichannel.Infrastructure.Data
                 // 1. Seed hoặc Cập nhật Theme "Rose Gold Beauty"
                 var defaultTheme = await context.ThemeConfigs.FirstOrDefaultAsync();
                 var logoMedia = await context.MediaAssets
-                    .Where(m => m.FileName.Contains("logo-full") || m.FileName.Contains("logo-circle"))
+                    .Where(m => m.FileName.Contains("canmake-logo-horizontal"))
                     .OrderBy(m => m.Id)
                     .FirstOrDefaultAsync();
                 var faviconMedia = await context.MediaAssets
@@ -5014,11 +5015,11 @@ namespace Omnichannel.Infrastructure.Data
                     defaultTheme = new ThemeConfig
                     {
                         ThemeName = "Rose Gold Beauty",
-                        BrandName = "OMNI BEAUTY",
-                        Slogan = "Hệ Thống Bán Lẻ Mỹ Phẩm Cao Cấp Tiên Phong Công Nghệ FEFO",
-                        PrimaryColor = "#E11D48",
-                        SecondaryColor = "#BE185D",
-                        AccentColor = "#F59E0B",
+                        BrandName = "CANMAKE BEAUTY",
+                        Slogan = "Canmake Beauty – Hệ Thống Mỹ Phẩm Đa Kênh Chính Hãng",
+                        PrimaryColor = "#E8618C",
+                        SecondaryColor = "#B8336A",
+                        AccentColor = "#F7C6D4",
                         FontHeading = "'Playfair Display', serif",
                         FontBody = "'Inter', sans-serif",
                         FontFamily = "'Inter', sans-serif",
@@ -5026,11 +5027,11 @@ namespace Omnichannel.Infrastructure.Data
                         LogoMediaAssetId = logoMedia?.Id,
                         FaviconMediaId = faviconMedia?.Id,
                         FaviconMediaAssetId = faviconMedia?.Id,
-                        AnnouncementBarText = "✨ Chào mừng bạn đến với OMNI BEAUTY - Miễn phí vận chuyển cho đơn hàng từ 300K ✨",
+                        AnnouncementBarText = "✨ Chào mừng bạn đến với CANMAKE BEAUTY - Miễn phí vận chuyển cho đơn hàng từ 300K ✨",
                         AnnouncementBarActive = true,
-                        AnnouncementBarBgColor = "#881337",
+                        AnnouncementBarBgColor = "#B8336A",
                         Hotline = "1900 8888",
-                        ContactEmail = "hotro@omnibeauty.vn",
+                        ContactEmail = "hotro@canmakebeauty.vn",
                         IsActive = true
                     };
                     context.ThemeConfigs.Add(defaultTheme);
@@ -5059,8 +5060,8 @@ namespace Omnichannel.Infrastructure.Data
                     homeLayout = new PageLayout
                     {
                         PageKey = "home_page",
-                        Title = "Trang Chủ - OMNI BEAUTY",
-                        MetaDescription = "Hệ Thống Bán Lẻ Mỹ Phẩm Cao Cấp Tiên Phong Công Nghệ FEFO",
+                        Title = "Trang Chủ - CANMAKE BEAUTY",
+                        MetaDescription = "Canmake Beauty – Hệ Thống Mỹ Phẩm Đa Kênh Chính Hãng",
                         IsPublished = true,
                         CreatedAt = DateTime.UtcNow
                     };
@@ -5294,7 +5295,7 @@ namespace Omnichannel.Infrastructure.Data
                     foreach (var ord in recentOrders)
                     {
                         string trackCode = $"GHN{ord.CreatedAt:yyMMdd}{(ord.OrderCode.Length >= 6 ? ord.OrderCode[^6..].Replace("-", "").ToUpperInvariant() : ord.Id.ToString("D6"))}";
-                        string carrier = ord.ShippingFee == 45000m ? "Giao Hàng Hỏa Tốc 2H (Omni VIP Express)" : "Giao Hàng Nhanh (GHN Express)";
+                        string carrier = ord.ShippingFee == 45000m ? "Giao Hàng Hỏa Tốc 2H (Canmake VIP Express)" : "Giao Hàng Nhanh (GHN Express)";
 
                         historyList.Add(new OrderStatusHistory
                         {
@@ -5329,7 +5330,7 @@ namespace Omnichannel.Infrastructure.Data
                                 Status = "CONFIRMED",
                                 Title = "Xác nhận",
                                 Description = "Bộ phận CSKH đã xác nhận đơn hàng & giữ chỗ lô FEFO.",
-                                ChangedByName = "CSKH Omni Beauty",
+                                ChangedByName = "CSKH Canmake Beauty",
                                 CreatedAt = ord.CreatedAt.AddMinutes(15)
                             });
                         }
@@ -5445,7 +5446,7 @@ namespace Omnichannel.Infrastructure.Data
                 {
                     foreach (var w in walletsWithoutCode)
                     {
-                        w.ReferralCode = $"OMNI-REF-{w.UserId:D4}";
+                        w.ReferralCode = $"CANMAKE-REF-{w.UserId:D4}";
                     }
                     await context.SaveChangesAsync();
                     LogInfo(logger, $"[DbInitializer] Đã cấp mã giới thiệu (ReferralCode) cho {walletsWithoutCode.Count} ví thành viên.");
@@ -5453,7 +5454,7 @@ namespace Omnichannel.Infrastructure.Data
 
                 // Đảm bảo khách hàng mẫu (customer01) có ví điểm >= 850 điểm và sổ cái PointTransactions khớp số dư
                 var demoCustomer = await context.Users
-                    .FirstOrDefaultAsync(u => u.Username == "customer01" || u.Email == "phuonganh@omnibeauty.vn" || u.UserType == 1);
+                    .FirstOrDefaultAsync(u => u.Username == "customer01" || u.Email == "phuonganh@canmakebeauty.vn" || u.UserType == 1);
 
                 if (demoCustomer != null)
                 {
@@ -5474,7 +5475,7 @@ namespace Omnichannel.Infrastructure.Data
                                 CurrentBalance = 850,
                                 TotalPointsEarned = 850,
                                 TotalSpend12Months = 8550000m,
-                                ReferralCode = $"OMNI-REF-{demoCustomer.Id:D4}",
+                                ReferralCode = $"CANMAKE-REF-{demoCustomer.Id:D4}",
                                 CurrentStreak = 0,
                                 QrCodeData = $"BEAUTY-MEM-{demoCustomer.Id:D6}",
                                 CreatedAt = DateTime.UtcNow.AddMonths(-6)
@@ -5500,7 +5501,7 @@ namespace Omnichannel.Infrastructure.Data
                                 Points = 100,
                                 BalanceBefore = 0,
                                 BalanceAfter = 100,
-                                Description = "Thưởng chào mừng thành viên mới Omni Beauty Club (+100 điểm)",
+                                Description = "Thưởng chào mừng thành viên mới Canmake Beauty Club (+100 điểm)",
                                 CreatedAt = now.AddDays(-30)
                             },
                             new PointTransaction
@@ -5541,7 +5542,7 @@ namespace Omnichannel.Infrastructure.Data
                             {
                                 ReferrerUserId = demoCustomer.Id,
                                 ReferredUserId = friendUser.Id,
-                                ReferralCode = wallet.ReferralCode ?? $"OMNI-REF-{demoCustomer.Id:D4}",
+                                ReferralCode = wallet.ReferralCode ?? $"CANMAKE-REF-{demoCustomer.Id:D4}",
                                 Status = "REWARDED",
                                 ReferrerPointsAwarded = 100,
                                 ReferredPointsAwarded = 50,

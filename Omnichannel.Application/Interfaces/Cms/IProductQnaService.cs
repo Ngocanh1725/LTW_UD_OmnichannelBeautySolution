@@ -18,7 +18,7 @@ namespace Omnichannel.Application.Interfaces.Cms
         Task<ProductQuestionDto> SubmitQuestionAsync(int productId, string content, int? userId, string? authorName = null, CancellationToken ct = default);
 
         /// <summary>
-        /// Gửi câu trả lời cho câu hỏi (Chuyên viên CSKH Omni Beauty hoặc cộng đồng)
+        /// Gửi câu trả lời cho câu hỏi (Chuyên viên CSKH Canmake Beauty hoặc cộng đồng)
         /// </summary>
         Task<ProductAnswerDto> SubmitAnswerAsync(int questionId, string content, int? userId, string? authorName = null, bool isOfficial = false, CancellationToken ct = default);
 

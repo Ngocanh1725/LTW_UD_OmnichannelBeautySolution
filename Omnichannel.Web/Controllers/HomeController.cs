@@ -333,7 +333,7 @@ namespace Omnichannel.Web.Controllers
             var sb = new StringBuilder();
 
             sb.AppendLine("# ==============================================================");
-            sb.AppendLine("# OMNI BEAUTY - Senior Technical SEO Robots.txt Directives");
+            sb.AppendLine("# CANMAKE BEAUTY - Senior Technical SEO Robots.txt Directives");
             sb.AppendLine("# ==============================================================");
             sb.AppendLine("User-agent: *");
             sb.AppendLine("Allow: /");

@@ -140,7 +140,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
                                     SalePrice = (prod.DiscountPrice.HasValue && prod.DiscountPrice.Value > 0 && prod.DiscountPrice.Value < prod.SellingPrice)
                                         ? prod.DiscountPrice.Value
                                         : null,
-                                    BrandName = prod.Brand?.Name ?? prod.ManufacturerName ?? "Omni Beauty",
+                                    BrandName = prod.Brand?.Name ?? prod.ManufacturerName ?? "Canmake Beauty",
                                     CategoryName = prod.Category?.Name ?? "Mỹ Phẩm",
                                     RoutineStep = prod.RoutineStep,
                                     CoOccurrenceCount = co.CountAB,
@@ -187,7 +187,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
                         SalePrice = (p.DiscountPrice.HasValue && p.DiscountPrice.Value > 0 && p.DiscountPrice.Value < p.SellingPrice)
                             ? p.DiscountPrice.Value
                             : null,
-                        BrandName = p.Brand?.Name ?? p.ManufacturerName ?? "Omni Beauty",
+                        BrandName = p.Brand?.Name ?? p.ManufacturerName ?? "Canmake Beauty",
                         CategoryName = p.Category?.Name ?? "Mỹ Phẩm",
                         RoutineStep = p.RoutineStep,
                         CoOccurrenceCount = 0,
@@ -217,7 +217,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
                 SalePrice = (currentProduct.DiscountPrice.HasValue && currentProduct.DiscountPrice.Value > 0 && currentProduct.DiscountPrice.Value < currentProduct.SellingPrice)
                     ? currentProduct.DiscountPrice.Value
                     : null,
-                BrandName = currentProduct.Brand?.Name ?? currentProduct.ManufacturerName ?? "Omni Beauty",
+                BrandName = currentProduct.Brand?.Name ?? currentProduct.ManufacturerName ?? "Canmake Beauty",
                 CategoryName = currentProduct.Category?.Name ?? "Mỹ Phẩm",
                 RoutineStep = currentProduct.RoutineStep,
                 RecommendationReason = "Sản phẩm bạn đang xem",
@@ -307,7 +307,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
                         ImageUrl = Data.ProductImageSourceRegistry.ResolveProductImageUrl(p.ThumbnailUrl, p.Sku, p.Slug, p.Name),
                         Price = p.SellingPrice,
                         SalePrice = salePrice,
-                        BrandName = p.Brand?.Name ?? p.ManufacturerName ?? "Omni Beauty",
+                        BrandName = p.Brand?.Name ?? p.ManufacturerName ?? "Canmake Beauty",
                         CategoryName = p.Category?.Name ?? "Mỹ Phẩm",
                         RoutineStep = p.RoutineStep,
                         Rating = stat != null ? Math.Round(stat.AvgRating, 1) : 5.0,
