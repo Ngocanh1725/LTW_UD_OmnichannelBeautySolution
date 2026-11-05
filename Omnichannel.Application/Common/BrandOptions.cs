@@ -89,6 +89,11 @@ namespace Omnichannel.Application.Common
         public string IconUrl { get; set; } = "/images/branding/canmake-logo-icon.svg";
 
         /// <summary>
+        /// Alias tương thích ngược cho IconUrl.
+        /// </summary>
+        public string LogoIconPath => IconUrl;
+
+        /// <summary>
         /// Đường dẫn Favicon định dạng vector SVG.
         /// </summary>
         public string FaviconSvgUrl { get; set; } = "/images/branding/favicon.svg";
