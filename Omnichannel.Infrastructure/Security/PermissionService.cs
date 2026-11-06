@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,6 +33,15 @@ namespace Omnichannel.Infrastructure.Security
             }
 
             var effectivePerms = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            var isUserActive = await _context.Users
+                .AsNoTracking()
+                .AnyAsync(u => u.Id == userId && u.IsActive && !u.IsDeleted);
+
+            if (!isUserActive)
+            {
+                return effectivePerms;
+            }
 
             // 1. Lấy toàn bộ quyền từ các Roles đang Active gán cho User
             var rolePermissions = await _context.UserRoles

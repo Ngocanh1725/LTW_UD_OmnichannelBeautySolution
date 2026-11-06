@@ -56,6 +56,103 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.ToTable("ActiveIngredients");
                 });
 
+            modelBuilder.Entity("Omnichannel.Domain.Entities.AdminDelegationDepartment", b =>
+                {
+                    b.Property<int>("AdminDelegationScopeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AdminDelegationScopeId", "DepartmentId");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.ToTable("AdminDelegationDepartments");
+                });
+
+            modelBuilder.Entity("Omnichannel.Domain.Entities.AdminDelegationPermission", b =>
+                {
+                    b.Property<int>("AdminDelegationScopeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PermissionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AdminDelegationScopeId", "PermissionId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.ToTable("AdminDelegationPermissions");
+                });
+
+            modelBuilder.Entity("Omnichannel.Domain.Entities.AdminDelegationScope", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AdminUserId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("CanAssignRole")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanCreateUser")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanDelegateFurther")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanDeleteUser")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanEditUser")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanResetPassword")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<int?>("GrantedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaxGrantLevel")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2(7)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdminUserId")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_AdminDelegationScopes_AdminUserId");
+
+                    b.HasIndex("GrantedByUserId");
+
+                    b.ToTable("AdminDelegationScopes");
+                });
+
+            modelBuilder.Entity("Omnichannel.Domain.Entities.AdminDelegationStore", b =>
+                {
+                    b.Property<int>("AdminDelegationScopeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StoreId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AdminDelegationScopeId", "StoreId");
+
+                    b.HasIndex("StoreId");
+
+                    b.ToTable("AdminDelegationStores");
+                });
+
             modelBuilder.Entity("Omnichannel.Domain.Entities.Alert", b =>
                 {
                     b.Property<int>("Id")
@@ -746,6 +843,59 @@ namespace Omnichannel.Infrastructure.Migrations
                         .HasDatabaseName("IX_CustomerProfiles_UserId");
 
                     b.ToTable("CustomerProfiles");
+                });
+
+            modelBuilder.Entity("Omnichannel.Domain.Entities.Department", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("HeadUserId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2(7)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Departments_Code");
+
+                    b.HasIndex("HeadUserId");
+
+                    b.HasIndex("ParentId");
+
+                    b.ToTable("Departments");
                 });
 
             modelBuilder.Entity("Omnichannel.Domain.Entities.FinancialLedger", b =>
@@ -3200,22 +3350,44 @@ namespace Omnichannel.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Color")
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2(7)");
+
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
+                    b.Property<string>("DisplayName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("IsSystem")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Level")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2(7)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
 
                     b.HasIndex("Name")
                         .IsUnique()
@@ -4083,6 +4255,10 @@ namespace Omnichannel.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
                     b.Property<int?>("AvatarMediaId")
                         .HasColumnType("int");
 
@@ -4093,22 +4269,65 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2(7)");
 
+                    b.Property<int?>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DateOfBirth")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<int?>("DeletedBy")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("varchar(150)");
+
+                    b.Property<string>("EmployeeCode")
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("Gender")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("HireDate")
+                        .HasColumnType("date");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("JobTitle")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("LastLoginAt")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<int?>("ManagerId")
+                        .HasColumnType("int");
 
                     b.Property<string>("NormalizedUsername")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -4129,6 +4348,9 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2(7)");
 
+                    b.Property<int?>("UpdatedBy")
+                        .HasColumnType("int");
+
                     b.Property<int>("UserType")
                         .HasColumnType("int");
 
@@ -4141,9 +4363,18 @@ namespace Omnichannel.Infrastructure.Migrations
 
                     b.HasIndex("AvatarMediaId");
 
+                    b.HasIndex("DepartmentId");
+
                     b.HasIndex("Email")
                         .IsUnique()
                         .HasDatabaseName("IX_Users_Email");
+
+                    b.HasIndex("EmployeeCode")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_Users_EmployeeCode")
+                        .HasFilter("[EmployeeCode] IS NOT NULL");
+
+                    b.HasIndex("ManagerId");
 
                     b.HasIndex("StoreId");
 
@@ -4162,10 +4393,22 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<int>("PermissionId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("GrantedAt")
+                        .HasColumnType("datetime2(7)");
+
+                    b.Property<int?>("GrantedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsGranted")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Reason")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.HasKey("UserId", "PermissionId");
+
+                    b.HasIndex("GrantedByUserId");
 
                     b.HasIndex("PermissionId");
 
@@ -4183,7 +4426,12 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Property<DateTime>("AssignedAt")
                         .HasColumnType("datetime2(7)");
 
+                    b.Property<int?>("AssignedByUserId")
+                        .HasColumnType("int");
+
                     b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("AssignedByUserId");
 
                     b.HasIndex("RoleId");
 
@@ -4280,6 +4528,81 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("WishlistItems");
+                });
+
+            modelBuilder.Entity("Omnichannel.Domain.Entities.AdminDelegationDepartment", b =>
+                {
+                    b.HasOne("Omnichannel.Domain.Entities.AdminDelegationScope", "Scope")
+                        .WithMany("AllowedDepartments")
+                        .HasForeignKey("AdminDelegationScopeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Omnichannel.Domain.Entities.Department", "Department")
+                        .WithMany("DelegationDepartments")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+
+                    b.Navigation("Scope");
+                });
+
+            modelBuilder.Entity("Omnichannel.Domain.Entities.AdminDelegationPermission", b =>
+                {
+                    b.HasOne("Omnichannel.Domain.Entities.AdminDelegationScope", "Scope")
+                        .WithMany("AllowedPermissions")
+                        .HasForeignKey("AdminDelegationScopeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Omnichannel.Domain.Entities.Permission", "Permission")
+                        .WithMany("DelegationPermissions")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Scope");
+                });
+
+            modelBuilder.Entity("Omnichannel.Domain.Entities.AdminDelegationScope", b =>
+                {
+                    b.HasOne("Omnichannel.Domain.Entities.User", "AdminUser")
+                        .WithOne("DelegationScope")
+                        .HasForeignKey("Omnichannel.Domain.Entities.AdminDelegationScope", "AdminUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Omnichannel.Domain.Entities.User", "GrantedByUser")
+                        .WithMany()
+                        .HasForeignKey("GrantedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("AdminUser");
+
+                    b.Navigation("GrantedByUser");
+                });
+
+            modelBuilder.Entity("Omnichannel.Domain.Entities.AdminDelegationStore", b =>
+                {
+                    b.HasOne("Omnichannel.Domain.Entities.AdminDelegationScope", "Scope")
+                        .WithMany("AllowedStores")
+                        .HasForeignKey("AdminDelegationScopeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Omnichannel.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Scope");
+
+                    b.Navigation("Store");
                 });
 
             modelBuilder.Entity("Omnichannel.Domain.Entities.Alert", b =>
@@ -4420,6 +4743,23 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Navigation("Consultant");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Omnichannel.Domain.Entities.Department", b =>
+                {
+                    b.HasOne("Omnichannel.Domain.Entities.User", "HeadUser")
+                        .WithMany()
+                        .HasForeignKey("HeadUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Omnichannel.Domain.Entities.Department", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("HeadUser");
+
+                    b.Navigation("Parent");
                 });
 
             modelBuilder.Entity("Omnichannel.Domain.Entities.FinancialLedger", b =>
@@ -5124,6 +5464,16 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Omnichannel.Domain.Entities.Role", b =>
+                {
+                    b.HasOne("Omnichannel.Domain.Entities.Department", "Department")
+                        .WithMany("Roles")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Department");
+                });
+
             modelBuilder.Entity("Omnichannel.Domain.Entities.RolePermission", b =>
                 {
                     b.HasOne("Omnichannel.Domain.Entities.Permission", "Permission")
@@ -5351,6 +5701,16 @@ namespace Omnichannel.Infrastructure.Migrations
                         .HasForeignKey("AvatarMediaId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("Omnichannel.Domain.Entities.Department", "Department")
+                        .WithMany("Users")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Omnichannel.Domain.Entities.User", "Manager")
+                        .WithMany("Subordinates")
+                        .HasForeignKey("ManagerId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("Omnichannel.Domain.Entities.Store", "Store")
                         .WithMany("Users")
                         .HasForeignKey("StoreId")
@@ -5358,11 +5718,20 @@ namespace Omnichannel.Infrastructure.Migrations
 
                     b.Navigation("AvatarMedia");
 
+                    b.Navigation("Department");
+
+                    b.Navigation("Manager");
+
                     b.Navigation("Store");
                 });
 
             modelBuilder.Entity("Omnichannel.Domain.Entities.UserPermission", b =>
                 {
+                    b.HasOne("Omnichannel.Domain.Entities.User", "GrantedByUser")
+                        .WithMany()
+                        .HasForeignKey("GrantedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("Omnichannel.Domain.Entities.Permission", "Permission")
                         .WithMany("UserPermissions")
                         .HasForeignKey("PermissionId")
@@ -5375,6 +5744,8 @@ namespace Omnichannel.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("GrantedByUser");
+
                     b.Navigation("Permission");
 
                     b.Navigation("User");
@@ -5382,6 +5753,11 @@ namespace Omnichannel.Infrastructure.Migrations
 
             modelBuilder.Entity("Omnichannel.Domain.Entities.UserRole", b =>
                 {
+                    b.HasOne("Omnichannel.Domain.Entities.User", "AssignedByUser")
+                        .WithMany()
+                        .HasForeignKey("AssignedByUserId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("Omnichannel.Domain.Entities.Role", "Role")
                         .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
@@ -5393,6 +5769,8 @@ namespace Omnichannel.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("AssignedByUser");
 
                     b.Navigation("Role");
 
@@ -5440,6 +5818,15 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Navigation("ProductIngredients");
                 });
 
+            modelBuilder.Entity("Omnichannel.Domain.Entities.AdminDelegationScope", b =>
+                {
+                    b.Navigation("AllowedDepartments");
+
+                    b.Navigation("AllowedPermissions");
+
+                    b.Navigation("AllowedStores");
+                });
+
             modelBuilder.Entity("Omnichannel.Domain.Entities.Cart", b =>
                 {
                     b.Navigation("CartItems");
@@ -5467,6 +5854,17 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Navigation("RepurchaseSchedules");
 
                     b.Navigation("SkinHistories");
+                });
+
+            modelBuilder.Entity("Omnichannel.Domain.Entities.Department", b =>
+                {
+                    b.Navigation("Children");
+
+                    b.Navigation("DelegationDepartments");
+
+                    b.Navigation("Roles");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Omnichannel.Domain.Entities.LayoutSection", b =>
@@ -5520,6 +5918,8 @@ namespace Omnichannel.Infrastructure.Migrations
 
             modelBuilder.Entity("Omnichannel.Domain.Entities.Permission", b =>
                 {
+                    b.Navigation("DelegationPermissions");
+
                     b.Navigation("RolePermissions");
 
                     b.Navigation("UserPermissions");
@@ -5657,6 +6057,8 @@ namespace Omnichannel.Infrastructure.Migrations
 
                     b.Navigation("CustomerProfile");
 
+                    b.Navigation("DelegationScope");
+
                     b.Navigation("InventoryLogs");
 
                     b.Navigation("LoyaltyWallet");
@@ -5664,6 +6066,8 @@ namespace Omnichannel.Infrastructure.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("Posts");
+
+                    b.Navigation("Subordinates");
 
                     b.Navigation("UserPermissions");
 

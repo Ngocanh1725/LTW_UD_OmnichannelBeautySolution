@@ -17,12 +17,17 @@ namespace Omnichannel.Infrastructure.Data
         }
 
         // 1. PhÃ¢n há»‡ Äá»‹nh danh & Báº£o máº­t
+        public DbSet<Department> Departments => Set<Department>();
         public DbSet<Role> Roles => Set<Role>();
         public DbSet<Permission> Permissions => Set<Permission>();
         public DbSet<User> Users => Set<User>();
         public DbSet<UserRole> UserRoles => Set<UserRole>();
         public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
         public DbSet<UserPermission> UserPermissions => Set<UserPermission>();
+        public DbSet<AdminDelegationScope> AdminDelegationScopes => Set<AdminDelegationScope>();
+        public DbSet<AdminDelegationPermission> AdminDelegationPermissions => Set<AdminDelegationPermission>();
+        public DbSet<AdminDelegationDepartment> AdminDelegationDepartments => Set<AdminDelegationDepartment>();
+        public DbSet<AdminDelegationStore> AdminDelegationStores => Set<AdminDelegationStore>();
 
         // 2. PhÃ¢n há»‡ CMS & Navigation
         public DbSet<Menu> Menus => Set<Menu>();
@@ -140,20 +145,54 @@ namespace Omnichannel.Infrastructure.Data
             // =========================================================================
             // 1. Cáº¤U HÃŒNH PHÃ‚N Há»† Äá»ŠNH DANH & Báº¢O Máº¬T (IDENTITY & SECURITY)
             // =========================================================================
+            modelBuilder.Entity<Department>(entity =>
+            {
+                entity.HasIndex(d => d.Code).IsUnique().HasDatabaseName("IX_Departments_Code");
+
+                entity.HasOne(d => d.Parent)
+                      .WithMany(d => d.Children)
+                      .HasForeignKey(d => d.ParentId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(d => d.HeadUser)
+                      .WithMany()
+                      .HasForeignKey(d => d.HeadUserId)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasIndex(u => u.Username).IsUnique().HasDatabaseName("IX_Users_Username");
                 entity.HasIndex(u => u.Email).IsUnique().HasDatabaseName("IX_Users_Email");
+                entity.HasIndex(u => u.EmployeeCode)
+                      .IsUnique()
+                      .HasFilter("[EmployeeCode] IS NOT NULL")
+                      .HasDatabaseName("UQ_Users_EmployeeCode");
 
                 entity.HasOne(u => u.Store)
                       .WithMany(s => s.Users)
                       .HasForeignKey(u => u.StoreId)
                       .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(u => u.Department)
+                      .WithMany(d => d.Users)
+                      .HasForeignKey(u => u.DepartmentId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(u => u.Manager)
+                      .WithMany(u => u.Subordinates)
+                      .HasForeignKey(u => u.ManagerId)
+                      .OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<Role>(entity =>
             {
                 entity.HasIndex(r => r.Name).IsUnique().HasDatabaseName("IX_Roles_Name");
+
+                entity.HasOne(r => r.Department)
+                      .WithMany(d => d.Roles)
+                      .HasForeignKey(r => r.DepartmentId)
+                      .OnDelete(DeleteBehavior.SetNull);
             });
 
             modelBuilder.Entity<Permission>(entity =>
@@ -174,6 +213,11 @@ namespace Omnichannel.Infrastructure.Data
                       .WithMany(r => r.UserRoles)
                       .HasForeignKey(ur => ur.RoleId)
                       .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ur => ur.AssignedByUser)
+                      .WithMany()
+                      .HasForeignKey(ur => ur.AssignedByUserId)
+                      .OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<RolePermission>(entity =>
@@ -203,6 +247,71 @@ namespace Omnichannel.Infrastructure.Data
                 entity.HasOne(up => up.Permission)
                       .WithMany(p => p.UserPermissions)
                       .HasForeignKey(up => up.PermissionId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(up => up.GrantedByUser)
+                      .WithMany()
+                      .HasForeignKey(up => up.GrantedByUserId)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<AdminDelegationScope>(entity =>
+            {
+                entity.HasIndex(s => s.AdminUserId).IsUnique().HasDatabaseName("UQ_AdminDelegationScopes_AdminUserId");
+
+                entity.HasOne(s => s.AdminUser)
+                      .WithOne(u => u.DelegationScope)
+                      .HasForeignKey<AdminDelegationScope>(s => s.AdminUserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(s => s.GrantedByUser)
+                      .WithMany()
+                      .HasForeignKey(s => s.GrantedByUserId)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<AdminDelegationPermission>(entity =>
+            {
+                entity.HasKey(adp => new { adp.AdminDelegationScopeId, adp.PermissionId });
+
+                entity.HasOne(adp => adp.Scope)
+                      .WithMany(s => s.AllowedPermissions)
+                      .HasForeignKey(adp => adp.AdminDelegationScopeId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(adp => adp.Permission)
+                      .WithMany(p => p.DelegationPermissions)
+                      .HasForeignKey(adp => adp.PermissionId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<AdminDelegationDepartment>(entity =>
+            {
+                entity.HasKey(add => new { add.AdminDelegationScopeId, add.DepartmentId });
+
+                entity.HasOne(add => add.Scope)
+                      .WithMany(s => s.AllowedDepartments)
+                      .HasForeignKey(add => add.AdminDelegationScopeId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(add => add.Department)
+                      .WithMany(d => d.DelegationDepartments)
+                      .HasForeignKey(add => add.DepartmentId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<AdminDelegationStore>(entity =>
+            {
+                entity.HasKey(ads => new { ads.AdminDelegationScopeId, ads.StoreId });
+
+                entity.HasOne(ads => ads.Scope)
+                      .WithMany(s => s.AllowedStores)
+                      .HasForeignKey(ads => ads.AdminDelegationScopeId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ads => ads.Store)
+                      .WithMany()
+                      .HasForeignKey(ads => ads.StoreId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -1175,7 +1284,8 @@ namespace Omnichannel.Infrastructure.Data
             // =========================================================================
             // 19. BỘ LỌC TRUY VẤN TOÀN CỤC (GLOBAL QUERY FILTERS CHO SOFT DELETE & ISACTIVE)
             // =========================================================================
-            modelBuilder.Entity<User>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<Department>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Role>().HasQueryFilter(e => e.IsActive);
             modelBuilder.Entity<Product>().HasQueryFilter(e => e.IsActive);
             modelBuilder.Entity<Category>().HasQueryFilter(e => e.IsActive);

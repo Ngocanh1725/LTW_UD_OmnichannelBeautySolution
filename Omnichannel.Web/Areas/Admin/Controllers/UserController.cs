@@ -104,6 +104,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 Email = model.Email.Trim().ToLowerInvariant(),
                 PhoneNumber = model.PhoneNumber?.Trim(),
                 PasswordHash = _passwordHasher.HashPassword(model.Password),
+                UserType = 2,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             };

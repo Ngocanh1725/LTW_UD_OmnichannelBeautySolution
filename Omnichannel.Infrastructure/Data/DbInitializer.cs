@@ -70,6 +70,9 @@ namespace Omnichannel.Infrastructure.Data
             // Đảm bảo cột RoutineStep và Coupon COMBO15 luôn sẵn sàng
             await EnsureRoutineStepAndComboSeededAsync(context, logger);
 
+            // Đảm bảo mô hình Delegated RBAC, Phòng ban, Level vai trò và hồ sơ nhân sự luôn được đồng bộ
+            await EnsureDelegatedRbacAndDepartmentsSeededAsync(context, logger);
+
             // Seed dữ liệu chỉ chạy khi bảng rỗng (nếu đã có Products và Roles thì hệ thống đã khởi tạo hoàn tất)
             if (await context.Products.AnyAsync() && await context.Roles.AnyAsync())
             {
@@ -116,6 +119,7 @@ namespace Omnichannel.Infrastructure.Data
             await EnsureFlashSaleAndShowroomStockSeededAsync(context, logger);
             await EnsureRealisticDemoDataSeededAsync(context, logger);
             await EnsureOrderStatusHistoriesAndReturnsSeededAsync(context, logger);
+            await EnsureDelegatedRbacAndDepartmentsSeededAsync(context, logger);
         }
 
         private static string HashPassword(string password)

@@ -196,12 +196,13 @@ namespace Omnichannel.Web.Controllers
                 return View(model);
             }
 
-            // Tự động mở kích hoạt lại nếu tài khoản trước đó bị vô tình khóa
+            // Tự động mở kích hoạt lại nếu tài khoản trước đó bị vô tình khóa và ghi nhận thời điểm đăng nhập
             if (!user.IsActive)
             {
                 user.IsActive = true;
-                await _dbContext.SaveChangesAsync();
             }
+            user.LastLoginAt = DateTime.UtcNow;
+            await _dbContext.SaveChangesAsync();
 
             // Đăng nhập thành công -> Xóa bộ đếm Brute-force
             _bruteForceTracker.TryRemove(bruteForceKey, out _);
