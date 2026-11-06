@@ -56,3 +56,24 @@
     <partial name="_TrashTable" model="Model.TrashPaged" />
 </div>
 
+@section Scripts {
+    <script>
+        async function handleStaffRestoreSubmit(event, form, staffName) {
+            event.preventDefault();
+            const confirm = await Swal.fire({
+                title: 'Khôi phục nhân sự?',
+                text: `Bạn có chắc muốn đưa nhân sự '${staffName}' trở lại danh sách hoạt động?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Khôi phục ngay',
+                cancelButtonText: 'Hủy'
+            });
+            if (confirm.isConfirmed) {
+                form.submit();
+            }
+        }
+    </script>
+}
+

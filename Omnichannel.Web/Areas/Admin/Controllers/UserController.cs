@@ -59,6 +59,11 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             var stats = await _staffService.GetStatsAsync(actorId);
             var metadata = await LoadFilterMetadataAsync(actorCtx);
 
+            int customerCount = await _context.Users.CountAsync(u => u.UserType == 1 && !u.IsDeleted);
+            int adminCount = stats.StaffByRole
+                .Where(kv => kv.Key.Contains("Admin") || kv.Key.Contains("Quản trị") || kv.Key.Contains("Giám đốc") || kv.Key.Contains("Trưởng phòng"))
+                .Sum(kv => kv.Value);
+
             var vm = new StaffIndexViewModel
             {
                 StaffPaged = paged,
@@ -68,7 +73,10 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 AssignableRoles = metadata.Roles,
                 ScopedStores = metadata.Stores,
                 PotentialManagers = metadata.Managers,
-                ActorContext = actorCtx
+                ActorContext = actorCtx,
+                CustomerCount = customerCount,
+                TotalAdmins = adminCount,
+                TotalDepartments = stats.StaffByDepartment.Count(k => k.Key != "Chưa phân phòng")
             };
 
             return View(vm);
@@ -658,10 +666,50 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             {
                 deptQuery = deptQuery.Where(d => actorCtx.ManagedDepartmentIds.Contains(d.Id));
             }
-            var departments = await deptQuery
+            var rawDepts = await deptQuery
                 .OrderBy(d => d.SortOrder)
-                .Select(d => new DepartmentOptionDto { Id = d.Id, Code = d.Code, Name = d.Name })
+                .Select(d => new { d.Id, d.Code, d.Name, d.ParentId })
                 .ToListAsync();
+
+            // Xây dựng cây phòng ban (Hierarchical Tree) hiển thị thụt đầu dòng
+            var departments = new List<DepartmentOptionDto>();
+            void AddDeptNodes(int? parentId, int level)
+            {
+                var children = rawDepts.Where(d => d.ParentId == parentId).ToList();
+                foreach (var c in children)
+                {
+                    string indent = level switch
+                    {
+                        0 => "",
+                        1 => "— ",
+                        2 => "— — ",
+                        _ => new string('—', level) + " "
+                    };
+                    departments.Add(new DepartmentOptionDto
+                    {
+                        Id = c.Id,
+                        Code = c.Code,
+                        Name = c.Name,
+                        ParentId = c.ParentId,
+                        Level = level,
+                        DisplayTreeName = indent + c.Name
+                    });
+                    AddDeptNodes(c.Id, level + 1);
+                }
+            }
+            AddDeptNodes(null, 0);
+            foreach (var rem in rawDepts.Where(d => !departments.Any(x => x.Id == d.Id)))
+            {
+                departments.Add(new DepartmentOptionDto
+                {
+                    Id = rem.Id,
+                    Code = rem.Code,
+                    Name = rem.Name,
+                    ParentId = rem.ParentId,
+                    Level = 0,
+                    DisplayTreeName = rem.Name
+                });
+            }
 
             var assignableRoleIds = (await _delegationService.GetAssignableRoleIdsAsync(actorCtx.ActorId)).ToHashSet();
             var roles = await _context.Roles
@@ -674,6 +722,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                     Id = r.Id,
                     Name = r.Name,
                     DisplayName = r.DisplayName ?? r.Name,
+                    Description = r.Description,
                     Level = r.Level,
                     Color = r.Color
                 })
@@ -691,6 +740,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             var managerQuery = _context.Users
                 .AsNoTracking()
+                .Include(u => u.Department)
                 .Where(u => u.UserType >= 2 && !u.IsDeleted && u.IsActive);
             managerQuery = _delegationService.ApplyUserScope(managerQuery, actorCtx);
             var managers = await managerQuery
@@ -701,7 +751,9 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                     FullName = u.FullName,
                     Username = u.Username,
                     EmployeeCode = u.EmployeeCode,
-                    JobTitle = u.JobTitle
+                    JobTitle = u.JobTitle,
+                    DepartmentId = u.DepartmentId,
+                    DepartmentName = u.Department != null ? u.Department.Name : null
                 })
                 .ToListAsync();
 

@@ -1,207 +1,529 @@
 @model Omnichannel.Application.DTOs.HR.PagedResult<Omnichannel.Application.DTOs.HR.StaffListItemDto>
+@{
+    // Gom nhóm danh sách theo phòng ban cho chế độ xem Accordion
+    var deptGroups = Model.Items
+        .GroupBy(s => s.DepartmentName ?? "Chưa phân phòng ban")
+        .OrderBy(g => g.Key == "Chưa phân phòng ban" ? 1 : 0)
+        .ThenBy(g => g.Key)
+        .ToList();
+}
 
-<div class="table-responsive" tabindex="0" role="region" aria-label="Bảng danh sách nhân sự nội bộ">
-    <table class="table table-hover align-middle mb-0">
-        <thead class="bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
-            <tr>
-                <th class="ps-4 py-3 text-center" style="width: 40px;">
-                    <input type="checkbox" id="selectAllStaffCb" class="form-check-input m-0 cursor-pointer" onchange="toggleSelectAllStaff(this.checked)" title="Chọn tất cả trên trang này" />
-                </th>
-                <th class="py-3 px-3">Mã NV / Họ Tên</th>
-                <th class="py-3 px-3">Phòng Ban & Chức Danh</th>
-                <th class="py-3 px-3">Vai Trò Phân Bổ</th>
-                <th class="py-3 px-3">Chi Nhánh & Quản Lý</th>
-                <th class="py-3 px-3">Liên Hệ</th>
-                <th class="py-3 px-3 text-center">Trạng Thái</th>
-                <th class="py-3 px-3 text-center">Đăng Nhập Cuối</th>
-                <th class="pe-4 py-3 text-end" style="min-width: 160px;">Thao Tác</th>
-            </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
-            @if (Model.Items.Count == 0)
-            {
+<!-- ========================================================================= -->
+<!-- 1. CHẾ ĐỘ XEM BẢNG (TABLE VIEW - MẶC ĐỊNH) -->
+<!-- ========================================================================= -->
+<div id="staffTableView" class="hr-view-container">
+    <div class="table-responsive" tabindex="0" role="region" aria-label="Bảng danh sách nhân sự nội bộ">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
                 <tr>
-                    <td colspan="9" class="text-center py-5 text-muted">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-rose-50 text-rose-600 mb-2" style="width: 50px; height: 50px;">
-                            <i class="fa-solid fa-user-slash fs-4"></i>
+                    <th class="ps-4 py-3 text-center" style="width: 42px;">
+                        <input type="checkbox" id="selectAllStaffCb" class="form-check-input m-0 cursor-pointer" onchange="toggleSelectAllStaff(this.checked)" title="Chọn tất cả trên trang này" aria-label="Chọn tất cả nhân sự" />
+                    </th>
+                    <th class="py-3 px-3 cursor-pointer select-none" onclick="toggleSortStaff('name')">
+                        <div class="d-inline-flex align-items-center gap-1.5">
+                            <span>Nhân Sự / Mã NV</span>
+                            <span class="text-muted sort-icon" data-sort="name"><i class="fa-solid fa-sort"></i></span>
                         </div>
-                        <div class="fw-bold text-dark dark:text-white">Không tìm thấy nhân sự nào</div>
-                        <p class="small text-muted mb-0">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm để xem kết quả khác.</p>
-                    </td>
+                    </th>
+                    <th class="py-3 px-3 cursor-pointer select-none" onclick="toggleSortStaff('department')">
+                        <div class="d-inline-flex align-items-center gap-1.5">
+                            <span>Phòng Ban & Vị Trí</span>
+                            <span class="text-muted sort-icon" data-sort="department"><i class="fa-solid fa-sort"></i></span>
+                        </div>
+                    </th>
+                    <th class="py-3 px-3">Vai Trò & Cấp Bậc</th>
+                    <th class="py-3 px-3">Chi Nhánh & Quản Lý</th>
+                    <th class="py-3 px-3">Liên Hệ</th>
+                    <th class="py-3 px-3 text-center">Trạng Thái</th>
+                    <th class="py-3 px-3 text-center cursor-pointer select-none" onclick="toggleSortStaff('lastLogin')">
+                        <div class="d-inline-flex align-items-center gap-1.5">
+                            <span>Đăng Nhập Cuối</span>
+                            <span class="text-muted sort-icon" data-sort="lastLogin"><i class="fa-solid fa-sort"></i></span>
+                        </div>
+                    </th>
+                    <th class="pe-4 py-3 text-end" style="min-width: 130px;">Thao Tác</th>
                 </tr>
-            }
-            else
-            {
-                @foreach (var staff in Model.Items)
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                @if (Model.Items.Count == 0)
                 {
-                    <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
-                        <td class="ps-4 py-3 text-center">
-                            @if (staff.CanActorManage)
-                            {
-                                <input type="checkbox" class="form-check-input staff-select-cb m-0 cursor-pointer" value="@staff.Id" onchange="updateBulkActionToolbar()" />
-                            }
-                            else
-                            {
-                                <input type="checkbox" class="form-check-input m-0 opacity-25" disabled title="Tài khoản cùng cấp hoặc cao hơn cấp của bạn" />
-                            }
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-rose-50 text-rose-600 mb-3" style="width: 56px; height: 56px;">
+                                <i class="fa-solid fa-user-slash fs-3"></i>
+                            </div>
+                            <div class="fw-bold text-dark dark:text-white fs-6">Không tìm thấy nhân sự phù hợp</div>
+                            <p class="small text-muted mb-3">Vui lòng điều chỉnh hoặc xóa bớt tiêu chí lọc để mở rộng kết quả tìm kiếm.</p>
+                            <button type="button" class="btn btn-sm btn-outline-danger rounded-3 px-3 py-1.5 fw-semibold" onclick="resetAllFilters()">
+                                <i class="fa-solid fa-rotate-left me-1"></i>Xóa Bộ Lọc
+                            </button>
                         </td>
-                        <td class="py-3 px-3">
-                            <div class="d-flex align-items-center gap-2.5">
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var staff in Model.Items)
+                    {
+                        <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition">
+                            <td class="ps-4 py-3 text-center">
+                                @if (staff.CanActorManage)
+                                {
+                                    <input type="checkbox" class="form-check-input staff-select-cb m-0 cursor-pointer" value="@staff.Id" onchange="updateBulkActionToolbar()" aria-label="Chọn nhân sự @staff.FullName" />
+                                }
+                                else
+                                {
+                                    <input type="checkbox" class="form-check-input m-0 opacity-25" disabled title="Tài khoản cùng cấp bậc hoặc cao hơn cấp bậc của bạn" aria-label="Không thể chọn nhân sự cùng cấp" />
+                                }
+                            </td>
+                            <td class="py-3 px-3">
+                                <div class="d-flex align-items-center gap-2.5">
+                                    <div class="d-inline-flex align-items-center justify-content-center rounded-3 fw-bold text-white shadow-xs flex-shrink-0"
+                                         style="width: 40px; height: 40px; font-size: 14px; background: linear-gradient(135deg, #e11d48, #9333ea);">
+                                        @(staff.FullName.Length > 0 ? staff.FullName[0].ToString().ToUpper() : "U")
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                            @if (!string.IsNullOrEmpty(staff.EmployeeCode))
+                                            {
+                                                <span class="badge bg-light text-dark border font-monospace" style="font-size: 0.68rem;">@staff.EmployeeCode</span>
+                                            }
+                                            <a href="/Admin/User/Details/@staff.Id" class="fw-bold text-dark dark:text-white text-decoration-none hover:text-rose-600">
+                                                @staff.FullName
+                                            </a>
+                                            @if (staff.IsDepartmentHead)
+                                            {
+                                                <span class="badge bg-amber-100 text-amber-800 border border-amber-300" style="font-size: 0.65rem;" title="Trưởng phòng phụ trách">
+                                                    <i class="fa-solid fa-crown text-amber-600 me-0.5"></i>Trưởng phòng
+                                                </span>
+                                            }
+                                        </div>
+                                        <div class="text-muted font-monospace" style="font-size: 0.75rem;">@@@staff.Username</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3 px-3">
+                                <div class="fw-semibold text-dark dark:text-white small">
+                                    <i class="fa-solid fa-building-user text-rose-500 me-1"></i>@(staff.DepartmentName ?? "Chưa phân phòng")
+                                </div>
+                                <div class="text-muted" style="font-size: 0.75rem;">
+                                    @(staff.JobTitle ?? "Nhân viên")
+                                </div>
+                            </td>
+                            <td class="py-3 px-3">
+                                <div class="d-flex flex-wrap gap-1 align-items-center">
+                                    @if (staff.Roles.Count == 0)
+                                    {
+                                        <span class="badge bg-light text-muted border" style="font-size: 0.68rem;">Chưa gán vai trò</span>
+                                    }
+                                    else
+                                    {
+                                        var mainRoles = staff.Roles.Take(2).ToList();
+                                        var moreRolesCount = staff.Roles.Count - 2;
+                                        @foreach (var role in mainRoles)
+                                        {
+                                            string badgeBg = !string.IsNullOrEmpty(role.Color) ? role.Color : "#4f46e5";
+                                            <span class="badge text-white px-2 py-0.5 rounded-2 font-medium" style="font-size: 11px; background: @badgeBg;" title="Cấp bậc Lv@role.Level">
+                                                @role.DisplayName
+                                            </span>
+                                        }
+                                        @if (moreRolesCount > 0)
+                                        {
+                                            <span class="badge bg-light text-dark border px-1.5 py-0.5 rounded-2 font-monospace" style="font-size: 10px;" title="@string.Join(", ", staff.Roles.Skip(2).Select(r => r.DisplayName))">
+                                                +@moreRolesCount
+                                            </span>
+                                        }
+                                    }
+                                </div>
+                            </td>
+                            <td class="py-3 px-3 small">
+                                <div class="text-dark dark:text-slate-200 fw-medium">
+                                    <i class="fa-solid fa-store text-indigo-500 me-1"></i>@(staff.StoreName ?? "Trụ sở chính")
+                                </div>
+                                @if (!string.IsNullOrEmpty(staff.ManagerName))
+                                {
+                                    <div class="text-muted" style="font-size: 0.72rem;">QL: @staff.ManagerName</div>
+                                }
+                            </td>
+                            <td class="py-3 px-3 small">
+                                <div class="d-flex align-items-center gap-1.5 text-dark dark:text-slate-200">
+                                    <span class="text-truncate" style="max-width: 160px;" title="@staff.Email">@staff.Email</span>
+                                    <button type="button" class="btn btn-link p-0 text-muted hover:text-rose-600 copy-btn" onclick="copyTextToClipboard('@staff.Email', this)" title="Sao chép email">
+                                        <i class="fa-regular fa-copy" style="font-size: 11px;"></i>
+                                    </button>
+                                </div>
+                                @if (!string.IsNullOrEmpty(staff.PhoneNumber))
+                                {
+                                    <div class="d-flex align-items-center gap-1.5 text-muted font-monospace" style="font-size: 0.72rem;">
+                                        <span>@staff.PhoneNumber</span>
+                                        <button type="button" class="btn btn-link p-0 text-muted hover:text-rose-600 copy-btn" onclick="copyTextToClipboard('@staff.PhoneNumber', this)" title="Sao chép SĐT">
+                                            <i class="fa-regular fa-copy" style="font-size: 10px;"></i>
+                                        </button>
+                                    </div>
+                                }
+                            </td>
+                            <td class="py-3 px-3 text-center">
+                                @if (staff.CanActorManage)
+                                {
+                                    <div class="form-check form-switch d-inline-block m-0" title="Bật/tắt trạng thái hoạt động">
+                                        <input class="form-check-input cursor-pointer" type="checkbox" role="switch" @(staff.IsActive ? "checked" : "") onchange="quickToggleStaffStatus(@staff.Id, this)" />
+                                    </div>
+                                }
+                                else
+                                {
+                                    @if (staff.IsActive)
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5 rounded-pill fw-semibold" style="font-size: 0.7rem;">
+                                            Hoạt động
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-0.5 rounded-pill fw-semibold" style="font-size: 0.7rem;">
+                                            Tạm khóa
+                                        </span>
+                                    }
+                                }
+                            </td>
+                            <td class="py-3 px-3 text-center small text-muted font-monospace" style="font-size: 0.75rem;">
+                                @if (staff.LastLoginAt.HasValue)
+                                {
+                                    var timeSpan = DateTime.UtcNow - staff.LastLoginAt.Value;
+                                    string relativeTime;
+                                    if (timeSpan.TotalMinutes < 60)
+                                    {
+                                        relativeTime = $"{(int)timeSpan.TotalMinutes} phút trước";
+                                    }
+                                    else if (timeSpan.TotalHours < 24)
+                                    {
+                                        relativeTime = $"{(int)timeSpan.TotalHours} giờ trước";
+                                    }
+                                    else if (timeSpan.TotalDays < 7)
+                                    {
+                                        relativeTime = $"{(int)timeSpan.TotalDays} ngày trước";
+                                    }
+                                    else
+                                    {
+                                        relativeTime = staff.LastLoginAt.Value.ToLocalTime().ToString("dd/MM/yyyy");
+                                    }
+                                    <div class="fw-semibold text-dark dark:text-slate-200">@relativeTime</div>
+                                    <div class="text-slate-400" style="font-size: 0.68rem;">@staff.LastLoginAt.Value.ToLocalTime().ToString("HH:mm")</div>
+                                }
+                                else
+                                {
+                                    <span class="text-slate-400">Chưa đăng nhập</span>
+                                }
+                            </td>
+                            <td class="pe-4 py-3 text-end">
+                                <div class="dropdown d-inline-block">
+                                    <button class="btn btn-sm btn-light border rounded-3 px-2.5 py-1 text-muted hover:text-dark dark:hover:text-white" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Menu thao tác">
+                                        <i class="fa-solid fa-ellipsis"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3 text-sm p-1.5">
+                                        <li>
+                                            <a class="dropdown-item rounded-2 py-1.5" href="/Admin/User/Details/@staff.Id">
+                                                <i class="fa-regular fa-eye me-2 text-indigo-600"></i>Xem hồ sơ 360
+                                            </a>
+                                        </li>
+                                        @if (staff.CanActorManage)
+                                        {
+                                            <li asp-permission="USER_EDIT">
+                                                <a class="dropdown-item rounded-2 py-1.5" href="/Admin/User/Edit/@staff.Id">
+                                                    <i class="fa-solid fa-pen-to-square me-2 text-primary"></i>Chỉnh sửa hồ sơ
+                                                </a>
+                                            </li>
+                                            <li asp-permission="PERMISSION_DELEGATE">
+                                                <a class="dropdown-item rounded-2 py-1.5" href="/Admin/User/Permissions/@staff.Id">
+                                                    <i class="fa-solid fa-shield-halved me-2 text-rose-600"></i>Phân quyền đặc cách
+                                                </a>
+                                            </li>
+                                            <li asp-permission="USER_RESET_PASSWORD">
+                                                <button type="button" class="dropdown-item rounded-2 py-1.5" onclick="openResetPasswordModal(@staff.Id, '@staff.FullName', '@staff.Username')">
+                                                    <i class="fa-solid fa-key me-2 text-amber-600"></i>Đặt lại mật khẩu
+                                                </button>
+                                            </li>
+                                            <li asp-permission="USER_EDIT">
+                                                <button type="button" class="dropdown-item rounded-2 py-1.5 @(staff.IsActive ? "text-warning" : "text-success")" onclick="confirmToggleStaffStatus(@staff.Id, '@staff.FullName', @staff.IsActive.ToString().ToLower())">
+                                                    @if (staff.IsActive)
+                                                    {
+                                                        <i class="fa-solid fa-user-lock me-2"></i><span>Tạm khóa tài khoản</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="fa-solid fa-lock-open me-2"></i><span>Mở khóa tài khoản</span>
+                                                    }
+                                                </button>
+                                            </li>
+                                            <li><hr class="dropdown-divider my-1"></li>
+                                            <li asp-permission="USER_DELETE">
+                                                <button type="button" class="dropdown-item rounded-2 py-1.5 text-danger" onclick="confirmDeleteStaff(@staff.Id, '@staff.FullName', '@staff.Username')">
+                                                    <i class="fa-regular fa-trash-can me-2"></i>Xóa mềm vào thùng rác
+                                                </button>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- 2. CHẾ ĐỘ XEM THẺ (CARD GRID VIEW) -->
+<!-- ========================================================================= -->
+<div id="staffCardView" class="hr-view-container d-none p-3">
+    @if (Model.Items.Count == 0)
+    {
+        <div class="text-center py-5 text-muted">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-rose-50 text-rose-600 mb-3" style="width: 56px; height: 56px;">
+                <i class="fa-solid fa-user-slash fs-3"></i>
+            </div>
+            <div class="fw-bold text-dark dark:text-white fs-6">Không tìm thấy nhân sự phù hợp</div>
+            <p class="small text-muted mb-0">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-3">
+            @foreach (var staff in Model.Items)
+            {
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="card h-100 border border-slate-200 dark:border-slate-800 rounded-4 shadow-2xs hover:shadow-sm transition bg-white dark:bg-slate-900 p-3.5">
+                        <div class="d-flex align-items-start justify-content-between gap-2.5 mb-3">
+                            <div class="d-flex align-items-center gap-2.5 min-w-0">
+                                @if (staff.CanActorManage)
+                                {
+                                    <input type="checkbox" class="form-check-input staff-select-cb m-0 cursor-pointer flex-shrink-0" value="@staff.Id" onchange="updateBulkActionToolbar()" aria-label="Chọn nhân sự @staff.FullName" />
+                                }
                                 <div class="d-inline-flex align-items-center justify-content-center rounded-3 fw-bold text-white shadow-xs flex-shrink-0"
-                                     style="width: 38px; height: 38px; font-size: 14px; background: linear-gradient(135deg, #e11d48, #9333ea);">
+                                     style="width: 44px; height: 44px; font-size: 16px; background: linear-gradient(135deg, #e11d48, #9333ea);">
                                     @(staff.FullName.Length > 0 ? staff.FullName[0].ToString().ToUpper() : "U")
                                 </div>
                                 <div class="min-w-0">
-                                    <div class="d-flex align-items-center gap-1.5 flex-wrap">
-                                        @if (!string.IsNullOrEmpty(staff.EmployeeCode))
-                                        {
-                                            <span class="badge bg-light text-dark border font-monospace" style="font-size: 0.68rem;">@staff.EmployeeCode</span>
-                                        }
-                                        <a href="/Admin/User/Details/@staff.Id" class="fw-bold text-dark dark:text-white text-decoration-none hover:text-rose-600">
+                                    <div class="d-flex align-items-center gap-1 flex-wrap">
+                                        <a href="/Admin/User/Details/@staff.Id" class="fw-bold text-dark dark:text-white text-decoration-none hover:text-rose-600 text-truncate">
                                             @staff.FullName
                                         </a>
                                         @if (staff.IsDepartmentHead)
                                         {
-                                            <span class="badge bg-amber-100 text-amber-800 border border-amber-300" style="font-size: 0.65rem;" title="Trưởng phòng phụ trách">
-                                                <i class="fa-solid fa-crown text-amber-600 me-0.5"></i>Trưởng phòng
+                                            <span class="badge bg-amber-100 text-amber-800 border border-amber-300" style="font-size: 0.62rem;" title="Trưởng phòng">
+                                                <i class="fa-solid fa-crown text-amber-600"></i>
                                             </span>
                                         }
                                     </div>
-                                    <div class="text-muted font-monospace" style="font-size: 0.75rem;">@@@staff.Username</div>
+                                    <div class="text-muted font-monospace small">@@@staff.Username</div>
                                 </div>
                             </div>
-                        </td>
-                        <td class="py-3 px-3">
-                            <div class="fw-semibold text-dark dark:text-white small">
-                                <i class="fa-solid fa-building-user text-rose-500 me-1"></i>@(staff.DepartmentName ?? "Chưa phân phòng")
-                            </div>
-                            <div class="text-muted" style="font-size: 0.75rem;">
-                                @(staff.JobTitle ?? "Nhân viên")
-                            </div>
-                        </td>
-                        <td class="py-3 px-3">
-                            <div class="d-flex flex-wrap gap-1">
-                                @if (staff.Roles.Count == 0)
+
+                            <div>
+                                @if (staff.IsActive)
                                 {
-                                    <span class="badge bg-light text-muted border" style="font-size: 0.68rem;">Chưa gán vai trò</span>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5 rounded-pill fw-semibold" style="font-size: 0.68rem;">
+                                        Hoạt động
+                                    </span>
                                 }
                                 else
                                 {
-                                    @foreach (var role in staff.Roles)
-                                    {
-                                        <span class="badge bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border px-2 py-0.5 rounded-2" style="font-size: 11px;">
-                                            <i class="fa-solid fa-id-badge text-rose-500 me-1" style="font-size: 10px;"></i>@role.DisplayName
-                                        </span>
-                                    }
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-0.5 rounded-pill fw-semibold" style="font-size: 0.68rem;">
+                                        Tạm khóa
+                                    </span>
                                 }
                             </div>
-                        </td>
-                        <td class="py-3 px-3 small">
-                            <div class="text-dark dark:text-slate-200 fw-medium">
-                                <i class="fa-solid fa-store text-indigo-500 me-1"></i>@(staff.StoreName ?? "Trụ sở chính")
+                        </div>
+
+                        <div class="small space-y-1.5 mb-3 bg-light/60 dark:bg-slate-800/60 p-2.5 rounded-3">
+                            <div class="d-flex justify-content-between text-truncate">
+                                <span class="text-muted">Phòng ban:</span>
+                                <span class="fw-semibold text-dark dark:text-slate-200">@(staff.DepartmentName ?? "Chưa phân phòng")</span>
                             </div>
-                            @if (!string.IsNullOrEmpty(staff.ManagerName))
+                            <div class="d-flex justify-content-between text-truncate">
+                                <span class="text-muted">Chức danh:</span>
+                                <span class="fw-medium text-dark dark:text-slate-300">@(staff.JobTitle ?? "Nhân viên")</span>
+                            </div>
+                            <div class="d-flex justify-content-between text-truncate">
+                                <span class="text-muted">Chi nhánh:</span>
+                                <span>@(staff.StoreName ?? "Trụ sở chính")</span>
+                            </div>
+                            <div class="d-flex justify-content-between text-truncate">
+                                <span class="text-muted">Email:</span>
+                                <span class="font-monospace text-truncate" style="max-width: 170px;" title="@staff.Email">@staff.Email</span>
+                            </div>
+                        </div>
+
+                        <!-- Roles badges -->
+                        <div class="d-flex flex-wrap gap-1 mb-3">
+                            @if (staff.Roles.Count == 0)
                             {
-                                <div class="text-muted" style="font-size: 0.72rem;">QL: @staff.ManagerName</div>
-                            }
-                        </td>
-                        <td class="py-3 px-3 small">
-                            <div class="text-dark dark:text-slate-200">@staff.Email</div>
-                            <div class="text-muted font-monospace" style="font-size: 0.72rem;">@(staff.PhoneNumber ?? "Chưa có SĐT")</div>
-                        </td>
-                        <td class="py-3 px-3 text-center">
-                            @if (staff.IsActive)
-                            {
-                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 rounded-pill fw-semibold" style="font-size: 0.72rem;">
-                                    <i class="fa-solid fa-circle-check me-1"></i>Hoạt động
-                                </span>
+                                <span class="badge bg-light text-muted border" style="font-size: 0.65rem;">Chưa gán vai trò</span>
                             }
                             else
                             {
-                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1 rounded-pill fw-semibold" style="font-size: 0.72rem;">
-                                    <i class="fa-solid fa-lock me-1"></i>Đã khóa
-                                </span>
-                            }
-                        </td>
-                        <td class="py-3 px-3 text-center small text-muted font-monospace" style="font-size: 0.75rem;">
-                            @if (staff.LastLoginAt.HasValue)
-                            {
-                                <div>@staff.LastLoginAt.Value.ToLocalTime().ToString("dd/MM/yyyy")</div>
-                                <div class="text-slate-400" style="font-size: 0.68rem;">@staff.LastLoginAt.Value.ToLocalTime().ToString("HH:mm")</div>
-                            }
-                            else
-                            {
-                                <span class="text-slate-400">Chưa đăng nhập</span>
-                            }
-                        </td>
-                        <td class="pe-4 py-3 text-end">
-                            <div class="d-inline-flex align-items-center gap-1">
-                                <a href="/Admin/User/Details/@staff.Id" class="btn btn-sm btn-light border rounded-3 p-1 px-2" title="Xem chi tiết hồ sơ 360">
-                                    <i class="fa-regular fa-eye text-muted"></i>
-                                </a>
-
-                                @if (staff.CanActorManage)
+                                @foreach (var role in staff.Roles)
                                 {
-                                    <a asp-permission="USER_EDIT" href="/Admin/User/Edit/@staff.Id" class="btn btn-sm btn-light border rounded-3 p-1 px-2" title="Chỉnh sửa thông tin nhân sự">
-                                        <i class="fa-solid fa-pen text-primary"></i>
-                                    </a>
-
-                                    <a asp-permission="PERMISSION_DELEGATE" href="/Admin/User/Permissions/@staff.Id" class="btn btn-sm btn-outline-rose rounded-3 p-1 px-2" style="border-color:#f43f5e;color:#e11d48;" title="Phân quyền cá nhân 3 trạng thái">
-                                        <i class="fa-solid fa-shield-halved"></i>
-                                    </a>
-
-                                    <button type="button" class="btn btn-sm btn-light border rounded-3 p-1 px-2" title="Đặt lại mật khẩu"
-                                            onclick="openResetPasswordModal(@staff.Id, '@staff.FullName', '@staff.Username')">
-                                        <i class="fa-solid fa-key text-amber-600"></i>
-                                    </button>
-
-                                    <form asp-permission="USER_EDIT" asp-action="ToggleStatus" asp-route-userId="@staff.Id" method="post" class="d-inline m-0">
-                                        @Html.AntiForgeryToken()
-                                        @if (staff.IsActive)
-                                        {
-                                            <button type="submit" class="btn btn-sm btn-light border text-danger rounded-3 p-1 px-2" title="Tạm khóa tài khoản" onclick="return confirm('Bạn có chắc muốn tạm khóa tài khoản @staff.Username?')">
-                                                <i class="fa-solid fa-user-lock"></i>
-                                            </button>
-                                        }
-                                        else
-                                        {
-                                            <button type="submit" class="btn btn-sm btn-light border text-success rounded-3 p-1 px-2" title="Mở khóa tài khoản">
-                                                <i class="fa-solid fa-lock-open"></i>
-                                            </button>
-                                        }
-                                    </form>
-
-                                    <button asp-permission="USER_DELETE" type="button" class="btn btn-sm btn-light border text-danger rounded-3 p-1 px-2" title="Xóa mềm (chuyển vào thùng rác)"
-                                            onclick="confirmDeleteStaff(@staff.Id, '@staff.FullName', '@staff.Username')">
-                                        <i class="fa-regular fa-trash-can"></i>
-                                    </button>
+                                    string badgeBg = !string.IsNullOrEmpty(role.Color) ? role.Color : "#4f46e5";
+                                    <span class="badge text-white px-2 py-0.5 rounded-2 font-medium" style="font-size: 10px; background: @badgeBg;">
+                                        @role.DisplayName
+                                    </span>
                                 }
-                                else
-                                {
-                                    <span class="badge bg-light text-muted border" style="font-size: 0.65rem;" title="Tài khoản cùng cấp bậc hoặc cao hơn bạn">Chỉ xem</span>
-                                }
-                            </div>
-                        </td>
-                    </tr>
-                }
+                            }
+                        </div>
+
+                        <div class="mt-auto pt-2 border-top d-flex align-items-center justify-content-between">
+                            <a href="/Admin/User/Details/@staff.Id" class="btn btn-sm btn-outline-secondary rounded-3 px-2.5 py-1 text-xs fw-semibold">
+                                <i class="fa-regular fa-eye me-1"></i>Hồ Sơ 360
+                            </a>
+
+                            @if (staff.CanActorManage)
+                            {
+                                <div class="d-flex align-items-center gap-1">
+                                    <a asp-permission="USER_EDIT" href="/Admin/User/Edit/@staff.Id" class="btn btn-sm btn-light border rounded-3 p-1 px-2" title="Chỉnh sửa">
+                                        <i class="fa-solid fa-pen text-primary" style="font-size: 11px;"></i>
+                                    </a>
+                                    <a asp-permission="PERMISSION_DELEGATE" href="/Admin/User/Permissions/@staff.Id" class="btn btn-sm btn-light border rounded-3 p-1 px-2" title="Phân quyền">
+                                        <i class="fa-solid fa-shield-halved text-rose-600" style="font-size: 11px;"></i>
+                                    </a>
+                                    <button asp-permission="USER_RESET_PASSWORD" type="button" class="btn btn-sm btn-light border rounded-3 p-1 px-2" title="Đổi mật khẩu" onclick="openResetPasswordModal(@staff.Id, '@staff.FullName', '@staff.Username')">
+                                        <i class="fa-solid fa-key text-amber-600" style="font-size: 11px;"></i>
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
+        </div>
+    }
 </div>
 
-<!-- Phân trang (Pagination) -->
+<!-- ========================================================================= -->
+<!-- 3. CHẾ ĐỘ XEM NHÓM THEO PHÒNG BAN (ACCORDION VIEW) -->
+<!-- ========================================================================= -->
+<div id="staffAccordionView" class="hr-view-container d-none p-3">
+    @if (Model.Items.Count == 0)
+    {
+        <div class="text-center py-5 text-muted">
+            <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-rose-50 text-rose-600 mb-3" style="width: 56px; height: 56px;">
+                <i class="fa-solid fa-user-slash fs-3"></i>
+            </div>
+            <div class="fw-bold text-dark dark:text-white fs-6">Không tìm thấy nhân sự phù hợp</div>
+        </div>
+    }
+    else
+    {
+        <div class="accordion" id="deptStaffAccordion">
+            @for (int i = 0; i < deptGroups.Count; i++)
+            {
+                var group = deptGroups[i];
+                string collapseId = $"deptCollapse_{i}";
+                <div class="accordion-item border rounded-4 overflow-hidden mb-3 shadow-2xs">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button @(i > 0 ? "collapsed" : "") bg-slate-50 dark:bg-slate-800 fw-bold text-dark dark:text-white py-3 px-3.5" type="button" data-bs-toggle="collapse" data-bs-target="#@collapseId" aria-expanded="@(i == 0 ? "true" : "false")">
+                            <i class="fa-solid fa-building-user text-rose-600 me-2.5"></i>
+                            <span class="me-2">@group.Key</span>
+                            <span class="badge bg-rose-100 text-rose-700 rounded-pill px-2.5 py-1 font-monospace" style="font-size: 0.72rem;">@group.Count() nhân sự</span>
+                        </button>
+                    </h2>
+                    <div id="@collapseId" class="accordion-collapse collapse @(i == 0 ? "show" : "")" data-bs-parent="#deptStaffAccordion">
+                        <div class="accordion-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0 text-sm">
+                                    <thead class="bg-light dark:bg-slate-800 text-xs text-muted text-uppercase">
+                                        <tr>
+                                            <th class="ps-4 py-2">Họ Tên / Username</th>
+                                            <th class="py-2">Chức Danh</th>
+                                            <th class="py-2">Vai Trò</th>
+                                            <th class="py-2">Liên Hệ</th>
+                                            <th class="py-2 text-center">Trạng Thái</th>
+                                            <th class="pe-4 py-2 text-end">Hành Động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                        @foreach (var staff in group)
+                                        {
+                                            <tr>
+                                                <td class="ps-4 py-2.5">
+                                                    <a href="/Admin/User/Details/@staff.Id" class="fw-bold text-dark dark:text-white text-decoration-none hover:text-rose-600">
+                                                        @staff.FullName
+                                                    </a>
+                                                    <div class="text-muted font-monospace small">@@@staff.Username</div>
+                                                </td>
+                                                <td class="py-2.5">@(staff.JobTitle ?? "Nhân viên")</td>
+                                                <td class="py-2.5">
+                                                    @foreach (var r in staff.Roles)
+                                                    {
+                                                        string badgeBg = !string.IsNullOrEmpty(r.Color) ? r.Color : "#4f46e5";
+                                                        <span class="badge text-white px-2 py-0.5 rounded-2 font-medium" style="font-size: 10px; background: @badgeBg;">
+                                                            @r.DisplayName
+                                                        </span>
+                                                    }
+                                                </td>
+                                                <td class="py-2.5 small">
+                                                    <div>@staff.Email</div>
+                                                    <div class="text-muted font-monospace">@staff.PhoneNumber</div>
+                                                </td>
+                                                <td class="py-2.5 text-center">
+                                                    @if (staff.IsActive)
+                                                    {
+                                                        <span class="badge bg-success-subtle text-success border px-2 py-0.5 rounded-pill" style="font-size: 0.68rem;">Hoạt động</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-danger-subtle text-danger border px-2 py-0.5 rounded-pill" style="font-size: 0.68rem;">Tạm khóa</span>
+                                                    }
+                                                </td>
+                                                <td class="pe-4 py-2.5 text-end">
+                                                    <a href="/Admin/User/Details/@staff.Id" class="btn btn-sm btn-light border rounded-3 px-2 py-1 text-xs" title="Xem hồ sơ">
+                                                        <i class="fa-regular fa-eye text-muted"></i>
+                                                    </a>
+                                                    @if (staff.CanActorManage)
+                                                    {
+                                                        <a asp-permission="USER_EDIT" href="/Admin/User/Edit/@staff.Id" class="btn btn-sm btn-light border rounded-3 px-2 py-1 text-xs text-primary" title="Sửa">
+                                                            <i class="fa-solid fa-pen"></i>
+                                                        </a>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- ========================================================================= -->
+<!-- 4. THANH PHÂN TRANG & THỐNG KÊ (PAGINATION BAR) -->
+<!-- ========================================================================= -->
 @if (Model.TotalItems > 0)
 {
     <div class="p-3 border-top bg-white dark:bg-slate-900 d-flex flex-wrap align-items-center justify-content-between gap-3">
-        <div class="small text-muted">
-            Hiển thị <span class="fw-bold text-dark dark:text-white">@Model.FromItem</span> - <span class="fw-bold text-dark dark:text-white">@Model.ToItem</span> trên tổng số <span class="fw-bold text-dark dark:text-white">@Model.TotalItems</span> nhân sự
+        <div class="d-flex align-items-center gap-3">
+            <div class="small text-muted">
+                Hiển thị <span class="fw-bold text-dark dark:text-white">@Model.FromItem</span> - <span class="fw-bold text-dark dark:text-white">@Model.ToItem</span> trên tổng số <span class="fw-bold text-dark dark:text-white">@Model.TotalItems</span> nhân sự
+            </div>
+            <div class="d-flex align-items-center gap-1.5">
+                <label for="pageSizeSelect" class="small text-muted mb-0">Hiển thị:</label>
+                <select id="pageSizeSelect" class="form-select form-select-sm rounded-3 py-0.5" style="width: 72px;" onchange="changeStaffPageSize(this.value)">
+                    <option value="10" selected="@(Model.PageSize == 10 ? "selected" : null)">10</option>
+                    <option value="20" selected="@(Model.PageSize == 20 ? "selected" : null)">20</option>
+                    <option value="50" selected="@(Model.PageSize == 50 ? "selected" : null)">50</option>
+                    <option value="100" selected="@(Model.PageSize == 100 ? "selected" : null)">100</option>
+                </select>
+            </div>
         </div>
 
         <div class="d-flex align-items-center gap-2">
             <nav aria-label="Phân trang nhân sự">
                 <ul class="pagination pagination-sm mb-0">
                     <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
-                        <button type="button" class="page-link" onclick="goToStaffPage(@(Model.Page - 1))" aria-label="Trang trước">
+                        <button type="button" class="page-link rounded-start-3" onclick="goToStaffPage(@(Model.Page - 1))" aria-label="Trang trước" title="Trang trước">
                             <i class="fa-solid fa-chevron-left"></i>
                         </button>
                     </li>
@@ -215,7 +537,7 @@
                     }
 
                     <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
-                        <button type="button" class="page-link" onclick="goToStaffPage(@(Model.Page + 1))" aria-label="Trang sau">
+                        <button type="button" class="page-link rounded-end-3" onclick="goToStaffPage(@(Model.Page + 1))" aria-label="Trang sau" title="Trang sau">
                             <i class="fa-solid fa-chevron-right"></i>
                         </button>
                     </li>
@@ -224,4 +546,3 @@
         </div>
     </div>
 }
-

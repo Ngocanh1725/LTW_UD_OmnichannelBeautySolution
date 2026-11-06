@@ -64,9 +64,9 @@
                             </div>
                         </td>
                         <td class="pe-4 py-3 text-end">
-                            <form asp-action="Restore" asp-route-id="@staff.Id" method="post" class="d-inline m-0">
+                            <form asp-action="Restore" asp-route-id="@staff.Id" method="post" class="d-inline m-0 restore-staff-form" onsubmit="handleStaffRestoreSubmit(event, this, '@staff.FullName')">
                                 @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-outline-success rounded-3 px-3 py-1 fw-semibold" title="Khôi phục nhân sự về hoạt động">
+                                <button type="submit" class="btn btn-sm btn-outline-success rounded-3 px-3 py-1 fw-semibold shadow-2xs" title="Khôi phục nhân sự về hoạt động">
                                     <i class="fa-solid fa-rotate-left me-1"></i>Khôi Phục
                                 </button>
                             </form>

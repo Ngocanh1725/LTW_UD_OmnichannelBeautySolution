@@ -1,0 +1,578 @@
+@model Omnichannel.Application.DTOs.HR.StaffFormViewModel
+@{
+    bool isEdit = Model.IsEditMode;
+    string prefix = isEdit ? "UpdateRequest" : "CreateRequest";
+    string formAction = isEdit ? $"/Admin/User/Edit/{Model.StaffId}" : "/Admin/User/Create";
+    var formFullName = isEdit ? Model.UpdateRequest.FullName : Model.CreateRequest.FullName;
+    var formEmail = isEdit ? Model.UpdateRequest.Email : Model.CreateRequest.Email;
+    var formPhone = isEdit ? Model.UpdateRequest.PhoneNumber : Model.CreateRequest.PhoneNumber;
+    var formCode = isEdit ? Model.UpdateRequest.EmployeeCode : Model.CreateRequest.EmployeeCode;
+    var formDeptId = isEdit ? Model.UpdateRequest.DepartmentId : Model.CreateRequest.DepartmentId;
+    var formJobTitle = isEdit ? Model.UpdateRequest.JobTitle : Model.CreateRequest.JobTitle;
+    var formStoreId = isEdit ? Model.UpdateRequest.StoreId : Model.CreateRequest.StoreId;
+    var formManagerId = isEdit ? Model.UpdateRequest.ManagerId : Model.CreateRequest.ManagerId;
+    var formGender = isEdit ? Model.UpdateRequest.Gender : Model.CreateRequest.Gender;
+    var formDob = isEdit ? Model.UpdateRequest.DateOfBirth : Model.CreateRequest.DateOfBirth;
+    var formHireDate = isEdit ? Model.UpdateRequest.HireDate : Model.CreateRequest.HireDate;
+    var formAddress = isEdit ? Model.UpdateRequest.Address : Model.CreateRequest.Address;
+    var formNotes = isEdit ? Model.UpdateRequest.Notes : Model.CreateRequest.Notes;
+    var formIsActive = isEdit ? Model.UpdateRequest.IsActive : true;
+    var selectedRoleIds = isEdit ? Model.UpdateRequest.RoleIds : Model.CreateRequest.RoleIds;
+}
+
+<div class="card border-0 shadow-sm rounded-4 p-4 bg-white dark:bg-slate-900">
+    <form id="staffMainForm" action="@formAction" method="post" class="needs-validation" novalidate>
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 small mb-4"></div>
+
+        <!-- ========================================================================= -->
+        <!-- SECTION 1: THÔNG TIN CÁ NHÂN & LIÊN HỆ -->
+        <!-- ========================================================================= -->
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+            <h6 class="fw-bold text-dark dark:text-white mb-0 d-flex align-items-center gap-2">
+                <i class="fa-solid fa-id-card text-rose-600"></i>
+                <span>1. Thông Tin Cá Nhân & Liên Hệ</span>
+            </h6>
+            <span class="text-xs text-muted">Các trường có dấu <span class="text-danger">*</span> là bắt buộc</span>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <!-- Avatar Upload / Media Picker Preview -->
+            <div class="col-12 col-md-3 text-center d-flex flex-column align-items-center justify-content-center p-3 bg-light/60 dark:bg-slate-800/50 rounded-4">
+                <div id="staffAvatarPreview" class="d-inline-flex align-items-center justify-content-center rounded-circle fw-bold text-white shadow-sm mb-2"
+                     style="width: 80px; height: 80px; font-size: 28px; background: linear-gradient(135deg, #e11d48, #9333ea);">
+                    <span id="avatarInitialText">@(string.IsNullOrEmpty(formFullName) ? "U" : formFullName[0].ToString().ToUpper())</span>
+                </div>
+                <div class="small fw-semibold text-dark dark:text-white mb-1">Ảnh đại diện</div>
+                <p class="text-muted" style="font-size: 0.68rem;">Khuyến nghị ảnh vuông tỉ lệ 1:1, tối đa 2MB</p>
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-3 px-2.5 py-1 text-xs" onclick="triggerMediaPickerForAvatar()">
+                    <i class="fa-solid fa-photo-film me-1"></i>Chọn ảnh thư viện
+                </button>
+            </div>
+
+            <!-- Fields: Họ tên, Giới tính, Ngày sinh, SĐT, Email, Địa chỉ -->
+            <div class="col-12 col-md-9">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="inputFullName" class="form-label small fw-bold text-dark dark:text-white">
+                            Họ và tên <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" id="inputFullName" name="@($"{prefix}.FullName")" value="@formFullName" class="form-control"
+                               placeholder="vd: Nguyễn Văn An" required maxlength="100" oninput="updateAvatarInitial(this.value)" />
+                        <span class="text-danger small" data-valmsg-for="@($"{prefix}.FullName")" data-valmsg-replace="true"></span>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="inputGender" class="form-label small fw-bold text-dark dark:text-white">Giới tính</label>
+                        <select id="inputGender" name="@($"{prefix}.Gender")" class="form-select rounded-3">
+                            <option value="">-- Chưa chọn --</option>
+                            <option value="Nam" selected="@(formGender == "Nam" ? "selected" : null)">Nam</option>
+                            <option value="Nữ" selected="@(formGender == "Nữ" ? "selected" : null)">Nữ</option>
+                            <option value="Khác" selected="@(formGender == "Khác" ? "selected" : null)">Khác</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label for="inputDob" class="form-label small fw-bold text-dark dark:text-white">Ngày sinh</label>
+                        <input type="date" id="inputDob" name="@($"{prefix}.DateOfBirth")" value="@(formDob?.ToString("yyyy-MM-dd"))" class="form-control" onchange="validateAgeMinimum(this.value)" />
+                        <div id="dobValidationMsg" class="small mt-1"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="inputEmail" class="form-label small fw-bold text-dark dark:text-white">
+                            Địa chỉ Email <span class="text-danger">*</span>
+                        </label>
+                        <input type="email" id="inputEmail" name="@($"{prefix}.Email")" value="@formEmail" class="form-control"
+                               placeholder="vd: an.nguyen@canmakebeauty.vn" required autocorrect="off" autocapitalize="off" spellcheck="false"
+                               onblur="validateUniqueEmail(this.value)" />
+                        <span class="text-danger small" data-valmsg-for="@($"{prefix}.Email")" data-valmsg-replace="true"></span>
+                        <div id="emailCheckMsg" class="small mt-1"></div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="inputPhone" class="form-label small fw-bold text-dark dark:text-white">
+                            Số điện thoại di động
+                        </label>
+                        <input type="tel" id="inputPhone" name="@($"{prefix}.PhoneNumber")" value="@formPhone" class="form-control font-monospace"
+                               placeholder="vd: 0901234567 (10 số VN)" maxlength="15" />
+                        <span class="text-danger small" data-valmsg-for="@($"{prefix}.PhoneNumber")" data-valmsg-replace="true"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label for="inputAddress" class="form-label small fw-bold text-dark dark:text-white">Địa chỉ thường trú / Nơi ở</label>
+                        <input type="text" id="inputAddress" name="@($"{prefix}.Address")" value="@formAddress" class="form-control"
+                               placeholder="vd: Tầng 6, Tòa nhà Canmake, 123 Đường Cầu Giấy, Hà Nội" maxlength="255" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4 border-slate-200 dark:border-slate-800" />
+
+        <!-- ========================================================================= -->
+        <!-- SECTION 2: CƠ CẤU TỔ CHỨC & VỊ TRÍ CÔNG TÁC -->
+        <!-- ========================================================================= -->
+        <h6 class="fw-bold text-dark dark:text-white mb-3 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-sitemap text-indigo-600"></i>
+            <span>2. Cơ Cấu Tổ Chức & Vị Trí Công Tác</span>
+        </h6>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label for="inputEmployeeCode" class="form-label small fw-bold text-dark dark:text-white">
+                    Mã nhân viên (EmployeeCode)
+                </label>
+                <div class="input-group">
+                    <input type="text" id="inputEmployeeCode" name="@($"{prefix}.EmployeeCode")" value="@formCode" class="form-control font-monospace"
+                           placeholder="vd: CB-0089" autocorrect="off" autocapitalize="off" spellcheck="false" onblur="validateUniqueEmployeeCode(this.value)" />
+                    <button type="button" class="btn btn-outline-secondary" onclick="generateRandomEmployeeCode()" title="Tự động sinh mã nhân sự mới">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                    </button>
+                </div>
+                <span class="text-danger small" data-valmsg-for="@($"{prefix}.EmployeeCode")" data-valmsg-replace="true"></span>
+                <div id="codeCheckMsg" class="small mt-1"></div>
+            </div>
+
+            <div class="col-md-4">
+                <label for="inputDepartmentId" class="form-label small fw-bold text-dark dark:text-white">
+                    Phòng ban trực thuộc
+                </label>
+                <select id="inputDepartmentId" name="@($"{prefix}.DepartmentId")" class="form-select rounded-3" onchange="handleDepartmentChange(this.value)">
+                    <option value="">-- Chưa phân phòng ban --</option>
+                    @foreach (var d in Model.ScopedDepartments)
+                    {
+                        <option value="@d.Id" selected="@(formDeptId == d.Id ? "selected" : null)">
+                            @(string.IsNullOrEmpty(d.DisplayTreeName) ? d.Name : d.DisplayTreeName) (@d.Code)
+                        </option>
+                    }
+                </select>
+                <span class="text-danger small" data-valmsg-for="@($"{prefix}.DepartmentId")" data-valmsg-replace="true"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label for="inputJobTitle" class="form-label small fw-bold text-dark dark:text-white">Chức danh công việc</label>
+                <input type="text" id="inputJobTitle" name="@($"{prefix}.JobTitle")" value="@formJobTitle" class="form-control"
+                       placeholder="vd: Chuyên Viên Tư Vấn Khách Hàng / Quản Lý Bán Lẻ" maxlength="100" />
+                <span class="text-danger small" data-valmsg-for="@($"{prefix}.JobTitle")" data-valmsg-replace="true"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label for="inputManagerId" class="form-label small fw-bold text-dark dark:text-white">Người quản lý trực tiếp</label>
+                <select id="inputManagerId" name="@($"{prefix}.ManagerId")" class="form-select rounded-3">
+                    <option value="">-- Không có người quản lý --</option>
+                    @foreach (var m in Model.PotentialManagers)
+                    {
+                        <option value="@m.Id" data-dept="@m.DepartmentId" selected="@(formManagerId == m.Id ? "selected" : null)">
+                            @m.FullName (@m.Username) @(!string.IsNullOrEmpty(m.JobTitle) ? $"• {m.JobTitle}" : "")
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label for="inputStoreId" class="form-label small fw-bold text-dark dark:text-white">Chi nhánh / Điểm làm việc</label>
+                <select id="inputStoreId" name="@($"{prefix}.StoreId")" class="form-select rounded-3">
+                    <option value="">Trụ sở chính / Văn phòng tổng</option>
+                    @foreach (var s in Model.ScopedStores)
+                    {
+                        <option value="@s.Id" selected="@(formStoreId == s.Id ? "selected" : null)">
+                            @s.Name (@s.Code)
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label for="inputHireDate" class="form-label small fw-bold text-dark dark:text-white">Ngày bắt đầu làm việc</label>
+                <input type="date" id="inputHireDate" name="@($"{prefix}.HireDate")" value="@(formHireDate?.ToString("yyyy-MM-dd"))" class="form-control" />
+                <span class="text-danger small" data-valmsg-for="@($"{prefix}.HireDate")" data-valmsg-replace="true"></span>
+            </div>
+
+            <div class="col-12">
+                <label for="inputNotes" class="form-label small fw-bold text-dark dark:text-white">Ghi chú nội bộ</label>
+                <textarea id="inputNotes" name="@($"{prefix}.Notes")" rows="2" class="form-control" placeholder="Ghi chú về phân ca, năng lực, hợp đồng thử việc...">@formNotes</textarea>
+            </div>
+        </div>
+
+        <hr class="my-4 border-slate-200 dark:border-slate-800" />
+
+        <!-- ========================================================================= -->
+        <!-- SECTION 3: TÀI KHOẢN ĐĂNG NHẬP & BẢO MẬT -->
+        <!-- ========================================================================= -->
+        <h6 class="fw-bold text-dark dark:text-white mb-3 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-lock text-amber-500"></i>
+            <span>3. Tài Khoản Đăng Nhập & Bảo Mật</span>
+        </h6>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label for="inputUsername" class="form-label small fw-bold text-dark dark:text-white">
+                    Tên đăng nhập (Username) <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light text-muted">@@</span>
+                    @if (isEdit)
+                    {
+                        <input type="text" id="inputUsername" class="form-control bg-light text-muted font-monospace" value="@Model.Username" disabled readonly />
+                    }
+                    else
+                    {
+                        <input type="text" id="inputUsername" name="CreateRequest.Username" value="@Model.CreateRequest.Username" class="form-control font-monospace"
+                               placeholder="vd: nguyenan" required autocorrect="off" autocapitalize="off" spellcheck="false" onblur="validateUniqueUsername(this.value)" />
+                    }
+                </div>
+                @if (!isEdit)
+                {
+                    <span class="text-danger small" data-valmsg-for="CreateRequest.Username" data-valmsg-replace="true"></span>
+                    <div id="usernameCheckMsg" class="small mt-1"></div>
+                }
+            </div>
+
+            @if (!isEdit)
+            {
+                <div class="col-md-5">
+                    <label for="inputPassword" class="form-label small fw-bold text-dark dark:text-white">
+                        Mật khẩu khởi tạo <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <input type="password" id="inputPassword" name="CreateRequest.Password" class="form-control font-monospace"
+                               placeholder="Tối thiểu 8 ký tự (hoa, thường, số, ký tự đặc biệt)" required oninput="evaluatePasswordStrength(this.value)" />
+                        <button type="button" class="btn btn-outline-secondary" onclick="togglePasswordVisibility()" title="Hiện/ẩn mật khẩu">
+                            <i id="passwordEyeIcon" class="fa-regular fa-eye"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="generateRandomStrongPassword()" title="Tự sinh mật khẩu an toàn">
+                            <i class="fa-solid fa-wand-magic-sparkles me-1"></i>Sinh ngẫu nhiên
+                        </button>
+                    </div>
+                    <span class="text-danger small" data-valmsg-for="CreateRequest.Password" data-valmsg-replace="true"></span>
+                    <!-- Thanh đo độ mạnh mật khẩu -->
+                    <div class="progress mt-1.5" style="height: 4px;">
+                        <div id="passwordStrengthBar" class="progress-bar bg-danger" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div id="passwordStrengthText" class="small text-muted mt-1" style="font-size: 0.72rem;">Chưa nhập mật khẩu</div>
+                </div>
+            }
+
+            <div class="col-md-3 d-flex align-items-center">
+                <div class="form-check form-switch pt-md-3">
+                    @if (isEdit)
+                    {
+                        <input type="checkbox" class="form-check-input cursor-pointer" role="switch" id="inputIsActive" name="UpdateRequest.IsActive" value="true" @(formIsActive ? "checked" : "") />
+                    }
+                    else
+                    {
+                        <input type="checkbox" class="form-check-input cursor-pointer" role="switch" id="inputIsActive" name="CreateRequest.IsActive" value="true" checked />
+                    }
+                    <label class="form-check-label fw-bold small text-dark dark:text-white" for="inputIsActive">
+                        Tài khoản hoạt động ngay
+                    </label>
+                    <div class="text-muted" style="font-size: 0.7rem;">Cho phép nhân sự đăng nhập hệ thống sau khi lưu</div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4 border-slate-200 dark:border-slate-800" />
+
+        <!-- ========================================================================= -->
+        <!-- SECTION 4: PHÂN BỔ VAI TRÒ BAN ĐẦU -->
+        <!-- ========================================================================= -->
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <h6 class="fw-bold text-dark dark:text-white mb-0 d-flex align-items-center gap-2">
+                <i class="fa-solid fa-shield-halved text-emerald-600"></i>
+                <span>4. Phân Bổ Vai Trò (Role Assignment)</span>
+            </h6>
+            <span class="small text-muted">
+                Giới hạn cấp bậc: <span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 font-monospace">MaxGrantLevel = @Model.ActorContext.MaxGrantLevel</span>
+            </span>
+        </div>
+        <p class="small text-muted mb-3">
+            Chọn một hoặc nhiều vai trò phù hợp với phạm vi thẩm quyền của bạn. Nhân viên sẽ tự động nhận toàn bộ quyền gắn liền với vai trò được chọn.
+        </p>
+
+        <div class="row g-2.5 mb-4">
+            @foreach (var r in Model.AssignableRoles)
+            {
+                bool isRoleChecked = selectedRoleIds.Contains(r.Id);
+                string badgeBg = !string.IsNullOrEmpty(r.Color) ? r.Color : "#4f46e5";
+                <div class="col-12 col-md-6 col-xl-4">
+                    <label class="card h-100 border rounded-3 p-3 bg-light/70 dark:bg-slate-800/60 cursor-pointer hover:border-rose-400 transition role-select-card select-none @(isRoleChecked ? "border-rose-500 ring-1 ring-rose-300" : "")">
+                        <div class="d-flex align-items-start gap-2.5">
+                            <input type="checkbox" name="@($"{prefix}.RoleIds")" value="@r.Id" class="form-check-input mt-1 cursor-pointer flex-shrink-0" @(isRoleChecked ? "checked" : "") onchange="toggleRoleCardActive(this)" />
+                            <div class="min-w-0 flex-grow-1">
+                                <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
+                                    <span class="fw-bold small text-dark dark:text-white text-truncate">@r.DisplayName</span>
+                                    <span class="badge text-white font-monospace" style="font-size: 0.65rem; background: @badgeBg;">Lv@r.Level</span>
+                                </div>
+                                <div class="text-muted font-monospace mb-1" style="font-size: 0.68rem;">@r.Name</div>
+                                <div class="text-muted text-xs line-clamp-2" style="font-size: 0.72rem;">
+                                    @(string.IsNullOrEmpty(r.Description) ? "Vai trò hệ thống tiêu chuẩn." : r.Description)
+                                </div>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            }
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- ACTION BUTTONS: LƯU, LƯU & THÊM MỚI, HỦY -->
+        <!-- ========================================================================= -->
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 pt-3 border-top">
+            <a href="/Admin/User" class="btn btn-light rounded-3 px-4 fw-semibold">
+                <i class="fa-solid fa-arrow-left me-1.5"></i>Quay Lại Danh Sách
+            </a>
+
+            <div class="d-flex align-items-center gap-2">
+                @if (!isEdit)
+                {
+                    <button type="submit" name="SubmitAction" value="SaveAndNew" class="btn btn-outline-secondary px-3.5 py-2 fw-semibold rounded-3 shadow-2xs">
+                        <i class="fa-solid fa-plus me-1.5"></i>Lưu & Tiếp Tục Thêm Mới
+                    </button>
+                }
+                <button type="submit" class="btn btn-primary-gradient px-4 py-2 text-white fw-semibold rounded-3 shadow-xs">
+                    <i class="fa-solid fa-check me-1.5"></i>@(isEdit ? "Cập Nhật Hồ Sơ Nhân Sự" : "Tạo Nhân Sự Mới")
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Scripts phụ trợ cho form nhân sự -->
+<script>
+    let isFormDirty = false;
+    let initialEmail = '@formEmail';
+    let initialCode = '@formCode';
+    let initialUsername = '@Model.Username';
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Theo dõi thay đổi form để cảnh báo rời trang
+        const form = document.getElementById('staffMainForm');
+        form.addEventListener('input', () => { isFormDirty = true; });
+        form.addEventListener('change', () => { isFormDirty = true; });
+        form.addEventListener('submit', () => { isFormDirty = false; });
+
+        window.addEventListener('beforeunload', function (e) {
+            if (isFormDirty) {
+                e.preventDefault();
+                e.returnValue = 'Bạn có thay đổi chưa lưu trên form này. Bạn có chắc muốn rời đi?';
+            }
+        });
+    });
+
+    // 1. Tự sinh avatar chữ cái đầu
+    function updateAvatarInitial(fullName) {
+        const text = (fullName || '').trim();
+        const initial = text.length > 0 ? text[0].toUpperCase() : 'U';
+        document.getElementById('avatarInitialText').textContent = initial;
+    }
+
+    // 2. Tự sinh mã nhân viên ngẫu nhiên dạng CB-XXXX
+    function generateRandomEmployeeCode() {
+        const num = Math.floor(1000 + Math.random() * 9000);
+        const code = `CB-${num}`;
+        const input = document.getElementById('inputEmployeeCode');
+        input.value = code;
+        isFormDirty = true;
+        validateUniqueEmployeeCode(code);
+    }
+
+    // 3. Lọc người quản lý theo phòng ban được chọn
+    function handleDepartmentChange(deptId) {
+        const mgrSelect = document.getElementById('inputManagerId');
+        if (!mgrSelect) return;
+        const opts = mgrSelect.querySelectorAll('option');
+        opts.forEach(opt => {
+            if (!opt.value) return; // Keep "Không có người quản lý"
+            const optDept = opt.getAttribute('data-dept');
+            if (!deptId || optDept === deptId) {
+                opt.style.display = '';
+            } else {
+                opt.style.display = 'none';
+            }
+        });
+    }
+
+    // 4. Client validation tuổi tối thiểu >= 16
+    function validateAgeMinimum(dobVal) {
+        const msgEl = document.getElementById('dobValidationMsg');
+        if (!dobVal) {
+            msgEl.textContent = '';
+            return;
+        }
+        const birthDate = new Date(dobVal);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const m = today.getMonth() - birthDate.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        if (age < 16) {
+            msgEl.className = 'small text-danger mt-1';
+            msgEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i>Nhân sự chưa đủ 16 tuổi theo quy định.';
+        } else {
+            msgEl.className = 'small text-success mt-1';
+            msgEl.innerHTML = `<i class="fa-solid fa-check me-1"></i>${age} tuổi (Hợp lệ)`;
+        }
+    }
+
+    // 5. Kiểm tra trùng realtime qua AJAX API
+    async function validateUniqueUsername(username) {
+        if (!username || username === initialUsername) return;
+        const msgEl = document.getElementById('usernameCheckMsg');
+        msgEl.innerHTML = '<span class="text-muted"><i class="fa-solid fa-spinner fa-spin me-1"></i>Đang kiểm tra...</span>';
+
+        try {
+            const res = await fetch(`/Admin/User/CheckUsername?username=${encodeURIComponent(username)}`);
+            const isAvailable = await res.json();
+            if (isAvailable) {
+                msgEl.innerHTML = '<span class="text-success"><i class="fa-solid fa-circle-check me-1"></i>Tên đăng nhập khả dụng.</span>';
+            } else {
+                msgEl.innerHTML = '<span class="text-danger"><i class="fa-solid fa-circle-xmark me-1"></i>Tên đăng nhập đã tồn tại!</span>';
+            }
+        } catch (e) {
+            msgEl.innerHTML = '';
+        }
+    }
+
+    async function validateUniqueEmail(email) {
+        if (!email || email === initialEmail) return;
+        const msgEl = document.getElementById('emailCheckMsg');
+        msgEl.innerHTML = '<span class="text-muted"><i class="fa-solid fa-spinner fa-spin me-1"></i>Đang kiểm tra...</span>';
+
+        try {
+            const res = await fetch(`/Admin/User/CheckEmail?email=${encodeURIComponent(email)}`);
+            const isAvailable = await res.json();
+            if (isAvailable) {
+                msgEl.innerHTML = '<span class="text-success"><i class="fa-solid fa-circle-check me-1"></i>Email hợp lệ và chưa được dùng.</span>';
+            } else {
+                msgEl.innerHTML = '<span class="text-danger"><i class="fa-solid fa-circle-xmark me-1"></i>Email này đã thuộc về nhân sự khác!</span>';
+            }
+        } catch (e) {
+            msgEl.innerHTML = '';
+        }
+    }
+
+    async function validateUniqueEmployeeCode(code) {
+        if (!code || code === initialCode) return;
+        const msgEl = document.getElementById('codeCheckMsg');
+        msgEl.innerHTML = '<span class="text-muted"><i class="fa-solid fa-spinner fa-spin me-1"></i>Đang kiểm tra...</span>';
+
+        try {
+            const res = await fetch(`/Admin/User/CheckEmployeeCode?code=${encodeURIComponent(code)}`);
+            const isAvailable = await res.json();
+            if (isAvailable) {
+                msgEl.innerHTML = '<span class="text-success"><i class="fa-solid fa-circle-check me-1"></i>Mã nhân viên hợp lệ.</span>';
+            } else {
+                msgEl.innerHTML = '<span class="text-danger"><i class="fa-solid fa-circle-xmark me-1"></i>Mã nhân viên đã tồn tại!</span>';
+            }
+        } catch (e) {
+            msgEl.innerHTML = '';
+        }
+    }
+
+    // 6. Đánh giá độ mạnh mật khẩu & sinh pass ngẫu nhiên
+    function evaluatePasswordStrength(pwd) {
+        const bar = document.getElementById('passwordStrengthBar');
+        const text = document.getElementById('passwordStrengthText');
+        if (!bar || !text) return;
+
+        if (!pwd || pwd.length === 0) {
+            bar.style.width = '0%';
+            bar.className = 'progress-bar bg-danger';
+            text.textContent = 'Chưa nhập mật khẩu';
+            text.className = 'small text-muted mt-1';
+            return;
+        }
+
+        let score = 0;
+        if (pwd.length >= 8) score++;
+        if (pwd.length >= 12) score++;
+        if (/[A-Z]/.test(pwd)) score++;
+        if (/[a-z]/.test(pwd)) score++;
+        if (/[0-9]/.test(pwd)) score++;
+        if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+        if (score <= 3) {
+            bar.style.width = '30%';
+            bar.className = 'progress-bar bg-danger';
+            text.textContent = 'Mật khẩu yếu (Cần đủ chữ hoa, thường, số, ký tự đặc biệt)';
+            text.className = 'small text-danger mt-1';
+        } else if (score <= 5) {
+            bar.style.width = '70%';
+            bar.className = 'progress-bar bg-warning';
+            text.textContent = 'Mật khẩu trung bình';
+            text.className = 'small text-warning mt-1';
+        } else {
+            bar.style.width = '100%';
+            bar.className = 'progress-bar bg-success';
+            text.textContent = 'Mật khẩu mạnh (Rất an toàn)';
+            text.className = 'small text-success mt-1';
+        }
+    }
+
+    function togglePasswordVisibility() {
+        const input = document.getElementById('inputPassword');
+        const icon = document.getElementById('passwordEyeIcon');
+        if (!input || !icon) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fa-regular fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fa-regular fa-eye';
+        }
+    }
+
+    function generateRandomStrongPassword() {
+        const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+        const lower = 'abcdefghijkmnpqrstuvwxyz';
+        const digits = '23456789';
+        const specials = '!#$%&*+\x40';
+        const all = upper + lower + digits + specials;
+
+        let pwd = '';
+        pwd += upper[Math.floor(Math.random() * upper.length)];
+        pwd += lower[Math.floor(Math.random() * lower.length)];
+        pwd += digits[Math.floor(Math.random() * digits.length)];
+        pwd += specials[Math.floor(Math.random() * specials.length)];
+
+        for (let i = 0; i < 8; i++) {
+            pwd += all[Math.floor(Math.random() * all.length)];
+        }
+
+        const input = document.getElementById('inputPassword');
+        input.value = pwd;
+        input.type = 'text';
+        const icon = document.getElementById('passwordEyeIcon');
+        if (icon) icon.className = 'fa-regular fa-eye-slash';
+        evaluatePasswordStrength(pwd);
+        isFormDirty = true;
+    }
+
+    // 7. Toggle visual card cho vai trò
+    function toggleRoleCardActive(cb) {
+        const card = cb.closest('.role-select-card');
+        if (!card) return;
+        if (cb.checked) {
+            card.classList.add('border-rose-500', 'ring-1', 'ring-rose-300');
+        } else {
+            card.classList.remove('border-rose-500', 'ring-1', 'ring-rose-300');
+        }
+    }
+
+    // 8. Tích hợp Media Picker Modal
+    function triggerMediaPickerForAvatar() {
+        if (typeof window.openMediaPicker === 'function') {
+            window.openMediaPicker(function (item) {
+                if (item && item.publicUrl) {
+                    const prev = document.getElementById('staffAvatarPreview');
+                    prev.style.background = `url('${item.publicUrl}') center / cover no-repeat`;
+                    prev.innerHTML = '';
+                    isFormDirty = true;
+                }
+            });
+        } else {
+            Swal.fire('Thư viện Media', 'Bạn có thể chọn ảnh đại diện từ Thư viện Media CSDL.', 'info');
+        }
+    }
+</script>

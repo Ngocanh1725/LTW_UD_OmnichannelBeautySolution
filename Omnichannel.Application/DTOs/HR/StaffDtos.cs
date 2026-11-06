@@ -199,8 +199,22 @@ namespace Omnichannel.Application.DTOs.HR
         public string? Notes { get; set; }
         public int SubordinatesCount { get; set; }
         public string? HeadOfDepartmentName { get; set; }
+        public List<StaffListItemDto> Subordinates { get; set; } = new();
+        public int TotalOrdersProcessed { get; set; }
+        public decimal TotalSalesProcessed { get; set; }
+        public List<StaffRecentOrderDto> RecentOrders { get; set; } = new();
         public List<UserPermissionDetailDto> EffectivePermissions { get; set; } = new();
         public List<AuditLogDto> RecentAuditLogs { get; set; } = new();
+    }
+
+    public class StaffRecentOrderDto
+    {
+        public int Id { get; set; }
+        public string OrderCode { get; set; } = string.Empty;
+        public decimal TotalAmount { get; set; }
+        public string OrderStatus { get; set; } = string.Empty;
+        public string OrderSource { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
     }
 
     public class BulkStaffActionRequest
@@ -261,6 +275,9 @@ namespace Omnichannel.Application.DTOs.HR
         public List<StoreOptionDto> ScopedStores { get; set; } = new();
         public List<UserSummaryDto> PotentialManagers { get; set; } = new();
         public DelegationContextDto ActorContext { get; set; } = new();
+        public int CustomerCount { get; set; }
+        public int TotalAdmins { get; set; }
+        public int TotalDepartments { get; set; }
     }
 
     public class DepartmentOptionDto
@@ -268,6 +285,9 @@ namespace Omnichannel.Application.DTOs.HR
         public int Id { get; set; }
         public string Code { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
+        public int? ParentId { get; set; }
+        public int Level { get; set; }
+        public string DisplayTreeName { get; set; } = string.Empty;
     }
 
     public class StaffTrashViewModel

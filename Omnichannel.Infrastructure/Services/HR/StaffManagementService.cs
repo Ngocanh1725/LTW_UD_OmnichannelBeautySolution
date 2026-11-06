@@ -226,6 +226,41 @@ namespace Omnichannel.Infrastructure.Services.HR
                 .AsNoTracking()
                 .CountAsync(u => u.ManagerId == id && u.UserType >= 2 && !u.IsDeleted);
 
+            var subUsers = await _context.Users
+                .AsNoTracking()
+                .Include(u => u.Department)
+                .Include(u => u.Store)
+                .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
+                .Where(u => u.ManagerId == id && u.UserType >= 2 && !u.IsDeleted)
+                .OrderBy(u => u.FullName)
+                .Take(20)
+                .ToListAsync();
+            var subordinates = subUsers.Select(u => MapToListItemDto(u, canActorManage: canManage, isHead: false)).ToList();
+
+            var ordersQuery = _context.Orders
+                .AsNoTracking()
+                .Where(o => (o.PosShift != null && o.PosShift.CashierId == id) || 
+                            (user.StoreId.HasValue && o.StoreId == user.StoreId.Value && o.OrderSource == "POS"));
+
+            int totalOrders = await ordersQuery.CountAsync();
+            decimal totalSales = totalOrders > 0
+                ? await ordersQuery.Where(o => o.OrderStatus != "CANCELLED").SumAsync(o => (decimal?)o.TotalAmount) ?? 0m
+                : 0m;
+
+            var recentOrders = await ordersQuery
+                .OrderByDescending(o => o.CreatedAt)
+                .Take(10)
+                .Select(o => new StaffRecentOrderDto
+                {
+                    Id = o.Id,
+                    OrderCode = o.OrderCode,
+                    TotalAmount = o.TotalAmount,
+                    OrderStatus = o.OrderStatus,
+                    OrderSource = o.OrderSource,
+                    CreatedAt = o.CreatedAt
+                })
+                .ToListAsync();
+
             var permissions = await _permissionService.GetUserPermissionBreakdownAsync(id);
 
             string userIdStr = id.ToString();
@@ -282,6 +317,10 @@ namespace Omnichannel.Infrastructure.Services.HR
                 Address = user.Address,
                 Notes = user.Notes,
                 SubordinatesCount = subCount,
+                Subordinates = subordinates,
+                TotalOrdersProcessed = totalOrders,
+                TotalSalesProcessed = totalSales,
+                RecentOrders = recentOrders,
                 EffectivePermissions = permissions,
                 RecentAuditLogs = recentLogs
             };
@@ -1242,7 +1281,12 @@ namespace Omnichannel.Infrastructure.Services.HR
                 ));
             }
 
-            return Encoding.UTF8.GetBytes(sb.ToString());
+            var preamble = Encoding.UTF8.GetPreamble();
+            var contentBytes = Encoding.UTF8.GetBytes(sb.ToString());
+            var result = new byte[preamble.Length + contentBytes.Length];
+            Buffer.BlockCopy(preamble, 0, result, 0, preamble.Length);
+            Buffer.BlockCopy(contentBytes, 0, result, preamble.Length, contentBytes.Length);
+            return result;
         }
 
         private static string EscapeCsv(string val)

@@ -1,254 +1,578 @@
 @model Omnichannel.Application.DTOs.HR.StaffDetailDto
 @{
-    ViewData["Title"] = $"Hồ Sơ 360 - {Model.FullName}";
+    ViewData["Title"] = $"Hồ Sơ Nhân Sự 360 - {Model.FullName}";
     Layout = "_AdminLayout";
+
+    // Gom nhóm quyền theo phân hệ chức năng (Module)
+    var permsByModule = Model.EffectivePermissions
+        .GroupBy(p => p.Module)
+        .OrderBy(g => g.Key)
+        .ToList();
+
+    int effectiveCount = Model.EffectivePermissions.Count(p => p.IsEffective);
+    int inheritedCount = Model.EffectivePermissions.Count(p => p.InheritedFromRole && p.DirectOverride == null);
+    int extraGrantedCount = Model.EffectivePermissions.Count(p => p.DirectOverride == true);
+    int revokedCount = Model.EffectivePermissions.Count(p => p.DirectOverride == false);
 }
 
-<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+<!-- Top Navigation Breadcrumb & Back Button -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
     <div>
-        <div class="d-flex align-items-center gap-2 mb-1">
-            <a href="/Admin/User" class="btn btn-sm btn-outline-secondary rounded-3 px-2.5 py-1">
-                <i class="fa-solid fa-arrow-left me-1"></i>Danh sách nhân sự
-            </a>
-            @if (!string.IsNullOrEmpty(Model.EmployeeCode))
-            {
-                <span class="badge bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-pill font-monospace" style="background:#fff1f2;color:#be123c;">
-                    @Model.EmployeeCode
-                </span>
-            }
-        </div>
-        <h4 class="fw-bold text-slate-900 dark:text-white mb-0 d-flex align-items-center gap-2">
-            <i class="fa-solid fa-address-card text-rose-600"></i>
-            <span>Hồ Sơ Nhân Sự 360: @Model.FullName</span>
-        </h4>
-        <div class="text-muted small mt-1 font-monospace">@@@Model.Username</div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1 text-xs">
+                <li class="breadcrumb-item"><a href="/Admin/User" class="text-decoration-none text-muted">Nhân sự</a></li>
+                <li class="breadcrumb-item active text-dark dark:text-white fw-semibold" aria-current="page">Hồ sơ 360</li>
+            </ol>
+        </nav>
     </div>
-
-    <div class="d-flex flex-wrap align-items-center gap-2">
-        @if (Model.CanActorManage)
-        {
-            <a asp-permission="USER_EDIT" href="/Admin/User/Edit/@Model.Id" class="btn btn-outline-primary btn-sm px-3 py-2 fw-semibold rounded-3">
-                <i class="fa-solid fa-pen me-1"></i>Chỉnh Sửa
-            </a>
-            <a asp-permission="PERMISSION_DELEGATE" href="/Admin/User/Permissions/@Model.Id" class="btn btn-outline-rose btn-sm px-3 py-2 fw-semibold rounded-3" style="border-color:#f43f5e;color:#e11d48;">
-                <i class="fa-solid fa-shield-halved me-1"></i>Phân Quyền Cá Nhân
-            </a>
-        }
+    <div class="d-flex align-items-center gap-2">
+        <a href="/Admin/User" class="btn btn-sm btn-outline-secondary rounded-3 px-3 py-1.5 fw-semibold shadow-2xs">
+            <i class="fa-solid fa-arrow-left me-1.5"></i>Danh Sách Nhân Sự
+        </a>
     </div>
 </div>
 
-<div class="row g-4">
-    <!-- Cột trái: Thông tin tổng hợp & Tổ chức -->
-    <div class="col-lg-4">
-        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white dark:bg-slate-900 mb-4">
-            <div class="text-center pb-3 border-bottom">
-                <div class="d-inline-flex align-items-center justify-content-center rounded-circle fw-bold text-white shadow-sm mb-3"
-                     style="width: 72px; height: 72px; font-size: 26px; background: linear-gradient(135deg, #e11d48, #9333ea);">
+<!-- Header Profile Cover Card -->
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-white dark:bg-slate-900">
+    <!-- Banner Cover Gradient -->
+    <div class="p-4 text-white position-relative" style="background: linear-gradient(135deg, #be123c, #831843 40%, #581c87 80%, #312e81); min-height: 120px;">
+        <div class="position-absolute end-0 top-0 p-3 opacity-15">
+            <i class="fa-solid fa-id-badge" style="font-size: 110px;"></i>
+        </div>
+    </div>
+
+    <!-- Profile Header Info Row -->
+    <div class="px-4 pb-4 position-relative">
+        <div class="d-flex flex-column flex-md-row align-items-md-end justify-content-between gap-3" style="margin-top: -45px;">
+            <div class="d-flex align-items-end gap-3.5">
+                <!-- Avatar Circle -->
+                <div class="d-inline-flex align-items-center justify-content-center rounded-circle fw-bolder text-white border-4 border-white dark:border-slate-900 shadow-md flex-shrink-0"
+                     style="width: 90px; height: 90px; font-size: 34px; background: linear-gradient(135deg, #e11d48, #9333ea);">
                     @(Model.FullName.Length > 0 ? Model.FullName[0].ToString().ToUpper() : "U")
                 </div>
-                <h5 class="fw-bold text-dark dark:text-white mb-1">@Model.FullName</h5>
-                <div class="text-muted font-monospace small">@@@Model.Username</div>
-                <div class="mt-2">
-                    @if (Model.IsActive)
-                    {
-                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1.5 rounded-pill fw-semibold">
-                            <i class="fa-solid fa-circle-check me-1"></i>Đang hoạt động
-                        </span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1.5 rounded-pill fw-semibold">
-                            <i class="fa-solid fa-lock me-1"></i>Đã tạm khóa
-                        </span>
-                    }
+
+                <!-- Name & Title -->
+                <div class="mb-1">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <h4 class="fw-bold text-dark dark:text-white mb-0">@Model.FullName</h4>
+                        @if (!string.IsNullOrEmpty(Model.EmployeeCode))
+                        {
+                            <span class="badge bg-light text-dark border font-monospace" style="font-size: 0.72rem;">@Model.EmployeeCode</span>
+                        }
+                        @if (Model.IsDepartmentHead)
+                        {
+                            <span class="badge bg-amber-100 text-amber-800 border border-amber-300 px-2 py-0.5" style="font-size: 0.7rem;">
+                                <i class="fa-solid fa-crown text-amber-600 me-1"></i>Trưởng Phòng
+                            </span>
+                        }
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 text-muted small mt-1 flex-wrap">
+                        <span class="font-monospace text-rose-600 fw-bold">@@@Model.Username</span>
+                        <span>•</span>
+                        <span><i class="fa-solid fa-briefcase text-muted me-1"></i>@(Model.JobTitle ?? "Nhân viên")</span>
+                        <span>•</span>
+                        <span><i class="fa-solid fa-building-user text-indigo-500 me-1"></i>@(Model.DepartmentName ?? "Chưa phân phòng")</span>
+                        <span>•</span>
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0.5 rounded-pill fw-semibold" style="font-size: 0.7rem;">
+                                <i class="fa-solid fa-circle-check me-1"></i>Đang hoạt động
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-0.5 rounded-pill fw-semibold" style="font-size: 0.7rem;">
+                                <i class="fa-solid fa-lock me-1"></i>Đã tạm khóa
+                            </span>
+                        }
+                    </div>
                 </div>
             </div>
 
-            <div class="pt-3 space-y-2.5 small">
-                <div class="d-flex justify-content-between py-1 border-bottom border-light">
-                    <span class="text-muted">Mã nhân viên:</span>
-                    <span class="fw-bold font-monospace text-dark dark:text-white">@(Model.EmployeeCode ?? "Chưa cấp")</span>
+            <!-- Header Action Buttons -->
+            @if (Model.CanActorManage)
+            {
+                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                    <a asp-permission="USER_EDIT" href="/Admin/User/Edit/@Model.Id" class="btn btn-outline-primary btn-sm px-3 py-1.5 fw-semibold rounded-3 shadow-2xs">
+                        <i class="fa-solid fa-pen-to-square me-1.5"></i>Chỉnh Sửa
+                    </a>
+                    <a asp-permission="PERMISSION_DELEGATE" href="/Admin/User/Permissions/@Model.Id" class="btn btn-outline-rose btn-sm px-3 py-1.5 fw-semibold rounded-3 shadow-2xs" style="border-color:#f43f5e;color:#e11d48;">
+                        <i class="fa-solid fa-shield-halved me-1.5"></i>Phân Quyền Cá Nhân
+                    </a>
+                    <button asp-permission="USER_RESET_PASSWORD" type="button" class="btn btn-outline-warning btn-sm px-3 py-1.5 fw-semibold rounded-3 shadow-2xs" onclick="openResetPasswordModal(@Model.Id, '@Model.FullName', '@Model.Username')">
+                        <i class="fa-solid fa-key me-1.5"></i>Đổi Mật Khẩu
+                    </button>
                 </div>
-                <div class="d-flex justify-content-between py-1 border-bottom border-light">
-                    <span class="text-muted">Phòng ban:</span>
-                    <span class="fw-bold text-dark dark:text-white">@(Model.DepartmentName ?? "Chưa phân phòng")</span>
+            }
+        </div>
+    </div>
+
+    <!-- 5 Tabs Navigation -->
+    <div class="border-top px-4 bg-light/40 dark:bg-slate-800/40">
+        <ul class="nav nav-tabs border-0" id="staffDetailTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold text-dark dark:text-white border-0 border-bottom border-2 border-rose-600 bg-transparent py-3 px-3.5 d-flex align-items-center gap-2" id="tab-overview-btn" data-bs-toggle="tab" data-bs-target="#tab-overview" type="button" role="tab">
+                    <i class="fa-regular fa-id-badge text-rose-600"></i>
+                    <span>Tổng Quan</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link text-muted hover:text-dark dark:hover:text-white border-0 py-3 px-3.5 d-flex align-items-center gap-2" id="tab-permissions-btn" data-bs-toggle="tab" data-bs-target="#tab-permissions" type="button" role="tab">
+                    <i class="fa-solid fa-shield-halved text-indigo-500"></i>
+                    <span>Vai Trò & Quyền Hiệu Lực</span>
+                    <span class="badge bg-indigo-100 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300 rounded-pill font-monospace" style="font-size: 0.68rem;">@effectiveCount</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link text-muted hover:text-dark dark:hover:text-white border-0 py-3 px-3.5 d-flex align-items-center gap-2" id="tab-subordinates-btn" data-bs-toggle="tab" data-bs-target="#tab-subordinates" type="button" role="tab">
+                    <i class="fa-solid fa-people-arrows text-emerald-500"></i>
+                    <span>Nhân Sự Dưới Quyền</span>
+                    <span class="badge bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 rounded-pill font-monospace" style="font-size: 0.68rem;">@Model.SubordinatesCount</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link text-muted hover:text-dark dark:hover:text-white border-0 py-3 px-3.5 d-flex align-items-center gap-2" id="tab-audit-btn" data-bs-toggle="tab" data-bs-target="#tab-audit" type="button" role="tab">
+                    <i class="fa-solid fa-clock-rotate-left text-amber-500"></i>
+                    <span>Nhật Ký Thao Tác</span>
+                    <span class="badge bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 rounded-pill font-monospace" style="font-size: 0.68rem;">@Model.RecentAuditLogs.Count</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link text-muted hover:text-dark dark:hover:text-white border-0 py-3 px-3.5 d-flex align-items-center gap-2" id="tab-sales-btn" data-bs-toggle="tab" data-bs-target="#tab-sales" type="button" role="tab">
+                    <i class="fa-solid fa-cash-register text-purple-500"></i>
+                    <span>Đơn Hàng Xử Lý</span>
+                    <span class="badge bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-300 rounded-pill font-monospace" style="font-size: 0.68rem;">@Model.TotalOrdersProcessed</span>
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Tabs Content -->
+<div class="tab-content" id="staffDetailTabsContent">
+    <!-- ========================================================================= -->
+    <!-- TAB 1: TỔNG QUAN HỒ SƠ -->
+    <!-- ========================================================================= -->
+    <div class="tab-pane fade show active" id="tab-overview" role="tabpanel">
+        <div class="row g-4">
+            <!-- Cột trái: Thông tin cá nhân & Liên hệ -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white dark:bg-slate-900 h-100">
+                    <h6 class="fw-bold text-dark dark:text-white mb-3 d-flex align-items-center gap-2">
+                        <i class="fa-regular fa-address-card text-rose-600"></i>
+                        <span>Thông Tin Cá Nhân & Liên Hệ</span>
+                    </h6>
+
+                    <div class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                        <div class="py-2.5 d-flex justify-content-between">
+                            <span class="text-muted">Họ và tên:</span>
+                            <span class="fw-bold text-dark dark:text-white">@Model.FullName</span>
+                        </div>
+                        <div class="py-2.5 d-flex justify-content-between">
+                            <span class="text-muted">Tên đăng nhập (Username):</span>
+                            <span class="fw-bold font-monospace text-rose-600">@@@Model.Username</span>
+                        </div>
+                        <div class="py-2.5 d-flex justify-content-between">
+                            <span class="text-muted">Địa chỉ Email:</span>
+                            <span class="font-monospace text-dark dark:text-white">@Model.Email</span>
+                        </div>
+                        <div class="py-2.5 d-flex justify-content-between">
+                            <span class="text-muted">Số điện thoại:</span>
+                            <span class="font-monospace text-dark dark:text-white">@(Model.PhoneNumber ?? "Chưa ghi nhận")</span>
+                        </div>
+                        <div class="py-2.5 d-flex justify-content-between">
+                            <span class="text-muted">Giới tính:</span>
+                            <span class="text-dark dark:text-white">@(Model.Gender ?? "Chưa ghi nhận")</span>
+                        </div>
+                        <div class="py-2.5 d-flex justify-content-between">
+                            <span class="text-muted">Ngày sinh:</span>
+                            <span class="text-dark dark:text-white">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa ghi nhận")</span>
+                        </div>
+                        <div class="py-2.5 d-flex justify-content-between">
+                            <span class="text-muted">Địa chỉ thường trú:</span>
+                            <span class="text-dark dark:text-white text-end" style="max-width: 60%;">@(Model.Address ?? "Chưa ghi nhận")</span>
+                        </div>
+                        <div class="py-2.5 d-flex justify-content-between">
+                            <span class="text-muted">Ghi chú nội bộ:</span>
+                            <span class="text-dark dark:text-white text-end" style="max-width: 60%;">@(Model.Notes ?? "Không có")</span>
+                        </div>
+                    </div>
                 </div>
-                <div class="d-flex justify-content-between py-1 border-bottom border-light">
-                    <span class="text-muted">Chức vụ:</span>
-                    <span class="fw-bold text-dark dark:text-white">@(Model.JobTitle ?? "Nhân viên")</span>
-                </div>
-                <div class="d-flex justify-content-between py-1 border-bottom border-light">
-                    <span class="text-muted">Chi nhánh:</span>
-                    <span class="fw-bold text-dark dark:text-white">@(Model.StoreName ?? "Trụ sở chính")</span>
-                </div>
-                <div class="d-flex justify-content-between py-1 border-bottom border-light">
-                    <span class="text-muted">Quản lý trực tiếp:</span>
-                    <span class="fw-bold text-dark dark:text-white">@(Model.ManagerName ?? "Không có")</span>
-                </div>
-                <div class="d-flex justify-content-between py-1 border-bottom border-light">
-                    <span class="text-muted">Cấp dưới trực tiếp:</span>
-                    <span class="fw-bold text-rose-600">@Model.SubordinatesCount nhân viên</span>
-                </div>
-                <div class="d-flex justify-content-between py-1 border-bottom border-light">
-                    <span class="text-muted">Ngày vào làm:</span>
-                    <span class="fw-bold text-dark dark:text-white">@(Model.HireDate?.ToString("dd/MM/yyyy") ?? "Chưa ghi nhận")</span>
-                </div>
-                <div class="d-flex justify-content-between py-1">
-                    <span class="text-muted">Đăng nhập cuối:</span>
-                    <span class="fw-bold font-monospace text-dark dark:text-white">@(Model.LastLoginAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "Chưa đăng nhập")</span>
+            </div>
+
+            <!-- Cột phải: Tổ chức, Vị trí & Công tác -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white dark:bg-slate-900 h-100">
+                    <h6 class="fw-bold text-dark dark:text-white mb-3 d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-sitemap text-indigo-600"></i>
+                        <span>Cơ Cấu Tổ Chức & Vị Trí Công Tác</span>
+                    </h6>
+
+                    <div class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
+                        <div class="py-2.5 d-flex justify-content-between">
+                            <span class="text-muted">Mã nhân viên:</span>
+                            <span class="fw-bold font-monospace text-dark dark:text-white">@(Model.EmployeeCode ?? "Chưa cấp")</span>
+                        </div>
+                        <div class="py-2.5 d-flex justify-content-between">
+                            <span class="text-muted">Phòng ban trực thuộc:</span>
+                            <span class="fw-bold text-rose-600">@(Model.DepartmentName ?? "Chưa phân phòng")</span>
+                        </div>
+                        <div class="py-2.5 d-flex justify-content-between">
+                            <span class="text-muted">Chức danh công việc:</span>
+                            <span class="fw-bold text-dark dark:text-white">@(Model.JobTitle ?? "Nhân viên")</span>
+                        </div>
+                        <div class="py-2.5 d-flex justify-content-between">
+                            <span class="text-muted">Chi nhánh / Điểm làm việc:</span>
+                            <span class="text-dark dark:text-white">@(Model.StoreName ?? "Trụ sở chính")</span>
+                        </div>
+                        <div class="py-2.5 d-flex justify-content-between">
+                            <span class="text-muted">Người quản lý trực tiếp:</span>
+                            <span class="text-dark dark:text-white">@(Model.ManagerName ?? "Không có (Cấp cao nhất)")</span>
+                        </div>
+                        <div class="py-2.5 d-flex justify-content-between">
+                            <span class="text-muted">Ngày vào làm việc:</span>
+                            <span class="text-dark dark:text-white">@(Model.HireDate?.ToString("dd/MM/yyyy") ?? "Chưa ghi nhận")</span>
+                        </div>
+                        <div class="py-2.5 d-flex justify-content-between">
+                            <span class="text-muted">Lần đăng nhập cuối:</span>
+                            <span class="font-monospace text-dark dark:text-white">@(Model.LastLoginAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss") ?? "Chưa đăng nhập")</span>
+                        </div>
+                        <div class="py-2.5 d-flex justify-content-between">
+                            <span class="text-muted">Ngày tạo hồ sơ:</span>
+                            <span class="font-monospace text-dark dark:text-white">@Model.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white dark:bg-slate-900">
-            <h6 class="fw-bold text-dark dark:text-white mb-3">
-                <i class="fa-solid fa-id-badge text-rose-600 me-1.5"></i>Vai Trò Đang Đảm Nhiệm
+    <!-- ========================================================================= -->
+    <!-- TAB 2: VAI TRÒ & QUYỀN HIỆU LỰC -->
+    <!-- ========================================================================= -->
+    <div class="tab-pane fade" id="tab-permissions" role="tabpanel">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white dark:bg-slate-900 mb-4">
+            <h6 class="fw-bold text-dark dark:text-white mb-3 d-flex align-items-center gap-2">
+                <i class="fa-solid fa-id-badge text-rose-600"></i>
+                <span>Vai Trò Đang Đảm Nhiệm</span>
             </h6>
-            <div class="d-flex flex-wrap gap-2">
+
+            <div class="row g-2.5">
                 @if (Model.Roles.Count == 0)
                 {
-                    <span class="text-muted small">Chưa được gán vai trò nào.</span>
+                    <div class="col-12 text-muted small">Chưa được gán vai trò nào.</div>
                 }
                 else
                 {
                     @foreach (var r in Model.Roles)
                     {
-                        <div class="border rounded-3 p-2 px-3 w-100 bg-light dark:bg-slate-800 d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="fw-bold small text-dark dark:text-white">@r.DisplayName</div>
-                                <div class="text-muted font-monospace" style="font-size: 0.68rem;">@r.Name</div>
+                        string badgeBg = !string.IsNullOrEmpty(r.Color) ? r.Color : "#4f46e5";
+                        <div class="col-md-4">
+                            <div class="card border rounded-3 p-3 bg-light/70 dark:bg-slate-800/60">
+                                <div class="d-flex align-items-center justify-content-between mb-1">
+                                    <span class="fw-bold text-dark dark:text-white">@r.DisplayName</span>
+                                    <span class="badge text-white font-monospace" style="background:@badgeBg; font-size: 0.65rem;">Lv@r.Level</span>
+                                </div>
+                                <div class="text-muted font-monospace small">@r.Name</div>
                             </div>
-                            <span class="badge bg-rose-100 text-rose-700 font-monospace">Lv@r.Level</span>
                         </div>
                     }
                 }
             </div>
         </div>
-    </div>
 
-    <!-- Cột phải: Quyền hiệu lực & Lịch sử kiểm toán gần nhất -->
-    <div class="col-lg-8">
-        <!-- Tab Điều hướng giữa Quyền và Lịch sử -->
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white dark:bg-slate-900 mb-4">
-            <div class="card-header bg-white dark:bg-slate-900 border-b p-3">
-                <ul class="nav nav-pills card-header-pills" id="detailTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active small fw-bold px-3 py-1.5 rounded-3" id="perms-tab" data-bs-toggle="pill" data-bs-target="#tab-perms" type="button" role="tab">
-                            <i class="fa-solid fa-shield-halved me-1.5 text-rose-600"></i>Quyền Hạt Nhân Đang Hiệu Lực (@Model.EffectivePermissions.Count(p => p.IsEffective))
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link small fw-bold px-3 py-1.5 rounded-3" id="audit-tab" data-bs-toggle="pill" data-bs-target="#tab-audit" type="button" role="tab">
-                            <i class="fa-solid fa-clock-rotate-left me-1.5 text-indigo-600"></i>Lịch Sử Kiểm Toán Gần Nhất (@Model.RecentAuditLogs.Count)
-                        </button>
-                    </li>
-                </ul>
+        <!-- Bảng thống kê quyền hạt nhân -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-2xs rounded-3 p-3 bg-white dark:bg-slate-900 text-center">
+                    <div class="small text-muted mb-1">Quyền Hiệu Lực</div>
+                    <h4 class="fw-bolder mb-0 text-success">@effectiveCount</h4>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-2xs rounded-3 p-3 bg-white dark:bg-slate-900 text-center">
+                    <div class="small text-muted mb-1">Kế Thừa Từ Vai Trò</div>
+                    <h4 class="fw-bolder mb-0 text-indigo-600">@inheritedCount</h4>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-2xs rounded-3 p-3 bg-white dark:bg-slate-900 text-center">
+                    <div class="small text-muted mb-1">Đặc Cách Cấp Thêm</div>
+                    <h4 class="fw-bolder mb-0 text-rose-600">+@extraGrantedCount</h4>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card border-0 shadow-2xs rounded-3 p-3 bg-white dark:bg-slate-900 text-center">
+                    <div class="small text-muted mb-1">Đặc Cách Thu Hồi</div>
+                    <h4 class="fw-bolder mb-0 text-danger">-@revokedCount</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bảng danh sách quyền hạt nhân nhóm theo module -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white dark:bg-slate-900">
+            <div class="card-header bg-white dark:bg-slate-900 p-3 border-bottom d-flex align-items-center justify-content-between">
+                <h6 class="fw-bold text-dark dark:text-white mb-0">
+                    <i class="fa-solid fa-list-check me-2 text-indigo-600"></i>Danh Sách Quyền Hiệu Lực Theo Phân Hệ
+                </h6>
+                @if (Model.CanActorManage)
+                {
+                    <a asp-permission="PERMISSION_DELEGATE" href="/Admin/User/Permissions/@Model.Id" class="btn btn-sm btn-outline-rose rounded-3 px-3 py-1 font-semibold" style="border-color:#f43f5e;color:#e11d48;">
+                        <i class="fa-solid fa-sliders me-1"></i>Điều Chỉnh Đặc Cách
+                    </a>
+                }
             </div>
 
-            <div class="card-body p-0">
-                <div class="tab-content">
-                    <!-- Tab 1: Quyền hiệu lực -->
-                    <div class="tab-pane fade show active" id="tab-perms" role="tabpanel">
-                        <div class="table-responsive" style="max-height: 500px;" tabindex="0" role="region" aria-label="Danh sách quyền hiệu lực">
-                            <table class="table table-hover align-middle mb-0 text-sm">
-                                <thead class="bg-light dark:bg-slate-800 text-xs text-uppercase font-bold text-muted border-b sticky-top">
-                                    <tr>
-                                        <th class="ps-4 py-2.5">Chức Năng & Mã Quyền</th>
-                                        <th class="py-2.5 text-center">Nguồn Quyền</th>
-                                        <th class="py-2.5 text-center">Đặc Cách</th>
-                                        <th class="pe-4 py-2.5 text-center">Hiệu Lực</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var p in Model.EffectivePermissions)
+            <div class="table-responsive" style="max-height: 520px;" tabindex="0" role="region" aria-label="Bảng quyền hiệu lực">
+                <table class="table table-hover align-middle mb-0 text-sm">
+                    <thead class="bg-light dark:bg-slate-800 text-xs text-uppercase font-bold text-muted border-b sticky-top">
+                        <tr>
+                            <th class="ps-4 py-2.5">Phân Hệ & Mã Quyền</th>
+                            <th class="py-2.5 text-center">Kế Thừa Vai Trò</th>
+                            <th class="py-2.5 text-center">Đặc Cách Cá Nhân</th>
+                            <th class="pe-4 py-2.5 text-center">Trạng Thái Cuối</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                        @foreach (var p in Model.EffectivePermissions)
+                        {
+                            <tr>
+                                <td class="ps-4 py-2">
+                                    <div class="fw-bold text-dark dark:text-white">@p.PermissionName</div>
+                                    <div class="text-muted font-monospace" style="font-size: 0.72rem;">@p.PermissionCode • <span class="badge bg-light text-muted border">@p.Module</span></div>
+                                </td>
+                                <td class="py-2 text-center small">
+                                    @if (p.InheritedFromRole)
                                     {
-                                        <tr>
-                                            <td class="ps-4 py-2">
-                                                <div class="fw-bold text-dark dark:text-white">@p.PermissionName</div>
-                                                <div class="text-muted font-monospace" style="font-size: 0.72rem;">@p.PermissionCode • @p.Module</div>
-                                            </td>
-                                            <td class="py-2 text-center small">
-                                                @(p.InheritedFromRole ? "Vai trò" : "-")
-                                            </td>
-                                            <td class="py-2 text-center small">
-                                                @if (p.DirectOverride == true)
-                                                {
-                                                    <span class="badge bg-success text-white">+ Cấp thêm</span>
-                                                }
-                                                else if (p.DirectOverride == false)
-                                                {
-                                                    <span class="badge bg-danger text-white">- Thu hồi</span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="text-muted">Kế thừa</span>
-                                                }
-                                            </td>
-                                            <td class="pe-4 py-2 text-center">
-                                                @if (p.IsEffective)
-                                                {
-                                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 rounded-pill">
-                                                        <i class="fa-solid fa-check me-1"></i>Có
-                                                    </span>
-                                                }
-                                                else
-                                                {
-                                                    <span class="badge bg-light text-muted border px-2 py-1 rounded-pill">Không</span>
-                                                }
-                                            </td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Tab 2: Lịch sử audit log -->
-                    <div class="tab-pane fade" id="tab-audit" role="tabpanel">
-                        <div class="table-responsive" style="max-height: 500px;" tabindex="0" role="region" aria-label="Lịch sử kiểm toán nhân sự">
-                            <table class="table table-hover align-middle mb-0 text-sm">
-                                <thead class="bg-light dark:bg-slate-800 text-xs text-uppercase font-bold text-muted border-b sticky-top">
-                                    <tr>
-                                        <th class="ps-4 py-2.5">Thời Gian</th>
-                                        <th class="py-2.5">Hành Động</th>
-                                        <th class="py-2.5">Người Thực Hiện</th>
-                                        <th class="pe-4 py-2.5">Chi Tiết Thao Tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @if (Model.RecentAuditLogs.Count == 0)
-                                    {
-                                        <tr>
-                                            <td colspan="4" class="text-center py-4 text-muted">Chưa ghi nhận nhật ký kiểm toán nào.</td>
-                                        </tr>
+                                        <span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200" style="font-size: 0.68rem;">Có trong Role</span>
                                     }
                                     else
                                     {
-                                        @foreach (var log in Model.RecentAuditLogs)
-                                        {
-                                            <tr>
-                                                <td class="ps-4 py-2 font-monospace small text-muted">
-                                                    @log.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")
-                                                </td>
-                                                <td class="py-2">
-                                                    <span class="badge bg-slate-100 text-slate-800 border font-mono" style="font-size: 0.72rem;">@log.Action</span>
-                                                </td>
-                                                <td class="py-2 small fw-semibold text-dark dark:text-white">
-                                                    @log.UserName
-                                                </td>
-                                                <td class="pe-4 py-2 small text-muted">
-                                                    @(log.NewValues ?? log.OldValues ?? "-")
-                                                </td>
-                                            </tr>
-                                        }
+                                        <span class="text-muted">-</span>
                                     }
-                                </tbody>
-                            </table>
-                        </div>
+                                </td>
+                                <td class="py-2 text-center small">
+                                    @if (p.DirectOverride == true)
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success px-2 py-0.5 rounded-pill font-semibold" style="font-size: 0.68rem;">
+                                            <i class="fa-solid fa-plus me-0.5"></i>Cấp thêm
+                                        </span>
+                                    }
+                                    else if (p.DirectOverride == false)
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger border border-danger px-2 py-0.5 rounded-pill font-semibold" style="font-size: 0.68rem;">
+                                            <i class="fa-solid fa-minus me-0.5"></i>Thu hồi
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted" style="font-size: 0.72rem;">Mặc định vai trò</span>
+                                    }
+                                </td>
+                                <td class="pe-4 py-2 text-center">
+                                    @if (p.IsEffective)
+                                    {
+                                        <span class="badge bg-success text-white px-2.5 py-1 rounded-pill" style="font-size: 0.72rem;">
+                                            <i class="fa-solid fa-check me-1"></i>Đang hiệu lực
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-light text-muted border px-2 py-1 rounded-pill" style="font-size: 0.72rem;">Không có</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 3: NHÂN SỰ DƯỚI QUYỀN (SUBORDINATES) -->
+    <!-- ========================================================================= -->
+    <div class="tab-pane fade" id="tab-subordinates" role="tabpanel">
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white dark:bg-slate-900">
+            <h6 class="fw-bold text-dark dark:text-white mb-3 d-flex align-items-center gap-2">
+                <i class="fa-solid fa-people-arrows text-emerald-600"></i>
+                <span>Đội Ngũ Nhân Sự Dưới Quyền Trực Tiếp (@Model.SubordinatesCount)</span>
+            </h6>
+
+            @if (Model.Subordinates.Count == 0)
+            {
+                <div class="text-center py-5 text-muted">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-slate-100 text-slate-500 mb-2" style="width: 50px; height: 50px;">
+                        <i class="fa-solid fa-user-group fs-4"></i>
                     </div>
+                    <div class="fw-bold text-dark dark:text-white">Chưa có nhân viên nào dưới quyền trực tiếp</div>
+                    <p class="small text-muted mb-0">Khi bổ nhiệm nhân sự mới hoặc chỉ định người này làm quản lý, nhân viên sẽ hiển thị tại đây.</p>
                 </div>
+            }
+            else
+            {
+                <div class="row g-3">
+                    @foreach (var sub in Model.Subordinates)
+                    {
+                        <div class="col-md-6 col-xl-4">
+                            <div class="card border rounded-3 p-3 bg-light/70 dark:bg-slate-800/60 h-100">
+                                <div class="d-flex align-items-center gap-2.5 mb-2">
+                                    <div class="d-inline-flex align-items-center justify-content-center rounded-3 fw-bold text-white shadow-xs flex-shrink-0"
+                                         style="width: 38px; height: 38px; font-size: 14px; background: linear-gradient(135deg, #e11d48, #9333ea);">
+                                        @(sub.FullName.Length > 0 ? sub.FullName[0].ToString().ToUpper() : "U")
+                                    </div>
+                                    <div class="min-w-0 flex-grow-1">
+                                        <a href="/Admin/User/Details/@sub.Id" class="fw-bold text-dark dark:text-white text-decoration-none hover:text-rose-600 text-truncate d-block">
+                                            @sub.FullName
+                                        </a>
+                                        <div class="text-muted font-monospace small">@@@sub.Username</div>
+                                    </div>
+                                    <div>
+                                        @if (sub.IsActive)
+                                        {
+                                            <span class="badge bg-success-subtle text-success border px-2 py-0.5 rounded-pill" style="font-size: 0.65rem;">Hoạt động</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger-subtle text-danger border px-2 py-0.5 rounded-pill" style="font-size: 0.65rem;">Khóa</span>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="small text-muted space-y-1">
+                                    <div><i class="fa-solid fa-briefcase me-1"></i>@(sub.JobTitle ?? "Nhân viên")</div>
+                                    <div><i class="fa-solid fa-envelope me-1"></i>@sub.Email</div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 4: NHẬT KÝ THAO TÁC (AUDIT LOGS) -->
+    <!-- ========================================================================= -->
+    <div class="tab-pane fade" id="tab-audit" role="tabpanel">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white dark:bg-slate-900">
+            <div class="card-header bg-white dark:bg-slate-900 p-3 border-bottom">
+                <h6 class="fw-bold text-dark dark:text-white mb-0">
+                    <i class="fa-solid fa-clock-rotate-left me-2 text-amber-500"></i>20 Thao Tác Kiểm Toán Gần Nhất
+                </h6>
+            </div>
+
+            <div class="table-responsive" style="max-height: 520px;" tabindex="0" role="region" aria-label="Nhật ký thao tác">
+                <table class="table table-hover align-middle mb-0 text-sm">
+                    <thead class="bg-light dark:bg-slate-800 text-xs text-uppercase font-bold text-muted border-b sticky-top">
+                        <tr>
+                            <th class="ps-4 py-2.5">Thời Gian</th>
+                            <th class="py-2.5">Hành Động</th>
+                            <th class="py-2.5">Người Thực Hiện</th>
+                            <th class="py-2.5">Địa Chỉ IP</th>
+                            <th class="pe-4 py-2.5">Nội Dung Thay Đổi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                        @if (Model.RecentAuditLogs.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">Chưa ghi nhận nhật ký kiểm toán nào.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var log in Model.RecentAuditLogs)
+                            {
+                                <tr>
+                                    <td class="ps-4 py-2 font-monospace small text-muted">
+                                        @log.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")
+                                    </td>
+                                    <td class="py-2">
+                                        <span class="badge bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border font-monospace" style="font-size: 0.72rem;">@log.Action</span>
+                                    </td>
+                                    <td class="py-2 small fw-semibold text-dark dark:text-white">
+                                        @log.UserName
+                                    </td>
+                                    <td class="py-2 font-monospace small text-muted">
+                                        @(log.IpAddress ?? "Localhost")
+                                    </td>
+                                    <td class="pe-4 py-2 small text-muted">
+                                        @(log.NewValues ?? log.OldValues ?? "-")
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- TAB 5: ĐƠN HÀNG XỬ LÝ (SALES & THU NGÂN) -->
+    <!-- ========================================================================= -->
+    <div class="tab-pane fade" id="tab-sales" role="tabpanel">
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-2xs rounded-4 p-3 bg-white dark:bg-slate-900">
+                    <div class="small text-muted mb-1">Tổng Số Đơn Hàng Xử Lý</div>
+                    <h3 class="fw-bolder mb-0 text-purple-600">@Model.TotalOrdersProcessed</h3>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-2xs rounded-4 p-3 bg-white dark:bg-slate-900">
+                    <div class="small text-muted mb-1">Tổng Doanh Số Đã Đóng Góp</div>
+                    <h3 class="fw-bolder mb-0 text-success">@Model.TotalSalesProcessed.ToString("N0") ₫</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white dark:bg-slate-900">
+            <div class="card-header bg-white dark:bg-slate-900 p-3 border-bottom">
+                <h6 class="fw-bold text-dark dark:text-white mb-0">
+                    <i class="fa-solid fa-receipt me-2 text-purple-600"></i>10 Đơn Hàng Xử Lý Gần Nhất
+                </h6>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-sm">
+                    <thead class="bg-light dark:bg-slate-800 text-xs text-uppercase font-bold text-muted border-b">
+                        <tr>
+                            <th class="ps-4 py-2.5">Mã Đơn</th>
+                            <th class="py-2.5">Kênh Bán</th>
+                            <th class="py-2.5">Thời Gian</th>
+                            <th class="py-2.5">Tổng Tiền</th>
+                            <th class="pe-4 py-2.5 text-center">Trạng Thái</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                        @if (Model.RecentOrders.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">Chưa phát sinh giao dịch đơn hàng nào.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var ord in Model.RecentOrders)
+                            {
+                                <tr>
+                                    <td class="ps-4 py-2 font-monospace fw-bold text-dark dark:text-white">
+                                        <a href="/Admin/Order/Details/@ord.Id" class="text-decoration-none hover:text-rose-600">@ord.OrderCode</a>
+                                    </td>
+                                    <td class="py-2"><span class="badge bg-light text-dark border">@ord.OrderSource</span></td>
+                                    <td class="py-2 font-monospace small text-muted">@ord.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td class="py-2 fw-semibold text-rose-600 font-monospace">@ord.TotalAmount.ToString("N0") ₫</td>
+                                    <td class="pe-4 py-2 text-center">
+                                        <span class="badge bg-slate-100 text-slate-800 border">@ord.OrderStatus</span>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
-
