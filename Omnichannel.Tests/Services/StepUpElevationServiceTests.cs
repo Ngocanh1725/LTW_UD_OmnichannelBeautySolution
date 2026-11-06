@@ -60,6 +60,7 @@ namespace Omnichannel.Tests.Services
                 FullName = "Trần Quản Lý HQ",
                 Email = "manager_hq@test.com",
                 StoreId = 1,
+                UserType = 2,
                 IsActive = true
             };
             db.Users.Add(manager);

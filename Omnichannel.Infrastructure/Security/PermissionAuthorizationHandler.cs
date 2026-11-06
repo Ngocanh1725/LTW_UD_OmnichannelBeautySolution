@@ -1,12 +1,9 @@
-﻿using System;
+using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Omnichannel.Application.Interfaces.Security;
-// Là việc các đối tượng thuộc các lớp khác nhau (nhưng các 
-//lớp chung 1 cha) sử dụng phương thức của lớp cha đó theo 
-//các cách khác nhau.  
-//+ Ví dụ: Tính thuế: Hàng Điện Tử 8%, Hàng Mỹ Phẩm 10% chẳng hạn
+
 namespace Omnichannel.Infrastructure.Security
 {
     public class PermissionAuthorizationHandler : AuthorizationHandler<PermissionRequirement>
@@ -28,7 +25,25 @@ namespace Omnichannel.Infrastructure.Security
             }
 
             // =========================================================================
-            // TẦNG 1: KIỂM TRA QUYỀN SUPERADMIN TỐI CAO (GOD MODE BYPASS)
+            // TẦNG 0: CHẶN TUYỆT ĐỐI TÀI KHOẢN KHÁCH HÀNG (UserType = 1) HOẶC TÀI KHOẢN BỊ KHÓA/XÓA
+            // Kể cả khi bị gán nhầm Role nội bộ hoặc SuperAdmin
+            // =========================================================================
+            if (context.User.HasClaim("UserType", "1"))
+            {
+                return;
+            }
+
+            var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var hasValidUserId = !string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out _);
+            int userId = hasValidUserId ? int.Parse(userIdClaim!) : 0;
+
+            if (hasValidUserId && await _permissionService.IsCustomerOrInactiveInDbAsync(userId))
+            {
+                return;
+            }
+
+            // =========================================================================
+            // TẦNG 1: KIỂM TRA QUYỀN SUPERADMIN TỐI CAO (GOD MODE BYPASS CHO NHÂN SỰ NỘI BỘ)
             // =========================================================================
             if (context.User.IsInRole("SuperAdmin") ||
                 context.User.IsInRole("SUPER_ADMIN") ||
@@ -41,8 +56,7 @@ namespace Omnichannel.Infrastructure.Security
             // =========================================================================
             // TẦNG 2: LẤY USER ID VÀ ĐỐI SOÁT TẬP QUYỀN HỮU HIỆU (EFFECTIVE PERMISSIONS)
             // =========================================================================
-            var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            if (!hasValidUserId)
             {
                 return;
             }

@@ -61,7 +61,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HasPermission("USER_MANAGE")]
         public async Task<IActionResult> Create()
         {
-            var roles = await _context.Roles.AsNoTracking().ToListAsync();
+            var roles = await _context.Roles.AsNoTracking().Where(r => r.IsActive && r.Level > 0 && r.Name != "Customer" && r.Name != "CUSTOMER").ToListAsync();
             ViewBag.Roles = new SelectList(roles, "Id", "Name");
             return View(new CreateUserViewModel());
         }
@@ -73,7 +73,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         {
             if (!ModelState.IsValid)
             {
-                var roles = await _context.Roles.AsNoTracking().ToListAsync();
+                var roles = await _context.Roles.AsNoTracking().Where(r => r.IsActive && r.Level > 0 && r.Name != "Customer" && r.Name != "CUSTOMER").ToListAsync();
                 ViewBag.Roles = new SelectList(roles, "Id", "Name");
                 return View(model);
             }
@@ -84,7 +84,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             if (await _context.Users.AnyAsync(u => u.Username.ToUpper() == normalized))
             {
                 ModelState.AddModelError("Username", "Tên đăng nhập này đã tồn tại.");
-                var roles = await _context.Roles.AsNoTracking().ToListAsync();
+                var roles = await _context.Roles.AsNoTracking().Where(r => r.IsActive && r.Level > 0 && r.Name != "Customer" && r.Name != "CUSTOMER").ToListAsync();
                 ViewBag.Roles = new SelectList(roles, "Id", "Name");
                 return View(model);
             }
@@ -92,7 +92,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             if (await _context.Users.AnyAsync(u => u.Email.ToUpper() == model.Email.Trim().ToUpper()))
             {
                 ModelState.AddModelError("Email", "Địa chỉ Email này đã được sử dụng.");
-                var roles = await _context.Roles.AsNoTracking().ToListAsync();
+                var roles = await _context.Roles.AsNoTracking().Where(r => r.IsActive && r.Level > 0 && r.Name != "Customer" && r.Name != "CUSTOMER").ToListAsync();
                 ViewBag.Roles = new SelectList(roles, "Id", "Name");
                 return View(model);
             }

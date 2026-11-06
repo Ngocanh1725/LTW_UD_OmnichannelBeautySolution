@@ -72,13 +72,15 @@ builder.Services.AddMemoryCache();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddHttpContextAccessor();
 
-// 3. Đăng ký Services Phân hệ Bảo mật
+// 3. Đăng ký Services Phân hệ Bảo mật & Ủy quyền Phân cấp (Delegated RBAC)
 builder.Services.AddSingleton<IPasswordHasherService, PasswordHasherService>();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, DynamicPermissionPolicyProvider>();
 builder.Services.AddScoped<IPermissionService, PermissionService>();
+builder.Services.AddScoped<IDelegationService, DelegationService>();
 builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IStepUpElevationService, StepUpElevationService>();
+builder.Services.AddScoped<AdminAreaBoundaryFilter>();
 // Đăng ký Service CMS & Menu Đa hình vào DI Container:
 builder.Services.AddScoped<IMenuEngineService, MenuEngineService>();
 builder.Services.AddScoped<IProductReviewService, ProductReviewService>();
@@ -206,13 +208,95 @@ builder.Services.AddAuthentication(options =>
     options.AccessDeniedPath = AuthConstants.AdminAccessDeniedPath;
     options.SlidingExpiration = true;
     options.ExpireTimeSpan = TimeSpan.FromHours(8);
+
+    // Kiểm tra SecurityStamp, trạng thái IsActive/IsDeleted và tách bạch UserType >= 2 ở mọi request
+    options.Events = new CookieAuthenticationEvents
+    {
+        OnValidatePrincipal = async context =>
+        {
+            var principal = context.Principal;
+            if (principal?.Identity == null || !principal.Identity.IsAuthenticated)
+            {
+                return;
+            }
+
+            var userIdStr = principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdStr) || !int.TryParse(userIdStr, out int userId))
+            {
+                context.RejectPrincipal();
+                return;
+            }
+
+            var db = context.HttpContext.RequestServices.GetService<ApplicationDbContext>();
+            if (db == null)
+            {
+                return;
+            }
+
+            var dbUser = await db.Users
+                .IgnoreQueryFilters()
+                .AsNoTracking()
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            // Chặn ngay lập tức nếu tài khoản không tồn tại, bị khóa, xóa mềm hoặc là Khách hàng (UserType = 1)
+            if (dbUser == null || !dbUser.IsActive || dbUser.IsDeleted || dbUser.UserType < 2)
+            {
+                context.RejectPrincipal();
+                return;
+            }
+
+            var cookieStamp = principal.FindFirst("SecurityStamp")?.Value;
+            var currentStamp = dbUser.SecurityStamp ?? string.Empty;
+
+            if (!string.Equals(cookieStamp, currentStamp, StringComparison.Ordinal))
+            {
+                var refreshedClaims = new System.Collections.Generic.List<System.Security.Claims.Claim>
+                {
+                    new(System.Security.Claims.ClaimTypes.NameIdentifier, dbUser.Id.ToString()),
+                    new(System.Security.Claims.ClaimTypes.Name, dbUser.Username),
+                    new(System.Security.Claims.ClaimTypes.GivenName, dbUser.FullName ?? dbUser.Username),
+                    new(System.Security.Claims.ClaimTypes.Email, dbUser.Email ?? string.Empty),
+                    new("UserType", dbUser.UserType.ToString()),
+                    new("IsStaff", "true"),
+                    new("SecurityStamp", currentStamp)
+                };
+
+                if (dbUser.StoreId.HasValue)
+                {
+                    refreshedClaims.Add(new("StoreId", dbUser.StoreId.Value.ToString()));
+                }
+
+                if (dbUser.DepartmentId.HasValue)
+                {
+                    refreshedClaims.Add(new("DepartmentId", dbUser.DepartmentId.Value.ToString()));
+                }
+
+                foreach (var ur in dbUser.UserRoles)
+                {
+                    if (ur.Role != null && ur.Role.IsActive && !string.Equals(ur.Role.Name, "Customer", StringComparison.OrdinalIgnoreCase))
+                    {
+                        refreshedClaims.Add(new(System.Security.Claims.ClaimTypes.Role, ur.Role.Name));
+                    }
+                }
+
+                var refreshedIdentity = new System.Security.Claims.ClaimsIdentity(refreshedClaims, AuthConstants.AdminCookieScheme);
+                context.ReplacePrincipal(new System.Security.Claims.ClaimsPrincipal(refreshedIdentity));
+                context.ShouldRenew = true;
+            }
+        }
+    };
 });
 
 // 5. Cấu hình Ủy quyền (Authorization)
 builder.Services.AddAuthorization();
 
-// 6. Đăng ký MVC Controllers & Views
-var mvcBuilder = builder.Services.AddControllersWithViews();
+// 6. Đăng ký MVC Controllers & Views kèm Guard tách bạch Admin/Customer
+var mvcBuilder = builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<AdminAreaBoundaryFilter>();
+});
 
 if (builder.Environment.IsDevelopment())
 {

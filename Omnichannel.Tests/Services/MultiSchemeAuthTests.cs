@@ -53,18 +53,20 @@ namespace Omnichannel.Tests.Services
             Assert.Equal(expectedScheme, resolvedScheme);
         }
 
-        [Fact]
-        public void RoleBoundary_CustomerRole_ShouldNotBeAllowedInAdminPortal()
+        [Theory]
+        [InlineData(1, "CUSTOMER")]
+        [InlineData(1, "SUPER_ADMIN")] // UserType 1 dù bị gán nhầm role nội bộ vẫn tuyệt đối bị chặn khỏi /Admin
+        [InlineData(1, "STORE_MANAGER")]
+        public void RoleBoundary_CustomerRole_ShouldNotBeAllowedInAdminPortal(int userType, string role)
         {
-            // Arrange: Regular customer with UserType 1 and role CUSTOMER
-            int userType = 1;
-            var roles = new[] { "CUSTOMER" };
+            // Arrange
+            var roles = new[] { role };
 
-            // Act: evaluate role boundary logic
-            bool isStaffOrAdmin = userType >= 2 || Array.Exists(roles, r => !string.Equals(r, "CUSTOMER", StringComparison.OrdinalIgnoreCase));
+            // Act: evaluate strict role boundary logic (chỉ UserType >= 2 mới là nhân sự nội bộ)
+            bool isStaffOrAdmin = userType >= 2 && roles.Length >= 0;
 
             // Assert
-            Assert.False(isStaffOrAdmin, "Customer account must be blocked from Admin portal");
+            Assert.False(isStaffOrAdmin, "Customer account (UserType = 1) must be strictly blocked from Admin portal even if assigned internal role");
         }
 
         [Theory]
@@ -72,14 +74,13 @@ namespace Omnichannel.Tests.Services
         [InlineData(3, "STORE_MANAGER")]
         [InlineData(4, "ACCOUNTANT")]
         [InlineData(5, "SUPER_ADMIN")]
-        [InlineData(1, "SUPER_ADMIN")] // UserType 1 but assigned admin role
         public void RoleBoundary_StaffOrAdmin_ShouldBeAllowedInAdminPortal(int userType, string role)
         {
             // Arrange
             var roles = new[] { role };
 
             // Act
-            bool isStaffOrAdmin = userType >= 2 || Array.Exists(roles, r => !string.Equals(r, "CUSTOMER", StringComparison.OrdinalIgnoreCase));
+            bool isStaffOrAdmin = userType >= 2 && roles.Length > 0;
 
             // Assert
             Assert.True(isStaffOrAdmin, "Staff/Admin role must be allowed in Admin portal");

@@ -162,8 +162,8 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             }
 
             // 5. THỰC THI RANH GIỚI VAI TRÒ (ROLE BOUNDARY):
-            // Kiểm tra người dùng có thẩm quyền nhân sự / quản trị hay không
-            bool isStaffOrAdmin = user.UserType >= 2 || user.UserRoles.Any(r => !string.Equals(r.Role.Name, "CUSTOMER", StringComparison.OrdinalIgnoreCase));
+            // Tuyệt đối chỉ cho phép Nhân sự nội bộ (UserType >= 2) đăng nhập cổng /Admin, kể cả khi UserType = 1 bị gán nhầm Role
+            bool isStaffOrAdmin = user.UserType >= 2;
             if (!isStaffOrAdmin)
             {
                 await _auditLogService.LogAsync(
@@ -192,8 +192,14 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 new Claim(ClaimTypes.GivenName, user.FullName ?? user.Username),
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                 new Claim("UserType", user.UserType.ToString()),
-                new Claim("IsStaff", "true")
+                new Claim("IsStaff", "true"),
+                new Claim("SecurityStamp", user.SecurityStamp ?? string.Empty)
             };
+
+            if (user.DepartmentId.HasValue)
+            {
+                claims.Add(new Claim("DepartmentId", user.DepartmentId.Value.ToString()));
+            }
 
             if (user.StoreId.HasValue)
             {

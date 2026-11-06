@@ -207,8 +207,8 @@ namespace Omnichannel.Web.Controllers
             // Đăng nhập thành công -> Xóa bộ đếm Brute-force
             _bruteForceTracker.TryRemove(bruteForceKey, out _);
 
-            bool isStaffOrAdmin = user.UserType >= 2 ||
-                user.UserRoles.Any(r => !string.Equals(r.Role.Name, "CUSTOMER", StringComparison.OrdinalIgnoreCase));
+            // Tuyệt đối tách bạch: chỉ tài khoản Nhân sự nội bộ (UserType >= 2) mới được cấp phiên Admin
+            bool isStaffOrAdmin = user.UserType >= 2;
 
             var claims = new List<Claim>
             {
@@ -216,8 +216,14 @@ namespace Omnichannel.Web.Controllers
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.GivenName, user.FullName ?? user.Username),
                 new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-                new Claim("UserType", user.UserType.ToString())
+                new Claim("UserType", user.UserType.ToString()),
+                new Claim("SecurityStamp", user.SecurityStamp ?? string.Empty)
             };
+
+            if (user.DepartmentId.HasValue)
+            {
+                claims.Add(new Claim("DepartmentId", user.DepartmentId.Value.ToString()));
+            }
 
             if (isStaffOrAdmin)
             {

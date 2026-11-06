@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Omnichannel.Application.DTOs.Catalog;
 using Omnichannel.Application.Interfaces.Catalog;
+using Omnichannel.Infrastructure.Security;
 
 namespace Omnichannel.Web.Areas.Admin.Controllers
 {
@@ -20,15 +21,9 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [HasPermission("PRODUCT_VIEW")]
         public async Task<IActionResult> Index(string? search, int? categoryId, int? skinTypeId, int? concernId)
         {
-            if (!User.IsInRole("SuperAdmin") && !User.IsInRole("SUPER_ADMIN") && 
-                !User.HasClaim("Permission", "PRODUCT_VIEW") &&
-                !User.HasClaim("Permission", "PRODUCT_MANAGE"))
-            {
-                return Forbid();
-            }
-
             var viewModel = await _smartFilterService.GetProductAttributesOverviewAsync(search, categoryId, skinTypeId, concernId);
             ViewBag.Search = search;
             ViewBag.CategoryId = categoryId;
@@ -40,14 +35,9 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [HasPermission("PRODUCT_EDIT")]
         public async Task<IActionResult> UpdateSingle(int productId, List<int> skinTypeIds, List<int> concernIds)
         {
-            if (!User.IsInRole("SuperAdmin") && !User.IsInRole("SUPER_ADMIN") && 
-                !User.HasClaim("Permission", "PRODUCT_MANAGE"))
-            {
-                return Forbid();
-            }
-
             var success = await _smartFilterService.UpdateProductAttributesAsync(productId, skinTypeIds, concernIds);
             if (success)
             {
@@ -63,14 +53,9 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [HasPermission("PRODUCT_EDIT")]
         public async Task<IActionResult> BulkUpdate(BulkUpdateAttributesDto dto)
         {
-            if (!User.IsInRole("SuperAdmin") && !User.IsInRole("SUPER_ADMIN") && 
-                !User.HasClaim("Permission", "PRODUCT_MANAGE"))
-            {
-                return Forbid();
-            }
-
             if (dto == null || dto.ProductIds == null || dto.ProductIds.Count == 0)
             {
                 TempData["ErrorMessage"] = "Vui lòng chọn ít nhất một sản phẩm để cập nhật hàng loạt.";

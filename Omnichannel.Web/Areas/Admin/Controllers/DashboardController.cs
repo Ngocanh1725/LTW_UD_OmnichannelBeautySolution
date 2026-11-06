@@ -39,6 +39,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [HasPermission("DASHBOARD_VIEW")]
         public async Task<IActionResult> Index(
             int days = 30,
             string channel = "ALL",

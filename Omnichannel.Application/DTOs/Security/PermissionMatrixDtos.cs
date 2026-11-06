@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace Omnichannel.Application.DTOs.Security
 {
@@ -9,13 +9,20 @@ namespace Omnichannel.Application.DTOs.Security
         public List<ModulePermissionGroupDto> ModuleGroups { get; set; } = new();
         public int SelectedRoleId { get; set; }
         public List<int> ActivePermissionIdsForRole { get; set; } = new();
+        public DelegationContextDto? ActorContext { get; set; }
     }
 
     public class RoleDto
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
+        public string? DisplayName { get; set; }
         public string? Description { get; set; }
+        public int Level { get; set; }
+        public int? DepartmentId { get; set; }
+        public string? DepartmentName { get; set; }
+        public bool IsSystem { get; set; }
+        public string? Color { get; set; }
     }
 
     public class UserSummaryDto
@@ -25,6 +32,9 @@ namespace Omnichannel.Application.DTOs.Security
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string? StoreName { get; set; }
+        public int? DepartmentId { get; set; }
+        public string? DepartmentName { get; set; }
+        public string? JobTitle { get; set; }
     }
 
     public class ModulePermissionGroupDto
@@ -41,6 +51,7 @@ namespace Omnichannel.Application.DTOs.Security
         public string Name { get; set; } = string.Empty;
         public string Action { get; set; } = string.Empty; // VIEW, CREATE, EDIT, DELETE, APPROVE, EXPORT
         public string? Description { get; set; }
+        public bool IsGrantableByActor { get; set; } = true;
     }
 
     public class RolePermissionUpdateDto
@@ -54,6 +65,7 @@ namespace Omnichannel.Application.DTOs.Security
         public int UserId { get; set; }
         public int PermissionId { get; set; }
         public bool? OverrideStatus { get; set; } // true = Granted, false = Revoked, null = Remove override
+        public string? Reason { get; set; }
     }
 
     public class UserPermissionDetailDto
@@ -65,5 +77,8 @@ namespace Omnichannel.Application.DTOs.Security
         public bool InheritedFromRole { get; set; }
         public bool? DirectOverride { get; set; } // true: Grant, false: Revoke, null: None
         public bool IsEffective { get; set; }
+        public bool CanActorGrant { get; set; } = true;
+        public int? GrantedByUserId { get; set; }
+        public string? Reason { get; set; }
     }
 }

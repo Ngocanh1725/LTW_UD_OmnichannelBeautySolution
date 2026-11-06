@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Omnichannel.Application.DTOs.Security;
 
@@ -8,6 +8,7 @@ namespace Omnichannel.Application.Interfaces.Security
     {
         Task<HashSet<string>> GetEffectivePermissionsAsync(int userId);
         Task<bool> HasPermissionAsync(int userId, string permissionCode);
+        Task<bool> IsCustomerOrInactiveInDbAsync(int userId);
 
         Task InvalidateUserPermissionCacheAsync(int userId);
         Task InvalidateRolePermissionCacheAsync(int roleId);

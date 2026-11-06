@@ -12,6 +12,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize]
+    [HasPermission("SETTINGS_VIEW")]
     public class AuditLogController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -31,12 +32,6 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             int page = 1,
             int pageSize = 20)
         {
-            // Bảo mật PBAC: Chỉ SuperAdmin hoặc người dùng có quyền xem Audit Log / Settings
-            if (!User.IsInRole("SuperAdmin") && !User.IsInRole("SUPER_ADMIN") && !User.HasClaim("Permission", "SETTINGS_VIEW"))
-            {
-                return Forbid();
-            }
-
             var query = _context.AuditLogs.AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(entityType))

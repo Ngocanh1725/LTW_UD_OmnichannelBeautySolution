@@ -4,11 +4,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Omnichannel.Application.DTOs.Alerts;
 using Omnichannel.Application.Interfaces.Alerts;
+using Omnichannel.Infrastructure.Security;
 
 namespace Omnichannel.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize]
+    [HasPermission("DASHBOARD_VIEW")]
     public class AlertController : Controller
     {
         private readonly IAlertService _alertService;

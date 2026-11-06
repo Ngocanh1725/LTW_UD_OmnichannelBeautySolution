@@ -5,11 +5,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Omnichannel.Application.DTOs.Cms;
 using Omnichannel.Application.Interfaces.Cms;
+using Omnichannel.Infrastructure.Security;
 
 namespace Omnichannel.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize]
+    [HasPermission("THEME_MANAGE")]
     [Route("admin/customizer")]
     public class ThemeCustomizerController : Controller
     {
