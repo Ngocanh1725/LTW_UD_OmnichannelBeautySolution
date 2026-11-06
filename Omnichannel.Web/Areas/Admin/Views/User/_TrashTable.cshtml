@@ -1,0 +1,89 @@
+@model Omnichannel.Application.DTOs.HR.PagedResult<Omnichannel.Application.DTOs.HR.StaffListItemDto>
+
+<div class="table-responsive" tabindex="0" role="region" aria-label="Bảng danh sách nhân sự đã xóa mềm">
+    <table class="table table-hover align-middle mb-0 text-sm">
+        <thead class="bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold uppercase tracking-wider border-b">
+            <tr>
+                <th class="ps-4 py-3">Mã NV / Họ Tên</th>
+                <th class="py-3 px-3">Phòng Ban & Chức Danh</th>
+                <th class="py-3 px-3">Email & SĐT</th>
+                <th class="py-3 px-3">Người Xóa & Thời Gian</th>
+                <th class="pe-4 py-3 text-end" style="width: 140px;">Thao Tác</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+            @if (Model.Items.Count == 0)
+            {
+                <tr>
+                    <td colspan="5" class="text-center py-5 text-muted">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-muted mb-2" style="width: 48px; height: 48px;">
+                            <i class="fa-regular fa-trash-can fs-4"></i>
+                        </div>
+                        <div class="fw-bold text-dark dark:text-white">Thùng rác trống</div>
+                        <p class="small text-muted mb-0">Không có nhân sự nào đang bị xóa mềm trong phạm vi quản lý của bạn.</p>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var staff in Model.Items)
+                {
+                    <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
+                        <td class="ps-4 py-3">
+                            <div class="d-flex align-items-center gap-2.5">
+                                <div class="d-inline-flex align-items-center justify-content-center rounded-3 fw-bold text-white shadow-xs flex-shrink-0 opacity-75"
+                                     style="width: 36px; height: 36px; font-size: 13px; background: #64748b;">
+                                    @(staff.FullName.Length > 0 ? staff.FullName[0].ToString().ToUpper() : "U")
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark dark:text-white">
+                                        @staff.FullName
+                                        @if (!string.IsNullOrEmpty(staff.EmployeeCode))
+                                        {
+                                            <span class="badge bg-light text-dark border font-monospace ms-1" style="font-size: 0.68rem;">@staff.EmployeeCode</span>
+                                        }
+                                    </div>
+                                    <div class="text-muted font-monospace" style="font-size: 0.72rem;">@@@staff.Username</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-3 px-3">
+                            <div class="small fw-semibold text-dark dark:text-white">@(staff.DepartmentName ?? "Chưa phân phòng")</div>
+                            <div class="text-muted" style="font-size: 0.72rem;">@(staff.JobTitle ?? "Nhân viên")</div>
+                        </td>
+                        <td class="py-3 px-3 small">
+                            <div class="text-dark dark:text-white">@staff.Email</div>
+                            <div class="text-muted font-monospace" style="font-size: 0.72rem;">@(staff.PhoneNumber ?? "Chưa có SĐT")</div>
+                        </td>
+                        <td class="py-3 px-3 small">
+                            <div class="fw-semibold text-danger">
+                                <i class="fa-regular fa-trash-can me-1"></i>@(staff.DeletedByName ?? "Quản trị viên")
+                            </div>
+                            <div class="text-muted font-monospace" style="font-size: 0.72rem;">
+                                @(staff.DeletedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")
+                            </div>
+                        </td>
+                        <td class="pe-4 py-3 text-end">
+                            <form asp-action="Restore" asp-route-id="@staff.Id" method="post" class="d-inline m-0">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-sm btn-outline-success rounded-3 px-3 py-1 fw-semibold" title="Khôi phục nhân sự về hoạt động">
+                                    <i class="fa-solid fa-rotate-left me-1"></i>Khôi Phục
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@if (Model.TotalItems > 0)
+{
+    <div class="p-3 border-top bg-white dark:bg-slate-900 d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="small text-muted">
+            Hiển thị <span class="fw-bold text-dark dark:text-white">@Model.FromItem</span> - <span class="fw-bold text-dark dark:text-white">@Model.ToItem</span> trên tổng số <span class="fw-bold text-dark dark:text-white">@Model.TotalItems</span> nhân sự trong thùng rác
+        </div>
+    </div>
+}
+

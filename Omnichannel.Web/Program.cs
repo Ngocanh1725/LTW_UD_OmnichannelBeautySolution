@@ -81,6 +81,7 @@ builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler
 builder.Services.AddScoped<IAuditLogService, AuditLogService>();
 builder.Services.AddScoped<IStepUpElevationService, StepUpElevationService>();
 builder.Services.AddScoped<AdminAreaBoundaryFilter>();
+builder.Services.AddScoped<Omnichannel.Application.Interfaces.HR.IStaffManagementService, Omnichannel.Infrastructure.Services.HR.StaffManagementService>();
 // Đăng ký Service CMS & Menu Đa hình vào DI Container:
 builder.Services.AddScoped<IMenuEngineService, MenuEngineService>();
 builder.Services.AddScoped<IProductReviewService, ProductReviewService>();

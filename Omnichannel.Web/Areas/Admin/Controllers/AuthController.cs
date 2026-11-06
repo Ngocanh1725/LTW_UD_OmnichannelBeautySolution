@@ -181,8 +181,10 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 return View(model);
             }
 
-            // Đăng nhập thành công -> Xóa bộ đếm brute-force
+            // Đăng nhập thành công -> Xóa bộ đếm brute-force & cập nhật thời điểm đăng nhập cuối
             _adminBruteForceTracker.TryRemove(bruteForceKey, out _);
+            user.LastLoginAt = DateTime.UtcNow;
+            await _dbContext.SaveChangesAsync();
 
             // 6. Xây dựng Danh sách Claims cho Admin Scheme
             var claims = new List<Claim>

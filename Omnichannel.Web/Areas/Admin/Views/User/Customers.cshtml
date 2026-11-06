@@ -1,0 +1,81 @@
+@model Omnichannel.Application.DTOs.HR.CustomerUserIndexViewModel
+@{
+    ViewData["Title"] = "Quản Lý Tài Khoản Khách Hàng";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <a href="/Admin/User" class="btn btn-sm btn-outline-secondary rounded-3 px-2.5 py-1">
+                <i class="fa-solid fa-arrow-left me-1"></i>Hồ sơ nhân sự
+            </a>
+            <span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-1 rounded-pill font-monospace" style="background:#eef2ff;color:#4338ca;">
+                UserType = 1 (Storefront Customers)
+            </span>
+        </div>
+        <h4 class="fw-bold text-slate-900 dark:text-white mb-0 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-user-tag text-indigo-600"></i>
+            <span>Tài Khoản Đăng Nhập Của Khách Hàng</span>
+        </h4>
+        <p class="small text-muted mb-0 mt-1">Danh sách tài khoản khách hàng đăng ký mua sắm tại Storefront. Để quản lý hồ sơ sắc đẹp và ví điểm Loyalty chi tiết, vui lòng chuyển sang cổng CRM.</p>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a href="/Admin/Customer" class="btn btn-primary-gradient btn-sm px-3 py-2 text-white fw-semibold rounded-3 shadow-xs">
+            <i class="fa-solid fa-address-book me-1"></i>Mở Phân Hệ CRM 360
+        </a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-4">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white dark:bg-slate-900">
+            <div class="small text-muted text-uppercase fw-semibold" style="font-size: 0.7rem;">Tổng Khách Hàng</div>
+            <h3 class="fw-bolder mb-0 mt-1 text-slate-900 dark:text-white">@Model.TotalCustomers</h3>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white dark:bg-slate-900">
+            <div class="small text-muted text-uppercase fw-semibold" style="font-size: 0.7rem;">Đang Hoạt Động</div>
+            <h3 class="fw-bolder mb-0 mt-1 text-success">@Model.ActiveCustomers</h3>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white dark:bg-slate-900">
+            <div class="small text-muted text-uppercase fw-semibold" style="font-size: 0.7rem;">Đang Tạm Khóa</div>
+            <h3 class="fw-bolder mb-0 mt-1 text-danger">@Model.LockedCustomers</h3>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Form -->
+<div class="card border-0 shadow-sm rounded-4 mb-4 bg-white dark:bg-slate-900 p-3">
+    <form method="get" action="/Admin/User/Customers" class="row g-2 align-items-center">
+        <div class="col-md-6">
+            <div class="input-group input-group-sm">
+                <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="text" name="Keyword" class="form-control" placeholder="Tìm theo tên, username, email, số điện thoại..." value="@Model.Filter.Keyword" />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select name="Status" class="form-select form-select-sm rounded-3">
+                <option value="all" selected="@(Model.Filter.Status == "all" ? "selected" : null)">-- Trạng thái: Tất cả --</option>
+                <option value="active" selected="@(Model.Filter.Status == "active" ? "selected" : null)">Đang hoạt động</option>
+                <option value="locked" selected="@(Model.Filter.Status == "locked" ? "selected" : null)">Đã tạm khóa</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex gap-1.5">
+            <button type="submit" class="btn btn-primary-gradient btn-sm flex-grow-1 text-white fw-semibold rounded-3">
+                <i class="fa-solid fa-filter me-1"></i>Lọc
+            </button>
+            <a href="/Admin/User/Customers" class="btn btn-outline-secondary btn-sm px-2.5 rounded-3">Đặt lại</a>
+        </div>
+    </form>
+</div>
+
+<!-- Customer Table Container -->
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white dark:bg-slate-900">
+    <partial name="_CustomerTable" model="Model.CustomersPaged" />
+</div>
+

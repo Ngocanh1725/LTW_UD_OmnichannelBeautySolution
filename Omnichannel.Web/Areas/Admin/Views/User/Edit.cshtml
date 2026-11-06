@@ -1,0 +1,228 @@
+@model Omnichannel.Application.DTOs.HR.StaffFormViewModel
+@{
+    ViewData["Title"] = $"Chỉnh Sửa Hồ Sơ - {Model.UpdateRequest.FullName}";
+    Layout = "_AdminLayout";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <a href="/Admin/User" class="btn btn-sm btn-outline-secondary rounded-3 px-2.5 py-1">
+                <i class="fa-solid fa-arrow-left me-1"></i>Danh sách nhân sự
+            </a>
+            <span class="badge bg-indigo-50 text-indigo-700 border border-indigo-200 px-2.5 py-1 rounded-pill font-monospace" style="background:#eef2ff;color:#4338ca;">
+                ID #@Model.StaffId
+            </span>
+        </div>
+        <h4 class="fw-bold text-slate-900 dark:text-white mb-0 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-user-pen text-rose-600"></i>
+            <span>Chỉnh Sửa Hồ Sơ Nhân Sự: @Model.UpdateRequest.FullName</span>
+        </h4>
+        <div class="text-muted small mt-1 font-monospace">@@@Model.Username</div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a href="/Admin/User/Details/@Model.StaffId" class="btn btn-outline-secondary btn-sm px-3 py-2 fw-semibold rounded-3">
+            <i class="fa-regular fa-eye me-1 text-primary"></i>Xem Hồ Sơ 360
+        </a>
+        <a asp-permission="PERMISSION_DELEGATE" href="/Admin/User/Permissions/@Model.StaffId" class="btn btn-outline-rose btn-sm px-3 py-2 fw-semibold rounded-3" style="border-color:#f43f5e;color:#e11d48;">
+            <i class="fa-solid fa-shield-halved me-1"></i>Phân Quyền Cá Nhân
+        </a>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 p-4 bg-white dark:bg-slate-900">
+    <form asp-action="Edit" asp-route-id="@Model.StaffId" method="post" id="editStaffForm">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger rounded-3 small mb-4"></div>
+
+        <h6 class="fw-bold text-dark dark:text-white mb-3 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-id-card text-rose-600"></i>
+            <span>1. Thông Tin Cá Nhân & Liên Hệ</span>
+        </h6>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-dark dark:text-white">Tên đăng nhập (Cố định)</label>
+                <input type="text" class="form-control bg-light font-monospace" value="@@@Model.Username" readonly disabled />
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="UpdateRequest.FullName" class="form-label small fw-bold text-dark dark:text-white">
+                    Họ và tên <span class="text-danger">*</span>
+                </label>
+                <input asp-for="UpdateRequest.FullName" class="form-control" />
+                <span asp-validation-for="UpdateRequest.FullName" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="UpdateRequest.EmployeeCode" class="form-label small fw-bold text-dark dark:text-white">
+                    Mã nhân viên (EmployeeCode)
+                </label>
+                <input asp-for="UpdateRequest.EmployeeCode" class="form-control font-monospace" />
+                <span asp-validation-for="UpdateRequest.EmployeeCode" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="UpdateRequest.Email" class="form-label small fw-bold text-dark dark:text-white">
+                    Địa chỉ Email <span class="text-danger">*</span>
+                </label>
+                <input asp-for="UpdateRequest.Email" type="email" class="form-control" />
+                <span asp-validation-for="UpdateRequest.Email" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="UpdateRequest.PhoneNumber" class="form-label small fw-bold text-dark dark:text-white">
+                    Số điện thoại
+                </label>
+                <input asp-for="UpdateRequest.PhoneNumber" class="form-control font-monospace" />
+                <span asp-validation-for="UpdateRequest.PhoneNumber" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-dark dark:text-white">Trạng thái tài khoản</label>
+                <div class="form-check form-switch pt-2">
+                    <input asp-for="UpdateRequest.IsActive" class="form-check-input" type="checkbox" id="isActiveSwitch">
+                    <label class="form-check-label small fw-bold text-dark dark:text-white" for="isActiveSwitch">
+                        Cho phép đăng nhập hoạt động
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4 border-slate-200 dark:border-slate-700" />
+
+        <h6 class="fw-bold text-dark dark:text-white mb-3 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-sitemap text-indigo-600"></i>
+            <span>2. Cơ Cấu Tổ Chức & Nơi Làm Việc</span>
+        </h6>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label asp-for="UpdateRequest.DepartmentId" class="form-label small fw-bold text-dark dark:text-white">
+                    Phòng ban trực thuộc
+                </label>
+                <select asp-for="UpdateRequest.DepartmentId" class="form-select rounded-3">
+                    <option value="">-- Chưa phân phòng ban --</option>
+                    @foreach (var d in Model.ScopedDepartments)
+                    {
+                        <option value="@d.Id" selected="@(Model.UpdateRequest.DepartmentId == d.Id ? "selected" : null)">@d.Name (@d.Code)</option>
+                    }
+                </select>
+                <span asp-validation-for="UpdateRequest.DepartmentId" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="UpdateRequest.JobTitle" class="form-label small fw-bold text-dark dark:text-white">
+                    Chức danh công việc
+                </label>
+                <input asp-for="UpdateRequest.JobTitle" class="form-control" />
+                <span asp-validation-for="UpdateRequest.JobTitle" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="UpdateRequest.StoreId" class="form-label small fw-bold text-dark dark:text-white">
+                    Chi nhánh / Điểm làm việc
+                </label>
+                <select asp-for="UpdateRequest.StoreId" class="form-select rounded-3">
+                    <option value="">Trụ sở chính / Văn phòng</option>
+                    @foreach (var s in Model.ScopedStores)
+                    {
+                        <option value="@s.Id" selected="@(Model.UpdateRequest.StoreId == s.Id ? "selected" : null)">@s.Name (@s.Code)</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="UpdateRequest.ManagerId" class="form-label small fw-bold text-dark dark:text-white">
+                    Người quản lý trực tiếp
+                </label>
+                <select asp-for="UpdateRequest.ManagerId" class="form-select rounded-3">
+                    <option value="">-- Không chỉ định / Trực thuộc cấp cao --</option>
+                    @foreach (var m in Model.PotentialManagers)
+                    {
+                        <option value="@m.Id" selected="@(Model.UpdateRequest.ManagerId == m.Id ? "selected" : null)">@m.FullName (@($"@{m.Username}") - @(m.JobTitle ?? "Quản lý"))</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="UpdateRequest.Gender" class="form-label small fw-bold text-dark dark:text-white">
+                    Giới tính
+                </label>
+                <select asp-for="UpdateRequest.Gender" class="form-select rounded-3">
+                    <option value="">Chưa xác định</option>
+                    <option value="Nữ" selected="@(Model.UpdateRequest.Gender == "Nữ" ? "selected" : null)">Nữ</option>
+                    <option value="Nam" selected="@(Model.UpdateRequest.Gender == "Nam" ? "selected" : null)">Nam</option>
+                    <option value="Khác" selected="@(Model.UpdateRequest.Gender == "Khác" ? "selected" : null)">Khác</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label asp-for="UpdateRequest.DateOfBirth" class="form-label small fw-bold text-dark dark:text-white">
+                    Ngày sinh (≥ 16 tuổi)
+                </label>
+                <input asp-for="UpdateRequest.DateOfBirth" type="date" class="form-control" />
+                <span asp-validation-for="UpdateRequest.DateOfBirth" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-2">
+                <label asp-for="UpdateRequest.HireDate" class="form-label small fw-bold text-dark dark:text-white">
+                    Ngày vào làm (≤ hôm nay)
+                </label>
+                <input asp-for="UpdateRequest.HireDate" type="date" class="form-control" />
+                <span asp-validation-for="UpdateRequest.HireDate" class="text-danger small"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="UpdateRequest.Address" class="form-label small fw-bold text-dark dark:text-white">
+                    Địa chỉ liên hệ
+                </label>
+                <input asp-for="UpdateRequest.Address" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="UpdateRequest.Notes" class="form-label small fw-bold text-dark dark:text-white">
+                    Ghi chú nội bộ
+                </label>
+                <input asp-for="UpdateRequest.Notes" class="form-control" />
+            </div>
+        </div>
+
+        <hr class="my-4 border-slate-200 dark:border-slate-700" />
+
+        <h6 class="fw-bold text-dark dark:text-white mb-2 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-shield-halved text-emerald-600"></i>
+            <span>3. Phân Vai Trò (Role Assignment)</span>
+        </h6>
+        <p class="small text-muted mb-3">
+            Gán các vai trò nhân sự trong phạm vi cho phép (<code>MaxGrantLevel = @Model.ActorContext.MaxGrantLevel</code>).
+        </p>
+
+        <div class="d-flex flex-wrap gap-2.5 mb-4">
+            @foreach (var r in Model.AssignableRoles)
+            {
+                bool isChecked = Model.UpdateRequest.RoleIds != null && Model.UpdateRequest.RoleIds.Contains(r.Id);
+                <label class="border rounded-3 p-2.5 px-3 d-inline-flex align-items-center gap-2 @(isChecked ? "bg-rose-50 border-danger" : "bg-light dark:bg-slate-800") cursor-pointer hover:border-rose-400">
+                    <input type="checkbox" name="UpdateRequest.RoleIds" value="@r.Id" class="form-check-input m-0" checked="@(isChecked ? "checked" : null)" />
+                    <div>
+                        <div class="fw-bold small text-dark dark:text-white">@r.DisplayName</div>
+                        <div class="text-muted font-monospace" style="font-size: 0.68rem;">@r.Name • Cấp bậc Lv@r.Level</div>
+                    </div>
+                </label>
+            }
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+            <a href="/Admin/User" class="btn btn-light rounded-3 px-4 fw-semibold">Hủy Bỏ</a>
+            <button type="submit" class="btn btn-primary-gradient px-4 py-2 text-white fw-semibold rounded-3 shadow-xs">
+                <i class="fa-solid fa-floppy-disk me-1.5"></i>Lưu Thay Đổi
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
