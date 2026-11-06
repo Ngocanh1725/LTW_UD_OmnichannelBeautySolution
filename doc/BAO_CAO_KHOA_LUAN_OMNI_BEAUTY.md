@@ -248,7 +248,7 @@ Mặc dù đã dành nhiều tâm huyết và nỗ lực tối đa để hoàn t
 
   - 2.1. Khảo sát hiện trạng và quy trình nghiệp vụ tổng thể
 
-    - 2.1.1. Mô hình vận hành thực tế của chuỗi bán lẻ Omni Beauty
+    - 2.1.1. Mô hình vận hành thực tế của chuỗi bán lẻ Canmake Beauty
 
     - 2.1.2. Luồng vận hành hàng hóa và dữ liệu từ đầu vào đến đầu ra
 
@@ -394,7 +394,7 @@ Cuối cùng là bài toán an toàn da liễu và trải nghiệm khách hàng.
 
 ### 3. Mục tiêu và đối tượng nghiên cứu của đề tài
 
-Mục tiêu tổng quát của bài tập lớn là nghiên cứu, phân tích và xây dựng hoàn chỉnh giải pháp phần mềm cấp doanh nghiệp mang tên Omni Beauty Solution. Hệ thống hướng tới việc hợp nhất toàn diện chuỗi cung ứng, quản trị bán lẻ tại quầy, thương mại điện tử, chăm sóc khách hàng và kiểm soát tài chính kế toán trên một nền tảng kiến trúc hiện đại, có tính mở rộng cao và vận hành ổn định.
+Mục tiêu tổng quát của bài tập lớn là nghiên cứu, phân tích và xây dựng hoàn chỉnh giải pháp phần mềm cấp doanh nghiệp mang tên Canmake Beauty Solution. Hệ thống hướng tới việc hợp nhất toàn diện chuỗi cung ứng, quản trị bán lẻ tại quầy, thương mại điện tử, chăm sóc khách hàng và kiểm soát tài chính kế toán trên một nền tảng kiến trúc hiện đại, có tính mở rộng cao và vận hành ổn định.
 
 
 
@@ -684,7 +684,7 @@ Sự kết hợp này mang lại cho hệ thống thời gian tương tác đầ
 
 
 
-Qua bảng phân tích so sánh trên, có thể khẳng định rằng việc lựa chọn kiến trúc Clean Architecture trên nền tảng .NET 8 là giải pháp phù hợp nhất với bài toán bán lẻ đa kênh của hệ thống Omni Beauty Solution:
+Qua bảng phân tích so sánh trên, có thể khẳng định rằng việc lựa chọn kiến trúc Clean Architecture trên nền tảng .NET 8 là giải pháp phù hợp nhất với bài toán bán lẻ đa kênh của hệ thống Canmake Beauty Solution:
 
 
 
@@ -714,9 +714,9 @@ Tóm lại, sự kết hợp giữa nền tảng hiện đại .NET 8, hệ qu�
 
 
 
-### 2.1.1. Mô hình vận hành thực tế của chuỗi bán lẻ Omni Beauty
+### 2.1.1. Mô hình vận hành thực tế của chuỗi bán lẻ Canmake Beauty
 
-Qua quá trình khảo sát thực tế tại chuỗi bán lẻ mỹ phẩm Omni Beauty, mô hình kinh doanh của doanh nghiệp được tổ chức theo mạng lưới phân phối đa điểm nhằm phục vụ cả hai thị trường trọng điểm phía Nam và phía Bắc. Cơ cấu tổ chức vật lý của chuỗi bao gồm ba đơn vị nòng cốt:
+Qua quá trình khảo sát thực tế tại chuỗi bán lẻ mỹ phẩm Canmake Beauty, mô hình kinh doanh của doanh nghiệp được tổ chức theo mạng lưới phân phối đa điểm nhằm phục vụ cả hai thị trường trọng điểm phía Nam và phía Bắc. Cơ cấu tổ chức vật lý của chuỗi bao gồm ba đơn vị nòng cốt:
 
 
 
@@ -732,13 +732,13 @@ Thứ ba là Showroom bán lẻ chi nhánh Ba Đình tại Thủ đô Hà Nội 
 
 
 
-Trước khi ứng dụng giải pháp công nghệ mới, chuỗi Omni Beauty gặp phải nhiều trở ngại lớn trong khâu phối hợp giữa các đơn vị này. Các cửa hàng sử dụng phần mềm kế toán bán hàng độc lập, dữ liệu tồn kho cuối ngày mới được kết xuất và gửi về trụ sở chính qua các bảng tính Excel. Sự trễ pha về dữ liệu khiến ban điều hành không nắm bắt được chính xác lượng hàng tồn thực tế tại từng chi nhánh, dẫn đến tình trạng chi nhánh Quận 1 hết sạch mặt hàng serum phục hồi da trong khi kho Ba Đình lại tồn đọng nhiều lô hàng cận hạn dùng.
+Trước khi ứng dụng giải pháp công nghệ mới, chuỗi Canmake Beauty gặp phải nhiều trở ngại lớn trong khâu phối hợp giữa các đơn vị này. Các cửa hàng sử dụng phần mềm kế toán bán hàng độc lập, dữ liệu tồn kho cuối ngày mới được kết xuất và gửi về trụ sở chính qua các bảng tính Excel. Sự trễ pha về dữ liệu khiến ban điều hành không nắm bắt được chính xác lượng hàng tồn thực tế tại từng chi nhánh, dẫn đến tình trạng chi nhánh Quận 1 hết sạch mặt hàng serum phục hồi da trong khi kho Ba Đình lại tồn đọng nhiều lô hàng cận hạn dùng.
 
 
 
 ### 2.1.2. Luồng vận hành hàng hóa và dữ liệu từ đầu vào đến đầu ra
 
-Quy trình luân chuyển hàng hóa và dữ liệu xuyên suốt chuỗi bán lẻ Omni Beauty được chuẩn hóa thành một chu trình khép kín, bảo đảm tính minh bạch và khả năng truy xuất nguồn gốc trên từng sản phẩm:
+Quy trình luân chuyển hàng hóa và dữ liệu xuyên suốt chuỗi bán lẻ Canmake Beauty được chuẩn hóa thành một chu trình khép kín, bảo đảm tính minh bạch và khả năng truy xuất nguồn gốc trên từng sản phẩm:
 
 
 
@@ -758,17 +758,11 @@ Giai đoạn sau bán hàng bao gồm các nghiệp vụ tiếp nhận khiếu n
 
 
 
-```
-
-[HÌNH 2.1: KHUNG ẢNH SƠ ĐỒ LUỒNG VẬN HÀNH HÀNG HÓA VÀ DỮ LIỆU TỔNG THỂ CHUỖI OMNI BEAUTY]
-
-(Hướng dẫn: Chèn sơ đồ khối thể hiện luồng di chuyển từ Nhà cung cấp -> Tổng kho WH-MN -> Điều chuyển kho -> Showroom SH-Q1 & SH-BD -> Điểm bán lẻ trực tiếp / Khách hàng trực tuyến -> Xử lý đơn hàng, Thanh toán, Đổi trả và Hoàn tất)
-
-```
+![Hình 2.1: KHUNG ẢNH SƠ ĐỒ LUỒNG VẬN HÀNH HÀNG HÓA VÀ DỮ LIỆU TỔNG THỂ CHUỖI CANMAKE BEAUTY](./Hinh_2_1_Luong_Van_Hanh_Hang_Hoa.png)
 
 **Hình 2.1. Sơ đồ luồng vận hành hàng hóa và dữ liệu từ đầu vào đến đầu ra**  
 
-*(Nguồn: Khảo sát thực tế chuỗi bán lẻ Omni Beauty)*
+*(Nguồn: Khảo sát thực tế chuỗi bán lẻ Canmake Beauty)*
 
 
 
@@ -894,7 +888,7 @@ Phân hệ đảm bảo sự kết nối thông suốt giữa các phòng ban tr
 
 
 
-Bên cạnh việc đáp ứng trọn vẹn các yêu cầu nghiệp vụ, hệ thống Omni Beauty Solution đặt ra các tiêu chuẩn kỹ thuật khắt khe về mặt kiến trúc nhằm đảm bảo tính ổn định và an toàn khi vận hành trong môi trường thực tế:
+Bên cạnh việc đáp ứng trọn vẹn các yêu cầu nghiệp vụ, hệ thống Canmake Beauty Solution đặt ra các tiêu chuẩn kỹ thuật khắt khe về mặt kiến trúc nhằm đảm bảo tính ổn định và an toàn khi vận hành trong môi trường thực tế:
 
 
 
@@ -976,19 +970,13 @@ Hệ thống Omnichannel Beauty Solution phân quyền chặt chẽ cho sáu nh�
 
 
 
-*(Nguồn: Phân tích yêu cầu hệ thống Omni Beauty)*
+*(Nguồn: Phân tích yêu cầu hệ thống Canmake Beauty)*
 
 
 
-```
+![Hình 2.2: KHUNG ẢNH SƠ ĐỒ CA SỬ DỤNG TỔNG QUÁT HỆ THỐNG CANMAKE BEAUTY](./Hinh_2_2_So_Do_Use_Case_Tong_Quat.png)
 
-[HÌNH 2.2: KHUNG ẢNH SƠ ĐỒ CA SỬ DỤNG TỔNG QUÁT HỆ THỐNG OMNI BEAUTY]
-
-(Hướng dẫn: Chèn sơ đồ Use Case tổng thể thể hiện mối liên kết giữa 6 Tác nhân: SuperAdmin, StoreManager, Cashier, WarehouseStaff, ContentEditor, Customer với 17 gói phân hệ chức năng tương ứng)
-
-```
-
-**Hình 2.2. Sơ đồ Ca sử dụng tổng quát hệ thống Omni Beauty**  
+**Hình 2.2. Sơ đồ Ca sử dụng tổng quát hệ thống Canmake Beauty**  
 
 *(Nguồn: Thiết kế phân tích yêu cầu hệ thống)*
 
@@ -1034,13 +1022,7 @@ Hệ thống Omnichannel Beauty Solution phân quyền chặt chẽ cho sáu nh�
 
 
 
-```
-
-[HÌNH 2.3: KHUNG ẢNH SƠ ĐỒ CA SỬ DỤNG CHI TIẾT UC-01: PHÂN QUYỀN ĐỘNG THEO QUYỀN HẠN]
-
-(Hướng dẫn: Chèn sơ đồ Use Case chi tiết thể hiện tác nhân SuperAdmin thực hiện các ca sử dụng con: Xem lưới ma trận, Cập nhật quyền theo vai trò, Ghi đè quyền cá nhân Grant/Revoke, Xóa cache phân quyền tự động)
-
-```
+![Hình 2.3: KHUNG ẢNH SƠ ĐỒ CA SỬ DỤNG CHI TIẾT UC-01: PHÂN QUYỀN ĐỘNG THEO QUYỀN HẠN](./Hinh_2_3_So_Do_Use_Case_Chi_Tiet_UC01.png)
 
 **Hình 2.3. Sơ đồ Ca sử dụng chi tiết UC-01: Phân quyền động dựa trên quyền hạn chi tiết**  
 
@@ -1084,13 +1066,7 @@ Hệ thống Omnichannel Beauty Solution phân quyền chặt chẽ cho sáu nh�
 
 
 
-```
-
-[HÌNH 2.4: KHUNG ẢNH SƠ ĐỒ CA SỬ DỤNG CHI TIẾT UC-02: ĐẶT HÀNG VÀ TRỪ KHO HAI GIAI ĐOẠN]
-
-(Hướng dẫn: Chèn sơ đồ Use Case chi tiết thể hiện luồng tương tác giữa Khách hàng, Cổng thanh toán và Hệ thống qua 2 pha: Khóa tồn tạm tính Soft Reserve và Trừ kho thực tế Hard Deduct)
-
-```
+![Hình 2.4: KHUNG ẢNH SƠ ĐỒ CA SỬ DỤNG CHI TIẾT UC-02: ĐẶT HÀNG VÀ TRỪ KHO HAI GIAI ĐOẠN](./Hinh_2_4_So_Do_Use_Case_Chi_Tiet_UC02.png)
 
 **Hình 2.4. Sơ đồ Ca sử dụng chi tiết UC-02: Đặt hàng và trừ kho hai giai đoạn theo hạn dùng**  
 
@@ -1134,13 +1110,7 @@ Hệ thống Omnichannel Beauty Solution phân quyền chặt chẽ cho sáu nh�
 
 
 
-```
-
-[HÌNH 2.5: KHUNG ẢNH SƠ ĐỒ CA SỬ DỤNG CHI TIẾT UC-03: VÒNG ĐỜI CA BÁN HÀNG VÀ KIỂM KÉT]
-
-(Hướng dẫn: Chèn sơ đồ Use Case thể hiện các hành động của Thu ngân: Khai báo tiền đầu ca -> Bán hàng quầy -> Thu/Chi két giữa ca -> Đếm tiền cuối ca -> Đối soát chênh lệch)
-
-```
+![Hình 2.5: KHUNG ẢNH SƠ ĐỒ CA SỬ DỤNG CHI TIẾT UC-03: VÒNG ĐỜI CA BÁN HÀNG VÀ KIỂM KÉT](./Hinh_2_5_So_Do_Use_Case_Chi_Tiet_UC03.png)
 
 **Hình 2.5. Sơ đồ Ca sử dụng chi tiết UC-03: Vòng đời ca làm việc thu ngân và kiểm toán két tiền**  
 
@@ -1184,13 +1154,7 @@ Hệ thống Omnichannel Beauty Solution phân quyền chặt chẽ cho sáu nh�
 
 
 
-```
-
-[HÌNH 2.6: KHUNG ẢNH SƠ ĐỒ CA SỬ DỤNG CHI TIẾT UC-04: ĐIỀU CHUYỂN KHO LIÊN CHI NHÁNH]
-
-(Hướng dẫn: Chèn sơ đồ Use Case thể hiện quy trình phối hợp giữa Quản lý chi nhánh nhận, Quản trị viên duyệt và Thủ kho xuất/nhập qua 3 trạng thái: Chờ duyệt -> Đang vận chuyển -> Hoàn tất)
-
-```
+![Hình 2.6: KHUNG ẢNH SƠ ĐỒ CA SỬ DỤNG CHI TIẾT UC-04: ĐIỀU CHUYỂN KHO LIÊN CHI NHÁNH](./Hinh_2_6_So_Do_Use_Case_Chi_Tiet_UC04.png)
 
 **Hình 2.6. Sơ đồ Ca sử dụng chi tiết UC-04: Điều chuyển tồn kho liên chi nhánh qua ba bước**  
 
@@ -1234,13 +1198,7 @@ Hệ thống Omnichannel Beauty Solution phân quyền chặt chẽ cho sáu nh�
 
 
 
-```
-
-[HÌNH 2.7: KHUNG ẢNH SƠ ĐỒ CA SỬ DỤNG CHI TIẾT UC-05: TƯ VẤN ROUTINE DA VÀ KIỂM TRA TƯƠNG KỴ]
-
-(Hướng dẫn: Chèn sơ đồ Use Case thể hiện sự tương tác giữa Khách hàng/Chuyên viên tư vấn với Động cơ chẩn đoán và Động cơ phân tích tương kỵ thành phần)
-
-```
+![Hình 2.7: KHUNG ẢNH SƠ ĐỒ CA SỬ DỤNG CHI TIẾT UC-05: TƯ VẤN ROUTINE DA VÀ KIỂM TRA TƯƠNG KỴ](./Hinh_2_7_So_Do_Use_Case_Chi_Tiet_UC05.png)
 
 **Hình 2.7. Sơ đồ Ca sử dụng chi tiết UC-05: Tư vấn phác đồ da và kiểm tra tương kỵ hoạt chất**  
 
@@ -1264,21 +1222,15 @@ Hệ thống Omnichannel Beauty Solution phân quyền chặt chẽ cho sáu nh�
 
 ### 3.1.1. Kiến trúc Clean Architecture bốn tầng và nguyên lý Đảo ngược Phụ thuộc
 
-Để xây dựng một hệ thống bán lẻ có quy mô nghiệp vụ phức tạp và đòi hỏi khả năng mở rộng lâu dài như Omni Beauty Solution, việc lựa chọn một kiến trúc phần mềm có tính kỷ luật cao là yếu tố quyết định. Hệ thống được tổ chức tuân thủ nghiêm ngặt mô hình kiến trúc Clean Architecture gồm bốn tầng độc lập, tương ứng với bốn dự án riêng biệt trong không gian giải pháp:
+Để xây dựng một hệ thống bán lẻ có quy mô nghiệp vụ phức tạp và đòi hỏi khả năng mở rộng lâu dài như Canmake Beauty Solution, việc lựa chọn một kiến trúc phần mềm có tính kỷ luật cao là yếu tố quyết định. Hệ thống được tổ chức tuân thủ nghiêm ngặt mô hình kiến trúc Clean Architecture gồm bốn tầng độc lập, tương ứng với bốn dự án riêng biệt trong không gian giải pháp:
 
 
 
-```
+![Hình 3.0: KHUNG ẢNH KIẾN TRÚC PHẦN MỀM CLEAN ARCHITECTURE BỐN TẦNG VÀ NGUYÊN LÝ ĐẢO NGƯỢC PHỤ THUỘC](./Kien_Truc_Clean_Architecture_4_Tang.png)
 
-[HÌNH 3.0: KHUNG ẢNH KIẾN TRÚC PHẦN MỀM CLEAN ARCHITECTURE BỐN TẦNG VÀ NGUYÊN LÝ ĐẢO NGƯỢC PHỤ THUỘC]
+**Hình 3.0. Kiến trúc Clean Architecture bốn tầng và nguyên lý Đảo ngược Phụ thuộc của hệ thống Canmake Beauty**  
 
-(Hướng dẫn: Chèn hình ảnh sơ đồ kiến trúc 4 tầng được kết xuất từ tệp tin Kien_Truc_Clean_Architecture_4_Tang.png)
-
-```
-
-**Hình 3.0. Kiến trúc Clean Architecture bốn tầng và nguyên lý Đảo ngược Phụ thuộc của hệ thống Omni Beauty**  
-
-*(Nguồn: Thiết kế kiến trúc giải pháp hệ thống Omni Beauty)*
+*(Nguồn: Thiết kế kiến trúc giải pháp hệ thống Canmake Beauty)*
 
 
 
@@ -1376,7 +1328,7 @@ Mối liên kết giữa các tầng tuân thủ triệt để nguyên tắc Ph�
 
 
 
-*(Nguồn: Thiết kế kiến trúc giải pháp Omni Beauty)*
+*(Nguồn: Thiết kế kiến trúc giải pháp Canmake Beauty)*
 
 
 
@@ -1416,7 +1368,7 @@ Quy trình xử lý thực tế diễn ra qua tám bước nghiêm ngặt:
 
 ### 3.2.1. Phân tích và Chứng minh Chuẩn hóa Dữ liệu Dạng chuẩn 3
 
-Cơ sở dữ liệu của giải pháp Omni Beauty Solution gồm 65 bảng thực thể được xây dựng trên Microsoft SQL Server. Cấu trúc của toàn bộ lược đồ dữ liệu được chứng minh tuân thủ nghiêm ngặt Dạng chuẩn 3 (3NF):
+Cơ sở dữ liệu của giải pháp Canmake Beauty Solution gồm 65 bảng thực thể được xây dựng trên Microsoft SQL Server. Cấu trúc của toàn bộ lược đồ dữ liệu được chứng minh tuân thủ nghiêm ngặt Dạng chuẩn 3 (3NF):
 
 - Dạng chuẩn 1 (1NF): Mọi cột thuộc tính đều mang giá trị nguyên tố đơn lẻ. Không tồn tại cột lặp hay danh sách phức hợp. Các cấu trúc động (mảng ảnh Swatch, bộ lọc) được tách thành bảng quan hệ riêng hoặc trường JSON có cấu trúc kiểm soát. Mỗi bảng đều có Khóa chính đơn kiểu `INT IDENTITY(1,1)`.
 
@@ -1482,7 +1434,7 @@ Cơ sở dữ liệu của giải pháp Omni Beauty Solution gồm 65 bảng th�
 
 
 
-*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Omni Beauty)*
+*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Canmake Beauty)*
 
 
 
@@ -1532,7 +1484,7 @@ Cơ sở dữ liệu của giải pháp Omni Beauty Solution gồm 65 bảng th�
 
 
 
-*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Omni Beauty)*
+*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Canmake Beauty)*
 
 
 
@@ -1572,7 +1524,7 @@ Cơ sở dữ liệu của giải pháp Omni Beauty Solution gồm 65 bảng th�
 
 
 
-*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Omni Beauty)*
+*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Canmake Beauty)*
 
 
 
@@ -1626,7 +1578,7 @@ Cơ sở dữ liệu của giải pháp Omni Beauty Solution gồm 65 bảng th�
 
 
 
-*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Omni Beauty)*
+*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Canmake Beauty)*
 
 
 
@@ -1674,7 +1626,7 @@ Cơ sở dữ liệu của giải pháp Omni Beauty Solution gồm 65 bảng th�
 
 
 
-*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Omni Beauty)*
+*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Canmake Beauty)*
 
 
 
@@ -1708,7 +1660,7 @@ Cơ sở dữ liệu của giải pháp Omni Beauty Solution gồm 65 bảng th�
 
 
 
-*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Omni Beauty)*
+*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Canmake Beauty)*
 
 
 
@@ -1754,7 +1706,7 @@ Cơ sở dữ liệu của giải pháp Omni Beauty Solution gồm 65 bảng th�
 
 
 
-*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Omni Beauty)*
+*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Canmake Beauty)*
 
 
 
@@ -1794,7 +1746,7 @@ Cơ sở dữ liệu của giải pháp Omni Beauty Solution gồm 65 bảng th�
 
 
 
-*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Omni Beauty)*
+*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Canmake Beauty)*
 
 
 
@@ -2014,17 +1966,11 @@ Quy trình phân giải quyền hạn PBAC diễn ra qua ba tầng sàng lọc �
 
 
 
-```
-
-[HÌNH 3.1: KHUNG ẢNH SƠ ĐỒ TUẦN TỰ SD-01: LUỒNG PHÂN GIẢI QUYỀN ĐỘNG BA TẦNG]
-
-(Hướng dẫn: Chèn hình ảnh sơ đồ tuần tự được xuất từ mã nguồn PlantUML SD-01 phía trên)
-
-```
+![Hình 3.1: KHUNG ẢNH SƠ ĐỒ TUẦN TỰ SD-01: LUỒNG PHÂN GIẢI QUYỀN ĐỘNG BA TẦNG](./Hinh_3_1_So_Do_Tuan_Tu_SD01.png)
 
 **Hình 3.1. Sơ đồ tuần tự luồng phân giải quyền động 3 tầng khi gửi yêu cầu HTTP**  
 
-*(Nguồn: Thiết kế hệ thống giải pháp Omni Beauty)*
+*(Nguồn: Thiết kế hệ thống giải pháp Canmake Beauty)*
 
 
 
@@ -2278,17 +2224,11 @@ CheckoutCtrl --> Customer: Điều hướng trang cảm ơn (Hiển thị đơn 
 
 
 
-```
-
-[HÌNH 3.2: KHUNG ẢNH SƠ ĐỒ TUẦN TỰ SD-02: ĐẶT HÀNG TRỰC TUYẾN VÀ TRỪ TỒN KHO HAI GIAI ĐOẠN]
-
-(Hướng dẫn: Chèn hình ảnh sơ đồ tuần tự được xuất từ tệp tin Hinh_3_2_So_Do_Tuan_Tu_SD02.png)
-
-```
+![Hình 3.2: KHUNG ẢNH SƠ ĐỒ TUẦN TỰ SD-02: ĐẶT HÀNG TRỰC TUYẾN VÀ TRỪ TỒN KHO HAI GIAI ĐOẠN](./Hinh_3_2_So_Do_Tuan_Tu_SD02.png)
 
 **Hình 3.2. Sơ đồ tuần tự luồng đặt hàng trực tuyến và trừ tồn kho 2 giai đoạn**  
 
-*(Nguồn: Thiết kế hệ thống giải pháp Omni Beauty)*
+*(Nguồn: Thiết kế hệ thống giải pháp Canmake Beauty)*
 
 
 
@@ -2568,17 +2508,11 @@ deactivate ShiftCtrl
 
 
 
-```
-
-[HÌNH 3.3: KHUNG ẢNH SƠ ĐỒ TUẦN TỰ SD-03: VÒNG ĐỜI CA LÀM VIỆC VÀ ĐỐI SOÁT KÉT TIỀN THU NGÂN]
-
-(Hướng dẫn: Chèn hình ảnh sơ đồ tuần tự được xuất từ tệp tin Hinh_3_3_So_Do_Tuan_Tu_SD03.png)
-
-```
+![Hình 3.3: KHUNG ẢNH SƠ ĐỒ TUẦN TỰ SD-03: VÒNG ĐỜI CA LÀM VIỆC VÀ ĐỐI SOÁT KÉT TIỀN THU NGÂN](./Hinh_3_3_So_Do_Tuan_Tu_SD03.png)
 
 **Hình 3.3. Sơ đồ tuần tự luồng quản lý vòng đời ca làm việc và kiểm toán két tiền thu ngân**  
 
-*(Nguồn: Thiết kế hệ thống giải pháp Omni Beauty)*
+*(Nguồn: Thiết kế hệ thống giải pháp Canmake Beauty)*
 
 
 
@@ -2834,17 +2768,11 @@ deactivate TransferCtrl
 
 
 
-```
-
-[HÌNH 3.4: KHUNG ẢNH SƠ ĐỒ TUẦN TỰ SD-04: ĐIỀU CHUYỂN TỒN KHO LIÊN CHI NHÁNH BA BƯỚC]
-
-(Hướng dẫn: Chèn hình ảnh sơ đồ tuần tự được xuất từ tệp tin Hinh_3_4_So_Do_Tuan_Tu_SD04.png)
-
-```
+![Hình 3.4: KHUNG ẢNH SƠ ĐỒ TUẦN TỰ SD-04: ĐIỀU CHUYỂN TỒN KHO LIÊN CHI NHÁNH BA BƯỚC](./Hinh_3_4_So_Do_Tuan_Tu_SD04.png)
 
 **Hình 3.4. Sơ đồ tuần tự luồng điều chuyển tồn kho liên chi nhánh 3 bước**  
 
-*(Nguồn: Thiết kế hệ thống giải pháp Omni Beauty)*
+*(Nguồn: Thiết kế hệ thống giải pháp Canmake Beauty)*
 
 
 
@@ -2902,27 +2830,15 @@ Toàn bộ mã nguồn giải pháp được phân bổ theo Clean Architecture 
 
 
 
-```
+![Hình 4.1: GIAO DIỆN TRANG CHỦ HỆ THỐNG THƯƠNG MẠI ĐIỆN TỬ CANMAKE BEAUTY](./Hinh_4_1_Giao_Dien_Trang_Chu.png)
 
-[HÌNH 4.1: GIAO DIỆN TRANG CHỦ HỆ THỐNG THƯƠNG MẠI ĐIỆN TỬ OMNI BEAUTY]
-
-(Hướng dẫn chèn ảnh: Chèn hình ảnh chụp thực tế từ tệp tin Hinh_4_1_Giao_Dien_Trang_Chu.png với độ phân giải chuẩn 1920x1080)
-
-```
-
-**Hình 4.1. Giao diện Trang chủ Hệ thống Thương mại Điện tử Omni Beauty**  
+**Hình 4.1. Giao diện Trang chủ Hệ thống Thương mại Điện tử Canmake Beauty**  
 
 *(Nguồn: Chụp trực tiếp từ giao diện thực tế hệ thống)*
 
 
 
-```
-
-[HÌNH 4.2: GIAO DIỆN CHI TIẾT SẢN PHẨM VỚI BẢNG THÀNH PHẦN HOẠT CHẤT MỸ PHẨM]
-
-(Hướng dẫn chèn ảnh: Chèn hình ảnh chụp thực tế từ tệp tin Hinh_4_2_Giao_Dien_Chi_Tiet_San_Pham.png với độ phân giải chuẩn 1920x1080)
-
-```
+![Hình 4.2: GIAO DIỆN CHI TIẾT SẢN PHẨM VỚI BẢNG THÀNH PHẦN HOẠT CHẤT MỸ PHẨM](./Hinh_4_2_Giao_Dien_Chi_Tiet_San_Pham_Full.png)
 
 **Hình 4.2. Giao diện Chi tiết Sản phẩm với Bảng thành phần Hoạt chất mỹ phẩm**  
 
@@ -2930,13 +2846,7 @@ Toàn bộ mã nguồn giải pháp được phân bổ theo Clean Architecture 
 
 
 
-```
-
-[HÌNH 4.3: GIAO DIỆN GIỎ HÀNG VÀ CƠ CHẾ CẢNH BÁO XUNG ĐỘT HOẠT CHẤT TỰ ĐỘNG]
-
-(Hướng dẫn chèn ảnh: Chèn hình ảnh chụp thực tế từ tệp tin Hinh_4_3_Giao_Dien_Gio_Hang_Va_Canh_Bao_Xung_Dot.png với độ phân giải chuẩn 1920x1080)
-
-```
+![Hình 4.3: GIAO DIỆN GIỎ HÀNG VÀ CƠ CHẾ CẢNH BÁO XUNG ĐỘT HOẠT CHẤT TỰ ĐỘNG](./Hinh_4_3_Giao_Dien_Gio_Hang_Va_Canh_Bao_Xung_Dot.png)
 
 **Hình 4.3. Giao diện Giỏ hàng và Cơ chế Cảnh báo Xung đột Hoạt chất tự động**  
 
@@ -2952,13 +2862,7 @@ Toàn bộ mã nguồn giải pháp được phân bổ theo Clean Architecture 
 
 
 
-```
-
-[HÌNH 4.4: GIAO DIỆN BẢNG ĐIỀU KHIỂN QUẢN TRỊ TRUNG TÂM (ADMIN DASHBOARD)]
-
-(Hướng dẫn chèn ảnh: Chèn hình ảnh chụp thực tế từ tệp tin Hinh_4_4_Giao_Dien_Bang_Dieu_Khien_Admin_Dashboard.png với độ phân giải chuẩn 1920x1080)
-
-```
+![Hình 4.4: GIAO DIỆN BẢNG ĐIỀU KHIỂN QUẢN TRỊ TRUNG TÂM (ADMIN DASHBOARD)](./Hinh_4_4_Giao_Dien_Bang_Dieu_Khien_Admin_Dashboard.png)
 
 **Hình 4.4. Giao diện Bảng điều khiển Quản trị Trung tâm (Admin Dashboard)**  
 
@@ -2966,13 +2870,7 @@ Toàn bộ mã nguồn giải pháp được phân bổ theo Clean Architecture 
 
 
 
-```
-
-[HÌNH 4.5: GIAO DIỆN QUẢN TRỊ CÂY MENU ĐA HÌNH VÀ ĐIỀU HƯỚNG SEO]
-
-(Hướng dẫn chèn ảnh: Chèn hình ảnh chụp thực tế từ tệp tin Hinh_4_5_Giao_Dien_Quan_Tri_Menu_Da_Hinh_SEO.png với độ phân giải chuẩn 1920x1080)
-
-```
+![Hình 4.5: GIAO DIỆN QUẢN TRỊ CÂY MENU ĐA HÌNH VÀ ĐIỀU HƯỚNG SEO](./Hinh_4_5_Giao_Dien_Quan_Tri_Menu_Da_Hinh_SEO.png)
 
 **Hình 4.5. Giao diện Quản trị Cây Menu Đa hình và Điều hướng SEO**  
 
@@ -2980,13 +2878,7 @@ Toàn bộ mã nguồn giải pháp được phân bổ theo Clean Architecture 
 
 
 
-```
-
-[HÌNH 4.6: GIAO DIỆN MA TRẬN PHÂN QUYỀN HẠT NHÂN ĐỘNG (PBAC SECURITY MATRIX)]
-
-(Hướng dẫn chèn ảnh: Chèn hình ảnh chụp thực tế từ tệp tin Hinh_4_6_Giao_Dien_Ma_Tran_Phan_Quyen_PBAC.png với độ phân giải chuẩn 1920x1080)
-
-```
+![Hình 4.6: GIAO DIỆN MA TRẬN PHÂN QUYỀN HẠT NHÂN ĐỘNG (PBAC SECURITY MATRIX)](./Hinh_4_6_Giao_Dien_Ma_Tran_Phan_Quyen_PBAC.png)
 
 **Hình 4.6. Giao diện Ma trận Phân quyền Hạt nhân Động (PBAC Security Matrix)**  
 
@@ -2994,13 +2886,7 @@ Toàn bộ mã nguồn giải pháp được phân bổ theo Clean Architecture 
 
 
 
-```
-
-[HÌNH 4.7: GIAO DIỆN GIÁM SÁT TỒN KHO CHI NHÁNH VÀ CẢNH BÁO HẠN DÙNG FEFO]
-
-(Hướng dẫn chèn ảnh: Chèn hình ảnh chụp thực tế từ tệp tin Hinh_4_7_Giao_Dien_Giam_Sat_Ton_Kho_FEFO.png với độ phân giải chuẩn 1920x1080)
-
-```
+![Hình 4.7: GIAO DIỆN GIÁM SÁT TỒN KHO CHI NHÁNH VÀ CẢNH BÁO HẠN DÙNG FEFO](./Hinh_4_7_Giao_Dien_Giam_Sat_Ton_Kho_FEFO.png)
 
 **Hình 4.7. Giao diện Giám sát Tồn kho Chi nhánh và Cảnh báo Hạn dùng FEFO**  
 
@@ -3008,13 +2894,7 @@ Toàn bộ mã nguồn giải pháp được phân bổ theo Clean Architecture 
 
 
 
-```
-
-[HÌNH 4.8: GIAO DIỆN QUẢN LÝ ĐƠN HÀNG ĐA KÊNH VÀ CẤP PHÁT LÔ TỰ ĐỘNG]
-
-(Hướng dẫn chèn ảnh: Chèn hình ảnh chụp thực tế từ tệp tin Hinh_4_8_Giao_Dien_Quan_Ly_Don_Hang_Cap_Phat_Lo.png với độ phân giải chuẩn 1920x1080)
-
-```
+![Hình 4.8: GIAO DIỆN QUẢN LÝ ĐƠN HÀNG ĐA KÊNH VÀ CẤP PHÁT LÔ TỰ ĐỘNG](./Hinh_4_8_Giao_Dien_Quan_Ly_Don_Hang_Cap_Phat_Lo.png)
 
 **Hình 4.8. Giao diện Quản lý Đơn hàng Đa kênh và Cấp phát Lô tự động**  
 
@@ -3022,13 +2902,7 @@ Toàn bộ mã nguồn giải pháp được phân bổ theo Clean Architecture 
 
 
 
-```
-
-[HÌNH 4.9: GIAO DIỆN MÀN HÌNH BÁN HÀNG CẢM ỨNG TẠI QUẦY (POS TOUCHSCREEN)]
-
-(Hướng dẫn chèn ảnh: Chèn hình ảnh chụp thực tế từ tệp tin Hinh_4_9_Giao_Dien_Man_Hinh_Ban_Hang_POS.png với độ phân giải chuẩn 1920x1080)
-
-```
+![Hình 4.9: GIAO DIỆN MÀN HÌNH BÁN HÀNG CẢM ỨNG TẠI QUẦY (POS TOUCHSCREEN)](./Hinh_4_9_Giao_Dien_Man_Hinh_Ban_Hang_POS.png)
 
 **Hình 4.9. Giao diện Màn hình Bán hàng Cảm ứng tại Quầy (POS Touchscreen)**  
 
@@ -3036,13 +2910,7 @@ Toàn bộ mã nguồn giải pháp được phân bổ theo Clean Architecture 
 
 
 
-```
-
-[HÌNH 4.10: GIAO DIỆN QUẢN LÝ ĐÓNG - MỞ CA VÀ ĐỐI SOÁT TIỀN MẶT KÉT THU NGÂN]
-
-(Hướng dẫn chèn ảnh: Chèn hình ảnh chụp thực tế từ tệp tin Hinh_4_10_Giao_Dien_Dong_Mo_Ca_Va_Doi_Soat_Ket.png với độ phân giải chuẩn 1920x1080)
-
-```
+![Hình 4.10: GIAO DIỆN QUẢN LÝ ĐÓNG - MỞ CA VÀ ĐỐI SOÁT TIỀN MẶT KÉT THU NGÂN](./Hinh_4_10_Giao_Dien_Dong_Mo_Ca_Va_Doi_Soat_Ket.png)
 
 **Hình 4.10. Giao diện Quản lý Đóng - Mở Ca và Đối soát Tiền mặt Két thu ngân**  
 
@@ -3698,7 +3566,7 @@ namespace Omnichannel.Web.BackgroundServices
 
 
 
-Hệ thống Omni Beauty Solution áp dụng mô hình Kim tự tháp Kiểm thử bốn tầng toàn diện nhằm bảo đảm độ tin cậy, tính toàn vẹn dữ liệu và an toàn bảo mật trước khi vận hành thực tế:
+Hệ thống Canmake Beauty Solution áp dụng mô hình Kim tự tháp Kiểm thử bốn tầng toàn diện nhằm bảo đảm độ tin cậy, tính toàn vẹn dữ liệu và an toàn bảo mật trước khi vận hành thực tế:
 
 - **Tầng 1 - Kiểm thử Đơn vị Miền Dữ liệu (Domain Unit Tests):** Xác minh tính bất biến nội tại trên các thực thể thuần C# (POCO Entities), bao gồm công thức tính tồn khả dụng, quy tắc kiểm tra hạn sử dụng và tính toán chi tiết đơn hàng.
 
@@ -3826,10 +3694,7 @@ Kịch bản kiểm thử: 500 người dùng ảo (500 VUs) đồng thời gử
 
 
 
-```
-[HÌNH 5.1: BIỂU ĐỒ KẾT QUẢ KIỂM THỬ CHỊU TẢI K6 CHỐNG ÂM KHO FEFO]
-(Hướng dẫn chèn ảnh: Chèn hình ảnh chụp thực tế từ tệp tin Hinh_5_1_Ket_Qua_Kiem_Thu_Chiu_Tai_K6.png với độ phân giải chuẩn 1920x1080)
-```
+![Hình 5.1: BIỂU ĐỒ KẾT QUẢ KIỂM THỬ CHỊU TẢI K6 CHỐNG ÂM KHO FEFO](./Hinh_5_1_Ket_Qua_Kiem_Thu_Chiu_Tai_K6.png)
 
 **Hình 5.1. Đồ thị kiểm thử tải đồng thời chống bán âm kho với k6**  
 
@@ -3913,7 +3778,7 @@ Bên cạnh những kết quả nổi bật đã đạt được, tác giả nh�
 
 
 
-Nhằm nâng cấp giải pháp Omni Beauty Solution đạt chuẩn các hệ thống bán lẻ đa kênh quốc tế, tác giả đề xuất bốn hướng phát triển công nghệ chiến lược trong giai đoạn tiếp theo:
+Nhằm nâng cấp giải pháp Canmake Beauty Solution đạt chuẩn các hệ thống bán lẻ đa kênh quốc tế, tác giả đề xuất bốn hướng phát triển công nghệ chiến lược trong giai đoạn tiếp theo:
 
 
 

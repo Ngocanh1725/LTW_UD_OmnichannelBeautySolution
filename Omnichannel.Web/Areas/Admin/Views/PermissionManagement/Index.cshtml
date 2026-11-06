@@ -1,11 +1,16 @@
 @model Omnichannel.Application.DTOs.Security.PermissionMatrixViewModel
+@using System.Text.Json
 @{
     Layout = "_AdminLayout";
-    ViewData["Title"] = "Ma Trận Phân Quyền Hạt Nhân Động (PBAC Security Matrix)";
+    bool isSuperAdmin = Model.ActorContext?.IsSuperAdmin ?? false;
+    ViewData["Title"] = isSuperAdmin
+        ? "Ma Trận Phân Quyền Hạt Nhân Động (PBAC Security Matrix)"
+        : "Phân Quyền Nhân Viên Phòng Ban";
 
     var targetRoles = Model.Roles
         .Where(r => r.Name != "Customer")
-        .OrderBy(r => r.Id)
+        .OrderByDescending(r => r.Level)
+        .ThenBy(r => r.Id)
         .ToList();
 
     var rolePermMap = ViewBag.RolePermissionMap as Dictionary<int, HashSet<int>> ?? new Dictionary<int, HashSet<int>>();
@@ -14,218 +19,655 @@
         if (roleName.Equals("SuperAdmin", StringComparison.OrdinalIgnoreCase)) return true;
         return rolePermMap.ContainsKey(roleId) && rolePermMap[roleId].Contains(permId);
     }
+
+    int totalPermCount = Model.ModuleGroups.Sum(g => g.Permissions.Count);
+    var initialMapJson = JsonSerializer.Serialize(rolePermMap);
 }
 
 <style>
     .perm-table-row:hover {
-        background-color: rgba(248, 250, 252, 0.8);
+        background-color: rgba(248, 250, 252, 0.85);
     }
     .dark .perm-table-row:hover {
-        background-color: rgba(30, 41, 59, 0.5);
+        background-color: rgba(30, 41, 59, 0.55);
     }
     .sticky-header {
         position: sticky;
         top: 0;
         z-index: 20;
     }
+    .sticky-col-left {
+        position: sticky;
+        left: 0;
+        z-index: 10;
+    }
 </style>
 
-<div class="mb-8" style="zoom: 0.82;">
-    <!-- =========================================================================
-         1. TIÊU ĐỀ & THANH ĐIỀU HÀNH BẢO MẬT PBAC
-         ========================================================================= -->
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-6 border-b border-slate-200/80 dark:border-slate-800">
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-5 border-b border-slate-200 dark:border-slate-800">
         <div>
-            <div class="flex items-center gap-3 mb-1.5 flex-wrap">
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <div class="flex items-center gap-3 flex-wrap">
+                <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2.5">
                     <i class="fa-solid fa-shield-halved text-rose-500"></i>
-                    <span>Ma Trận Phân Quyền Hạt Nhân Động (PBAC Security Matrix)</span>
+                    <span>@(isSuperAdmin ? "Ma Trận Phân Quyền Toàn Cục & Chia Quyền Nhân Sự" : "Phân Quyền Nhân Viên Của Tôi")</span>
                 </h1>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 shadow-sm">
-                    <i class="fa-solid fa-key"></i> 51 Quyền Hạt Nhân
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 shadow-sm">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> L1 Cache-Aside TTL 30 Phút
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                    <i class="fa-solid fa-key me-1"></i>
+                    @(isSuperAdmin ? $"{totalPermCount} Quyền Hạt Nhân • {targetRoles.Count} Vai Trò" : $"{Model.ActorContext?.GrantablePermissionIds.Count ?? 0} Quyền Được Phép Chia • {Model.Users.Count} Nhân Sự")
                 </span>
             </div>
-            <p class="text-slate-500 dark:text-slate-400 text-sm">
-                Cơ chế phân giải quyền động ba tầng: Cookie Claims &rarr; L1 Cache &rarr; Database SQL Server kết hợp luật cấm/tước quyền ưu tiên tuyệt đối (Deny Overrides).
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                @(isSuperAdmin
+                    ? "Quản trị Ma trận Vai trò × Quyền toàn cục và đặc cách quyền cá nhân 3 trạng thái (Kế thừa / Cấp thêm / Thu hồi - Deny luôn thắng)."
+                    : "Admin phòng ban chia tiếp quyền và gán vai trò cho nhân viên dưới quyền trong phạm vi Scope được Admin Tổng giao.")
             </p>
         </div>
 
-        <div class="flex flex-wrap items-center gap-3">
-            <button type="button" onclick="alert('Đã đồng bộ và làm sạch Cache phân quyền (IMemoryCache TTL 30m) toàn cụm Web Nodes!');" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-sm transition active:scale-95">
-                <i class="fa-solid fa-rotate text-rose-500"></i> Xóa Cache L1
+        <div class="flex flex-wrap items-center gap-2.5">
+            <a href="/Admin/Delegation/AuditLog" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-file-shield text-indigo-500 me-1"></i> Nhật Ký Phân Quyền
+            </a>
+            <button type="button" onclick="clearPermissionCache()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-rotate text-rose-500 me-1"></i> Xóa Cache L1
             </button>
-            <button type="button" onclick="alert('Đã cập nhật cấu hình Ma trận Phân quyền PBAC thành công!');" class="inline-flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-700 hover:to-pink-600 shadow-md shadow-rose-500/25 transition active:scale-95">
-                <i class="fa-solid fa-floppy-disk"></i> Lưu Thay Đổi Ma Trận
-            </button>
+            @if (isSuperAdmin)
+            {
+                <button type="button" id="btnSaveGlobalMatrix" onclick="saveGlobalRoleMatrix()" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-700 hover:to-pink-600 shadow-md shadow-rose-500/20 transition">
+                    <i class="fa-solid fa-floppy-disk me-1.5"></i> Lưu Thay Đổi Ma Trận
+                </button>
+            }
         </div>
     </div>
 
-    <!-- =========================================================================
-         2. CÁC THẺ TỔNG QUAN VỀ KIẾN TRÚC PHÂN QUYỀN PBAC
-         ========================================================================= -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 my-6">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center text-lg">
-                <i class="fa-solid fa-user-shield"></i>
-            </div>
-            <div>
-                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">5 Vai Trò Quản Trị</div>
-                <div class="text-sm font-extrabold text-slate-900 dark:text-white">RBAC + PBAC Hybrid</div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center text-lg">
-                <i class="fa-solid fa-list-check"></i>
-            </div>
-            <div>
-                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">51 Quyền Hạt Nhân</div>
-                <div class="text-sm font-extrabold text-slate-900 dark:text-white">9 Phân Hệ Nghiệp Vụ</div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg">
-                <i class="fa-solid fa-bolt"></i>
-            </div>
-            <div>
-                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Hiệu Năng Phân Giải</div>
-                <div class="text-sm font-extrabold text-slate-900 dark:text-white">&lt; 1ms (MemoryCache HIT)</div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center gap-3.5">
-            <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center text-lg">
-                <i class="fa-solid fa-ban"></i>
-            </div>
-            <div>
-                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Luật Bảo Mật Tối Cao</div>
-                <div class="text-sm font-extrabold text-slate-900 dark:text-white">Deny Luôn Thắng Grant</div>
-            </div>
-        </div>
+    <!-- Navigation Tabs -->
+    <div class="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800">
+        @if (isSuperAdmin)
+        {
+            <button type="button" onclick="switchPmTab('pm-tab-matrix')" id="btn_pm-tab-matrix"
+                    class="pm-tab-btn px-4 py-2.5 text-xs font-extrabold border-b-2 border-rose-600 text-rose-600 flex items-center gap-2">
+                <i class="fa-solid fa-table-cells"></i>
+                <span>Ma Trận Vai Trò Toàn Cục (@targetRoles.Count Vai trò × @totalPermCount Quyền)</span>
+            </button>
+        }
+        <button type="button" onclick="switchPmTab('pm-tab-staff')" id="btn_pm-tab-staff"
+                class="pm-tab-btn px-4 py-2.5 text-xs @(isSuperAdmin ? "font-bold border-b-2 border-transparent text-slate-500" : "font-extrabold border-b-2 border-rose-600 text-rose-600") flex items-center gap-2">
+            <i class="fa-solid fa-user-check"></i>
+            <span>Phân Quyền Nhân Viên Của Tôi (@Model.Users.Count nhân sự)</span>
+        </button>
     </div>
 
-    <!-- =========================================================================
-         3. LƯỚI MA TRẬN PHÂN QUYỀN PBAC 2D (5 CỘT VAI TRÒ x 51 QUYỀN HẠT NHÂN)
-         ========================================================================= -->
-    <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
-        <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div>
-                <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <i class="fa-solid fa-table-cells text-rose-500"></i>
-                    <span>Ma Trận Cấp Phép Quyền Theo Vai Trò (Role - Permission Matrix)</span>
-                </h3>
-                <p class="text-xs text-slate-400 mt-0.5">Lưới phân quyền trực quan cho phép bật/tắt quyền tức thì, tự động kích hoạt Cache Invalidation.</p>
+    @if (isSuperAdmin)
+    {
+        <!-- =========================================================================
+             TAB 1 (CHỈ SUPERADMIN): MA TRẬN ROLE × PERMISSION TOÀN CỤC
+             ========================================================================= -->
+        <div id="pm-tab-matrix" class="pm-tab-pane space-y-4">
+            <!-- Bộ lọc Module & Tìm kiếm quyền -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div class="flex flex-wrap items-center gap-3 flex-1">
+                    <div class="w-full sm:w-64">
+                        <label for="matrixModuleFilter" class="sr-only">Lọc theo phân hệ</label>
+                        <select id="matrixModuleFilter" onchange="filterMatrixRows()" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold">
+                            <option value="">-- Tất cả @Model.ModuleGroups.Count phân hệ nghiệp vụ --</option>
+                            @foreach (var grp in Model.ModuleGroups)
+                            {
+                                <option value="@grp.ModuleCode">@grp.ModuleName (@grp.Permissions.Count)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="relative flex-1 min-w-[240px]">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                        <input type="text" id="matrixSearchInput" oninput="filterMatrixRows()"
+                               autocorrect="off" autocapitalize="off" spellcheck="false"
+                               placeholder="Tìm kiếm quyền theo tên hoặc mã Code (VD: USER_ASSIGN_ROLE, ORDER_CONFIRM)..."
+                               class="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs focus:outline-none focus:border-rose-500" />
+                    </div>
+                </div>
+                <div class="text-xs text-slate-500 flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200 font-semibold">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+                        Bỏ quyền của vai trò hệ thống (`IsSystem`) sẽ hiện cảnh báo xác nhận trước khi lưu
+                    </span>
+                </div>
             </div>
-            <div class="flex items-center gap-2 flex-wrap">
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Đã cấp quyền (Checked)
-                </span>
-                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-400">
-                    <span class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600"></span> Không có quyền (Unchecked)
-                </span>
-            </div>
-        </div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs border-collapse">
-                <thead class="sticky-header bg-slate-100/90 dark:bg-slate-800/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-extrabold uppercase tracking-wider text-[11px]">
-                    <tr>
-                        <th class="py-3.5 px-5 w-80">Phân Hệ & Quyền Hạt Nhân</th>
-                        <th class="py-3.5 px-3 w-44 font-mono">Mã Quyền (Code)</th>
-                        
-                        <!-- 5 Cột Vai Trò Yêu Cầu Trong Luận Văn -->
-                        <th class="py-3.5 px-3 text-center w-36 bg-purple-50/60 dark:bg-purple-950/30 border-l border-r border-purple-200/50 dark:border-purple-800/40">
-                            <div class="flex flex-col items-center">
-                                <span class="text-purple-700 dark:text-purple-300 font-extrabold">SuperAdmin</span>
-                                <span class="text-[9px] font-normal text-purple-600/70 lowercase">toàn quyền</span>
-                            </div>
-                        </th>
-                        <th class="py-3.5 px-3 text-center w-36 bg-blue-50/60 dark:bg-blue-950/30 border-r border-blue-200/50 dark:border-blue-800/40">
-                            <div class="flex flex-col items-center">
-                                <span class="text-blue-700 dark:text-blue-300 font-extrabold">StoreManager</span>
-                                <span class="text-[9px] font-normal text-blue-600/70 lowercase">quản lý shop</span>
-                            </div>
-                        </th>
-                        <th class="py-3.5 px-3 text-center w-36 bg-pink-50/60 dark:bg-pink-950/30 border-r border-pink-200/50 dark:border-pink-800/40">
-                            <div class="flex flex-col items-center">
-                                <span class="text-pink-700 dark:text-pink-300 font-extrabold">Cashier</span>
-                                <span class="text-[9px] font-normal text-pink-600/70 lowercase">thu ngân pos</span>
-                            </div>
-                        </th>
-                        <th class="py-3.5 px-3 text-center w-36 bg-amber-50/60 dark:bg-amber-950/30 border-r border-amber-200/50 dark:border-amber-800/40">
-                            <div class="flex flex-col items-center">
-                                <span class="text-amber-700 dark:text-amber-300 font-extrabold">WarehouseStaff</span>
-                                <span class="text-[9px] font-normal text-amber-600/70 lowercase">thủ kho fefo</span>
-                            </div>
-                        </th>
-                        <th class="py-3.5 px-3 text-center w-36 bg-emerald-50/60 dark:bg-emerald-950/30 border-r border-emerald-200/50 dark:border-emerald-800/40">
-                            <div class="flex flex-col items-center">
-                                <span class="text-emerald-700 dark:text-emerald-300 font-extrabold">ContentEditor</span>
-                                <span class="text-[9px] font-normal text-emerald-600/70 lowercase">biên tập viên</span>
-                            </div>
-                        </th>
-                    </tr>
-                </thead>
-
-                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
-                    @foreach (var group in Model.ModuleGroups)
-                    {
-                        <!-- Dòng Header Phân Hệ Chức Năng -->
-                        <tr class="bg-slate-50 dark:bg-slate-800/80 font-bold text-slate-800 dark:text-slate-200">
-                            <td colspan="7" class="py-2.5 px-5">
-                                <div class="flex items-center gap-2">
-                                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
-                                    <span class="uppercase tracking-wider text-[11px] font-extrabold text-slate-900 dark:text-white">@group.ModuleName</span>
-                                    <span class="font-mono text-[10px] text-slate-400 font-normal">(@group.Permissions.Count quyền hạt nhân)</span>
-                                </div>
-                            </td>
-                        </tr>
-
-                        @foreach (var perm in group.Permissions)
-                        {
-                            <tr class="perm-table-row transition-colors">
-                                <td class="py-2.5 px-5">
-                                    <div class="font-semibold text-slate-800 dark:text-slate-200">@perm.Name</div>
-                                    @if (!string.IsNullOrEmpty(perm.Description))
-                                    {
-                                        <div class="text-[10px] text-slate-400 leading-tight">@perm.Description</div>
-                                    }
-                                </td>
-                                <td class="py-2.5 px-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">
-                                    <span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">@perm.Code</span>
-                                </td>
-
-                                <!-- Checkbox 5 Vai Trò -->
+            <!-- Bảng Ma Trận 2D -->
+            <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
+                <div tabindex="0" role="region" aria-label="Ma trận phân quyền theo vai trò" class="overflow-x-auto" style="max-height: 72vh;">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="sticky-header bg-slate-100/95 dark:bg-slate-800/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-extrabold uppercase tracking-wider text-[10px]">
+                            <tr>
+                                <th class="py-3 px-4 min-w-[260px] sticky-col-left bg-slate-100 dark:bg-slate-800">Phân Hệ & Quyền Hạt Nhân</th>
+                                <th class="py-3 px-3 min-w-[150px] font-mono">Mã Quyền (Code)</th>
+                                <th class="py-3 px-2 text-center w-20">Cả Hàng</th>
                                 @foreach (var role in targetRoles)
                                 {
-                                    var isChecked = HasPerm(role.Id, perm.Id, role.Name);
-                                    var isSuper = role.Name == "SuperAdmin";
-                                    <td class="py-2.5 px-3 text-center border-l border-r border-slate-100 dark:border-slate-800/40">
-                                        <input type="checkbox" 
-                                               class="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 dark:focus:ring-rose-600 dark:ring-offset-slate-800 focus:ring-1 cursor-pointer transition @(isSuper ? "opacity-90 cursor-not-allowed" : "")"
-                                               @(isChecked ? "checked" : "")
-                                               @(isSuper ? "disabled" : "")
-                                               title="@role.Name: @perm.Name (@(isChecked ? "Cho phép" : "Chặn"))" />
-                                    </td>
+                                    bool isSuperCol = role.Name.Equals("SuperAdmin", StringComparison.OrdinalIgnoreCase);
+                                    <th class="py-2.5 px-2.5 text-center min-w-[115px] border-l border-slate-200/70 dark:border-slate-700">
+                                        <div class="flex flex-col items-center gap-1">
+                                            <span class="font-extrabold text-slate-900 dark:text-white">@role.Name</span>
+                                            <span class="text-[9px] font-normal text-slate-500 normal-case leading-tight text-center">@(role.DisplayName ?? role.Name) (Lv@(role.Level))</span>
+                                            @if (!isSuperCol)
+                                            {
+                                                <button type="button"
+                                                        onclick="toggleMatrixColumn(@role.Id)"
+                                                        class="mt-0.5 px-2 py-0.5 rounded bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[9px] font-bold text-rose-600 hover:bg-rose-50 transition"
+                                                        title="Chọn / Bỏ chọn cả cột @role.Name">
+                                                    Chọn cột
+                                                </button>
+                                            }
+                                        </div>
+                                    </th>
                                 }
                             </tr>
+                        </thead>
+
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60">
+                            @foreach (var group in Model.ModuleGroups)
+                            {
+                                <tr class="matrix-group-header bg-slate-50 dark:bg-slate-800/80 font-bold text-slate-800 dark:text-slate-200" data-module="@group.ModuleCode">
+                                    <td colspan="@(targetRoles.Count + 3)" class="py-2.5 px-4">
+                                        <div class="flex items-center gap-2">
+                                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                                            <span class="uppercase tracking-wider text-[11px] font-extrabold text-slate-900 dark:text-white">@group.ModuleName</span>
+                                            <span class="font-mono text-[10px] text-slate-400 font-normal">(@group.Permissions.Count quyền hạt nhân)</span>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                @foreach (var perm in group.Permissions)
+                                {
+                                    <tr class="perm-table-row matrix-perm-row transition-colors"
+                                        data-module="@group.ModuleCode"
+                                        data-perm-id="@perm.Id"
+                                        data-search="@($"{perm.Name} {perm.Code} {group.ModuleName}".ToLowerInvariant())">
+                                        <td class="py-2.5 px-4 sticky-col-left bg-white dark:bg-slate-900">
+                                            <div class="font-semibold text-slate-800 dark:text-slate-200">@perm.Name</div>
+                                            @if (!string.IsNullOrEmpty(perm.Description))
+                                            {
+                                                <div class="text-[10px] text-slate-400 leading-tight">@perm.Description</div>
+                                            }
+                                        </td>
+                                        <td class="py-2.5 px-3 font-mono text-[11px] text-slate-500">
+                                            <span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">@perm.Code</span>
+                                        </td>
+                                        <td class="py-2.5 px-2 text-center">
+                                            <button type="button"
+                                                    onclick="toggleMatrixRow(@perm.Id)"
+                                                    class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 text-[10px] font-bold text-slate-600 hover:text-rose-600 border border-slate-200 dark:border-slate-700 transition"
+                                                    title="Chọn / Bỏ chọn cả hàng quyền @perm.Code">
+                                                Cả hàng
+                                            </button>
+                                        </td>
+
+                                        @foreach (var role in targetRoles)
+                                        {
+                                            var isChecked = HasPerm(role.Id, perm.Id, role.Name);
+                                            var isSuperCol = role.Name.Equals("SuperAdmin", StringComparison.OrdinalIgnoreCase);
+                                            <td class="py-2.5 px-2 text-center border-l border-slate-100 dark:border-slate-800/40">
+                                                <input type="checkbox"
+                                                       class="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 cursor-pointer matrix-cell-cb @(isSuperCol ? "opacity-80 cursor-not-allowed" : "")"
+                                                       data-role-id="@role.Id"
+                                                       data-role-name="@role.Name"
+                                                       data-is-system="@(role.IsSystem ? "1" : "0")"
+                                                       data-perm-id="@perm.Id"
+                                                       @(isChecked ? "checked" : "")
+                                                       @(isSuperCol ? "disabled" : "")
+                                                       title="@role.Name: @perm.Name" />
+                                            </td>
+                                        }
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- =========================================================================
+         TAB 2 (DÀNH CHO MỌI ADMIN CÓ PERMISSION_DELEGATE): PHÂN QUYỀN NHÂN VIÊN CỦA TÔI
+         ========================================================================= -->
+    <div id="pm-tab-staff" class="pm-tab-pane @(isSuperAdmin ? "hidden" : "") space-y-5">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <!-- Cột Trái: Danh sách nhân sự trong Scope -->
+            <div class="lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs flex flex-col" style="max-height: 78vh;">
+                <div class="pb-3 mb-3 border-b border-slate-100 dark:border-slate-800">
+                    <h3 class="text-sm font-extrabold text-slate-900 dark:text-white flex items-center justify-between">
+                        <span><i class="fa-solid fa-users text-rose-500 me-1.5"></i>Nhân Viên Trong Phạm Vi</span>
+                        <span class="px-2 py-0.5 rounded-full text-[11px] bg-rose-50 text-rose-600">@Model.Users.Count</span>
+                    </h3>
+                    <div class="relative mt-2.5">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                        <input type="text" id="scopedStaffSearch" oninput="filterScopedStaffList()"
+                               autocorrect="off" autocapitalize="off" spellcheck="false"
+                               placeholder="Tìm nhân viên theo tên, username, phòng ban..."
+                               class="w-full pl-8 pr-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs focus:outline-none focus:border-rose-500" />
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto space-y-2 pr-1" id="scopedStaffList">
+                    @if (Model.Users.Count == 0)
+                    {
+                        <div class="p-6 text-center text-xs text-slate-400">
+                            Hiện chưa có nhân sự cấp dưới nào trong phạm vi phòng ban của bạn.
+                        </div>
+                    }
+                    else
+                    {
+                        @foreach (var u in Model.Users)
+                        {
+                            bool isSelected = u.Id == Model.SelectedUserId;
+                            <div onclick="loadStaffPermissionEditor(@u.Id, '@Html.Raw(u.FullName.Replace("'", "\\'"))', '@u.Username', '@Html.Raw((u.DepartmentName ?? "").Replace("'", "\\'"))')"
+                                 id="staffCard_@u.Id"
+                                 data-search="@($"{u.FullName} {u.Username} {u.EmployeeCode} {u.DepartmentName}".ToLowerInvariant())"
+                                 class="scoped-staff-item p-3 rounded-xl border cursor-pointer transition @(isSelected ? "border-rose-500 bg-rose-50/40 dark:bg-rose-950/30" : "border-slate-200/80 dark:border-slate-800 hover:border-rose-300")">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div class="font-bold text-xs text-slate-900 dark:text-white truncate">@u.FullName</div>
+                                    <span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-mono text-slate-500">@@@u.Username</span>
+                                </div>
+                                <div class="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
+                                    <span><i class="fa-solid fa-building text-[10px] text-indigo-400 me-1"></i>@(u.DepartmentName ?? "Chưa phân phòng")</span>
+                                    <a href="/Admin/User/Permissions/@u.Id" onclick="event.stopPropagation();" class="text-[10px] font-bold text-rose-600 hover:underline">
+                                        Mở trang riêng &rarr;
+                                    </a>
+                                </div>
+                            </div>
                         }
                     }
-                </tbody>
-            </table>
-        </div>
-
-        <div class="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 gap-2">
-            <div>
-                Tổng cộng: <strong class="text-slate-800 dark:text-white font-mono">51 Quyền Hạt Nhân</strong> trên <strong class="text-slate-800 dark:text-white font-mono">5 Vai Trò Quản Trị</strong>
+                </div>
             </div>
-            <div class="font-mono text-[11px]">
-                <i class="fa-solid fa-lock text-rose-500 me-1"></i> Security Level: PBAC Dynamic Policy Resolution
+
+            <!-- Cột Phải: Trình Phân Quyền Cá Nhân 3 Trạng Thái -->
+            <div class="lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-xs space-y-4">
+                <input type="hidden" id="editor_TargetUserId" value="@Model.SelectedUserId" />
+
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div>
+                        <h3 class="text-base font-extrabold text-slate-900 dark:text-white" id="editor_StaffTitle">
+                            Đang tải hồ sơ phân quyền nhân viên...
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-0.5" id="editor_StaffSubtitle">
+                            Chỉ các quyền nằm trong phạm vi ủy quyền của bạn mới được bật để thao tác.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="resetCurrentStaffOverrides()" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition">
+                            <i class="fa-solid fa-rotate-left me-1"></i> Khôi Phục Mặc Định Theo Vai Trò
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Khối Gán Vai Trò (Multi-select chỉ gồm GetAssignableRoleIds) -->
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
+                        <div>
+                            <div class="text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-200">
+                                <i class="fa-solid fa-id-badge text-rose-500 me-1"></i>Vai Trò Được Gán (Chỉ hiển thị Role trong phạm vi được phép gán)
+                            </div>
+                        </div>
+                        <button type="button" onclick="saveCurrentStaffRoles()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition">
+                            <i class="fa-solid fa-check me-1"></i> Lưu Vai Trò Nhân Viên
+                        </button>
+                    </div>
+                    <div class="flex flex-wrap gap-2" id="editor_AssignableRolesContainer">
+                        @foreach (var r in Model.AssignableRoles)
+                        {
+                            <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer hover:border-indigo-400">
+                                <input type="checkbox" class="w-4 h-4 rounded text-indigo-600 staff-role-cb" value="@r.Id" />
+                                <span class="text-xs font-bold text-slate-800 dark:text-slate-100">@r.DisplayName</span>
+                                <span class="text-[10px] font-mono text-slate-400">(Lv@(r.Level))</span>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <!-- Thanh tìm kiếm quyền cá nhân -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="relative flex-1">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-slate-400 text-xs"></i>
+                        <input type="text" id="staffPermSearch" oninput="filterStaffOverrideRows()"
+                               autocorrect="off" autocapitalize="off" spellcheck="false"
+                               placeholder="Tìm kiếm quyền để Cấp thêm hoặc Thu hồi..."
+                               class="w-full pl-9 pr-4 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs" />
+                    </div>
+                    <label class="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 cursor-pointer">
+                        <input type="checkbox" id="onlyShowGrantableToggle" onchange="filterStaffOverrideRows()" checked class="w-4 h-4 rounded text-rose-600" />
+                        <span>Chỉ hiện quyền trong phạm vi của tôi</span>
+                    </label>
+                </div>
+
+                <!-- Bảng Quyền 3 Trạng Thái -->
+                <div tabindex="0" role="region" aria-label="Bảng phân quyền cá nhân 3 trạng thái" class="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-xl" style="max-height: 52vh;">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead class="sticky-header bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 text-[11px] font-extrabold uppercase text-slate-700 dark:text-slate-200">
+                            <tr>
+                                <th class="py-3 px-4">Quyền Hạt Nhân & Phân Hệ</th>
+                                <th class="py-3 px-3 text-center w-28">Quyền Hiệu Lực</th>
+                                <th class="py-3 px-3 text-center w-64">Trạng Thái Cấp Quyền (3 Trạng Thái)</th>
+                                <th class="py-3 px-3 w-48">Cấp Bởi – Ngày / Lý Do</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staffOverrideTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
+                            <tr>
+                                <td colspan="4" class="py-8 text-center text-slate-400">Đang tải dữ liệu phân quyền...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        const initialRolePermMap = @Html.Raw(initialMapJson);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const defaultUserId = parseInt(document.getElementById('editor_TargetUserId')?.value || '0', 10);
+            if (defaultUserId > 0) {
+                const firstCard = document.getElementById('staffCard_' + defaultUserId);
+                if (firstCard) firstCard.click();
+            }
+        });
+
+        function switchPmTab(tabId) {
+            document.querySelectorAll('.pm-tab-pane').forEach(p => p.classList.add('hidden'));
+            document.getElementById(tabId)?.classList.remove('hidden');
+
+            document.querySelectorAll('.pm-tab-btn').forEach(b => {
+                b.classList.remove('border-rose-600', 'text-rose-600', 'font-extrabold');
+                b.classList.add('border-transparent', 'text-slate-500', 'font-bold');
+            });
+            const active = document.getElementById('btn_' + tabId);
+            if (active) {
+                active.classList.remove('border-transparent', 'text-slate-500', 'font-bold');
+                active.classList.add('border-rose-600', 'text-rose-600', 'font-extrabold');
+            }
+        }
+
+        function filterMatrixRows() {
+            const mod = document.getElementById('matrixModuleFilter')?.value || '';
+            const q = (document.getElementById('matrixSearchInput')?.value || '').trim().toLowerCase();
+
+            document.querySelectorAll('.matrix-perm-row').forEach(row => {
+                const rowMod = row.getAttribute('data-module') || '';
+                const rowSearch = row.getAttribute('data-search') || '';
+                const matchMod = !mod || rowMod === mod;
+                const matchQ = !q || rowSearch.includes(q);
+                row.classList.toggle('hidden', !(matchMod && matchQ));
+            });
+
+            document.querySelectorAll('.matrix-group-header').forEach(hdr => {
+                const gMod = hdr.getAttribute('data-module') || '';
+                const hasVisibleRow = Array.from(document.querySelectorAll(`.matrix-perm-row[data-module="${gMod}"]`))
+                    .some(r => !r.classList.contains('hidden'));
+                hdr.classList.toggle('hidden', !hasVisibleRow);
+            });
+        }
+
+        function toggleMatrixColumn(roleId) {
+            const cbs = Array.from(document.querySelectorAll(`.matrix-cell-cb[data-role-id="${roleId}"]:not(:disabled)`))
+                .filter(cb => !cb.closest('tr').classList.contains('hidden'));
+            if (cbs.length === 0) return;
+            const allChecked = cbs.every(cb => cb.checked);
+            cbs.forEach(cb => { cb.checked = !allChecked; });
+        }
+
+        function toggleMatrixRow(permId) {
+            const cbs = Array.from(document.querySelectorAll(`.matrix-cell-cb[data-perm-id="${permId}"]:not(:disabled)`));
+            if (cbs.length === 0) return;
+            const allChecked = cbs.every(cb => cb.checked);
+            cbs.forEach(cb => { cb.checked = !allChecked; });
+        }
+
+        async function saveGlobalRoleMatrix() {
+            const roleMap = new Map();
+            const removedFromSystemRoles = [];
+
+            document.querySelectorAll('.matrix-cell-cb:not(:disabled)').forEach(cb => {
+                const rId = parseInt(cb.getAttribute('data-role-id'), 10);
+                const rName = cb.getAttribute('data-role-name');
+                const isSys = cb.getAttribute('data-is-system') === '1';
+                const pId = parseInt(cb.getAttribute('data-perm-id'), 10);
+
+                if (!roleMap.has(rId)) {
+                    roleMap.set(rId, { roleId: rId, roleName: rName, isSystem: isSys, permissionIds: [] });
+                }
+                if (cb.checked) {
+                    roleMap.get(rId).permissionIds.push(pId);
+                } else if (isSys && initialRolePermMap[rId] && initialRolePermMap[rId].includes(pId)) {
+                    removedFromSystemRoles.push(rName);
+                }
+            });
+
+            if (removedFromSystemRoles.length > 0) {
+                const distinctRoles = [...new Set(removedFromSystemRoles)];
+                const confirmSys = await Swal.fire({
+                    icon: 'warning',
+                    title: 'Cảnh báo gỡ quyền khỏi Vai trò hệ thống!',
+                    html: `Bạn đang bỏ chọn <b>${removedFromSystemRoles.length} quyền</b> khỏi các vai trò hệ thống: <b>${distinctRoles.join(', ')}</b>.<br/>Thao tác này sẽ thu hồi quyền ngay lập tức của các tài khoản đang giữ vai trò trên.`,
+                    showCancelButton: true,
+                    confirmButtonColor: '#e11d48',
+                    confirmButtonText: 'Xác nhận lưu Ma trận',
+                    cancelButtonText: 'Hủy'
+                });
+                if (!confirmSys.isConfirmed) return;
+            }
+
+            const btn = document.getElementById('btnSaveGlobalMatrix');
+            if (btn) btn.disabled = true;
+
+            const payload = {
+                roles: Array.from(roleMap.values()).map(x => ({ roleId: x.roleId, permissionIds: x.permissionIds }))
+            };
+
+            const res = await window.adminJsonRequest('/Admin/PermissionManagement/SaveBulkRoleMatrix', payload, 'POST');
+            if (btn) btn.disabled = false;
+
+            if (res && res.success) {
+                window.showAdminToast(res.message, 'success');
+            }
+        }
+
+        async function clearPermissionCache() {
+            const res = await window.adminJsonRequest('/Admin/PermissionManagement/ClearAllCache', {}, 'POST');
+            if (res && res.success) {
+                window.showAdminToast(res.message, 'success');
+            }
+        }
+
+        function filterScopedStaffList() {
+            const q = (document.getElementById('scopedStaffSearch')?.value || '').trim().toLowerCase();
+            document.querySelectorAll('.scoped-staff-item').forEach(el => {
+                const s = el.getAttribute('data-search') || '';
+                el.classList.toggle('hidden', !(!q || s.includes(q)));
+            });
+        }
+
+        let currentBreakdownData = [];
+
+        async function loadStaffPermissionEditor(userId, fullName, username, deptName) {
+            document.getElementById('editor_TargetUserId').value = userId;
+            document.getElementById('editor_StaffTitle').textContent = `Phân Quyền Cá Nhân: ${fullName} (\x40${username})`;
+            document.getElementById('editor_StaffSubtitle').textContent = `Phòng ban: ${deptName || 'Chưa phân phòng'} • Luật ưu tiên: Thu hồi (Deny) luôn thắng Kế thừa vai trò`;
+
+            document.querySelectorAll('.scoped-staff-item').forEach(el => {
+                el.classList.remove('border-rose-500', 'bg-rose-50/40', 'dark:bg-rose-950/30');
+            });
+            const activeCard = document.getElementById('staffCard_' + userId);
+            if (activeCard) {
+                activeCard.classList.add('border-rose-500', 'bg-rose-50/40', 'dark:bg-rose-950/30');
+            }
+
+            const res = await window.adminJsonRequest(`/Admin/PermissionManagement/GetUserOverrides?userId=${userId}`, null, 'GET');
+            if (!res || !res.success) return;
+
+            const currentRoleSet = new Set(res.currentRoleIds || []);
+            document.querySelectorAll('.staff-role-cb').forEach(cb => {
+                cb.checked = currentRoleSet.has(parseInt(cb.value, 10));
+                cb.disabled = !res.canAssignRole;
+            });
+
+            currentBreakdownData = res.breakdown || [];
+            renderStaffOverrideTable();
+        }
+
+        function renderStaffOverrideTable() {
+            const tbody = document.getElementById('staffOverrideTableBody');
+            if (!tbody) return;
+
+            const q = (document.getElementById('staffPermSearch')?.value || '').trim().toLowerCase();
+            const onlyGrantable = document.getElementById('onlyShowGrantableToggle')?.checked ?? false;
+
+            const filtered = currentBreakdownData.filter(item => {
+                if (onlyGrantable && !item.canActorGrant) return false;
+                if (!q) return true;
+                const text = `${item.permissionName} ${item.permissionCode} ${item.moduleDisplayName}`.toLowerCase();
+                return text.includes(q);
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-8 text-center text-slate-400">Không có quyền nào khớp với bộ lọc hiện tại.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(item => {
+                const canEdit = !!item.canActorGrant;
+                const stateVal = item.directOverride === true ? 'grant' : (item.directOverride === false ? 'revoke' : 'inherit');
+
+                const effBadge = item.isEffective
+                    ? `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-check text-[10px]"></i> Có quyền</span>`
+                    : `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500 border border-slate-200"><i class="fa-solid fa-xmark text-[10px]"></i> Không</span>`;
+
+                const auditInfo = item.directOverride !== null && item.directOverride !== undefined
+                    ? `<div class="text-[11px] font-semibold text-slate-700 dark:text-slate-200">${item.grantedByName || 'Quản trị viên'}</div>
+                       <div class="text-[10px] font-mono text-slate-400">${item.grantedAt ? new Date(item.grantedAt).toLocaleString('vi-VN') : ''}</div>
+                       ${item.reason ? `<div class="text-[10px] text-rose-600 italic mt-0.5">Lý do: ${item.reason}</div>` : ''}`
+                    : `<span class="text-[11px] text-slate-400">Mặc định từ Role (${item.inheritedFromRole ? 'Có' : 'Không'})</span>`;
+
+                const disAttr = canEdit ? '' : 'disabled';
+                const tooltip = canEdit ? '' : 'title="Vượt phạm vi của bạn"';
+
+                return `<tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 ${canEdit ? '' : 'opacity-60'}">
+                    <td class="py-2.5 px-4">
+                        <div class="font-bold text-slate-800 dark:text-slate-100">${item.permissionName}</div>
+                        <div class="flex items-center gap-2 mt-0.5">
+                            <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600">${item.permissionCode}</span>
+                            <span class="text-[10px] text-slate-400">${item.moduleDisplayName || item.module}</span>
+                            ${!canEdit ? `<span class="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 text-[10px] font-bold">Ngoài Scope (Read-only)</span>` : ''}
+                        </div>
+                    </td>
+                    <td class="py-2.5 px-3 text-center">${effBadge}</td>
+                    <td class="py-2.5 px-3 text-center" ${tooltip}>
+                        <div class="inline-flex rounded-xl p-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 gap-1">
+                            <button type="button" ${disAttr}
+                                    onclick="changeStaffPermissionState(${item.permissionId}, null, '${item.permissionCode}')"
+                                    class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${stateVal === 'inherit' ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'}">
+                                Kế thừa
+                            </button>
+                            <button type="button" ${disAttr}
+                                    onclick="changeStaffPermissionState(${item.permissionId}, true, '${item.permissionCode}')"
+                                    class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${stateVal === 'grant' ? 'bg-emerald-600 text-white shadow-xs' : 'text-emerald-700 hover:bg-emerald-50'}">
+                                + Cấp thêm
+                            </button>
+                            <button type="button" ${disAttr}
+                                    onclick="changeStaffPermissionState(${item.permissionId}, false, '${item.permissionCode}')"
+                                    class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${stateVal === 'revoke' ? 'bg-rose-600 text-white shadow-xs' : 'text-rose-700 hover:bg-rose-50'}">
+                                - Thu hồi
+                            </button>
+                        </div>
+                    </td>
+                    <td class="py-2.5 px-3">${auditInfo}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        function filterStaffOverrideRows() {
+            renderStaffOverrideTable();
+        }
+
+        async function changeStaffPermissionState(permissionId, overrideStatus, permCode) {
+            const userId = parseInt(document.getElementById('editor_TargetUserId').value || '0', 10);
+            if (userId <= 0) return;
+
+            let reason = null;
+            if (overrideStatus === false) {
+                const promptRes = await Swal.fire({
+                    icon: 'warning',
+                    title: `Thu hồi quyền ${permCode}`,
+                    input: 'text',
+                    inputLabel: 'Lý do thu hồi quyền (Bắt buộc)',
+                    inputPlaceholder: 'Nhập lý do thu hồi quyền này của nhân sự...',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e11d48',
+                    confirmButtonText: 'Xác nhận Thu hồi (Deny)',
+                    cancelButtonText: 'Hủy',
+                    inputValidator: (value) => {
+                        if (!value || !value.trim()) {
+                            return 'Bạn bắt buộc phải nhập lý do khi Thu hồi quyền!';
+                        }
+                    }
+                });
+                if (!promptRes.isConfirmed) return;
+                reason = promptRes.value.trim();
+            }
+
+            const res = await window.adminJsonRequest('/Admin/PermissionManagement/SaveUserOverride', {
+                userId,
+                permissionId,
+                overrideStatus,
+                reason
+            }, 'POST');
+
+            if (res && res.success) {
+                window.showAdminToast(res.message, 'success');
+                const activeCard = document.getElementById('staffCard_' + userId);
+                if (activeCard) activeCard.click();
+            }
+        }
+
+        async function saveCurrentStaffRoles() {
+            const userId = parseInt(document.getElementById('editor_TargetUserId').value || '0', 10);
+            if (userId <= 0) return;
+
+            const roleIds = Array.from(document.querySelectorAll('.staff-role-cb:checked')).map(cb => parseInt(cb.value, 10));
+            const res = await window.adminJsonRequest('/Admin/PermissionManagement/AssignUserRoles', {
+                userId,
+                roleIds
+            }, 'POST');
+
+            if (res && res.success) {
+                window.showAdminToast(res.message, 'success');
+                const activeCard = document.getElementById('staffCard_' + userId);
+                if (activeCard) activeCard.click();
+            }
+        }
+
+        async function resetCurrentStaffOverrides() {
+            const userId = parseInt(document.getElementById('editor_TargetUserId').value || '0', 10);
+            if (userId <= 0) return;
+
+            const confirmRes = await Swal.fire({
+                icon: 'question',
+                title: 'Khôi phục mặc định theo vai trò?',
+                text: 'Toàn bộ các quyền Cấp thêm / Thu hồi cá nhân của nhân viên này (trong phạm vi của bạn) sẽ được xóa để quay về mặc định theo Role.',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                confirmButtonText: 'Khôi phục mặc định',
+                cancelButtonText: 'Hủy'
+            });
+            if (!confirmRes.isConfirmed) return;
+
+            const res = await window.adminJsonRequest('/Admin/PermissionManagement/ResetUserOverrides', { userId }, 'POST');
+            if (res && res.success) {
+                window.showAdminToast(res.message, 'success');
+                const activeCard = document.getElementById('staffCard_' + userId);
+                if (activeCard) activeCard.click();
+            }
+        }
+    </script>
+}

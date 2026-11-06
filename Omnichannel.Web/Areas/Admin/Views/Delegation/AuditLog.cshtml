@@ -1,0 +1,169 @@
+@model Omnichannel.Application.DTOs.Security.DelegationAuditLogViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Nhật Ký Phân Quyền & Ủy Quyền";
+}
+
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-5 border-b border-slate-200 dark:border-slate-800">
+        <div>
+            <div class="flex items-center gap-3 flex-wrap">
+                <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2.5">
+                    <i class="fa-solid fa-file-shield text-indigo-500"></i>
+                    <span>Nhật Ký Phân Quyền & Ủy Quyền (Delegation Audit Log)</span>
+                </h1>
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                    @Model.TotalCount Bản Ghi Kiểm Toán
+                </span>
+            </div>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                @(Model.IsSuperAdmin
+                    ? "Chế độ Admin Tổng: Theo dõi toàn bộ lịch sử cấu hình Scope, gán vai trò, cấp thêm/thu hồi quyền cá nhân trên toàn hệ thống."
+                    : "Chế độ Quản trị Phòng ban: Chỉ hiển thị nhật ký phân quyền trong phạm vi phòng ban và nhân sự dưới quyền của bạn.")
+            </p>
+        </div>
+
+        <div class="flex items-center gap-2">
+            @if (Model.IsSuperAdmin)
+            {
+                <a href="/Admin/Delegation" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition">
+                    <i class="fa-solid fa-user-gear text-rose-500 me-1"></i> Ủy Quyền Admin Nhỏ
+                </a>
+            }
+            <a href="/Admin/PermissionManagement" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-shield-halved text-rose-500 me-1"></i> Chia Quyền Nhân Sự
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Form -->
+    <form method="get" action="/Admin/Delegation/AuditLog" class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div>
+                <label for="actorId" class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Người Thao Tác</label>
+                <select id="actorId" name="actorId" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs">
+                    <option value="">-- Tất cả trong phạm vi --</option>
+                    @foreach (var actor in Model.ScopedActors)
+                    {
+                        <option value="@actor.Id" selected="@(Model.FilterActorId == actor.Id ? "selected" : null)">
+                            @actor.FullName (@actor.Username)
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div>
+                <label for="targetKeyword" class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Người Bị Tác Động / Mã Quyền</label>
+                <input type="text" id="targetKeyword" name="targetKeyword" value="@Model.FilterTargetKeyword"
+                       autocorrect="off" autocapitalize="off" spellcheck="false"
+                       placeholder="Username, ID, mã quyền..."
+                       class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs" />
+            </div>
+
+            <div>
+                <label for="actionType" class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Loại Hành Động</label>
+                <select id="actionType" name="actionType" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs">
+                    <option value="">-- Tất cả hành động --</option>
+                    <option value="DELEGATION_SCOPE" selected="@(Model.FilterActionType == "DELEGATION_SCOPE" ? "selected" : null)">Cấu hình Scope Admin nhỏ</option>
+                    <option value="DELEGATION_GRANT" selected="@(Model.FilterActionType == "DELEGATION_GRANT" ? "selected" : null)">Cấp thêm quyền cá nhân</option>
+                    <option value="DELEGATION_REVOKE" selected="@(Model.FilterActionType == "DELEGATION_REVOKE" ? "selected" : null)">Thu hồi quyền cá nhân (Deny)</option>
+                    <option value="DELEGATION_ASSIGN_ROLES" selected="@(Model.FilterActionType == "DELEGATION_ASSIGN_ROLES" ? "selected" : null)">Gán vai trò nhân sự</option>
+                    <option value="DELEGATION_CASCADE_REVOKE" selected="@(Model.FilterActionType == "DELEGATION_CASCADE_REVOKE" ? "selected" : null)">Thu hồi dây chuyền (Cascade)</option>
+                    <option value="PERMISSION_ROLE_UPDATE" selected="@(Model.FilterActionType == "PERMISSION_ROLE_UPDATE" ? "selected" : null)">Cập nhật Ma trận Vai trò</option>
+                    <option value="DEPARTMENT_" selected="@(Model.FilterActionType == "DEPARTMENT_" ? "selected" : null)">Thay đổi Phòng ban</option>
+                </select>
+            </div>
+
+            <div>
+                <label for="fromDate" class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Từ Ngày</label>
+                <input type="date" id="fromDate" name="fromDate" value="@(Model.FilterFromDate?.ToString("yyyy-MM-dd"))"
+                       class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs" />
+            </div>
+
+            <div class="flex items-end gap-2">
+                <div class="flex-1">
+                    <label for="toDate" class="block text-[11px] font-bold uppercase text-slate-500 mb-1">Đến Ngày</label>
+                    <input type="date" id="toDate" name="toDate" value="@(Model.FilterToDate?.ToString("yyyy-MM-dd"))"
+                           class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs" />
+                </div>
+                <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-700 hover:to-pink-600 shadow-xs shrink-0">
+                    <i class="fa-solid fa-filter me-1"></i> Lọc
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Audit Logs Table -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden">
+        <div tabindex="0" role="region" aria-label="Bảng nhật ký phân quyền" class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead class="bg-slate-100/90 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 uppercase font-extrabold text-[11px]">
+                    <tr>
+                        <th class="py-3.5 px-4 w-40">Thời Gian</th>
+                        <th class="py-3.5 px-4 w-44">Người Thao Tác</th>
+                        <th class="py-3.5 px-4 w-52">Loại Hành Động</th>
+                        <th class="py-3.5 px-4 w-40">Đối Tượng Tác Động</th>
+                        <th class="py-3.5 px-4">Chi Tiết Thay Đổi (Trước &rarr; Sau)</th>
+                        <th class="py-3.5 px-4 w-32">Địa Chỉ IP</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    @if (Model.Logs.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6" class="py-10 text-center text-slate-400">
+                                <i class="fa-solid fa-clipboard-check text-2xl mb-2 block text-slate-300"></i>
+                                Chưa có bản ghi nhật ký phân quyền nào khớp với bộ lọc hiện tại.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var log in Model.Logs)
+                        {
+                            bool isRevoke = log.Action.Contains("REVOKE") || log.Action.Contains("DELETE");
+                            bool isGrant = log.Action.Contains("GRANT") || log.Action.Contains("CREATE") || log.Action.Contains("SAVE");
+                            <tr class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition">
+                                <td class="py-3 px-4 font-mono text-[11px] text-slate-500">
+                                    @log.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm:ss")
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span class="font-bold text-slate-800 dark:text-slate-100">@(log.UserName ?? "Hệ thống")</span>
+                                    @if (log.UserId.HasValue)
+                                    {
+                                        <span class="text-[10px] font-mono text-slate-400 block">ID: #@log.UserId</span>
+                                    }
+                                </td>
+                                <td class="py-3 px-4">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold @(isRevoke ? "bg-rose-50 text-rose-700 border border-rose-200" : (isGrant ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-indigo-50 text-indigo-700 border border-indigo-200"))">
+                                        <i class="fa-solid @(isRevoke ? "fa-ban" : (isGrant ? "fa-circle-check" : "fa-bolt")) text-[10px]"></i>
+                                        <span>@log.Action</span>
+                                    </span>
+                                </td>
+                                <td class="py-3 px-4 font-mono text-[11px]">
+                                    <span class="font-semibold text-slate-700 dark:text-slate-300">@log.EntityType</span>
+                                    <span class="text-rose-500 ms-1">#@log.EntityId</span>
+                                </td>
+                                <td class="py-3 px-4 text-xs text-slate-700 dark:text-slate-300">
+                                    @if (!string.IsNullOrWhiteSpace(log.OldValues))
+                                    {
+                                        <div class="text-[11px] text-slate-400 mb-0.5"><span class="font-bold">Trước:</span> @log.OldValues</div>
+                                    }
+                                    @if (!string.IsNullOrWhiteSpace(log.NewValues))
+                                    {
+                                        <div class="font-medium text-slate-800 dark:text-slate-100">@log.NewValues</div>
+                                    }
+                                </td>
+                                <td class="py-3 px-4 font-mono text-[11px] text-slate-400">
+                                    @(log.IpAddress ?? "127.0.0.1")
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

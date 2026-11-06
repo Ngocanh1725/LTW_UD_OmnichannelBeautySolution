@@ -833,7 +833,7 @@ Toàn bộ **65 bảng thực thể quan hệ** dưới đây được thiết k
 | `Longevity` | `string?` | `NVARCHAR(50)` | YES | NULL | Tiêu chí phụ: Độ bám màu / Giữ ẩm ("Lâu trôi 6-8H", "Trung bình") |
 | `SkinFeel` | `string?` | `NVARCHAR(50)` | YES | NULL | Cảm giác trên da ("Mỏng nhẹ thoáng da", "Căng bóng") |
 | `HelpfulCount` | `int` | `INT` | **NO** | DEFAULT 0 | Số lượt người khác bình chọn nhận xét này là hữu ích (Thumbs Up) |
-| `AdminReply` | `string?` | `NVARCHAR(1000)` | YES | NULL | Nội dung phản hồi chính thức từ Chuyên viên CSKH Omni Beauty |
+| `AdminReply` | `string?` | `NVARCHAR(1000)` | YES | NULL | Nội dung phản hồi chính thức từ Chuyên viên CSKH Canmake Beauty |
 | `AdminRepliedAt` | `DateTime?` | `DATETIME2(7)` | YES | NULL | Thời điểm chuyên viên CSKH phản hồi |
 | `AdminReplyBy` | `string?` | `NVARCHAR(100)` | YES | NULL | Tên hoặc danh xưng người phản hồi |
 | `CreatedAt` | `DateTime` | `DATETIME2(7)` | **NO** | DEFAULT UTC | Thời điểm gửi đánh giá |

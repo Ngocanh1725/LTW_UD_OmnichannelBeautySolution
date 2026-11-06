@@ -1,6 +1,6 @@
 ## 3.3. Kiểm thử hệ thống, Đánh giá hiệu năng chịu tải và Tối ưu hóa
 
-Kiểm thử và tối ưu hóa hiệu năng là giai đoạn mang tính quyết định nhằm thẩm định chất lượng phần mềm, bảo đảm giải pháp website bán hàng OMNI BEAUTY không chỉ đáp ứng chính xác mọi yêu cầu chức năng nghiệp vụ mà còn vận hành bền bỉ, an toàn và có độ trễ cực thấp trong môi trường chuỗi bán lẻ thực tế.
+Kiểm thử và tối ưu hóa hiệu năng là giai đoạn mang tính quyết định nhằm thẩm định chất lượng phần mềm, bảo đảm giải pháp website bán hàng CANMAKE BEAUTY không chỉ đáp ứng chính xác mọi yêu cầu chức năng nghiệp vụ mà còn vận hành bền bỉ, an toàn và có độ trễ cực thấp trong môi trường chuỗi bán lẻ thực tế.
 
 ---
 
@@ -18,7 +18,7 @@ Chiến lược kiểm thử của dự án được xây dựng theo mô hình 
 
 Toàn bộ 203 kịch bản kiểm thử trong dự án `Omnichannel.Tests` đã được thực thi và đạt tỷ lệ vượt qua tuyệt đối 100% (**203 Passed, 0 Failed, 0 Skipped, 0 Warning**).
 
-###### Bảng 3.2: Tổng hợp kết quả các Bộ kiểm thử tự động trong giải pháp OMNI BEAUTY
+###### Bảng 3.2: Tổng hợp kết quả các Bộ kiểm thử tự động trong giải pháp CANMAKE BEAUTY
 
 | STT | Bộ kiểm thử (Test Suite Class) | Phân loại | Số Test Cases | Nghiệp vụ và Kỹ thuật trọng tâm kiểm chứng | Trạng thái |
 | :---: | :--- | :---: | :---: | :--- | :---: |
@@ -109,7 +109,7 @@ Bên cạnh bài kiểm tra chịu tải đặt hàng, hệ thống đã đượ
 - **Tổng thời gian tiêu thụ CPU:** Toàn bộ quá trình khởi động máy chủ web Kestrel, biên dịch view Razor và xử lý 200 requests benchmark liên tiếp chỉ tiêu tốn **1.64 giây CPU time**, minh chứng tính tối ưu của các biểu thức truy vấn LINQ và việc loại bỏ hoàn toàn các hàm I/O chặn đồng bộ (`Console.WriteLine`, `.Result`, `.Wait()`).
 
 ##### (2) Đánh giá trải nghiệm người dùng theo chuẩn Google Core Web Vitals
-Nhờ ứng dụng đồng bộ các hướng dẫn phát triển web hiện đại (Modern Web Best Practices), giao diện Storefront của OMNI BEAUTY đạt các chỉ số trải nghiệm người dùng xuất sắc theo chuẩn mực đo lường của Google:
+Nhờ ứng dụng đồng bộ các hướng dẫn phát triển web hiện đại (Modern Web Best Practices), giao diện Storefront của CANMAKE BEAUTY đạt các chỉ số trải nghiệm người dùng xuất sắc theo chuẩn mực đo lường của Google:
 - **Chỉ số hiển thị nội dung lớn nhất (Largest Contentful Paint - LCP):** Đạt **1.15 giây** (chuẩn Google yêu cầu < 2.5 giây). Kết quả này có được nhờ gắn thuộc tính ưu tiên tải `fetchpriority="high"` cho banner đầu tiên, đồng thời nén hình ảnh theo tỷ lệ kích thước vật lý chính xác.
 - **Chỉ số độ trễ tương tác (Interaction to Next Paint - INP):** Đạt **38 mili-giây** (chuẩn Google yêu cầu < 200 mili-giây). Logic giao diện được xây dựng bằng Alpine.js siêu nhẹ (< 15 KB), tách biệt hoàn toàn mã nguồn vào tệp `site.js` và áp dụng kỹ thuật Debounce 300ms cho các ô nhập liệu giúp luồng chính (Main Thread) của trình duyệt luôn ở trạng thái sẵn sàng tiếp nhận sự kiện nhấp chuột.
 - **Chỉ số ổn định thị giác (Cumulative Layout Shift - CLS):** Đạt mức **0.000 tuyệt đối** (chuẩn Google yêu cầu < 0.1). Toàn bộ các thẻ ảnh sản phẩm và khối quảng cáo đều được thiết lập sẵn chiều rộng, chiều cao cố định (`width`, `height`) kết hợp thuộc tính CSS hiện đại `aspect-ratio: 1/1`, triệt tiêu hoàn toàn hiện tượng xô lệch bố cục trang trong quá trình tải tài nguyên mạng.
@@ -129,7 +129,7 @@ Qua quá trình nghiên cứu lý luận, phân tích thiết kế hướng đ�
 
 ##### (2) Về mặt thực tiễn nghiệp vụ quản trị chuỗi bán lẻ mỹ phẩm
 - **Giải quyết triệt để bài toán Lô Hạn và Giảm thiểu hủy hàng (FEFO Engine):** Hệ thống đã thay thế hoàn toàn phương pháp quản lý hạn dùng thủ công bằng thuật toán FEFO tự động 2 giai đoạn. Việc chủ động phân loại mức độ rủi ro qua hệ thống Đèn giao thông Date và cơ chế xả hàng cận date tự động giúp doanh nghiệp giảm thiểu tới 85% nguy cơ thất thoát do mỹ phẩm hết hạn sử dụng.
-- **Bảo vệ sức khỏe người tiêu dùng với Trợ lý Da liễu AI (Skincare Lab):** Tính năng bóc tách chuẩn quốc tế INCI, chấm điểm an toàn EWG và tự động phát hiện cặp hoạt chất tương kỵ (như Retinol phối hợp AHA/BHA) mang lại giá trị nhân văn và khoa học vượt trội, nâng tầm vị thế thương hiệu OMNI BEAUTY trong mắt khách hàng hiện đại.
+- **Bảo vệ sức khỏe người tiêu dùng với Trợ lý Da liễu AI (Skincare Lab):** Tính năng bóc tách chuẩn quốc tế INCI, chấm điểm an toàn EWG và tự động phát hiện cặp hoạt chất tương kỵ (như Retinol phối hợp AHA/BHA) mang lại giá trị nhân văn và khoa học vượt trội, nâng tầm vị thế thương hiệu CANMAKE BEAUTY trong mắt khách hàng hiện đại.
 - **Hợp nhất trải nghiệm bán lẻ đa kênh O2O và Minh bạch tài chính:** Kết nối mượt mà giữa website trực tuyến và quầy bán hàng Showroom thông qua mô hình Click-and-Collect mã PIN 6 số, tích hợp cổng thanh toán VietQR Napas247 động, cùng cơ chế Kiểm toán két tiền mù (Blind Cash Audit) triệt tiêu hoàn toàn gian lận tiền mặt tại điểm bán.
 
 ---
@@ -145,11 +145,11 @@ Bên cạnh những kết quả nổi bật đã đạt được, hệ thống v
 
 ### 3.4.3. Định hướng phát triển và Lộ trình nâng cấp hệ thống (Roadmap v3.0+)
 
-Nhằm đưa OMNI BEAUTY trở thành giải pháp chuyển đổi số bán lẻ toàn diện, sẵn sàng cạnh tranh với các hệ sinh thái thương mại điện tử hàng đầu khu vực, lộ trình phát triển phiên bản v3.0+ được định hướng với 4 trọng tâm kỹ thuật đột phá:
+Nhằm đưa CANMAKE BEAUTY trở thành giải pháp chuyển đổi số bán lẻ toàn diện, sẵn sàng cạnh tranh với các hệ sinh thái thương mại điện tử hàng đầu khu vực, lộ trình phát triển phiên bản v3.0+ được định hướng với 4 trọng tâm kỹ thuật đột phá:
 
 ```
 +--------------------------------------------------------------------------------------------------------+
-| LỘ TRÌNH NÂNG CẤP KIẾN TRÚC VÀ TÍNH NĂNG ĐỘT PHÁ OMNI BEAUTY (ROADMAP v3.0+)                           |
+| LỘ TRÌNH NÂNG CẤP KIẾN TRÚC VÀ TÍNH NĂNG ĐỘT PHÁ CANMAKE BEAUTY (ROADMAP v3.0+)                           |
 +--------------------------------------------------------------------------------------------------------+
 | GIAI ĐOẠN 1 (Quý 1/2027)        | GIAI ĐOẠN 2 (Quý 2/2027)        | GIAI ĐOẠN 3 (Quý 3 - 4/2027)       |
 | HẠ TẦNG PHÂN TÁN CLOUD-NATIVE   | HỢP NHẤT ĐA SÀN & E-INVOICE     | TRẢI NGHIỆM BEAUTYTECH ĐỘT PHÁ     |
@@ -180,7 +180,7 @@ Nhằm đưa OMNI BEAUTY trở thành giải pháp chuyển đổi số bán l�
 
 ### TIỂU KẾT CHƯƠNG 3
 
-Chương 3 đã hoàn tất trọn vẹn sứ mệnh hiện thực hóa giải pháp phần mềm Quản lý Bán hàng cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY từ bản thiết kế trên giấy thành một hệ thống công nghệ thông tin vận hành thực tế vững chắc, tin cậy và đạt hiệu năng cao:
+Chương 3 đã hoàn tất trọn vẹn sứ mệnh hiện thực hóa giải pháp phần mềm Quản lý Bán hàng cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY từ bản thiết kế trên giấy thành một hệ thống công nghệ thông tin vận hành thực tế vững chắc, tin cậy và đạt hiệu năng cao:
 
 1. **Hiện thực hóa Kỹ thuật Vững chắc:** Toàn bộ giải pháp được tổ chức chuẩn mực theo kiến trúc Clean Architecture trên nền tảng .NET 8.0 LTS và SQL Server 2022. 5 thuật toán và giải pháp kỹ thuật cốt lõi (FEFO 2 giai đoạn, PBAC 3 tầng phân tán, Bóc tách da liễu EWG/INCI, Chuyển hướng SEO 301 tự động, và Thanh toán VietQR Napas247 kết hợp Sổ cái tài chính đích danh) đã được phân tích tường tận kèm mã nguồn C# thực tế.
 2. **Minh họa Giao diện Sống động:** 10 màn hình giao diện then chốt được chụp trực tiếp từ hệ thống đang chạy thực tế, chứng minh tính công thái học xuất sắc, tối ưu hóa triệt để cho từng nhóm người dùng chuyên biệt từ người tiêu dùng trực tuyến đến thủ kho và nhân viên thu ngân.
@@ -195,7 +195,7 @@ Chương 3 đã hoàn tất trọn vẹn sứ mệnh hiện thực hóa giải p
 
 Trong bối cảnh cuộc Cách mạng Công nghiệp lần thứ tư đang thúc đẩy mạnh mẽ quá trình chuyển đổi số trong mọi lĩnh vực kinh tế, mô hình kinh doanh bán lẻ truyền thống đang dần nhường chỗ cho mô hình Bán lẻ Hợp nhất Đa kênh (Omnichannel Retail). Đối với ngành bán lẻ mỹ phẩm và chăm sóc sắc đẹp - một thị trường có tốc độ tăng trưởng phi mã nhưng lại đặt ra những thách thức vô cùng khắc nghiệt về quản trị hạn sử dụng ngắn, bảo mật thông tin và yêu cầu tư vấn an toàn da liễu chuyên sâu - việc sở hữu một hệ thống thông tin quản lý hiện đại, linh hoạt và có khả năng tích hợp cao là yếu tố mang tính sống còn quyết định năng lực cạnh tranh của doanh nghiệp.
 
-Khóa luận tốt nghiệp với đề tài **"Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY"** đã hoàn thành xuất sắc toàn bộ các mục tiêu nghiên cứu và nhiệm vụ phát triển phần mềm đã đề ra:
+Khóa luận tốt nghiệp với đề tài **"Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY"** đã hoàn thành xuất sắc toàn bộ các mục tiêu nghiên cứu và nhiệm vụ phát triển phần mềm đã đề ra:
 
 - **Về mặt cơ sở lý luận:** Khóa luận đã hệ thống hóa sâu sắc các nguyên lý cốt lõi về Hệ thống thông tin quản lý (MIS), mô hình chuyển dịch từ Đa kênh rời rạc (Multi-channel) sang Đa kênh hợp nhất (Omnichannel), nghiên cứu thấu đáo các quy chuẩn quản lý mỹ phẩm theo Hiệp định Mỹ phẩm ASEAN (ACCSQ), hệ thống phân loại danh pháp hóa mỹ phẩm quốc tế INCI và bộ tiêu chuẩn an toàn người tiêu dùng EWG Skin Deep®.
 - **Về mặt phân tích và thiết kế:** Ứng dụng bài bản phương pháp luận Phân tích và Thiết kế Hướng đối tượng (OOAD) kết hợp ngôn ngữ mô hình hóa UML để xây dựng mô hình quy trình vận hành toàn diện (To-Be). Hệ thống đã định danh chính xác 11 tác nhân người dùng, phân rã 17 phân hệ nghiệp vụ bao quát 52 điểm chạm thực tế, thiết lập ma trận 51 quyền hạn nguyên tử PBAC, và hoàn thiện lược đồ cơ sở dữ liệu quy mô 65 bảng dữ liệu được chứng minh đạt chuẩn 3NF tuyệt đối.
@@ -235,7 +235,7 @@ Dựa trên những kết quả nghiên cứu và thực nghiệm đạt đượ
 - **Đầu tư mở rộng phòng thực hành công nghệ bán lẻ (Retail Lab):** Đề xuất Học viện nghiên cứu xây dựng các mô hình phòng thực nghiệm mô phỏng quy trình vận hành Showroom bán lẻ thực tế (với đầy đủ máy POS, máy quét mã vạch, máy in hóa đơn, màn hình phụ CFD) để sinh viên có cơ hội cọ xát, kiểm thử phần mềm trong điều kiện môi trường công thái học thực tiễn.
 
 ##### (3) Định hướng hoàn thiện đề tài trong tương lai
-- Tác giả sẽ tiếp tục phối hợp với các kỹ sư hạ tầng và chuyên gia da liễu để hiện thực hóa Lộ trình nâng cấp v3.0+: tích hợp hạ tầng phân tán Redis/RedLock, kết nối Open API đồng bộ với các sàn Shopee/TikTok Shop, hoàn thiện cổng hóa đơn điện tử theo Thông tư 78/2021/TT-BTC và nghiên cứu ứng dụng công nghệ WebAssembly AR để ra mắt tính năng thử trang điểm ảo trên trình duyệt di động, đưa giải pháp OMNI BEAUTY trở thành một hệ sinh thái phần mềm bán lẻ mỹ phẩm toàn diện, hiện đại và dẫn đầu thị trường.
+- Tác giả sẽ tiếp tục phối hợp với các kỹ sư hạ tầng và chuyên gia da liễu để hiện thực hóa Lộ trình nâng cấp v3.0+: tích hợp hạ tầng phân tán Redis/RedLock, kết nối Open API đồng bộ với các sàn Shopee/TikTok Shop, hoàn thiện cổng hóa đơn điện tử theo Thông tư 78/2021/TT-BTC và nghiên cứu ứng dụng công nghệ WebAssembly AR để ra mắt tính năng thử trang điểm ảo trên trình duyệt di động, đưa giải pháp CANMAKE BEAUTY trở thành một hệ sinh thái phần mềm bán lẻ mỹ phẩm toàn diện, hiện đại và dẫn đầu thị trường.
 
 ---
 

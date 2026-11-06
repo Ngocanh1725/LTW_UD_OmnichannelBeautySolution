@@ -1,6 +1,6 @@
 # BÁO CÁO PHÂN TÍCH, ĐỐI SÁNH CHUYÊN SÂU 4 KHÓA LUẬN MẪU & ĐỀ CƯƠNG MỤC LỤC TỐI ƯU (CHUẨN ĐIỂM A+)
 
-**Đề tài mục tiêu:** *Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY*  
+**Đề tài mục tiêu:** *Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY*  
 **Ngành:** Hệ thống thông tin (Định hướng Hệ thống thông tin Quản lý & Thương mại điện tử Đa kênh)  
 **Cơ sở đào tạo:** Học viện Hành chính và Quản trị công (APAG)
 
@@ -79,9 +79,9 @@ Qua quá trình rà soát độc lập và đối chiếu từng trang của 4 c
 
 ---
 
-### 2\. Bảng Ma trận Đối sánh Tổng hợp 4 Khóa luận Mẫu & Định vị Đề tài OMNI BEAUTY
+### 2\. Bảng Ma trận Đối sánh Tổng hợp 4 Khóa luận Mẫu & Định vị Đề tài CANMAKE BEAUTY
 
-| Tiêu chí đánh giá | KL1: Vũ Thị Minh Huyền (*Thời trang Star*) | KL2: Trương Quốc Việt (*BĐS Quốc Việt*) | KL3: Nguyễn Thị Ngọc Thương (*NT Flowers*) | KL4: Đặng Văn Vượng (*ĐTDĐ Hoàng Minh*) | Định chuẩn Tối ưu cho OMNI BEAUTY |
+| Tiêu chí đánh giá | KL1: Vũ Thị Minh Huyền (*Thời trang Star*) | KL2: Trương Quốc Việt (*BĐS Quốc Việt*) | KL3: Nguyễn Thị Ngọc Thương (*NT Flowers*) | KL4: Đặng Văn Vượng (*ĐTDĐ Hoàng Minh*) | Định chuẩn Tối ưu cho CANMAKE BEAUTY |
 | :---- | :---- | :---- | :---- | :---- | :---- |
 | **1\. Quy mô bài toán nghiệp vụ** | 1 công ty thời trang (B2C \+ Kho đơn giản, 10 bảng CSDL) | 1 văn phòng môi giới BĐS (Ký gửi \+ Hợp đồng, 25 bảng CSDL) | 1 cửa hàng hoa nhỏ lẻ (B2C cơ bản, 12 bảng CSDL) | 1 cửa hàng điện thoại nhỏ (B2C cơ bản, 10 bảng CSDL) | **Chuỗi cửa hàng mỹ phẩm Đa kênh (Omnichannel: E-Commerce \+ Smart POS \+ Kho Lô FEFO \+ CRM/AI \+ Tài chính, 65 bảng 3NF)** |
 | **2\. Nền tảng & Kiến trúc Công nghệ** | PHP thuần \+ MySQL \+ Tailwind CSS | C\# ASP.NET MVC \+ EF \+ SQL Server | C\# ASP.NET MVC \+ EF \+ SQL Server | PHP MVC \+ MySQL \+ Bootstrap | **.NET 8 (C\# 12\) Clean Architecture 4 tầng \+ EF Core 8 \+ SQL Server (3NF) \+ SignalR \+ HybridCache** |
@@ -93,17 +93,17 @@ Qua quá trình rà soát độc lập và đối chiếu từng trang của 4 c
 
 ---
 
-### 3\. Đúc kết "10 Nguyên tắc Vàng" giúp Khóa luận OMNI BEAUTY đạt điểm Tuyệt đối
+### 3\. Đúc kết "10 Nguyên tắc Vàng" giúp Khóa luận CANMAKE BEAUTY đạt điểm Tuyệt đối
 
-Từ những ưu điểm và sai sót thực tế của 4 bài khóa luận trên, khi viết báo cáo cho **Chuỗi cửa hàng mỹ phẩm OMNI BEAUTY**, bạn cần tuân thủ 10 nguyên tắc sau:
+Từ những ưu điểm và sai sót thực tế của 4 bài khóa luận trên, khi viết báo cáo cho **Chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY**, bạn cần tuân thủ 10 nguyên tắc sau:
 
 2. **Cân đối dung lượng 3 Chương theo "Tỷ lệ Vàng" (20% – 50% – 30%):**  
    - **Phần Mở đầu (\~10–12 trang):** Đầy đủ 8 mục chuẩn APAG.  
-   - **Chương 1 (\~22–25 trang):** Cơ sở lý luận về Hệ thống thông tin quản lý bán hàng đa kênh (Omnichannel), cơ sở pháp lý ngành mỹ phẩm, nền tảng công nghệ `.NET 8 Clean Architecture` và tổng quan chuỗi cửa hàng OMNI BEAUTY.  
+   - **Chương 1 (\~22–25 trang):** Cơ sở lý luận về Hệ thống thông tin quản lý bán hàng đa kênh (Omnichannel), cơ sở pháp lý ngành mỹ phẩm, nền tảng công nghệ `.NET 8 Clean Architecture` và tổng quan chuỗi cửa hàng CANMAKE BEAUTY.  
    - **Chương 2 (\~60–70 trang):** Khảo sát hiện trạng và Phân tích – Thiết kế hệ thống (tập trung hoàn toàn vào *Analysis & Design*: BFD, Use Case, Activity, Sequence, Class BCE, CSDL 3NF và Thiết kế UI/UX). **Tuyệt đối không nhồi nhét phần Kiểm thử vào Chương 2** như bài của Minh Huyền hay Văn Vượng.  
    - **Chương 3 (\~35–40 trang):** Triển khai cài đặt hệ thống, Kết quả đạt được (Trình diễn giải pháp kỹ thuật kèm code \+ Giao diện Storefront/POS/Warehouse/Admin), Kiểm thử toàn diện (Unit Test, Integration Test 12 tài khoản PBAC, Concurrency Test) và Đánh giá – Hướng phát triển.  
 2. **Nâng tầm Bài toán từ "Cửa hàng đơn lẻ" lên "Chuỗi cửa hàng Bán lẻ Đa kênh (Omnichannel Retail Chain)":**  
-   - 3/4 bài mẫu chỉ dừng ở một cửa hàng nhỏ lẻ (bán hoa, bán điện thoại). Với **OMNI BEAUTY**, bạn sở hữu lợi thế cạnh tranh tuyệt đối khi giải quyết bài toán **Chuỗi cửa hàng & Kho tổng** (đồng bộ tức thời giữa Website Thương mại điện tử, Quầy thu ngân Smart POS tại từng Showroom, Kho tổng và Điều chuyển hàng hóa liên chi nhánh).  
+   - 3/4 bài mẫu chỉ dừng ở một cửa hàng nhỏ lẻ (bán hoa, bán điện thoại). Với **CANMAKE BEAUTY**, bạn sở hữu lợi thế cạnh tranh tuyệt đối khi giải quyết bài toán **Chuỗi cửa hàng & Kho tổng** (đồng bộ tức thời giữa Website Thương mại điện tử, Quầy thu ngân Smart POS tại từng Showroom, Kho tổng và Điều chuyển hàng hóa liên chi nhánh).  
 3. **Khắc họa rõ nét "Đặc thù Ngành Dược – Mỹ phẩm" trong từng trang viết:**  
    - Khác với quần áo hay điện thoại, mỹ phẩm gắn liền với **an toàn sức khỏe làn da và hạn sử dụng nghiêm ngặt**. Hãy làm nổi bật:  
      - Thuật toán quản lý lô sản xuất và xuất kho theo hạn dùng **FEFO (First-Expired, First-Out)** kèm cơ chế cảnh báo cận date & định giá xả hàng tự động.  
@@ -119,19 +119,19 @@ Từ những ưu điểm và sai sót thực tế của 4 bài khóa luận trê
 
 ---
 
-## PHẦN II: ĐỀ CƯƠNG MỤC LỤC HOÀN CHỈNH, TỐI ƯU CHO BÁO CÁO KHÓA LUẬN "OMNI BEAUTY"
+## PHẦN II: ĐỀ CƯƠNG MỤC LỤC HOÀN CHỈNH, TỐI ƯU CHO BÁO CÁO KHÓA LUẬN "CANMAKE BEAUTY"
 
-Dưới đây là bản **Đề cương Mục lục Chi tiết (Master Outline)** được thiết kế chuẩn hóa theo đúng quy định trình bày Khóa luận tốt nghiệp của Học viện Hành chính và Quản trị công (APAG), kết hợp hoàn hảo với kiến trúc kỹ thuật của dự án **OMNI BEAUTY**.
+Dưới đây là bản **Đề cương Mục lục Chi tiết (Master Outline)** được thiết kế chuẩn hóa theo đúng quy định trình bày Khóa luận tốt nghiệp của Học viện Hành chính và Quản trị công (APAG), kết hợp hoàn hảo với kiến trúc kỹ thuật của dự án **CANMAKE BEAUTY**.
 
 ---
 
 ### KHUNG TRÌNH BÀY ĐẦU BÁO CÁO (FRONT MATTER)
 
-* **TRANG BÌA CHÍNH & TRANG BÌA PHỤ** *(Tên đề tài: "XÂY DỰNG WEBSITE QUẢN LÝ BÁN HÀNG CHO CHUỖI CỬA HÀNG MỸ PHẨM OMNI BEAUTY" – Ngành: Hệ thống thông tin)*  
+* **TRANG BÌA CHÍNH & TRANG BÌA PHỤ** *(Tên đề tài: "XÂY DỰNG WEBSITE QUẢN LÝ BÁN HÀNG CHO CHUỖI CỬA HÀNG MỸ PHẨM CANMAKE BEAUTY" – Ngành: Hệ thống thông tin)*  
 * **LỜI CẢM ƠN**  
 * **LỜI CAM ĐOAN**  
 * **MỤC LỤC**  
-* **DANH MỤC CÁC TỪ VIẾT TẮT VÀ THUẬT NGỮ CHUYÊN NGÀNH** *(Thiết kế bảng 3 cột: Từ viết tắt/Thuật ngữ \| Tiếng Anh đầy đủ \| Ý nghĩa & Ứng dụng tại hệ thống OMNI BEAUTY: FEFO, PBAC, O2O, BOPIS, POS, SKU, PAO, COGS, COD, ORM, CSRF, XSS...)*  
+* **DANH MỤC CÁC TỪ VIẾT TẮT VÀ THUẬT NGỮ CHUYÊN NGÀNH** *(Thiết kế bảng 3 cột: Từ viết tắt/Thuật ngữ \| Tiếng Anh đầy đủ \| Ý nghĩa & Ứng dụng tại hệ thống CANMAKE BEAUTY: FEFO, PBAC, O2O, BOPIS, POS, SKU, PAO, COGS, COD, ORM, CSRF, XSS...)*  
 * **DANH MỤC BẢNG BIỂU**  
 * **DANH MỤC SƠ ĐỒ & BIỂU ĐỒ**  
 * **DANH MỤC HÌNH ẢNH GIAO DIỆN**
@@ -144,7 +144,7 @@ Dưới đây là bản **Đề cương Mục lục Chi tiết (Master Outline)*
 
 * *Bối cảnh vĩ mô:* Sự bùng nổ của chuyển đổi số ngành bán lẻ và xu hướng dịch chuyển từ thương mại điện tử đơn kênh sang mô hình **Bán lẻ hợp nhất đa kênh (Omnichannel Retail / O2O)** trong ngành mỹ phẩm và chăm sóc sắc đẹp tại Việt Nam.  
 * *Đặc thù khắt khe của ngành kinh doanh mỹ phẩm chuỗi:* Hàng hóa có hàng nghìn biến thể (màu sắc Swatch, dung tích, hoạt chất), nhạy cảm cao với **hạn sử dụng (Date/Lot)** và điều kiện bảo quản; khách hàng đòi hỏi tư vấn cá nhân hóa theo đúng loại da/tình trạng da và kiểm tra tương kỵ hoạt chất.  
-* *Thực trạng cấp thiết tại chuỗi cửa hàng OMNI BEAUTY:* Sự đứt gãy dữ liệu giữa kênh bán hàng trực tuyến (Website/Mạng xã hội) và các Showroom vật lý (Quận 1, Ba Đình) cùng Tổng kho phân phối; rủi ro bán lố tồn kho (Overselling), thất thoát hàng cận date do xuất kho cảm tính, đối soát tiền mặt ca thu ngân POS và tiền thu hộ COD thủ công.  
+* *Thực trạng cấp thiết tại chuỗi cửa hàng CANMAKE BEAUTY:* Sự đứt gãy dữ liệu giữa kênh bán hàng trực tuyến (Website/Mạng xã hội) và các Showroom vật lý (Quận 1, Ba Đình) cùng Tổng kho phân phối; rủi ro bán lố tồn kho (Overselling), thất thoát hàng cận date do xuất kho cảm tính, đối soát tiền mặt ca thu ngân POS và tiền thu hộ COD thủ công.  
 * *Ý nghĩa của việc thực hiện đề tài:* Xây dựng nền tảng website quản lý bán hàng đa kênh tập trung, chuẩn hóa toàn diện quy trình từ Storefront, Smart POS, Kho lô FEFO đến CRM và Tài chính.
 
 **2\. Tổng quan tình hình nghiên cứu**
@@ -158,7 +158,7 @@ Dưới đây là bản **Đề cương Mục lục Chi tiết (Master Outline)*
 **3\. Mục tiêu và nhiệm vụ nghiên cứu**
 
 * **3.1. Mục tiêu nghiên cứu:**  
-  * *Mục tiêu tổng quát:* Thiết kế và xây dựng thành công Hệ thống website quản lý bán hàng đa kênh cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY trên nền tảng .NET 8 Clean Architecture.  
+  * *Mục tiêu tổng quát:* Thiết kế và xây dựng thành công Hệ thống website quản lý bán hàng đa kênh cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY trên nền tảng .NET 8 Clean Architecture.  
   * *6 Mục tiêu cụ thể (Chiến lược):*  
     1. Quản trị bảo mật đa chi nhánh với cơ chế phân quyền động 3 tầng (**Granular Dynamic PBAC**).  
     2. Tối ưu hóa trải nghiệm mua sắm mỹ phẩm trực tuyến và tư vấn da liễu thông minh (**SmartFilter, Hoạt chất & AI Beauty Advisor**).  
@@ -168,14 +168,14 @@ Dưới đây là bản **Đề cương Mục lục Chi tiết (Master Outline)*
     6. Số hóa Sổ cái tài chính, hạch toán giá vốn đích danh theo lô xuất (**Batch-Specific COGS**), đối soát công nợ NCC/COD và hệ thống cảnh báo vận hành thời gian thực (**SignalR & AI Alerts**).  
 * **3.2. Nhiệm vụ nghiên cứu:**  
   * Nhiệm vụ về mặt lý thuyết (Hệ thống hóa lý luận MIS, Omnichannel, pháp lý mỹ phẩm, kiến trúc .NET 8).  
-  * Nhiệm vụ về mặt thực tiễn (Khảo sát chuỗi OMNI BEAUTY, phân tích thiết kế OOAD, chuẩn hóa CSDL 3NF, lập trình, kiểm thử đa tầng).
+  * Nhiệm vụ về mặt thực tiễn (Khảo sát chuỗi CANMAKE BEAUTY, phân tích thiết kế OOAD, chuẩn hóa CSDL 3NF, lập trình, kiểm thử đa tầng).
 
 **4\. Đối tượng và phạm vi nghiên cứu**
 
-* **4.1. Đối tượng nghiên cứu:** Các quy trình nghiệp vụ quản lý bán lẻ đa kênh, điều phối tồn kho theo lô hạn dùng FEFO, chăm sóc khách hàng và kiến trúc phần mềm web phục vụ chuỗi cửa hàng mỹ phẩm OMNI BEAUTY.  
+* **4.1. Đối tượng nghiên cứu:** Các quy trình nghiệp vụ quản lý bán lẻ đa kênh, điều phối tồn kho theo lô hạn dùng FEFO, chăm sóc khách hàng và kiến trúc phần mềm web phục vụ chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY.  
 * **4.2. Phạm vi nghiên cứu:**  
   * *Phạm vi về nội dung:* Tập trung giải quyết trọn vẹn 2 phân vùng: Phân hệ Khách hàng (Storefront E-Commerce & Cổng thành viên) và Phân hệ Quản trị Đa kênh (Admin Dashboard, POS Terminal, Quản lý Kho & Điều chuyển, CRM & Loyalty, CMS, Tài chính & Bảo mật PBAC).  
-  * *Phạm vi về không gian:* Chuỗi cửa hàng mỹ phẩm OMNI BEAUTY (bao gồm Tổng kho phân phối trung tâm và các Showroom chi nhánh như Flagship Quận 1, Showroom Ba Đình).  
+  * *Phạm vi về không gian:* Chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY (bao gồm Tổng kho phân phối trung tâm và các Showroom chi nhánh như Flagship Quận 1, Showroom Ba Đình).  
   * *Phạm vi về thời gian:* Khảo sát, phân tích, thiết kế và triển khai thực nghiệm từ tháng 11/2025 đến tháng 04/2026.  
   * *Phạm vi về khách thể (Actors):* 6 nhóm tác nhân tương tác trực tiếp gồm Quản trị viên tối cao (`SuperAdmin`), Quản lý chi nhánh (`StoreManager`), Thu ngân tại quầy (`Cashier`), Nhân viên thủ kho (`WarehouseStaff`), Biên tập viên nội dung (`ContentEditor`) và Khách hàng (`Customer`), cùng các hệ thống đối tác ngoài (`VNPay`, `MoMo`, `VietQR Napas247`, `Giao Hàng Nhanh - GHN`).
 
@@ -183,7 +183,7 @@ Dưới đây là bản **Đề cương Mục lục Chi tiết (Master Outline)*
 
 * **5.1. Phương pháp nghiên cứu:**  
   * Phương pháp thu thập, nghiên cứu tài liệu và văn bản pháp quy ngành mỹ phẩm/TMĐT.  
-  * Phương pháp khảo sát thực tiễn và phỏng vấn nghiệp vụ tại các điểm bán/kho của chuỗi OMNI BEAUTY.  
+  * Phương pháp khảo sát thực tiễn và phỏng vấn nghiệp vụ tại các điểm bán/kho của chuỗi CANMAKE BEAUTY.  
   * Phương pháp phân tích và thiết kế hệ thống hướng đối tượng (**OOAD** với ngôn ngữ mô hình hóa thống nhất **UML 2.5**: Use Case, Activity, Sequence, BCE Class Diagram) kết hợp chuẩn hóa cơ sở dữ liệu quan hệ dạng chuẩn 3 (**3NF**).  
   * Phương pháp thực nghiệm lập trình theo kiến trúc sạch (**Clean Architecture 4 tầng**).  
   * Phương pháp kiểm thử tự động và đánh giá thực nghiệm (Unit Test & Integration Test với `xUnit`, kiểm thử API với `Postman`, kiểm thử chịu tải đồng thời).  
@@ -194,11 +194,11 @@ Dưới đây là bản **Đề cương Mục lục Chi tiết (Master Outline)*
 
 **6\. Giả thuyết nghiên cứu**
 
-* Đặt ra 6 giả thuyết khoa học kỳ vọng hệ thống OMNI BEAUTY giải quyết triệt để bài toán bán lố tồn kho, triệt tiêu hàng hết hạn nhờ FEFO, rút ngắn thời gian thanh toán POS và nâng cao tỷ lệ khách hàng quay lại nhờ hồ sơ da CRM.
+* Đặt ra 6 giả thuyết khoa học kỳ vọng hệ thống CANMAKE BEAUTY giải quyết triệt để bài toán bán lố tồn kho, triệt tiêu hàng hết hạn nhờ FEFO, rút ngắn thời gian thanh toán POS và nâng cao tỷ lệ khách hàng quay lại nhờ hồ sơ da CRM.
 
 **7\. Đóng góp của khóa luận**
 
-* Đóng góp về mặt lý luận & học thuật; Đóng góp về mặt thực tiễn vận hành cho chuỗi OMNI BEAUTY.
+* Đóng góp về mặt lý luận & học thuật; Đóng góp về mặt thực tiễn vận hành cho chuỗi CANMAKE BEAUTY.
 
 **8\. Bố cục của khóa luận**
 
@@ -208,7 +208,7 @@ Dưới đây là bản **Đề cương Mục lục Chi tiết (Master Outline)*
 
 ### PHẦN NỘI DUNG
 
-#### CHƯƠNG 1: CƠ SỞ LÝ LUẬN VỀ HỆ THỐNG THÔNG TIN QUẢN LÝ BÁN HÀNG ĐA KÊNH VÀ TỔNG QUAN CHUỖI CỬA HÀNG MỸ PHẨM OMNI BEAUTY (Dự kiến: 22 – 25 trang)
+#### CHƯƠNG 1: CƠ SỞ LÝ LUẬN VỀ HỆ THỐNG THÔNG TIN QUẢN LÝ BÁN HÀNG ĐA KÊNH VÀ TỔNG QUAN CHUỖI CỬA HÀNG MỸ PHẨM CANMAKE BEAUTY (Dự kiến: 22 – 25 trang)
 
 **1.1. Cơ sở lý luận về Hệ thống thông tin quản lý và Thương mại điện tử đa kênh (Omnichannel)**
 
@@ -223,9 +223,9 @@ Dưới đây là bản **Đề cương Mục lục Chi tiết (Master Outline)*
 **1.2. Cơ sở pháp lý điều chỉnh hoạt động kinh doanh mỹ phẩm trực tuyến và sự đáp ứng của hệ thống** *(Kế thừa điểm sáng của KL2 \- Trương Quốc Việt)*
 
 * **1.2.1. Quy định về quản lý và công bố sản phẩm mỹ phẩm (Thông tư 06/2011/TT-BYT & Hiệp định Mỹ phẩm ASEAN):**  
-  * *Sự đáp ứng trên hệ thống OMNI BEAUTY:* Thiết kế các trường lưu trữ Số phiếu tiếp nhận công bố mỹ phẩm của Cục Quản lý Dược (`CosmeticNotificationNumber`), nước xuất xứ, đơn vị nhập khẩu và cơ chế khóa tự động các lô hàng chạm ngưỡng an toàn hạn dùng (\< 30 ngày).  
+  * *Sự đáp ứng trên hệ thống CANMAKE BEAUTY:* Thiết kế các trường lưu trữ Số phiếu tiếp nhận công bố mỹ phẩm của Cục Quản lý Dược (`CosmeticNotificationNumber`), nước xuất xứ, đơn vị nhập khẩu và cơ chế khóa tự động các lô hàng chạm ngưỡng an toàn hạn dùng (\< 30 ngày).  
 * **1.2.2. Quy định về giao dịch thương mại điện tử và bảo vệ dữ liệu cá nhân (Nghị định 52/2013/NĐ-CP, Nghị định 85/2021/NĐ-CP & Nghị định 13/2023/NĐ-CP):**  
-  * *Sự đáp ứng trên hệ thống OMNI BEAUTY:* Bảo mật dữ liệu hồ sơ làn da và tiền sử dị ứng của khách hàng (`CustomerProfiles`), mã hóa mật khẩu một chiều chuẩn PBKDF2-SHA256, kiểm soát truy cập đa tầng PBAC và lưu vết nhật ký kiểm toán bất biến (`AuditLogs`).
+  * *Sự đáp ứng trên hệ thống CANMAKE BEAUTY:* Bảo mật dữ liệu hồ sơ làn da và tiền sử dị ứng của khách hàng (`CustomerProfiles`), mã hóa mật khẩu một chiều chuẩn PBKDF2-SHA256, kiểm soát truy cập đa tầng PBAC và lưu vết nhật ký kiểm toán bất biến (`AuditLogs`).
 
 **1.3. Cơ sở lý luận về nền tảng công nghệ phát triển hệ thống**
 
@@ -236,18 +236,18 @@ Dưới đây là bản **Đề cương Mục lục Chi tiết (Master Outline)*
 * **1.3.3. Công nghệ giao tiếp thời gian thực (SignalR WebSockets), giao diện hiện đại (Tailwind CSS, HTMX, Alpine.js) và tích hợp API đối tác (VietQR Napas247, VNPay, MoMo, GHN).**  
 * **1.3.4. Phương pháp phân tích và thiết kế hệ thống hướng đối tượng (OOAD với UML và mô hình BCE: Boundary – Control – Entity).**
 
-**1.4. Tổng quan về Chuỗi cửa hàng mỹ phẩm OMNI BEAUTY**
+**1.4. Tổng quan về Chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY**
 
 * **1.4.1. Giới thiệu chung, tầm nhìn, sứ mệnh và mô hình chuỗi điểm bán:**  
-  * Hệ sinh thái OMNI BEAUTY gồm Tổng kho phân phối trung tâm (`WH-MN`) và hệ thống các Showroom bán lẻ (`SH-Q1` Flagship Quận 1, `SH-BD` Showroom Ba Đình...).  
+  * Hệ sinh thái CANMAKE BEAUTY gồm Tổng kho phân phối trung tâm (`WH-MN`) và hệ thống các Showroom bán lẻ (`SH-Q1` Flagship Quận 1, `SH-BD` Showroom Ba Đình...).  
 * **1.4.2. Cơ cấu tổ chức nhân sự và chức năng các bộ phận:**  
-  * Ban Giám đốc (SuperAdmin), Quản lý Chi nhánh (StoreManager), Bộ phận Thu ngân & Tư vấn viên Soi da tại quầy (Cashier & Beauty Consultant), Bộ phận Kho vận & Điều phối (WarehouseStaff), Bộ phận Marketing & Nội dung (ContentEditor), Bộ phận Tài chính – Kế toán. *(Kèm Sơ đồ 1.1: Sơ đồ cơ cấu tổ chức chuỗi cửa hàng mỹ phẩm OMNI BEAUTY)*.
+  * Ban Giám đốc (SuperAdmin), Quản lý Chi nhánh (StoreManager), Bộ phận Thu ngân & Tư vấn viên Soi da tại quầy (Cashier & Beauty Consultant), Bộ phận Kho vận & Điều phối (WarehouseStaff), Bộ phận Marketing & Nội dung (ContentEditor), Bộ phận Tài chính – Kế toán. *(Kèm Sơ đồ 1.1: Sơ đồ cơ cấu tổ chức chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY)*.
 
 **Tiểu kết Chương 1**
 
 ---
 
-#### CHƯƠNG 2: KHẢO SÁT, PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG WEBSITE QUẢN LÝ BÁN HÀNG CHO CHUỖI CỬA HÀNG MỸ PHẨM OMNI BEAUTY (Dự kiến: 60 – 70 trang)
+#### CHƯƠNG 2: KHẢO SÁT, PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG WEBSITE QUẢN LÝ BÁN HÀNG CHO CHUỖI CỬA HÀNG MỸ PHẨM CANMAKE BEAUTY (Dự kiến: 60 – 70 trang)
 
 **2.1. Khảo sát hiện trạng và xác lập bài toán nghiệp vụ**
 
@@ -256,14 +256,14 @@ Dưới đây là bản **Đề cương Mục lục Chi tiết (Master Outline)*
 * **2.1.2. Đánh giá các hạn chế, "điểm nghẽn" của mô hình hiện tại:**  
   * (1) Xung đột tồn kho giữa kênh Online và tại quầy dẫn đến bán lố (Overselling); (2) Không kiểm soát được hạn sử dụng theo lô dẫn đến nhân viên lấy hàng lô mới bán trước, lô cũ hết hạn phải tiêu hủy; (3) Thiếu công cụ tra cứu nhanh thành phần hoạt chất và tiền sử dị ứng da của khách; (4) Rủi ro thất thoát tiền mặt tại két thu ngân POS và sai lệch đối soát COD; (5) Phân quyền lỏng lẻo, nhân viên chi nhánh này có thể xem hoặc sửa nhầm dữ liệu của chi nhánh khác.  
 * **2.1.3. Đề xuất quy trình nghiệp vụ bán lẻ đa kênh số hóa mới (To-Be Omnichannel Process):**  
-  * *(Kèm Sơ đồ 2.2: Sơ đồ Swimlane quy trình bán hàng đa kênh và điều phối kho FEFO đề xuất tại OMNI BEAUTY)*.
+  * *(Kèm Sơ đồ 2.2: Sơ đồ Swimlane quy trình bán hàng đa kênh và điều phối kho FEFO đề xuất tại CANMAKE BEAUTY)*.
 
 **2.2. Phân tích yêu cầu hệ thống và Mô hình hóa chức năng tổng quát**
 
 * **2.2.1. Xác định các tác nhân hệ thống (Actors) và phạm vi truy cập:**  
   * Phân tích chi tiết 6 nhóm tác nhân con người (`SuperAdmin`, `StoreManager`, `Cashier`, `WarehouseStaff`, `ContentEditor`, `Customer`), 1 tác nhân tiến trình nền tự động (`AlertBackgroundWorker`) và 4 tác nhân hệ thống ngoài (`VNPay`, `MoMo`, `VietQR Napas247`, `GHN Express`). *(Kèm Bảng 2.1: Bảng đặc tả các tác nhân tham gia hệ thống)*.  
 * **2.2.2. Xây dựng Biểu đồ phân rã chức năng (BFD / BPC):**  
-  * Phân rã hệ thống thành các phân hệ nghiệp vụ cốt lõi từ tổng quát đến chi tiết. *(Kèm Sơ đồ 2.3: Biểu đồ phân rã chức năng tổng quát của hệ thống OMNI BEAUTY và các sơ đồ phân rã nhánh con)*.  
+  * Phân rã hệ thống thành các phân hệ nghiệp vụ cốt lõi từ tổng quát đến chi tiết. *(Kèm Sơ đồ 2.3: Biểu đồ phân rã chức năng tổng quát của hệ thống CANMAKE BEAUTY và các sơ đồ phân rã nhánh con)*.  
 * **2.2.3. Phân tích chi tiết yêu cầu chức năng theo phân hệ:**  
   * *(Kèm Bảng 2.2: Bảng danh mục yêu cầu chức năng chi tiết theo từng nhóm phân hệ Storefront & Admin Back-office)*.  
 * **2.2.4. Phân tích yêu cầu phi chức năng (Non-Functional Requirements):**  
@@ -272,7 +272,7 @@ Dưới đây là bản **Đề cương Mục lục Chi tiết (Master Outline)*
 **2.3. Mô hình hóa nghiệp vụ hướng đối tượng bằng UML (Use Case, Activity & Sequence Diagrams)**
 
 * **2.3.1. Mô hình hóa Use Case tổng quát và phân rã theo tác nhân:**  
-  * *Sơ đồ 2.4:* Biểu đồ Use Case tổng quát hệ thống OMNI BEAUTY.  
+  * *Sơ đồ 2.4:* Biểu đồ Use Case tổng quát hệ thống CANMAKE BEAUTY.  
   * *Sơ đồ 2.5 – 2.9:* Các biểu đồ Use Case phân rã theo tác nhân (`SuperAdmin & Bảo mật PBAC`, `StoreManager & Tài chính`, `Cashier & Smart POS`, `WarehouseStaff & Kho FEFO`, `Customer & AI BeautyTech`).  
 * **2.3.2. Đặc tả chi tiết Use Case, Biểu đồ Hoạt động (Activity) và Biểu đồ Tuần tự (Sequence) cho 8 nghiệp vụ cốt lõi nhất:** *(Trình bày theo cặp: Bảng Đặc tả Use Case chuẩn \-\> Biểu đồ Hoạt động / Biểu đồ Tuần tự UML \-\> Phân tích luồng thông điệp kỹ thuật)*  
   1. **Nghiệp vụ 1:** Quản trị Ma trận Phân quyền Động 3 tầng (Dynamic PBAC) và Cô lập dữ liệu đa chi nhánh *(Bảng đặc tả \+ Biểu đồ hoạt động \+ Biểu đồ tuần tự SD-01)*.  

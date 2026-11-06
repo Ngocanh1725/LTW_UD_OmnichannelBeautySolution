@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "Quản Lý Nhân Sự & Phân Quyền";
     Layout = "_AdminLayout";
+    var departments = ViewBag.Departments as IEnumerable<Omnichannel.Domain.Entities.Department> ?? Enumerable.Empty<Omnichannel.Domain.Entities.Department>();
+    var selectedDeptId = ViewBag.SelectedDepartmentId as int?;
 }
 
 <!-- Admin Page Header -->
@@ -9,7 +11,7 @@
     <div>
         <h4 class="fw-bold text-slate-900 mb-1 d-flex align-items-center gap-2">
             <i class="fa-solid fa-users text-rose-600"></i>
-            <span>Danh Sách Nhân Sự & Phân Quyền</span>
+            <span>Danh Sách Nhân Sự Nội Bộ & Phân Quyền</span>
         </h4>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb small text-muted mb-0">
@@ -18,8 +20,20 @@
             </ol>
         </nav>
     </div>
-    <div class="d-flex gap-2">
-        <a href="/Admin/User/Create" class="btn btn-primary-gradient px-3 py-2 text-white fw-semibold rounded-xl shadow-xs">
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        <form method="get" action="/Admin/User" class="d-flex align-items-center gap-2">
+            <select name="departmentId" class="form-select form-select-sm rounded-3 border" style="min-width: 210px;" onchange="this.form.submit()">
+                <option value="">-- Tất cả phòng ban trong phạm vi --</option>
+                @foreach (var dept in departments)
+                {
+                    <option value="@dept.Id" selected="@(selectedDeptId == dept.Id ? "selected" : null)">@dept.Name (@dept.Code)</option>
+                }
+            </select>
+        </form>
+        <a asp-permission="DEPARTMENT_VIEW" href="/Admin/Department" class="btn btn-outline-secondary btn-sm px-3 py-2 fw-semibold rounded-3">
+            <i class="fa-solid fa-sitemap me-1 text-rose-600"></i>Sơ Đồ Phòng Ban
+        </a>
+        <a asp-permission="USER_CREATE" href="/Admin/User/Create" class="btn btn-primary-gradient btn-sm px-3 py-2 text-white fw-semibold rounded-3 shadow-xs">
             <i class="fa-solid fa-user-plus me-1"></i>Thêm Mới Nhân Sự
         </a>
     </div>
@@ -31,94 +45,126 @@
         <div class="w-16 h-16 rounded-circle bg-rose-50 text-rose-600 d-inline-flex align-items-center justify-center fs-2 mb-3">
             <i class="fa-solid fa-user-xmark"></i>
         </div>
-        <h5 class="fw-bold text-dark">Chưa Có Nhân Sự Nào</h5>
+        <h5 class="fw-bold text-dark">Chưa Có Nhân Sự Nào Trong Phạm Vi</h5>
         <p class="text-muted small max-w-md mx-auto mb-3">
-            Hệ thống hiện tại chưa ghi nhận hồ sơ nhân sự nào. Bấm nút bên dưới để tạo tài khoản đầu tiên cho chi nhánh hoặc trụ sở.
+            Không tìm thấy hồ sơ nhân sự nội bộ nào phù hợp với bộ lọc hoặc phạm vi phòng ban của bạn.
         </p>
-        <a href="/Admin/User/Create" class="btn btn-primary-gradient px-4 py-2 text-white fw-semibold rounded-xl">
+        <a asp-permission="USER_CREATE" href="/Admin/User/Create" class="btn btn-primary-gradient px-4 py-2 text-white fw-semibold rounded-3">
             <i class="fa-solid fa-user-plus me-1"></i>Tạo Nhân Sự Đầu Tiên
         </a>
     </div>
 }
 else
 {
-    <!-- Admin White Data Card & Table -->
-    <div class="bg-white rounded-3 border shadow-sm overflow-hidden" style="background-color: #ffffff !important;">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0" style="background-color: #ffffff !important;">
+    <div class="bg-white rounded-3 border shadow-sm overflow-hidden">
+        <div class="table-responsive" tabindex="0" role="region" aria-label="Bảng danh sách nhân sự nội bộ">
+            <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light border-bottom">
-                    <tr style="background-color: #f8fafc !important;">
-                        <th class="py-3 px-4 text-slate-700 fw-bold small text-uppercase" style="width: 280px; letter-spacing: 0.05em;">Họ Và Tên / Username</th>
-                        <th class="py-3 text-slate-700 fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Email & Số Điện Thoại</th>
-                        <th class="py-3 text-slate-700 fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Vai Trò Phân Bổ</th>
-                        <th class="py-3 text-slate-700 fw-bold small text-uppercase text-center" style="letter-spacing: 0.05em;">Trạng Thái</th>
-                        <th class="py-3 text-slate-700 fw-bold small text-uppercase" style="letter-spacing: 0.05em;">Ngày Tạo</th>
-                        <th class="py-3 px-4 text-slate-700 fw-bold small text-uppercase text-end" style="width: 120px; letter-spacing: 0.05em;">Hành Động</th>
+                    <tr>
+                        <th class="py-3 px-4 text-slate-700 fw-bold small text-uppercase">Mã NV / Họ Tên</th>
+                        <th class="py-3 text-slate-700 fw-bold small text-uppercase">Phòng Ban & Chức Danh</th>
+                        <th class="py-3 text-slate-700 fw-bold small text-uppercase">Vai Trò Phân Bổ</th>
+                        <th class="py-3 text-slate-700 fw-bold small text-uppercase">Email & Điện Thoại</th>
+                        <th class="py-3 text-slate-700 fw-bold small text-uppercase text-center">Trạng Thái</th>
+                        <th class="py-3 px-4 text-slate-700 fw-bold small text-uppercase text-end">Thao Tác & Phân Quyền</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody>
                     @foreach (var user in Model)
                     {
-                        <tr class="bg-white border-bottom hover:bg-slate-50/60" style="background-color: #ffffff !important;">
-                            <td class="px-4 py-3" style="background-color: #ffffff !important;">
+                        <tr class="border-bottom">
+                            <td class="px-4 py-3">
                                 <div class="d-flex align-items-center gap-3">
-                                    <div class="d-inline-flex align-items-center justify-center rounded-3 fw-bold text-white shadow-xs" 
-                                         style="width: 40px; height: 40px; font-size: 15px; background: linear-gradient(135deg, #e11d48, #9333ea);">
+                                    <div class="d-inline-flex align-items-center justify-content-center rounded-3 fw-bold text-white shadow-xs flex-shrink-0" 
+                                         style="width: 40px; height: 40px; font-size: 14px; background: linear-gradient(135deg, #e11d48, #9333ea);">
                                         @(user.FullName.Length > 0 ? user.FullName[0].ToString().ToUpper() : "U")
                                     </div>
                                     <div>
-                                        <div class="fw-bold text-dark" style="font-size: 0.9375rem; color: #0f172a !important;">@user.FullName</div>
-                                        <div class="text-secondary font-monospace" style="font-size: 12px; color: #64748b !important;">@@@user.Username</div>
+                                        <div class="d-flex align-items-center gap-1.5">
+                                            @if (!string.IsNullOrEmpty(user.EmployeeCode))
+                                            {
+                                                <span class="badge bg-light text-dark border font-monospace" style="font-size: 0.68rem;">@user.EmployeeCode</span>
+                                            }
+                                            <span class="fw-bold text-dark" style="font-size: 0.9rem;">@user.FullName</span>
+                                        </div>
+                                        <div class="text-muted font-monospace" style="font-size: 0.75rem;">@@@user.Username</div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="py-3" style="background-color: #ffffff !important;">
-                                <div class="small fw-semibold text-dark" style="color: #1e293b !important;">@user.Email</div>
-                                <div class="text-muted small" style="font-size: 12px; color: #64748b !important;">@(user.PhoneNumber ?? "Chưa có SĐT")</div>
+                            <td class="py-3">
+                                <div class="fw-semibold text-dark small">
+                                    <i class="fa-solid fa-building-user text-rose-500 me-1"></i>@(user.DepartmentName ?? "Chưa phân phòng ban")
+                                </div>
+                                <div class="text-muted" style="font-size: 0.75rem;">
+                                    @(user.JobTitle ?? "Nhân viên")
+                                    @if (!string.IsNullOrEmpty(user.ManagerName))
+                                    {
+                                        <span> • QL: @user.ManagerName</span>
+                                    }
+                                </div>
                             </td>
-                            <td class="py-3" style="background-color: #ffffff !important;">
+                            <td class="py-3">
                                 <div class="d-flex flex-wrap gap-1">
                                     @foreach (var role in user.AssignedRoles)
                                     {
-                                        <span class="badge bg-slate-100 text-slate-800 border px-2 py-1 rounded-2" style="font-size: 11px; background-color: #f1f5f9 !important; color: #334155 !important;">
+                                        <span class="badge bg-slate-100 text-slate-800 border px-2 py-1 rounded-2" style="font-size: 11px; background-color: #f1f5f9; color: #334155;">
                                             <i class="fa-solid fa-id-badge text-rose-500 me-1" style="font-size: 10px;"></i>@role
                                         </span>
                                     }
                                 </div>
                             </td>
-                            <td class="py-3 text-center" style="background-color: #ffffff !important;">
+                            <td class="py-3">
+                                <div class="small fw-semibold text-dark">@user.Email</div>
+                                <div class="text-muted" style="font-size: 0.75rem;">@(user.PhoneNumber ?? "Chưa có SĐT")</div>
+                            </td>
+                            <td class="py-3 text-center">
                                 @if (user.IsActive)
                                 {
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1.5 rounded-pill shadow-xs">
-                                        <i class="fa-solid fa-circle-dot me-1"></i>Hoạt động
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1.5 rounded-pill">
+                                        <i class="fa-solid fa-circle-check me-1"></i>Hoạt động
                                     </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1.5 rounded-pill shadow-xs">
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1.5 rounded-pill">
                                         <i class="fa-solid fa-lock me-1"></i>Đã khóa
                                     </span>
                                 }
                             </td>
-                            <td class="py-3 small text-muted font-monospace" style="background-color: #ffffff !important; color: #64748b !important;">
-                                @user.CreatedAt.ToString("dd/MM/yyyy HH:mm")
-                            </td>
-                            <td class="px-4 py-3 text-end" style="background-color: #ffffff !important;">
-                                <form asp-action="ToggleStatus" asp-route-userId="@user.UserId" method="post" class="d-inline m-0">
-                                    @Html.AntiForgeryToken()
-                                    @if (user.IsActive)
+                            <td class="px-4 py-3 text-end">
+                                <div class="d-inline-flex align-items-center gap-1.5">
+                                    @if (user.CanActorManage)
                                     {
-                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-3 px-2 py-1" title="Tạm khóa tài khoản" onclick="return confirm('Bạn có chắc chắn muốn khóa tài khoản này?')">
-                                            <i class="fa-solid fa-user-lock"></i>
-                                        </button>
+                                        <a asp-permission="PERMISSION_DELEGATE"
+                                           href="/Admin/User/Permissions/@user.UserId"
+                                           class="btn btn-sm btn-outline-primary rounded-3 px-2.5 py-1 fw-semibold"
+                                           title="Phân quyền cá nhân & Gán vai trò">
+                                            <i class="fa-solid fa-user-Check fa-shield-halved me-1"></i>Phân quyền
+                                        </a>
+
+                                        <form asp-permission="USER_EDIT" asp-action="ToggleStatus" asp-route-userId="@user.UserId" method="post" class="d-inline m-0">
+                                            @Html.AntiForgeryToken()
+                                            @if (user.IsActive)
+                                            {
+                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-3 px-2 py-1" title="Tạm khóa tài khoản" onclick="return confirm('Bạn có chắc chắn muốn khóa tài khoản này?')">
+                                                    <i class="fa-solid fa-user-lock"></i>
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="submit" class="btn btn-sm btn-outline-success rounded-3 px-2 py-1" title="Mở khóa tài khoản">
+                                                    <i class="fa-solid fa-lock-open"></i>
+                                                </button>
+                                            }
+                                        </form>
                                     }
                                     else
                                     {
-                                        <button type="submit" class="btn btn-sm btn-outline-success rounded-3 px-2 py-1" title="Mở khóa tài khoản">
-                                            <i class="fa-solid fa-lock-open"></i>
-                                        </button>
+                                        <span class="badge bg-light text-muted border" title="Tài khoản cùng cấp hoặc cao hơn cấp bậc của bạn">
+                                            <i class="fa-solid fa-lock me-1"></i>Chỉ xem
+                                        </span>
                                     }
-                                </form>
+                                </div>
                             </td>
                         </tr>
                     }

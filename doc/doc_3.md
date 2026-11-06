@@ -123,7 +123,7 @@ Mặc dù đã dành nhiều tâm huyết và nỗ lực tối đa để hoàn t
   - 1.4. Đánh giá, so sánh và luận chứng giải pháp công nghệ đã chọn  
 - **CHƯƠNG II: PHÂN TÍCH YÊU CẦU NGHIỆP VỤ VÀ MÔ HÌNH HÓA HỆ THỐNG**  
   - 2.1. Khảo sát hiện trạng và quy trình nghiệp vụ tổng thể  
-    - 2.1.1. Mô hình vận hành thực tế của chuỗi bán lẻ Omni Beauty  
+    - 2.1.1. Mô hình vận hành thực tế của chuỗi bán lẻ Canmake Beauty  
     - 2.1.2. Luồng vận hành hàng hóa và dữ liệu từ đầu vào đến đầu ra  
   - 2.2. Phân tích yêu cầu chức năng (Mười bảy phân hệ nghiệp vụ)  
     1. Phân hệ Quản lý Điểm bán lẻ trực tiếp và Ca làm việc (Point of Sale)  
@@ -199,7 +199,7 @@ Cuối cùng là bài toán an toàn da liễu và trải nghiệm khách hàng.
 
 #### **3\. Mục tiêu và đối tượng nghiên cứu của đề tài**
 
-Mục tiêu tổng quát của bài tập lớn là nghiên cứu, phân tích và xây dựng hoàn chỉnh giải pháp phần mềm cấp doanh nghiệp mang tên Omni Beauty Solution. Hệ thống hướng tới việc hợp nhất toàn diện chuỗi cung ứng, quản trị bán lẻ tại quầy, thương mại điện tử, chăm sóc khách hàng và kiểm soát tài chính kế toán trên một nền tảng kiến trúc hiện đại, có tính mở rộng cao và vận hành ổn định.
+Mục tiêu tổng quát của bài tập lớn là nghiên cứu, phân tích và xây dựng hoàn chỉnh giải pháp phần mềm cấp doanh nghiệp mang tên Canmake Beauty Solution. Hệ thống hướng tới việc hợp nhất toàn diện chuỗi cung ứng, quản trị bán lẻ tại quầy, thương mại điện tử, chăm sóc khách hàng và kiểm soát tài chính kế toán trên một nền tảng kiến trúc hiện đại, có tính mở rộng cao và vận hành ổn định.
 
 Đối tượng nghiên cứu của đề tài bao gồm:
 
@@ -365,7 +365,7 @@ Sự kết hợp này mang lại cho hệ thống thời gian tương tác đầ
 
 *(Nguồn: Tác giả nghiên cứu và đối chiếu các chuẩn kiến trúc phần mềm)*
 
-Qua bảng phân tích so sánh trên, có thể khẳng định rằng việc lựa chọn kiến trúc Clean Architecture trên nền tảng .NET 8 là giải pháp phù hợp nhất với bài toán bán lẻ đa kênh của hệ thống Omni Beauty Solution:
+Qua bảng phân tích so sánh trên, có thể khẳng định rằng việc lựa chọn kiến trúc Clean Architecture trên nền tảng .NET 8 là giải pháp phù hợp nhất với bài toán bán lẻ đa kênh của hệ thống Canmake Beauty Solution:
 
 Thứ nhất, so với mô hình MVC truyền thống, Clean Architecture triệt tiêu hoàn toàn sự phụ thuộc lẫn nhau giữa các thành phần. Nhờ việc tuân thủ nguyên lý Đảo ngược Phụ thuộc, logic cốt lõi của doanh nghiệp như giải thuật phân bổ hạn dùng FEFO, công thức tính điểm thưởng hay quy tắc kiểm toán chênh lệch két tiền không bị ảnh hưởng khi có sự thay đổi về giao diện hay khi nâng cấp thư viện truy cập dữ liệu. Điều này đảm bảo dự án có tuổi thọ cao và không bị biến thành một mớ mã nguồn hỗn tạp khi quy mô nghiệp vụ mở rộng.
 
@@ -381,9 +381,9 @@ Tóm lại, sự kết hợp giữa nền tảng hiện đại .NET 8, hệ qu�
 
 ### 2.1. Khảo sát hiện trạng và quy trình nghiệp vụ tổng thể
 
-#### 2.1.1. Mô hình vận hành thực tế của chuỗi bán lẻ Omni Beauty
+#### 2.1.1. Mô hình vận hành thực tế của chuỗi bán lẻ Canmake Beauty
 
-Qua quá trình khảo sát thực tế tại chuỗi bán lẻ mỹ phẩm Omni Beauty, mô hình kinh doanh của doanh nghiệp được tổ chức theo mạng lưới phân phối đa điểm nhằm phục vụ cả hai thị trường trọng điểm phía Nam và phía Bắc. Cơ cấu tổ chức vật lý của chuỗi bao gồm ba đơn vị nòng cốt:
+Qua quá trình khảo sát thực tế tại chuỗi bán lẻ mỹ phẩm Canmake Beauty, mô hình kinh doanh của doanh nghiệp được tổ chức theo mạng lưới phân phối đa điểm nhằm phục vụ cả hai thị trường trọng điểm phía Nam và phía Bắc. Cơ cấu tổ chức vật lý của chuỗi bao gồm ba đơn vị nòng cốt:
 
 Thứ nhất là Tổng kho phân phối trung tâm Miền Nam (ký hiệu mã kho WH-MN). Đây là kho đầu mối tiếp nhận toàn bộ các lô hàng mỹ phẩm nhập khẩu chính ngạch từ các tập đoàn dược mỹ phẩm quốc tế. Tổng kho đảm nhiệm chức năng lưu trữ dài hạn, kiểm định tem nhãn phụ, số công bố mỹ phẩm của Bộ Y tế, phân loại hạn sử dụng và điều phối hàng hóa cho toàn bộ các điểm bán lẻ trên toàn quốc.
 
@@ -391,11 +391,11 @@ Thứ hai là Showroom bán lẻ trung tâm Flagship Quận 1 tại Thành phố
 
 Thứ ba là Showroom bán lẻ chi nhánh Ba Đình tại Thủ đô Hà Nội (ký hiệu mã cửa hàng SH-BD). Chi nhánh này đóng vai trò phục vụ thị trường tiêu dùng phía Bắc, kết hợp giữa hoạt động bán hàng trực tiếp tại quầy và làm điểm lấy hàng cho các đơn hàng trực tuyến của khách hàng khu vực Hà Nội.
 
-Trước khi ứng dụng giải pháp công nghệ mới, chuỗi Omni Beauty gặp phải nhiều trở ngại lớn trong khâu phối hợp giữa các đơn vị này. Các cửa hàng sử dụng phần mềm kế toán bán hàng độc lập, dữ liệu tồn kho cuối ngày mới được kết xuất và gửi về trụ sở chính qua các bảng tính Excel. Sự trễ pha về dữ liệu khiến ban điều hành không nắm bắt được chính xác lượng hàng tồn thực tế tại từng chi nhánh, dẫn đến tình trạng chi nhánh Quận 1 hết sạch mặt hàng serum phục hồi da trong khi kho Ba Đình lại tồn đọng nhiều lô hàng cận hạn dùng.
+Trước khi ứng dụng giải pháp công nghệ mới, chuỗi Canmake Beauty gặp phải nhiều trở ngại lớn trong khâu phối hợp giữa các đơn vị này. Các cửa hàng sử dụng phần mềm kế toán bán hàng độc lập, dữ liệu tồn kho cuối ngày mới được kết xuất và gửi về trụ sở chính qua các bảng tính Excel. Sự trễ pha về dữ liệu khiến ban điều hành không nắm bắt được chính xác lượng hàng tồn thực tế tại từng chi nhánh, dẫn đến tình trạng chi nhánh Quận 1 hết sạch mặt hàng serum phục hồi da trong khi kho Ba Đình lại tồn đọng nhiều lô hàng cận hạn dùng.
 
 #### 2.1.2. Luồng vận hành hàng hóa và dữ liệu từ đầu vào đến đầu ra
 
-Quy trình luân chuyển hàng hóa và dữ liệu xuyên suốt chuỗi bán lẻ Omni Beauty được chuẩn hóa thành một chu trình khép kín, bảo đảm tính minh bạch và khả năng truy xuất nguồn gốc trên từng sản phẩm:
+Quy trình luân chuyển hàng hóa và dữ liệu xuyên suốt chuỗi bán lẻ Canmake Beauty được chuẩn hóa thành một chu trình khép kín, bảo đảm tính minh bạch và khả năng truy xuất nguồn gốc trên từng sản phẩm:
 
 Giai đoạn đầu vào bắt đầu khi phòng mua hàng phát hành đơn đặt hàng nhập kho gửi tới nhà cung cấp. Khi xe hàng vận chuyển tới Tổng kho WH-MN, nhân viên thủ kho thực hiện kiểm đếm số lượng thực nhận so với phiếu giao hàng, kiểm tra tính nguyên vẹn của tem niêm phong và đối chiếu số lô sản xuất cùng ngày sản xuất, ngày hết hạn in trên bao bì. Mỗi lô mỹ phẩm nhập kho đều được hệ thống cấp phát một bản ghi quản lý riêng biệt, gắn kèm các thông số kỹ thuật như số tiếp nhận phiếu công bố mỹ phẩm do Cục Quản lý Dược cấp và hạn dùng sau khi mở nắp (PAO).
 
@@ -407,7 +407,7 @@ Giai đoạn sau bán hàng bao gồm các nghiệp vụ tiếp nhận khiếu n
 ![][image1]
 
 **Hình 2.1. Sơ đồ luồng vận hành hàng hóa và dữ liệu từ đầu vào đến đầu ra**  
-*(Nguồn: Khảo sát thực tế chuỗi bán lẻ Omni Beauty)*
+*(Nguồn: Khảo sát thực tế chuỗi bán lẻ Canmake Beauty)*
 
 ### **2.2. Phân tích yêu cầu chức năng (Mười bảy phân hệ nghiệp vụ)**
 
@@ -483,7 +483,7 @@ Phân hệ đảm bảo sự kết nối thông suốt giữa các phòng ban tr
 
 ### **2.3. Phân tích yêu cầu phi chức năng**
 
-Bên cạnh việc đáp ứng trọn vẹn các yêu cầu nghiệp vụ, hệ thống Omni Beauty Solution đặt ra các tiêu chuẩn kỹ thuật khắt khe về mặt kiến trúc nhằm đảm bảo tính ổn định và an toàn khi vận hành trong môi trường thực tế:
+Bên cạnh việc đáp ứng trọn vẹn các yêu cầu nghiệp vụ, hệ thống Canmake Beauty Solution đặt ra các tiêu chuẩn kỹ thuật khắt khe về mặt kiến trúc nhằm đảm bảo tính ổn định và an toàn khi vận hành trong môi trường thực tế:
 
 #### **2.3.1. Yêu cầu về Hiệu năng và Thời gian Phản hồi**
 
@@ -528,10 +528,10 @@ Hệ thống Omnichannel Beauty Solution phân quyền chặt chẽ cho sáu nh�
 | **ContentEditor** | Biên tập viên CMS | Quản lý cây Menu điều hướng website; biên tập bài viết cẩm nang làm đẹp; xuất bản banner sự kiện; kiểm duyệt đánh giá và hình ảnh swatch thực tế của khách hàng; quản lý trang chính sách tĩnh. |
 | **Customer** | Khách hàng mua sắm | Tìm kiếm và xem thông tin sản phẩm; thực hiện bài trắc nghiệm phân tích da; tương tác với trợ lý tư vấn hoạt chất; đặt hàng trực tuyến; chọn nhận hàng tại quầy; theo dõi ví điểm. |
 
-*(Nguồn: Phân tích yêu cầu hệ thống Omni Beauty)*
+*(Nguồn: Phân tích yêu cầu hệ thống Canmake Beauty)*
 
 ![][image2]  
-**Hình 2.2. Sơ đồ Ca sử dụng tổng quát hệ thống Omni Beauty**
+**Hình 2.2. Sơ đồ Ca sử dụng tổng quát hệ thống Canmake Beauty**
 
 #### **2.4.2. Đặc tả chi tiết các Ca sử dụng trọng yếu**
 
@@ -650,7 +650,7 @@ Hệ thống Omnichannel Beauty Solution phân quyền chặt chẽ cho sáu nh�
 
 #### **3.1.1. Kiến trúc Clean Architecture bốn tầng và nguyên lý Đảo ngược Phụ thuộc**
 
-Để xây dựng một hệ thống bán lẻ có quy mô nghiệp vụ phức tạp và đòi hỏi khả năng mở rộng lâu dài như Omni Beauty Solution, việc lựa chọn một kiến trúc phần mềm có tính kỷ luật cao là yếu tố quyết định. Hệ thống được tổ chức tuân thủ nghiêm ngặt mô hình kiến trúc Clean Architecture gồm bốn tầng độc lập, tương ứng với bốn dự án riêng biệt trong không gian giải pháp:  
+Để xây dựng một hệ thống bán lẻ có quy mô nghiệp vụ phức tạp và đòi hỏi khả năng mở rộng lâu dài như Canmake Beauty Solution, việc lựa chọn một kiến trúc phần mềm có tính kỷ luật cao là yếu tố quyết định. Hệ thống được tổ chức tuân thủ nghiêm ngặt mô hình kiến trúc Clean Architecture gồm bốn tầng độc lập, tương ứng với bốn dự án riêng biệt trong không gian giải pháp:  
 ![][image8]
 
 Tầng trung tâm là Domain Core (Omnichannel.Domain), nơi định nghĩa 65 thực thể nghiệp vụ dưới dạng các lớp đối tượng thuần C\# (Plain Old CLR Objects \- POCO). Tầng này hoàn toàn cô lập, không chứa bất kỳ chỉ thị hay thư viện phụ thuộc nào từ bên ngoài, kể cả Entity Framework hay ASP.NET Core. Mọi quy tắc nghiệp vụ nội tại như công thức tính tồn kho khả dụng GetAvailableQuantity() \= PhysicalQuantity \- ReservedQuantity, kiểm tra trạng thái cận hạn dùng IsNearExpiration(), hay tính thành tiền chi tiết dòng hàng đều được đóng gói trực tiếp bên trong các thực thể này.
@@ -692,7 +692,7 @@ Quy trình xử lý thực tế diễn ra qua tám bước nghiêm ngặt:
 
 #### **3.2.1. Phân tích và Chứng minh Chuẩn hóa Dữ liệu Dạng chuẩn 3**
 
-Cơ sở dữ liệu của giải pháp Omni Beauty Solution gồm 65 bảng thực thể được xây dựng trên Microsoft SQL Server. Cấu trúc của toàn bộ lược đồ dữ liệu được chứng minh tuân thủ nghiêm ngặt Dạng chuẩn 3 (3NF):
+Cơ sở dữ liệu của giải pháp Canmake Beauty Solution gồm 65 bảng thực thể được xây dựng trên Microsoft SQL Server. Cấu trúc của toàn bộ lược đồ dữ liệu được chứng minh tuân thủ nghiêm ngặt Dạng chuẩn 3 (3NF):
 
 - **Dạng chuẩn 1 (1NF):** Mọi cột thuộc tính đều mang giá trị nguyên tố đơn lẻ. Không tồn tại cột lặp hay danh sách phức hợp. Các cấu trúc động (mảng ảnh Swatch, bộ lọc) được tách thành bảng quan hệ riêng hoặc trường JSON có cấu trúc kiểm soát. Mỗi bảng đều có Khóa chính đơn kiểu INT IDENTITY(1,1).  
 - **Dạng chuẩn 2 (2NF):** Đã đạt 1NF và không tồn tại bất kỳ sự phụ thuộc hàm từng phần nào vào khóa chính phức hợp. Toàn bộ các thuộc tính không khóa đều phụ thuộc đầy đủ vào toàn bộ khóa chính.  
@@ -724,7 +724,7 @@ Cơ sở dữ liệu của giải pháp Omni Beauty Solution gồm 65 bảng th�
 | IsActive | BIT | **NO** | DEFAULT 1 | Cờ trạng thái: 1 \= Đang mở bán, 0 \= Ngừng bán |
 | CreatedAt | DATETIME2(7) | **NO** | DEFAULT UTC | Dấu thời gian khởi tạo bản ghi |
 
-*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Omni Beauty)*
+*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Canmake Beauty)*
 
 **Bảng 3.3. Từ điển dữ liệu Lô sản xuất và Hạn dùng (ProductBatches)**
 
@@ -747,7 +747,7 @@ Cơ sở dữ liệu của giải pháp Omni Beauty Solution gồm 65 bảng th�
 | AlertDaysThreshold | INT | **NO** | DEFAULT 90 | Ngưỡng số ngày kích hoạt cảnh báo cận date FEFO |
 | ClearanceDiscountPercent | DECIMAL(5,2) | YES | NULL | Tỷ lệ chiết khấu tự động khi xả hàng cận date |
 
-*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Omni Beauty)*
+*(Nguồn: Thiết kế cơ sở dữ liệu giải pháp Canmake Beauty)*
 
 **Bảng 3.4. Từ điển dữ liệu Tồn kho chi nhánh theo lô (StoreInventories)**
 
@@ -936,7 +936,7 @@ Toàn bộ mã nguồn giải pháp được phân bổ theo Clean Architecture 
 
 ![][image13]
 
-**Hình 4.1. Giao diện Trang chủ Hệ thống Thương mại Điện tử Omni Beauty**  
+**Hình 4.1. Giao diện Trang chủ Hệ thống Thương mại Điện tử Canmake Beauty**  
 *(Nguồn: Chụp trực tiếp từ giao diện thực tế hệ thống)*
 
 ![][image14]
@@ -1497,7 +1497,7 @@ namespace Omnichannel.Web.BackgroundServices
 
 ### **5.1. Chiến lược Kiểm thử phần mềm**
 
-Hệ thống Omni Beauty Solution áp dụng mô hình Kim tự tháp Kiểm thử bốn tầng toàn diện nhằm bảo đảm độ tin cậy, tính toàn vẹn dữ liệu và an toàn bảo mật trước khi vận hành thực tế:
+Hệ thống Canmake Beauty Solution áp dụng mô hình Kim tự tháp Kiểm thử bốn tầng toàn diện nhằm bảo đảm độ tin cậy, tính toàn vẹn dữ liệu và an toàn bảo mật trước khi vận hành thực tế:
 
 - **Tầng 1 \- Kiểm thử Đơn vị Miền Dữ liệu (Domain Unit Tests):** Xác minh tính bất biến nội tại trên các thực thể thuần C\# (POCO Entities), bao gồm công thức tính tồn khả dụng, quy tắc kiểm tra hạn sử dụng và tính toán chi tiết đơn hàng.  
 - **Tầng 2 \- Kiểm thử Đơn vị Dịch vụ Ứng dụng (Application & Service Tests):** Kiểm chứng các ca điều phối nghiệp vụ thông qua cơ sở dữ liệu giả lập trong bộ nhớ (Entity Framework Core InMemory/SQLite), bao gồm thuật toán trừ kho FEFO, quy trình mở/đóng ca POS và ghi sổ cái kế toán.  
@@ -1605,7 +1605,7 @@ Bên cạnh những kết quả nổi bật đã đạt được, tác giả nh�
 
 ### **2\. Định hướng phát triển hệ thống**
 
-Nhằm nâng cấp giải pháp Omni Beauty Solution đạt chuẩn các hệ thống bán lẻ đa kênh quốc tế, tác giả đề xuất bốn hướng phát triển công nghệ chiến lược trong giai đoạn tiếp theo:
+Nhằm nâng cấp giải pháp Canmake Beauty Solution đạt chuẩn các hệ thống bán lẻ đa kênh quốc tế, tác giả đề xuất bốn hướng phát triển công nghệ chiến lược trong giai đoạn tiếp theo:
 
 #### **2.1. Nâng cấp Bộ nhớ đệm phân tán Redis Cluster và Thuật toán Khóa phân tán RedLock**
 

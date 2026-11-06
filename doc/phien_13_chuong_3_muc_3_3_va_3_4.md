@@ -2,7 +2,7 @@
 
 ## 3.3. Triển khai Kiểm thử và Đánh giá chất lượng hệ thống
 
-Kiểm thử phần mềm là giai đoạn thực nghiệm then chốt nhằm thẩm định mức độ hoàn thiện, tính ổn định và sự chuẩn xác của hệ thống website quản lý bán hàng chuỗi mỹ phẩm OMNI BEAUTY trước khi đưa vào vận hành thực tế. Quá trình kiểm thử được triển khai bài bản, kết hợp giữa các phương pháp kiểm thử tự động đa tầng với các kịch bản kiểm thử hộp đen chi tiết bám sát thực tế chuỗi bán lẻ.
+Kiểm thử phần mềm là giai đoạn thực nghiệm then chốt nhằm thẩm định mức độ hoàn thiện, tính ổn định và sự chuẩn xác của hệ thống website quản lý bán hàng chuỗi mỹ phẩm CANMAKE BEAUTY trước khi đưa vào vận hành thực tế. Quá trình kiểm thử được triển khai bài bản, kết hợp giữa các phương pháp kiểm thử tự động đa tầng với các kịch bản kiểm thử hộp đen chi tiết bám sát thực tế chuỗi bán lẻ.
 
 ---
 
@@ -16,7 +16,7 @@ Chiến lược kiểm thử của dự án được thiết kế dựa trên m�
 4. **Tầng 4 - Kiểm thử Hiệu năng Chịu tải Đồng thời (High-Concurrency Load Testing với `k6`):** Giả lập môi trường bùng nổ lưu lượng truy cập trong các chiến dịch Flash Sale với hàng trăm người dùng ảo gửi yêu cầu đặt hàng cùng một phần nghìn giây, nhằm phát hiện sớm các hiện tượng nghẽn cổ chai (Bottleneck), khóa chết (Deadlock) hoặc bán lố số lượng tồn kho khả dụng.
 
 ##### Dữ liệu khởi tạo kiểm thử chuẩn hóa (Seed Data)
-Để bảo đảm tính khách quan, lặp lại được và phản ánh chân thực cơ cấu tổ chức phân quyền của chuỗi bán lẻ mỹ phẩm OMNI BEAUTY, hệ thống đã khởi tạo sẵn bộ dữ liệu mẫu gồm 12 tài khoản đại diện cho 6 nhóm vai trò tác nghiệp và các điểm bán trong lớp `DbInitializer.cs` và tài liệu hướng dẫn `TEST_ACCOUNTS.md`.
+Để bảo đảm tính khách quan, lặp lại được và phản ánh chân thực cơ cấu tổ chức phân quyền của chuỗi bán lẻ mỹ phẩm CANMAKE BEAUTY, hệ thống đã khởi tạo sẵn bộ dữ liệu mẫu gồm 12 tài khoản đại diện cho 6 nhóm vai trò tác nghiệp và các điểm bán trong lớp `DbInitializer.cs` và tài liệu hướng dẫn `TEST_ACCOUNTS.md`.
 
 ###### Bảng 3.2: Danh sách 12 Tài khoản kiểm thử tiêu chuẩn theo 6 Vai trò và các Chi nhánh cửa hàng trong `DbInitializer.cs` và `TEST_ACCOUNTS.md`
 
@@ -85,7 +85,7 @@ Phương pháp kiểm thử hộp đen được áp dụng để kiểm chứng 
 
 | Mã bước | Hành động thực hiện | Dữ liệu đầu vào | Kết quả mong đợi | Kết quả thực tế | Trạng thái |
 |:---:|:---|:---|:---|:---|:---:|
-| 1 | Truy cập trang đăng nhập quản trị `/admin/auth/login` | Trình duyệt Chrome ẩn danh | Hiển thị form đăng nhập quản trị với logo OMNI BEAUTY và nút Quick-Fill | Giao diện hiển thị đúng chuẩn, các trường nhập liệu sẵn sàng | **PASS** |
+| 1 | Truy cập trang đăng nhập quản trị `/admin/auth/login` | Trình duyệt Chrome ẩn danh | Hiển thị form đăng nhập quản trị với logo CANMAKE BEAUTY và nút Quick-Fill | Giao diện hiển thị đúng chuẩn, các trường nhập liệu sẵn sàng | **PASS** |
 | 2 | Nhập tài khoản và mật khẩu Quản trị viên | `superadmin` / `Admin@123` | Đăng nhập thành công, sinh Cookie `AdminScheme`, chuyển hướng về `/Admin/Dashboard` | Chuyển hướng Dashboard mượt mà, hiển thị tên "Nguyễn Quản Trị" | **PASS** |
 | 3 | Mở tab mới truy cập trang chủ khách hàng `/` | Giữ nguyên phiên đăng nhập | Hiển thị giao diện Storefront, menu nhận diện tài khoản quản trị viên đăng nhập | Storefront hiển thị bình thường với thanh thông báo tiện ích | **PASS** |
 | 4 | Thử nhấp nút "Thêm vào giỏ hàng" một sản phẩm mỹ phẩm | Sản phẩm bất kỳ | Hệ thống kích hoạt cơ chế `BlockAdminShopping`, hiển thị cảnh báo không cho phép Admin mua hàng cá nhân | Hiển thị Toast cảnh báo: "Tài khoản quản trị không được dùng để đặt hàng bán lẻ" | **PASS** |
@@ -262,7 +262,7 @@ Dưới đây là bảng tổng hợp đối chiếu giữa 5 mục tiêu nghiê
 
 ### 3.4.2. Nhìn nhận thẳng thắn một số hạn chế còn tồn tại của hệ thống
 
-Bên cạnh những kết quả nổi bật đã đạt được, do giới hạn về mặt thời gian và nguồn lực của một đồ án khóa luận tốt nghiệp cá nhân, hệ thống OMNI BEAUTY vẫn còn một số điểm hạn chế nhất định cần tiếp tục hoàn thiện:
+Bên cạnh những kết quả nổi bật đã đạt được, do giới hạn về mặt thời gian và nguồn lực của một đồ án khóa luận tốt nghiệp cá nhân, hệ thống CANMAKE BEAUTY vẫn còn một số điểm hạn chế nhất định cần tiếp tục hoàn thiện:
 - **Phụ thuộc vào kiến trúc cơ sở dữ liệu đơn máy chủ vật lý (Single Database Instance):** Mặc dù SQL Server 2022 đã được tối ưu hóa chỉ mục phức hợp rất mạnh mẽ, việc toàn bộ 65 bảng dữ liệu tập trung trên một máy chủ vật lý duy nhất có thể tiềm ẩn rủi ro trở thành điểm nghẽn cổ chai (Single Point of Failure) khi quy mô chuỗi bùng nổ lên hàng trăm showroom với hàng chục ngàn đơn hàng phát sinh đồng thời mỗi giờ.
 - **Bộ nhớ đệm phân tán chưa được triển khai hoàn chỉnh:** Hệ thống hiện đang khai thác tối đa bộ nhớ đệm nội bộ `IMemoryCache` của tiến trình ASP.NET Core. Cơ chế này hoạt động hoàn hảo trên môi trường máy chủ đơn lẻ, nhưng khi triển khai trên cụm máy chủ cân bằng tải (Web Farm / Kubernetes Cluster), việc đồng bộ làm sạch bộ đệm (Cache Invalidation) khi cập nhật menu hoặc ma trận phân quyền sẽ đòi hỏi phải tích hợp thêm giải pháp bộ nhớ đệm phân tán tập trung.
 - **Cơ chế AI Da liễu dựa trên tập luật chuyên gia (Rule-based Matrix):** Hiện tại, các quy tắc tương kỵ hoạt chất và phác đồ chăm sóc da hoạt động dựa trên tập luật cứng (Hard Rules) được các chuyên gia da liễu thẩm định nạp sẵn vào cơ sở dữ liệu. Hệ thống chưa tích hợp các mô hình học máy tự thích ứng (Machine Learning) để có thể tự động học và suy luận ra các xu hướng hoạt chất mới nổi trên thị trường từ phản hồi của cộng đồng.
@@ -271,11 +271,11 @@ Bên cạnh những kết quả nổi bật đã đạt được, do giới hạ
 
 ### 3.4.3. Đề xuất 4 định hướng nâng cấp và phát triển hệ thống trong tương lai (Roadmap v3.0+)
 
-Để đưa giải pháp OMNI BEAUTY trở thành một hệ sinh thái công nghệ bán lẻ mỹ phẩm toàn diện, sẵn sàng chuyển giao và ứng dụng thực tiễn cho các tập đoàn bán lẻ quy mô lớn, lộ trình nâng cấp phiên bản v3.0+ được định hướng với 4 giải pháp công nghệ mũi nhọn sau:
+Để đưa giải pháp CANMAKE BEAUTY trở thành một hệ sinh thái công nghệ bán lẻ mỹ phẩm toàn diện, sẵn sàng chuyển giao và ứng dụng thực tiễn cho các tập đoàn bán lẻ quy mô lớn, lộ trình nâng cấp phiên bản v3.0+ được định hướng với 4 giải pháp công nghệ mũi nhọn sau:
 
 ```
 +--------------------------------------------------------------------------------------------------------------------+
-| LỘ TRÌNH ĐỊNH HƯỚNG NÂNG CẤP HỆ THỐNG OMNI BEAUTY (ROADMAP v3.0+)                                                  |
+| LỘ TRÌNH ĐỊNH HƯỚNG NÂNG CẤP HỆ THỐNG CANMAKE BEAUTY (ROADMAP v3.0+)                                                  |
 +--------------------------------------------------------------------------------------------------------------------+
 | GIAI ĐOẠN 1 (Quý 1 - 2/2027): HẠ TẦNG PHÂN TÁN CLOUD-NATIVE                                                       |
 | - Triển khai cụm bộ nhớ đệm phân tán Redis Cluster L2 kết hợp thư viện HybridCache (.NET 9).                      |
@@ -316,7 +316,7 @@ Bên cạnh những kết quả nổi bật đã đạt được, do giới hạ
 
 ### TIỂU KẾT CHƯƠNG 3
 
-Chương 3 của khóa luận đã hoàn thành xuất sắc toàn bộ khối lượng công việc hiện thực hóa giải pháp phần mềm Quản lý Bán hàng cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY từ bản thiết kế trên giấy thành một hệ sinh thái ứng dụng công nghệ thông tin vận hành thực tế vững chắc, tin cậy và đạt hiệu năng cao:
+Chương 3 của khóa luận đã hoàn thành xuất sắc toàn bộ khối lượng công việc hiện thực hóa giải pháp phần mềm Quản lý Bán hàng cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY từ bản thiết kế trên giấy thành một hệ sinh thái ứng dụng công nghệ thông tin vận hành thực tế vững chắc, tin cậy và đạt hiệu năng cao:
 
 1. **Hiện thực hóa Kỹ thuật Vững chắc:** Toàn bộ giải pháp được tổ chức chuẩn mực theo kiến trúc Clean Architecture 4 tầng trên nền tảng .NET 8.0 LTS và SQL Server 2022. 5 thuật toán và giải pháp kỹ thuật cốt lõi (FEFO 2 giai đoạn, PBAC 3 tầng phân tán, Bóc tách da liễu EWG/INCI, Chuyển hướng SEO 301 tự động, và Thanh toán VietQR Napas247 kết hợp Sổ cái tài chính đích danh) đã được phân tích tường tận kèm mã nguồn C# thực tế.
 2. **Minh họa Giao diện Sống động:** 16 màn hình giao diện then chốt (gồm 7 màn hình Storefront khách hàng thượng lưu và 9 màn hình quản trị điều hành đa kênh) được chụp trực tiếp từ hệ thống đang chạy thực tế, phân tích chi tiết công thái học, dữ liệu hiển thị và luồng gọi API Backend tương ứng.

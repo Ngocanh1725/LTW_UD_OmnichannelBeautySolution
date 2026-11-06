@@ -53,6 +53,10 @@
   > Bộ nhận diện thương hiệu sử dụng biểu tượng **Blooming Heart Monogram (C × M)** — nét chữ C như đường cọ trang điểm ôm trọn chữ M tạo thành trái tim và đóa hoa bung nở cùng ngôi sao 4 cánh lấp lánh, phối trên bảng màu hồng Primary Rose `#E8618C` và Deep Berry `#B8336A` đạt chuẩn tương phản trợ năng quốc tế WCAG 2.1 AA.
   > Đi vào câu chuyện trải nghiệm của khách hàng VIP Lê Ngọc Linh: ngay khi Linh truy cập, nền tảng nhận diện hạng Kim Cương cùng thông báo Birthday Bonus cá nhân hóa cho sinh nhật tháng 11. Hệ thống được xây dựng trên .NET 8 Clean Architecture, đồng bộ xuyên suốt từ Website, Ứng dụng Khách hàng đến Quầy bán lẻ POS và Kho vận FEFO."*
 
+![Giao diện Trang chủ CANMAKE BEAUTY](./Hinh_4_1_Giao_Dien_Trang_Chu.png)
+*Hình minh họa Chặng 1: Giao diện Trang chủ & Kiến trúc Clean Architecture 4 tầng*
+![Kiến trúc Clean Architecture 4 tầng](./Kien_Truc_Clean_Architecture_4_Tang.png)
+
 ---
 
 ### CHẶNG 2 (1:30 – 3:30): TRỢ LÝ AI DA LIỄU & CẢNH BÁO TƯƠNG KỴ HOẠT CHẤT LÂM SÀNG
@@ -75,6 +79,9 @@
 * **Lời thuyết trình mẫu**:
   > *"Khác với các sàn thương mại điện tử thông thường chỉ cố gắng bán càng nhiều càng tốt, OmnichannelBeautySolution đóng vai trò là chuyên gia da liễu bảo vệ làn da người tiêu dùng. Động cơ Skincare Interaction Engine sử dụng AI phân tích trực tiếp thành phần hoá học để ngăn chặn tương kỵ lâm sàng ngay tại giỏ hàng."*
 
+![Giao diện Giỏ hàng và Cảnh báo Tương kỵ Hoạt chất AI](./Hinh_4_3_Giao_Dien_Gio_Hang_Va_Canh_Bao_Xung_Dot.png)
+*Hình minh họa Chặng 2: Cảnh báo tương kỵ hoạt chất Retinol + BHA ngay trong giỏ hàng*
+
 ---
 
 ### CHẶNG 3 (3:30 – 5:30): TRẢI NGHIỆM STOREFRONT ĐA KÊNH CHUYÊN SÂU
@@ -92,6 +99,9 @@
      - Nhập Mã đơn `ORD-SEED-0001` + SĐT `0909000001` $\rightarrow$ Hiển thị **Timeline dọc 6 bước**, mã vận đơn GHN Express và lịch sử chuyển trạng thái minh bạch.
 * **Lời thuyết trình mẫu**:
   > *"Mọi tính năng trên Storefront đều giải quyết nỗi đau thực tế: Khách hàng so sánh được giá trị kinh tế theo VNĐ/ml thay vì bị đánh lừa bởi kích thước chai lọ, minh bạch hạn sử dụng FEFO đến từng ngày, và khách mua vãng lai không cần tài khoản vẫn tra cứu được hành trình đơn hàng chi tiết."*
+
+![Giao diện Chi tiết Sản phẩm và Bảng thành phần Hoạt chất](./Hinh_4_2_Giao_Dien_Chi_Tiet_San_Pham_Full.png)
+*Hình minh họa Chặng 3: Chi tiết sản phẩm chuẩn quốc tế & Minh bạch thành phần hoạt chất*
 
 ---
 
@@ -124,6 +134,10 @@
 * **Lời thuyết trình mẫu**:
   > *"Đây chính là tính năng thể hiện rõ rệt nhất tinh thần Đa kênh (Omnichannel) của đề tài. Khách hàng đặt mua trên mạng chỉ sau 1 giờ đã có thể ghé showroom nhận hàng bằng mã PIN an toàn, nhân viên POS bàn giao trong 10 giây, khép kín hoàn hảo vòng lặp trải nghiệm O2O."*
 
+![Giao diện Bán hàng tại quầy POS](./Hinh_4_9_Giao_Dien_Man_Hinh_Ban_Hang_POS.png)
+*Hình minh họa Chặng 5: Màn hình thu ngân POS & Kiểm toán đóng ca két tiền mù*
+![Giao diện Đóng mở ca và Đối soát két](./Hinh_4_10_Giao_Dien_Dong_Mo_Ca_Va_Doi_Soat_Ket.png)
+
 ---
 
 ### CHẶNG 6 (8:30 – 10:00): TRUNG TÂM RA QUYẾT ĐỊNH & ĐIỀU HÀNH CHUỖI (EXECUTIVE DECISION CENTER)
@@ -145,6 +159,11 @@
      - Bấm **`Alt + D`**, bấm nút **"Reset Demo Data"** $\rightarrow$ Xác nhận SweetAlert2. Hệ thống hoàn nguyên tồn kho, xóa đơn test, đưa database về trạng thái sạch sẽ cho lượt demo tiếp theo.
 * **Lời thuyết trình mẫu**:
   > *"Tại trung tâm chỉ huy điều hành, chúng em loại bỏ 100% số liệu giả lập để mang lại công cụ phân tích kinh doanh thực chiến chuẩn Shopify Analytics. Lãnh đạo có thể phân khúc khách hàng theo thuật toán RFM và điều phối tồn kho liên chi nhánh trong 1 cú nhấp chuột."*
+
+![Giao diện Admin Dashboard](./Hinh_4_4_Giao_Dien_Bang_Dieu_Khien_Admin_Dashboard.png)
+*Hình minh họa Chặng 6: Bảng điều khiển Admin Dashboard, Giám sát Tồn kho FEFO và Ma trận Phân quyền PBAC*
+![Giao diện Giám sát Tồn kho FEFO](./Hinh_4_7_Giao_Dien_Giam_Sat_Ton_Kho_FEFO.png)
+![Giao diện Ma trận Phân quyền PBAC](./Hinh_4_6_Giao_Dien_Ma_Tran_Phan_Quyen_PBAC.png)
 
 ---
 

@@ -2,7 +2,7 @@
 
 ## 3.2.2. Phân hệ Giao diện Quản trị Điều hành & Bán lẻ Đa kênh (Admin Back-Office, Smart POS, Kho Lô FEFO, Visual Site Customizer & Tài chính)
 
-Nếu phân hệ Storefront là bộ mặt thương hiệu sang trọng tiếp xúc với người tiêu dùng, thì phân hệ Quản trị Điều hành và Bán lẻ Đa kênh (Admin Back-Office & Retail System) chính là bộ máy xương sống vận hành toàn bộ chuỗi bán lẻ OMNI BEAUTY. Được thiết kế chuyên biệt theo tiêu chuẩn công thái học phần mềm doanh nghiệp, phân hệ cung cấp các công cụ sắc bén cho từng cấp quản lý và nhân viên tác nghiệp: từ bảng điều khiển điều hành số (Digital Executive Dashboard), trình thiết kế giao diện không cần lập trình (Visual Site Customizer), hệ thống ma trận phân quyền động PBAC 51 quyền hạt nhân, công cụ giám sát hạn dùng kho dược mỹ phẩm FEFO, đến màn hình máy tính tiền quầy bán lẻ Smart POS màn hình đôi và sổ cái tài chính giá vốn đích danh theo từng số lô hàng.
+Nếu phân hệ Storefront là bộ mặt thương hiệu sang trọng tiếp xúc với người tiêu dùng, thì phân hệ Quản trị Điều hành và Bán lẻ Đa kênh (Admin Back-Office & Retail System) chính là bộ máy xương sống vận hành toàn bộ chuỗi bán lẻ CANMAKE BEAUTY. Được thiết kế chuyên biệt theo tiêu chuẩn công thái học phần mềm doanh nghiệp, phân hệ cung cấp các công cụ sắc bén cho từng cấp quản lý và nhân viên tác nghiệp: từ bảng điều khiển điều hành số (Digital Executive Dashboard), trình thiết kế giao diện không cần lập trình (Visual Site Customizer), hệ thống ma trận phân quyền động PBAC 51 quyền hạt nhân, công cụ giám sát hạn dùng kho dược mỹ phẩm FEFO, đến màn hình máy tính tiền quầy bán lẻ Smart POS màn hình đôi và sổ cái tài chính giá vốn đích danh theo từng số lô hàng.
 
 Dưới đây là phân tích chi tiết 9 màn hình quản trị và vận hành cốt lõi của hệ thống, bao gồm hướng dẫn thực nghiệm chụp ảnh minh chứng từ hệ thống đang chạy thực tế, mô tả trực quan bố cục và các chỉ số giao diện, cùng phân tích chuyên sâu về nghiệp vụ, phân quyền PBAC và luồng xử lý dữ liệu tầng Backend kết nối cơ sở dữ liệu.
 
@@ -23,7 +23,7 @@ Trung tâm Điều hành Quản trị là tháp chỉ huy số dành riêng cho 
 
 ```
 +--------------------------------------------------------------------------------------------------------------------+
-| OMNI BEAUTY ADMIN | Chi nhánh: [ Toàn chuỗi v ] | Kỳ báo cáo: [ Tháng này v ] | (🔔 3) [Tin nhắn: 2] [SuperAdmin v]|
+| CANMAKE BEAUTY ADMIN | Chi nhánh: [ Toàn chuỗi v ] | Kỳ báo cáo: [ Tháng này v ] | (🔔 3) [Tin nhắn: 2] [SuperAdmin v]|
 +--------------------------------------------------------------------------------------------------------------------+
 | [ THẺ 1: DOANH THU CHUỖI ]  | [ THẺ 2: ĐƠN CHỜ DUYỆT ]   | [ THẺ 3: DOANH SỐ POS ]    | [ THẺ 4: LÔ CẬN DATE FEFO] |
 | 1.845.250.000 đ            | 28 Đơn hàng mới            | 48.650.000 đ (Hôm nay)     | 12 Lô cần xả hàng          |
@@ -139,11 +139,11 @@ Visual Site Customizer là công cụ đồ họa cao cấp cho phép đội ng�
 | TRÌNH TÙY BIẾN GIAO DIỆN TRỰC QUAN (VISUAL SITE CUSTOMIZER)          [ LƯU BẢN NHÁP (DRAFT) ] [ 🚀 XUẤT BẢN THỰC TẾ ] |
 +--------------------------------------+-----------------------------------------------------------------------------+
 | SIDEBAR CẤU HÌNH (30% WIDTH)         | KHUNG LIVE PREVIEW TRỰC QUAN (70% WIDTH - CHUẨN POSTMESSAGE < 50MS)        |
-| Chọn trang: [ Trang Chủ (Home) v ]   | [ Chế độ xem: (🖥️ Máy tính)  (📱 Điện thoại) ] | URL: https://omnibeauty.vn|
+| Chọn trang: [ Trang Chủ (Home) v ]   | [ Chế độ xem: (🖥️ Máy tính)  (📱 Điện thoại) ] | URL: https://canmakebeauty.vn|
 | ------------------------------------ | --------------------------------------------------------------------------- |
 | 1. BẢNG MÀU THƯƠNG HIỆU (PALETTE):   | +-------------------------------------------------------------------------+ |
 | - Màu chủ đạo: [ ■ #B76E79 ] (Rose)  | | [Thanh thông báo] Freeship đơn từ 500k | Hotline 1800 6868               | |
-| - Màu điểm nhấn:[ ■ #1B4D3E ] (Green)| | [LOGO] OMNI BEAUTY  [ Tìm kiếm...              ]  [Wishlist] [Giỏ: 3]     | |
+| - Màu điểm nhấn:[ ■ #1B4D3E ] (Green)| | [LOGO] CANMAKE BEAUTY  [ Tìm kiếm...              ]  [Wishlist] [Giỏ: 3]     | |
 | - Màu nền trang:[ ■ #FFFDFB ] (Pearl)| | ----------------------------------------------------------------------- | |
 | ------------------------------------ | | HERO BANNER MÙA THU (ẢNH MỚI CẬP NHẬT TỨC THÌ)                          | |
 | 2. SẮP ĐẶT THỨ TỰ KHỐI (SECTIONS):   | | "ĐẠI TIỆC DƯỢC MỸ PHẨM CHUẨN FEFO - SALE ĐẾN 70%"                        | |
@@ -172,7 +172,7 @@ Visual Site Customizer là công cụ đồ họa cao cấp cho phép đội ng�
 
 ### 4. Hình 3.11 – Giao diện Ma trận Phân quyền Hạt nhân Động (PBAC Permission Matrix 51 Quyền x 6 Vai trò) & Nhật ký Kiểm toán (`AuditLog`)
 
-Hệ thống phân quyền PBAC kết hợp Nhật ký Kiểm toán là bức tường thành an ninh mạng vững chắc của chuỗi OMNI BEAUTY, đảm bảo kiểm soát truy cập theo nguyên tắc đặc quyền tối thiểu và truy vết mọi biến động dữ liệu quan trọng.
+Hệ thống phân quyền PBAC kết hợp Nhật ký Kiểm toán là bức tường thành an ninh mạng vững chắc của chuỗi CANMAKE BEAUTY, đảm bảo kiểm soát truy cập theo nguyên tắc đặc quyền tối thiểu và truy vết mọi biến động dữ liệu quan trọng.
 
 > **[HƯỚNG DẪN CHỤP & CHÈN HÌNH 3.11 - GIAO DIỆN MA TRẬN PHÂN QUYỀN PBAC VÀ AUDIT LOG]**  
 > - **Tệp hình ảnh có sẵn trong hệ thống:** `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_4_6_Giao_Dien_Ma_Tran_Phan_Quyen_PBAC.png`.  
@@ -340,7 +340,7 @@ Màn hình POS là công cụ làm việc cường độ cao của Nhân viên t
 
 ```
 +--------------------------------------------------------------------------------------------------------------------+
-| SMART POS KIOSK - OMNI BEAUTY | Ca: SÁNG (Thu ngân: Hoàng Thu Ngân) | Điểm bán: SHOWROOM CẦU GIẤY | [🔒 ĐÓNG CA F10]  |
+| SMART POS KIOSK - CANMAKE BEAUTY | Ca: SÁNG (Thu ngân: Hoàng Thu Ngân) | Điểm bán: SHOWROOM CẦU GIẤY | [🔒 ĐÓNG CA F10]  |
 +-------------------------------------------------------------------+------------------------------------------------+
 | [F1] QUÉT MÃ VẠCH EAN-13 / SKU: [ 8935028401923               🔍] | [F2] KHÁCH HÀNG: [ 0912.345.678             🔍] |
 +-------------------------------------------------------------------+ Tên: Lê Hoàng Yến | Hạng: KIM CƯƠNG (VIP)      |
@@ -378,7 +378,7 @@ Màn hình POS là công cụ làm việc cường độ cao của Nhân viên t
 
 ### 8. Hình 3.15 – Giao diện Quản lý Mở/Đóng Ca Thu ngân POS & Kiểm toán Đối soát Két tiền mặt
 
-Giao diện quản lý ca bán hàng hiện thực hóa quy trình kiểm toán két tiền mù (Blind Cash Drawer Audit), thiết lập kỷ luật tài chính nghiêm ngặt nhất cho toàn bộ mạng lưới cửa hàng bán lẻ của OMNI BEAUTY.
+Giao diện quản lý ca bán hàng hiện thực hóa quy trình kiểm toán két tiền mù (Blind Cash Drawer Audit), thiết lập kỷ luật tài chính nghiêm ngặt nhất cho toàn bộ mạng lưới cửa hàng bán lẻ của CANMAKE BEAUTY.
 
 > **[HƯỚNG DẪN CHỤP & CHÈN HÌNH 3.15 - GIAO DIỆN KIỂM TOÁN ĐÓNG CA THU NGÂN]**  
 > - **Tệp hình ảnh có sẵn trong hệ thống:** `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_4_10_Giao_Dien_Dong_Mo_Ca_Va_Doi_Soat_Ket.png`.  

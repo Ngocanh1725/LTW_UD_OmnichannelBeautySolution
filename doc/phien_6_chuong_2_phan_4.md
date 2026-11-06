@@ -1,6 +1,6 @@
 ## 2.4. Thiết kế Kiến trúc Hệ thống và Cơ sở dữ liệu Chuẩn hóa 3NF
 
-Một giải pháp phần mềm cấp doanh nghiệp phục vụ chuỗi bán lẻ đa chi nhánh và thương mại điện tử hợp nhất không chỉ đòi hỏi các chức năng nghiệp vụ phong phú ở mặt trước mà còn phụ thuộc cốt tử vào sự vững chắc của kiến trúc tổng thể và mô hình dữ liệu ở tầng nền tảng. Phần này trình bày toàn diện ba trụ cột kỹ thuật trọng yếu của hệ thống OMNI BEAUTY: Kiến trúc phân tầng Clean Architecture kết hợp biểu đồ lớp thực thi BCE; Mô hình ma trận phân quyền động PBAC giải quyết bài toán cô lập dữ liệu theo từng điểm bán; và Thiết kế cơ sở dữ liệu quan hệ chuẩn hóa 3NF quy mô 65 bảng dữ liệu thực tế trên Microsoft SQL Server.
+Một giải pháp phần mềm cấp doanh nghiệp phục vụ chuỗi bán lẻ đa chi nhánh và thương mại điện tử hợp nhất không chỉ đòi hỏi các chức năng nghiệp vụ phong phú ở mặt trước mà còn phụ thuộc cốt tử vào sự vững chắc của kiến trúc tổng thể và mô hình dữ liệu ở tầng nền tảng. Phần này trình bày toàn diện ba trụ cột kỹ thuật trọng yếu của hệ thống CANMAKE BEAUTY: Kiến trúc phân tầng Clean Architecture kết hợp biểu đồ lớp thực thi BCE; Mô hình ma trận phân quyền động PBAC giải quyết bài toán cô lập dữ liệu theo từng điểm bán; và Thiết kế cơ sở dữ liệu quan hệ chuẩn hóa 3NF quy mô 65 bảng dữ liệu thực tế trên Microsoft SQL Server.
 
 ---
 
@@ -51,9 +51,9 @@ PresComp .[#8E44AD,dashed].> InfraComp : "đăng ký thùng chứa phụ thuộc
 ```
 
 > **[HƯỚNG DẪN CHÈN SƠ ĐỒ 2.18 - KIẾN TRÚC TỔNG THỂ CLEAN ARCHITECTURE 4 TẦNG]**
-> - **Vị trí chèn:** Ngay sau đoạn phân tích bốn tầng kiến trúc của giải pháp OMNI BEAUTY.
+> - **Vị trí chèn:** Ngay sau đoạn phân tích bốn tầng kiến trúc của giải pháp CANMAKE BEAUTY.
 > - **Nguồn hình ảnh:** Sinh viên liên kết trực tiếp tới file ảnh đã có sẵn trong dự án tại đường dẫn `d:\Lập trình web\OmnichannelBeautySolution\doc\Kien_Truc_Clean_Architecture_4_Tang.png`.
-> - **Tiêu đề hình:** *Sơ đồ 2.18: Kiến trúc tổng thể Clean Architecture 4 tầng và luồng phụ thuộc của hệ thống OMNI BEAUTY.*
+> - **Tiêu đề hình:** *Sơ đồ 2.18: Kiến trúc tổng thể Clean Architecture 4 tầng và luồng phụ thuộc của hệ thống CANMAKE BEAUTY.*
 
 Dưới đây là bảng phân rã chi tiết trách nhiệm kỹ thuật và vòng đời phụ thuộc (Dependency Injection Lifecycle) của từng tầng được cấu hình trong `Program.cs`.
 
@@ -253,7 +253,7 @@ BatchEntity "1" -- "many" DetailEntity
 > **[HƯỚNG DẪN CHÈN SƠ ĐỒ 2.19 - BIỂU ĐỒ LỚP KIẾN TRÚC BCE CHO CÁC PHÂN HỆ CỐT LÕI]**
 > - **Vị trí chèn:** Ngay sau bảng phân rã kiến trúc và phân tích mô hình BCE.
 > - **Nguồn hình ảnh:** Sinh viên render từ đoạn mã PlantUML phía trên thành file ảnh `Hinh_2_19_BCE_Class_Diagram.png` và lưu trữ tại thư mục `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_2_19_BCE_Class_Diagram.png`.
-> - **Tiêu đề hình:** *Sơ đồ 2.19: Biểu đồ Lớp kiến trúc Boundary – Control – Entity (BCE) cho các phân hệ cốt lõi của hệ thống OMNI BEAUTY.*
+> - **Tiêu đề hình:** *Sơ đồ 2.19: Biểu đồ Lớp kiến trúc Boundary – Control – Entity (BCE) cho các phân hệ cốt lõi của hệ thống CANMAKE BEAUTY.*
 
 **Phân tích trách nhiệm kiến trúc của các thành phần trong Biểu đồ Lớp BCE:**
 - *Thành phần Giao diện Biên (Boundary Controllers):* Đóng vai trò là cổng đón tiếp và bảo vệ hệ thống trước các tác nhân bên ngoài. Lớp này tiếp nhận tham số từ HTTP Request, thực hiện chuyển đổi kiểu dữ liệu cơ bản, ủy quyền kiểm tra tính hợp lệ của tham số thông qua ViewModel/DTO và chuyển giao quyền xử lý nghiệp vụ cho các lớp Điều khiển (Control). Boundary tuyệt đối không trực tiếp mở kết nối cơ sở dữ liệu hay thực thi các câu lệnh truy vấn SQL.
@@ -264,7 +264,7 @@ BatchEntity "1" -- "many" DetailEntity
 
 ### 2.4.2. Thiết kế Ma trận Phân quyền Động (Granular Dynamic PBAC Matrix) và Cô lập dữ liệu đa chi nhánh
 
-Trong các hệ thống bán lẻ quy mô lớn, việc gán cứng vai trò trong mã nguồn dạng `[Authorize(Roles = "Admin")]` là nguyên nhân hàng đầu dẫn đến sự xơ cứng kiến trúc phần mềm. Khi chuỗi cửa hàng OMNI BEAUTY phát triển thêm các chức năng quản lý mới như Chuyên viên chăm sóc da, Trưởng ca bán lẻ hay Nhân viên kiểm kê kho cận date, phương pháp truyền thống buộc đội ngũ lập trình viên phải sửa đổi mã nguồn, biên dịch lại toàn bộ dự án và tạm dừng hệ thống để triển khai lại. Để khắc phục triệt để nhược điểm này, hệ thống áp dụng mô hình Kiểm soát Truy cập Dựa trên Quyền hạn Động (Permission-Based Access Control - PBAC) kết hợp cơ chế `DynamicPermissionPolicyProvider` của nền tảng ASP.NET Core 8.
+Trong các hệ thống bán lẻ quy mô lớn, việc gán cứng vai trò trong mã nguồn dạng `[Authorize(Roles = "Admin")]` là nguyên nhân hàng đầu dẫn đến sự xơ cứng kiến trúc phần mềm. Khi chuỗi cửa hàng CANMAKE BEAUTY phát triển thêm các chức năng quản lý mới như Chuyên viên chăm sóc da, Trưởng ca bán lẻ hay Nhân viên kiểm kê kho cận date, phương pháp truyền thống buộc đội ngũ lập trình viên phải sửa đổi mã nguồn, biên dịch lại toàn bộ dự án và tạm dừng hệ thống để triển khai lại. Để khắc phục triệt để nhược điểm này, hệ thống áp dụng mô hình Kiểm soát Truy cập Dựa trên Quyền hạn Động (Permission-Based Access Control - PBAC) kết hợp cơ chế `DynamicPermissionPolicyProvider` của nền tảng ASP.NET Core 8.
 
 Toàn bộ hệ thống được chia nhỏ thành **51 quyền hạn nguyên tử** (Atomic Permissions) thuộc **17 phân hệ chức năng**, phân bổ sẵn cho **6 vai trò người dùng cốt lõi** trong `DbInitializer.cs`:
 1. `SuperAdmin`: Quản trị viên tối cao toàn chuỗi, nắm giữ toàn quyền 51/51 quyền hạn, có tầm nhìn quản trị xuyên suốt mọi chi nhánh và cấu hình hệ thống.
@@ -274,7 +274,7 @@ Toàn bộ hệ thống được chia nhỏ thành **51 quyền hạn nguyên t�
 5. `ContentEditor`: Biên tập viên nội dung, chịu trách nhiệm quản lý tin tức làm đẹp, bài viết chuẩn SEO, cây menu điều hướng, banner khuyến mãi và kiểm duyệt đánh giá của khách hàng.
 6. `Customer`: Khách hàng thành viên, có quyền quản lý hồ sơ cá nhân, lịch sử chăm sóc da, theo dõi đơn hàng, tích lũy điểm thưởng và đổi voucher ưu đãi.
 
-Dưới đây là ma trận phân bổ chi tiết 51 quyền nguyên tử cho 6 vai trò người dùng được khởi tạo mặc định trong hệ thống OMNI BEAUTY.
+Dưới đây là ma trận phân bổ chi tiết 51 quyền nguyên tử cho 6 vai trò người dùng được khởi tạo mặc định trong hệ thống CANMAKE BEAUTY.
 
 ##### Bảng 2.12: Ma trận phân rã 51 Quyền nguyên tử thuộc 17 Phân hệ cho 6 Vai trò hệ thống
 
@@ -334,7 +334,7 @@ Dưới đây là ma trận phân bổ chi tiết 51 quyền nguyên tử cho 6 
 
 ##### Cơ chế Ghi đè Quyền cá nhân (User Permission Overrides) và Cô lập Dữ liệu chi nhánh (StoreId Isolation)
 
-Bên cạnh việc kế thừa quyền hạn tự động từ Vai trò người dùng (thông qua bảng `RolePermissions`), hệ thống OMNI BEAUTY hiện thực hóa một cơ chế quản trị nhân sự mang tính tùy biến cực cao: **Ghi đè quyền hạn trực tiếp trên từng tài khoản cá nhân** thông qua bảng `UserPermissions`. Bảng này chứa trường cờ nhị phân `IsGranted` với logic giải quyết xung đột như sau:
+Bên cạnh việc kế thừa quyền hạn tự động từ Vai trò người dùng (thông qua bảng `RolePermissions`), hệ thống CANMAKE BEAUTY hiện thực hóa một cơ chế quản trị nhân sự mang tính tùy biến cực cao: **Ghi đè quyền hạn trực tiếp trên từng tài khoản cá nhân** thông qua bảng `UserPermissions`. Bảng này chứa trường cờ nhị phân `IsGranted` với logic giải quyết xung đột như sau:
 - *Cấp quyền đặc cách (Grant Override - `IsGranted = 1`):* Cho phép một nhân sự cụ thể được thực thi một hành vi vượt cấp mà vai trò mặc định của họ không có. Ví dụ: Nhân viên thu ngân `cashier_01` tại Showroom Ba Đình có năng lực tốt được cấp đặc cách quyền `INVENTORY_STOCKTAKE` để tham gia tổ chức kiểm kê kho ban đêm cùng thủ kho mà không cần phải nâng toàn bộ nhóm thu ngân lên làm quản lý.
 - *Thu hồi quyền tức thời (Revoke Override - `IsGranted = 0`):* Cho phép tước bỏ ngay lập tức một quyền hạn nhạy cảm của một cá nhân dù vai trò của họ vẫn chứa quyền đó. Ví dụ: Một Quản lý cửa hàng đang trong thời gian bàn giao công việc có thể bị tước quyền `ORDER_CANCEL` để ngăn chặn việc tự ý hủy đơn hàng mà không cần phải thay đổi cấu hình vai trò `StoreManager` của các chi nhánh khác.
 
@@ -346,9 +346,9 @@ Cùng với phân quyền hành vi, bài toán **Cô lập dữ liệu theo từ
 
 ### 2.4.3. Thiết kế Cơ sở dữ liệu quan hệ chuẩn 3NF và Sơ đồ Thực thể – Liên kết (ERD) – Phần 1
 
-Cơ sở dữ liệu của giải pháp OMNI BEAUTY mang tên `OmnichannelBeautyDb` được cài đặt trên hệ quản trị cơ sở dữ liệu quan hệ Microsoft SQL Server. Mô hình dữ liệu bao gồm **65 bảng thực thể chuẩn hóa 3NF** được phân rã khoa học thành **17 phân nhóm nghiệp vụ**, đáp ứng trọn vẹn toàn bộ các điểm chạm nghiệp vụ đa kênh từ thương mại điện tử, quản trị tồn kho FEFO, vận hành bán lẻ POS, chăm sóc da liễu thông minh đến kế toán sổ cái tài chính.
+Cơ sở dữ liệu của giải pháp CANMAKE BEAUTY mang tên `OmnichannelBeautyDb` được cài đặt trên hệ quản trị cơ sở dữ liệu quan hệ Microsoft SQL Server. Mô hình dữ liệu bao gồm **65 bảng thực thể chuẩn hóa 3NF** được phân rã khoa học thành **17 phân nhóm nghiệp vụ**, đáp ứng trọn vẹn toàn bộ các điểm chạm nghiệp vụ đa kênh từ thương mại điện tử, quản trị tồn kho FEFO, vận hành bán lẻ POS, chăm sóc da liễu thông minh đến kế toán sổ cái tài chính.
 
-##### Bảng 2.13: Bảng tổng hợp quy mô 17 phân nhóm dữ liệu (65 bảng) của hệ thống OMNI BEAUTY
+##### Bảng 2.13: Bảng tổng hợp quy mô 17 phân nhóm dữ liệu (65 bảng) của hệ thống CANMAKE BEAUTY
 
 | STT | Phân nhóm dữ liệu nghiệp vụ | Số lượng bảng | Danh sách các bảng thực thể thành phần | Mục đích và vai trò vận hành |
 | :---: | :--- | :---: | :--- | :--- |
@@ -369,21 +369,21 @@ Cơ sở dữ liệu của giải pháp OMNI BEAUTY mang tên `OmnichannelBeauty
 | **15** | Kế toán Sổ cái Tài chính & Quản trị Lãi/Lỗ | 3 | `FinancialLedgers`, `SupplierDebts`, `CodReconciliations` | Sổ cái tài chính ghi nhận doanh thu, giá vốn đích danh theo lô (Batch COGS), công nợ và đối soát COD. |
 | **16** | Trợ lý Ảo AI & Lịch sử Hội thoại Tư vấn | 2 | `ChatSessions`, `ChatMessages` | Lưu trữ phiên hội thoại tương tác giữa khách hàng và trợ lý trí tuệ nhân tạo RAG. |
 | **17** | Cảnh báo Thông minh, Thông điệp & Thông báo | 6 | `Alerts`, `Notifications`, `InternalMessages`, `WishlistItems`, `StockAlerts`, `OutboxMessages` | Trung tâm thông báo đẩy thời gian thực, bảng tin nội bộ chuỗi và hộp thư bảo đảm giao dịch Outbox. |
-| **TỔNG** | **Toàn bộ hệ thống cơ sở dữ liệu** | **65** | **65 bảng chuẩn hóa 3NF phân rã chi tiết** | **Bảo đảm vận hành toàn diện chuỗi bán lẻ mỹ phẩm OMNI BEAUTY** |
+| **TỔNG** | **Toàn bộ hệ thống cơ sở dữ liệu** | **65** | **65 bảng chuẩn hóa 3NF phân rã chi tiết** | **Bảo đảm vận hành toàn diện chuỗi bán lẻ mỹ phẩm CANMAKE BEAUTY** |
 
 ##### Chứng minh tính Chuẩn hóa Cơ sở dữ liệu đạt Chuẩn 3NF (Third Normal Form)
 
-Để bảo đảm cơ sở dữ liệu hoạt động tối ưu, không phát sinh các dị thường khi thêm (Insertion Anomaly), xóa (Deletion Anomaly) hay sửa dữ liệu (Update Anomaly), toàn bộ thiết kế thực thể của OMNI BEAUTY được thẩm định nghiêm ngặt theo các tiêu chuẩn dạng chuẩn:
+Để bảo đảm cơ sở dữ liệu hoạt động tối ưu, không phát sinh các dị thường khi thêm (Insertion Anomaly), xóa (Deletion Anomaly) hay sửa dữ liệu (Update Anomaly), toàn bộ thiết kế thực thể của CANMAKE BEAUTY được thẩm định nghiêm ngặt theo các tiêu chuẩn dạng chuẩn:
 
 1. **Tuân thủ Dạng chuẩn 1 (First Normal Form - 1NF):**
    - *Yêu cầu:* Mỗi ô dữ liệu chỉ chứa giá trị nguyên tố (Atomic Value), không chứa danh sách lặp hoặc thuộc tính đa trị.
-   - *Thực thi trong hệ thống:* Trong các thiết kế sơ khai, thông tin các hoạt chất hóa học có trong một loại mỹ phẩm thường bị lưu gộp chung thành một chuỗi văn bản trong bảng sản phẩm. OMNI BEAUTY đã triệt tiêu hoàn toàn vi phạm này bằng cách tách riêng bảng `ActiveIngredients` (chứa định danh hoạt chất) và bảng trung gian `ProductIngredients` (lưu trữ chính xác cặp `ProductId` và `ActiveIngredientId` cùng nồng độ phần trăm `Concentration`). Tương tự, bảng màu son không lưu gộp trong sản phẩm cha mà được tách thành từng bản ghi biến thể `ProductVariants` và `ProductSwatches` độc lập. 100% các cột trong 65 bảng dữ liệu đều mang giá trị đơn nhất và mọi bảng đều sở hữu một khóa chính chuẩn mực `INT IDENTITY(1,1)`.
+   - *Thực thi trong hệ thống:* Trong các thiết kế sơ khai, thông tin các hoạt chất hóa học có trong một loại mỹ phẩm thường bị lưu gộp chung thành một chuỗi văn bản trong bảng sản phẩm. CANMAKE BEAUTY đã triệt tiêu hoàn toàn vi phạm này bằng cách tách riêng bảng `ActiveIngredients` (chứa định danh hoạt chất) và bảng trung gian `ProductIngredients` (lưu trữ chính xác cặp `ProductId` và `ActiveIngredientId` cùng nồng độ phần trăm `Concentration`). Tương tự, bảng màu son không lưu gộp trong sản phẩm cha mà được tách thành từng bản ghi biến thể `ProductVariants` và `ProductSwatches` độc lập. 100% các cột trong 65 bảng dữ liệu đều mang giá trị đơn nhất và mọi bảng đều sở hữu một khóa chính chuẩn mực `INT IDENTITY(1,1)`.
 2. **Tuân thủ Dạng chuẩn 2 (Second Normal Form - 2NF):**
    - *Yêu cầu:* Đã đạt 1NF và mọi thuộc tính không khóa phải phụ thuộc hàm đầy đủ (Fully Functionally Dependent) vào toàn bộ khóa chính, loại bỏ hoàn toàn sự phụ thuộc từng phần vào một phần của khóa chính phức hợp.
    - *Thực thi trong hệ thống:* Đối với bảng trung gian `StoreInventories` có cặp khóa ngoại liên kết tới chi nhánh và lô hàng, hệ thống không lưu trữ thuộc tính tên sản phẩm hay hạn sử dụng trong bảng này. Các thông tin về hạn sử dụng và số lô sản xuất phụ thuộc hoàn toàn vào khóa chính `Id` của bảng `ProductBatches`, trong khi vị trí địa lý và tên showroom phụ thuộc vào `StoreId` của bảng `Stores`. Bảng `StoreInventories` chỉ lưu trữ duy nhất các trường phụ thuộc vào sự kết hợp giữa kho và lô là `PhysicalQuantity` và `ReservedQuantity`. Nhờ vậy, khi một lô mỹ phẩm được phân bổ tới nhiều showroom khác nhau, thông tin ngày sản xuất và hạn dùng không bao giờ bị lặp lại dư thừa.
 3. **Tuân thủ Dạng chuẩn 3 (Third Normal Form - 3NF):**
    - *Yêu cầu:* Đã đạt 2NF và không tồn tại bất kỳ sự phụ thuộc bắc cầu (Transitive Dependency) nào giữa các thuộc tính không khóa; nghĩa là không có thuộc tính không khóa nào phụ thuộc vào một thuộc tính không khóa khác.
-   - *Thực thi trong hệ thống:* Một lỗi kinh điển thường gặp trong các hệ thống bán hàng là bảng `OrderDetails` lưu trữ tên thương hiệu hoặc tên nhà sản xuất của sản phẩm. Trong OMNI BEAUTY, `OrderDetails` chỉ chứa `ProductId` và `ProductBatchId`. Từ `ProductId`, hệ thống tham chiếu tới bảng `Products`, và từ `Products` tham chiếu tiếp tới `Brands` hoặc `Suppliers`. Không có thông tin thương hiệu nào nằm trong chi tiết đơn hàng. Đặc biệt, để bảo toàn giá trị lịch sử bán hàng khi giá niêm yết của sản phẩm thay đổi trong tương lai, bảng `OrderDetails` lưu hai trường chốt chặn lịch sử là `UnitPrice` (giá bán thực tế tại thời điểm thanh toán) và `CostPriceSnapshot` (giá vốn đích danh của lô xuất kho). Đây không phải là sự phụ thuộc bắc cầu mà là thuộc tính nội tại của chính bản ghi giao dịch tại thời điểm cam kết dữ liệu.
+   - *Thực thi trong hệ thống:* Một lỗi kinh điển thường gặp trong các hệ thống bán hàng là bảng `OrderDetails` lưu trữ tên thương hiệu hoặc tên nhà sản xuất của sản phẩm. Trong CANMAKE BEAUTY, `OrderDetails` chỉ chứa `ProductId` và `ProductBatchId`. Từ `ProductId`, hệ thống tham chiếu tới bảng `Products`, và từ `Products` tham chiếu tiếp tới `Brands` hoặc `Suppliers`. Không có thông tin thương hiệu nào nằm trong chi tiết đơn hàng. Đặc biệt, để bảo toàn giá trị lịch sử bán hàng khi giá niêm yết của sản phẩm thay đổi trong tương lai, bảng `OrderDetails` lưu hai trường chốt chặn lịch sử là `UnitPrice` (giá bán thực tế tại thời điểm thanh toán) và `CostPriceSnapshot` (giá vốn đích danh của lô xuất kho). Đây không phải là sự phụ thuộc bắc cầu mà là thuộc tính nội tại của chính bản ghi giao dịch tại thời điểm cam kết dữ liệu.
 
 ```plantuml
 @startuml ERD_Core_Modules_Omni_Beauty
@@ -569,7 +569,7 @@ Batches ||--o{ OrderDetails
 > **[HƯỚNG DẪN CHÈN SƠ ĐỒ 2.20 - SƠ ĐỒ THỰC THỂ LIÊN KẾT ERD TỔNG THỂ]**
 > - **Vị trí chèn:** Ngay sau phần chứng minh các dạng chuẩn 1NF, 2NF và 3NF.
 > - **Nguồn hình ảnh:** Sinh viên render từ đoạn mã PlantUML phía trên thành file ảnh `Hinh_2_20_So_Do_ERD_Tong_The.png` và lưu trữ tại thư mục `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_2_20_So_Do_ERD_Tong_The.png`.
-> - **Tiêu đề hình:** *Sơ đồ 2.20: Sơ đồ Thực thể – Liên kết (ERD) tổng thể của các phân hệ cốt lõi trong hệ thống OMNI BEAUTY.*
+> - **Tiêu đề hình:** *Sơ đồ 2.20: Sơ đồ Thực thể – Liên kết (ERD) tổng thể của các phân hệ cốt lõi trong hệ thống CANMAKE BEAUTY.*
 
 ---
 
@@ -673,7 +673,7 @@ Phân hệ này phản ánh bản sắc chuyên biệt của ngành bán lẻ m�
 | `SortOrder` | `int` | `INT` | Không | `DEFAULT = 0` | Thứ tự ưu tiên sắp xếp hiển thị trên thanh điều hướng. |
 | `IsActive` | `bool` | `BIT` | Không | `DEFAULT = 1` | Cờ kích hoạt trạng thái hiển thị danh mục trên Storefront. |
 
-*Phân tích thiết kế bảng Categories:* Khóa ngoại tự tham chiếu `ParentId` cho phép OMNI BEAUTY tổ chức cây danh mục linh hoạt từ Ngành hàng lớn (Chăm sóc da, Trang điểm) xuống Danh mục con cấp 1 (Làm sạch, Dưỡng ẩm) và Danh mục chi tiết cấp 2 (Tẩy trang dạng dầu, Sữa rửa mặt tạo bọt) mà không cần phải tạo thêm các bảng phân cấp cồng kềnh.
+*Phân tích thiết kế bảng Categories:* Khóa ngoại tự tham chiếu `ParentId` cho phép CANMAKE BEAUTY tổ chức cây danh mục linh hoạt từ Ngành hàng lớn (Chăm sóc da, Trang điểm) xuống Danh mục con cấp 1 (Làm sạch, Dưỡng ẩm) và Danh mục chi tiết cấp 2 (Tẩy trang dạng dầu, Sữa rửa mặt tạo bọt) mà không cần phải tạo thêm các bảng phân cấp cồng kềnh.
 
 ---
 

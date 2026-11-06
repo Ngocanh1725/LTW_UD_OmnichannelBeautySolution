@@ -29,7 +29,7 @@ actor "Khách hàng mua sắm\n(Customer)" as Customer
 ' ========================================================
 ' KHUNG HỆ THỐNG VÀ 17 GÓI PHÂN HỆ CHỨC NĂNG
 ' ========================================================
-rectangle "HỆ THỐNG THƯƠNG MẠI ĐIỆN TỬ VÀ BÁN LẺ MỸ PHẨM ĐA KÊNH OMNI BEAUTY" {
+rectangle "HỆ THỐNG THƯƠNG MẠI ĐIỆN TỬ VÀ BÁN LẺ MỸ PHẨM ĐA KÊNH CANMAKE BEAUTY" {
 
     package "1. BÁN LẺ & GIAO DỊCH ĐA KÊNH" #FDEDEC {
         usecase "UC-POS: Quản lý ca bán lẻ & Két tiền mù" as UC_POS

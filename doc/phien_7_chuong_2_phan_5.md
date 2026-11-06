@@ -222,7 +222,7 @@ Phân hệ này đảm nhiệm toàn bộ luồng giao dịch tiền - hàng t�
 
 ##### E. Nhóm 5: Phân hệ Hồ sơ Sắc đẹp CRM, Ví điểm Loyalty, Khuyến mãi, Tài chính & Nhật ký Kiểm toán
 
-Phân hệ này hoàn thiện bức tranh quản trị toàn diện của chuỗi bán lẻ mỹ phẩm OMNI BEAUTY, dung hòa giữa mục tiêu chăm sóc cá nhân hóa khách hàng để tối đa hóa doanh thu trọn đời (LTV) và kiểm soát tài chính minh bạch cho ban giám đốc.
+Phân hệ này hoàn thiện bức tranh quản trị toàn diện của chuỗi bán lẻ mỹ phẩm CANMAKE BEAUTY, dung hòa giữa mục tiêu chăm sóc cá nhân hóa khách hàng để tối đa hóa doanh thu trọn đời (LTV) và kiểm soát tài chính minh bạch cho ban giám đốc.
 
 ###### Bảng 2.32: Đặc tả chi tiết bảng CustomerProfiles & RepurchaseSchedules (Hồ sơ Sắc đẹp CRM & Dự báo dùng hết)
 
@@ -382,11 +382,11 @@ Phân hệ này hoàn thiện bức tranh quản trị toàn diện của chuỗ
 
 ### 2.4.4. Thiết kế Kiến trúc Giao diện Người dùng (UI/UX Design Specifications)
 
-Giao diện người dùng trong ngành kinh doanh mỹ phẩm cao cấp đóng vai trò là điểm chạm cảm xúc quyết định tỷ lệ chuyển đổi của khách hàng, đồng thời quyết định tốc độ thao tác và sự chuẩn xác của nhân viên vận hành tại chuỗi cửa hàng. OMNI BEAUTY xây dựng ngôn ngữ thiết kế mỹ phẩm sang trọng (*Luxury Cosmetic Design System*) kết hợp kiến trúc giao diện động dựa trên dữ liệu (*Data-Driven UI*) và bốn bố cục Razor Layouts quản trị chuyên biệt hóa cao theo từng vai trò công việc.
+Giao diện người dùng trong ngành kinh doanh mỹ phẩm cao cấp đóng vai trò là điểm chạm cảm xúc quyết định tỷ lệ chuyển đổi của khách hàng, đồng thời quyết định tốc độ thao tác và sự chuẩn xác của nhân viên vận hành tại chuỗi cửa hàng. CANMAKE BEAUTY xây dựng ngôn ngữ thiết kế mỹ phẩm sang trọng (*Luxury Cosmetic Design System*) kết hợp kiến trúc giao diện động dựa trên dữ liệu (*Data-Driven UI*) và bốn bố cục Razor Layouts quản trị chuyên biệt hóa cao theo từng vai trò công việc.
 
 ##### 1. Ngôn ngữ Thiết kế Mỹ phẩm Sang trọng (Luxury Cosmetic Design System)
 
-Hệ sinh thái giao diện của OMNI BEAUTY được chuẩn hóa thông qua hệ thống thẻ định danh thiết kế (Design Tokens) lưu trữ tập trung tại `design-tokens.css`, bảo đảm sự nhất quán tuyệt đối giữa kênh bán lẻ trực tuyến Storefront và hệ thống quản trị hậu trường Admin Portal:
+Hệ sinh thái giao diện của CANMAKE BEAUTY được chuẩn hóa thông qua hệ thống thẻ định danh thiết kế (Design Tokens) lưu trữ tập trung tại `design-tokens.css`, bảo đảm sự nhất quán tuyệt đối giữa kênh bán lẻ trực tuyến Storefront và hệ thống quản trị hậu trường Admin Portal:
 - **Bảng màu chủ đạo (Color Palette):**
   + *Rose Gold (`#B76E79` / `#EC4899`):* Màu vàng hồng đại diện cho sự quý phái, thanh lịch và mềm mại của phái đẹp, được sử dụng làm màu nhấn cho các nút kêu gọi hành động (CTA), huy hiệu khuyến mãi và biểu tượng quà tặng.
   + *Deep Emerald (`#1B4D3E`):* Màu xanh ngọc lục bảo đại diện cho tiêu chuẩn Mỹ phẩm Sạch (Clean Beauty), các sản phẩm có nguồn gốc thuần chay, hữu cơ và an toàn dược học, được dùng cho các nhãn chứng nhận thành phần và biểu đồ phân tích da liễu.
@@ -395,11 +395,11 @@ Hệ sinh thái giao diện của OMNI BEAUTY được chuẩn hóa thông qua h
 - **Nghệ thuật chữ phân cấp (Typography Hierarchy):**
   + Giao diện ứng dụng hai bộ font chữ tối tân được nhúng trực tiếp qua Google Fonts: Bộ font `Plus Jakarta Sans` với các biến thể độ đậm từ 300 đến 800 được sử dụng cho toàn bộ nhãn giao diện, nút bấm và nội dung bài viết nhờ tỷ lệ khoảng cách chữ hoàn hảo, dễ đọc trên cả màn hình điện thoại di động và máy tính bảng; Song song đó, bộ font chuyên biệt `JetBrains Mono` được sử dụng độc quyền cho các trường dữ liệu mang tính định lượng cao như mã SKU, mã vạch Barcode EAN-13, số lô sản xuất `BatchNumber`, ngày hết hạn FEFO và các con số tiền tệ, bảo đảm các chữ số luôn thẳng hàng hoàn hảo khi hiển thị trên các bảng đối soát và hóa đơn nhiệt POS.
 - **Kiến trúc Tùy biến Giao diện Động (Data-Driven Dynamic Theme Engine):**
-  + Thay vì gán cứng bố cục trang chủ trong mã nguồn, hệ thống OMNI BEAUTY thiết kế các bảng `ThemeConfigs`, `PageLayouts`, `UiSections` và `SectionItems`. Quản trị viên nội dung có thể tự do thay đổi màu sắc chủ đạo, chuyển đổi chế độ giao diện Mùa Hè sang Chiến dịch Lễ Hội cuối năm, hoặc sắp xếp lại thứ tự các khối hiển thị (Banner Slider -> Sản phẩm Flash Sale cận date -> Danh mục nổi bật -> Trắc nghiệm Phân tích da) trực tiếp trên trang quản trị mà không cần lập trình viên phải can thiệp sửa mã HTML.
+  + Thay vì gán cứng bố cục trang chủ trong mã nguồn, hệ thống CANMAKE BEAUTY thiết kế các bảng `ThemeConfigs`, `PageLayouts`, `UiSections` và `SectionItems`. Quản trị viên nội dung có thể tự do thay đổi màu sắc chủ đạo, chuyển đổi chế độ giao diện Mùa Hè sang Chiến dịch Lễ Hội cuối năm, hoặc sắp xếp lại thứ tự các khối hiển thị (Banner Slider -> Sản phẩm Flash Sale cận date -> Danh mục nổi bật -> Trắc nghiệm Phân tích da) trực tiếp trên trang quản trị mà không cần lập trình viên phải can thiệp sửa mã HTML.
 
 ##### 2. Thiết kế Công thái học của 4 Razor Layouts Quản trị Chuyên biệt
 
-Nhận thức sâu sắc rằng mỗi chức danh nhân sự trong chuỗi bán lẻ đều có bối cảnh làm việc và áp lực thao tác hoàn toàn khác nhau, OMNI BEAUTY không sử dụng chung một bố cục quản trị đơn điệu mà xây dựng **4 Razor Layouts chuyên biệt hóa tối đa về mặt công thái học (Ergonomics)**:
+Nhận thức sâu sắc rằng mỗi chức danh nhân sự trong chuỗi bán lẻ đều có bối cảnh làm việc và áp lực thao tác hoàn toàn khác nhau, CANMAKE BEAUTY không sử dụng chung một bố cục quản trị đơn điệu mà xây dựng **4 Razor Layouts chuyên biệt hóa tối đa về mặt công thái học (Ergonomics)**:
 
 ```
 Omnichannel.Web/Areas/Admin/Views/Shared/
@@ -435,7 +435,7 @@ Dành riêng cho Biên tập viên nội dung (`ContentEditor`) sáng tạo các
 - **Giao diện chia đôi màn hình tương tác (Split-View Workspace):** Cửa sổ làm việc được phân đôi hoàn hảo với tỷ lệ 50:50. Phía bên trái là khung soạn thảo văn bản đa dạng định dạng (Rich Text Editor) tích hợp kéo thả hình ảnh từ kho Media; Phía bên phải là khung nhìn giả lập kết quả tìm kiếm thời gian thực (Real-time Google SERP Simulator & Social Share Card Preview).
 - Khi biên tập viên gõ tiêu đề, mô tả hoặc thay đổi hình ảnh đại diện, khung nhìn bên phải sử dụng font chữ `Roboto` chuẩn của Google để mô phỏng chính xác mẫu kết quả tìm kiếm sẽ hiển thị trên trang tìm kiếm Google, đồng thời tính toán điểm số tối ưu SEO Onpage (độ dài tiêu đề từ 50-60 ký tự, thẻ mô tả Meta Description từ 150-160 ký tự) giúp nội dung đạt thứ hạng cao nhất trên công cụ tìm kiếm.
 
-Dưới đây là bảng tổng hợp các thông số kỹ thuật và đặc trưng công thái học của 5 môi trường hiển thị trong giải pháp OMNI BEAUTY.
+Dưới đây là bảng tổng hợp các thông số kỹ thuật và đặc trưng công thái học của 5 môi trường hiển thị trong giải pháp CANMAKE BEAUTY.
 
 ##### Bảng 2.36: Bảng tổng hợp thông số thiết kế công thái học của Storefront và 4 Layout quản trị chuyên biệt
 
@@ -451,11 +451,11 @@ Dưới đây là bảng tổng hợp các thông số kỹ thuật và đặc t
 
 ### TIỂU KẾT CHƯƠNG 2
 
-Chương 2 của khóa luận tốt nghiệp đã hoàn thành xuất sắc toàn bộ khối lượng nghiên cứu phân tích và thiết kế hệ thống cho giải pháp phần mềm Quản lý Bán hàng Chuỗi Cửa hàng Mỹ phẩm OMNI BEAUTY theo phương pháp luận hướng đối tượng (OOAD) kết hợp kiến trúc phần mềm doanh nghiệp hiện đại:
+Chương 2 của khóa luận tốt nghiệp đã hoàn thành xuất sắc toàn bộ khối lượng nghiên cứu phân tích và thiết kế hệ thống cho giải pháp phần mềm Quản lý Bán hàng Chuỗi Cửa hàng Mỹ phẩm CANMAKE BEAUTY theo phương pháp luận hướng đối tượng (OOAD) kết hợp kiến trúc phần mềm doanh nghiệp hiện đại:
 
 1. **Khảo sát hiện trạng và Xác lập bài toán:** Khóa luận đã bóc tách tường tận quy trình vận hành thực tế tại chuỗi bán lẻ mỹ phẩm, chỉ rõ 5 điểm nghẽn nghiêm trọng của mô hình bán hàng rời rạc truyền thống (độ trễ tồn kho O2O, rủi ro tiêu hủy mỹ phẩm cận date, thất thoát hàng hóa điều chuyển, gian lận két tiền mặt thu ngân và nguy cơ kích ứng da do tương kỵ hoạt chất). Trên cơ sở đó, quy trình vận hành mục tiêu (To-Be) đã được thiết lập chặt chẽ thông qua Sơ đồ luồng vận hành hàng hóa và tài chính khép kín.
 2. **Xác định Yêu cầu và Phân rã chức năng:** Hệ thống đã định danh chính xác 11 tác nhân người dùng và dịch vụ nền, xây dựng Biểu đồ Phân rã Chức năng (BFD) bao quát 17 phân hệ nghiệp vụ, và thiết lập Ma trận 52 Điểm chạm thực tế ánh xạ chi tiết giữa màn hình giao diện, API Endpoint, Controller, Service và Bảng cơ sở dữ liệu.
 3. **Mô hình hóa Hành vi bằng UML:** Khóa luận đã mô hình hóa toàn diện hệ thống Use Case tổng quát và 5 biểu đồ Use Case phân rã chuyên sâu. Tám nghiệp vụ cốt lõi mang tính sống còn của chuỗi mỹ phẩm đã được đặc tả chi tiết qua Bảng đặc tả 10 mục chuẩn mực, Biểu đồ Tuần tự (Sequence Diagram) chuẩn UML và các đoạn phân tích kỹ thuật tầng xử lý Backend sâu sắc.
 4. **Thiết kế Kiến trúc và Cơ sở dữ liệu Chuẩn hóa 3NF:** Khóa luận đã hiện thực hóa kiến trúc Clean Architecture 4 tầng bảo đảm nguyên lý Đảo ngược Phụ thuộc (DIP), chi tiết hóa chuỗi đường ống dẫn HTTP Request Pipeline 9 bước thực tế trong `Program.cs`, và mô hình hóa thành công Biểu đồ Lớp thực thi BCE. Hệ thống Phân quyền Động PBAC 51 quyền nguyên tử kết hợp kỹ thuật cô lập dữ liệu chi nhánh (`StoreId Isolation`) đã giải quyết triệt để bài toán bảo mật đa điểm bán. Đặc biệt, Cơ sở dữ liệu `OmnichannelBeautyDb` quy mô 65 bảng dữ liệu được chứng minh đạt chuẩn 3NF tuyệt đối, đi kèm Từ điển dữ liệu chi tiết của 22 bảng thực thể cốt lõi và hệ thống 4 Razor Layouts quản trị chuyên biệt hóa cao về mặt công thái học.
 
-Những kết quả phân tích và thiết kế vững chắc trong Chương 2 là kim chỉ nam và nền tảng kỹ thuật tiên quyết để bước sang **CHƯƠNG 3: CÀI ĐẶT, TRIỂN KHAI VÀ THỰC NGHIỆM HỆ THỐNG WEBSITE QUẢN LÝ BÁN HÀNG OMNI BEAUTY**.
+Những kết quả phân tích và thiết kế vững chắc trong Chương 2 là kim chỉ nam và nền tảng kỹ thuật tiên quyết để bước sang **CHƯƠNG 3: CÀI ĐẶT, TRIỂN KHAI VÀ THỰC NGHIỆM HỆ THỐNG WEBSITE QUẢN LÝ BÁN HÀNG CANMAKE BEAUTY**.

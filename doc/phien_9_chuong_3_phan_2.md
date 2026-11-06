@@ -1,26 +1,26 @@
 ## 3.2. Hiện thực hóa và Minh họa giao diện các phân hệ chức năng chính
 
-Phần này trình bày chi tiết kết quả hiện thực hóa giao diện người dùng thực tế của hệ thống website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY. Toàn bộ các màn hình dưới đây được chụp trực tiếp từ hệ thống phần mềm đang vận hành thực tế trên môi trường máy chủ cục bộ và thử nghiệm, thể hiện sự kết hợp hài hòa giữa ngôn ngữ thiết kế Clean Beauty hiện đại (Modern Clean Beauty Aesthetics), tính công thái học trong vận hành chuỗi bán lẻ đa kênh (Omnichannel Ergonomics) và khả năng xử lý nghiệp vụ thông minh chuyên sâu cho ngành mỹ phẩm.
+Phần này trình bày chi tiết kết quả hiện thực hóa giao diện người dùng thực tế của hệ thống website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY. Toàn bộ các màn hình dưới đây được chụp trực tiếp từ hệ thống phần mềm đang vận hành thực tế trên môi trường máy chủ cục bộ và thử nghiệm, thể hiện sự kết hợp hài hòa giữa ngôn ngữ thiết kế Clean Beauty hiện đại (Modern Clean Beauty Aesthetics), tính công thái học trong vận hành chuỗi bán lẻ đa kênh (Omnichannel Ergonomics) và khả năng xử lý nghiệp vụ thông minh chuyên sâu cho ngành mỹ phẩm.
 
 ---
 
 ### 3.2.1. Phân hệ Kênh bán lẻ trực tuyến (Storefront Khách hàng)
 
-Kênh bán lẻ trực tuyến của OMNI BEAUTY được xây dựng nhằm mang đến cho khách hàng trải nghiệm mua sắm trực quan, mượt mà và an toàn tối đa cho làn da. Giao diện Storefront tuân thủ nghiêm ngặt chuẩn mực thiết kế Mobile-First, sử dụng bảng màu thương hiệu sang trọng với nền Pearl White kết hợp điểm nhấn Rose Gold và Deep Emerald, đồng thời tích hợp các tính năng công nghệ đặc thù của ngành làm đẹp.
+Kênh bán lẻ trực tuyến của CANMAKE BEAUTY được xây dựng nhằm mang đến cho khách hàng trải nghiệm mua sắm trực quan, mượt mà và an toàn tối đa cho làn da. Giao diện Storefront tuân thủ nghiêm ngặt chuẩn mực thiết kế Mobile-First, sử dụng bảng màu thương hiệu sang trọng với nền Pearl White kết hợp điểm nhấn Rose Gold và Deep Emerald, đồng thời tích hợp các tính năng công nghệ đặc thù của ngành làm đẹp.
 
-#### 1. Màn hình Trang chủ Omni Beauty (Storefront Home)
+#### 1. Màn hình Trang chủ Canmake Beauty (Storefront Home)
 
-Trang chủ là điểm chạm đầu tiên của khách hàng khi tiếp cận thương hiệu OMNI BEAUTY trên môi trường số, đóng vai trò định vị đẳng cấp thương hiệu, truyền tải cam kết mỹ phẩm sạch và kích thích chuyển đổi hành vi mua sắm.
+Trang chủ là điểm chạm đầu tiên của khách hàng khi tiếp cận thương hiệu CANMAKE BEAUTY trên môi trường số, đóng vai trò định vị đẳng cấp thương hiệu, truyền tải cam kết mỹ phẩm sạch và kích thích chuyển đổi hành vi mua sắm.
 
 > **[HƯỚNG DẪN CHÈN HÌNH/SƠ ĐỒ 3.1 - GIAO DIỆN TRANG CHỦ STOREFRONT]**  
 > *Đường dẫn tệp hình ảnh:* `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_4_1_Giao_Dien_Trang_Chu.png`  
-> *Mô tả hình:* Ảnh chụp thực tế toàn màn hình Trang chủ Storefront OMNI BEAUTY hiển thị thanh thông báo chiến dịch, Header đa hình, Hero Banner Clean Beauty cao cấp, Thanh bảo chứng giá trị USP, Bộ lọc đa diện Facet thông minh và Lưới sản phẩm nổi bật gắn nhãn chứng chỉ an toàn.
+> *Mô tả hình:* Ảnh chụp thực tế toàn màn hình Trang chủ Storefront CANMAKE BEAUTY hiển thị thanh thông báo chiến dịch, Header đa hình, Hero Banner Clean Beauty cao cấp, Thanh bảo chứng giá trị USP, Bộ lọc đa diện Facet thông minh và Lưới sản phẩm nổi bật gắn nhãn chứng chỉ an toàn.
 
 ```
 +--------------------------------------------------------------------------------------------------------+
 | [Thanh thông báo] Freeship đơn từ 500k | Hotline tư vấn da liễu: 1900-xxxx | Cửa hàng gần nhất         |
 +--------------------------------------------------------------------------------------------------------+
-| [LOGO] OMNI BEAUTY    [Ô tìm kiếm thông minh Niacinamide, Retinol...] (🔍)    [Wishlist] [Giỏ hàng: (3)] |
+| [LOGO] CANMAKE BEAUTY    [Ô tìm kiếm thông minh Niacinamide, Retinol...] (🔍)    [Wishlist] [Giỏ hàng: (3)] |
 | Danh mục: Chăm sóc da | Trang điểm | Chăm sóc cơ thể | Thương hiệu Clean | Cẩm nang Skincare Lab       |
 +--------------------------------------------------------------------------------------------------------+
 |                                HERO BANNER SLIDER CHIẾN DỊCH                                           |
@@ -41,7 +41,7 @@ Trang chủ là điểm chạm đầu tiên của khách hàng khi tiếp cận 
 
 ##### (1) Bố cục công thái học và thành phần giao diện
 - **Thanh thông báo trên cùng (Top Notification Bar):** Nổi bật với chính sách miễn phí giao hàng toàn quốc cho đơn từ 500.000 đồng, tích hợp nút chọn chi nhánh gần nhất giúp khách hàng xác định được kho hàng phục vụ ngay từ khi bắt đầu phiên duyệt web.
-- **Thanh điều hướng Header đa hình (Polymorphic Navigation Header):** Logo OMNI BEAUTY được đặt trang trọng tại góc trái; ô tìm kiếm toàn trang ứng dụng kỹ thuật Debounce 300ms kết hợp phân tích từ khóa hoạt chất thông minh; góc phải là nút truy cập nhanh vào Danh sách yêu thích (Wishlist) và Giỏ hàng kèm huy hiệu số lượng cập nhật theo thời gian thực. Hệ thống Mega Menu đa cấp phân loại sản phẩm theo cả hai chiều: nhóm công năng (Dưỡng ẩm, Trị mụn, Chống lão hóa) và nhóm hoạt chất (AHA, Retinol, Vitamin C).
+- **Thanh điều hướng Header đa hình (Polymorphic Navigation Header):** Logo CANMAKE BEAUTY được đặt trang trọng tại góc trái; ô tìm kiếm toàn trang ứng dụng kỹ thuật Debounce 300ms kết hợp phân tích từ khóa hoạt chất thông minh; góc phải là nút truy cập nhanh vào Danh sách yêu thích (Wishlist) và Giỏ hàng kèm huy hiệu số lượng cập nhật theo thời gian thực. Hệ thống Mega Menu đa cấp phân loại sản phẩm theo cả hai chiều: nhóm công năng (Dưỡng ẩm, Trị mụn, Chống lão hóa) và nhóm hoạt chất (AHA, Retinol, Vitamin C).
 - **Hero Slider Banner chuẩn Clean Beauty:** Trình bày hình ảnh quảng bá chiến dịch mỹ phẩm thuần chay với tỷ lệ vàng, sử dụng kỹ thuật tải ưu tiên `fetchpriority="high"` để tối ưu hóa chỉ số LCP. Nút kêu gọi hành động (Call to Action - CTA) "Khám phá ngay" đưa người dùng đến trang đích chiến dịch được cá nhân hóa.
 - **Thanh bảo chứng niềm tin (USP Bar - Unique Selling Proposition):** 4 khối biểu tượng cam kết mạnh mẽ về nguồn gốc sản phẩm: 100% hàng nhập khẩu chính ngạch có tem phụ tiếng Việt, Giao hỏa tốc trong 2 giờ tại nội thành Hà Nội và TP. Hồ Chí Minh, Đổi trả miễn phí 7 ngày và Đội ngũ chuyên gia da liễu hỗ trợ tư vấn 24/7.
 - **Bộ lọc thông minh đa diện (Smart Facet Filters) kết hợp Lưới sản phẩm:** Cho phép lọc đồng thời theo Loại da (Da khô, Da nhạy cảm, Da dầu mụn), Tình trạng da, Hoạt chất chủ đạo và Chứng chỉ an toàn (EWG 1-2, Vegan, Cruelty-Free). Thẻ sản phẩm hiển thị ảnh tỷ lệ chuẩn 1:1 chống giật layout (Zero CLS), gắn nhãn màu chứng chỉ xanh, hiển thị giá niêm yết/giá khuyến mại rõ ràng và nút "Thêm vào giỏ" hỗ trợ hiệu ứng hoạt họa Fly-to-Cart mượt mà.
@@ -53,11 +53,11 @@ Khi người dùng truy cập trang chủ, máy chủ ASP.NET Core kích hoạt 
 
 #### 2. Màn hình Chi tiết Sản phẩm chuyên sâu (Product Detail Page)
 
-Giao diện chi tiết sản phẩm của OMNI BEAUTY là nơi phô diễn thế mạnh công nghệ chuyên biệt cho ngành dược mỹ phẩm, cung cấp đầy đủ thông tin khoa học giúp người tiêu dùng đưa ra quyết định mua hàng an tâm và có trách nhiệm.
+Giao diện chi tiết sản phẩm của CANMAKE BEAUTY là nơi phô diễn thế mạnh công nghệ chuyên biệt cho ngành dược mỹ phẩm, cung cấp đầy đủ thông tin khoa học giúp người tiêu dùng đưa ra quyết định mua hàng an tâm và có trách nhiệm.
 
 > **[HƯỚNG DẪN CHÈN HÌNH/SƠ ĐỒ 3.2 - GIAO DIỆN CHI TIẾT SẢN PHẨM CHUYÊN SÂU]**  
 > *Đường dẫn tệp hình ảnh:* `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_4_2_Giao_Dien_Chi_Tiet_San_Pham.png`  
-> *Mô tả hình:* Ảnh chụp chi tiết trang thông tin sản phẩm OMNI BEAUTY gồm khối Gallery ảnh độ nét cao kèm tính năng Zoom, bảng lựa chọn biến thể màu sắc/dung tích đồng bộ tồn kho chi nhánh, và widget độc quyền "Phòng thí nghiệm Thành phần Skincare Lab" hiển thị danh sách hoạt chất INCI, chỉ số an toàn EWG và thời hạn sử dụng sau khi mở nắp PAO.
+> *Mô tả hình:* Ảnh chụp chi tiết trang thông tin sản phẩm CANMAKE BEAUTY gồm khối Gallery ảnh độ nét cao kèm tính năng Zoom, bảng lựa chọn biến thể màu sắc/dung tích đồng bộ tồn kho chi nhánh, và widget độc quyền "Phòng thí nghiệm Thành phần Skincare Lab" hiển thị danh sách hoạt chất INCI, chỉ số an toàn EWG và thời hạn sử dụng sau khi mở nắp PAO.
 
 ```
 +--------------------------------------------------------------------------------------------------------+
@@ -101,11 +101,11 @@ Khi trang sản phẩm được mở, Controller `ProductController.Detail(strin
 
 #### 3. Màn hình Giỏ hàng thông minh và Cảnh báo Tương kỵ Hoạt chất (Cart & Skincare Conflict Alert)
 
-Đây là tính năng mang tính đột phá và duy nhất chỉ có tại OMNI BEAUTY, biến một giỏ hàng thương mại điện tử thông thường trở thành một trợ lý da liễu cá nhân thông minh, bảo vệ sức khỏe người tiêu dùng trước nguy cơ tự ý phối hợp các hoạt chất xung đột.
+Đây là tính năng mang tính đột phá và duy nhất chỉ có tại CANMAKE BEAUTY, biến một giỏ hàng thương mại điện tử thông thường trở thành một trợ lý da liễu cá nhân thông minh, bảo vệ sức khỏe người tiêu dùng trước nguy cơ tự ý phối hợp các hoạt chất xung đột.
 
 > **[HƯỚNG DẪN CHÈN HÌNH/SƠ ĐỒ 3.3 - GIAO DIỆN GIỎ HÀNG VÀ CẢNH BÁO XUNG ĐỘT HOẠT CHẤT]**  
 > *Đường dẫn tệp hình ảnh:* `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_4_3_Giao_Dien_Gio_Hang_Va_Canh_Bao_Xung_Dot.png`  
-> *Mô tả hình:* Ảnh chụp thực tế giao diện Giỏ hàng OMNI BEAUTY với danh sách mỹ phẩm đã chọn, thanh công cụ tính điểm thưởng thành viên, và hộp cảnh báo da liễu nổi bật màu đỏ/cam thông báo phát hiện cặp hoạt chất tương kỵ Retinol và AHA/BHA giữa hai sản phẩm trong giỏ kèm khuyến nghị phân chia chu trình sáng/tối hoặc dùng cách ngày.
+> *Mô tả hình:* Ảnh chụp thực tế giao diện Giỏ hàng CANMAKE BEAUTY với danh sách mỹ phẩm đã chọn, thanh công cụ tính điểm thưởng thành viên, và hộp cảnh báo da liễu nổi bật màu đỏ/cam thông báo phát hiện cặp hoạt chất tương kỵ Retinol và AHA/BHA giữa hai sản phẩm trong giỏ kèm khuyến nghị phân chia chu trình sáng/tối hoặc dùng cách ngày.
 
 ```
 +--------------------------------------------------------------------------------------------------------+
@@ -117,7 +117,7 @@ Khi trang sản phẩm được mở, Controller `ProductController.Detail(strin
 | - Sản phẩm liên quan:                                                                                  |
 |   + Kem dưỡng tái tạo ban đêm Retinol Avene (Chứa Retinol)                                             |
 |   + Dung dịch tẩy tế bào chết Paula's Choice (Chứa Salicylic Acid)                                      |
-| - Khuyến cáo của Chuyên gia Da liễu OMNI BEAUTY:                                                       |
+| - Khuyến cáo của Chuyên gia Da liễu CANMAKE BEAUTY:                                                       |
 |   "Việc sử dụng đồng thời Retinol cùng BHA trong cùng một buổi tối có thể làm suy yếu nghiêm trọng     |
 |   hàng rào bảo vệ tự nhiên của da, gây khô căng rát, bong tróc diện rộng và tăng nguy cơ kích ứng đỏ.  |
 |   Khuyến nghị: Hãy dùng BHA vào các buổi tối Thứ 2-4-6 và dùng Retinol vào các buổi tối Thứ 3-5-7!"    |
@@ -143,7 +143,7 @@ Mỗi khi khách hàng thêm một sản phẩm vào giỏ hoặc thay đổi s�
 
 ### 3.2.2. Phân hệ Quản trị Trung tâm (Admin Executive Dashboard & Phân quyền)
 
-Phân hệ Quản trị Trung tâm là cơ quan đầu não điều hành toàn bộ chuỗi bán lẻ OMNI BEAUTY, cung cấp cho Ban Giám đốc và các Trưởng bộ phận góc nhìn 360 độ về hiệu quả kinh doanh, dòng tiền, an toàn kho vận và mức độ tuân thủ quy chế phân quyền trong tổ chức.
+Phân hệ Quản trị Trung tâm là cơ quan đầu não điều hành toàn bộ chuỗi bán lẻ CANMAKE BEAUTY, cung cấp cho Ban Giám đốc và các Trưởng bộ phận góc nhìn 360 độ về hiệu quả kinh doanh, dòng tiền, an toàn kho vận và mức độ tuân thủ quy chế phân quyền trong tổ chức.
 
 #### 4. Màn hình Bảng điều khiển Quản trị Trung tâm (Admin Executive Dashboard)
 
@@ -155,7 +155,7 @@ Bảng điều khiển Executive Dashboard đóng vai trò là một tháp đi�
 
 ```
 +--------------------------------------------------------------------------------------------------------+
-| BẢNG ĐIỀU KHIỂN QUẢN TRỊ OMNI BEAUTY | Chi nhánh: [ Toàn chuỗi v ] | Thời gian: [ Tháng này v ]        |
+| BẢNG ĐIỀU KHIỂN QUẢN TRỊ CANMAKE BEAUTY | Chi nhánh: [ Toàn chuỗi v ] | Thời gian: [ Tháng này v ]        |
 +--------------------------------------------------------------------------------------------------------+
 | [ THẺ DOANH THU RÒNG ]     | [ THẺ TỶ LỆ ĐƠN O2O ]      | [ TỶ SUẤT GMROI ]        | [ LÔ CẬN DATE ]   |
 | 1.845.250.000 đ            | 38.6 %                     | 3.42 x                   | 12 Lô cần xả      |
@@ -215,15 +215,15 @@ Giao diện quản trị menu và danh mục cung cấp cho chuyên viên quản
 | [+] 3. BỘ SƯU TẬP CLEAN BEAUTY                       (Thứ tự: 30) | Icon biểu tượng: [ icon-droplet ]  |
 +-------------------------------------------------------------------+------------------------------------+
 | HỘP CÔNG CỤ TỐI ƯU HÓA TÌM KIẾM GOOGLE (GOOGLE SERP PREVIEW BOX)                                       |
-| - Tiêu đề SEO (Title): [ Serum & Tinh Chất Dưỡng Da Chính Hãng Giá Tốt | OMNI BEAUTY ] (56/60 ký tự)  |
-| - Đường dẫn URL Thân thiện (Slug): https://omnibeauty.vn/catalog/serum-tinh-chat-dac-tri                |
+| - Tiêu đề SEO (Title): [ Serum & Tinh Chất Dưỡng Da Chính Hãng Giá Tốt | CANMAKE BEAUTY ] (56/60 ký tự)  |
+| - Đường dẫn URL Thân thiện (Slug): https://canmakebeauty.vn/catalog/serum-tinh-chat-dac-tri                |
 | - Thẻ mô tả (Meta Description): (152/160 ký tự)                                                        |
 |   [ Mua serum & tinh chất dưỡng da phục hồi B5, chống lão hóa retinol, trị mụn BHA chính hãng 100%    |
-|     tại chuỗi cửa hàng OMNI BEAUTY. Tư vấn phác đồ da liễu miễn phí, giao hỏa tốc 2H. ]               |
+|     tại chuỗi cửa hàng CANMAKE BEAUTY. Tư vấn phác đồ da liễu miễn phí, giao hỏa tốc 2H. ]               |
 |                                                                                                        |
 | GIAO DIỆN HIỂN THỊ MÔ PHỎNG TRÊN GOOGLE TRÊN MÁY TÍNH:                                                 |
-|   https://omnibeauty.vn > catalog > serum-tinh-chat-dac-tri                                            |
-|   Serum & Tinh Chất Dưỡng Da Chính Hãng Giá Tốt | OMNI BEAUTY                                          |
+|   https://canmakebeauty.vn > catalog > serum-tinh-chat-dac-tri                                            |
+|   Serum & Tinh Chất Dưỡng Da Chính Hãng Giá Tốt | CANMAKE BEAUTY                                          |
 |   Mua serum & tinh chất dưỡng da phục hồi B5, chống lão hóa retinol, trị mụn BHA chính hãng 100% tại...|
 +--------------------------------------------------------------------------------------------------------+
 ```
@@ -330,7 +330,7 @@ Giao diện quản lý đơn hàng giúp nhân viên xử lý đơn kết nối 
 
 > **[HƯỚNG DẪN CHÈN HÌNH/SƠ ĐỒ 3.8 - GIAO DIỆN QUẢN LÝ ĐƠN HÀNG VÀ CẤP PHÁT LÔ FEFO]**  
 > *Đường dẫn tệp hình ảnh:* `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_4_8_Giao_Dien_Quan_Ly_Don_Hang_Cap_Phat_Lo.png`  
-> *Mô tả hình:* Ảnh chụp thực tế Màn hình Chi tiết Đơn hàng Đa kênh OMNI BEAUTY hiển thị luồng thông tin đơn hàng O2O Click-and-Collect, bảng phân bổ số lô đích danh tự động gán cho từng sản phẩm theo thuật toán FEFO, mã vận đơn Giao Hàng Nhanh GHN và ô nhập mã PIN 6 số xác thực khi khách nhận hàng tại showroom.
+> *Mô tả hình:* Ảnh chụp thực tế Màn hình Chi tiết Đơn hàng Đa kênh CANMAKE BEAUTY hiển thị luồng thông tin đơn hàng O2O Click-and-Collect, bảng phân bổ số lô đích danh tự động gán cho từng sản phẩm theo thuật toán FEFO, mã vận đơn Giao Hàng Nhanh GHN và ô nhập mã PIN 6 số xác thực khi khách nhận hàng tại showroom.
 
 ```
 +--------------------------------------------------------------------------------------------------------+
@@ -373,11 +373,11 @@ Màn hình bán hàng POS được thiết kế dành riêng cho môi trường 
 
 > **[HƯỚNG DẪN CHÈN HÌNH/SƠ ĐỒ 3.9 - GIAO DIỆN MÀN HÌNH BÁN HÀNG TẠI QUẦY POS]**  
 > *Đường dẫn tệp hình ảnh:* `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_4_9_Giao_Dien_Man_Hinh_Ban_Hang_POS.png`  
-> *Mô tả hình:* Ảnh chụp thực tế Màn hình Bán hàng Kiosk POS tại quầy Showroom OMNI BEAUTY gồm bố cục cố định 100vh không cuộn trang, danh sách giỏ hàng bán lẻ tự động nhận diện số lô FEFO, bảng phím tắt F1-F12, khung thanh toán quét mã VietQR Napas247 động và cơ chế đồng bộ màn hình phụ khách hàng CFD.
+> *Mô tả hình:* Ảnh chụp thực tế Màn hình Bán hàng Kiosk POS tại quầy Showroom CANMAKE BEAUTY gồm bố cục cố định 100vh không cuộn trang, danh sách giỏ hàng bán lẻ tự động nhận diện số lô FEFO, bảng phím tắt F1-F12, khung thanh toán quét mã VietQR Napas247 động và cơ chế đồng bộ màn hình phụ khách hàng CFD.
 
 ```
 +--------------------------------------------------------------------------------------------------------+
-| SMART POS - OMNI BEAUTY | Ca: SÁNG (Thu ngân: Trần Thu Trang) | Showroom: CẦU GIẤY | [ĐÓNG CA (F10)]   |
+| SMART POS - CANMAKE BEAUTY | Ca: SÁNG (Thu ngân: Trần Thu Trang) | Showroom: CẦU GIẤY | [ĐÓNG CA (F10)]   |
 +-------------------------------------------------------------------+------------------------------------+
 | [F1] QUÉT MÃ VẠCH / TÌM SẢN PHẨM: [ 8935028401923             ]  | [F2] KHÁCH HÀNG: [ 0912.345.678  ] |
 +-------------------------------------------------------------------+ Tên: Lê Hoàng Yến - Hạng: KIM CƯƠNG|
@@ -414,7 +414,7 @@ Giao diện quản lý ca bán hàng hiện thực hóa quy trình kiểm toán 
 
 > **[HƯỚNG DẪN CHÈN HÌNH/SƠ ĐỒ 3.10 - GIAO DIỆN ĐÓNG CA VÀ KIỂM TOÁN KẾT MÙ POS]**  
 > *Đường dẫn tệp hình ảnh:* `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_4_10_Giao_Dien_Dong_Mo_Ca_Va_Doi_Soat_Ket.png`  
-> *Mô tả hình:* Ảnh chụp thực tế Màn hình Đóng ca và Kiểm toán Két tiền Mù POS tại OMNI BEAUTY gồm bảng kê kiểm đếm chi tiết 9 mệnh giá tiền mặt Việt Nam (từ 1.000đ đến 500.000đ), cơ chế ẩn doanh thu hệ thống trước khi nộp tiền, và bảng đối soát tài chính sau khóa ca thể hiện chênh lệch thừa/thiếu tiền mặt kèm yêu cầu giải trình bắt buộc.
+> *Mô tả hình:* Ảnh chụp thực tế Màn hình Đóng ca và Kiểm toán Két tiền Mù POS tại CANMAKE BEAUTY gồm bảng kê kiểm đếm chi tiết 9 mệnh giá tiền mặt Việt Nam (từ 1.000đ đến 500.000đ), cơ chế ẩn doanh thu hệ thống trước khi nộp tiền, và bảng đối soát tài chính sau khóa ca thể hiện chênh lệch thừa/thiếu tiền mặt kèm yêu cầu giải trình bắt buộc.
 
 ```
 +--------------------------------------------------------------------------------------------------------+
@@ -449,10 +449,10 @@ Giao diện quản lý ca bán hàng hiện thực hóa quy trình kiểm toán 
 - **Khung đối soát tự động sau khóa sổ (Post-Closing Reconciliation Panel):** Chỉ xuất hiện duy nhất sau khi thu ngân đã nhấn nút xác nhận khóa ca. Khung thể hiện rõ ràng phép tính đối soát chuẩn mực kế toán: `ExpectedCashAtClose = InitialCashBalance + CashSalesAmount - CashRefundAmount`. Số tiền chênh lệch `DiscrepancyAmount` được tô màu trực quan: màu xanh nếu số liệu khớp hoàn toàn (bằng 0), màu vàng nếu thừa tiền (> 0) và màu đỏ rực rỡ nếu thiếu hụt (< 0) đi kèm ô bắt buộc nhập lý do giải trình trước khi nộp báo cáo cho Cửa hàng trưởng.
 
 ##### (2) Luồng tương tác người dùng và cơ chế Backend
-Khi thu ngân hoàn thành nhập bảng kê và bấm nút xác nhận khóa sổ, phương thức `PosShiftController.CloseShift()` được triệu gọi với dữ liệu phân rã mệnh giá. Dịch vụ `PosShiftService` kích hoạt một giao dịch cơ sở dữ liệu `BeginTransactionAsync()`. Máy chủ tính toán tổng doanh thu tiền mặt thực tế từ các đơn hàng hoàn tất trong ca trực, cộng với số dư bàn giao đầu ca để xác định `ExpectedCashAtClose`. Sau đó, hệ thống trừ đi con số `ActualCashAtClose` do thu ngân vừa khai báo để tính toán `DiscrepancyAmount`. Bản ghi ca bán hàng trong bảng `PosShifts` được chuyển trạng thái sang `CLOSED`, lưu vết thời gian kết thúc chính xác đến từng giây và ghi nhận người ký duyệt. Bút toán chênh lệch két tiền nếu có sẽ được chuyển sang dịch vụ `FinanceService` để tự động hạch toán vào tài khoản tổn thất hoặc thu nhập khác, bảo đảm tính minh bạch tài chính tuyệt đối của toàn chuỗi cửa hàng OMNI BEAUTY.
+Khi thu ngân hoàn thành nhập bảng kê và bấm nút xác nhận khóa sổ, phương thức `PosShiftController.CloseShift()` được triệu gọi với dữ liệu phân rã mệnh giá. Dịch vụ `PosShiftService` kích hoạt một giao dịch cơ sở dữ liệu `BeginTransactionAsync()`. Máy chủ tính toán tổng doanh thu tiền mặt thực tế từ các đơn hàng hoàn tất trong ca trực, cộng với số dư bàn giao đầu ca để xác định `ExpectedCashAtClose`. Sau đó, hệ thống trừ đi con số `ActualCashAtClose` do thu ngân vừa khai báo để tính toán `DiscrepancyAmount`. Bản ghi ca bán hàng trong bảng `PosShifts` được chuyển trạng thái sang `CLOSED`, lưu vết thời gian kết thúc chính xác đến từng giây và ghi nhận người ký duyệt. Bút toán chênh lệch két tiền nếu có sẽ được chuyển sang dịch vụ `FinanceService` để tự động hạch toán vào tài khoản tổn thất hoặc thu nhập khác, bảo đảm tính minh bạch tài chính tuyệt đối của toàn chuỗi cửa hàng CANMAKE BEAUTY.
 
 ---
 
 ### TIỂU KẾT MỤC 3.2
 
-Mục 3.2 đã tái hiện một cách sống động, chân thực và toàn diện kết quả hiện thực hóa 10 màn hình giao diện cốt lõi của hệ thống website bán hàng OMNI BEAUTY. Từ trải nghiệm mua sắm trực tuyến tinh tế, an toàn cho làn da trên Storefront khách hàng đến các công cụ quản trị sắc bén, chuẩn mực công thái học tại tháp điều hành Admin, kho vận FEFO và kiosk bán lẻ POS, hệ thống chứng minh sự trưởng thành vượt bậc về mặt năng lực thiết kế phần mềm doanh nghiệp, đáp ứng trọn vẹn mọi yêu cầu chức năng và nghiệp vụ đã đề ra trong bài toán tổng thể.
+Mục 3.2 đã tái hiện một cách sống động, chân thực và toàn diện kết quả hiện thực hóa 10 màn hình giao diện cốt lõi của hệ thống website bán hàng CANMAKE BEAUTY. Từ trải nghiệm mua sắm trực tuyến tinh tế, an toàn cho làn da trên Storefront khách hàng đến các công cụ quản trị sắc bén, chuẩn mực công thái học tại tháp điều hành Admin, kho vận FEFO và kiosk bán lẻ POS, hệ thống chứng minh sự trưởng thành vượt bậc về mặt năng lực thiết kế phần mềm doanh nghiệp, đáp ứng trọn vẹn mọi yêu cầu chức năng và nghiệp vụ đã đề ra trong bài toán tổng thể.

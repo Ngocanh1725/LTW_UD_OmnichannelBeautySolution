@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -7,14 +7,21 @@ namespace Omnichannel.Application.DTOs.Account
     public class UserItemViewModel
     {
         public string UserId { get; set; } = string.Empty;
+        public string? EmployeeCode { get; set; }
         public string Username { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string? PhoneNumber { get; set; }
+        public string? JobTitle { get; set; }
+        public int? DepartmentId { get; set; }
+        public string? DepartmentName { get; set; }
+        public string? ManagerName { get; set; }
+        public string? StoreName { get; set; }
         public int UserType { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<string> AssignedRoles { get; set; } = new();
+        public bool CanActorManage { get; set; } = true;
     }
 
     public class CreateUserViewModel
@@ -46,7 +53,13 @@ namespace Omnichannel.Application.DTOs.Account
         [Display(Name = "Nhóm vai trò")]
         public string RoleId { get; set; } = string.Empty;
 
+        [Display(Name = "Phòng ban")]
+        public int? DepartmentId { get; set; }
+
+        [Display(Name = "Chức danh công việc")]
+        public string? JobTitle { get; set; }
+
         [Display(Name = "Loại tài khoản")]
-        public int UserType { get; set; } = 2; // 2: SalesStaff, 3: WarehouseStaff, 4: Manager, 5: Admin
+        public int UserType { get; set; } = 2;
     }
 }

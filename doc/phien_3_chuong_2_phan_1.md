@@ -1,10 +1,10 @@
-# CHƯƠNG 2: KHẢO SÁT, PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG WEBSITE QUẢN LÝ BÁN HÀNG CHO CHUỖI CỬA HÀNG MỸ PHẨM OMNI BEAUTY
+# CHƯƠNG 2: KHẢO SÁT, PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG WEBSITE QUẢN LÝ BÁN HÀNG CHO CHUỖI CỬA HÀNG MỸ PHẨM CANMAKE BEAUTY
 
-## 2.1. Khảo sát hiện trạng và xác lập bài toán nghiệp vụ tại chuỗi cửa hàng OMNI BEAUTY
+## 2.1. Khảo sát hiện trạng và xác lập bài toán nghiệp vụ tại chuỗi cửa hàng CANMAKE BEAUTY
 
 ### 2.1.1. Khảo sát quy trình hoạt động nghiệp vụ hiện tại (Quy trình As-Is)
 
-Nhằm thu thập đầy đủ các yêu cầu chức năng và phi chức năng phục vụ cho việc phát triển giải pháp phần mềm, quá trình khảo sát thực địa đã được tiến hành trực tiếp tại Tổng kho phân phối trung tâm HQ-001 tại quận Cầu Giấy, thành phố Hà Nội, cùng hai điểm bán lẻ đại diện là Showroom Cầu Giấy và Showroom Quận 1 tại Thành phố Hồ Chí Minh. Hiện trạng vận hành của chuỗi OMNI BEAUTY trước khi có hệ thống tập trung mang tính chất bán tự động kết hợp nhiều thao tác thủ công, phân mảnh trên nhiều công cụ độc lập:
+Nhằm thu thập đầy đủ các yêu cầu chức năng và phi chức năng phục vụ cho việc phát triển giải pháp phần mềm, quá trình khảo sát thực địa đã được tiến hành trực tiếp tại Tổng kho phân phối trung tâm HQ-001 tại quận Cầu Giấy, thành phố Hà Nội, cùng hai điểm bán lẻ đại diện là Showroom Cầu Giấy và Showroom Quận 1 tại Thành phố Hồ Chí Minh. Hiện trạng vận hành của chuỗi CANMAKE BEAUTY trước khi có hệ thống tập trung mang tính chất bán tự động kết hợp nhiều thao tác thủ công, phân mảnh trên nhiều công cụ độc lập:
 
 Quy trình khách mua hàng trực tiếp tại các Showroom: Khi khách hàng bước vào cửa hàng, nhân viên bán hàng tiếp đón và tư vấn trực tiếp dựa trên kinh nghiệm cá nhân. Khách hàng xem các mẫu thử mỹ phẩm được bày trên kệ trưng bày. Khi khách chọn được món hàng ưng ý, nhân viên bán hàng mang sản phẩm ra quầy thu ngân. Tại quầy, thu ngân sử dụng một phần mềm tính tiền cài đặt cục bộ trên máy tính để chọn tên sản phẩm hoặc nhập giá tiền thủ công. Khách hàng thanh toán bằng tiền mặt hoặc chuyển khoản ngân hàng cá nhân thông qua việc quét mã chuyển tiền in tĩnh dán trên mặt bàn. Thu ngân in hóa đơn bán lẻ trao cho khách và hoàn tất giao dịch. Điểm yếu của quy trình này là thông tin tồn kho chỉ được trừ cục bộ trên máy tính tại quầy, hoàn toàn không được liên thông với bất kỳ kênh bán hàng nào khác của chuỗi.
 
@@ -14,7 +14,7 @@ Quy trình quản lý kho và theo dõi hạn sử dụng mỹ phẩm: Công tá
 
 Quy trình thu ngân bàn giao tiền mặt và đối soát cuối ca làm việc: Tại quầy bán lẻ, mỗi ngày chia làm hai ca làm việc gồm ca sáng và ca chiều. Khi kết thúc ca, nhân viên thu ngân mở ngăn kéo két tiền, đếm toàn bộ số tiền mặt có trong két và ghi chép vào một cuốn sổ tay bàn giao ca. Thu ngân ca sau tiếp nhận số tiền, ký xác nhận vào sổ và tiếp tục bán hàng. Số tiền mặt doanh thu tích lũy qua các ngày sẽ được gom lại và người quản lý chi nhánh mang nộp trực tiếp vào tài khoản ngân hàng của doanh nghiệp theo định kỳ vài ngày một lần.
 
-Sơ đồ quy trình dưới đây mô tả trực quan các bước vận hành nghiệp vụ thủ công hiện tại của chuỗi OMNI BEAUTY:
+Sơ đồ quy trình dưới đây mô tả trực quan các bước vận hành nghiệp vụ thủ công hiện tại của chuỗi CANMAKE BEAUTY:
 
 ```mermaid
 flowchart TD
@@ -62,9 +62,9 @@ flowchart TD
 
 ### 2.1.2. Đánh giá các hạn chế và điểm nghẽn của mô hình hiện tại
 
-Qua quá trình theo dõi trực tiếp các hoạt động tác nghiệp tại các chi nhánh và phân tích số liệu lịch sử của chuỗi OMNI BEAUTY, mô hình vận hành thủ công phân mảnh hiện tại đã bộc lộ năm điểm nghẽn nghiêm trọng, kìm hãm sự phát triển và gây thất thoát tài chính lớn cho doanh nghiệp:
+Qua quá trình theo dõi trực tiếp các hoạt động tác nghiệp tại các chi nhánh và phân tích số liệu lịch sử của chuỗi CANMAKE BEAUTY, mô hình vận hành thủ công phân mảnh hiện tại đã bộc lộ năm điểm nghẽn nghiêm trọng, kìm hãm sự phát triển và gây thất thoát tài chính lớn cho doanh nghiệp:
 
-Thứ nhất là độ trễ đồng bộ tồn kho giữa kênh bán hàng trực tuyến và các Showroom bán lẻ trực tiếp dẫn đến hiện tượng bán khống tồn kho. Do số liệu tồn kho trên tệp bảng tính Excel chỉ được cập nhật sau khi thủ kho hoàn tất kiểm đếm cuối ngày, trong suốt thời gian bán hàng ban ngày, số liệu tồn kho hiển thị cho nhân viên trực tin nhắn hoàn toàn là số liệu tĩnh. Khi có một mặt hàng đang được ưa chuộng, tại Showroom Cầu Giấy khách hàng trực tiếp đã mua hết sạch sản phẩm trên kệ, nhưng nhân viên trực mạng xã hội vẫn thấy trên bảng tính còn số lượng tồn nên tiếp tục nhận đơn và hứa hẹn giao hàng cho khách hàng trực tuyến. Đến khi chuyển thông tin xuống kho để đóng gói, thủ kho mới thông báo sản phẩm đã hết sạch. Doanh nghiệp buộc phải gọi điện xin lỗi khách hàng và hủy đơn, gây bức xúc lớn cho người tiêu dùng và làm tổn hại nghiêm trọng đến uy tín của thương hiệu OMNI BEAUTY.
+Thứ nhất là độ trễ đồng bộ tồn kho giữa kênh bán hàng trực tuyến và các Showroom bán lẻ trực tiếp dẫn đến hiện tượng bán khống tồn kho. Do số liệu tồn kho trên tệp bảng tính Excel chỉ được cập nhật sau khi thủ kho hoàn tất kiểm đếm cuối ngày, trong suốt thời gian bán hàng ban ngày, số liệu tồn kho hiển thị cho nhân viên trực tin nhắn hoàn toàn là số liệu tĩnh. Khi có một mặt hàng đang được ưa chuộng, tại Showroom Cầu Giấy khách hàng trực tiếp đã mua hết sạch sản phẩm trên kệ, nhưng nhân viên trực mạng xã hội vẫn thấy trên bảng tính còn số lượng tồn nên tiếp tục nhận đơn và hứa hẹn giao hàng cho khách hàng trực tuyến. Đến khi chuyển thông tin xuống kho để đóng gói, thủ kho mới thông báo sản phẩm đã hết sạch. Doanh nghiệp buộc phải gọi điện xin lỗi khách hàng và hủy đơn, gây bức xúc lớn cho người tiêu dùng và làm tổn hại nghiêm trọng đến uy tín của thương hiệu CANMAKE BEAUTY.
 
 Thứ hai là quy trình xuất kho diễn ra theo thói quen tiện tay thay vì kiểm soát theo hạn sử dụng, khiến các lô hàng mới nhập bị xuất bán hết trước trong khi các lô sản xuất cũ cận hạn dùng bị ứ đọng lại sâu trong kho. Do bao bì mỹ phẩm giữa các lô nhập khẩu cách nhau vài tháng thường có mẫu mã hoàn toàn giống nhau, nhân viên thủ kho khi soạn hàng thường bốc các thùng hàng đặt ở vị trí thuận tiện bên ngoài cửa kho để kịp tiến độ đóng gói. Hậu quả là những lô hàng nhập từ các đợt trước bị đẩy lùi vào các góc khuất bên trong kệ chứa hàng. Đến khi thủ kho rà soát định kỳ hàng quý, nhiều lô mỹ phẩm đắt tiền đã trôi qua hạn sử dụng an toàn hoặc chỉ còn dưới một tháng, bắt buộc doanh nghiệp phải làm thủ tục tiêu hủy toàn bộ, gây thiệt hại hàng trăm triệu đồng giá vốn mỗi năm.
 
@@ -91,7 +91,7 @@ Giai đoạn phân bổ tồn kho và bán hàng hợp nhất đa kênh:
 
 Giai đoạn hậu mãi, đổi trả và hạch toán sổ cái tài chính tự động: Toàn bộ doanh thu bán hàng tại quầy POS, doanh thu từ các đơn hàng trực tuyến và các bút toán giá vốn đích danh theo từng lô xuất bán đều được các trình xử lý sự kiện miền tự động đồng bộ vào bảng sổ cái tài chính `FinancialLedgers`. Khi phát sinh nghiệp vụ khách hàng bị kích ứng cần đổi trả sản phẩm, nhân viên tiếp nhận và phân loại: nếu sản phẩm còn nguyên vẹn tem niêm phong sẽ được nhập lại vào kho đúng lô ban đầu; nếu sản phẩm đã bị mở nắp hoặc hư hỏng sẽ được đưa vào danh mục chờ tiêu hủy. Mọi dòng tiền hoàn trả cho khách đều được ghi giảm doanh thu tương ứng trên sổ cái kế toán của chi nhánh phát sinh giao dịch.
 
-Dưới đây là sơ đồ luồng vận hành hàng hóa và chuỗi cung ứng khép kín được thiết kế chuẩn xác theo hiện trạng mã nguồn thực tế của hệ thống OMNI BEAUTY:
+Dưới đây là sơ đồ luồng vận hành hàng hóa và chuỗi cung ứng khép kín được thiết kế chuẩn xác theo hiện trạng mã nguồn thực tế của hệ thống CANMAKE BEAUTY:
 
 ```mermaid
 flowchart TD
@@ -120,11 +120,11 @@ flowchart TD
     LEDGER --> DASHBOARD["10. Trung tâm Điều hành Quản trị Admin Dashboard<br/>(6 thẻ KPI thời gian thực & Cảnh báo SignalR)"]
 ```
 
-> **[HƯỚNG DẪN CHÈN HÌNH 2.1 / SƠ ĐỒ 2.2 - SƠ ĐỒ LUỒNG VẬN HÀNH HÀNG HÓA VÀ DỮ LIỆU ĐA KÊNH ĐỀ XUẤT TẠI OMNI BEAUTY]:**
+> **[HƯỚNG DẪN CHÈN HÌNH 2.1 / SƠ ĐỒ 2.2 - SƠ ĐỒ LUỒNG VẬN HÀNH HÀNG HÓA VÀ DỮ LIỆU ĐA KÊNH ĐỀ XUẤT TẠI CANMAKE BEAUTY]:**
 > - **File ảnh có sẵn trong dự án:** `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_2_1_Luong_Van_Hanh_Hang_Hoa.png`
 > - **Cách tự tạo mới hoặc xuất lại ảnh:** Mở tệp mã nguồn PlantUML `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_2_1_Luong_Van_Hanh_Hang_Hoa.puml` bằng phần mềm PlantUML hoặc chạy kịch bản tự động `generate_plantuml_hinh2_1.js` trong thư mục `doc/` để kết xuất tệp ảnh PNG chất lượng cao.
 > - **Yêu cầu bố cục ảnh:** Đặt ảnh nằm ngang giữa trang giấy, bảo đảm các khối chữ và mũi tên chỉ hướng luồng hàng hóa từ Nhà cung cấp đến Sổ cái tài chính rõ nét, không bị nhòe vỡ chữ.
-> - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Hình 2.1: Sơ đồ luồng vận hành hàng hóa và dữ liệu đa kênh đề xuất tại OMNI BEAUTY*
+> - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Hình 2.1: Sơ đồ luồng vận hành hàng hóa và dữ liệu đa kênh đề xuất tại CANMAKE BEAUTY*
 
 ---
 
@@ -132,7 +132,7 @@ flowchart TD
 
 ### 2.2.1. Xác định các tác nhân hệ thống (Actors) và phạm vi truy cập dữ liệu
 
-Trong phương pháp phân tích thiết kế hệ thống hướng đối tượng, tác nhân được định nghĩa là bất kỳ thực thể nào bên ngoài hệ thống có hành vi tương tác trực tiếp, gửi thông tin vào hoặc nhận kết quả phản hồi từ hệ thống phần mềm. Dựa trên cơ cấu tổ chức nhân sự của chuỗi OMNI BEAUTY và các luồng tích hợp dịch vụ bên ngoài, hệ thống xác định chính xác mười một tác nhân tương tác, bao gồm sáu tác nhân con người nội bộ, một tác nhân tiến trình ngầm tự động và bốn tác nhân hệ thống đối tác bên thứ ba:
+Trong phương pháp phân tích thiết kế hệ thống hướng đối tượng, tác nhân được định nghĩa là bất kỳ thực thể nào bên ngoài hệ thống có hành vi tương tác trực tiếp, gửi thông tin vào hoặc nhận kết quả phản hồi từ hệ thống phần mềm. Dựa trên cơ cấu tổ chức nhân sự của chuỗi CANMAKE BEAUTY và các luồng tích hợp dịch vụ bên ngoài, hệ thống xác định chính xác mười một tác nhân tương tác, bao gồm sáu tác nhân con người nội bộ, một tác nhân tiến trình ngầm tự động và bốn tác nhân hệ thống đối tác bên thứ ba:
 
 Nhóm tác nhân con người nội bộ bao gồm:
 1. Quản trị viên tối cao mang mã hiệu `SuperAdmin`: Là người sở hữu đặc quyền cao nhất trong hệ thống, thường là thành viên Ban Giám đốc hoặc Trưởng phòng Công nghệ thông tin. Tác nhân này có toàn quyền cấu hình các tham số toàn hệ thống, tạo mới chi nhánh, thiết lập ma trận phân quyền năm mươi mốt quyền hạn cho các vai trò và thực hiện ghi đè quyền hạn cho từng nhân viên cụ thể.
@@ -151,18 +151,18 @@ Nhóm tác nhân hệ thống đối tác bên thứ ba bao gồm:
 10. Hạ tầng chuyển khoản ngân hàng tự động `VietQR Napas247`: Hệ thống cổng thanh toán liên ngân hàng quốc gia, cung cấp định dạng mã phản hồi nhanh chứa sẵn số tài khoản nhận tiền, số tiền chính xác đến từng đồng và nội dung chuyển khoản là mã đơn hàng để khách hàng tự quét thanh toán nhanh chóng và chính xác.
 11. Đơn vị dịch vụ logistics `Giao Hàng Nhanh - GHN`: Hệ thống giao nhận vận chuyển đối tác, cung cấp giao diện lập trình ứng dụng để hệ thống tự động tính cước phí giao hàng dựa trên tọa độ địa chỉ của khách hàng và tự động khởi tạo vận đơn giao nhận ngay khi người quản lý duyệt xuất kho đơn hàng.
 
-Bảng dưới đây tổng hợp chi tiết đặc tả của toàn bộ mười một tác nhân trong hệ thống OMNI BEAUTY:
+Bảng dưới đây tổng hợp chi tiết đặc tả của toàn bộ mười một tác nhân trong hệ thống CANMAKE BEAUTY:
 
-**Bảng 2.1: Bảng đặc tả chi tiết các tác nhân tham gia hệ thống OMNI BEAUTY**
+**Bảng 2.1: Bảng đặc tả chi tiết các tác nhân tham gia hệ thống CANMAKE BEAUTY**
 
 | STT | Mã tác nhân | Tên gọi vai trò tác nhân | Phạm vi quản lý dữ liệu | Lược đồ xác thực / Cơ chế phiên | Trách nhiệm và quyền hạn nghiệp vụ chính yếu |
 | :---: | :--- | :--- | :--- | :--- | :--- |
-| 1 | `SuperAdmin` | Quản trị viên tối cao | Toàn quyền trên toàn bộ Tổng kho và tất cả các Showroom | Cookie: `OmniBeauty.Admin.Session` | Cấu hình tham số hệ thống, tạo mới chi nhánh, quản trị danh mục 51 quyền hạn nguyên tử, gán quyền vai trò và ghi đè quyền cá nhân. |
-| 2 | `StoreManager` | Quản lý chi nhánh | Giới hạn nghiêm ngặt theo mã chi nhánh `StoreId` phụ trách | Cookie: `OmniBeauty.Admin.Session` | Quản lý doanh số bán lẻ chi nhánh, duyệt ca làm việc thu ngân, xác nhận biên bản lệch két và duyệt phiếu điều chuyển kho chi nhánh. |
-| 3 | `Cashier` | Nhân viên thu ngân | Giới hạn tại quầy POS của chi nhánh được phân công | Cookie: `OmniBeauty.Admin.Session` | Mở đóng ca bán hàng, khai báo số dư két đầu ca, quét mã vạch sản phẩm, áp mã giảm giá, thu tiền và in hóa đơn nhiệt cho khách. |
-| 4 | `WarehouseStaff` | Nhân viên thủ kho | Giới hạn tại Tổng kho hoặc kho chi nhánh làm việc | Cookie: `OmniBeauty.Admin.Session` | Nhập lô hàng mới, khai báo hạn dùng, giám sát cảnh báo FEFO, đóng gói đơn hàng và xác nhận phiếu điều chuyển kho liên chi nhánh. |
-| 5 | `ContentEditor` | Biên tập viên nội dung | Toàn hệ thống đối với các tài nguyên truyền thông | Cookie: `OmniBeauty.Admin.Session` | Quản lý bài viết cẩm nang làm đẹp, tạo chuyên mục bài viết, quản lý biểu ngữ quảng cáo và cấu hình cây menu đa hình chuẩn SEO. |
-| 6 | `Customer` | Khách hàng thành viên | Chỉ có quyền truy cập vào dữ liệu cá nhân của chính mình | Cookie: `OmniBeauty.Customer.Session` | Xem danh mục, thực hiện trắc nghiệm chẩn đoán da, đặt hàng trực tuyến, thanh toán điện tử, tra cứu đơn hàng và đổi điểm thưởng ví Loyalty. |
+| 1 | `SuperAdmin` | Quản trị viên tối cao | Toàn quyền trên toàn bộ Tổng kho và tất cả các Showroom | Cookie: `CanmakeBeauty.Admin.Session` | Cấu hình tham số hệ thống, tạo mới chi nhánh, quản trị danh mục 51 quyền hạn nguyên tử, gán quyền vai trò và ghi đè quyền cá nhân. |
+| 2 | `StoreManager` | Quản lý chi nhánh | Giới hạn nghiêm ngặt theo mã chi nhánh `StoreId` phụ trách | Cookie: `CanmakeBeauty.Admin.Session` | Quản lý doanh số bán lẻ chi nhánh, duyệt ca làm việc thu ngân, xác nhận biên bản lệch két và duyệt phiếu điều chuyển kho chi nhánh. |
+| 3 | `Cashier` | Nhân viên thu ngân | Giới hạn tại quầy POS của chi nhánh được phân công | Cookie: `CanmakeBeauty.Admin.Session` | Mở đóng ca bán hàng, khai báo số dư két đầu ca, quét mã vạch sản phẩm, áp mã giảm giá, thu tiền và in hóa đơn nhiệt cho khách. |
+| 4 | `WarehouseStaff` | Nhân viên thủ kho | Giới hạn tại Tổng kho hoặc kho chi nhánh làm việc | Cookie: `CanmakeBeauty.Admin.Session` | Nhập lô hàng mới, khai báo hạn dùng, giám sát cảnh báo FEFO, đóng gói đơn hàng và xác nhận phiếu điều chuyển kho liên chi nhánh. |
+| 5 | `ContentEditor` | Biên tập viên nội dung | Toàn hệ thống đối với các tài nguyên truyền thông | Cookie: `CanmakeBeauty.Admin.Session` | Quản lý bài viết cẩm nang làm đẹp, tạo chuyên mục bài viết, quản lý biểu ngữ quảng cáo và cấu hình cây menu đa hình chuẩn SEO. |
+| 6 | `Customer` | Khách hàng thành viên | Chỉ có quyền truy cập vào dữ liệu cá nhân của chính mình | Cookie: `CanmakeBeauty.Customer.Session` | Xem danh mục, thực hiện trắc nghiệm chẩn đoán da, đặt hàng trực tuyến, thanh toán điện tử, tra cứu đơn hàng và đổi điểm thưởng ví Loyalty. |
 | 7 | `AlertWorker` | Tiến trình nền cảnh báo | Toàn bộ cơ sở dữ liệu trên máy chủ dịch vụ | Tiến trình nội bộ (IHostedService Background Worker) | Quét định kỳ 15 phút phát hiện lô cận hạn nguy hiểm, rà soát ngưỡng tồn kho tối thiểu, cảnh báo lệch két và giải phóng tồn kho giữ chỗ. |
 | 8 | `VNPay` | Cổng thanh toán VNPay | Phạm vi giao dịch đơn hàng thanh toán qua VNPay | Ký số điện tử bảo mật HMAC-SHA512 qua API Webhook | Tiếp nhận yêu cầu thanh toán thẻ nội địa/quốc tế và gửi thông báo xác thực kết quả thanh toán về hệ thống xử lý gạch nợ tự động. |
 | 9 | `MoMo` | Ví điện tử MoMo | Phạm vi giao dịch đơn hàng thanh toán qua MoMo | Xác thực khóa bảo mật qua Webhook API | Cung cấp cổng thanh toán ví điện tử và gửi thông báo xác nhận trạng thái trừ tiền tài khoản ví của người dùng. |
@@ -179,11 +179,11 @@ Khối chức năng Khách hàng Storefront tập trung vào việc phục vụ 
 
 Khối chức năng Quản trị Điều hành Back-Office dành cho đội ngũ quản lý và nhân viên tác nghiệp, bao gồm mười một nhánh chức năng nghiệp vụ chuyên biệt: Nhánh Quản trị Điểm bán lẻ Trực tiếp Smart POS; Nhánh Quản trị Kho Dược Mỹ phẩm và Hạn dùng FEFO; Nhánh Quản trị Đơn hàng và Vận chuyển Đa kênh; Nhánh Quản lý Điều chuyển Hàng hóa Liên chi nhánh; Nhánh Quản trị Quan hệ Khách hàng CRM và Hồ sơ Làn da; Nhánh Quản lý Chương trình Khách hàng Thân thiết và Ví điểm Loyalty; Nhánh Quản trị Động cơ Khuyến mại và Mã giảm giá; Nhánh Kế toán Sổ cái và Quản lý Tài chính Chi nhánh; Nhánh Quản trị Nội dung và Hệ thống Điều hướng CMS; Nhánh Quản trị An ninh và Ma trận Phân quyền Động PBAC; và Nhánh Giám sát Tự động, Cảnh báo AI và Thông báo Thời gian thực SignalR.
 
-Sơ đồ phân rã chức năng tổng quát dưới đây thể hiện rõ cấu trúc thứ bậc của toàn bộ hệ thống OMNI BEAUTY:
+Sơ đồ phân rã chức năng tổng quát dưới đây thể hiện rõ cấu trúc thứ bậc của toàn bộ hệ thống CANMAKE BEAUTY:
 
 ```mermaid
 flowchart TD
-    ROOT["HỆ THỐNG QUẢN LÝ BÁN HÀNG CHUỖI MỸ PHẨM OMNI BEAUTY"]
+    ROOT["HỆ THỐNG QUẢN LÝ BÁN HÀNG CHUỖI MỸ PHẨM CANMAKE BEAUTY"]
 
     ROOT --> STOREFRONT["KHỐI KHÁCH HÀNG (STOREFRONT)"]
     ROOT --> ADMIN["KHỐI QUẢN TRỊ ĐIỀU HÀNH (ADMIN BACK-OFFICE)"]
@@ -203,10 +203,10 @@ flowchart TD
     ADMIN --> A7["7. CMS, Menu & Cảnh báo Realtime<br/>- Cây Menu đa hình chuẩn SEO<br/>- Chuông thông báo đẩy SignalR<br/>- Tiến trình nền tự động cảnh báo"]
 ```
 
-> **[HƯỚNG DẪN CHÈN SƠ ĐỒ 2.3 - BIỂU ĐỒ PHÂN RÃ CHỨC NĂNG HỆ THỐNG QUẢN LÝ BÁN HÀNG CHUỖI MỸ PHẨM OMNI BEAUTY]:**
+> **[HƯỚNG DẪN CHÈN SƠ ĐỒ 2.3 - BIỂU ĐỒ PHÂN RÃ CHỨC NĂNG HỆ THỐNG QUẢN LÝ BÁN HÀNG CHUỖI MỸ PHẨM CANMAKE BEAUTY]:**
 > - **Mã nguồn vẽ sơ đồ:** Sử dụng mã nguồn Mermaid được thiết lập ở trên, sao chép vào trình biên dịch đồ họa trực tuyến hoặc sử dụng công cụ Mermaid CLI để kết xuất ảnh định dạng PNG độ nét cao.
 > - **Cách chèn vào tài liệu:** Đặt sơ đồ nằm giữa trang tài liệu, định dạng kích thước cân đối, bảo đảm nhìn rõ cả hai khối phân rã lớn và các nhánh chức năng cấp hai.
-> - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Sơ đồ 2.3: Biểu đồ phân rã chức năng hệ thống quản lý bán hàng chuỗi mỹ phẩm OMNI BEAUTY*
+> - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Sơ đồ 2.3: Biểu đồ phân rã chức năng hệ thống quản lý bán hàng chuỗi mỹ phẩm CANMAKE BEAUTY*
 
 Sơ đồ phân rã chức năng trên đóng vai trò là kim chỉ nam định hình toàn bộ cấu trúc kiến trúc phần mềm. Từ việc phân chia các khối chức năng này, nhóm phát triển có thể thiết lập các phân vùng giao diện chuyên biệt, xác định các ranh giới xử lý của từng dịch vụ và phân chia các bảng dữ liệu tương ứng trong cơ sở dữ liệu.
 
@@ -267,7 +267,7 @@ Phân hệ này vận hành tiến trình nền tự động quét cơ sở dữ
 17. Phân hệ Thông báo Đẩy Thời gian thực (SignalR) và Hộp thư Điều hành Nội bộ:  
 Phân hệ này sử dụng công nghệ WebSockets của SignalR để truyền phát các thông báo tức thời đến đúng tài khoản người dùng hoặc vai trò tương ứng khi có sự kiện nghiệp vụ mới, đồng thời cung cấp hộp thư nội bộ an toàn giúp nhân viên giữa các chi nhánh và phòng ban trao đổi công việc nhanh chóng.
 
-Nhằm thể hiện sự ánh xạ tường minh và chuẩn mực giữa giao diện, mã nguồn và cơ sở dữ liệu theo nguyên lý thiết kế hướng đối tượng, bảng dưới đây trích xuất toàn diện năm mươi hai điểm chạm nghiệp vụ thực tế của hệ thống OMNI BEAUTY:
+Nhằm thể hiện sự ánh xạ tường minh và chuẩn mực giữa giao diện, mã nguồn và cơ sở dữ liệu theo nguyên lý thiết kế hướng đối tượng, bảng dưới đây trích xuất toàn diện năm mươi hai điểm chạm nghiệp vụ thực tế của hệ thống CANMAKE BEAUTY:
 
 **Bảng 2.2: Bảng ma trận ánh xạ các điểm chạm chức năng với Controller, Service và Bảng cơ sở dữ liệu tương ứng**
 

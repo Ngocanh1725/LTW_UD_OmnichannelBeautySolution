@@ -285,6 +285,30 @@ builder.Services.AddAuthentication(options =>
                 context.ReplacePrincipal(new System.Security.Claims.ClaimsPrincipal(refreshedIdentity));
                 context.ShouldRenew = true;
             }
+        },
+        OnRedirectToAccessDenied = async context =>
+        {
+            var req = context.Request;
+            bool isAjaxOrJson =
+                string.Equals(req.Headers["X-Requested-With"], "XMLHttpRequest", StringComparison.OrdinalIgnoreCase) ||
+                (req.Headers.Accept.ToString().Contains("application/json", StringComparison.OrdinalIgnoreCase) &&
+                 !req.Headers.Accept.ToString().Contains("text/html", StringComparison.OrdinalIgnoreCase)) ||
+                (req.ContentType != null && req.ContentType.Contains("application/json", StringComparison.OrdinalIgnoreCase));
+
+            if (isAjaxOrJson)
+            {
+                context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                context.Response.ContentType = "application/json; charset=utf-8";
+                await context.Response.WriteAsJsonAsync(new
+                {
+                    success = false,
+                    message = "Từ chối truy cập (HTTP 403): Tài khoản của bạn không có quyền thực hiện thao tác này.",
+                    errorCode = "FORBIDDEN_403"
+                });
+                return;
+            }
+
+            context.Response.Redirect(context.RedirectUri);
         }
     };
 });

@@ -1,0 +1,400 @@
+@model Omnichannel.Application.DTOs.Security.UserPermissionPageViewModel
+@{
+    ViewData["Title"] = $"Phân Quyền Cá Nhân - {Model.FullName}";
+    Layout = "_AdminLayout";
+    var groupedPermissions = Model.Permissions
+        .GroupBy(p => new { p.Module, p.ModuleDisplayName })
+        .OrderBy(g => g.Key.Module)
+        .ToList();
+}
+
+<style>
+    .state-btn-group .btn {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 4px 10px;
+    }
+    .state-btn-inherit.active {
+        background-color: #334155 !important;
+        color: #fff !important;
+        border-color: #334155 !important;
+    }
+    .state-btn-grant.active {
+        background-color: #059669 !important;
+        color: #fff !important;
+        border-color: #059669 !important;
+    }
+    .state-btn-revoke.active {
+        background-color: #dc2626 !important;
+        color: #fff !important;
+        border-color: #dc2626 !important;
+    }
+    .perm-table-sticky thead th {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        background-color: #f8fafc;
+    }
+</style>
+
+<!-- Header -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <a href="/Admin/User" class="btn btn-sm btn-outline-secondary rounded-3 px-2.5 py-1">
+                <i class="fa-solid fa-arrow-left me-1"></i>Danh sách nhân sự
+            </a>
+            <span class="badge bg-rose-100 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-pill font-monospace" style="background:#ffe4e6;color:#be123c;">
+                @(Model.EmployeeCode ?? $"ID#{Model.TargetUserId}")
+            </span>
+        </div>
+        <h4 class="fw-bold text-slate-900 mb-0 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-user-shield text-rose-600"></i>
+            <span>Phân Quyền Cá Nhân: @Model.FullName (@($"@{Model.Username}"))</span>
+        </h4>
+        <div class="text-muted small mt-1">
+            <i class="fa-solid fa-building-user me-1 text-rose-500"></i>Phòng ban: <strong>@(Model.DepartmentName ?? "Chưa phân bổ")</strong>
+            <span class="mx-2">•</span>
+            <i class="fa-solid fa-briefcase me-1 text-purple-600"></i>Chức danh: <strong>@(Model.JobTitle ?? "Nhân viên")</strong>
+            @if (!string.IsNullOrEmpty(Model.ManagerName))
+            {
+                <span class="mx-2">•</span>
+                <span>Quản lý trực tiếp: <strong>@Model.ManagerName</strong></span>
+            }
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        <a href="/Admin/Delegation/AuditLog?targetKeyword=@Model.Username" class="btn btn-outline-secondary btn-sm px-3 py-2 rounded-3 fw-semibold">
+            <i class="fa-solid fa-clock-rotate-left me-1 text-rose-600"></i>Lịch sử phân quyền của @Model.Username
+        </a>
+        <button type="button" class="btn btn-outline-danger btn-sm px-3 py-2 rounded-3 fw-semibold" onclick="resetTargetUserOverrides()">
+            <i class="fa-solid fa-rotate-left me-1"></i>Khôi phục mặc định theo vai trò
+        </button>
+    </div>
+</div>
+
+<!-- Khối 1: Vai trò hiện tại & Gán vai trò (Multi-select chỉ chứa các role từ GetAssignableRoleIdsAsync) -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-lg-5">
+                <h6 class="fw-bold text-dark mb-1">
+                    <i class="fa-solid fa-id-badge text-rose-600 me-1.5"></i>Vai Trò Đang Đảm Nhiệm (Multi-select Role Assignment)
+                </h6>
+                <p class="text-muted small mb-0">
+                    Chỉ hiển thị các vai trò nằm trong phạm vi cấp bậc (<code>GetAssignableRoleIdsAsync</code>) mà bạn được phép gán.
+                </p>
+            </div>
+            <div class="col-lg-7">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    @foreach (var role in Model.AssignableRoles)
+                    {
+                        bool isChecked = Model.CurrentRoleIds.Contains(role.Id);
+                        <label class="border rounded-3 px-3 py-2 d-inline-flex align-items-center gap-2 @(isChecked ? "bg-rose-50 border-danger" : "bg-light")"
+                               style="cursor: @(Model.CanActorAssignRoles ? "pointer" : "not-allowed");">
+                            <input type="checkbox"
+                                   class="form-check-input m-0 role-multi-checkbox"
+                                   value="@role.Id"
+                                   checked="@(isChecked ? "checked" : null)"
+                                   disabled="@(!Model.CanActorAssignRoles ? "disabled" : null)" />
+                            <div>
+                                <div class="fw-bold small text-dark">@(role.DisplayName ?? role.Name)</div>
+                                <div class="text-muted font-monospace" style="font-size: 0.68rem;">@role.Name • Lv@(role.Level)</div>
+                            </div>
+                        </label>
+                    }
+                    @if (Model.CanActorAssignRoles)
+                    {
+                        <button type="button" class="btn btn-primary-gradient btn-sm px-3 py-2 text-white fw-semibold rounded-3 ms-auto" onclick="saveAssignedRoles()">
+                            <i class="fa-solid fa-floppy-disk me-1"></i>Cập Nhật Vai Trò
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Khối 2: Bảng quyền 3 trạng thái -->
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-header bg-white border-bottom p-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <h6 class="fw-bold text-dark mb-0">
+                <i class="fa-solid fa-sliders text-rose-600 me-1.5"></i>Bảng Phân Quyền Cá Nhân 3 Trạng Thái (RBAC + PBAC Override)
+            </h6>
+            <span class="badge bg-emerald-50 text-emerald-700 border px-2.5 py-1 rounded-pill" style="background:#ecfdf5;color:#047857;">
+                Đang hiệu lực: <strong id="effectiveCountBadge">@Model.Permissions.Count(p => p.IsEffective)</strong> / @Model.Permissions.Count quyền
+            </span>
+        </div>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <select id="filterModuleSelect" class="form-select form-select-sm rounded-3" style="width: 220px;" onchange="filterUserPermissions()">
+                <option value="">-- Tất cả phân hệ --</option>
+                @foreach (var grp in groupedPermissions)
+                {
+                    <option value="@grp.Key.Module">@grp.Key.ModuleDisplayName (@grp.Count())</option>
+                }
+            </select>
+            <div class="input-group input-group-sm" style="width: 250px;">
+                <span class="input-group-text bg-light"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
+                <input type="text" id="searchPermInput" class="form-control" placeholder="Tìm mã quyền hoặc tên..."
+                       autocorrect="off" autocapitalize="off" spellcheck="false" oninput="filterUserPermissions()" />
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive perm-table-sticky" style="max-height: 680px;" tabindex="0" role="region" aria-label="Bảng phân quyền cá nhân 3 trạng thái">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="border-bottom">
+                <tr>
+                    <th class="ps-4 py-3 text-slate-700 fw-bold small text-uppercase" style="width: 30%;">Chức Năng / Mã Quyền</th>
+                    <th class="py-3 text-slate-700 fw-bold small text-uppercase text-center" style="width: 13%;">Kế Thừa Từ Role</th>
+                    <th class="py-3 text-slate-700 fw-bold small text-uppercase text-center" style="width: 26%;">Trạng Thái Ghi Đè (3-State)</th>
+                    <th class="py-3 text-slate-700 fw-bold small text-uppercase text-center" style="width: 13%;">Quyền Hiệu Lực</th>
+                    <th class="pe-4 py-3 text-slate-700 fw-bold small text-uppercase" style="width: 18%;">Cấp Bởi – Ngày / Lý Do</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var grp in groupedPermissions)
+                {
+                    <tr class="table-light perm-module-header" data-module="@grp.Key.Module">
+                        <td colspan="5" class="ps-4 py-2 fw-bold text-uppercase small text-rose-700" style="background: #fff1f2; color: #be123c;">
+                            <i class="fa-solid fa-layer-group me-1.5"></i>@grp.Key.ModuleDisplayName (@grp.Key.Module) — @grp.Count() quyền
+                        </td>
+                    </tr>
+                    @foreach (var p in grp)
+                    {
+                        string disabledAttr = !p.CanActorGrant ? "disabled" : "";
+                        string tooltipText = !p.CanActorGrant ? "Vượt phạm vi của bạn" : "";
+                        <tr class="perm-item-row @(!p.CanActorGrant ? "opacity-75 bg-light" : "")"
+                            id="perm-row-@p.PermissionId"
+                            data-module="@p.Module"
+                            data-search="@($"{p.PermissionCode} {p.PermissionName} {p.PermissionDescription}".ToLowerInvariant())"
+                            title="@tooltipText">
+                            <td class="ps-4 py-2.5">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-bold text-dark small">@p.PermissionName</span>
+                                    @if (!p.CanActorGrant)
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary border" style="font-size: 0.65rem;" title="Vượt phạm vi của bạn">
+                                            <i class="fa-solid fa-lock me-1"></i>Vượt phạm vi của bạn
+                                        </span>
+                                    }
+                                </div>
+                                <div class="font-monospace text-muted" style="font-size: 0.72rem;">@p.PermissionCode</div>
+                            </td>
+                            <td class="py-2.5 text-center">
+                                @if (p.InheritedFromRole)
+                                {
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 rounded-pill" style="font-size: 0.72rem;">
+                                        <i class="fa-solid fa-check me-1"></i>Có từ Role
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-light text-muted border px-2 py-1 rounded-pill" style="font-size: 0.72rem;">
+                                        Không
+                                    </span>
+                                }
+                            </td>
+                            <td class="py-2.5 text-center">
+                                <div class="btn-group state-btn-group" role="group" aria-label="Chọn trạng thái quyền @p.PermissionCode" title="@tooltipText">
+                                    <button type="button"
+                                            class="btn btn-outline-secondary state-btn-inherit @(p.DirectOverride == null ? "active" : "")"
+                                            @(p.CanActorGrant ? "" : "disabled")
+                                            onclick="applySingleOverride(@p.PermissionId, '@p.PermissionCode', null)">
+                                        Kế thừa
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-outline-success state-btn-grant @(p.DirectOverride == true ? "active" : "")"
+                                            @(p.CanActorGrant ? "" : "disabled")
+                                            onclick="applySingleOverride(@p.PermissionId, '@p.PermissionCode', true)">
+                                        + Cấp thêm
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-outline-danger state-btn-revoke @(p.DirectOverride == false ? "active" : "")"
+                                            @(p.CanActorGrant ? "" : "disabled")
+                                            onclick="promptRevokeReason(@p.PermissionId, '@p.PermissionCode', '@p.PermissionName')">
+                                        - Thu hồi
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="py-2.5 text-center" id="effective-cell-@p.PermissionId">
+                                @if (p.IsEffective)
+                                {
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 rounded-pill fw-bold" style="font-size: 0.75rem;">
+                                        <i class="fa-solid fa-circle-check me-1"></i>Được phép
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1 rounded-pill fw-bold" style="font-size: 0.75rem;">
+                                        <i class="fa-solid fa-ban me-1"></i>Từ chối
+                                    </span>
+                                }
+                            </td>
+                            <td class="pe-4 py-2.5 small" id="audit-cell-@p.PermissionId">
+                                @if (p.DirectOverride.HasValue)
+                                {
+                                    <div class="fw-semibold text-dark" style="font-size: 0.75rem;">
+                                        <i class="fa-solid fa-user-pen text-rose-500 me-1"></i>@(p.GrantedByName ?? "Hệ thống")
+                                        @if (p.GrantedAt.HasValue)
+                                        {
+                                            <span class="text-muted font-monospace">(@p.GrantedAt.Value.ToLocalTime().ToString("dd/MM HH:mm"))</span>
+                                        }
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(p.Reason))
+                                    {
+                                        <div class="text-muted fst-italic" style="font-size: 0.72rem;">"@p.Reason"</div>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted" style="font-size: 0.72rem;">Mặc định theo vai trò</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Bắt buộc nhập lý do khi Thu hồi (- Thu hồi) -->
+<div class="modal fade" id="revokeReasonModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-danger text-white border-0 rounded-top-4">
+                <h6 class="modal-title fw-bold">
+                    <i class="fa-solid fa-ban me-2"></i>Xác Nhận Thu Hồi Quyền (Deny Override)
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="revokePermissionId" />
+                <p class="small text-muted mb-3">
+                    Bạn đang thực hiện <strong>Thu hồi trực tiếp (- Thu hồi)</strong> quyền <strong id="revokePermissionTitle" class="text-danger"></strong> của nhân sự <strong>@Model.FullName</strong>.
+                    Quy tắc <em>Deny Overrides</em> sẽ chặn quyền này kể cả khi vai trò gốc có cấp.
+                </p>
+                <div class="mb-2">
+                    <label class="form-label fw-bold small text-dark">Lý do thu hồi quyền <span class="text-danger">*</span></label>
+                    <textarea id="revokeReasonInput" class="form-control rounded-3" rows="3" placeholder="Nhập lý do nghiệp vụ bắt buộc để lưu vào Nhật ký kiểm toán (Audit Log)..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                <button type="button" class="btn btn-light rounded-3 fw-semibold" data-bs-dismiss="modal">Hủy bỏ</button>
+                <button type="button" class="btn btn-danger rounded-3 fw-semibold px-4" onclick="confirmRevokeOverride()">
+                    <i class="fa-solid fa-gavel me-1"></i>Xác Nhận Thu Hồi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const targetUserId = @Model.TargetUserId;
+        let revokeModalInstance = null;
+
+        function filterUserPermissions() {
+            const mod = document.getElementById('filterModuleSelect').value;
+            const q = (document.getElementById('searchPermInput').value || '').trim().toLowerCase();
+
+            document.querySelectorAll('.perm-item-row').forEach(row => {
+                const rowMod = row.getAttribute('data-module');
+                const rowSearch = row.getAttribute('data-search') || '';
+                const matchMod = !mod || rowMod === mod;
+                const matchSearch = !q || rowSearch.includes(q);
+                row.style.display = (matchMod && matchSearch) ? '' : 'none';
+            });
+
+            document.querySelectorAll('.perm-module-header').forEach(hdr => {
+                const hdrMod = hdr.getAttribute('data-module');
+                const visibleRows = document.querySelectorAll(`.perm-item-row[data-module="${hdrMod}"]:not([style*="display: none"])`);
+                hdr.style.display = visibleRows.length > 0 ? '' : 'none';
+            });
+        }
+
+        async function saveAssignedRoles() {
+            const roleIds = Array.from(document.querySelectorAll('.role-multi-checkbox:checked'))
+                .map(cb => parseInt(cb.value, 10));
+
+            const res = await window.adminJsonRequest('/Admin/PermissionManagement/AssignUserRoles', {
+                userId: targetUserId,
+                roleIds: roleIds
+            });
+
+            if (res && res.success) {
+                window.showAdminToast(res.message || 'Đã cập nhật vai trò nhân sự.', 'success');
+                setTimeout(() => window.location.reload(), 650);
+            }
+        }
+
+        function promptRevokeReason(permissionId, code, name) {
+            document.getElementById('revokePermissionId').value = permissionId;
+            document.getElementById('revokePermissionTitle').textContent = `${name} (${code})`;
+            document.getElementById('revokeReasonInput').value = '';
+            if (!revokeModalInstance) {
+                revokeModalInstance = new bootstrap.Modal(document.getElementById('revokeReasonModal'));
+            }
+            revokeModalInstance.show();
+        }
+
+        async function confirmRevokeOverride() {
+            const permissionId = parseInt(document.getElementById('revokePermissionId').value, 10);
+            const reason = (document.getElementById('revokeReasonInput').value || '').trim();
+            if (!reason) {
+                window.showAdminToast('Vui lòng nhập lý do bắt buộc khi thu hồi quyền!', 'warning');
+                return;
+            }
+            if (revokeModalInstance) revokeModalInstance.hide();
+            await sendUserOverride(permissionId, false, reason);
+        }
+
+        async function applySingleOverride(permissionId, code, overrideStatus) {
+            const reason = overrideStatus === true
+                ? `Cấp thêm quyền cá nhân ${code} trên màn Phân quyền nhân sự`
+                : null;
+            await sendUserOverride(permissionId, overrideStatus, reason);
+        }
+
+        async function sendUserOverride(permissionId, overrideStatus, reason) {
+            const res = await window.adminJsonRequest('/Admin/PermissionManagement/SaveUserOverride', {
+                userId: targetUserId,
+                permissionId: permissionId,
+                overrideStatus: overrideStatus,
+                reason: reason
+            });
+
+            if (res && res.success) {
+                window.showAdminToast(res.message || 'Đã lưu thay đổi phân quyền cá nhân.', 'success');
+                setTimeout(() => window.location.reload(), 500);
+            }
+        }
+
+        async function resetTargetUserOverrides() {
+            const confirmResult = await Swal.fire({
+                title: 'Khôi phục mặc định theo vai trò?',
+                text: 'Tất cả quyền Cấp thêm (+ Grant) và Thu hồi (- Deny) cá nhân trong phạm vi của bạn sẽ được xóa để quay về mặc định theo Role.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                confirmButtonText: 'Khôi phục ngay',
+                cancelButtonText: 'Hủy'
+            });
+
+            if (!confirmResult.isConfirmed) return;
+
+            const res = await window.adminJsonRequest('/Admin/PermissionManagement/ResetUserOverrides', {
+                userId: targetUserId
+            });
+
+            if (res && res.success) {
+                window.showAdminToast(res.message || 'Đã khôi phục mặc định theo vai trò.', 'success');
+                setTimeout(() => window.location.reload(), 600);
+            }
+        }
+    </script>
+}
+

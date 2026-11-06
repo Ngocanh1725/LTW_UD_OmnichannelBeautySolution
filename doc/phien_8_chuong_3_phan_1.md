@@ -84,13 +84,13 @@ Dưới đây là bảng phân rã chi tiết về quy mô tệp tin và vai tr�
 | **Omnichannel.Infrastructure**| 61 | 63 | Hiện thực hóa toàn bộ 25 Interfaces bằng 27 Services, quản lý kết nối SQL Server qua `ApplicationDbContext`, chặn bắt lưu vết `AuditLogs`, tích hợp API VietQR, VNPay, GHN. | `Microsoft.EntityFrameworkCore.SqlServer` (8.0.8), `Microsoft.Extensions.Caching.Memory`, `BCrypt.Net-Next`. |
 | **Omnichannel.Web** | 72 | 490 | Đón tiếp HTTP/WebSocket Request, thực thi đường ống Middleware 9 bước, xử lý điều hướng đa hình SEO 301, kết xuất giao diện qua 4 Razor Layouts và đồng bộ 2 màn hình POS CFD. | `Microsoft.AspNetCore.SignalR.Common`, `Microsoft.AspNetCore.ResponseCompression`. |
 | **Omnichannel.Tests** | 40 | 41 | Thực thi tự động 21 bộ kiểm thử cho các thuật toán trọng yếu (FEFO, PBAC, xung đột tương kỵ da liễu, đối soát két tiền mặt và tính giá vốn đích danh). | `xunit` (2.9.0), `Moq` (4.20.70), `FluentAssertions` (6.12.0), `Microsoft.EntityFrameworkCore.InMemory`. |
-| **TỔNG CỘNG SOLUTION** | **288** | **711** | **Hệ thống kiến trúc phần mềm bán lẻ mỹ phẩm hợp nhất OMNI BEAUTY hoàn chỉnh** | **Kiến trúc Clean Architecture 4 tầng chuẩn mực** |
+| **TỔNG CỘNG SOLUTION** | **288** | **711** | **Hệ thống kiến trúc phần mềm bán lẻ mỹ phẩm hợp nhất CANMAKE BEAUTY hoàn chỉnh** | **Kiến trúc Clean Architecture 4 tầng chuẩn mực** |
 
 ---
 
 ### 3.1.2. Hiện thực hóa các giải pháp kỹ thuật và thuật toán cốt lõi (Code & Algorithm Walkthrough)
 
-Tính ưu việt của giải pháp OMNI BEAUTY không chỉ nằm ở bản thiết kế lý thuyết mà được khẳng định thông qua việc cài đặt thực tế 5 giải pháp kỹ thuật và thuật toán phức tạp được xây dựng bài bản, giải quyết triệt để các bài toán hóc búa của chuỗi bán lẻ mỹ phẩm đa kênh.
+Tính ưu việt của giải pháp CANMAKE BEAUTY không chỉ nằm ở bản thiết kế lý thuyết mà được khẳng định thông qua việc cài đặt thực tế 5 giải pháp kỹ thuật và thuật toán phức tạp được xây dựng bài bản, giải quyết triệt để các bài toán hóc búa của chuỗi bán lẻ mỹ phẩm đa kênh.
 
 ---
 
@@ -164,7 +164,7 @@ Việc bảo mật phân quyền trong chuỗi bán lẻ đòi hỏi tính linh 
   + Nấc 1: Kiểm tra quyền tối cao `SuperAdmin` (God Mode) cho phép vượt qua tức thì.
   + Nấc 2: Tra cứu danh sách quyền hữu hiệu trong bộ nhớ đệm `MemoryCache` với thời gian sống TTL 30 phút.
   + Nấc 3: Nếu Cache Miss, truy vấn CSDL gom toàn bộ quyền từ các vai trò của người dùng (`RolePermissions`), sau đó áp dụng quy tắc ghi đè cá nhân trong `UserPermissions` (nếu `IsGranted = 1` thì cộng thêm quyền, nếu `IsGranted = 0` thì tước bỏ quyền cưỡng chế).
-- *Cách ly phiên xác thực đa đề án (Multi-Scheme Cookie Separation):* Thiết lập hai Cookie độc lập: `OmniBeauty.Admin.Session` (dành riêng cho Admin Area, SameSite=Strict, đường dẫn `/Admin`) và `OmniBeauty.Customer.Session` (dành cho Storefront). Bộ lọc `BlockAdminShoppingAttribute` chặn tuyệt đối các tài khoản quản trị sử dụng quyền nội bộ để đặt hàng lách khuyến mãi trên giao diện khách hàng.
+- *Cách ly phiên xác thực đa đề án (Multi-Scheme Cookie Separation):* Thiết lập hai Cookie độc lập: `CanmakeBeauty.Admin.Session` (dành riêng cho Admin Area, SameSite=Strict, đường dẫn `/Admin`) và `CanmakeBeauty.Customer.Session` (dành cho Storefront). Bộ lọc `BlockAdminShoppingAttribute` chặn tuyệt đối các tài khoản quản trị sử dụng quyền nội bộ để đặt hàng lách khuyến mãi trên giao diện khách hàng.
 - *Tự động ghi Nhật ký Kiểm toán (`AuditSaveChangesInterceptor`):* Kế thừa `SaveChangesInterceptor` của EF Core 8. Trước khi dữ liệu được cam kết vào SQL Server, bộ đánh chặn rà soát toàn bộ các thực thể mang trạng thái `Modified` hoặc `Deleted`, tự động tuần tự hóa thuộc tính cũ thành chuỗi JSON `OldValues` và giá trị mới thành `NewValues`, ghi vào bảng `AuditLogs` kèm IP máy trạm.
 
 ##### (3) Trích đoạn mã nguồn C# thực tế trong PermissionAuthorizationHandler.cs

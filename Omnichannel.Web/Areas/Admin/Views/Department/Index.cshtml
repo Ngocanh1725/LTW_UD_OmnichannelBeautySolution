@@ -1,0 +1,470 @@
+@model Omnichannel.Application.DTOs.Security.DepartmentIndexViewModel
+@using System.Text.Json
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Phòng Ban & Sơ Đồ Tổ Chức";
+    var flatJson = JsonSerializer.Serialize(Model.FlatDepartments, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+}
+
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-5 border-b border-slate-200 dark:border-slate-800">
+        <div>
+            <div class="flex items-center gap-3 flex-wrap">
+                <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2.5">
+                    <i class="fa-solid fa-sitemap text-teal-500"></i>
+                    <span>Phòng Ban & Sơ Đồ Tổ Chức</span>
+                </h1>
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-teal-50 text-teal-700 dark:bg-teal-950/60 dark:text-teal-300 border border-teal-200 dark:border-teal-800">
+                    @Model.TotalDepartments Phòng Ban • @Model.TotalStaffCount Nhân Sự Nội Bộ
+                </span>
+            </div>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Cấu trúc cây phòng ban đa cấp, chỉ định Trưởng phòng phụ trách và điều phối nhân sự theo mô hình Ủy quyền phân cấp (Delegated RBAC).
+            </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+            <button type="button" onclick="toggleAllNodes(true)" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-Folder-open fa-arrows-up-down me-1 text-teal-500"></i> Mở rộng tất cả
+            </button>
+            <button type="button" onclick="toggleAllNodes(false)" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-compress me-1 text-slate-400"></i> Thu gọn
+            </button>
+            @if (Model.CanManage)
+            {
+                <button type="button" onclick="openDepartmentModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-700 hover:to-pink-600 shadow-md shadow-rose-500/20 transition">
+                    <i class="fa-solid fa-plus me-1.5"></i> Thêm Phòng Ban Mới
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-building-user"></i>
+            </div>
+            <div>
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Tổng Số Phòng Ban</div>
+                <div class="text-lg font-extrabold text-slate-900 dark:text-white">@Model.TotalDepartments phòng ban (@Model.ActiveDepartments đang hoạt động)</div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-user-tie"></i>
+            </div>
+            <div>
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Trưởng Phòng Phụ Trách</div>
+                <div class="text-lg font-extrabold text-slate-900 dark:text-white">@Model.FlatDepartments.Count(d => d.HeadUserId.HasValue) / @Model.TotalDepartments phòng đã bổ nhiệm</div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div>
+                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Tổng Nhân Sự Nội Bộ</div>
+                <div class="text-lg font-extrabold text-slate-900 dark:text-white">@Model.TotalStaffCount nhân sự chính thức</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tree View Card -->
+    <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-xs">
+        <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div>
+                <h2 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-diagram-project text-rose-500"></i>
+                    <span>Sơ Đồ Cây Tổ Chức Phòng Ban</span>
+                </h2>
+                <p class="text-xs text-slate-400 mt-0.5">Nhấn vào biểu tượng mũi tên ở từng nhánh để mở rộng hoặc thu gọn các phòng ban trực thuộc.</p>
+            </div>
+        </div>
+
+        <div class="space-y-3" id="deptTreeContainer">
+            @foreach (var root in Model.TreeRoots)
+            {
+                await RenderDepartmentNode(root, 0);
+            }
+        </div>
+    </div>
+</div>
+
+@{
+    async Task RenderDepartmentNode(Omnichannel.Application.DTOs.Security.DepartmentTreeItemDto node, int depth)
+    {
+        bool hasChildren = node.Children != null && node.Children.Count > 0;
+        string avatar = !string.IsNullOrWhiteSpace(node.HeadAvatarUrl)
+            ? node.HeadAvatarUrl
+            : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop";
+
+        <div class="dept-tree-node @(depth > 0 ? "ms-6 md:ms-10 mt-2.5 pl-4 border-l-2 border-slate-200 dark:border-slate-700" : "")" data-dept-id="@node.Id">
+            <div class="p-4 rounded-2xl border @(node.IsActive ? "bg-slate-50/70 dark:bg-slate-800/50 border-slate-200/90 dark:border-slate-700/80" : "bg-slate-100/50 dark:bg-slate-900/40 border-dashed border-slate-300 dark:border-slate-800 opacity-75") hover:border-rose-300 dark:hover:border-rose-700 transition flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div class="flex items-start gap-3.5 min-w-0">
+                    @if (hasChildren)
+                    {
+                        <button type="button"
+                                onclick="toggleSingleNode(@node.Id)"
+                                id="toggleBtn_@node.Id"
+                                aria-expanded="true"
+                                aria-controls="children_@node.Id"
+                                class="w-8 h-8 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:text-rose-600 transition shrink-0 mt-0.5"
+                                title="Thu gọn / Mở rộng nhánh phòng ban">
+                            <i class="fa-solid fa-chevron-down text-xs transition-transform duration-200" id="toggleIcon_@node.Id"></i>
+                        </button>
+                    }
+                    else
+                    {
+                        <div class="w-8 h-8 rounded-xl bg-teal-50 dark:bg-teal-950/50 border border-teal-200/60 dark:border-teal-800/60 flex items-center justify-center text-teal-600 dark:text-teal-400 shrink-0 mt-0.5">
+                            <i class="fa-solid fa-building text-xs"></i>
+                        </div>
+                    }
+
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="font-bold text-slate-900 dark:text-white text-sm">@node.Name</span>
+                            <span class="px-2 py-0.5 rounded bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-mono text-[11px] font-semibold">@node.Code</span>
+                            @if (node.IsActive)
+                            {
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                    <i class="fa-solid fa-circle-check text-[10px]"></i> Đang hoạt động
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                                    <i class="fa-solid fa-eye-slash text-[10px]"></i> Đã tạm ẩn
+                                </span>
+                            }
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(node.Description))
+                        {
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">@node.Description</p>
+                        }
+                    </div>
+                </div>
+
+                <!-- Head of Department, Staff Count & Actions -->
+                <div class="flex flex-wrap items-center gap-4 shrink-0">
+                    <!-- Trưởng phòng -->
+                    <div class="flex items-center gap-2.5 bg-white dark:bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-slate-700">
+                        @if (node.HeadUserId.HasValue)
+                        {
+                            <img src="@avatar" alt="@node.HeadFullName" class="w-7 h-7 rounded-full object-cover border border-rose-200" />
+                            <div class="text-xs">
+                                <div class="font-bold text-slate-800 dark:text-slate-100">@node.HeadFullName</div>
+                                <div class="text-[10px] text-rose-500 font-mono">@@@node.HeadUserName</div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 text-xs">
+                                <i class="fa-solid fa-user-slash"></i>
+                            </div>
+                            <div class="text-xs text-slate-400 italic">Chưa chỉ định Trưởng phòng</div>
+                        }
+                    </div>
+
+                    <!-- Số lượng nhân sự -->
+                    <a href="/Admin/User?departmentId=@node.Id"
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 transition"
+                       title="Xem danh sách nhân sự thuộc phòng ban này">
+                        <i class="fa-solid fa-users"></i>
+                        <span>@node.StaffCount nhân sự</span>
+                    </a>
+
+                    @if (Model.CanManage)
+                    {
+                        <div class="flex items-center gap-1.5">
+                            <button type="button"
+                                    onclick="openDepartmentModal(0, @node.Id)"
+                                    class="p-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-teal-600 border border-slate-200 dark:border-slate-700 hover:bg-teal-50 transition"
+                                    title="Thêm phòng ban con trực thuộc @node.Name">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                            <button type="button"
+                                    onclick="openDepartmentModal(@node.Id)"
+                                    class="p-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-indigo-600 border border-slate-200 dark:border-slate-700 hover:bg-indigo-50 transition"
+                                    title="Chỉnh sửa phòng ban">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            @if (!string.Equals(node.Code, "BAN_GIAM_DOC", StringComparison.OrdinalIgnoreCase))
+                            {
+                                <button type="button"
+                                        onclick="toggleDepartmentStatus(@node.Id, '@Html.Raw(node.Name.Replace("'", "\\'"))')"
+                                        class="p-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 text-amber-600 border border-slate-200 dark:border-slate-700 hover:bg-amber-50 transition"
+                                        title="@(node.IsActive ? "Tạm ẩn phòng ban" : "Kích hoạt lại phòng ban")">
+                                    <i class="fa-solid @(node.IsActive ? "fa-eye-slash" : "fa-eye")"></i>
+                                </button>
+                                <button type="button"
+                                        onclick="deleteDepartment(@node.Id, '@Html.Raw(node.Name.Replace("'", "\\'"))', @node.StaffCount)"
+                                        class="p-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 @(node.StaffCount > 0 ? "text-slate-300 cursor-not-allowed" : "text-rose-600 hover:bg-rose-50") border border-slate-200 dark:border-slate-700 transition"
+                                        title="@(node.StaffCount > 0 ? $"Không thể xóa phòng ban còn {node.StaffCount} nhân sự" : "Xóa phòng ban")">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @if (hasChildren)
+            {
+                <div id="children_@node.Id" class="space-y-2">
+                    @foreach (var child in node.Children!)
+                    {
+                        await RenderDepartmentNode(child, depth + 1);
+                    }
+                </div>
+            }
+        </div>
+    }
+}
+
+<!-- Modal Thêm / Sửa Phòng Ban -->
+<div class="modal fade" id="departmentModal" tabindex="-1" aria-labelledby="departmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-2xl border-0 shadow-2xl overflow-hidden bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">
+            <div class="p-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-teal-500/20 border border-teal-400/30 flex items-center justify-center text-teal-300">
+                        <i class="fa-solid fa-sitemap"></i>
+                    </div>
+                    <div>
+                        <h5 class="font-bold text-base mb-0" id="departmentModalLabel">Thêm Phòng Ban Mới</h5>
+                        <p class="text-[11px] text-slate-300 mb-0">Thiết lập mã định danh, phòng ban cấp cha và trưởng phòng phụ trách</p>
+                    </div>
+                </div>
+                <button type="button" class="text-slate-300 hover:text-white" data-bs-dismiss="modal" aria-label="Đóng">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="departmentForm" onsubmit="submitDepartmentForm(event)" class="p-5 space-y-4">
+                <input type="hidden" id="dept_Id" value="0" />
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="dept_Code" class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                            Mã Phòng Ban <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" id="dept_Code" name="Code" required maxlength="30"
+                               autocorrect="off" autocapitalize="off" spellcheck="false"
+                               placeholder="VD: PHONG_CSKH"
+                               class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-mono uppercase focus:outline-none focus:border-rose-500" />
+                    </div>
+                    <div>
+                        <label for="dept_SortOrder" class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                            Thứ Tự Hiển Thị
+                        </label>
+                        <input type="number" id="dept_SortOrder" name="SortOrder" value="10" min="1" max="999"
+                               class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs focus:outline-none focus:border-rose-500" />
+                    </div>
+                </div>
+
+                <div>
+                    <label for="dept_Name" class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                        Tên Phòng Ban <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" id="dept_Name" name="Name" required maxlength="120"
+                           placeholder="VD: Phòng Chăm Sóc Khách Hàng Đa Kênh"
+                           class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold focus:outline-none focus:border-rose-500" />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="dept_ParentId" class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                            Phòng Ban Cha
+                        </label>
+                        <select id="dept_ParentId" name="ParentId"
+                                class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs focus:outline-none focus:border-rose-500">
+                            <option value="">-- Cấp gốc (Không có phòng cha) --</option>
+                            @foreach (var d in Model.FlatDepartments)
+                            {
+                                <option value="@d.Id">@d.Name (@d.Code)</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label for="dept_HeadUserId" class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                            Trưởng Phòng Phụ Trách
+                        </label>
+                        <select id="dept_HeadUserId" name="HeadUserId"
+                                class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs focus:outline-none focus:border-rose-500">
+                            <option value="">-- Chưa chỉ định --</option>
+                            @foreach (var u in Model.EligibleHeads)
+                            {
+                                <option value="@u.Id">@u.FullName (@u.Username) - @(u.JobTitle ?? "Nhân sự")</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="dept_Description" class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 mb-1">
+                        Chức Năng & Nhiệm Vụ Chính
+                    </label>
+                    <textarea id="dept_Description" name="Description" rows="3" maxlength="500"
+                              placeholder="Mô tả chức năng, phạm vi nghiệp vụ của phòng ban..."
+                              class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs focus:outline-none focus:border-rose-500"></textarea>
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="dept_IsActive" checked class="w-4 h-4 rounded text-rose-600 focus:ring-rose-500" />
+                        <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">Phòng ban đang hoạt động</span>
+                    </label>
+
+                    <div class="flex items-center gap-2">
+                        <button type="button" data-bs-dismiss="modal" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                            Hủy
+                        </button>
+                        <button type="submit" id="deptSubmitBtn" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-700 hover:to-pink-600 shadow-md">
+                            <i class="fa-solid fa-floppy-disk me-1"></i> Lưu Phòng Ban
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const flatDepartments = @Html.Raw(flatJson);
+        let deptModalInstance = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const modalEl = document.getElementById('departmentModal');
+            if (modalEl && window.bootstrap) {
+                deptModalInstance = new bootstrap.Modal(modalEl);
+            }
+        });
+
+        function toggleSingleNode(deptId) {
+            const container = document.getElementById('children_' + deptId);
+            const icon = document.getElementById('toggleIcon_' + deptId);
+            const btn = document.getElementById('toggleBtn_' + deptId);
+            if (!container) return;
+            const isHidden = container.classList.toggle('hidden');
+            if (icon) {
+                icon.style.transform = isHidden ? 'rotate(-90deg)' : 'rotate(0deg)';
+            }
+            if (btn) {
+                btn.setAttribute('aria-expanded', (!isHidden).toString());
+            }
+        }
+
+        function toggleAllNodes(expand) {
+            document.querySelectorAll('[id^="children_"]').forEach(el => {
+                if (expand) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+            document.querySelectorAll('[id^="toggleIcon_"]').forEach(icon => {
+                icon.style.transform = expand ? 'rotate(0deg)' : 'rotate(-90deg)';
+            });
+        }
+
+        function openDepartmentModal(deptId = 0, defaultParentId = null) {
+            const title = document.getElementById('departmentModalLabel');
+            const idInput = document.getElementById('dept_Id');
+            const codeInput = document.getElementById('dept_Code');
+            const nameInput = document.getElementById('dept_Name');
+            const parentSelect = document.getElementById('dept_ParentId');
+            const headSelect = document.getElementById('dept_HeadUserId');
+            const sortInput = document.getElementById('dept_SortOrder');
+            const descInput = document.getElementById('dept_Description');
+            const activeCheck = document.getElementById('dept_IsActive');
+
+            if (deptId > 0) {
+                const item = flatDepartments.find(d => d.id === deptId);
+                if (!item) return;
+                title.textContent = 'Chỉnh Sửa Phòng Ban: ' + item.name;
+                idInput.value = item.id;
+                codeInput.value = item.code;
+                codeInput.readOnly = (item.code === 'BAN_GIAM_DOC');
+                nameInput.value = item.name;
+                parentSelect.value = item.parentId || '';
+                headSelect.value = item.headUserId || '';
+                sortInput.value = item.sortOrder || 10;
+                descInput.value = item.description || '';
+                activeCheck.checked = !!item.isActive;
+            } else {
+                title.textContent = 'Thêm Phòng Ban Mới';
+                idInput.value = 0;
+                codeInput.value = '';
+                codeInput.readOnly = false;
+                nameInput.value = '';
+                parentSelect.value = defaultParentId || '';
+                headSelect.value = '';
+                sortInput.value = flatDepartments.length + 1;
+                descInput.value = '';
+                activeCheck.checked = true;
+            }
+
+            if (deptModalInstance) deptModalInstance.show();
+        }
+
+        async function submitDepartmentForm(e) {
+            e.preventDefault();
+            const btn = document.getElementById('deptSubmitBtn');
+            btn.disabled = true;
+
+            const payload = {
+                id: parseInt(document.getElementById('dept_Id').value || '0', 10),
+                code: document.getElementById('dept_Code').value.trim(),
+                name: document.getElementById('dept_Name').value.trim(),
+                parentId: document.getElementById('dept_ParentId').value ? parseInt(document.getElementById('dept_ParentId').value, 10) : null,
+                headUserId: document.getElementById('dept_HeadUserId').value ? parseInt(document.getElementById('dept_HeadUserId').value, 10) : null,
+                sortOrder: parseInt(document.getElementById('dept_SortOrder').value || '10', 10),
+                description: document.getElementById('dept_Description').value.trim(),
+                isActive: document.getElementById('dept_IsActive').checked
+            };
+
+            const res = await window.adminJsonRequest('/Admin/Department/Save', payload, 'POST');
+            btn.disabled = false;
+
+            if (res && res.success) {
+                window.showAdminToast(res.message, 'success');
+                if (deptModalInstance) deptModalInstance.hide();
+                setTimeout(() => window.location.reload(), 600);
+            }
+        }
+
+        async function toggleDepartmentStatus(id, name) {
+            const res = await window.adminJsonRequest(`/Admin/Department/ToggleStatus?id=${id}`, {}, 'POST');
+            if (res && res.success) {
+                window.showAdminToast(res.message, 'success');
+                setTimeout(() => window.location.reload(), 600);
+            }
+        }
+
+        async function deleteDepartment(id, name, staffCount) {
+            if (staffCount > 0) {
+                window.showAdminToast(`Không thể xóa phòng ban '${name}' vì đang có ${staffCount} nhân sự trực thuộc!`, 'warning');
+                return;
+            }
+
+            const confirmRes = await Swal.fire({
+                icon: 'warning',
+                title: 'Xác nhận xóa phòng ban?',
+                html: `Bạn có chắc chắn muốn xóa phòng ban <b>${name}</b>?`,
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                confirmButtonText: 'Xóa phòng ban',
+                cancelButtonText: 'Hủy'
+            });
+
+            if (!confirmRes.isConfirmed) return;
+
+            const res = await window.adminJsonRequest(`/Admin/Department/Delete?id=${id}`, {}, 'POST');
+            if (res && res.success) {
+                window.showAdminToast(res.message, 'success');
+                setTimeout(() => window.location.reload(), 600);
+            }
+        }
+    </script>
+}
+

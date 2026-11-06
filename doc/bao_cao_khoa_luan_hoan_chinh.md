@@ -1,6 +1,6 @@
 # BÁO CÁO BÀI TẬP LỚN MÔN HỌC: LẬP TRÌNH WEB
 
-## XÂY DỰNG WEBSITE QUẢN LÝ BÁN HÀNG CHO CHUỖI CỬA HÀNG MỸ PHẨM OMNI BEAUTY
+## XÂY DỰNG WEBSITE QUẢN LÝ BÁN HÀNG CHO CHUỖI CỬA HÀNG MỸ PHẨM CANMAKE BEAUTY
 
 ---
 
@@ -23,7 +23,7 @@
        
                  ĐỀ TÀI BÀI TẬP LỚN:
        XÂY DỰNG WEBSITE QUẢN LÝ BÁN HÀNG
-    CHO CHUỖI CỬA HÀNG MỸ PHẨM OMNI BEAUTY
+    CHO CHUỖI CỬA HÀNG MỸ PHẨM CANMAKE BEAUTY
     
     
     
@@ -60,7 +60,7 @@
        
                  ĐỀ TÀI BÀI TẬP LỚN:
        XÂY DỰNG WEBSITE QUẢN LÝ BÁN HÀNG
-    CHO CHUỖI CỬA HÀNG MỸ PHẨM OMNI BEAUTY
+    CHO CHUỖI CỬA HÀNG MỸ PHẨM CANMAKE BEAUTY
     
     
     
@@ -81,11 +81,11 @@
 
 ## LỜI CẢM ƠN
 
-Để hoàn thành báo cáo bài tập lớn môn Lập trình Web với đề tài "Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY", lời đầu tiên em xin được bày tỏ lòng biết ơn chân thành và sâu sắc nhất tới toàn thể quý Thầy Cô giáo tại Học viện Hành chính và Quản trị công, đặc biệt là các Thầy Cô trong Khoa Hệ thống thông tin và Chuyển đổi số. Trong quá trình học tập và rèn luyện dưới mái trường học viện, đặc biệt là trong suốt thời gian theo học học phần Lập trình Web, sự chỉ bảo tận tình, tri thức chuyên môn sâu rộng cùng lòng nhiệt huyết của các Thầy Cô đã truyền cho em nền tảng kiến thức vững chắc về phân tích thiết kế hệ thống, cơ sở dữ liệu quan hệ, kiến trúc phần mềm doanh nghiệp và tư duy giải quyết vấn đề khoa học.
+Để hoàn thành báo cáo bài tập lớn môn Lập trình Web với đề tài "Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY", lời đầu tiên em xin được bày tỏ lòng biết ơn chân thành và sâu sắc nhất tới toàn thể quý Thầy Cô giáo tại Học viện Hành chính và Quản trị công, đặc biệt là các Thầy Cô trong Khoa Hệ thống thông tin và Chuyển đổi số. Trong quá trình học tập và rèn luyện dưới mái trường học viện, đặc biệt là trong suốt thời gian theo học học phần Lập trình Web, sự chỉ bảo tận tình, tri thức chuyên môn sâu rộng cùng lòng nhiệt huyết của các Thầy Cô đã truyền cho em nền tảng kiến thức vững chắc về phân tích thiết kế hệ thống, cơ sở dữ liệu quan hệ, kiến trúc phần mềm doanh nghiệp và tư duy giải quyết vấn đề khoa học.
 
 Đặc biệt, em xin gửi lời tri ân sâu sắc nhất tới Giảng viên hướng dẫn học phần Lập trình Web. Thầy đã dành nhiều thời gian quý báu để định hướng đề tài, trực tiếp theo sát tiến độ, chỉ dẫn cặn kẽ từng phương pháp lập trình hiện đại, định hình tư duy thiết kế kiến trúc phần mềm sạch và nghiêm khắc đóng góp những ý kiến chuyên môn quý giá giúp bản báo cáo cùng sản phẩm phần mềm được hoàn thiện một cách chỉn chu, đúng chuẩn mực kỹ thuật cao nhất.
 
-Em cũng xin trân trọng gửi lời cảm ơn tới Ban Giám đốc cùng toàn thể các anh chị nhân viên tại chuỗi cửa hàng mỹ phẩm OMNI BEAUTY, từ các chi nhánh bán lẻ đến kho phân phối trung tâm. Sự nhiệt tình hỗ trợ, chia sẻ dữ liệu thực tế và tạo điều kiện cho em được tham gia khảo sát quy trình bán hàng trực tiếp, quản trị kho hàng theo lô hạn dùng và nghiệp vụ thu ngân tại quầy đã giúp đề tài gắn liền với hơi thở thực tiễn của doanh nghiệp, biến các dòng mã lệnh khô khan thành một giải pháp hữu ích cho hoạt động vận hành.
+Em cũng xin trân trọng gửi lời cảm ơn tới Ban Giám đốc cùng toàn thể các anh chị nhân viên tại chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY, từ các chi nhánh bán lẻ đến kho phân phối trung tâm. Sự nhiệt tình hỗ trợ, chia sẻ dữ liệu thực tế và tạo điều kiện cho em được tham gia khảo sát quy trình bán hàng trực tiếp, quản trị kho hàng theo lô hạn dùng và nghiệp vụ thu ngân tại quầy đã giúp đề tài gắn liền với hơi thở thực tiễn của doanh nghiệp, biến các dòng mã lệnh khô khan thành một giải pháp hữu ích cho hoạt động vận hành.
 
 Cuối cùng, con xin bày tỏ lòng biết ơn vô hạn tới cha mẹ và gia đình, những người luôn là chỗ dựa tinh thần vững chắc, thầm lặng hy sinh và tiếp thêm nghị lực cho con trên suốt chặng đường học tập. Cảm ơn tất cả những người bạn cùng lớp Hệ thống thông tin K22 đã luôn đồng hành, chia sẻ tài liệu và cùng nhau vượt qua những bài thực hành, thử thách lập trình trong suốt quá trình học tập học phần.
 
@@ -101,7 +101,7 @@ Em xin chân thành cảm ơn.
 
 ## LỜI CAM ĐOAN
 
-Tôi xin cam đoan rằng báo cáo bài tập lớn môn Lập trình Web với đề tài: "Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY" là báo cáo bài tập lớn và sản phẩm phần mềm độc lập của riêng cá nhân tôi (nhóm tác giả), được thực hiện dưới sự hướng dẫn chuyên môn trực tiếp của Giảng viên phụ trách học phần.
+Tôi xin cam đoan rằng báo cáo bài tập lớn môn Lập trình Web với đề tài: "Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY" là báo cáo bài tập lớn và sản phẩm phần mềm độc lập của riêng cá nhân tôi (nhóm tác giả), được thực hiện dưới sự hướng dẫn chuyên môn trực tiếp của Giảng viên phụ trách học phần.
 
 Mọi số liệu khảo sát hiện trạng hoạt động kinh doanh, sơ đồ phân tích nghiệp vụ, mô hình kiến trúc phần mềm, cấu trúc cơ sở dữ liệu quan hệ gồm sáu mươi lăm bảng chuẩn hóa dạng chuẩn ba và toàn bộ mã nguồn của giải pháp phần mềm được trình bày trong bản báo cáo bài tập lớn này là kết quả nghiên cứu và lập trình hoàn toàn trung thực, phản ánh chính xác hiện trạng hệ thống phần mềm do chính tác giả tự tay phân tích, thiết kế, cài đặt và kiểm thử.
 
@@ -143,7 +143,7 @@ Tôi xin hoàn toàn chịu trách nhiệm trước Giảng viên chấm điểm
     - 7.1. Đóng góp về mặt lý luận học thuật
     - 7.2. Đóng góp về mặt thực tiễn vận hành
   - 8. Bố cục của báo cáo bài tập lớn
-- **CHƯƠNG 1: CƠ SỞ LÝ LUẬN VỀ HỆ THỐNG THÔNG TIN QUẢN LÝ BÁN HÀNG ĐA KÊNH VÀ TỔNG QUAN CHUỖI CỬA HÀNG MỸ PHẨM OMNI BEAUTY**
+- **CHƯƠNG 1: CƠ SỞ LÝ LUẬN VỀ HỆ THỐNG THÔNG TIN QUẢN LÝ BÁN HÀNG ĐA KÊNH VÀ TỔNG QUAN CHUỖI CỬA HÀNG MỸ PHẨM CANMAKE BEAUTY**
   - 1.1. Cơ sở lý luận về hệ thống thông tin quản lý và thương mại điện tử đa kênh hợp nhất
     - 1.1.1. Hệ thống thông tin và hệ thống thông tin quản lý trong doanh nghiệp bán lẻ chuỗi
     - 1.1.2. Mô hình thương mại điện tử kết hợp bán lẻ hợp nhất đa kênh trực tiếp và trực tuyến
@@ -156,11 +156,11 @@ Tôi xin hoàn toàn chịu trách nhiệm trước Giảng viên chấm điểm
     - 1.3.2. Hệ quản trị cơ sở dữ liệu Microsoft SQL Server và công nghệ ánh xạ thực thể Entity Framework Core 8
     - 1.3.3. Công nghệ truyền thông thời gian thực SignalR, thiết kế giao diện hiện đại và tích hợp cổng thanh toán
     - 1.3.4. Phương pháp phân tích thiết kế hệ thống hướng đối tượng và mô hình kiến trúc ba lớp biên điều khiển thực thể
-  - 1.4. Tổng quan về chuỗi cửa hàng mỹ phẩm OMNI BEAUTY
+  - 1.4. Tổng quan về chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY
     - 1.4.1. Quá trình hình thành, sứ mệnh phát triển và mô hình mạng lưới điểm bán
     - 1.4.2. Cơ cấu tổ chức bộ máy nhân sự và chức năng nhiệm vụ của các bộ phận
   - Tiểu kết Chương 1
-- **CHƯƠNG 2: KHẢO SÁT, PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG WEBSITE QUẢN LÝ BÁN HÀNG CHO CHUỖI CỬA HÀNG MỸ PHẨM OMNI BEAUTY**
+- **CHƯƠNG 2: KHẢO SÁT, PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG WEBSITE QUẢN LÝ BÁN HÀNG CHO CHUỖI CỬA HÀNG MỸ PHẨM CANMAKE BEAUTY**
   - 2.1. Khảo sát hiện trạng và xác lập bài toán nghiệp vụ
     - 2.1.1. Khảo sát các quy trình hoạt động nghiệp vụ hiện tại của chuỗi cửa hàng
     - 2.1.2. Đánh giá những bất cập, hạn chế và điểm nghẽn trong vận hành thủ công
@@ -204,9 +204,9 @@ Tôi xin hoàn toàn chịu trách nhiệm trước Giảng viên chấm điểm
 
 ## DANH MỤC CÁC TỪ VIẾT TẮT VÀ THUẬT NGỮ CHUYÊN NGÀNH
 
-Bảng danh mục dưới đây tổng hợp các thuật ngữ chuyên môn và từ viết tắt tiêu chuẩn trong lĩnh vực hệ thống thông tin quản lý, kỹ thuật phần mềm và nghiệp vụ bán lẻ mỹ phẩm, đồng thời giải thích rõ ràng vai trò và cách thức ứng dụng thực tế trong hệ thống website OMNI BEAUTY:
+Bảng danh mục dưới đây tổng hợp các thuật ngữ chuyên môn và từ viết tắt tiêu chuẩn trong lĩnh vực hệ thống thông tin quản lý, kỹ thuật phần mềm và nghiệp vụ bán lẻ mỹ phẩm, đồng thời giải thích rõ ràng vai trò và cách thức ứng dụng thực tế trong hệ thống website CANMAKE BEAUTY:
 
-| STT | Từ viết tắt / Thuật ngữ | Tên tiếng Anh đầy đủ | Giải thích ý nghĩa và cách ứng dụng thực tế tại hệ thống OMNI BEAUTY |
+| STT | Từ viết tắt / Thuật ngữ | Tên tiếng Anh đầy đủ | Giải thích ý nghĩa và cách ứng dụng thực tế tại hệ thống CANMAKE BEAUTY |
 | :---: | :--- | :--- | :--- |
 | 1 | **3NF** | Third Normal Form | Dạng chuẩn hóa cơ sở dữ liệu quan hệ thứ ba. Toàn bộ sáu mươi lăm bảng dữ liệu của hệ thống được chuẩn hóa để loại bỏ triệt để các phụ thuộc hàm bắc cầu, ngăn chặn dị thường thêm, xóa, sửa và tối ưu hóa không gian lưu trữ. |
 | 2 | **ACID** | Atomicity, Consistency, Isolation, Durability | Bốn đặc tính bảo đảm tính toàn vẹn của giao dịch cơ sở dữ liệu gồm Tính nguyên tố, Tính nhất quán, Tính cô lập và Tính bền vững. Ứng dụng trong việc xử lý thanh toán hóa đơn, trừ tồn kho và hạch toán dòng tiền két thu ngân. |
@@ -222,7 +222,7 @@ Bảng danh mục dưới đây tổng hợp các thuật ngữ chuyên môn và
 | 12 | **EAN-13** | European Article Number 13 | Chuẩn mã vạch sản phẩm quốc tế gồm mười ba chữ số được in trên bao bì từng hộp mỹ phẩm, dùng để nhận diện chính xác mã định danh mặt hàng khi nhân viên quét máy đọc mã vạch tại quầy thu ngân. |
 | 13 | **EF Core** | Entity Framework Core | Bộ công cụ ánh xạ đối tượng quan hệ hiệu năng cao của Microsoft dành cho nền tảng .NET 8, cho phép thao tác với cơ sở dữ liệu Microsoft SQL Server thông qua cú pháp truy vấn hướng đối tượng LINQ mạnh mẽ và an toàn. |
 | 14 | **EWG** | Environmental Working Group | Thang đo mức độ an toàn của thành phần hóa mỹ phẩm theo thang điểm từ một đến mười của tổ chức phi chính phủ quốc tế, được hệ thống số hóa để hiển thị mức độ lành tính của từng hoạt chất trong trang chi tiết sản phẩm. |
-| 15 | **FEFO** | First-Expired, First-Out | Nguyên tắc quản lý xuất kho ưu tiên lô hàng có hạn sử dụng gần nhất ra bán trước. Đây là giải thuật cốt lõi được lập trình tự động trong hệ thống OMNI BEAUTY nhằm triệt tiêu hoàn toàn rủi ro tồn ứ mỹ phẩm hết hạn sử dụng. |
+| 15 | **FEFO** | First-Expired, First-Out | Nguyên tắc quản lý xuất kho ưu tiên lô hàng có hạn sử dụng gần nhất ra bán trước. Đây là giải thuật cốt lõi được lập trình tự động trong hệ thống CANMAKE BEAUTY nhằm triệt tiêu hoàn toàn rủi ro tồn ứ mỹ phẩm hết hạn sử dụng. |
 | 16 | **FIFO** | First-In, First-Out | Nguyên tắc nhập trước xuất trước truyền thống, được áp dụng đối với các mặt hàng vật tư tiêu hao, bao bì đóng gói hoặc các sản phẩm phụ trợ không có ràng buộc khắt khe về thời hạn sử dụng. |
 | 17 | **HTMX** | High-power Tools for HTML | Thư viện mở rộng khả năng của tài liệu HTML, cho phép thực hiện các yêu cầu nạp tải bất đồng bộ trực tiếp thông qua các thuộc tính mở rộng mà không cần viết các đoạn mã lệnh JavaScript phức tạp, giúp tăng tốc độ tải trang. |
 | 18 | **O2O** | Online-to-Offline | Mô hình kinh doanh kết hợp trải nghiệm mua sắm trực tuyến trên website với mạng lưới cửa hàng vật lý thực tế, cho phép khách hàng chuyển đổi liền mạch giữa việc xem thông tin trên mạng và thử hàng tại điểm bán. |
@@ -241,7 +241,7 @@ Bảng danh mục dưới đây tổng hợp các thuật ngữ chuyên môn và
 
 | Ký hiệu bảng | Tên gọi bảng biểu |
 | :---: | :--- |
-| **Bảng 1.1** | Ma trận đối soát sự đáp ứng của hệ thống OMNI BEAUTY đối với các văn bản pháp quy hiện hành |
+| **Bảng 1.1** | Ma trận đối soát sự đáp ứng của hệ thống CANMAKE BEAUTY đối với các văn bản pháp quy hiện hành |
 | **Bảng 2.1** | Đặc tả chi tiết sáu nhóm tác nhân nội bộ và bốn tác nhân đối tác tham gia hệ thống |
 | **Bảng 2.2** | Danh mục yêu cầu chức năng nghiệp vụ chi tiết của phân hệ Khách hàng và phân hệ Quản trị |
 | **Bảng 2.3** | Đặc tả ca sử dụng UC-01: Quản trị ma trận phân quyền động ba tầng và cô lập chi nhánh |
@@ -295,11 +295,11 @@ Bảng danh mục dưới đây tổng hợp các thuật ngữ chuyên môn và
 
 | Ký hiệu sơ đồ | Tên gọi sơ đồ hoặc biểu đồ |
 | :---: | :--- |
-| **Sơ đồ 1.1** | Sơ đồ cơ cấu tổ chức bộ máy quản lý và chuỗi cung ứng OMNI BEAUTY |
+| **Sơ đồ 1.1** | Sơ đồ cơ cấu tổ chức bộ máy quản lý và chuỗi cung ứng CANMAKE BEAUTY |
 | **Sơ đồ 2.1** | Sơ đồ quy trình nghiệp vụ bán hàng và quản trị kho vận thủ công hiện tại |
 | **Sơ đồ 2.2** | Sơ đồ Swimlane quy trình bán lẻ đa kênh hợp nhất và điều phối tồn kho FEFO đề xuất |
-| **Sơ đồ 2.3** | Biểu đồ phân rã chức năng nghiệp vụ tổng quát của hệ thống OMNI BEAUTY |
-| **Sơ đồ 2.4** | Biểu đồ ca sử dụng tổng quát toàn bộ hệ thống OMNI BEAUTY |
+| **Sơ đồ 2.3** | Biểu đồ phân rã chức năng nghiệp vụ tổng quát của hệ thống CANMAKE BEAUTY |
+| **Sơ đồ 2.4** | Biểu đồ ca sử dụng tổng quát toàn bộ hệ thống CANMAKE BEAUTY |
 | **Sơ đồ 2.5** | Biểu đồ ca sử dụng phân rã cho nhóm tác nhân Quản trị viên tối cao |
 | **Sơ đồ 2.6** | Biểu đồ ca sử dụng phân rã cho nhóm tác nhân Quản lý chi nhánh |
 | **Sơ đồ 2.7** | Biểu đồ ca sử dụng phân rã cho nhóm tác nhân Nhân viên thu ngân tại quầy |
@@ -324,7 +324,7 @@ Bảng danh mục dưới đây tổng hợp các thuật ngữ chuyên môn và
 | Ký hiệu hình ảnh | Tên gọi hình ảnh giao diện hệ thống |
 | :---: | :--- |
 | **Hình 2.1** | Lưu đồ luồng vận hành hàng hóa và chuỗi cung ứng theo lô sản xuất |
-| **Hình 2.2** | Sơ đồ ca sử dụng tổng quát toàn bộ hệ thống OMNI BEAUTY |
+| **Hình 2.2** | Sơ đồ ca sử dụng tổng quát toàn bộ hệ thống CANMAKE BEAUTY |
 | **Hình 2.3** | Sơ đồ ca sử dụng chi tiết phân hệ Quản trị ma trận phân quyền động PBAC |
 | **Hình 2.4** | Sơ đồ ca sử dụng chi tiết phân hệ Đặt hàng trực tuyến và cấp phát tồn kho FEFO |
 | **Hình 2.5** | Sơ đồ ca sử dụng chi tiết phân hệ Quầy thu ngân thông minh Smart POS |
@@ -356,11 +356,11 @@ Trong bối cảnh nền kinh tế số và thương mại điện tử tại Vi
 
 Ngành kinh doanh mỹ phẩm và sản phẩm chăm sóc sắc đẹp là một trong những lĩnh vực có tốc độ tăng trưởng nhanh nhất nhưng cũng đồng thời đặt ra những yêu cầu quản trị nghiệp vụ phức tạp và khắt khe bậc nhất trong toàn ngành bán lẻ. Khác biệt hoàn toàn với các mặt hàng tiêu dùng thông thường hay ngành thời trang may mặc, sản phẩm mỹ phẩm mang tính nhạy cảm đặc biệt đối với sức khỏe và làn da người sử dụng. Về mặt danh mục, một sản phẩm chăm sóc da hay trang điểm thường sở hữu rất nhiều biến thể về bảng màu son, tông sắc phấn phủ hoặc các quy cách dung tích đóng gói khác nhau, đòi hỏi hệ thống quản trị phải theo dõi chính xác từng đơn vị lưu kho riêng biệt. Về mặt an toàn chất lượng, mỹ phẩm chịu sự ràng buộc nghiêm ngặt về thời hạn sử dụng theo từng lô sản xuất cùng thời hạn an toàn sau khi mở nắp niêm phong lần đầu tiên. Việc kiểm soát hạn dùng không thể thực hiện chung chung mà bắt buộc phải gắn liền với từng lô nhập kho cụ thể. Bên cạnh đó, người tiêu dùng mỹ phẩm hiện đại ngày càng am hiểu về khoa học làm đẹp, có xu hướng tìm hiểu sâu về bảng thành phần và cơ chế tác động của các hoạt chất lên từng nền da chuyên biệt như da dầu mụn, da khô hay da nhạy cảm. Do đó, việc tư vấn sản phẩm không chỉ dừng lại ở tên gọi thương hiệu mà phải dựa trên cơ sở khoa học để tránh triệt để tình trạng kích ứng da hay xung đột hoạt chất nguy hại khi sử dụng chung trong một chu trình chăm sóc.
 
-Qua quá trình khảo sát thực tế tại chuỗi cửa hàng mỹ phẩm OMNI BEAUTY, hệ thống hiện đang vận hành một Tổng kho phân phối trung tâm mang mã hiệu HQ-001 tại thành phố Hà Nội cùng mạng lưới các Showroom bán lẻ đặt tại các vị trí trọng điểm như Showroom Cầu Giấy và Showroom Quận 1 tại Thành phố Hồ Chí Minh. Hiện trạng quản lý tại chuỗi đang bộc lộ những điểm nghẽn nghiêm trọng xuất phát từ việc sử dụng các công cụ quản lý phân mảnh và quy trình vận hành mang nặng tính thủ công. Kênh bán hàng trực tuyến và quầy thu ngân tại các cửa hàng vật lý hoạt động trên hai cơ sở dữ liệu tách rời, dẫn đến tình trạng sai lệch số lượng tồn kho khả dụng theo thời gian thực. Thực trạng này thường xuyên gây ra hiện tượng bán vượt quá số lượng hàng hóa thực tế có trong kho đối với các mặt hàng đang có nhu cầu cao, khiến khách hàng trực tuyến đặt mua thành công nhưng cửa hàng không có sản phẩm để giao, làm suy giảm uy tín thương hiệu nghiêm trọng.
+Qua quá trình khảo sát thực tế tại chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY, hệ thống hiện đang vận hành một Tổng kho phân phối trung tâm mang mã hiệu HQ-001 tại thành phố Hà Nội cùng mạng lưới các Showroom bán lẻ đặt tại các vị trí trọng điểm như Showroom Cầu Giấy và Showroom Quận 1 tại Thành phố Hồ Chí Minh. Hiện trạng quản lý tại chuỗi đang bộc lộ những điểm nghẽn nghiêm trọng xuất phát từ việc sử dụng các công cụ quản lý phân mảnh và quy trình vận hành mang nặng tính thủ công. Kênh bán hàng trực tuyến và quầy thu ngân tại các cửa hàng vật lý hoạt động trên hai cơ sở dữ liệu tách rời, dẫn đến tình trạng sai lệch số lượng tồn kho khả dụng theo thời gian thực. Thực trạng này thường xuyên gây ra hiện tượng bán vượt quá số lượng hàng hóa thực tế có trong kho đối với các mặt hàng đang có nhu cầu cao, khiến khách hàng trực tuyến đặt mua thành công nhưng cửa hàng không có sản phẩm để giao, làm suy giảm uy tín thương hiệu nghiêm trọng.
 
 Bên cạnh sự xung đột về tồn kho, công tác quản trị kho tại các chi nhánh cửa hàng cũng gặp thách thức lớn khi nhân viên bán hàng thường xuất hàng theo thói quen tiện tay lấy các hộp mỹ phẩm mới nhập đặt ở phía ngoài, khiến các lô sản xuất cũ nằm sâu bên trong bị lãng quên cho đến khi cận hạn sử dụng hoặc hết hạn hoàn toàn, gây tổn thất kinh tế rất lớn do phải tiêu hủy sản phẩm. Ở khâu thanh toán tại quầy, việc quản lý dòng tiền mặt của nhân viên thu ngân qua các ca làm việc chưa có cơ chế kiểm két và đối soát chặt chẽ, dễ phát sinh thất thoát và nhầm lẫn khi bàn giao ca. Đồng thời, việc đối soát số tiền thu hộ từ các đơn vị vận chuyển giao hàng tận nơi đối với các đơn hàng trực tuyến vẫn phải nhập liệu thủ công qua các bảng tính Excel, tiềm ẩn nguy cơ sai sót cao và tiêu tốn nhiều thời gian của bộ phận kế toán.
 
-Xuất phát từ những đòi hỏi cấp bách của thực tiễn quản lý nêu trên, việc nghiên cứu và triển khai đề tài: "Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY" là hết sức cần thiết và có ý nghĩa ứng dụng thực tiễn to lớn. Đề tài hướng tới việc xây dựng một giải pháp phần mềm tổng thể, hợp nhất toàn bộ dữ liệu danh mục biến thể, đồng bộ tồn kho thời gian thực, tự động hóa giải thuật xuất kho theo hạn sử dụng, quản lý chặt chẽ ca làm việc thu ngân và bảo đảm an toàn dữ liệu đa chi nhánh dựa trên nền tảng công nghệ hiện đại.
+Xuất phát từ những đòi hỏi cấp bách của thực tiễn quản lý nêu trên, việc nghiên cứu và triển khai đề tài: "Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY" là hết sức cần thiết và có ý nghĩa ứng dụng thực tiễn to lớn. Đề tài hướng tới việc xây dựng một giải pháp phần mềm tổng thể, hợp nhất toàn bộ dữ liệu danh mục biến thể, đồng bộ tồn kho thời gian thực, tự động hóa giải thuật xuất kho theo hạn sử dụng, quản lý chặt chẽ ca làm việc thu ngân và bảo đảm an toàn dữ liệu đa chi nhánh dựa trên nền tảng công nghệ hiện đại.
 
 ---
 
@@ -374,7 +374,7 @@ Tại thị trường trong nước, một số chuỗi bán lẻ mỹ phẩm qu
 
 Bên cạnh các hệ thống tự phát triển của các doanh nghiệp lớn, phần lớn các chuỗi cửa hàng bán lẻ quy mô vừa và nhỏ hiện nay đang phụ thuộc vào các nền tảng phần mềm quản lý bán hàng dạng dịch vụ đóng gói phổ biến trên thị trường như KiotViet hay Sapo. Mặc dù các phần mềm này giải quyết tốt các nghiệp vụ bán hàng tổng quát như in hóa đơn, ghi nhận đơn hàng và thống kê doanh thu cơ bản, nhưng chúng lại bộc lộ những khoảng trống rất lớn khi áp dụng vào lĩnh vực mỹ phẩm chuyên sâu. Các giải pháp đóng gói đại trà này thường chỉ theo dõi tồn kho theo phương pháp bình quân hoặc quản lý số lượng tổng đơn thuần, hoàn toàn thiếu vắng cơ chế quản lý kho theo lô sản xuất gắn liền với hạn sử dụng và không hỗ trợ giải thuật tự động phân bổ lô hàng xuất bán theo nguyên tắc hết hạn trước xuất trước. Ngoài ra, các phần mềm này cũng không có các công cụ phân tích cấu trúc da liễu, không thể cảnh báo mức độ an toàn của thành phần hóa học và không có khả năng cô lập dữ liệu theo từng chi nhánh với ma trận phân quyền chi tiết.
 
-Xét về các đồ án, bài tập lớn và dự án phần mềm thuộc môn học Lập trình Web chuyên ngành Hệ thống thông tin và Kỹ thuật phần mềm tại các trường đại học trong nước những năm vừa qua, có thể nhận thấy các đề tài về website bán hàng xuất hiện khá nhiều. Tuy nhiên, phần lớn các công trình này chỉ dừng lại ở phạm vi xây dựng một trang web thương mại điện tử đơn giản phục vụ một cửa hàng đơn lẻ, tập trung vào việc hiển thị sản phẩm và đặt hàng cơ bản. Rất ít đề tài đi sâu vào việc giải quyết bài toán cốt lõi của hệ thống thông tin quản lý chuỗi điểm bán như: kiến trúc đồng bộ trạng thái đơn hàng thời gian thực giữa quầy thu ngân và kho hàng trực tuyến, cơ chế khóa tồn kho mềm hai giai đoạn để chống bán vượt số lượng thực tế khi có nhiều giao dịch đồng thời, và phân định quyền hạn bảo mật chi tiết theo từng chi nhánh cửa hàng. Do đó, đề tài OMNI BEAUTY được xác lập nhằm giải quyết trọn vẹn những khoảng trống nghiên cứu và ứng dụng thực tiễn còn đang bị bỏ ngỏ.
+Xét về các đồ án, bài tập lớn và dự án phần mềm thuộc môn học Lập trình Web chuyên ngành Hệ thống thông tin và Kỹ thuật phần mềm tại các trường đại học trong nước những năm vừa qua, có thể nhận thấy các đề tài về website bán hàng xuất hiện khá nhiều. Tuy nhiên, phần lớn các công trình này chỉ dừng lại ở phạm vi xây dựng một trang web thương mại điện tử đơn giản phục vụ một cửa hàng đơn lẻ, tập trung vào việc hiển thị sản phẩm và đặt hàng cơ bản. Rất ít đề tài đi sâu vào việc giải quyết bài toán cốt lõi của hệ thống thông tin quản lý chuỗi điểm bán như: kiến trúc đồng bộ trạng thái đơn hàng thời gian thực giữa quầy thu ngân và kho hàng trực tuyến, cơ chế khóa tồn kho mềm hai giai đoạn để chống bán vượt số lượng thực tế khi có nhiều giao dịch đồng thời, và phân định quyền hạn bảo mật chi tiết theo từng chi nhánh cửa hàng. Do đó, đề tài CANMAKE BEAUTY được xác lập nhằm giải quyết trọn vẹn những khoảng trống nghiên cứu và ứng dụng thực tiễn còn đang bị bỏ ngỏ.
 
 #### 2.2. Tình hình nghiên cứu và ứng dụng trên thế giới
 
@@ -392,7 +392,7 @@ Ngoài ra, các nghiên cứu quốc tế trong lĩnh vực công nghệ bán l�
 
 ##### Mục tiêu tổng quát
 
-Mục tiêu tổng quát của bài tập lớn là nghiên cứu, thiết kế và xây dựng thành công một hệ thống website quản lý bán hàng đa kênh hợp nhất hoàn chỉnh cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY dựa trên nền tảng công nghệ ASP.NET Core 8.0 và kiến trúc Clean Architecture bốn tầng, bảo đảm tính toàn vẹn dữ liệu, khả năng mở rộng linh hoạt, độ bảo mật cao và giải quyết triệt để các bài toán nghiệp vụ đặc thù của ngành bán lẻ mỹ phẩm chuỗi.
+Mục tiêu tổng quát của bài tập lớn là nghiên cứu, thiết kế và xây dựng thành công một hệ thống website quản lý bán hàng đa kênh hợp nhất hoàn chỉnh cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY dựa trên nền tảng công nghệ ASP.NET Core 8.0 và kiến trúc Clean Architecture bốn tầng, bảo đảm tính toàn vẹn dữ liệu, khả năng mở rộng linh hoạt, độ bảo mật cao và giải quyết triệt để các bài toán nghiệp vụ đặc thù của ngành bán lẻ mỹ phẩm chuỗi.
 
 ##### Các mục tiêu cụ thể
 
@@ -424,7 +424,7 @@ Bốn là, nghiên cứu chuyên sâu về các kỹ thuật lập trình hiện
 
 ##### Nhiệm vụ về mặt thực tiễn
 
-Một là, tiến hành khảo sát thực địa hiện trạng vận hành, cơ cấu tổ chức nhân sự, chuỗi cung ứng và luồng chu chuyển hàng hóa tại các chi nhánh và kho tổng của chuỗi cửa hàng mỹ phẩm OMNI BEAUTY để thu thập, phân loại các yêu cầu chức năng và yêu cầu phi chức năng của hệ thống.
+Một là, tiến hành khảo sát thực địa hiện trạng vận hành, cơ cấu tổ chức nhân sự, chuỗi cung ứng và luồng chu chuyển hàng hóa tại các chi nhánh và kho tổng của chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY để thu thập, phân loại các yêu cầu chức năng và yêu cầu phi chức năng của hệ thống.
 
 Hai là, xây dựng hoàn chỉnh hồ sơ mô hình hóa hệ thống bao gồm biểu đồ phân rã chức năng, biểu đồ ca sử dụng tổng quát và chi tiết, các biểu đồ hoạt động và biểu đồ tuần tự cho tám luồng quy trình nghiệp vụ cốt lõi nhất.
 
@@ -454,7 +454,7 @@ Phân hệ thứ hai là Hệ thống quản trị điều hành đa kênh dành
 
 ##### Phạm vi về không gian
 
-Nghiên cứu được triển khai khảo sát thực tế và thiết lập dữ liệu thực nghiệm trên toàn bộ mạng lưới hoạt động của chuỗi cửa hàng mỹ phẩm OMNI BEAUTY, bao gồm một Tổng kho phân phối trung tâm mang mã hiệu HQ-001 đặt tại địa bàn quận Cầu Giấy, thành phố Hà Nội và hệ thống các Showroom bán lẻ trực tiếp đại diện cho các vùng thị trường trọng điểm gồm Showroom Cầu Giấy tại Hà Nội và Showroom Quận 1 tại Thành phố Hồ Chí Minh.
+Nghiên cứu được triển khai khảo sát thực tế và thiết lập dữ liệu thực nghiệm trên toàn bộ mạng lưới hoạt động của chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY, bao gồm một Tổng kho phân phối trung tâm mang mã hiệu HQ-001 đặt tại địa bàn quận Cầu Giấy, thành phố Hà Nội và hệ thống các Showroom bán lẻ trực tiếp đại diện cho các vùng thị trường trọng điểm gồm Showroom Cầu Giấy tại Hà Nội và Showroom Quận 1 tại Thành phố Hồ Chí Minh.
 
 ##### Phạm vi về thời gian
 
@@ -478,7 +478,7 @@ Các tác nhân đối tác bên ngoài bao gồm: Cổng thanh toán trực tuy
 
 Phương pháp nghiên cứu lý thuyết và phân tích tài liệu: Tiến hành thu thập, đọc hiểu, phân loại và tổng hợp các tài liệu học thuật chuyên ngành, các tiêu chuẩn thiết kế kiến trúc phần mềm quốc tế và toàn bộ hệ thống văn bản quy phạm pháp luật của Nhà nước điều chỉnh hoạt động thương mại điện tử và quản lý mỹ phẩm. Phương pháp này tạo lập nền tảng lý luận vững chắc để định hình các yêu cầu kỹ thuật và pháp lý của hệ thống.
 
-Phương pháp khảo sát thực địa và phỏng vấn chuyên gia: Trực tiếp đến quan sát các hoạt động thực tế tại cửa hàng và kho hàng của chuỗi OMNI BEAUTY, phỏng vấn sâu nhân viên thu ngân, nhân viên thủ kho và quản lý chi nhánh về những khó khăn, thao tác chậm và sai sót thường gặp trong quá trình làm việc hàng ngày. Phương pháp này giúp tác giả nắm bắt chính xác các yêu cầu nghiệp vụ thực tế để xây dựng hệ thống bám sát nhu cầu sử dụng.
+Phương pháp khảo sát thực địa và phỏng vấn chuyên gia: Trực tiếp đến quan sát các hoạt động thực tế tại cửa hàng và kho hàng của chuỗi CANMAKE BEAUTY, phỏng vấn sâu nhân viên thu ngân, nhân viên thủ kho và quản lý chi nhánh về những khó khăn, thao tác chậm và sai sót thường gặp trong quá trình làm việc hàng ngày. Phương pháp này giúp tác giả nắm bắt chính xác các yêu cầu nghiệp vụ thực tế để xây dựng hệ thống bám sát nhu cầu sử dụng.
 
 Phương pháp phân tích và thiết kế hệ thống hướng đối tượng: Sử dụng ngôn ngữ mô hình hóa thống nhất UML 2.5 để trực quan hóa toàn bộ hệ thống từ góc nhìn ca sử dụng, hành vi tương tác và cấu trúc tĩnh. Kết hợp với mô hình phân tích ba lớp biên điều khiển thực thể để phân rã rõ ràng trách nhiệm của từng thành phần trong hệ thống, đồng thời áp dụng phương pháp chuẩn hóa dữ liệu để đưa mô hình cơ sở dữ liệu đạt dạng chuẩn ba, triệt tiêu mọi rủi ro dư thừa dữ liệu.
 
@@ -534,13 +534,13 @@ Thứ ba, công trình xây dựng một mô hình kiến trúc phần mềm m�
 
 #### 7.2. Đóng góp về mặt thực tiễn vận hành
 
-Về mặt thực tiễn vận hành, bài tập lớn đem lại những giá trị ứng dụng trực tiếp, thiết thực và rõ rệt cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY cũng như các doanh nghiệp bán lẻ tương tự:
+Về mặt thực tiễn vận hành, bài tập lớn đem lại những giá trị ứng dụng trực tiếp, thiết thực và rõ rệt cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY cũng như các doanh nghiệp bán lẻ tương tự:
 
 Thứ nhất, công trình cung cấp một sản phẩm phần mềm quản lý bán hàng đa kênh hoàn chỉnh, có tính ổn định cao, sẵn sàng đưa vào triển khai ứng dụng thực tế để thay thế toàn diện các công cụ quản lý thủ công rời rạc, giúp ban lãnh đạo doanh nghiệp nắm bắt chính xác và kịp thời các chỉ số kinh doanh then chốt thông qua bảng điều khiển trung tâm thời gian thực.
 
 Thứ hai, hệ thống giải quyết triệt để các bài toán tổn thất kinh tế kinh niên của doanh nghiệp bằng việc loại bỏ hoàn toàn tình trạng bán lố tồn kho gây mất uy tín với khách hàng, triệt tiêu nguy cơ tiêu hủy hàng hóa cận hạn dùng nhờ giải thuật phân bổ lô tự động, và ngăn ngừa các thất thoát tiền mặt trong quá trình bàn giao ca thu ngân tại các điểm bán lẻ.
 
-Thứ ba, hệ thống tạo ra một bước đột phá trong việc nâng cao trải nghiệm mua sắm và bảo vệ sức khỏe người tiêu dùng thông qua các công cụ công nghệ làm đẹp thông minh, giúp người mua an tâm chọn lựa sản phẩm phù hợp với làn da của mình, từ đó củng cố sự gắn kết và lòng trung thành của khách hàng đối với thương hiệu OMNI BEAUTY.
+Thứ ba, hệ thống tạo ra một bước đột phá trong việc nâng cao trải nghiệm mua sắm và bảo vệ sức khỏe người tiêu dùng thông qua các công cụ công nghệ làm đẹp thông minh, giúp người mua an tâm chọn lựa sản phẩm phù hợp với làn da của mình, từ đó củng cố sự gắn kết và lòng trung thành của khách hàng đối với thương hiệu CANMAKE BEAUTY.
 
 ---
 
@@ -548,15 +548,15 @@ Thứ ba, hệ thống tạo ra một bước đột phá trong việc nâng cao
 
 Ngoài các trang mở đầu, danh mục từ viết tắt, bảng biểu, sơ đồ, hình ảnh, phần kết luận, danh mục tài liệu tham khảo và các phụ lục đính kèm, nội dung chính của báo cáo bài tập lớn được cấu trúc một cách khoa học, chặt chẽ và cân đối thành ba chương cụ thể như sau:
 
-**Chương 1: Cơ sở lý luận về hệ thống thông tin quản lý bán hàng đa kênh và tổng quan chuỗi cửa hàng mỹ phẩm OMNI BEAUTY.**  
-Chương này tập trung trình bày các cơ sở lý luận nền tảng về hệ thống thông tin quản lý trong ngành bán lẻ chuỗi, phân tích sâu bản chất của mô hình thương mại hợp nhất đa kênh trực tiếp và trực tuyến, cùng các đặc thù khắt khe trong quản trị danh mục và hạn dùng của ngành mỹ phẩm. Đồng thời, chương 1 đối soát toàn diện sự đáp ứng của hệ thống đối với các văn bản pháp luật hiện hành của Việt Nam về quản lý công bố mỹ phẩm và thương mại điện tử; làm rõ các cơ sở lý luận về nền tảng công nghệ ASP.NET Core 8, kiến trúc Clean Architecture, cơ sở dữ liệu quan hệ và phương pháp luận hướng đối tượng; cuối cùng giới thiệu chi tiết về lịch sử hình thành, cơ cấu tổ chức và chức năng các bộ phận của chuỗi cửa hàng OMNI BEAUTY.
+**Chương 1: Cơ sở lý luận về hệ thống thông tin quản lý bán hàng đa kênh và tổng quan chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY.**  
+Chương này tập trung trình bày các cơ sở lý luận nền tảng về hệ thống thông tin quản lý trong ngành bán lẻ chuỗi, phân tích sâu bản chất của mô hình thương mại hợp nhất đa kênh trực tiếp và trực tuyến, cùng các đặc thù khắt khe trong quản trị danh mục và hạn dùng của ngành mỹ phẩm. Đồng thời, chương 1 đối soát toàn diện sự đáp ứng của hệ thống đối với các văn bản pháp luật hiện hành của Việt Nam về quản lý công bố mỹ phẩm và thương mại điện tử; làm rõ các cơ sở lý luận về nền tảng công nghệ ASP.NET Core 8, kiến trúc Clean Architecture, cơ sở dữ liệu quan hệ và phương pháp luận hướng đối tượng; cuối cùng giới thiệu chi tiết về lịch sử hình thành, cơ cấu tổ chức và chức năng các bộ phận của chuỗi cửa hàng CANMAKE BEAUTY.
 
-**Chương 2: Khảo sát, phân tích và thiết kế hệ thống website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY.**  
+**Chương 2: Khảo sát, phân tích và thiết kế hệ thống website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY.**  
 Chương này là trọng tâm nghiên cứu và phân tích thiết kế của bài tập lớn. Nội dung chương bắt đầu bằng việc khảo sát chi tiết hiện trạng quy trình vận hành thủ công hiện tại, chỉ rõ các điểm nghẽn nghiêm trọng và đề xuất sơ đồ quy trình bán hàng đa kênh hợp nhất số hóa mới. Tiếp theo, chương tiến hành phân tích các yêu cầu chức năng và phi chức năng, xây dựng biểu đồ phân rã chức năng và mô hình hóa hệ thống bằng ngôn ngữ UML từ biểu đồ ca sử dụng tổng quát đến các đặc tả chi tiết, biểu đồ hoạt động và biểu đồ tuần tự cho tám luồng nghiệp vụ cốt lõi nhất. Phần cuối chương 2 dành cho việc thiết kế kiến trúc hệ thống bốn tầng, thiết lập ma trận phân quyền động ba tầng kiểm soát năm mươi mốt quyền hạn nguyên tử, thiết kế cơ sở dữ liệu quan hệ gồm sáu mươi lăm bảng chuẩn hóa dạng chuẩn ba kèm từ điển dữ liệu chi tiết cho các bảng cốt lõi, và xác lập các đặc tả thiết kế giao diện người dùng công thái học.
 
 **Chương 3: Triển khai cài đặt, kiểm thử hệ thống và định hướng phát triển.**  
 Chương này phản ánh toàn bộ kết quả hiện thực hóa giải pháp phần mềm trên thực tế. Mở đầu chương là phần mô tả môi trường cài đặt, cách thức tổ chức các dự án trong giải pháp và trình bày chi tiết các giải pháp kỹ thuật, đoạn mã nguồn chương trình cốt lõi để hiện thực hóa các giải thuật nghiệp vụ trọng tâm. Tiếp đó, chương trình bày trực quan các kết quả đạt được về mặt giao diện người dùng trên cả hai phân hệ bán hàng trực tuyến và quản trị điều hành bán lẻ đa kênh với các hình ảnh minh họa thực tế. Trọng tâm tiếp theo của chương là chiến lược kiểm thử đa tầng, công bố kết quả thực thi các bộ kiểm thử tự động, các kịch bản kiểm thử chức năng hộp đen và kết quả kiểm thử hiệu năng chịu tải đồng thời. Cuối cùng, chương 3 đánh giá mức độ hoàn thành nhiệm vụ so với các mục tiêu, giả thuyết nghiên cứu đã đề ra ban đầu, thẳng thắn chỉ ra những điểm còn hạn chế và vạch ra lộ trình nâng cấp hệ thống trong tương lai.
-# CHƯƠNG 1: CƠ SỞ LÝ LUẬN VỀ HỆ THỐNG THÔNG TIN QUẢN LÝ BÁN HÀNG ĐA KÊNH VÀ TỔNG QUAN CHUỖI CỬA HÀNG MỸ PHẨM OMNI BEAUTY
+# CHƯƠNG 1: CƠ SỞ LÝ LUẬN VỀ HỆ THỐNG THÔNG TIN QUẢN LÝ BÁN HÀNG ĐA KÊNH VÀ TỔNG QUAN CHUỖI CỬA HÀNG MỸ PHẨM CANMAKE BEAUTY
 
 ## 1.1. Cơ sở lý luận về Hệ thống thông tin quản lý và Thương mại điện tử đa kênh (Omnichannel)
 
@@ -586,9 +586,9 @@ Sự phân mảnh này dẫn đến việc khách hàng phải chịu đựng m�
 
 Mô hình bán lẻ đa kênh hợp nhất trực tuyến và trực tiếp ra đời như một lời giải toàn diện cho sự phân mảnh nói trên. Điểm khác biệt mấu chốt của bán hàng hợp nhất không nằm ở số lượng kênh phân phối mà nằm ở kiến trúc dữ liệu tập trung duy nhất đóng vai trò là nguồn chân lý duy nhất cho toàn bộ hệ thống. Mọi điểm chạm từ ứng dụng web, máy tính bảng của nhân viên tư vấn da liễu tại cửa hàng, màn hình quầy thu ngân cho đến ứng dụng di động đều truy vấn và ghi nhận vào cùng một cơ sở dữ liệu trung tâm theo thời gian thực. Bất kỳ một sự kiện mua sắm nào phát sinh tại một kênh đều ngay lập tức cập nhật số dư tồn kho và biến động tài chính trên toàn chuỗi. Nhờ sự hợp nhất này, doanh nghiệp có thể triển khai hoàn hảo các nghiệp vụ kết hợp trực tiếp và trực tuyến hiện đại, tiêu biểu là mô hình mua hàng trên mạng và đến nhận hàng trực tiếp tại cửa hàng trong vòng một giờ, giúp khách hàng tiết kiệm chi phí vận chuyển và nhận được sản phẩm một cách nhanh chóng nhất.
 
-Để làm rõ sự khác biệt mang tính bản chất về mặt kiến trúc công nghệ và hiệu quả vận hành giữa hai mô hình, bảng đối sánh dưới đây tổng hợp năm tiêu chí kỹ thuật cốt lõi được đúc kết từ thực tiễn khảo sát tại chuỗi cửa hàng OMNI BEAUTY:
+Để làm rõ sự khác biệt mang tính bản chất về mặt kiến trúc công nghệ và hiệu quả vận hành giữa hai mô hình, bảng đối sánh dưới đây tổng hợp năm tiêu chí kỹ thuật cốt lõi được đúc kết từ thực tiễn khảo sát tại chuỗi cửa hàng CANMAKE BEAUTY:
 
-**Bảng 1.1: Bảng đối sánh đặc trưng kỹ thuật giữa mô hình Đa kênh rời rạc (Multi-channel) và Đa kênh hợp nhất (Omnichannel) tại chuỗi OMNI BEAUTY**
+**Bảng 1.1: Bảng đối sánh đặc trưng kỹ thuật giữa mô hình Đa kênh rời rạc (Multi-channel) và Đa kênh hợp nhất (Omnichannel) tại chuỗi CANMAKE BEAUTY**
 
 | Tiêu chí so sánh | Mô hình Đa kênh rời rạc (Multi-channel) | Mô hình Đa kênh hợp nhất (Omnichannel O2O) |
 | :--- | :--- | :--- |
@@ -598,7 +598,7 @@ Mô hình bán lẻ đa kênh hợp nhất trực tuyến và trực tiếp ra �
 | **Hồ sơ sắc đẹp và ví điểm thưởng** | Khách hàng phải đăng ký nhiều tài khoản riêng biệt. Lịch sử soi da tại quầy ghi trên sổ tay nhân viên; điểm tích lũy khi mua tại showroom không thể tra cứu hoặc quy đổi khi mua sắm trực tuyến trên website. | Một hồ sơ khách hàng định danh duy nhất xuyên suốt mọi kênh. Dữ liệu loại da, lịch sử kích ứng và ví điểm thưởng thành viên được tra cứu và sử dụng đồng nhất cả tại quầy thu ngân POS và trên giao diện website. |
 | **Hạch toán tài chính kế toán** | Báo cáo doanh thu và chi phí rời rạc, đối soát thủ công vào cuối tháng. Rất khó tính toán chính xác giá vốn hàng bán và lợi nhuận ròng của từng chi nhánh do độ trễ cập nhật số liệu và sai lệch kiểm kê. | Tự động hóa sổ cái tài chính, hạch toán giá vốn đích danh theo từng lô sản xuất thực tế xuất bán. Tự động đối soát công nợ tiền thu hộ COD từ đơn vị vận chuyển và kiểm soát két tiền mặt thu ngân theo từng ca. |
 
-Nhìn vào bảng đối sánh kỹ thuật trên, có thể nhận thấy mô hình bán lẻ đa kênh hợp nhất mang lại sự vượt trội hoàn toàn về mặt năng lực kiểm soát dữ liệu và hiệu quả kinh doanh. Việc chuyển đổi từ kiến trúc cơ sở dữ liệu phân mảnh sang một cơ sở dữ liệu tập trung theo chuẩn 3NF không chỉ giúp loại bỏ hoàn toàn tình trạng sai lệch tồn kho mà còn tạo tiền đề vững chắc cho việc triển khai các quy trình nghiệp vụ phức tạp xuyên suốt các điểm chạm. Đặc biệt, việc hợp nhất hồ sơ khách hàng và cơ chế hạch toán giá vốn theo lô đích danh chính là nền tảng cốt lõi giúp chuỗi cửa hàng OMNI BEAUTY tối ưu hóa dòng tiền, giảm thiểu chi phí quản lý vận hành thủ công và mang lại cho người tiêu dùng một hành trình trải nghiệm chăm sóc sắc đẹp hoàn chỉnh, an toàn và chuyên nghiệp nhất.
+Nhìn vào bảng đối sánh kỹ thuật trên, có thể nhận thấy mô hình bán lẻ đa kênh hợp nhất mang lại sự vượt trội hoàn toàn về mặt năng lực kiểm soát dữ liệu và hiệu quả kinh doanh. Việc chuyển đổi từ kiến trúc cơ sở dữ liệu phân mảnh sang một cơ sở dữ liệu tập trung theo chuẩn 3NF không chỉ giúp loại bỏ hoàn toàn tình trạng sai lệch tồn kho mà còn tạo tiền đề vững chắc cho việc triển khai các quy trình nghiệp vụ phức tạp xuyên suốt các điểm chạm. Đặc biệt, việc hợp nhất hồ sơ khách hàng và cơ chế hạch toán giá vốn theo lô đích danh chính là nền tảng cốt lõi giúp chuỗi cửa hàng CANMAKE BEAUTY tối ưu hóa dòng tiền, giảm thiểu chi phí quản lý vận hành thủ công và mang lại cho người tiêu dùng một hành trình trải nghiệm chăm sóc sắc đẹp hoàn chỉnh, an toàn và chuyên nghiệp nhất.
 
 ---
 
@@ -616,13 +616,13 @@ Một lô mỹ phẩm nhập về kho vào tháng Năm hoàn toàn có thể man
 
 Chính vì vậy, nguyên tắc xuất kho bắt buộc và tối ưu nhất cho ngành mỹ phẩm là nguyên tắc hết hạn trước xuất trước FEFO. Theo nguyên tắc này, mỗi khi có yêu cầu xuất bán lẻ tại quầy thu ngân hay duyệt đơn hàng trực tuyến, thuật toán hệ thống sẽ tự động quét toàn bộ các lô hàng có sẵn trong kho chi nhánh, sắp xếp theo thời hạn sử dụng tăng dần và tự động phân bổ lô có ngày hết hạn gần nhất ra xuất trước, với điều kiện lô đó vẫn nằm trong ngưỡng an toàn cho phép lưu hành. Đồng thời, hệ thống phải theo dõi song song thời hạn an toàn sau khi mở nắp niêm phong PAO được ký hiệu bằng số tháng như sáu tháng, mười hai tháng hay hai mươi tư tháng để hướng dẫn người tiêu dùng bảo quản đúng cách sau khi đưa vào sử dụng.
 
-Thứ ba là phương pháp hạch toán giá vốn đích danh theo từng lô xuất thực tế và quy trình kiểm soát ca làm việc tại quầy thu ngân bán lẻ. Do biến động về tỷ giá hối đoái, thuế nhập khẩu và các chính sách chiết khấu của nhà cung cấp theo từng đợt nhập khẩu, mỗi lô mỹ phẩm nhập kho đều có một đơn giá vốn nhập kho riêng biệt. Để phản ánh chính xác hiệu quả kinh doanh, hệ thống OMNI BEAUTY áp dụng phương pháp hạch toán giá vốn đích danh gắn chặt với mã định danh của từng lô sản xuất. Khi một đơn hàng xuất bán lô nào, giá vốn hàng bán của đơn hàng đó sẽ được tính toán trực tiếp từ đơn giá nhập của chính lô đó, mang lại số liệu lợi nhuận gộp chân thực tuyệt đối cho từng chi nhánh. 
+Thứ ba là phương pháp hạch toán giá vốn đích danh theo từng lô xuất thực tế và quy trình kiểm soát ca làm việc tại quầy thu ngân bán lẻ. Do biến động về tỷ giá hối đoái, thuế nhập khẩu và các chính sách chiết khấu của nhà cung cấp theo từng đợt nhập khẩu, mỗi lô mỹ phẩm nhập kho đều có một đơn giá vốn nhập kho riêng biệt. Để phản ánh chính xác hiệu quả kinh doanh, hệ thống CANMAKE BEAUTY áp dụng phương pháp hạch toán giá vốn đích danh gắn chặt với mã định danh của từng lô sản xuất. Khi một đơn hàng xuất bán lô nào, giá vốn hàng bán của đơn hàng đó sẽ được tính toán trực tiếp từ đơn giá nhập của chính lô đó, mang lại số liệu lợi nhuận gộp chân thực tuyệt đối cho từng chi nhánh. 
 
 Tại quầy thu ngân bán lẻ trực tiếp, nơi dòng tiền mặt luân chuyển liên tục với cường độ giao dịch cao, hệ thống áp dụng cơ chế quản trị vòng đời ca làm việc nghiêm ngặt. Mỗi nhân viên thu ngân khi nhận ca phải tiến hành mở ca làm việc trên giao diện điểm bán, khai báo số tiền mặt có sẵn trong két để làm quỹ tiền thối đầu ca. Trong suốt ca, mọi giao dịch bán hàng, thu tiền mặt, các nghiệp vụ tiếp thêm tiền lẻ hay rút bớt tiền mặt gửi vào két an toàn đều phải được ghi nhận thành các phiếu biến động két tiền mặt chi tiết. Khi kết thúc ca, nhân viên bắt buộc phải kiểm đếm thực tế toàn bộ tiền mặt trong két và nhập vào hệ thống để máy tính tự động so sánh với số dư lý thuyết được tính toán từ các giao dịch. Mọi sai lệch thừa thiếu đều được lập biên bản kiểm toán tức thời, giúp phân định rõ ràng trách nhiệm cá nhân và triệt tiêu nguy cơ thất thoát dòng tiền của cửa hàng.
 
 ---
 
-## 1.2. Cơ sở pháp lý điều chỉnh hoạt động kinh doanh mỹ phẩm trực tuyến và sự đáp ứng của hệ thống OMNI BEAUTY
+## 1.2. Cơ sở pháp lý điều chỉnh hoạt động kinh doanh mỹ phẩm trực tuyến và sự đáp ứng của hệ thống CANMAKE BEAUTY
 
 ### 1.2.1. Quy định về quản lý và công bố sản phẩm mỹ phẩm (Thông tư số 06/2011/TT-BYT của Bộ Y tế và Hiệp định Mỹ phẩm ASEAN)
 
@@ -630,7 +630,7 @@ Kinh doanh mỹ phẩm là ngành nghề kinh doanh có điều kiện chịu s�
 
 Theo quy định tại Điều 3 của Thông tư số 06/2011/TT-BYT, tất cả các sản phẩm mỹ phẩm trước khi được đưa ra lưu thông trên thị trường Việt Nam bắt buộc phải được cơ quan quản lý nhà nước có thẩm quyền cấp Số tiếp nhận Phiếu công bố sản phẩm mỹ phẩm. Đối với mỹ phẩm sản xuất trong nước, cơ quan có thẩm quyền cấp là Sở Y tế nơi đặt nhà máy sản xuất; đối với mỹ phẩm nhập khẩu, cơ quan cấp phép là Cục Quản lý Dược thuộc Bộ Y tế. Số phiếu tiếp nhận này có hiệu lực trong thời hạn năm năm kể từ ngày cấp và là căn cứ pháp lý duy nhất chứng minh sản phẩm đã được cơ quan y tế kiểm tra hồ sơ thông tin sản phẩm và cho phép lưu hành hợp pháp. Bên cạnh đó, Điều 18 của Thông tư quy định khắt khe về nội dung ghi nhãn bắt buộc trên bao bì thương phẩm, bao gồm: tên sản phẩm và chức năng của nó; danh sách đầy đủ các thành phần công thức được ghi theo danh pháp quốc tế INCI; tên và địa chỉ của tổ chức, cá nhân chịu trách nhiệm đưa sản phẩm ra thị trường; nước xuất xứ sản xuất; định lượng thể tích hoặc khối lượng tịnh; số lô sản xuất; ngày sản xuất và hạn dùng được ghi rõ ràng theo định dạng ngày, tháng, năm; và các cảnh báo về an toàn khi sử dụng.
 
-Để đáp ứng tuyệt đối các quy định pháp lý khắt khe nêu trên, hệ thống phần mềm OMNI BEAUTY đã được thiết kế kiến trúc cơ sở dữ liệu và quy trình nghiệp vụ tương thích hoàn toàn:
+Để đáp ứng tuyệt đối các quy định pháp lý khắt khe nêu trên, hệ thống phần mềm CANMAKE BEAUTY đã được thiết kế kiến trúc cơ sở dữ liệu và quy trình nghiệp vụ tương thích hoàn toàn:
 
 Về mặt cấu trúc dữ liệu, bảng thực thể sản phẩm `Products` trong hệ thống được thiết kế bổ sung các trường dữ liệu bắt buộc: trường `CosmeticNotificationNumber` kiểu chuỗi ký tự độ dài năm mươi ký tự dùng để lưu trữ chính xác Số phiếu tiếp nhận công bố mỹ phẩm được cấp bởi Cục Quản lý Dược; trường `OriginCountry` lưu trữ quốc gia xuất xứ; và trường `ImporterInfo` lưu trữ tên đơn vị chịu trách nhiệm nhập khẩu. Khi sản phẩm được hiển thị trên giao diện bán lẻ trực tuyến, các thông tin pháp lý này được kết xuất công khai, minh bạch tại khu vực thông tin chi tiết giúp khách hàng dễ dàng đối chiếu, tra cứu tính hợp pháp của sản phẩm trên cổng thông tin công cộng của cơ quan quản lý dược.
 
@@ -646,11 +646,11 @@ Hoạt động vận hành website thương mại điện tử bán hàng trực
 
 Đặc biệt, trong kỷ nguyên số hóa dữ liệu, việc bảo vệ thông tin người dùng được luật hóa chặt chẽ tại Nghị định số 13/2023/NĐ-CP ngày 17 tháng 04 năm 2023 của Chính phủ về bảo vệ dữ liệu cá nhân. Trong ngành bán lẻ mỹ phẩm, dữ liệu khách hàng không đơn thuần là số điện thoại hay địa chỉ nhận hàng, mà còn bao gồm các thông tin cá nhân mang tính nhạy cảm cao như phân loại nền da, tình trạng bệnh lý da liễu, tiền sử dị ứng với các thành phần hóa chất và hình ảnh chụp khuôn mặt khi thực hiện soi da. Theo Nghị định số 13/2023/NĐ-CP, doanh nghiệp có trách nhiệm áp dụng các biện pháp kỹ thuật và an ninh mạng để bảo vệ dữ liệu cá nhân khỏi hành vi đánh cắp, rò rỉ, truy cập trái phép hoặc sử dụng sai mục đích khi chưa có sự đồng ý của chủ thể dữ liệu.
 
-Nhằm tuân thủ tuyệt đối các quy định pháp luật về thương mại điện tử và bảo vệ dữ liệu cá nhân, hệ thống OMNI BEAUTY đã hiện thực hóa các giải pháp bảo mật kỹ thuật đa tầng trong mã nguồn giải pháp:
+Nhằm tuân thủ tuyệt đối các quy định pháp luật về thương mại điện tử và bảo vệ dữ liệu cá nhân, hệ thống CANMAKE BEAUTY đã hiện thực hóa các giải pháp bảo mật kỹ thuật đa tầng trong mã nguồn giải pháp:
 
 Một là, cơ chế bảo vệ danh tính và mã hóa mật khẩu một chiều. Hệ thống không bao giờ lưu trữ mật khẩu của người dùng dưới dạng văn bản thô. Dịch vụ xác thực `PasswordHasherService` áp dụng thuật toán PBKDF2 kết hợp hàm băm bảo mật SHA256 với chuỗi muối ngẫu nhiên có độ dài một trăm hai mươi tám bit và số vòng lặp băm lên đến một trăm nghìn lần theo khuyến nghị của các cơ quan an ninh mạng quốc tế. Điều này bảo đảm rằng ngay cả khi cơ sở dữ liệu bị tấn công trích xuất dữ liệu, mật khẩu của người dùng vẫn được bảo vệ an toàn trước các cuộc tấn công vét cạn hoặc tấn công bằng bảng cầu vồng.
 
-Hai là, cơ chế tách biệt phiên đăng nhập đa lược đồ xác thực. Hệ thống sử dụng kỹ thuật xác thực phiên làm việc tách biệt thông qua hai Cookie độc lập: lược đồ `OmniBeauty.Admin.Session` dành riêng cho ban giám đốc, nhân viên quản lý chi nhánh và thu ngân làm việc trên các cổng quản trị hậu cần; và lược đồ `OmniBeauty.Customer.Session` dành riêng cho khách hàng mua sắm tại cổng thông tin bán hàng trực tuyến. Cơ chế phân tách phiên làm việc này giúp triệt tiêu hoàn toàn nguy cơ tấn công leo thang đặc quyền hoặc chiếm đoạt phiên đăng nhập chéo giữa người dùng phổ thông và người dùng quản trị.
+Hai là, cơ chế tách biệt phiên đăng nhập đa lược đồ xác thực. Hệ thống sử dụng kỹ thuật xác thực phiên làm việc tách biệt thông qua hai Cookie độc lập: lược đồ `CanmakeBeauty.Admin.Session` dành riêng cho ban giám đốc, nhân viên quản lý chi nhánh và thu ngân làm việc trên các cổng quản trị hậu cần; và lược đồ `CanmakeBeauty.Customer.Session` dành riêng cho khách hàng mua sắm tại cổng thông tin bán hàng trực tuyến. Cơ chế phân tách phiên làm việc này giúp triệt tiêu hoàn toàn nguy cơ tấn công leo thang đặc quyền hoặc chiếm đoạt phiên đăng nhập chéo giữa người dùng phổ thông và người dùng quản trị.
 
 Ba là, mô hình kiểm soát truy cập dựa trên quyền hạn hạt nhân PBAC và cơ chế cô lập dữ liệu đa chi nhánh. Hệ thống phân rã toàn bộ hoạt động của doanh nghiệp thành năm mươi mốt quyền hạn nguyên tử trên mười bảy phân hệ chức năng. Nhân viên tại Showroom Cầu Giấy chỉ được cấp quyền xem và xử lý các đơn hàng, tồn kho thuộc phạm vi chi nhánh của mình thông qua điều kiện lọc mã định danh cửa hàng `StoreId` được gắn chặt vào danh tính người dùng trong phiên làm việc, hoàn toàn bị chặn quyền truy cập vào dữ liệu khách hàng hay doanh thu của Showroom Quận 1.
 
@@ -662,7 +662,7 @@ Bốn là, cơ chế lưu vết nhật ký kiểm toán tự động bất biế
 
 ### 1.3.1. Nền tảng ASP.NET Core 8.0, ngôn ngữ C# 12 và kiến trúc Clean Architecture 4 tầng
 
-Nền tảng công nghệ đóng vai trò là khung xương quyết định sự ổn định, hiệu năng xử lý và khả năng mở rộng của một hệ thống thương mại điện tử doanh nghiệp. Giải pháp OMNI BEAUTY được xây dựng trên nền tảng khung ứng dụng ASP.NET Core 8.0 kết hợp với ngôn ngữ lập trình C# 12 hiện đại của Microsoft. ASP.NET Core 8.0 sở hữu môi trường thực thi mã nguồn mở với máy ảo được tối ưu hóa sâu sắc về quản lý bộ nhớ, cơ chế biên dịch động hiện đại và mô hình xử lý bất đồng bộ theo luồng tác vụ. Nền tảng này cho phép máy chủ tiếp nhận và phản hồi hàng chục nghìn yêu cầu HTTP đồng thời với độ trễ phản hồi cực thấp và mức tiêu hao tài nguyên phần cứng tối thiểu.
+Nền tảng công nghệ đóng vai trò là khung xương quyết định sự ổn định, hiệu năng xử lý và khả năng mở rộng của một hệ thống thương mại điện tử doanh nghiệp. Giải pháp CANMAKE BEAUTY được xây dựng trên nền tảng khung ứng dụng ASP.NET Core 8.0 kết hợp với ngôn ngữ lập trình C# 12 hiện đại của Microsoft. ASP.NET Core 8.0 sở hữu môi trường thực thi mã nguồn mở với máy ảo được tối ưu hóa sâu sắc về quản lý bộ nhớ, cơ chế biên dịch động hiện đại và mô hình xử lý bất đồng bộ theo luồng tác vụ. Nền tảng này cho phép máy chủ tiếp nhận và phản hồi hàng chục nghìn yêu cầu HTTP đồng thời với độ trễ phản hồi cực thấp và mức tiêu hao tài nguyên phần cứng tối thiểu.
 
 Về phương pháp luận kiến trúc phần mềm, hệ thống tuân thủ nghiêm ngặt mô hình kiến trúc sạch Clean Architecture bốn tầng, được định hình nhằm thực hiện triệt để nguyên lý Đảo ngược Phụ thuộc trong bộ nguyên lý thiết kế hướng đối tượng SOLID. Mô hình này tổ chức mã nguồn thành bốn tầng độc lập có ranh giới trách nhiệm rõ ràng:
 
@@ -680,9 +680,9 @@ Sự phân tách bốn tầng này bảo đảm rằng mọi sự phụ thuộc 
 
 ### 1.3.2. Hệ quản trị cơ sở dữ liệu Microsoft SQL Server và công nghệ ánh xạ đối tượng Entity Framework Core 8
 
-Hệ thống OMNI BEAUTY lựa chọn Microsoft SQL Server 2022 làm hệ quản trị cơ sở dữ liệu quan hệ trung tâm. Đây là hệ quản trị cơ sở dữ liệu cấp doanh nghiệp đạt chuẩn công nghiệp cao nhất về độ an toàn, bảo mật và hiệu năng xử lý giao dịch thương mại. Việc xử lý các giao dịch mua bán, trừ kho và thu chi tiền mặt trong hệ thống bán lẻ đòi hỏi cơ sở dữ liệu phải bảo đảm tuyệt đối bốn đặc tính ACID: Tính nguyên tố bảo đảm một giao dịch phức hợp gồm việc tạo đơn hàng, trừ tồn kho và ghi nhận hóa đơn hoặc là thành công trọn vẹn hoặc là bị hoàn tác toàn bộ nếu có bất kỳ lỗi nào phát sinh giữa chừng; Tính nhất quán bảo đảm các ràng buộc kiểm tra toàn vẹn như số lượng tồn kho không âm và ngày hết hạn lớn hơn ngày sản xuất luôn được tuân thủ; Tính cô lập bảo đảm các giao dịch xảy ra đồng thời không đọc phải dữ liệu rác của nhau; và Tính bền vững bảo đảm một khi giao dịch đã hoàn tất thành công thì dữ liệu sẽ được ghi vĩnh viễn vào bộ nhớ thứ cấp ngay cả khi xảy ra sự cố sập nguồn điện máy chủ.
+Hệ thống CANMAKE BEAUTY lựa chọn Microsoft SQL Server 2022 làm hệ quản trị cơ sở dữ liệu quan hệ trung tâm. Đây là hệ quản trị cơ sở dữ liệu cấp doanh nghiệp đạt chuẩn công nghiệp cao nhất về độ an toàn, bảo mật và hiệu năng xử lý giao dịch thương mại. Việc xử lý các giao dịch mua bán, trừ kho và thu chi tiền mặt trong hệ thống bán lẻ đòi hỏi cơ sở dữ liệu phải bảo đảm tuyệt đối bốn đặc tính ACID: Tính nguyên tố bảo đảm một giao dịch phức hợp gồm việc tạo đơn hàng, trừ tồn kho và ghi nhận hóa đơn hoặc là thành công trọn vẹn hoặc là bị hoàn tác toàn bộ nếu có bất kỳ lỗi nào phát sinh giữa chừng; Tính nhất quán bảo đảm các ràng buộc kiểm tra toàn vẹn như số lượng tồn kho không âm và ngày hết hạn lớn hơn ngày sản xuất luôn được tuân thủ; Tính cô lập bảo đảm các giao dịch xảy ra đồng thời không đọc phải dữ liệu rác của nhau; và Tính bền vững bảo đảm một khi giao dịch đã hoàn tất thành công thì dữ liệu sẽ được ghi vĩnh viễn vào bộ nhớ thứ cấp ngay cả khi xảy ra sự cố sập nguồn điện máy chủ.
 
-Trong môi trường thương mại điện tử có lưu lượng truy cập cao, đặc biệt là trong các sự kiện bán hàng giảm giá chớp nhoáng đối với các lô mỹ phẩm cận date, bài toán xung đột dữ liệu đồng thời khi nhiều khách hàng cùng bấm nút đặt mua một sản phẩm cuối cùng tại cùng một tích tắc là thách thức kỹ thuật rất lớn. Nếu sử dụng cơ chế khóa bi quan truyền thống bằng việc khóa cứng toàn bộ bảng dữ liệu, hiệu năng của hệ thống sẽ bị suy giảm nghiêm trọng và dễ dẫn đến hiện tượng bế tắc tiến trình. Để giải quyết triệt để vấn đề này, hệ thống OMNI BEAUTY áp dụng cơ chế khóa lạc quan dựa trên trường kiểm soát phiên bản dữ liệu `RowVersion` kiểu mảng nhị phân `byte[]` được khai báo trong thực thể `StoreInventory`.
+Trong môi trường thương mại điện tử có lưu lượng truy cập cao, đặc biệt là trong các sự kiện bán hàng giảm giá chớp nhoáng đối với các lô mỹ phẩm cận date, bài toán xung đột dữ liệu đồng thời khi nhiều khách hàng cùng bấm nút đặt mua một sản phẩm cuối cùng tại cùng một tích tắc là thách thức kỹ thuật rất lớn. Nếu sử dụng cơ chế khóa bi quan truyền thống bằng việc khóa cứng toàn bộ bảng dữ liệu, hiệu năng của hệ thống sẽ bị suy giảm nghiêm trọng và dễ dẫn đến hiện tượng bế tắc tiến trình. Để giải quyết triệt để vấn đề này, hệ thống CANMAKE BEAUTY áp dụng cơ chế khóa lạc quan dựa trên trường kiểm soát phiên bản dữ liệu `RowVersion` kiểu mảng nhị phân `byte[]` được khai báo trong thực thể `StoreInventory`.
 
 Trường `RowVersion` trong SQL Server hoạt động như một dấu thời gian tự động tăng mỗi khi bản ghi tương ứng có sự thay đổi. Khi một tiến trình đọc bản ghi tồn kho để chuẩn bị trừ hàng, nó sẽ đọc kèm giá trị `RowVersion` hiện tại. Khi tiến trình gửi lệnh cập nhật số lượng tồn mới xuống cơ sở dữ liệu, câu lệnh SQL sẽ tự động chèn thêm điều kiện kiểm tra xem giá trị `RowVersion` trong cơ sở dữ liệu có còn khớp đúng với giá trị đã đọc ban đầu hay không. Nếu có một tiến trình khác đã nhanh tay cập nhật bản ghi trước đó, giá trị `RowVersion` bị thay đổi, câu lệnh cập nhật sẽ không tác động vào dòng nào và Entity Framework Core sẽ ném ra ngoại lệ xung đột đồng thời `DbUpdateConcurrencyException`. Lúc này, hệ thống bắt giữ ngoại lệ và kích hoạt cơ chế nạp lại dữ liệu mới nhất để thông báo chính xác cho người dùng rằng sản phẩm đã hết hàng, bảo đảm một trăm phần trăm không bao giờ xảy ra lỗi âm kho hay bán vượt quá số lượng hàng hóa thực tế.
 
@@ -700,11 +700,11 @@ Về công nghệ giao diện người dùng: Thay vì áp dụng các khung ứ
 
 Về khả năng tích hợp cổng đối tác: Hệ thống được tích hợp toàn diện với các hạ tầng tài chính và logistics hiện đại tại Việt Nam bao gồm: dịch vụ tạo mã VietQR động theo chuẩn Napas247 nhúng sẵn số tiền và nội dung chuyển khoản tự động; cổng thanh toán trực tuyến VNPay với thuật toán ký số điện tử bảo mật HMAC-SHA512 chống giả mạo gói tin; ví điện tử MoMo; và hệ thống giao diện lập trình ứng dụng của Công ty Cổ phần Giao Hàng Nhanh phục vụ việc tự động tính toán cước phí vận chuyển dựa trên khoảng cách địa lý và trọng lượng kiện hàng, đồng thời tự động đẩy thông tin đơn hàng sang hệ thống nhà vận chuyển ngay khi người quản lý duyệt đơn.
 
-Nhằm cung cấp cơ sở khoa học cho việc lựa chọn các công nghệ nêu trên, bảng dưới đây tổng hợp so sánh giữa giải pháp công nghệ được lựa chọn trong dự án OMNI BEAUTY với các giải pháp công nghệ thay thế phổ biến khác:
+Nhằm cung cấp cơ sở khoa học cho việc lựa chọn các công nghệ nêu trên, bảng dưới đây tổng hợp so sánh giữa giải pháp công nghệ được lựa chọn trong dự án CANMAKE BEAUTY với các giải pháp công nghệ thay thế phổ biến khác:
 
-**Bảng 1.2: Bảng so sánh và luận chứng lựa chọn giải pháp công nghệ phát triển hệ thống OMNI BEAUTY**
+**Bảng 1.2: Bảng so sánh và luận chứng lựa chọn giải pháp công nghệ phát triển hệ thống CANMAKE BEAUTY**
 
-| Hạng mục công nghệ | Giải pháp được lựa chọn trong dự án OMNI BEAUTY | Giải pháp công nghệ thay thế phổ biến | Luận chứng lý do và lợi thế kỹ thuật lựa chọn |
+| Hạng mục công nghệ | Giải pháp được lựa chọn trong dự án CANMAKE BEAUTY | Giải pháp công nghệ thay thế phổ biến | Luận chứng lý do và lợi thế kỹ thuật lựa chọn |
 | :--- | :--- | :--- | :--- |
 | **Nền tảng & Ngôn ngữ** | .NET 8 kết hợp ngôn ngữ lập trình C# 12 | Node.js (JavaScript/TypeScript) hoặc PHP 8 (Laravel) | .NET 8 mang lại hiệu năng xử lý đa luồng bất đồng bộ vượt trội, kiểm soát kiểu dữ liệu tĩnh mạnh mẽ, hạn chế tối đa các lỗi ngoại lệ lúc chạy và có khả năng tương thích cao với các hệ thống quản trị doanh nghiệp. |
 | **Kiến trúc phần mềm** | Kiến trúc sạch Clean Architecture 4 tầng phân tách độc lập | Kiến trúc nguyên khối Monolithic 3 tầng truyền thống | Clean Architecture cô lập hoàn toàn logic nghiệp vụ cốt lõi khỏi sự phụ thuộc vào cơ sở dữ liệu và giao diện, tuân thủ nguyên lý DIP, giúp hệ thống dễ dàng bảo trì, mở rộng và viết kiểm thử tự động toàn diện. |
@@ -723,7 +723,7 @@ Phương pháp phân tích hướng đối tượng cho phép nhìn nhận thế
 
 Đặc biệt, trong quá trình phân tích ca sử dụng, bài tập lớn áp dụng triệt để mô hình kiến trúc ba lớp BCE:
 
-Lớp biên Boundary đóng vai trò là giao diện trung gian kết nối giữa tác nhân bên ngoài với hệ thống bên trong. Trong hệ thống OMNI BEAUTY, các lớp biên chính là các trang giao diện Razor Views, các bảng điều khiển quản trị, các cửa sổ biểu mẫu nhập liệu và các điểm cuối giao diện lập trình Web API. Lớp biên có nhiệm vụ thu nhận các thao tác bấm chuột, quét mã vạch của người dùng, thực hiện kiểm tra sơ bộ tính hợp lệ của dữ liệu đầu vào và hiển thị các kết quả phản hồi từ hệ thống.
+Lớp biên Boundary đóng vai trò là giao diện trung gian kết nối giữa tác nhân bên ngoài với hệ thống bên trong. Trong hệ thống CANMAKE BEAUTY, các lớp biên chính là các trang giao diện Razor Views, các bảng điều khiển quản trị, các cửa sổ biểu mẫu nhập liệu và các điểm cuối giao diện lập trình Web API. Lớp biên có nhiệm vụ thu nhận các thao tác bấm chuột, quét mã vạch của người dùng, thực hiện kiểm tra sơ bộ tính hợp lệ của dữ liệu đầu vào và hiển thị các kết quả phản hồi từ hệ thống.
 
 Lớp điều khiển Control đóng vai trò là bộ não xử lý logic và điều phối quy trình nghiệp vụ. Lớp điều khiển tiếp nhận các yêu cầu từ lớp biên, triệu gọi các quy tắc tính toán nghiệp vụ, áp dụng các giải thuật kiểm tra tồn kho, tính giá khuyến mãi hay xét duyệt phân quyền, sau đó cập nhật dữ liệu vào các lớp thực thể tương ứng. Trong dự án, các lớp điều khiển được hiện thực hóa thông qua các bộ điều khiển Controller tại tầng Web kết hợp cùng các lớp dịch vụ nghiệp vụ tại tầng Application.
 
@@ -733,15 +733,15 @@ Việc áp dụng mô hình phân tích BCE mang lại một cấu trúc mã ngu
 
 ---
 
-## 1.4. Tổng quan về Chuỗi cửa hàng mỹ phẩm OMNI BEAUTY
+## 1.4. Tổng quan về Chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY
 
 ### 1.4.1. Giới thiệu chung, tầm nhìn, sứ mệnh và mô hình chuỗi điểm bán
 
-Chuỗi cửa hàng mỹ phẩm OMNI BEAUTY được thành lập và phát triển với định vị là một thương hiệu bán lẻ mỹ phẩm và sản phẩm chăm sóc sắc đẹp chính hãng tiên phong tại thị trường Việt Nam trong việc ứng dụng công nghệ số vào mô hình bán lẻ kết hợp trực tuyến và trực tiếp. Xuất phát điểm từ một cửa hàng bán lẻ truyền thống chuyên cung cấp các dòng dược mỹ phẩm nhập khẩu, doanh nghiệp đã nhanh chóng nhận diện xu hướng làm đẹp khoa học và yêu cầu khắt khe của người tiêu dùng hiện đại, từ đó quyết định tái cấu trúc toàn diện mô hình vận hành sang hệ sinh thái bán lẻ đa kênh hợp nhất.
+Chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY được thành lập và phát triển với định vị là một thương hiệu bán lẻ mỹ phẩm và sản phẩm chăm sóc sắc đẹp chính hãng tiên phong tại thị trường Việt Nam trong việc ứng dụng công nghệ số vào mô hình bán lẻ kết hợp trực tuyến và trực tiếp. Xuất phát điểm từ một cửa hàng bán lẻ truyền thống chuyên cung cấp các dòng dược mỹ phẩm nhập khẩu, doanh nghiệp đã nhanh chóng nhận diện xu hướng làm đẹp khoa học và yêu cầu khắt khe của người tiêu dùng hiện đại, từ đó quyết định tái cấu trúc toàn diện mô hình vận hành sang hệ sinh thái bán lẻ đa kênh hợp nhất.
 
-Tầm nhìn chiến lược của OMNI BEAUTY là trở thành chuỗi bán lẻ mỹ phẩm ứng dụng công nghệ làm đẹp uy tín và tiện lợi hàng đầu tại Việt Nam, nơi mọi khách hàng đều có thể tiếp cận các giải pháp chăm sóc da khoa học, chuẩn hóa và an toàn nhất thông qua sự hỗ trợ của các công cụ thông minh. Sứ mệnh của chuỗi là mang đến cho người tiêu dùng những sản phẩm chăm sóc sắc đẹp chính hãng một trăm phần trăm có nguồn gốc xuất xứ minh bạch, bảng thành phần được phân tích khoa học rõ ràng, đồng thời xây dựng một hành trình mua sắm nhất quán, tiện lợi từ không gian số đến các cửa hàng vật lý thực tế.
+Tầm nhìn chiến lược của CANMAKE BEAUTY là trở thành chuỗi bán lẻ mỹ phẩm ứng dụng công nghệ làm đẹp uy tín và tiện lợi hàng đầu tại Việt Nam, nơi mọi khách hàng đều có thể tiếp cận các giải pháp chăm sóc da khoa học, chuẩn hóa và an toàn nhất thông qua sự hỗ trợ của các công cụ thông minh. Sứ mệnh của chuỗi là mang đến cho người tiêu dùng những sản phẩm chăm sóc sắc đẹp chính hãng một trăm phần trăm có nguồn gốc xuất xứ minh bạch, bảng thành phần được phân tích khoa học rõ ràng, đồng thời xây dựng một hành trình mua sắm nhất quán, tiện lợi từ không gian số đến các cửa hàng vật lý thực tế.
 
-Mô hình mạng lưới hoạt động của chuỗi OMNI BEAUTY hiện nay được tổ chức thành cấu trúc hình sao tập trung gồm một trung tâm điều phối tổng và mạng lưới các chi nhánh bán lẻ trực thuộc:
+Mô hình mạng lưới hoạt động của chuỗi CANMAKE BEAUTY hiện nay được tổ chức thành cấu trúc hình sao tập trung gồm một trung tâm điều phối tổng và mạng lưới các chi nhánh bán lẻ trực thuộc:
 
 Tổng kho phân phối trung tâm mang mã hiệu HQ-001 đặt tại địa bàn quận Cầu Giấy, thành phố Hà Nội. Đây là đại bản doanh đầu não chịu trách nhiệm tiếp nhận các lô hàng mỹ phẩm nhập khẩu nguyên đai nguyên kiện từ các hãng sản xuất quốc tế, thực hiện công tác kiểm định chất lượng, lưu trữ bảo quản trong điều kiện nhiệt độ tiêu chuẩn của kho dược, và điều phối vận chuyển bổ sung hàng hóa định kỳ cho toàn bộ các điểm bán lẻ trong chuỗi.
 
@@ -753,7 +753,7 @@ Showroom bán lẻ Quận 1 đặt tại vị trí trung tâm Quận 1, Thành p
 
 ### 1.4.2. Cơ cấu tổ chức nhân sự và chức năng nhiệm vụ của các bộ phận
 
-Cơ cấu tổ chức bộ máy nhân sự của chuỗi cửa hàng mỹ phẩm OMNI BEAUTY được thiết kế theo mô hình trực tuyến chức năng, bảo đảm sự chỉ đạo tập trung, xuyên suốt từ ban giám đốc xuống các bộ phận chuyên môn, đồng thời phân định quyền hạn và trách nhiệm rõ ràng cho từng vị trí công việc:
+Cơ cấu tổ chức bộ máy nhân sự của chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY được thiết kế theo mô hình trực tuyến chức năng, bảo đảm sự chỉ đạo tập trung, xuyên suốt từ ban giám đốc xuống các bộ phận chuyên môn, đồng thời phân định quyền hạn và trách nhiệm rõ ràng cho từng vị trí công việc:
 
 Ban Giám đốc điều hành: Là cơ quan lãnh đạo cao nhất của chuỗi, chịu trách nhiệm hoạch định chiến lược kinh doanh toàn chuỗi, phê duyệt ngân sách tài chính, ban hành các chính sách chiết khấu, phân bổ chỉ tiêu doanh thu và giám sát toàn diện hoạt động của các chi nhánh thông qua bảng điều khiển trung tâm. Trong hệ thống phần mềm, vai trò của Ban Giám đốc tương ứng với vai trò Quản trị viên tối cao mang mã hiệu `SuperAdmin` với toàn quyền can thiệp hệ thống và phê duyệt phân quyền bảo mật.
 
@@ -767,7 +767,7 @@ Bộ phận Nội dung và Tiếp thị số: Chịu trách nhiệm quản lý h
 
 Bộ phận Tài chính – Kế toán: Đặt tại trụ sở chính, chịu trách nhiệm theo dõi sổ cái thu chi toàn chuỗi, theo dõi công nợ phải trả cho các nhà cung cấp mỹ phẩm, quản lý dòng tiền gửi về từ các chi nhánh và thực hiện đối soát tự động tiền thu hộ COD từ các công ty vận chuyển đối tác.
 
-Sơ đồ dưới đây trực quan hóa cấu trúc bộ máy tổ chức quản lý của chuỗi cửa hàng mỹ phẩm OMNI BEAUTY:
+Sơ đồ dưới đây trực quan hóa cấu trúc bộ máy tổ chức quản lý của chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY:
 
 ```mermaid
 flowchart TD
@@ -798,27 +798,32 @@ flowchart TD
     CN_HCM --> K_HCM["Thủ kho Chi nhánh Quận 1"]
 ```
 
-> **[HƯỚNG DẪN CHÈN SƠ ĐỒ 1.1 - SƠ ĐỒ CƠ CẤU TỔ CHỨC QUẢN LÝ CỦA CHUỖI CỬA HÀNG MỸ PHẨM OMNI BEAUTY]:**
+> **[HƯỚNG DẪN CHÈN SƠ ĐỒ 1.1 - SƠ ĐỒ CƠ CẤU TỔ CHỨC QUẢN LÝ CỦA CHUỖI CỬA HÀNG MỸ PHẨM CANMAKE BEAUTY]:**
 > - **Mã nguồn vẽ sơ đồ:** Sử dụng mã nguồn Mermaid được cung cấp ở trên hoặc mở file ảnh tương ứng nếu đã xuất ra định dạng hình ảnh.
 > - **Cách xuất và chèn vào tài liệu Word/Docs:** Sao chép đoạn mã Mermaid vào trình biên dịch trực tuyến như `mermaid.live` hoặc công cụ xuất ảnh đồ họa để xuất ra tệp ảnh định dạng PNG độ phân giải cao (1920x1080 pixel). Chèn ảnh vào giữa trang tài liệu.
-> - **Yêu cầu trình bày chú thích dưới sơ đồ (Canh giữa, in nghiêng):** *Sơ đồ 1.1: Sơ đồ cơ cấu tổ chức quản lý của chuỗi cửa hàng mỹ phẩm OMNI BEAUTY*
+> - **Yêu cầu trình bày chú thích dưới sơ đồ (Canh giữa, in nghiêng):** *Sơ đồ 1.1: Sơ đồ cơ cấu tổ chức quản lý của chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY*
 
-Đoạn sơ đồ cơ cấu tổ chức trên có mối quan hệ hữu cơ mật thiết với việc thiết kế kiến trúc phân quyền bảo mật trong hệ thống phần mềm OMNI BEAUTY. Sự phân cấp chức năng giữa Ban Giám đốc, các cấp quản lý chi nhánh và các nhân viên thừa hành tác nghiệp tại các bộ phận kho, thu ngân và nội dung chính là căn cứ thực tế để hệ thống thiết lập sáu nhóm vai trò người dùng chuẩn mực: Quản trị viên tối cao `SuperAdmin`, Quản lý chi nhánh `StoreManager`, Thu ngân quầy `Cashier`, Thủ kho `WarehouseStaff`, Biên tập viên `ContentEditor` và Khách hàng thành viên `Customer`. Mỗi vai trò được gán một tập hợp quyền hạn nguyên tử tương ứng trong ma trận phân quyền PBAC năm mươi mốt quyền hạn, bảo đảm nguyên tắc đặc quyền tối thiểu trong an ninh mạng: nhân viên ở vị trí nào chỉ được cấp đúng những quyền hạn cần thiết để hoàn thành công việc của mình, không thể can thiệp sang quyền hạn của bộ phận khác và tuyệt đối không thể xem hoặc sửa đổi dữ liệu kinh doanh của các chi nhánh không thuộc phạm vi quản lý được phân công.
+![Sơ đồ 1.1: Sơ đồ cơ cấu tổ chức quản lý của chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY](./So_Do_1_1_Co_Cau_To_Chuc.png)
+
+*Sơ đồ 1.1: Sơ đồ cơ cấu tổ chức quản lý của chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY*
+
+
+Đoạn sơ đồ cơ cấu tổ chức trên có mối quan hệ hữu cơ mật thiết với việc thiết kế kiến trúc phân quyền bảo mật trong hệ thống phần mềm CANMAKE BEAUTY. Sự phân cấp chức năng giữa Ban Giám đốc, các cấp quản lý chi nhánh và các nhân viên thừa hành tác nghiệp tại các bộ phận kho, thu ngân và nội dung chính là căn cứ thực tế để hệ thống thiết lập sáu nhóm vai trò người dùng chuẩn mực: Quản trị viên tối cao `SuperAdmin`, Quản lý chi nhánh `StoreManager`, Thu ngân quầy `Cashier`, Thủ kho `WarehouseStaff`, Biên tập viên `ContentEditor` và Khách hàng thành viên `Customer`. Mỗi vai trò được gán một tập hợp quyền hạn nguyên tử tương ứng trong ma trận phân quyền PBAC năm mươi mốt quyền hạn, bảo đảm nguyên tắc đặc quyền tối thiểu trong an ninh mạng: nhân viên ở vị trí nào chỉ được cấp đúng những quyền hạn cần thiết để hoàn thành công việc của mình, không thể can thiệp sang quyền hạn của bộ phận khác và tuyệt đối không thể xem hoặc sửa đổi dữ liệu kinh doanh của các chi nhánh không thuộc phạm vi quản lý được phân công.
 
 ---
 
 ## Tiểu kết Chương 1
 
-Chương 1 đã hoàn thành việc xây dựng nền tảng lý luận khoa học vững chắc và phác họa tổng quan bức tranh tổ chức hoạt động của chuỗi cửa hàng mỹ phẩm OMNI BEAUTY. Thông qua việc phân tích sâu sắc các lý luận về hệ thống thông tin quản lý trong doanh nghiệp bán lẻ chuỗi, chương 1 đã làm rõ sự cần thiết khách quan của việc chuyển dịch từ mô hình đa kênh phân mảnh truyền thống sang mô hình bán lẻ đa kênh hợp nhất O2O, nơi dữ liệu tồn kho, khách hàng và giao dịch tài chính được đồng bộ theo thời gian thực dựa trên một nguồn chân lý dữ liệu duy nhất. Các bài toán nghiệp vụ đặc thù mang tính sống còn của ngành mỹ phẩm như quản trị danh mục đa biến thể màu sắc và dung tích, giải thuật xuất kho theo hạn sử dụng FEFO kết hợp hạn dùng sau mở nắp PAO, cơ chế hạch toán giá vốn lô đích danh và kiểm soát két tiền mặt thu ngân đã được phân tích thấu đáo, chứng minh sự thất bại tất yếu của các phương pháp quản lý thủ công hay phương pháp FIFO truyền thống.
+Chương 1 đã hoàn thành việc xây dựng nền tảng lý luận khoa học vững chắc và phác họa tổng quan bức tranh tổ chức hoạt động của chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY. Thông qua việc phân tích sâu sắc các lý luận về hệ thống thông tin quản lý trong doanh nghiệp bán lẻ chuỗi, chương 1 đã làm rõ sự cần thiết khách quan của việc chuyển dịch từ mô hình đa kênh phân mảnh truyền thống sang mô hình bán lẻ đa kênh hợp nhất O2O, nơi dữ liệu tồn kho, khách hàng và giao dịch tài chính được đồng bộ theo thời gian thực dựa trên một nguồn chân lý dữ liệu duy nhất. Các bài toán nghiệp vụ đặc thù mang tính sống còn của ngành mỹ phẩm như quản trị danh mục đa biến thể màu sắc và dung tích, giải thuật xuất kho theo hạn sử dụng FEFO kết hợp hạn dùng sau mở nắp PAO, cơ chế hạch toán giá vốn lô đích danh và kiểm soát két tiền mặt thu ngân đã được phân tích thấu đáo, chứng minh sự thất bại tất yếu của các phương pháp quản lý thủ công hay phương pháp FIFO truyền thống.
 
 Bên cạnh đó, chương 1 đã đối soát toàn diện hệ thống với các văn bản quy phạm pháp luật hiện hành của Việt Nam, khẳng định sự tuân thủ nghiêm ngặt của giải pháp phần mềm đối với các quy định về công bố sản phẩm mỹ phẩm theo Thông tư 06/2011/TT-BYT, các quy định thương mại điện tử theo Nghị định 52/2013/NĐ-CP và các tiêu chuẩn bảo vệ dữ liệu cá nhân nhạy cảm theo Nghị định 13/2023/NĐ-CP thông qua cơ chế mã hóa mật khẩu PBKDF2-SHA256, phân tách phiên Cookie đa lược đồ, kiểm soát truy cập phân tán PBAC và lưu vết nhật ký kiểm toán bất biến. Về mặt kỹ thuật, việc lựa chọn nền tảng .NET 8, ngôn ngữ C# 12, kiến trúc Clean Architecture bốn tầng, hệ quản trị Microsoft SQL Server 2022 với kiểm soát khóa lạc quan `RowVersion`, công nghệ thời gian thực SignalR cùng các thư viện giao diện hiện đại Tailwind CSS, HTMX, Alpine.js đã được luận chứng khoa học và thuyết phục. Toàn bộ cơ sở lý thuyết và cơ cấu tổ chức nhân sự này chính là nền móng cốt lõi để tiến hành công tác khảo sát, phân tích chi tiết và thiết kế kỹ thuật cho hệ thống trong Chương 2 tiếp theo.
-# CHƯƠNG 2: KHẢO SÁT, PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG WEBSITE QUẢN LÝ BÁN HÀNG CHO CHUỖI CỬA HÀNG MỸ PHẨM OMNI BEAUTY
+# CHƯƠNG 2: KHẢO SÁT, PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG WEBSITE QUẢN LÝ BÁN HÀNG CHO CHUỖI CỬA HÀNG MỸ PHẨM CANMAKE BEAUTY
 
-## 2.1. Khảo sát hiện trạng và xác lập bài toán nghiệp vụ tại chuỗi cửa hàng OMNI BEAUTY
+## 2.1. Khảo sát hiện trạng và xác lập bài toán nghiệp vụ tại chuỗi cửa hàng CANMAKE BEAUTY
 
 ### 2.1.1. Khảo sát quy trình hoạt động nghiệp vụ hiện tại (Quy trình As-Is)
 
-Nhằm thu thập đầy đủ các yêu cầu chức năng và phi chức năng phục vụ cho việc phát triển giải pháp phần mềm, quá trình khảo sát thực địa đã được tiến hành trực tiếp tại Tổng kho phân phối trung tâm HQ-001 tại quận Cầu Giấy, thành phố Hà Nội, cùng hai điểm bán lẻ đại diện là Showroom Cầu Giấy và Showroom Quận 1 tại Thành phố Hồ Chí Minh. Hiện trạng vận hành của chuỗi OMNI BEAUTY trước khi có hệ thống tập trung mang tính chất bán tự động kết hợp nhiều thao tác thủ công, phân mảnh trên nhiều công cụ độc lập:
+Nhằm thu thập đầy đủ các yêu cầu chức năng và phi chức năng phục vụ cho việc phát triển giải pháp phần mềm, quá trình khảo sát thực địa đã được tiến hành trực tiếp tại Tổng kho phân phối trung tâm HQ-001 tại quận Cầu Giấy, thành phố Hà Nội, cùng hai điểm bán lẻ đại diện là Showroom Cầu Giấy và Showroom Quận 1 tại Thành phố Hồ Chí Minh. Hiện trạng vận hành của chuỗi CANMAKE BEAUTY trước khi có hệ thống tập trung mang tính chất bán tự động kết hợp nhiều thao tác thủ công, phân mảnh trên nhiều công cụ độc lập:
 
 Quy trình khách mua hàng trực tiếp tại các Showroom: Khi khách hàng bước vào cửa hàng, nhân viên bán hàng tiếp đón và tư vấn trực tiếp dựa trên kinh nghiệm cá nhân. Khách hàng xem các mẫu thử mỹ phẩm được bày trên kệ trưng bày. Khi khách chọn được món hàng ưng ý, nhân viên bán hàng mang sản phẩm ra quầy thu ngân. Tại quầy, thu ngân sử dụng một phần mềm tính tiền cài đặt cục bộ trên máy tính để chọn tên sản phẩm hoặc nhập giá tiền thủ công. Khách hàng thanh toán bằng tiền mặt hoặc chuyển khoản ngân hàng cá nhân thông qua việc quét mã chuyển tiền in tĩnh dán trên mặt bàn. Thu ngân in hóa đơn bán lẻ trao cho khách và hoàn tất giao dịch. Điểm yếu của quy trình này là thông tin tồn kho chỉ được trừ cục bộ trên máy tính tại quầy, hoàn toàn không được liên thông với bất kỳ kênh bán hàng nào khác của chuỗi.
 
@@ -828,7 +833,7 @@ Quy trình quản lý kho và theo dõi hạn sử dụng mỹ phẩm: Công tá
 
 Quy trình thu ngân bàn giao tiền mặt và đối soát cuối ca làm việc: Tại quầy bán lẻ, mỗi ngày chia làm hai ca làm việc gồm ca sáng và ca chiều. Khi kết thúc ca, nhân viên thu ngân mở ngăn kéo két tiền, đếm toàn bộ số tiền mặt có trong két và ghi chép vào một cuốn sổ tay bàn giao ca. Thu ngân ca sau tiếp nhận số tiền, ký xác nhận vào sổ và tiếp tục bán hàng. Số tiền mặt doanh thu tích lũy qua các ngày sẽ được gom lại và người quản lý chi nhánh mang nộp trực tiếp vào tài khoản ngân hàng của doanh nghiệp theo định kỳ vài ngày một lần.
 
-Sơ đồ quy trình dưới đây mô tả trực quan các bước vận hành nghiệp vụ thủ công hiện tại của chuỗi OMNI BEAUTY:
+Sơ đồ quy trình dưới đây mô tả trực quan các bước vận hành nghiệp vụ thủ công hiện tại của chuỗi CANMAKE BEAUTY:
 
 ```mermaid
 flowchart TD
@@ -872,13 +877,18 @@ flowchart TD
 > - **Cách chèn vào tài liệu:** Căn giữa hình ảnh trên trang văn bản, định dạng độ rộng hình ảnh chiếm khoảng 85% chiều rộng trang in.
 > - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Sơ đồ 2.1: Sơ đồ quy trình bán hàng và quản lý kho hiện tại (As-Is)*
 
+![Sơ đồ 2.1: Sơ đồ quy trình bán hàng và quản lý kho hiện tại (As-Is)](./So_Do_2_1_Quy_Trinh_As_Is.png)
+
+*Sơ đồ 2.1: Sơ đồ quy trình bán hàng và quản lý kho hiện tại (As-Is)*
+
+
 ---
 
 ### 2.1.2. Đánh giá các hạn chế và điểm nghẽn của mô hình hiện tại
 
-Qua quá trình theo dõi trực tiếp các hoạt động tác nghiệp tại các chi nhánh và phân tích số liệu lịch sử của chuỗi OMNI BEAUTY, mô hình vận hành thủ công phân mảnh hiện tại đã bộc lộ năm điểm nghẽn nghiêm trọng, kìm hãm sự phát triển và gây thất thoát tài chính lớn cho doanh nghiệp:
+Qua quá trình theo dõi trực tiếp các hoạt động tác nghiệp tại các chi nhánh và phân tích số liệu lịch sử của chuỗi CANMAKE BEAUTY, mô hình vận hành thủ công phân mảnh hiện tại đã bộc lộ năm điểm nghẽn nghiêm trọng, kìm hãm sự phát triển và gây thất thoát tài chính lớn cho doanh nghiệp:
 
-Thứ nhất là độ trễ đồng bộ tồn kho giữa kênh bán hàng trực tuyến và các Showroom bán lẻ trực tiếp dẫn đến hiện tượng bán khống tồn kho. Do số liệu tồn kho trên tệp bảng tính Excel chỉ được cập nhật sau khi thủ kho hoàn tất kiểm đếm cuối ngày, trong suốt thời gian bán hàng ban ngày, số liệu tồn kho hiển thị cho nhân viên trực tin nhắn hoàn toàn là số liệu tĩnh. Khi có một mặt hàng đang được ưa chuộng, tại Showroom Cầu Giấy khách hàng trực tiếp đã mua hết sạch sản phẩm trên kệ, nhưng nhân viên trực mạng xã hội vẫn thấy trên bảng tính còn số lượng tồn nên tiếp tục nhận đơn và hứa hẹn giao hàng cho khách hàng trực tuyến. Đến khi chuyển thông tin xuống kho để đóng gói, thủ kho mới thông báo sản phẩm đã hết sạch. Doanh nghiệp buộc phải gọi điện xin lỗi khách hàng và hủy đơn, gây bức xúc lớn cho người tiêu dùng và làm tổn hại nghiêm trọng đến uy tín của thương hiệu OMNI BEAUTY.
+Thứ nhất là độ trễ đồng bộ tồn kho giữa kênh bán hàng trực tuyến và các Showroom bán lẻ trực tiếp dẫn đến hiện tượng bán khống tồn kho. Do số liệu tồn kho trên tệp bảng tính Excel chỉ được cập nhật sau khi thủ kho hoàn tất kiểm đếm cuối ngày, trong suốt thời gian bán hàng ban ngày, số liệu tồn kho hiển thị cho nhân viên trực tin nhắn hoàn toàn là số liệu tĩnh. Khi có một mặt hàng đang được ưa chuộng, tại Showroom Cầu Giấy khách hàng trực tiếp đã mua hết sạch sản phẩm trên kệ, nhưng nhân viên trực mạng xã hội vẫn thấy trên bảng tính còn số lượng tồn nên tiếp tục nhận đơn và hứa hẹn giao hàng cho khách hàng trực tuyến. Đến khi chuyển thông tin xuống kho để đóng gói, thủ kho mới thông báo sản phẩm đã hết sạch. Doanh nghiệp buộc phải gọi điện xin lỗi khách hàng và hủy đơn, gây bức xúc lớn cho người tiêu dùng và làm tổn hại nghiêm trọng đến uy tín của thương hiệu CANMAKE BEAUTY.
 
 Thứ hai là quy trình xuất kho diễn ra theo thói quen tiện tay thay vì kiểm soát theo hạn sử dụng, khiến các lô hàng mới nhập bị xuất bán hết trước trong khi các lô sản xuất cũ cận hạn dùng bị ứ đọng lại sâu trong kho. Do bao bì mỹ phẩm giữa các lô nhập khẩu cách nhau vài tháng thường có mẫu mã hoàn toàn giống nhau, nhân viên thủ kho khi soạn hàng thường bốc các thùng hàng đặt ở vị trí thuận tiện bên ngoài cửa kho để kịp tiến độ đóng gói. Hậu quả là những lô hàng nhập từ các đợt trước bị đẩy lùi vào các góc khuất bên trong kệ chứa hàng. Đến khi thủ kho rà soát định kỳ hàng quý, nhiều lô mỹ phẩm đắt tiền đã trôi qua hạn sử dụng an toàn hoặc chỉ còn dưới một tháng, bắt buộc doanh nghiệp phải làm thủ tục tiêu hủy toàn bộ, gây thiệt hại hàng trăm triệu đồng giá vốn mỗi năm.
 
@@ -905,7 +915,7 @@ Giai đoạn phân bổ tồn kho và bán hàng hợp nhất đa kênh:
 
 Giai đoạn hậu mãi, đổi trả và hạch toán sổ cái tài chính tự động: Toàn bộ doanh thu bán hàng tại quầy POS, doanh thu từ các đơn hàng trực tuyến và các bút toán giá vốn đích danh theo từng lô xuất bán đều được các trình xử lý sự kiện miền tự động đồng bộ vào bảng sổ cái tài chính `FinancialLedgers`. Khi phát sinh nghiệp vụ khách hàng bị kích ứng cần đổi trả sản phẩm, nhân viên tiếp nhận và phân loại: nếu sản phẩm còn nguyên vẹn tem niêm phong sẽ được nhập lại vào kho đúng lô ban đầu; nếu sản phẩm đã bị mở nắp hoặc hư hỏng sẽ được đưa vào danh mục chờ tiêu hủy. Mọi dòng tiền hoàn trả cho khách đều được ghi giảm doanh thu tương ứng trên sổ cái kế toán của chi nhánh phát sinh giao dịch.
 
-Dưới đây là sơ đồ luồng vận hành hàng hóa và chuỗi cung ứng khép kín được thiết kế chuẩn xác theo hiện trạng mã nguồn thực tế của hệ thống OMNI BEAUTY:
+Dưới đây là sơ đồ luồng vận hành hàng hóa và chuỗi cung ứng khép kín được thiết kế chuẩn xác theo hiện trạng mã nguồn thực tế của hệ thống CANMAKE BEAUTY:
 
 ```mermaid
 flowchart TD
@@ -934,11 +944,16 @@ flowchart TD
     LEDGER --> DASHBOARD["10. Trung tâm Điều hành Quản trị Admin Dashboard<br/>(6 thẻ KPI thời gian thực & Cảnh báo SignalR)"]
 ```
 
-> **[HƯỚNG DẪN CHÈN HÌNH 2.1 / SƠ ĐỒ 2.2 - SƠ ĐỒ LUỒNG VẬN HÀNH HÀNG HÓA VÀ DỮ LIỆU ĐA KÊNH ĐỀ XUẤT TẠI OMNI BEAUTY]:**
+> **[HƯỚNG DẪN CHÈN HÌNH 2.1 / SƠ ĐỒ 2.2 - SƠ ĐỒ LUỒNG VẬN HÀNH HÀNG HÓA VÀ DỮ LIỆU ĐA KÊNH ĐỀ XUẤT TẠI CANMAKE BEAUTY]:**
 > - **File ảnh có sẵn trong dự án:** `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_2_1_Luong_Van_Hanh_Hang_Hoa.png`
 > - **Cách tự tạo mới hoặc xuất lại ảnh:** Mở tệp mã nguồn PlantUML `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_2_1_Luong_Van_Hanh_Hang_Hoa.puml` bằng phần mềm PlantUML hoặc chạy kịch bản tự động `generate_plantuml_hinh2_1.js` trong thư mục `doc/` để kết xuất tệp ảnh PNG chất lượng cao.
 > - **Yêu cầu bố cục ảnh:** Đặt ảnh nằm ngang giữa trang giấy, bảo đảm các khối chữ và mũi tên chỉ hướng luồng hàng hóa từ Nhà cung cấp đến Sổ cái tài chính rõ nét, không bị nhòe vỡ chữ.
-> - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Hình 2.1: Sơ đồ luồng vận hành hàng hóa và dữ liệu đa kênh đề xuất tại OMNI BEAUTY*
+> - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Hình 2.1: Sơ đồ luồng vận hành hàng hóa và dữ liệu đa kênh đề xuất tại CANMAKE BEAUTY*
+
+![Hình 2.1: Sơ đồ luồng vận hành hàng hóa và dữ liệu đa kênh đề xuất](./Hinh_2_1_Luong_Van_Hanh_Hang_Hoa.png)
+
+*Hình 2.1: Sơ đồ luồng vận hành hàng hóa và dữ liệu đa kênh đề xuất*
+
 
 ---
 
@@ -946,7 +961,7 @@ flowchart TD
 
 ### 2.2.1. Xác định các tác nhân hệ thống (Actors) và phạm vi truy cập dữ liệu
 
-Trong phương pháp phân tích thiết kế hệ thống hướng đối tượng, tác nhân được định nghĩa là bất kỳ thực thể nào bên ngoài hệ thống có hành vi tương tác trực tiếp, gửi thông tin vào hoặc nhận kết quả phản hồi từ hệ thống phần mềm. Dựa trên cơ cấu tổ chức nhân sự của chuỗi OMNI BEAUTY và các luồng tích hợp dịch vụ bên ngoài, hệ thống xác định chính xác mười một tác nhân tương tác, bao gồm sáu tác nhân con người nội bộ, một tác nhân tiến trình ngầm tự động và bốn tác nhân hệ thống đối tác bên thứ ba:
+Trong phương pháp phân tích thiết kế hệ thống hướng đối tượng, tác nhân được định nghĩa là bất kỳ thực thể nào bên ngoài hệ thống có hành vi tương tác trực tiếp, gửi thông tin vào hoặc nhận kết quả phản hồi từ hệ thống phần mềm. Dựa trên cơ cấu tổ chức nhân sự của chuỗi CANMAKE BEAUTY và các luồng tích hợp dịch vụ bên ngoài, hệ thống xác định chính xác mười một tác nhân tương tác, bao gồm sáu tác nhân con người nội bộ, một tác nhân tiến trình ngầm tự động và bốn tác nhân hệ thống đối tác bên thứ ba:
 
 Nhóm tác nhân con người nội bộ bao gồm:
 1. Quản trị viên tối cao mang mã hiệu `SuperAdmin`: Là người sở hữu đặc quyền cao nhất trong hệ thống, thường là thành viên Ban Giám đốc hoặc Trưởng phòng Công nghệ thông tin. Tác nhân này có toàn quyền cấu hình các tham số toàn hệ thống, tạo mới chi nhánh, thiết lập ma trận phân quyền năm mươi mốt quyền hạn cho các vai trò và thực hiện ghi đè quyền hạn cho từng nhân viên cụ thể.
@@ -965,18 +980,18 @@ Nhóm tác nhân hệ thống đối tác bên thứ ba bao gồm:
 10. Hạ tầng chuyển khoản ngân hàng tự động `VietQR Napas247`: Hệ thống cổng thanh toán liên ngân hàng quốc gia, cung cấp định dạng mã phản hồi nhanh chứa sẵn số tài khoản nhận tiền, số tiền chính xác đến từng đồng và nội dung chuyển khoản là mã đơn hàng để khách hàng tự quét thanh toán nhanh chóng và chính xác.
 11. Đơn vị dịch vụ logistics `Giao Hàng Nhanh - GHN`: Hệ thống giao nhận vận chuyển đối tác, cung cấp giao diện lập trình ứng dụng để hệ thống tự động tính cước phí giao hàng dựa trên tọa độ địa chỉ của khách hàng và tự động khởi tạo vận đơn giao nhận ngay khi người quản lý duyệt xuất kho đơn hàng.
 
-Bảng dưới đây tổng hợp chi tiết đặc tả của toàn bộ mười một tác nhân trong hệ thống OMNI BEAUTY:
+Bảng dưới đây tổng hợp chi tiết đặc tả của toàn bộ mười một tác nhân trong hệ thống CANMAKE BEAUTY:
 
-**Bảng 2.1: Bảng đặc tả chi tiết các tác nhân tham gia hệ thống OMNI BEAUTY**
+**Bảng 2.1: Bảng đặc tả chi tiết các tác nhân tham gia hệ thống CANMAKE BEAUTY**
 
 | STT | Mã tác nhân | Tên gọi vai trò tác nhân | Phạm vi quản lý dữ liệu | Lược đồ xác thực / Cơ chế phiên | Trách nhiệm và quyền hạn nghiệp vụ chính yếu |
 | :---: | :--- | :--- | :--- | :--- | :--- |
-| 1 | `SuperAdmin` | Quản trị viên tối cao | Toàn quyền trên toàn bộ Tổng kho và tất cả các Showroom | Cookie: `OmniBeauty.Admin.Session` | Cấu hình tham số hệ thống, tạo mới chi nhánh, quản trị danh mục 51 quyền hạn nguyên tử, gán quyền vai trò và ghi đè quyền cá nhân. |
-| 2 | `StoreManager` | Quản lý chi nhánh | Giới hạn nghiêm ngặt theo mã chi nhánh `StoreId` phụ trách | Cookie: `OmniBeauty.Admin.Session` | Quản lý doanh số bán lẻ chi nhánh, duyệt ca làm việc thu ngân, xác nhận biên bản lệch két và duyệt phiếu điều chuyển kho chi nhánh. |
-| 3 | `Cashier` | Nhân viên thu ngân | Giới hạn tại quầy POS của chi nhánh được phân công | Cookie: `OmniBeauty.Admin.Session` | Mở đóng ca bán hàng, khai báo số dư két đầu ca, quét mã vạch sản phẩm, áp mã giảm giá, thu tiền và in hóa đơn nhiệt cho khách. |
-| 4 | `WarehouseStaff` | Nhân viên thủ kho | Giới hạn tại Tổng kho hoặc kho chi nhánh làm việc | Cookie: `OmniBeauty.Admin.Session` | Nhập lô hàng mới, khai báo hạn dùng, giám sát cảnh báo FEFO, đóng gói đơn hàng và xác nhận phiếu điều chuyển kho liên chi nhánh. |
-| 5 | `ContentEditor` | Biên tập viên nội dung | Toàn hệ thống đối với các tài nguyên truyền thông | Cookie: `OmniBeauty.Admin.Session` | Quản lý bài viết cẩm nang làm đẹp, tạo chuyên mục bài viết, quản lý biểu ngữ quảng cáo và cấu hình cây menu đa hình chuẩn SEO. |
-| 6 | `Customer` | Khách hàng thành viên | Chỉ có quyền truy cập vào dữ liệu cá nhân của chính mình | Cookie: `OmniBeauty.Customer.Session` | Xem danh mục, thực hiện trắc nghiệm chẩn đoán da, đặt hàng trực tuyến, thanh toán điện tử, tra cứu đơn hàng và đổi điểm thưởng ví Loyalty. |
+| 1 | `SuperAdmin` | Quản trị viên tối cao | Toàn quyền trên toàn bộ Tổng kho và tất cả các Showroom | Cookie: `CanmakeBeauty.Admin.Session` | Cấu hình tham số hệ thống, tạo mới chi nhánh, quản trị danh mục 51 quyền hạn nguyên tử, gán quyền vai trò và ghi đè quyền cá nhân. |
+| 2 | `StoreManager` | Quản lý chi nhánh | Giới hạn nghiêm ngặt theo mã chi nhánh `StoreId` phụ trách | Cookie: `CanmakeBeauty.Admin.Session` | Quản lý doanh số bán lẻ chi nhánh, duyệt ca làm việc thu ngân, xác nhận biên bản lệch két và duyệt phiếu điều chuyển kho chi nhánh. |
+| 3 | `Cashier` | Nhân viên thu ngân | Giới hạn tại quầy POS của chi nhánh được phân công | Cookie: `CanmakeBeauty.Admin.Session` | Mở đóng ca bán hàng, khai báo số dư két đầu ca, quét mã vạch sản phẩm, áp mã giảm giá, thu tiền và in hóa đơn nhiệt cho khách. |
+| 4 | `WarehouseStaff` | Nhân viên thủ kho | Giới hạn tại Tổng kho hoặc kho chi nhánh làm việc | Cookie: `CanmakeBeauty.Admin.Session` | Nhập lô hàng mới, khai báo hạn dùng, giám sát cảnh báo FEFO, đóng gói đơn hàng và xác nhận phiếu điều chuyển kho liên chi nhánh. |
+| 5 | `ContentEditor` | Biên tập viên nội dung | Toàn hệ thống đối với các tài nguyên truyền thông | Cookie: `CanmakeBeauty.Admin.Session` | Quản lý bài viết cẩm nang làm đẹp, tạo chuyên mục bài viết, quản lý biểu ngữ quảng cáo và cấu hình cây menu đa hình chuẩn SEO. |
+| 6 | `Customer` | Khách hàng thành viên | Chỉ có quyền truy cập vào dữ liệu cá nhân của chính mình | Cookie: `CanmakeBeauty.Customer.Session` | Xem danh mục, thực hiện trắc nghiệm chẩn đoán da, đặt hàng trực tuyến, thanh toán điện tử, tra cứu đơn hàng và đổi điểm thưởng ví Loyalty. |
 | 7 | `AlertWorker` | Tiến trình nền cảnh báo | Toàn bộ cơ sở dữ liệu trên máy chủ dịch vụ | Tiến trình nội bộ (IHostedService Background Worker) | Quét định kỳ 15 phút phát hiện lô cận hạn nguy hiểm, rà soát ngưỡng tồn kho tối thiểu, cảnh báo lệch két và giải phóng tồn kho giữ chỗ. |
 | 8 | `VNPay` | Cổng thanh toán VNPay | Phạm vi giao dịch đơn hàng thanh toán qua VNPay | Ký số điện tử bảo mật HMAC-SHA512 qua API Webhook | Tiếp nhận yêu cầu thanh toán thẻ nội địa/quốc tế và gửi thông báo xác thực kết quả thanh toán về hệ thống xử lý gạch nợ tự động. |
 | 9 | `MoMo` | Ví điện tử MoMo | Phạm vi giao dịch đơn hàng thanh toán qua MoMo | Xác thực khóa bảo mật qua Webhook API | Cung cấp cổng thanh toán ví điện tử và gửi thông báo xác nhận trạng thái trừ tiền tài khoản ví của người dùng. |
@@ -993,11 +1008,11 @@ Khối chức năng Khách hàng Storefront tập trung vào việc phục vụ 
 
 Khối chức năng Quản trị Điều hành Back-Office dành cho đội ngũ quản lý và nhân viên tác nghiệp, bao gồm mười một nhánh chức năng nghiệp vụ chuyên biệt: Nhánh Quản trị Điểm bán lẻ Trực tiếp Smart POS; Nhánh Quản trị Kho Dược Mỹ phẩm và Hạn dùng FEFO; Nhánh Quản trị Đơn hàng và Vận chuyển Đa kênh; Nhánh Quản lý Điều chuyển Hàng hóa Liên chi nhánh; Nhánh Quản trị Quan hệ Khách hàng CRM và Hồ sơ Làn da; Nhánh Quản lý Chương trình Khách hàng Thân thiết và Ví điểm Loyalty; Nhánh Quản trị Động cơ Khuyến mại và Mã giảm giá; Nhánh Kế toán Sổ cái và Quản lý Tài chính Chi nhánh; Nhánh Quản trị Nội dung và Hệ thống Điều hướng CMS; Nhánh Quản trị An ninh và Ma trận Phân quyền Động PBAC; và Nhánh Giám sát Tự động, Cảnh báo AI và Thông báo Thời gian thực SignalR.
 
-Sơ đồ phân rã chức năng tổng quát dưới đây thể hiện rõ cấu trúc thứ bậc của toàn bộ hệ thống OMNI BEAUTY:
+Sơ đồ phân rã chức năng tổng quát dưới đây thể hiện rõ cấu trúc thứ bậc của toàn bộ hệ thống CANMAKE BEAUTY:
 
 ```mermaid
 flowchart TD
-    ROOT["HỆ THỐNG QUẢN LÝ BÁN HÀNG CHUỖI MỸ PHẨM OMNI BEAUTY"]
+    ROOT["HỆ THỐNG QUẢN LÝ BÁN HÀNG CHUỖI MỸ PHẨM CANMAKE BEAUTY"]
 
     ROOT --> STOREFRONT["KHỐI KHÁCH HÀNG (STOREFRONT)"]
     ROOT --> ADMIN["KHỐI QUẢN TRỊ ĐIỀU HÀNH (ADMIN BACK-OFFICE)"]
@@ -1017,10 +1032,15 @@ flowchart TD
     ADMIN --> A7["7. CMS, Menu & Cảnh báo Realtime<br/>- Cây Menu đa hình chuẩn SEO<br/>- Chuông thông báo đẩy SignalR<br/>- Tiến trình nền tự động cảnh báo"]
 ```
 
-> **[HƯỚNG DẪN CHÈN SƠ ĐỒ 2.3 - BIỂU ĐỒ PHÂN RÃ CHỨC NĂNG HỆ THỐNG QUẢN LÝ BÁN HÀNG CHUỖI MỸ PHẨM OMNI BEAUTY]:**
+> **[HƯỚNG DẪN CHÈN SƠ ĐỒ 2.3 - BIỂU ĐỒ PHÂN RÃ CHỨC NĂNG HỆ THỐNG QUẢN LÝ BÁN HÀNG CHUỖI MỸ PHẨM CANMAKE BEAUTY]:**
 > - **Mã nguồn vẽ sơ đồ:** Sử dụng mã nguồn Mermaid được thiết lập ở trên, sao chép vào trình biên dịch đồ họa trực tuyến hoặc sử dụng công cụ Mermaid CLI để kết xuất ảnh định dạng PNG độ nét cao.
 > - **Cách chèn vào tài liệu:** Đặt sơ đồ nằm giữa trang tài liệu, định dạng kích thước cân đối, bảo đảm nhìn rõ cả hai khối phân rã lớn và các nhánh chức năng cấp hai.
-> - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Sơ đồ 2.3: Biểu đồ phân rã chức năng hệ thống quản lý bán hàng chuỗi mỹ phẩm OMNI BEAUTY*
+> - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Sơ đồ 2.3: Biểu đồ phân rã chức năng hệ thống quản lý bán hàng chuỗi mỹ phẩm CANMAKE BEAUTY*
+
+![Sơ đồ 2.3: Biểu đồ phân rã chức năng hệ thống quản lý bán hàng chuỗi mỹ phẩm](./So_Do_2_3_Phan_Ra_Chuc_Nang.png)
+
+*Sơ đồ 2.3: Biểu đồ phân rã chức năng hệ thống quản lý bán hàng chuỗi mỹ phẩm*
+
 
 Sơ đồ phân rã chức năng trên đóng vai trò là kim chỉ nam định hình toàn bộ cấu trúc kiến trúc phần mềm. Từ việc phân chia các khối chức năng này, nhóm phát triển có thể thiết lập các phân vùng giao diện chuyên biệt, xác định các ranh giới xử lý của từng dịch vụ và phân chia các bảng dữ liệu tương ứng trong cơ sở dữ liệu.
 
@@ -1081,7 +1101,7 @@ Phân hệ này vận hành tiến trình nền tự động quét cơ sở dữ
 17. Phân hệ Thông báo Đẩy Thời gian thực (SignalR) và Hộp thư Điều hành Nội bộ:  
 Phân hệ này sử dụng công nghệ WebSockets của SignalR để truyền phát các thông báo tức thời đến đúng tài khoản người dùng hoặc vai trò tương ứng khi có sự kiện nghiệp vụ mới, đồng thời cung cấp hộp thư nội bộ an toàn giúp nhân viên giữa các chi nhánh và phòng ban trao đổi công việc nhanh chóng.
 
-Nhằm thể hiện sự ánh xạ tường minh và chuẩn mực giữa giao diện, mã nguồn và cơ sở dữ liệu theo nguyên lý thiết kế hướng đối tượng, bảng dưới đây trích xuất toàn diện năm mươi hai điểm chạm nghiệp vụ thực tế của hệ thống OMNI BEAUTY:
+Nhằm thể hiện sự ánh xạ tường minh và chuẩn mực giữa giao diện, mã nguồn và cơ sở dữ liệu theo nguyên lý thiết kế hướng đối tượng, bảng dưới đây trích xuất toàn diện năm mươi hai điểm chạm nghiệp vụ thực tế của hệ thống CANMAKE BEAUTY:
 
 **Bảng 2.2: Bảng ma trận ánh xạ các điểm chạm chức năng với Controller, Service và Bảng cơ sở dữ liệu tương ứng**
 
@@ -1166,9 +1186,9 @@ Yêu cầu về tính công thái học và thiết kế bốn bố cục giao d
 
 ### 2.3.1. Mô hình hóa Use Case tổng quát và phân rã theo nhóm phân hệ và tác nhân
 
-Trong kỹ thuật phần mềm hướng đối tượng, biểu đồ ca sử dụng đóng vai trò là công cụ trực quan hóa ranh giới chức năng của hệ thống và các điểm chạm tương tác của từng tác nhân người dùng. Hệ thống OMNI BEAUTY được thiết kế thành một biểu đồ ca sử dụng tổng quát cấp hệ thống và năm biểu đồ ca sử dụng phân rã chi tiết theo từng nhóm phân hệ nghiệp vụ trọng tâm:
+Trong kỹ thuật phần mềm hướng đối tượng, biểu đồ ca sử dụng đóng vai trò là công cụ trực quan hóa ranh giới chức năng của hệ thống và các điểm chạm tương tác của từng tác nhân người dùng. Hệ thống CANMAKE BEAUTY được thiết kế thành một biểu đồ ca sử dụng tổng quát cấp hệ thống và năm biểu đồ ca sử dụng phân rã chi tiết theo từng nhóm phân hệ nghiệp vụ trọng tâm:
 
-#### 1. Sơ đồ 2.4: Biểu đồ Use Case tổng quát của hệ thống OMNI BEAUTY
+#### 1. Sơ đồ 2.4: Biểu đồ Use Case tổng quát của hệ thống CANMAKE BEAUTY
 
 Biểu đồ Use Case tổng quát bao quát toàn bộ các gói chức năng chính yếu trong hệ thống và phản ánh đầy đủ mối liên kết giữa sáu nhóm tác nhân nội bộ với các ca sử dụng cấp cao:
 
@@ -1198,7 +1218,7 @@ actor "Nhân viên thủ kho\n(WarehouseStaff)" as WarehouseStaff
 actor "Biên tập viên CMS\n(ContentEditor)" as ContentEditor
 actor "Khách hàng mua sắm\n(Customer)" as Customer
 
-rectangle "HỆ THỐNG THƯƠNG MẠI ĐIỆN TỬ VÀ BÁN LẺ MỸ PHẨM ĐA KÊNH OMNI BEAUTY" {
+rectangle "HỆ THỐNG THƯƠNG MẠI ĐIỆN TỬ VÀ BÁN LẺ MỸ PHẨM ĐA KÊNH CANMAKE BEAUTY" {
 
     package "1. BÁN LẺ & GIAO DỊCH ĐA KÊNH" #FDEDEC {
         usecase "UC-POS: Quản lý ca bán lẻ & Két tiền mù" as UC_POS
@@ -1283,11 +1303,16 @@ Customer --> UC_MODERATE
 @enduml
 ```
 
-> **[HƯỚNG DẪN CHÈN SƠ ĐỒ 2.4 - BIỂU ĐỒ USE CASE TỔNG QUÁT CỦA HỆ THỐNG OMNI BEAUTY]:**
+> **[HƯỚNG DẪN CHÈN SƠ ĐỒ 2.4 - BIỂU ĐỒ USE CASE TỔNG QUÁT CỦA HỆ THỐNG CANMAKE BEAUTY]:**
 > - **File ảnh có sẵn trong dự án:** `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_2_2_So_Do_Use_Case_Tong_Quat.png`
 > - **Cách tự chụp hoặc kết xuất mới:** Chạy kịch bản `generate_plantuml_hinh2_2.js` trong thư mục `doc/` hoặc sử dụng mã PlantUML ở trên để xuất tệp PNG độ phân giải 1920x1080.
 > - **Yêu cầu bố cục ảnh:** Đặt ảnh giữa trang văn bản, bảo đảm sáu gói chức năng hiển thị rõ ràng, đường nối giữa các tác nhân và ca sử dụng không bị chồng chéo.
-> - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Sơ đồ 2.4: Biểu đồ Use Case tổng quát của hệ thống OMNI BEAUTY*
+> - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Sơ đồ 2.4: Biểu đồ Use Case tổng quát của hệ thống CANMAKE BEAUTY*
+
+![Sơ đồ 2.4: Biểu đồ Use Case tổng quát của hệ thống](./Hinh_2_2_So_Do_Use_Case_Tong_Quat.png)
+
+*Sơ đồ 2.4: Biểu đồ Use Case tổng quát của hệ thống*
+
 
 Biểu đồ Use Case tổng quát thể hiện rõ sự phân định trách nhiệm nghiệp vụ của từng tác nhân theo chuẩn kiến trúc hướng dữ liệu. Tác nhân `SuperAdmin` nắm giữ toàn quyền trên các ca sử dụng quản trị hệ thống lõi, cấu hình phân quyền và giám sát báo cáo tài chính toàn chuỗi. Tác nhân `StoreManager` tập trung vào điều hành chi nhánh, phê duyệt đơn hàng, quản lý ca thu ngân và đề xuất điều chuyển kho. Các tác nhân thừa hành tác nghiệp như `Cashier`, `WarehouseStaff` và `ContentEditor` được phân bổ chính xác vào các ca sử dụng chuyên trách về bán lẻ tại quầy, quản trị kho hàng theo lô và biên tập nội dung số. Tác nhân `Customer` tương tác với các ca sử dụng tiền tuyến từ tìm kiếm sản phẩm, trắc nghiệm da, đặt hàng đến tích lũy điểm thưởng.
 
@@ -1353,6 +1378,11 @@ UC01_5 --> DBService : Ghi bản ghi AuditLogs
 > - **File ảnh có sẵn trong dự án:** `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_2_3_So_Do_Use_Case_Chi_Tiet_UC01.png`
 > - **Cách tự tạo ảnh:** Chạy kịch bản `generate_plantuml_hinh2_3.js` trong thư mục `doc/` để kết xuất tệp ảnh PNG chuẩn 1920x1080.
 > - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Sơ đồ 2.5: Biểu đồ Use Case phân rã nhóm chức năng Quản trị Bảo mật và Phân quyền Động PBAC*
+
+![Sơ đồ 2.5: Biểu đồ Use Case phân rã nhóm Quản trị Bảo mật và Phân quyền Động PBAC](./Hinh_2_3_So_Do_Use_Case_Chi_Tiet_UC01.png)
+
+*Sơ đồ 2.5: Biểu đồ Use Case phân rã nhóm Quản trị Bảo mật và Phân quyền Động PBAC*
+
 
 Trong sơ đồ phân rã trên, ca sử dụng `UC-01` bắt buộc phải bao gồm ba ca sử dụng con thông qua quan hệ `<<include>>`: ca `UC-01.1` nạp lưới ma trận dữ liệu, ca `UC-01.4` làm mới bộ nhớ đệm để quyền hạn mới có hiệu lực tức thời, và ca `UC-01.5` ghi nhận vết kiểm toán an ninh. Hai nhánh nghiệp vụ cấu hình phân quyền theo vai trò `UC-01.2` và ghi đè quyền cá nhân `UC-01.3` mở rộng từ ca chính thông qua quan hệ `<<extend>>`. Đáng chú ý, cơ chế ghi đè cá nhân tiếp tục phân nhánh thành cấp quyền đặc xá `UC-01.3a` và tước bỏ quyền kế thừa `UC-01.3b`, tạo nên sự linh hoạt tuyệt đối trong công tác quản trị nhân sự phân tán.
 
@@ -1438,6 +1468,11 @@ UC04_8 --> DBService : Tăng PhysicalQuantity kho đích
 > - **Cách tự tạo ảnh:** Chạy kịch bản `generate_plantuml_hinh2_4.js` trong thư mục `doc/` để kết xuất tệp ảnh PNG chuẩn 1920x1080.
 > - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Sơ đồ 2.6: Biểu đồ Use Case phân rã nhóm chức năng Quản trị Kho Lô Hạn dùng FEFO và Điều chuyển Liên chi nhánh*
 
+![Sơ đồ 2.6: Biểu đồ Use Case phân rã nhóm Quản trị Kho Lô Hạn dùng FEFO và Điều chuyển Liên chi nhánh](./Hinh_2_6_So_Do_Use_Case_Chi_Tiet_UC04.png)
+
+*Sơ đồ 2.6: Biểu đồ Use Case phân rã nhóm Quản trị Kho Lô Hạn dùng FEFO và Điều chuyển Liên chi nhánh*
+
+
 Quy trình điều chuyển kho liên chi nhánh thể hiện sự phối hợp chặt chẽ giữa bốn nhóm nhân sự. Ca sử dụng lập đề xuất `UC-04.1` và phê duyệt `UC-04.2` là điều kiện tiên quyết bắt buộc. Nhánh mở rộng `UC-04.2a` xử lý trường hợp kho nguồn không đủ số lượng tồn khả dụng và từ chối lệnh chuyển. Tại bước xuất hàng, ca `UC-04.3` áp dụng thuật toán FEFO để chọn đúng lô cận hạn nhất đưa lên xe vận chuyển. Khi hàng đến nơi, nếu phát sinh sự cố vỡ hỏng trong quá trình chuyên chở, ca mở rộng `UC-04.7` được kích hoạt để ghi nhận hao hụt và hạch toán tổn thất vào sổ cái trước khi ca `UC-04.8` hoàn tất việc ghi tăng tồn kho tại chi nhánh đích.
 
 ---
@@ -1520,6 +1555,11 @@ UC03_9 --> DBService : Ghi bút toán FinancialLedgers
 > - **Cách tự tạo ảnh:** Chạy kịch bản `generate_plantuml_hinh2_5.js` trong thư mục `doc/` để kết xuất tệp ảnh PNG chuẩn 1920x1080.
 > - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Sơ đồ 2.7: Biểu đồ Use Case phân rã nhóm chức năng Bán hàng tại quầy Smart POS và Quản lý Ca thu ngân*
 
+![Sơ đồ 2.7: Biểu đồ Use Case phân rã nhóm Bán hàng tại quầy Smart POS và Quản lý Ca thu ngân](./Hinh_2_5_So_Do_Use_Case_Chi_Tiet_UC03.png)
+
+*Sơ đồ 2.7: Biểu đồ Use Case phân rã nhóm Bán hàng tại quầy Smart POS và Quản lý Ca thu ngân*
+
+
 Chuỗi nghiệp vụ ca bán lẻ bao gồm ba giai đoạn tuần tự khép kín. Giai đoạn mở ca bắt buộc thu ngân phải thực hiện khai báo quỹ tiền thối `UC-03.1`. Trong ca, ngoài việc quét mã tính tiền `UC-03.3`, hệ thống hỗ trợ hai nhánh mở rộng khi có biến động tiền mặt phát sinh là nộp thêm tiền lẻ `UC-03.4` và rút bớt tiền mặt doanh thu về két sắt trung tâm `UC-03.5`. Khi đóng ca, nghiệp vụ kiểm đếm két mù `UC-03.6` được thực hiện hoàn toàn độc lập, hệ thống tự động so khớp để tìm ra độ lệch `UC-03.7`, yêu cầu giải trình và in báo cáo Z-Report `UC-03.8` dưới sự phê duyệt trực tiếp của Quản lý chi nhánh trước khi hạch toán vào sổ cái kế toán `UC-03.9`.
 
 ---
@@ -1600,6 +1640,11 @@ UC02_8 --> DBService : Giảm ReservedQuantity
 > - **File ảnh có sẵn trong dự án:** `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_2_6_So_Do_Use_Case_Chi_Tiet_UC04.png`
 > - **Cách tự tạo ảnh:** Chạy kịch bản `generate_plantuml_hinh2_6.js` trong thư mục `doc/` để kết xuất tệp ảnh PNG chuẩn 1920x1080.
 > - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Sơ đồ 2.8: Biểu đồ Use Case phân rã nhóm chức năng Mua sắm Trực tuyến, Đặt hàng Đa kênh và Thanh toán*
+
+![Sơ đồ 2.8: Biểu đồ Use Case phân rã nhóm Mua sắm Trực tuyến, Đặt hàng Đa kênh và Thanh toán](./Hinh_2_4_So_Do_Use_Case_Chi_Tiet_UC02.png)
+
+*Sơ đồ 2.8: Biểu đồ Use Case phân rã nhóm Mua sắm Trực tuyến, Đặt hàng Đa kênh và Thanh toán*
+
 
 Sơ đồ phân rã ca sử dụng đặt hàng trực tuyến minh họa rõ nét cơ chế phân chia hai giai đoạn nhằm bảo đảm tính toàn vẹn tồn kho. Trong giai đoạn một, khách hàng thực hiện các ca sử dụng bao hàm `<<include>>` từ chọn phương thức thanh toán `UC-02.1`, giữ chỗ mềm lô hàng theo FEFO `UC-02.2` đến sinh mã thanh toán QR động `UC-02.4`. Khi có tín hiệu xác nhận thanh toán từ cổng trung gian kích hoạt ca `UC-02.5`, hệ thống lập tức thực hiện giao dịch trừ kho vật lý `UC-02.6` và tích điểm thưởng `UC-02.7`. Ngược lại, nếu khách hàng không thanh toán sau mười lăm phút hoặc xảy ra xung đột đồng thời khi có người mua trước, các ca mở rộng `UC-02.8` và `UC-02.9` sẽ được kích hoạt để giải phóng lượng giữ chỗ hoặc cảnh báo hết hàng an toàn.
 
@@ -1682,6 +1727,11 @@ UC05_8 --> DBService : Cập nhật CustomerProfiles
 > - **Cách tự tạo ảnh:** Chạy kịch bản `generate_plantuml_hinh2_7.js` trong thư mục `doc/` để kết xuất tệp ảnh PNG chuẩn 1920x1080.
 > - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Sơ đồ 2.9: Biểu đồ Use Case phân rã nhóm chức năng Tư vấn Da AI, Hồ sơ Sắc đẹp CRM và Ví điểm Loyalty*
 
+![Sơ đồ 2.9: Biểu đồ Use Case phân rã nhóm Tư vấn Da AI, Hồ sơ Sắc đẹp CRM và Ví điểm Loyalty](./Hinh_2_7_So_Do_Use_Case_Chi_Tiet_UC05.png)
+
+*Sơ đồ 2.9: Biểu đồ Use Case phân rã nhóm Tư vấn Da AI, Hồ sơ Sắc đẹp CRM và Ví điểm Loyalty*
+
+
 Biểu đồ trên phản ánh sự kết hợp chặt chẽ giữa tương tác người dùng và các động cơ thuật toán chuyên dụng. Cả khách hàng trực tuyến lẫn chuyên viên tư vấn tại quầy đều có thể khởi tạo bài trắc nghiệm phân tích da `UC-05.1`. Động cơ chẩn đoán tính toán điểm số tương thích sinh học `UC-05.2` và kích hoạt ca rà soát ma trận thành phần `UC-05.3`. Nếu phát hiện thành phần trùng với tiền sử dị ứng đã lưu trong hồ sơ, ca mở rộng `UC-05.4` sẽ cảnh báo và kích hoạt đề xuất hoạt chất thay thế dịu nhẹ `UC-05.7`. Trường hợp phát hiện hai sản phẩm có hoạt chất xung đột nồng độ cao như Retinol và BHA, ca mở rộng `UC-05.5` sẽ tự động kích hoạt ca phân tách lịch trình dưỡng da sáng tối `UC-05.6` trước khi lưu vào hồ sơ sắc đẹp cá nhân `UC-05.8`.
 
 ---
@@ -1700,7 +1750,7 @@ Biểu đồ trên phản ánh sự kết hợp chặt chẽ giữa tương tác
 | **Tên ca sử dụng** | Quản trị Ma trận Phân quyền Động 3 tầng và Phân giải Quyền hạn Yêu cầu HTTP |
 | **Tác nhân chính** | Quản trị viên tối cao (`SuperAdmin`), Người dùng tác nghiệp gửi yêu cầu |
 | **Mô tả tóm tắt** | Cho phép Quản trị viên tối cao cấu hình lưới ma trận năm mươi mốt quyền hạn cho sáu vai trò, ghi đè quyền cá nhân cấp hoặc tước quyền, tự động làm mới bộ nhớ đệm phân quyền và thực hiện thẩm định quyền hạn động ba tầng khi có yêu cầu HTTP gửi đến hệ thống. |
-| **Tiền điều kiện** | Tác nhân quản trị đã đăng nhập thành công vào hệ thống bằng tài khoản có vai trò `SuperAdmin` và sở hữu phiên làm việc hợp lệ trong Cookie `OmniBeauty.Admin.Session`. |
+| **Tiền điều kiện** | Tác nhân quản trị đã đăng nhập thành công vào hệ thống bằng tài khoản có vai trò `SuperAdmin` và sở hữu phiên làm việc hợp lệ trong Cookie `CanmakeBeauty.Admin.Session`. |
 | **Hậu điều kiện** | Ma trận quyền hạn mới được lưu vĩnh viễn vào các bảng `RolePermissions` hoặc `UserPermissions`, bộ nhớ đệm quyền hạn của các tài khoản bị ảnh hưởng bị xóa ngay lập tức, và bản ghi kiểm toán được tạo lập trong bảng `AuditLogs`. |
 | **Luồng sự kiện chính (Main Flow)** | 1. Quản trị viên truy cập vào phân hệ Quản lý Phân quyền tại đường dẫn `/Admin/PermissionManagement`.<br/>2. Hệ thống kiểm tra quyền `PERM:SECURITY:MANAGE`, truy vấn danh mục năm mươi mốt quyền hạn nguyên tử chia theo mười bảy phân hệ và hiển thị lưới ma trận quyền hạn.<br/>3. Quản trị viên lựa chọn chế độ phân quyền theo Vai trò hoặc chọn một nhân viên cụ thể để cấu hình ghi đè quyền cá nhân.<br/>4. Quản trị viên thực hiện tích chọn hoặc bỏ chọn các ô quyền hạn tương ứng trên giao diện.<br/>5. Quản trị viên bấm nút "Lưu thay đổi ma trận phân quyền".<br/>6. Hệ thống mở một giao dịch cơ sở dữ liệu `IDbContextTransaction`, cập nhật các bản ghi trong bảng `RolePermissions` hoặc `UserPermissions`.<br/>7. Hệ thống gọi phương thức xóa khóa bộ nhớ đệm `IMemoryCache` tương ứng với mã người dùng bị tác động.<br/>8. Hệ thống tự động ghi nhật ký kiểm toán vào bảng `AuditLogs` lưu vết chi tiết danh sách quyền vừa thay đổi.<br/>9. Hệ thống hoàn tất giao dịch và hiển thị thông báo cập nhật thành công trên giao diện. |
 | **Luồng rẽ nhánh / Ngoại lệ (Alternative / Exception Flows)** | - **Rẽ nhánh 3a (Ghi đè quyền cá nhân):** Nếu Quản trị viên chọn một nhân sự cụ thể, hệ thống hiển thị trạng thái ba mức cho từng quyền: Kế thừa theo vai trò, Cấp quyền đặc xá (`IsGranted = true`), hoặc Tước bỏ quyền (`IsGranted = false`).<br/>- **Ngoại lệ 6a (Lỗi kết nối CSDL):** Nếu quá trình lưu dữ liệu thất bại, hệ thống tự động hoàn tác giao dịch `Rollback`, không xóa bộ nhớ đệm và hiển thị thông báo lỗi hệ thống cho quản trị viên.<br/>- **Ngoại lệ 7a (Truy cập trái phép):** Nếu một người dùng không có quyền truy cập gửi yêu cầu HTTP đến một tài nguyên được bảo vệ, hệ thống chặn lại tại tầng xử lý ủy quyền và chuyển hướng về trang thông báo lỗi 403 Forbidden. |
@@ -1811,9 +1861,14 @@ deactivate Client
 > - **Cách tự tạo ảnh:** Chạy kịch bản `generate_plantuml_sd01.js` trong thư mục `doc/` để kết xuất tệp ảnh PNG độ phân giải cao 1920x1080.
 > - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Hình 3.1: Sơ đồ tuần tự xử lý luồng xác thực đăng nhập và cấp phát quyền hạn động PBAC (SD-01)*
 
+![Hình 3.1: Sơ đồ tuần tự xử lý luồng xác thực đăng nhập và cấp phát quyền hạn động PBAC (SD-01)](./Hinh_3_1_So_Do_Tuan_Tu_SD01.png)
+
+*Hình 3.1: Sơ đồ tuần tự xử lý luồng xác thực đăng nhập và cấp phát quyền hạn động PBAC (SD-01)*
+
+
 ##### C. Phân tích chuyên sâu cơ chế kiểm soát dữ liệu tại tầng Backend
 
-Cơ chế phân quyền PBAC của hệ thống OMNI BEAUTY giải quyết triệt để bài toán phân quyền cứng nhắc của mô hình phân quyền theo vai trò truyền thống RBAC. Trong thực tế quản trị chuỗi bán lẻ, luôn có những tình huống ngoại lệ phát sinh: một nhân viên có vai trò Thu ngân `Cashier` tại Showroom Cầu Giấy trong thời gian người quản lý đi vắng cần được Ban Giám đốc tạm thời giao thêm quyền duyệt kiểm kê kho, nhưng doanh nghiệp không thể nâng vai trò của nhân viên đó lên làm Quản lý `StoreManager` vì sẽ làm lộ toàn bộ dữ liệu tài chính nhạy cảm khác.
+Cơ chế phân quyền PBAC của hệ thống CANMAKE BEAUTY giải quyết triệt để bài toán phân quyền cứng nhắc của mô hình phân quyền theo vai trò truyền thống RBAC. Trong thực tế quản trị chuỗi bán lẻ, luôn có những tình huống ngoại lệ phát sinh: một nhân viên có vai trò Thu ngân `Cashier` tại Showroom Cầu Giấy trong thời gian người quản lý đi vắng cần được Ban Giám đốc tạm thời giao thêm quyền duyệt kiểm kê kho, nhưng doanh nghiệp không thể nâng vai trò của nhân viên đó lên làm Quản lý `StoreManager` vì sẽ làm lộ toàn bộ dữ liệu tài chính nhạy cảm khác.
 
 Để giải quyết bài toán này, hệ thống hiện thực hóa thuật toán hòa trộn quyền ba tầng trong dịch vụ `PermissionService`. Khi một yêu cầu HTTP gửi đến, hệ thống kiểm tra danh tính người dùng:
 - Tầng thứ nhất kiểm tra vai trò: Nếu người dùng mang vai trò `SuperAdmin`, thuật toán lập tức cấp quyền thông qua mà không cần truy vấn bất kỳ bảng quyền hạn nào, bảo đảm quản trị viên tối cao luôn duy trì quyền kiểm soát hệ thống.
@@ -1838,7 +1893,7 @@ Cơ chế phân quyền PBAC của hệ thống OMNI BEAUTY giải quyết tri�
 | **Mô tả tóm tắt** | Cho phép khách hàng đặt mua mỹ phẩm trực tuyến, hệ thống tự động định tuyến kho, áp dụng thuật toán FEFO để chọn đúng lô hàng có hạn sử dụng gần nhất, thực hiện khóa giữ chỗ mềm hai giai đoạn chống bán khống, và tự động trừ kho cứng khi thanh toán thành công. |
 | **Tiền điều kiện** | Khách hàng đã chọn các sản phẩm vào giỏ hàng, giỏ hàng có số lượng sản phẩm lớn hơn không và các sản phẩm đã vượt qua bài kiểm tra tương kỵ hoạt chất an toàn. |
 | **Hậu điều kiện** | Đơn hàng mới được tạo lập ở trạng thái Chờ xử lý, số lượng tồn kho vật lý của lô hàng tương ứng bị trừ chính xác trong bảng `StoreInventories`, số lượng giữ chỗ được giải phóng, và lịch sử xuất kho được ghi vào `InventoryLogs`. |
-| **Luồng sự kiện chính (Main Flow)** | 1. Khách hàng truy cập trang thanh toán `/Checkout`, nhập địa chỉ giao hàng hoặc chọn nhận hàng trực tiếp tại Showroom Cầu Giấy hay Showroom Quận 1.<br/>2. Khách hàng chọn phương thức thanh toán qua cổng VNPay và bấm nút "Xác nhận đặt hàng".<br/>3. Bộ điều khiển `CheckoutController` chuyển giao thông tin sang dịch vụ `OrderWorkflowService`.<br/>4. Dịch vụ gọi động cơ `InventoryAllocationEngine` thực hiện Giai đoạn 1 (Soft Reserve): truy vấn bảng `ProductBatches` lấy các lô còn hạn dùng an toàn lớn hơn ba mươi ngày, sắp xếp tăng dần theo `ExpDate`.<br/>5. Hệ thống kiểm tra số lượng khả dụng `GetAvailableQuantity()`: nếu đủ hàng, hệ thống tăng trường số lượng giữ chỗ `ReservedQuantity` tương ứng trên bản ghi `StoreInventories` và tạo đơn hàng với trạng thái `PENDING`, trạng thái thanh toán `UNPAID`.<br/>6. Hệ thống tạo đường dẫn thanh toán qua cổng VNPay kèm chữ ký số bảo mật HMAC-SHA512 và chuyển hướng trình duyệt của khách sang giao diện thanh toán của ngân hàng.<br/>7. Khách hàng thực hiện xác thực giao dịch và thanh toán thành công trên cổng VNPay.<br/>8. Cổng VNPay gửi thông báo Webhook IPN kèm kết quả giao dịch về máy chủ hệ thống OMNI BEAUTY.<br/>9. Hệ thống xác thực tính hợp lệ của chữ ký số điện tử và kích hoạt Giai đoạn 2 (Hard Deduct): mở giao dịch cơ sở dữ liệu, trừ số lượng tồn kho vật lý `PhysicalQuantity`, giảm số lượng giữ chỗ `ReservedQuantity`, chuyển trạng thái đơn hàng sang `PROCESSING` và trạng thái thanh toán sang `PAID`.<br/>10. Hệ thống tích điểm thưởng thành viên vào bảng `LoyaltyWallets`, ghi bút toán doanh thu vào sổ cái `FinancialLedgers` và gửi thông báo qua SignalR đến quản trị viên. |
+| **Luồng sự kiện chính (Main Flow)** | 1. Khách hàng truy cập trang thanh toán `/Checkout`, nhập địa chỉ giao hàng hoặc chọn nhận hàng trực tiếp tại Showroom Cầu Giấy hay Showroom Quận 1.<br/>2. Khách hàng chọn phương thức thanh toán qua cổng VNPay và bấm nút "Xác nhận đặt hàng".<br/>3. Bộ điều khiển `CheckoutController` chuyển giao thông tin sang dịch vụ `OrderWorkflowService`.<br/>4. Dịch vụ gọi động cơ `InventoryAllocationEngine` thực hiện Giai đoạn 1 (Soft Reserve): truy vấn bảng `ProductBatches` lấy các lô còn hạn dùng an toàn lớn hơn ba mươi ngày, sắp xếp tăng dần theo `ExpDate`.<br/>5. Hệ thống kiểm tra số lượng khả dụng `GetAvailableQuantity()`: nếu đủ hàng, hệ thống tăng trường số lượng giữ chỗ `ReservedQuantity` tương ứng trên bản ghi `StoreInventories` và tạo đơn hàng với trạng thái `PENDING`, trạng thái thanh toán `UNPAID`.<br/>6. Hệ thống tạo đường dẫn thanh toán qua cổng VNPay kèm chữ ký số bảo mật HMAC-SHA512 và chuyển hướng trình duyệt của khách sang giao diện thanh toán của ngân hàng.<br/>7. Khách hàng thực hiện xác thực giao dịch và thanh toán thành công trên cổng VNPay.<br/>8. Cổng VNPay gửi thông báo Webhook IPN kèm kết quả giao dịch về máy chủ hệ thống CANMAKE BEAUTY.<br/>9. Hệ thống xác thực tính hợp lệ của chữ ký số điện tử và kích hoạt Giai đoạn 2 (Hard Deduct): mở giao dịch cơ sở dữ liệu, trừ số lượng tồn kho vật lý `PhysicalQuantity`, giảm số lượng giữ chỗ `ReservedQuantity`, chuyển trạng thái đơn hàng sang `PROCESSING` và trạng thái thanh toán sang `PAID`.<br/>10. Hệ thống tích điểm thưởng thành viên vào bảng `LoyaltyWallets`, ghi bút toán doanh thu vào sổ cái `FinancialLedgers` và gửi thông báo qua SignalR đến quản trị viên. |
 | **Luồng rẽ nhánh / Ngoại lệ (Alternative / Exception Flows)** | - **Rẽ nhánh 4a (Không đủ tồn khả dụng):** Nếu một mặt hàng trong giỏ không đủ số lượng khả dụng tại chi nhánh đã chọn, hệ thống từ chối tạo đơn và thông báo rõ tên sản phẩm kèm số lượng tối đa còn có thể mua.<br/>- **Ngoại lệ 8a (Khách hàng hủy thanh toán hoặc quá hạn 15 phút):** Nếu sau mười lăm phút kể từ khi tạo đơn mà cổng thanh toán không nhận được tiền, dịch vụ nền `OrderCleanupWorker` tự động quét thấy đơn hàng quá hạn, thực hiện chuyển trạng thái đơn sang `CANCELLED` và tự động giảm trường `ReservedQuantity` để hoàn trả số lượng khả dụng về cho kho.<br/>- **Ngoại lệ 9a (Xung đột đồng thời RowVersion):** Nếu trong tích tắc trừ kho có giao dịch khác thay đổi bản ghi trước, hệ thống phát hiện xung đột phiên bản, tự động tải lại số dư và kiểm tra lại điều kiện xuất hàng an toàn. |
 | **Quy tắc nghiệp vụ (Business Rules)** | - `BR-FEFO-01`: Tuyệt đối không phân bổ các lô mỹ phẩm có số ngày sử dụng còn lại dưới ba mươi ngày (`ExpDate - UtcNow < 30 days`) cho các đơn hàng bán lẻ thông thường.<br/>- `BR-FEFO-02`: Thứ tự ưu tiên cấp phát lô hàng luôn tuân thủ nghiêm ngặt theo `ExpDate ASC`. Trường hợp hai lô có cùng hạn sử dụng thì ưu tiên lô có số lượng tồn ít hơn để dọn sạch khoảng trống kệ kho.<br/>- `BR-FEFO-03`: Thời gian khóa giữ chỗ mềm tối đa của một đơn hàng trực tuyến là mười lăm phút. Hết thời gian này hệ thống bắt buộc phải giải phóng lượng giữ chỗ. |
 | **Yêu cầu đặc biệt** | Toàn bộ thao tác kiểm tra tồn kho và tăng số lượng giữ chỗ mềm ở giai đoạn một phải hoàn tất trong thời gian dưới ba trăm mili giây để không làm gián đoạn trải nghiệm thanh toán của khách hàng. |
@@ -1975,9 +2030,14 @@ deactivate CheckoutCtrl
 > - **Cách tự tạo ảnh:** Chạy kịch bản `generate_plantuml_sd02.js` trong thư mục `doc/` để kết xuất tệp ảnh PNG độ phân giải cao 1920x1080.
 > - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Hình 3.2: Sơ đồ tuần tự xử lý luồng đặt hàng trực tuyến và khóa giữ chỗ tồn kho theo lô FEFO (SD-02)*
 
+![Hình 3.2: Sơ đồ tuần tự xử lý luồng đặt hàng trực tuyến và khóa giữ chỗ tồn kho theo lô FEFO (SD-02)](./Hinh_3_2_So_Do_Tuan_Tu_SD02.png)
+
+*Hình 3.2: Sơ đồ tuần tự xử lý luồng đặt hàng trực tuyến và khóa giữ chỗ tồn kho theo lô FEFO (SD-02)*
+
+
 ##### C. Phân tích chuyên sâu cơ chế kiểm soát dữ liệu tại tầng Backend
 
-Cơ chế cấp phát tồn kho hai giai đoạn kết hợp thuật toán FEFO trong giải pháp OMNI BEAUTY được cài đặt tại lớp `InventoryAllocationEngine` thuộc tầng Infrastructure. Đây là trái tim điều phối chuỗi cung ứng của toàn bộ hệ thống, giải quyết triệt để hai bài toán nhức nhối nhất trong bán lẻ mỹ phẩm: bài toán bán khống tồn kho và bài toán tồn đọng lô hàng cận hạn.
+Cơ chế cấp phát tồn kho hai giai đoạn kết hợp thuật toán FEFO trong giải pháp CANMAKE BEAUTY được cài đặt tại lớp `InventoryAllocationEngine` thuộc tầng Infrastructure. Đây là trái tim điều phối chuỗi cung ứng của toàn bộ hệ thống, giải quyết triệt để hai bài toán nhức nhối nhất trong bán lẻ mỹ phẩm: bài toán bán khống tồn kho và bài toán tồn đọng lô hàng cận hạn.
 
 Về mặt giải thuật chọn lô, khi nhận được yêu cầu cấp phát cho một sản phẩm tại một chi nhánh cụ thể, động cơ không truy vấn số lượng tồn tổng hợp mà thực hiện câu lệnh truy vấn có chỉ mục phân nhóm trên bảng `StoreInventories` kết hợp bảng `ProductBatches`:
 - Điều kiện thứ nhất lọc bỏ toàn bộ các lô hàng có trạng thái không hoạt động hoặc có ngày hết hạn `ExpDate` trừ đi thời gian hiện tại `DateTime.UtcNow` nhỏ hơn ba mươi ngày. Quy tắc này ngăn chặn tuyệt đối việc hệ thống vô tình bán các sản phẩm cận hạn nguy hiểm cho khách hàng trực tuyến.
@@ -2122,6 +2182,11 @@ deactivate PosUI
 > - **Mã nguồn vẽ sơ đồ:** Sao chép đoạn mã PlantUML ở trên vào công cụ PlantUML để xuất ra tệp ảnh PNG độ phân giải cao 1920x1080.
 > - **Cách chèn vào tài liệu:** Căn giữa hình ảnh trên trang văn bản, bảo đảm thể hiện rõ ràng luồng tương tác giữa màn hình thu ngân và màn hình phụ khách hàng CFD qua SignalR.
 > - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Sơ đồ 2.12: Sơ đồ tuần tự xử lý luồng bán hàng tại quầy POS và thanh toán VietQR động (SD-03)*
+
+![Sơ đồ 2.12: Sơ đồ tuần tự xử lý luồng bán hàng tại quầy POS và thanh toán VietQR động (SD-03)](./Hinh_2_12_So_Do_Tuan_Tu_SD03_POS.png)
+
+*Sơ đồ 2.12: Sơ đồ tuần tự xử lý luồng bán hàng tại quầy POS và thanh toán VietQR động (SD-03)*
+
 
 ##### C. Phân tích chuyên sâu cơ chế kiểm soát dữ liệu tại tầng Backend
 
@@ -2287,23 +2352,28 @@ deactivate ShiftCtrl
 > - **Cách tự tạo ảnh:** Chạy kịch bản `generate_plantuml_sd03.js` trong thư mục `doc/` để kết xuất tệp ảnh PNG độ phân giải cao 1920x1080.
 > - **Tên chú thích hình đặt dưới ảnh (Canh giữa, in nghiêng):** *Hình 3.4: Sơ đồ tuần tự xử lý luồng kiểm toán và đối soát két tiền mặt khi kết thúc ca làm việc (SD-04)*
 
+![Hình 3.4: Sơ đồ tuần tự xử lý luồng kiểm toán và đối soát két tiền mặt khi kết thúc ca làm việc (SD-04)](./Hinh_3_3_So_Do_Tuan_Tu_SD03.png)
+
+*Hình 3.4: Sơ đồ tuần tự xử lý luồng kiểm toán và đối soát két tiền mặt khi kết thúc ca làm việc (SD-04)*
+
+
 ##### C. Phân tích chuyên sâu cơ chế kiểm soát dữ liệu tại tầng Backend
 
-Quy trình quản lý ca làm việc và đối soát két tiền mặt của giải pháp OMNI BEAUTY được thiết kế dựa trên các nguyên tắc kế toán tài chính doanh nghiệp khắt khe, giải quyết triệt để vấn đề gian lận hoặc thất thoát tiền mặt thường gặp tại các cửa hàng bán lẻ trực tiếp:
+Quy trình quản lý ca làm việc và đối soát két tiền mặt của giải pháp CANMAKE BEAUTY được thiết kế dựa trên các nguyên tắc kế toán tài chính doanh nghiệp khắt khe, giải quyết triệt để vấn đề gian lận hoặc thất thoát tiền mặt thường gặp tại các cửa hàng bán lẻ trực tiếp:
 
 Trọng tâm kỹ thuật của phân hệ này nằm ở phương pháp kiểm toán két mù được hiện thực hóa trong dịch vụ `PosShiftService`. Trong các phần mềm bán hàng thông thường, giao diện đóng ca thường hiển thị sẵn con số tổng doanh số tiền mặt mà phần mềm đã ghi nhận được trong ca. Cách làm này tạo ra kẽ hở cho sự thiếu trung thực: nhân viên thu ngân có thể nhìn vào con số lý thuyết đó để điều chỉnh số tiền kiểm đếm thực tế cho khớp đúng, hoặc cố tình rút bớt tiền thừa nếu thấy số tiền mặt thực tế trong két nhiều hơn số tiền trên máy mà không khai báo.
 
-Để triệt tiêu kẽ hở này, hệ thống OMNI BEAUTY che giấu hoàn toàn các trường dữ liệu `CashSalesTotal` và `ExpectedCashBalance` trên giao diện người dùng khi thu ngân bấm nút yêu cầu đóng ca. Thu ngân chỉ nhìn thấy các ô trống để nhập số lượng tờ tiền của từng loại mệnh giá từ năm trăm nghìn đồng đến một nghìn đồng. Khi thu ngân bấm nút nộp số liệu kiểm đếm thực tế `ActualCashCounted`, toàn bộ logic so khớp được thực hiện ngầm tại tầng Backend:
+Để triệt tiêu kẽ hở này, hệ thống CANMAKE BEAUTY che giấu hoàn toàn các trường dữ liệu `CashSalesTotal` và `ExpectedCashBalance` trên giao diện người dùng khi thu ngân bấm nút yêu cầu đóng ca. Thu ngân chỉ nhìn thấy các ô trống để nhập số lượng tờ tiền của từng loại mệnh giá từ năm trăm nghìn đồng đến một nghìn đồng. Khi thu ngân bấm nút nộp số liệu kiểm đếm thực tế `ActualCashCounted`, toàn bộ logic so khớp được thực hiện ngầm tại tầng Backend:
 - Hệ thống áp dụng công thức cân đối dòng tiền chuẩn mực: `ExpectedCashBalance = OpeningBalance + CashSalesTotal + CashInTotal - CashOutTotal - CashRefundTotal`.
 - Độ lệch két tiền được xác định bằng phép trừ đại số: `DiscrepancyAmount = ActualCashCounted - ExpectedCashBalance`.
 - Nếu kết quả trả về bằng không, hệ thống ghi nhận ca làm việc cân đối hoàn hảo. Nếu kết quả âm, hệ thống ghi nhận tình trạng thiếu tiền két và bắt buộc thu ngân phải nhập văn bản giải trình nguyên nhân (ví dụ: thối nhầm tiền cho khách). Nếu kết quả dương, hệ thống ghi nhận tình trạng thừa tiền két.
 
-Toàn bộ các chỉ số kiểm toán này được lưu vĩnh viễn vào bảng `PosShifts`. Đồng thời, một sự kiện miền nội bộ được kích hoạt để gọi dịch vụ `FinanceService` tự động hạch toán khoản chênh lệch vào sổ cái tài chính `FinancialLedgers`: khoản tiền thiếu được ghi nhận vào tài khoản chi phí tổn thất vận hành của chi nhánh, trong khi khoản tiền thừa được ghi nhận vào tài khoản thu nhập bất thường. Nhờ sự kiểm soát khép kín này, người quản lý chi nhánh và ban giám đốc có thể nắm bắt chính xác mức độ trung thực và tính chuẩn xác của từng nhân viên thu ngân qua từng ca làm việc, bảo vệ tuyệt đối an toàn dòng tiền mặt cho chuỗi cửa hàng OMNI BEAUTY.
+Toàn bộ các chỉ số kiểm toán này được lưu vĩnh viễn vào bảng `PosShifts`. Đồng thời, một sự kiện miền nội bộ được kích hoạt để gọi dịch vụ `FinanceService` tự động hạch toán khoản chênh lệch vào sổ cái tài chính `FinancialLedgers`: khoản tiền thiếu được ghi nhận vào tài khoản chi phí tổn thất vận hành của chi nhánh, trong khi khoản tiền thừa được ghi nhận vào tài khoản thu nhập bất thường. Nhờ sự kiểm soát khép kín này, người quản lý chi nhánh và ban giám đốc có thể nắm bắt chính xác mức độ trung thực và tính chuẩn xác của từng nhân viên thu ngân qua từng ca làm việc, bảo vệ tuyệt đối an toàn dòng tiền mặt cho chuỗi cửa hàng CANMAKE BEAUTY.
 
 
 ### 2.3.3. Đặc tả chi tiết Use Case, Biểu đồ Tuần tự và Thiết kế Backend cho các nghiệp vụ cốt lõi (Phần 2: Nghiệp vụ 5 đến Nghiệp vụ 8)
 
-Tiếp nối bốn nghiệp vụ nền tảng đã trình bày, phần này đi sâu phân tích và mô hình hóa bốn nghiệp vụ chuyên sâu mang tính đặc thù cao của ngành bán lẻ mỹ phẩm chuỗi và thương mại điện tử hợp nhất OMNI BEAUTY. Các nghiệp vụ này bao gồm: Quản lý nhập lô mỹ phẩm gắn liền hạn sử dụng FEFO và định giá xả hàng tự động; Quy trình điều chuyển hàng hóa liên chi nhánh ba bước bảo toàn tổng tồn kho; Phòng thí nghiệm da liễu kiểm tra tương kỵ hóa học hoạt chất giỏ hàng kết hợp tư vấn AI; và cuối cùng là Hệ thống tích điểm thăng hạng hội viên song hành cùng cơ chế kế toán hạch toán giá vốn hàng bán đích danh theo từng lô sản phẩm.
+Tiếp nối bốn nghiệp vụ nền tảng đã trình bày, phần này đi sâu phân tích và mô hình hóa bốn nghiệp vụ chuyên sâu mang tính đặc thù cao của ngành bán lẻ mỹ phẩm chuỗi và thương mại điện tử hợp nhất CANMAKE BEAUTY. Các nghiệp vụ này bao gồm: Quản lý nhập lô mỹ phẩm gắn liền hạn sử dụng FEFO và định giá xả hàng tự động; Quy trình điều chuyển hàng hóa liên chi nhánh ba bước bảo toàn tổng tồn kho; Phòng thí nghiệm da liễu kiểm tra tương kỵ hóa học hoạt chất giỏ hàng kết hợp tư vấn AI; và cuối cùng là Hệ thống tích điểm thăng hạng hội viên song hành cùng cơ chế kế toán hạch toán giá vốn hàng bán đích danh theo từng lô sản phẩm.
 
 ---
 
@@ -2431,9 +2501,14 @@ deactivate Worker
 > - **Nguồn hình ảnh:** Sinh viên render từ đoạn mã PlantUML phía trên thành file ảnh `Hinh_2_14_So_Do_Tuan_Tu_SD05.png` và lưu trữ tại thư mục `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_2_14_So_Do_Tuan_Tu_SD05.png`.
 > - **Tiêu đề hình:** *Sơ đồ 2.14: Biểu đồ tuần tự nghiệp vụ Nhập lô mỹ phẩm, Giám sát hạn dùng FEFO và Định giá xả hàng cận date tự động.*
 
+![Sơ đồ 2.14: Biểu đồ tuần tự nghiệp vụ Nhập lô mỹ phẩm, Giám sát hạn dùng FEFO và Định giá xả hàng cận date tự động](./Hinh_2_14_So_Do_Tuan_Tu_SD05.png)
+
+*Sơ đồ 2.14: Biểu đồ tuần tự nghiệp vụ Nhập lô mỹ phẩm, Giám sát hạn dùng FEFO và Định giá xả hàng cận date tự động*
+
+
 **Phân tích kỹ thuật tầng xử lý Backend và cơ sở dữ liệu nghiệp vụ 5:**
 
-Cơ chế quản trị tồn kho mỹ phẩm của hệ thống OMNI BEAUTY được thiết kế phân tầng rõ rệt giữa hai thực thể `ProductBatches` (quản lý thông tin nguồn gốc, hạn dùng và giá vốn) và `StoreInventories` (quản lý vị trí địa lý và biến động số lượng vật lý theo từng điểm bán). Trong phương thức `ReceiveNewBatchAsync`, hệ thống bao bọc toàn bộ chuỗi thao tác ghi dữ liệu vào một giao dịch nguyên tử `BeginTransactionAsync`. Khi một lô mới được tạo, trường `UnitCost` được chốt cứng đại diện cho giá vốn đích danh của lô hàng đó. Đây là thông số tối quan trọng để phục vụ việc tính toán giá vốn hàng bán chính xác ở phân hệ tài chính mà không bị sai lệch bởi phương pháp bình quân gia quyền.
+Cơ chế quản trị tồn kho mỹ phẩm của hệ thống CANMAKE BEAUTY được thiết kế phân tầng rõ rệt giữa hai thực thể `ProductBatches` (quản lý thông tin nguồn gốc, hạn dùng và giá vốn) và `StoreInventories` (quản lý vị trí địa lý và biến động số lượng vật lý theo từng điểm bán). Trong phương thức `ReceiveNewBatchAsync`, hệ thống bao bọc toàn bộ chuỗi thao tác ghi dữ liệu vào một giao dịch nguyên tử `BeginTransactionAsync`. Khi một lô mới được tạo, trường `UnitCost` được chốt cứng đại diện cho giá vốn đích danh của lô hàng đó. Đây là thông số tối quan trọng để phục vụ việc tính toán giá vốn hàng bán chính xác ở phân hệ tài chính mà không bị sai lệch bởi phương pháp bình quân gia quyền.
 
 Điểm sáng tạo cốt lõi trong phân hệ quản lý kho là tiến trình `AlertBackgroundWorker` kế thừa `BackgroundService` của .NET 8, chạy ngầm định kỳ bằng cơ chế `PeriodicTimer`. Dịch vụ này không can thiệp trực tiếp vào giao dịch của người dùng để tránh nghẽn cổ chai cơ sở dữ liệu mà hoạt động hoàn toàn bất đồng bộ. Mỗi ngày một lần vào lúc 02:00 sáng, tiến trình kích hoạt hàm `ProcessExpiryAlertsAsync` trong `AlertService`. Thuật toán thực hiện tính toán khoảng cách thời gian giữa ngày hết hạn của từng lô với ngày hiện tại bằng biểu thức `(pb.ExpDate.Date - today).TotalDays`. Nếu thời gian còn lại rơi vào khoảng từ 16 đến 60 ngày, hệ thống tạo bản ghi cảnh báo `EXPIRY_WARNING` nhằm khuyến nghị nhân viên lập kế hoạch trưng bày sản phẩm ra các vị trí bắt mắt tại Showroom hoặc chạy chiến dịch flash-sale trực tuyến. Khi thời gian còn lại dưới 15 ngày, mức độ nguy hiểm chuyển thành `EXPIRY_CRITICAL`, hệ thống tự động gán giá trị chiết khấu thanh lý vào trường `ClearanceDiscountPercent` trong bảng `ProductBatches`. Nhờ vậy, khi khách hàng truy cập website hoặc thu ngân tra cứu mã hàng tại POS, giá bán tự động được khấu trừ theo tỷ lệ khuyến mãi cận date này mà không cần quản trị viên phải can thiệp thủ công. Đặc biệt, nếu phát hiện lô có `ExpDate <= today`, cờ trạng thái của lô bị chuyển tức thì sang `EXPIRED`. Mọi câu lệnh truy vấn tồn kho khả dụng tại `StoreInventoryService` đều có điều kiện chặn cứng `pb.Status != "EXPIRED"`, loại bỏ hoàn toàn khả năng bán nhầm mỹ phẩm quá hạn ra thị trường.
 
@@ -2583,6 +2658,11 @@ deactivate TransferCtrl
 > - **Nguồn hình ảnh:** Sinh viên đối chiếu trực tiếp file ảnh có sẵn trong hệ thống tại đường dẫn `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_3_4_So_Do_Tuan_Tu_SD04.png`.
 > - **Tiêu đề hình:** *Sơ đồ 2.15: Biểu đồ tuần tự nghiệp vụ Điều chuyển hàng hóa liên chi nhánh ba bước bảo toàn tổng tồn kho.*
 
+![Sơ đồ 2.15: Biểu đồ tuần tự nghiệp vụ Điều chuyển hàng hóa liên chi nhánh ba bước bảo toàn tổng tồn kho](./Hinh_3_4_So_Do_Tuan_Tu_SD04.png)
+
+*Sơ đồ 2.15: Biểu đồ tuần tự nghiệp vụ Điều chuyển hàng hóa liên chi nhánh ba bước bảo toàn tổng tồn kho*
+
+
 **Phân tích kỹ thuật tầng xử lý Backend và cơ sở dữ liệu nghiệp vụ 6:**
 
 Nghiệp vụ điều chuyển kho được thực thi bởi dịch vụ `StockTransferService.cs`. Điểm then chốt trong thiết kế kiến trúc của nghiệp vụ này là việc ngăn chặn tuyệt đối tình trạng hàng hóa bị "biến mất" hoặc "tự nhân đôi" trong quá trình lưu thông. Khi chuyển từ trạng thái `PENDING` sang `SHIPPED`, phương thức `DispatchTransferAsync` bắt buộc phải gọi `InventoryAllocationEngine` để chỉ định danh sách lô cụ thể. Thuật toán phân bổ lô thực thi truy vấn EF Core với tiêu chí sắp xếp ưu tiên `ExpDate ASC` nhằm bảo đảm lô có hạn dùng ngắn hơn tại kho tổng sẽ được luân chuyển đi trước. Giao dịch xuất kho được bọc trong giao dịch cơ sở dữ liệu với mức cô lập thích hợp. Tại kho xuất, trường `PhysicalQuantity` trong bảng `StoreInventories` bị trừ đi ngay lập tức, đồng thời số lượng tồn của từng lô trong `ProductBatches` cũng được giảm trừ tương ứng. Tuy nhiên, tại kho nhận, số lượng chưa hề tăng lên. Bản ghi `StockTransfers` mang trạng thái `SHIPPED` đóng vai trò là một "kho lưu động" ghi nhận toàn bộ giá trị hàng hóa đang nằm trên phương tiện vận tải. Nếu trích xuất báo cáo tổng tài sản hàng tồn kho toàn chuỗi tại thời điểm này, công thức kế toán quản trị sẽ là: Tổng tồn kho chuỗi = Tổng tồn tại các kho tĩnh + Tổng hàng đang điều chuyển trên đường (`In-Transit Stock`).
@@ -2602,10 +2682,10 @@ Khác với các ngành hàng tiêu dùng thông thường, mỹ phẩm là dòn
 | 1 | **Tên Use Case** | Trắc nghiệm Chẩn đoán Da thông minh, Kiểm tra tương kỵ hoạt chất giỏ hàng và Tư vấn AI (UC-07). |
 | 2 | **Tác nhân chính (Actors)** | Khách hàng vãng lai / Thành viên đã đăng nhập, Động cơ Tương kỵ Hoạt chất (`SkincareIngredientInteractionEngine`), Dịch vụ Trợ lý AI (`ChatbotService`). |
 | 3 | **Mục đích (Goal)** | Hỗ trợ khách hàng chẩn đoán tuýp da khoa học, tự động quét phát hiện các xung đột hóa học giữa các thành phần mỹ phẩm có trong giỏ hàng, đề xuất tách lịch trình sáng/tối khoa học và gợi ý các sản phẩm phục hồi hiệp đồng giúp bảo vệ hàng rào da tối ưu. |
-| 4 | **Tiền điều kiện (Preconditions)** | Khách hàng truy cập vào hệ thống Website hoặc ứng dụng di động của OMNI BEAUTY và tiến hành thêm sản phẩm vào giỏ hàng hoặc thực hiện bài khảo sát da. |
+| 4 | **Tiền điều kiện (Preconditions)** | Khách hàng truy cập vào hệ thống Website hoặc ứng dụng di động của CANMAKE BEAUTY và tiến hành thêm sản phẩm vào giỏ hàng hoặc thực hiện bài khảo sát da. |
 | 5 | **Hậu điều kiện (Postconditions)** | 1. Kết quả chẩn đoán da được lưu vết trong bảng `CustomerProfiles` (nếu khách đã đăng nhập).<br>2. Bảng phân tích tương kỵ hoạt chất hiển thị trực quan ngay tại giao diện Giỏ hàng (Cart) với các nhãn cảnh báo mức độ `WARNING`, `DANGER` hoặc huy hiệu hiệp đồng `SUCCESS_SYNERGY`.<br>3. Lịch trình chăm sóc da phân tách Buổi Sáng (AM) và Buổi Tối (PM) hoặc Skin Cycling được tự động tạo lập kèm sản phẩm phục hồi gợi ý. |
 | 6 | **Luồng sự kiện chính (Basic Flow)** | 1. Khách hàng thực hiện bài kiểm tra trắc nghiệm Da (Skin Quiz) trên web, trả lời các câu hỏi về lượng dầu tiết ra, độ nhạy cảm, tiền sử kích ứng và mục tiêu điều trị (Mụn, Nám, Chống lão hóa).<br>2. Hệ thống chấm điểm và xác định tuýp da (ví dụ: Da hỗn hợp thiên dầu, nhạy cảm mụn) kèm danh sách hoạt chất khuyến nghị và hoạt chất cần tránh.<br>3. Khách hàng lựa chọn một số sản phẩm điều trị chuyên sâu đưa vào giỏ hàng (ví dụ: Tinh chất Serum Retinol 0.5% và Dung dịch tẩy da chết BHA 2%).<br>4. Khi khách hàng bấm vào Giỏ hàng, hệ thống tự động kích hoạt Động cơ `SkincareIngredientInteractionEngine` truyền vào danh sách ProductId.<br>5. Động cơ phân tích truy vấn toàn bộ thành phần hoạt chất chính trong bảng `ProductIngredients` liên kết với bảng `ActiveIngredients`.<br>6. Động cơ đối chiếu ma trận quy tắc tương kỵ sinh hóa trong cơ sở tri thức hệ thống, phát hiện cặp hoạt chất xung đột Retinol và BHA.<br>7. Hệ thống hiển thị Hộp cảnh báo Da liễu (Skincare Safety Alert) màu cam trên đầu trang giỏ hàng với thông điệp: "Cảnh báo quá tải bong sừng: Dùng chung Retinol và BHA trong cùng một buổi tối dễ làm tổn thương hàng rào ẩm tự nhiên".<br>8. Động cơ tự động xuất lịch trình khuyến nghị: Phân tách sử dụng cách ngày (Skin Cycling) - Đêm chẵn dùng BHA, Đêm lẻ dùng Retinol.<br>9. Động cơ kích hoạt thuật toán gợi ý bán chéo hiệp đồng (Synergy Cross-sell): Đề xuất bổ sung kem dưỡng phục hồi chứa Vitamin B5 (Panthenol) và Ceramide để làm dịu da và củng cố biểu bì.<br>10. Khách hàng đồng ý, bấm nút "Thêm kem phục hồi B5 vào giỏ" và an tâm tiến hành thanh toán. |
-| 7 | **Luồng sự kiện rẽ nhánh (Alternative Flow)** | - *Phát hiện xung đột vô hiệu hóa hoạt tính (A1):* Nếu khách hàng chọn cùng lúc Vitamin C nguyên chất (L-AA) và Peptides đồng (Copper Peptides), động cơ phát cảnh báo mức đỏ `DANGER` về phản ứng oxy hóa khử (Redox Conflict) làm mất hoạt tính của cả hai sản phẩm, đồng thời hướng dẫn tách buổi: Dùng Vitamin C buổi sáng và Copper Peptides buổi tối.<br>- *Tương thích hiệp đồng vàng (A2):* Nếu khách hàng chọn Vitamin C kết hợp với Ferulic Acid hoặc Retinol kết hợp Niacinamide đúng tỷ lệ, hệ thống hiển thị huy hiệu xanh lá cây `SUCCESS_SYNERGY` khen ngợi sự kết hợp thông minh nhân đôi hiệu quả chống oxy hóa.<br>- *Khách hàng trò chuyện với AI Chatbot (A3):* Khách hàng mở khung chat hỏi: "Tôi đang mang thai 3 tháng đầu thì có dùng được Serum Retinol này không?". Dịch vụ `ChatbotService` phân tích ý định, tra cứu danh mục hoạt chất chống chỉ định thai kỳ và phản hồi tức thì: "Mẹ bầu tuyệt đối không nên sử dụng Retinol và các dẫn xuất Vitamin A liều cao. OMNI BEAUTY gợi ý bạn thay thế bằng hoạt chất Bakuchiol chiết xuất từ thiên nhiên an toàn cho thai kỳ". |
+| 7 | **Luồng sự kiện rẽ nhánh (Alternative Flow)** | - *Phát hiện xung đột vô hiệu hóa hoạt tính (A1):* Nếu khách hàng chọn cùng lúc Vitamin C nguyên chất (L-AA) và Peptides đồng (Copper Peptides), động cơ phát cảnh báo mức đỏ `DANGER` về phản ứng oxy hóa khử (Redox Conflict) làm mất hoạt tính của cả hai sản phẩm, đồng thời hướng dẫn tách buổi: Dùng Vitamin C buổi sáng và Copper Peptides buổi tối.<br>- *Tương thích hiệp đồng vàng (A2):* Nếu khách hàng chọn Vitamin C kết hợp với Ferulic Acid hoặc Retinol kết hợp Niacinamide đúng tỷ lệ, hệ thống hiển thị huy hiệu xanh lá cây `SUCCESS_SYNERGY` khen ngợi sự kết hợp thông minh nhân đôi hiệu quả chống oxy hóa.<br>- *Khách hàng trò chuyện với AI Chatbot (A3):* Khách hàng mở khung chat hỏi: "Tôi đang mang thai 3 tháng đầu thì có dùng được Serum Retinol này không?". Dịch vụ `ChatbotService` phân tích ý định, tra cứu danh mục hoạt chất chống chỉ định thai kỳ và phản hồi tức thì: "Mẹ bầu tuyệt đối không nên sử dụng Retinol và các dẫn xuất Vitamin A liều cao. CANMAKE BEAUTY gợi ý bạn thay thế bằng hoạt chất Bakuchiol chiết xuất từ thiên nhiên an toàn cho thai kỳ". |
 | 8 | **Luồng ngoại lệ (Exception Flow)** | - *Sản phẩm chưa cập nhật danh mục thành phần (E1):* Nếu một sản phẩm mới chưa được chuyên viên cập nhật danh sách hoạt chất trong `ProductIngredients`, động cơ bỏ qua sản phẩm đó và ghi log kiểm toán nhắc nhở quản trị viên hoàn thiện dữ liệu hoạt chất. |
 | 9 | **Quy tắc nghiệp vụ liên quan** | - BR-BEAUTY-01: Hệ thống cảnh báo khoa học và hướng dẫn điều chỉnh cách dùng chứ không chặn quyền đặt hàng của khách, bảo đảm trải nghiệm mua sắm thông suốt.<br>- BR-BEAUTY-02: Mọi đề xuất hiệp đồng bán chéo (Synergy Cross-sell) chỉ được gợi ý các sản phẩm phục hồi hiện đang còn tồn kho khả dụng tại chuỗi. |
 | 10 | **Yêu cầu giao diện & Dữ liệu** | Giao diện Giỏ hàng tích hợp widget "Phòng thí nghiệm Da liễu bỏ túi" với màu sắc trực quan (Đỏ: Nguy hiểm/Vô hiệu hóa; Cam: Quá tải kích ứng; Xanh lá: Hiệp đồng nhân đôi tác dụng). Hiển thị rõ danh sách các bước AM Routine và PM Routine. |
@@ -2709,6 +2789,11 @@ deactivate AiBot
 > - **Nguồn hình ảnh:** Sinh viên render từ đoạn mã PlantUML phía trên thành file ảnh `Hinh_2_16_So_Do_Tuan_Tu_SD07.png` và lưu trữ tại thư mục `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_2_16_So_Do_Tuan_Tu_SD07.png`.
 > - **Tiêu đề hình:** *Sơ đồ 2.16: Biểu đồ tuần tự nghiệp vụ Trắc nghiệm Da thông minh, Kiểm tra tương kỵ hoạt chất trong giỏ hàng và Trợ lý AI.*
 
+![Sơ đồ 2.16: Biểu đồ tuần tự nghiệp vụ Trắc nghiệm Da thông minh, Kiểm tra tương kỵ hoạt chất trong giỏ hàng và Trợ lý AI](./Hinh_2_16_So_Do_Tuan_Tu_SD07.png)
+
+*Sơ đồ 2.16: Biểu đồ tuần tự nghiệp vụ Trắc nghiệm Da thông minh, Kiểm tra tương kỵ hoạt chất trong giỏ hàng và Trợ lý AI*
+
+
 **Phân tích kỹ thuật tầng xử lý Backend và cơ sở dữ liệu nghiệp vụ 7:**
 
 Động cơ `SkincareIngredientInteractionEngine.cs` là một trong những thành tựu nổi bật nhất thể hiện tính chuyên biệt hóa sâu sắc của đề tài bài tập lớn trong lĩnh vực BeautyTech. Tại tầng cơ sở dữ liệu, mối quan hệ giữa sản phẩm và hoạt chất được chuẩn hóa theo chuẩn 3NF thông qua bảng trung gian `ProductIngredients` liên kết giữa bảng `Products` và `ActiveIngredients`. Mỗi liên kết lưu trữ rõ nồng độ phần trăm của hoạt chất và vai trò chính của nó trong công thức điều chế.
@@ -2719,13 +2804,13 @@ Khi phương thức `AnalyzeCartOrRoutineAsync` được gọi từ `CartService
    - Xung đột kích ứng quá tải (`HIGH_CONFLICT`): Điển hình là cặp Retinol kết hợp cùng BHA (Salicylic Acid) hoặc AHA (Glycolic Acid). Độ pH thấp của acid làm phóng thích Retinol ồ ạt gây bong tróc và suy yếu màng ẩm tự nhiên. Động cơ tự động sinh hướng dẫn phân chia lịch trình Skin Cycling (sử dụng luân phiên đêm chẵn - đêm lẻ).
    - Xung đột vô hiệu hóa sinh hóa (`CHEMICAL_DEACTIVATION` / `REDOX_CONFLICT`): Tiêu biểu là cặp Benzoyl Peroxide kết hợp Retinol (chất oxy hóa mạnh phá hủy phân tử chống lão hóa) hoặc Vitamin C nguyên chất kết hợp Copper Peptides (ion đồng xúc tác phản ứng oxy hóa làm biến màu và triệt tiêu hoạt tính). Hệ thống tự động phân tách chu trình sử dụng thành Buổi Sáng (AM Routine - ưu tiên chống oxy hóa ban ngày cùng kem chống nắng) và Buổi Tối (PM Routine - ưu tiên tái tạo tế bào trước khi ngủ).
    - Hiệp đồng vàng và củng cố biểu bì (`GOLD_SYNERGY` / `BARRIER_SYNERGY`): Điển hình là bộ ba Vitamin C + Ferulic Acid + Vitamin E giúp ổn định hoạt chất và nhân gấp nhiều lần khả năng chống gốc tự do tia cực tím, hoặc cặp đôi Retinol kết hợp Vitamin B5 (Panthenol) / Ceramide giúp bù đắp lipid sinh học và giảm đến 75% hiện tượng kích ứng ban đầu.
-3. *Động cơ gợi ý bán chéo hiệp đồng (Synergy Cross-Sell Engine):* Khi phát hiện giỏ hàng chứa sản phẩm treatment mạnh có nguy cơ gây khô da, thay vì chỉ đưa ra lời cảnh báo tiêu cực, động cơ kích hoạt truy vấn cơ sở dữ liệu tìm kiếm các sản phẩm kem phục hồi chứa Panthenol hoặc Ceramide đang có sẵn hàng tại chuỗi để xuất vào danh sách `SynergyCrossSellSuggestions`. Cơ chế này vừa bảo vệ làn da của người dùng, vừa gia tăng giá trị trung bình trên một đơn hàng (AOV - Average Order Value) cho chuỗi bán lẻ OMNI BEAUTY một cách hoàn toàn tự nhiên và thuyết phục.
+3. *Động cơ gợi ý bán chéo hiệp đồng (Synergy Cross-Sell Engine):* Khi phát hiện giỏ hàng chứa sản phẩm treatment mạnh có nguy cơ gây khô da, thay vì chỉ đưa ra lời cảnh báo tiêu cực, động cơ kích hoạt truy vấn cơ sở dữ liệu tìm kiếm các sản phẩm kem phục hồi chứa Panthenol hoặc Ceramide đang có sẵn hàng tại chuỗi để xuất vào danh sách `SynergyCrossSellSuggestions`. Cơ chế này vừa bảo vệ làn da của người dùng, vừa gia tăng giá trị trung bình trên một đơn hàng (AOV - Average Order Value) cho chuỗi bán lẻ CANMAKE BEAUTY một cách hoàn toàn tự nhiên và thuyết phục.
 
 ---
 
 #### 2.3.3.8. Nghiệp vụ 8: Tích/Tiêu điểm thưởng thành viên (`LoyaltyWallets`), Tự động xét thăng hạng VIP (`MemberTiers`) và Hạch toán giá vốn đích danh theo lô (`Batch-Specific COGS`) vào `FinancialLedgers` (UC-08 & SD-08)
 
-Để giữ chân khách hàng trong môi trường cạnh tranh khốc liệt của ngành bán lẻ mỹ phẩm, OMNI BEAUTY xây dựng cơ chế quản lý khách hàng thân thiết đa kênh hợp nhất. Mọi điểm thưởng tích lũy khi mua sắm tại cửa hàng vật lý đều có thể sử dụng trực tiếp để khấu trừ tiền khi mua sắm online trên website và ngược lại. Song song với luồng trải nghiệm khách hàng ở mặt trước, tại tầng quản trị nghiệp vụ phía sau, bài toán kế toán tài chính được giải quyết triệt để thông qua cơ chế hạch toán giá vốn hàng bán đích danh theo từng lô sản phẩm (`Batch-Specific COGS`). Mọi dòng tiền doanh thu, chiết khấu điểm thưởng và giá vốn đều được tự động ghi nhận vào Sổ cái tài chính (`FinancialLedgers`) phục vụ việc trích xuất báo cáo kết quả kinh doanh Lãi/Lỗ (P&L) theo thời gian thực cho từng showroom.
+Để giữ chân khách hàng trong môi trường cạnh tranh khốc liệt của ngành bán lẻ mỹ phẩm, CANMAKE BEAUTY xây dựng cơ chế quản lý khách hàng thân thiết đa kênh hợp nhất. Mọi điểm thưởng tích lũy khi mua sắm tại cửa hàng vật lý đều có thể sử dụng trực tiếp để khấu trừ tiền khi mua sắm online trên website và ngược lại. Song song với luồng trải nghiệm khách hàng ở mặt trước, tại tầng quản trị nghiệp vụ phía sau, bài toán kế toán tài chính được giải quyết triệt để thông qua cơ chế hạch toán giá vốn hàng bán đích danh theo từng lô sản phẩm (`Batch-Specific COGS`). Mọi dòng tiền doanh thu, chiết khấu điểm thưởng và giá vốn đều được tự động ghi nhận vào Sổ cái tài chính (`FinancialLedgers`) phục vụ việc trích xuất báo cáo kết quả kinh doanh Lãi/Lỗ (P&L) theo thời gian thực cho từng showroom.
 
 **Bảng 2.10: Bảng đặc tả Use Case UC-08 – Loyalty Wallet, Thăng hạng VIP và Hạch toán Giá vốn đích danh**
 
@@ -2871,13 +2956,18 @@ deactivate CheckoutCtrl
 > - **Nguồn hình ảnh:** Sinh viên render từ đoạn mã PlantUML phía trên thành file ảnh `Hinh_2_17_So_Do_Tuan_Tu_SD08.png` và lưu trữ tại thư mục `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_2_17_So_Do_Tuan_Tu_SD08.png`.
 > - **Tiêu đề hình:** *Sơ đồ 2.17: Biểu đồ tuần tự nghiệp vụ Tích/Tiêu điểm Loyalty, Tự động thăng hạng VIP và Hạch toán giá vốn đích danh theo lô vào Sổ cái tài chính.*
 
+![Sơ đồ 2.17: Biểu đồ tuần tự nghiệp vụ Tích/Tiêu điểm Loyalty, Tự động thăng hạng VIP và Hạch toán giá vốn đích danh theo lô](./Hinh_2_17_So_Do_Tuan_Tu_SD08.png)
+
+*Sơ đồ 2.17: Biểu đồ tuần tự nghiệp vụ Tích/Tiêu điểm Loyalty, Tự động thăng hạng VIP và Hạch toán giá vốn đích danh theo lô*
+
+
 **Phân tích kỹ thuật tầng xử lý Backend và cơ sở dữ liệu nghiệp vụ 8:**
 
 Mô hình dữ liệu của phân hệ khách hàng thân thiết được cấu thành từ ba thực thể liên kết chặt chẽ: `MemberTiers` (định nghĩa các cấp bậc hội viên từ Silver, Gold, Platinum đến Diamond kèm các đặc quyền tỷ lệ nhân điểm), `LoyaltyWallets` (lưu trữ số dư điểm tức thời `CurrentBalance`, tổng tích lũy trọn đời `TotalPointsEarned` và tổng chi tiêu xét hạng 12 tháng `TotalSpend12Months`), và `LoyaltyTransactions` (ghi nhận chi tiết từng biến động điểm vào/ra). Trong phương thức `RedeemPointsAsync`, hệ thống áp dụng cơ chế xác thực kép: vừa kiểm tra số dư điểm hiện tại có lớn hơn hoặc bằng số điểm yêu cầu tiêu hay không, vừa kiểm tra giá trị quy đổi không vượt quá trần quy định 30% tổng giá trị hóa đơn. Thao tác trừ điểm và ghi bản ghi nhật ký kiểm toán được gói gọn trong giao dịch bảo đảm tính toàn vẹn số liệu tuyệt đối.
 
 Song song đó, phương thức `AccumulatePointsAndCheckTierAsync` giải quyết bài toán chăm sóc khách hàng tự động mà không đòi hỏi sự can thiệp thủ công từ nhân viên quản trị. Sau khi tính toán điểm thưởng mới dựa trên hệ số `PointMultiplier` của hạng hiện tại, hệ thống thực hiện cộng dồn giá trị thanh toán thuần vào trường `TotalSpend12Months`. Ngay lập tức, thuật toán so khớp giá trị này với trường `MinSpend` của các bậc hạng cao hơn trong bảng `MemberTiers`. Nếu đạt ngưỡng, trường `CurrentTierId` trong ví khách hàng được nâng cấp tự động, đồng thời hệ thống kích hoạt gửi thông báo đẩy đến thiết bị di động của khách hàng chúc mừng cột mốc thăng hạng VIP kèm theo mã voucher ưu đãi sinh nhật đặc quyền.
 
-Về phía hậu trường điều hành doanh nghiệp, điểm đột phá về mặt quản trị tài chính của hệ thống OMNI BEAUTY so với các giải pháp thông thường là việc xóa bỏ hoàn toàn phương pháp tính giá vốn bình quân gia quyền vốn chứa đựng nhiều sai số khi giá nhập khẩu mỹ phẩm biến động liên tục theo tỷ giá ngoại tệ. Thông qua `FinanceService.cs`, hệ thống triển khai phương pháp Giá vốn đích danh theo lô (`Batch-Specific COGS`). Do mỗi đơn hàng xuất kho đều đã được `InventoryAllocationEngine` chỉ định chính xác sản phẩm được trích xuất từ lô hàng nào trong bảng `ProductBatches`, hệ thống chỉ việc lấy tích số giữa số lượng xuất và đơn giá vốn nhập kho gốc `UnitCost` của lô đó:
+Về phía hậu trường điều hành doanh nghiệp, điểm đột phá về mặt quản trị tài chính của hệ thống CANMAKE BEAUTY so với các giải pháp thông thường là việc xóa bỏ hoàn toàn phương pháp tính giá vốn bình quân gia quyền vốn chứa đựng nhiều sai số khi giá nhập khẩu mỹ phẩm biến động liên tục theo tỷ giá ngoại tệ. Thông qua `FinanceService.cs`, hệ thống triển khai phương pháp Giá vốn đích danh theo lô (`Batch-Specific COGS`). Do mỗi đơn hàng xuất kho đều đã được `InventoryAllocationEngine` chỉ định chính xác sản phẩm được trích xuất từ lô hàng nào trong bảng `ProductBatches`, hệ thống chỉ việc lấy tích số giữa số lượng xuất và đơn giá vốn nhập kho gốc `UnitCost` của lô đó:
 
 **Giá vốn đích danh (Batch-Specific COGS)** = ∑ (Quantity_i × ProductBatch.UnitCost_i)
 
@@ -2888,7 +2978,7 @@ Sau khi xác định được giá vốn chuẩn xác đến từng đồng, ph�
 
 ## 2.4. Thiết kế Kiến trúc Hệ thống và Cơ sở dữ liệu Chuẩn hóa 3NF
 
-Một giải pháp phần mềm cấp doanh nghiệp phục vụ chuỗi bán lẻ đa chi nhánh và thương mại điện tử hợp nhất không chỉ đòi hỏi các chức năng nghiệp vụ phong phú ở mặt trước mà còn phụ thuộc cốt tử vào sự vững chắc của kiến trúc tổng thể và mô hình dữ liệu ở tầng nền tảng. Phần này trình bày toàn diện ba trụ cột kỹ thuật trọng yếu của hệ thống OMNI BEAUTY: Kiến trúc phân tầng Clean Architecture kết hợp biểu đồ lớp thực thi BCE; Mô hình ma trận phân quyền động PBAC giải quyết bài toán cô lập dữ liệu theo từng điểm bán; và Thiết kế cơ sở dữ liệu quan hệ chuẩn hóa 3NF quy mô 65 bảng dữ liệu thực tế trên Microsoft SQL Server.
+Một giải pháp phần mềm cấp doanh nghiệp phục vụ chuỗi bán lẻ đa chi nhánh và thương mại điện tử hợp nhất không chỉ đòi hỏi các chức năng nghiệp vụ phong phú ở mặt trước mà còn phụ thuộc cốt tử vào sự vững chắc của kiến trúc tổng thể và mô hình dữ liệu ở tầng nền tảng. Phần này trình bày toàn diện ba trụ cột kỹ thuật trọng yếu của hệ thống CANMAKE BEAUTY: Kiến trúc phân tầng Clean Architecture kết hợp biểu đồ lớp thực thi BCE; Mô hình ma trận phân quyền động PBAC giải quyết bài toán cô lập dữ liệu theo từng điểm bán; và Thiết kế cơ sở dữ liệu quan hệ chuẩn hóa 3NF quy mô 65 bảng dữ liệu thực tế trên Microsoft SQL Server.
 
 ---
 
@@ -2939,9 +3029,14 @@ PresComp .[#8E44AD,dashed].> InfraComp : "đăng ký thùng chứa phụ thuộc
 ```
 
 > **[HƯỚNG DẪN CHÈN SƠ ĐỒ 2.18 - KIẾN TRÚC TỔNG THỂ CLEAN ARCHITECTURE 4 TẦNG]**
-> - **Vị trí chèn:** Ngay sau đoạn phân tích bốn tầng kiến trúc của giải pháp OMNI BEAUTY.
+> - **Vị trí chèn:** Ngay sau đoạn phân tích bốn tầng kiến trúc của giải pháp CANMAKE BEAUTY.
 > - **Nguồn hình ảnh:** Sinh viên liên kết trực tiếp tới file ảnh đã có sẵn trong dự án tại đường dẫn `d:\Lập trình web\OmnichannelBeautySolution\doc\Kien_Truc_Clean_Architecture_4_Tang.png`.
-> - **Tiêu đề hình:** *Sơ đồ 2.18: Kiến trúc tổng thể Clean Architecture 4 tầng và luồng phụ thuộc của hệ thống OMNI BEAUTY.*
+> - **Tiêu đề hình:** *Sơ đồ 2.18: Kiến trúc tổng thể Clean Architecture 4 tầng và luồng phụ thuộc của hệ thống CANMAKE BEAUTY.*
+
+![Sơ đồ 2.18: Kiến trúc tổng thể Clean Architecture 4 tầng và luồng phụ thuộc của hệ thống](./Kien_Truc_Clean_Architecture_4_Tang.png)
+
+*Sơ đồ 2.18: Kiến trúc tổng thể Clean Architecture 4 tầng và luồng phụ thuộc của hệ thống*
+
 
 Dưới đây là bảng phân rã chi tiết trách nhiệm kỹ thuật và vòng đời phụ thuộc (Dependency Injection Lifecycle) của từng tầng được cấu hình trong `Program.cs`.
 
@@ -3141,7 +3236,12 @@ BatchEntity "1" -- "many" DetailEntity
 > **[HƯỚNG DẪN CHÈN SƠ ĐỒ 2.19 - BIỂU ĐỒ LỚP KIẾN TRÚC BCE CHO CÁC PHÂN HỆ CỐT LÕI]**
 > - **Vị trí chèn:** Ngay sau bảng phân rã kiến trúc và phân tích mô hình BCE.
 > - **Nguồn hình ảnh:** Sinh viên render từ đoạn mã PlantUML phía trên thành file ảnh `Hinh_2_19_BCE_Class_Diagram.png` và lưu trữ tại thư mục `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_2_19_BCE_Class_Diagram.png`.
-> - **Tiêu đề hình:** *Sơ đồ 2.19: Biểu đồ Lớp kiến trúc Boundary – Control – Entity (BCE) cho các phân hệ cốt lõi của hệ thống OMNI BEAUTY.*
+> - **Tiêu đề hình:** *Sơ đồ 2.19: Biểu đồ Lớp kiến trúc Boundary – Control – Entity (BCE) cho các phân hệ cốt lõi của hệ thống CANMAKE BEAUTY.*
+
+![Sơ đồ 2.19: Biểu đồ Lớp kiến trúc Boundary - Control - Entity (BCE) cho các phân hệ cốt lõi](./Hinh_2_19_BCE_Class_Diagram.png)
+
+*Sơ đồ 2.19: Biểu đồ Lớp kiến trúc Boundary - Control - Entity (BCE) cho các phân hệ cốt lõi*
+
 
 **Phân tích trách nhiệm kiến trúc của các thành phần trong Biểu đồ Lớp BCE:**
 - *Thành phần Giao diện Biên (Boundary Controllers):* Đóng vai trò là cổng đón tiếp và bảo vệ hệ thống trước các tác nhân bên ngoài. Lớp này tiếp nhận tham số từ HTTP Request, thực hiện chuyển đổi kiểu dữ liệu cơ bản, ủy quyền kiểm tra tính hợp lệ của tham số thông qua ViewModel/DTO và chuyển giao quyền xử lý nghiệp vụ cho các lớp Điều khiển (Control). Boundary tuyệt đối không trực tiếp mở kết nối cơ sở dữ liệu hay thực thi các câu lệnh truy vấn SQL.
@@ -3152,7 +3252,7 @@ BatchEntity "1" -- "many" DetailEntity
 
 ### 2.4.2. Thiết kế Ma trận Phân quyền Động (Granular Dynamic PBAC Matrix) và Cô lập dữ liệu đa chi nhánh
 
-Trong các hệ thống bán lẻ quy mô lớn, việc gán cứng vai trò trong mã nguồn dạng `[Authorize(Roles = "Admin")]` là nguyên nhân hàng đầu dẫn đến sự xơ cứng kiến trúc phần mềm. Khi chuỗi cửa hàng OMNI BEAUTY phát triển thêm các chức năng quản lý mới như Chuyên viên chăm sóc da, Trưởng ca bán lẻ hay Nhân viên kiểm kê kho cận date, phương pháp truyền thống buộc đội ngũ lập trình viên phải sửa đổi mã nguồn, biên dịch lại toàn bộ dự án và tạm dừng hệ thống để triển khai lại. Để khắc phục triệt để nhược điểm này, hệ thống áp dụng mô hình Kiểm soát Truy cập Dựa trên Quyền hạn Động (Permission-Based Access Control - PBAC) kết hợp cơ chế `DynamicPermissionPolicyProvider` của nền tảng ASP.NET Core 8.
+Trong các hệ thống bán lẻ quy mô lớn, việc gán cứng vai trò trong mã nguồn dạng `[Authorize(Roles = "Admin")]` là nguyên nhân hàng đầu dẫn đến sự xơ cứng kiến trúc phần mềm. Khi chuỗi cửa hàng CANMAKE BEAUTY phát triển thêm các chức năng quản lý mới như Chuyên viên chăm sóc da, Trưởng ca bán lẻ hay Nhân viên kiểm kê kho cận date, phương pháp truyền thống buộc đội ngũ lập trình viên phải sửa đổi mã nguồn, biên dịch lại toàn bộ dự án và tạm dừng hệ thống để triển khai lại. Để khắc phục triệt để nhược điểm này, hệ thống áp dụng mô hình Kiểm soát Truy cập Dựa trên Quyền hạn Động (Permission-Based Access Control - PBAC) kết hợp cơ chế `DynamicPermissionPolicyProvider` của nền tảng ASP.NET Core 8.
 
 Toàn bộ hệ thống được chia nhỏ thành **51 quyền hạn nguyên tử** (Atomic Permissions) thuộc **17 phân hệ chức năng**, phân bổ sẵn cho **6 vai trò người dùng cốt lõi** trong `DbInitializer.cs`:
 1. `SuperAdmin`: Quản trị viên tối cao toàn chuỗi, nắm giữ toàn quyền 51/51 quyền hạn, có tầm nhìn quản trị xuyên suốt mọi chi nhánh và cấu hình hệ thống.
@@ -3162,7 +3262,7 @@ Toàn bộ hệ thống được chia nhỏ thành **51 quyền hạn nguyên t�
 5. `ContentEditor`: Biên tập viên nội dung, chịu trách nhiệm quản lý tin tức làm đẹp, bài viết chuẩn SEO, cây menu điều hướng, banner khuyến mãi và kiểm duyệt đánh giá của khách hàng.
 6. `Customer`: Khách hàng thành viên, có quyền quản lý hồ sơ cá nhân, lịch sử chăm sóc da, theo dõi đơn hàng, tích lũy điểm thưởng và đổi voucher ưu đãi.
 
-Dưới đây là ma trận phân bổ chi tiết 51 quyền nguyên tử cho 6 vai trò người dùng được khởi tạo mặc định trong hệ thống OMNI BEAUTY.
+Dưới đây là ma trận phân bổ chi tiết 51 quyền nguyên tử cho 6 vai trò người dùng được khởi tạo mặc định trong hệ thống CANMAKE BEAUTY.
 
 ##### Bảng 2.12: Ma trận phân rã 51 Quyền nguyên tử thuộc 17 Phân hệ cho 6 Vai trò hệ thống
 
@@ -3222,7 +3322,7 @@ Dưới đây là ma trận phân bổ chi tiết 51 quyền nguyên tử cho 6 
 
 ##### Cơ chế Ghi đè Quyền cá nhân (User Permission Overrides) và Cô lập Dữ liệu chi nhánh (StoreId Isolation)
 
-Bên cạnh việc kế thừa quyền hạn tự động từ Vai trò người dùng (thông qua bảng `RolePermissions`), hệ thống OMNI BEAUTY hiện thực hóa một cơ chế quản trị nhân sự mang tính tùy biến cực cao: **Ghi đè quyền hạn trực tiếp trên từng tài khoản cá nhân** thông qua bảng `UserPermissions`. Bảng này chứa trường cờ nhị phân `IsGranted` với logic giải quyết xung đột như sau:
+Bên cạnh việc kế thừa quyền hạn tự động từ Vai trò người dùng (thông qua bảng `RolePermissions`), hệ thống CANMAKE BEAUTY hiện thực hóa một cơ chế quản trị nhân sự mang tính tùy biến cực cao: **Ghi đè quyền hạn trực tiếp trên từng tài khoản cá nhân** thông qua bảng `UserPermissions`. Bảng này chứa trường cờ nhị phân `IsGranted` với logic giải quyết xung đột như sau:
 - *Cấp quyền đặc cách (Grant Override - `IsGranted = 1`):* Cho phép một nhân sự cụ thể được thực thi một hành vi vượt cấp mà vai trò mặc định của họ không có. Ví dụ: Nhân viên thu ngân `cashier_01` tại Showroom Ba Đình có năng lực tốt được cấp đặc cách quyền `INVENTORY_STOCKTAKE` để tham gia tổ chức kiểm kê kho ban đêm cùng thủ kho mà không cần phải nâng toàn bộ nhóm thu ngân lên làm quản lý.
 - *Thu hồi quyền tức thời (Revoke Override - `IsGranted = 0`):* Cho phép tước bỏ ngay lập tức một quyền hạn nhạy cảm của một cá nhân dù vai trò của họ vẫn chứa quyền đó. Ví dụ: Một Quản lý cửa hàng đang trong thời gian bàn giao công việc có thể bị tước quyền `ORDER_CANCEL` để ngăn chặn việc tự ý hủy đơn hàng mà không cần phải thay đổi cấu hình vai trò `StoreManager` của các chi nhánh khác.
 
@@ -3234,9 +3334,9 @@ Cùng với phân quyền hành vi, bài toán **Cô lập dữ liệu theo từ
 
 ### 2.4.3. Thiết kế Cơ sở dữ liệu quan hệ chuẩn 3NF và Sơ đồ Thực thể – Liên kết (ERD) – Phần 1
 
-Cơ sở dữ liệu của giải pháp OMNI BEAUTY mang tên `OmnichannelBeautyDb` được cài đặt trên hệ quản trị cơ sở dữ liệu quan hệ Microsoft SQL Server. Mô hình dữ liệu bao gồm **65 bảng thực thể chuẩn hóa 3NF** được phân rã khoa học thành **17 phân nhóm nghiệp vụ**, đáp ứng trọn vẹn toàn bộ các điểm chạm nghiệp vụ đa kênh từ thương mại điện tử, quản trị tồn kho FEFO, vận hành bán lẻ POS, chăm sóc da liễu thông minh đến kế toán sổ cái tài chính.
+Cơ sở dữ liệu của giải pháp CANMAKE BEAUTY mang tên `OmnichannelBeautyDb` được cài đặt trên hệ quản trị cơ sở dữ liệu quan hệ Microsoft SQL Server. Mô hình dữ liệu bao gồm **65 bảng thực thể chuẩn hóa 3NF** được phân rã khoa học thành **17 phân nhóm nghiệp vụ**, đáp ứng trọn vẹn toàn bộ các điểm chạm nghiệp vụ đa kênh từ thương mại điện tử, quản trị tồn kho FEFO, vận hành bán lẻ POS, chăm sóc da liễu thông minh đến kế toán sổ cái tài chính.
 
-##### Bảng 2.13: Bảng tổng hợp quy mô 17 phân nhóm dữ liệu (65 bảng) của hệ thống OMNI BEAUTY
+##### Bảng 2.13: Bảng tổng hợp quy mô 17 phân nhóm dữ liệu (65 bảng) của hệ thống CANMAKE BEAUTY
 
 | STT | Phân nhóm dữ liệu nghiệp vụ | Số lượng bảng | Danh sách các bảng thực thể thành phần | Mục đích và vai trò vận hành |
 | :---: | :--- | :---: | :--- | :--- |
@@ -3257,21 +3357,21 @@ Cơ sở dữ liệu của giải pháp OMNI BEAUTY mang tên `OmnichannelBeauty
 | **15** | Kế toán Sổ cái Tài chính & Quản trị Lãi/Lỗ | 3 | `FinancialLedgers`, `SupplierDebts`, `CodReconciliations` | Sổ cái tài chính ghi nhận doanh thu, giá vốn đích danh theo lô (Batch COGS), công nợ và đối soát COD. |
 | **16** | Trợ lý Ảo AI & Lịch sử Hội thoại Tư vấn | 2 | `ChatSessions`, `ChatMessages` | Lưu trữ phiên hội thoại tương tác giữa khách hàng và trợ lý trí tuệ nhân tạo RAG. |
 | **17** | Cảnh báo Thông minh, Thông điệp & Thông báo | 6 | `Alerts`, `Notifications`, `InternalMessages`, `WishlistItems`, `StockAlerts`, `OutboxMessages` | Trung tâm thông báo đẩy thời gian thực, bảng tin nội bộ chuỗi và hộp thư bảo đảm giao dịch Outbox. |
-| **TỔNG** | **Toàn bộ hệ thống cơ sở dữ liệu** | **65** | **65 bảng chuẩn hóa 3NF phân rã chi tiết** | **Bảo đảm vận hành toàn diện chuỗi bán lẻ mỹ phẩm OMNI BEAUTY** |
+| **TỔNG** | **Toàn bộ hệ thống cơ sở dữ liệu** | **65** | **65 bảng chuẩn hóa 3NF phân rã chi tiết** | **Bảo đảm vận hành toàn diện chuỗi bán lẻ mỹ phẩm CANMAKE BEAUTY** |
 
 ##### Chứng minh tính Chuẩn hóa Cơ sở dữ liệu đạt Chuẩn 3NF (Third Normal Form)
 
-Để bảo đảm cơ sở dữ liệu hoạt động tối ưu, không phát sinh các dị thường khi thêm (Insertion Anomaly), xóa (Deletion Anomaly) hay sửa dữ liệu (Update Anomaly), toàn bộ thiết kế thực thể của OMNI BEAUTY được thẩm định nghiêm ngặt theo các tiêu chuẩn dạng chuẩn:
+Để bảo đảm cơ sở dữ liệu hoạt động tối ưu, không phát sinh các dị thường khi thêm (Insertion Anomaly), xóa (Deletion Anomaly) hay sửa dữ liệu (Update Anomaly), toàn bộ thiết kế thực thể của CANMAKE BEAUTY được thẩm định nghiêm ngặt theo các tiêu chuẩn dạng chuẩn:
 
 1. **Tuân thủ Dạng chuẩn 1 (First Normal Form - 1NF):**
    - *Yêu cầu:* Mỗi ô dữ liệu chỉ chứa giá trị nguyên tố (Atomic Value), không chứa danh sách lặp hoặc thuộc tính đa trị.
-   - *Thực thi trong hệ thống:* Trong các thiết kế sơ khai, thông tin các hoạt chất hóa học có trong một loại mỹ phẩm thường bị lưu gộp chung thành một chuỗi văn bản trong bảng sản phẩm. OMNI BEAUTY đã triệt tiêu hoàn toàn vi phạm này bằng cách tách riêng bảng `ActiveIngredients` (chứa định danh hoạt chất) và bảng trung gian `ProductIngredients` (lưu trữ chính xác cặp `ProductId` và `ActiveIngredientId` cùng nồng độ phần trăm `Concentration`). Tương tự, bảng màu son không lưu gộp trong sản phẩm cha mà được tách thành từng bản ghi biến thể `ProductVariants` và `ProductSwatches` độc lập. 100% các cột trong 65 bảng dữ liệu đều mang giá trị đơn nhất và mọi bảng đều sở hữu một khóa chính chuẩn mực `INT IDENTITY(1,1)`.
+   - *Thực thi trong hệ thống:* Trong các thiết kế sơ khai, thông tin các hoạt chất hóa học có trong một loại mỹ phẩm thường bị lưu gộp chung thành một chuỗi văn bản trong bảng sản phẩm. CANMAKE BEAUTY đã triệt tiêu hoàn toàn vi phạm này bằng cách tách riêng bảng `ActiveIngredients` (chứa định danh hoạt chất) và bảng trung gian `ProductIngredients` (lưu trữ chính xác cặp `ProductId` và `ActiveIngredientId` cùng nồng độ phần trăm `Concentration`). Tương tự, bảng màu son không lưu gộp trong sản phẩm cha mà được tách thành từng bản ghi biến thể `ProductVariants` và `ProductSwatches` độc lập. 100% các cột trong 65 bảng dữ liệu đều mang giá trị đơn nhất và mọi bảng đều sở hữu một khóa chính chuẩn mực `INT IDENTITY(1,1)`.
 2. **Tuân thủ Dạng chuẩn 2 (Second Normal Form - 2NF):**
    - *Yêu cầu:* Đã đạt 1NF và mọi thuộc tính không khóa phải phụ thuộc hàm đầy đủ (Fully Functionally Dependent) vào toàn bộ khóa chính, loại bỏ hoàn toàn sự phụ thuộc từng phần vào một phần của khóa chính phức hợp.
    - *Thực thi trong hệ thống:* Đối với bảng trung gian `StoreInventories` có cặp khóa ngoại liên kết tới chi nhánh và lô hàng, hệ thống không lưu trữ thuộc tính tên sản phẩm hay hạn sử dụng trong bảng này. Các thông tin về hạn sử dụng và số lô sản xuất phụ thuộc hoàn toàn vào khóa chính `Id` của bảng `ProductBatches`, trong khi vị trí địa lý và tên showroom phụ thuộc vào `StoreId` của bảng `Stores`. Bảng `StoreInventories` chỉ lưu trữ duy nhất các trường phụ thuộc vào sự kết hợp giữa kho và lô là `PhysicalQuantity` và `ReservedQuantity`. Nhờ vậy, khi một lô mỹ phẩm được phân bổ tới nhiều showroom khác nhau, thông tin ngày sản xuất và hạn dùng không bao giờ bị lặp lại dư thừa.
 3. **Tuân thủ Dạng chuẩn 3 (Third Normal Form - 3NF):**
    - *Yêu cầu:* Đã đạt 2NF và không tồn tại bất kỳ sự phụ thuộc bắc cầu (Transitive Dependency) nào giữa các thuộc tính không khóa; nghĩa là không có thuộc tính không khóa nào phụ thuộc vào một thuộc tính không khóa khác.
-   - *Thực thi trong hệ thống:* Một lỗi kinh điển thường gặp trong các hệ thống bán hàng là bảng `OrderDetails` lưu trữ tên thương hiệu hoặc tên nhà sản xuất của sản phẩm. Trong OMNI BEAUTY, `OrderDetails` chỉ chứa `ProductId` và `ProductBatchId`. Từ `ProductId`, hệ thống tham chiếu tới bảng `Products`, và từ `Products` tham chiếu tiếp tới `Brands` hoặc `Suppliers`. Không có thông tin thương hiệu nào nằm trong chi tiết đơn hàng. Đặc biệt, để bảo toàn giá trị lịch sử bán hàng khi giá niêm yết của sản phẩm thay đổi trong tương lai, bảng `OrderDetails` lưu hai trường chốt chặn lịch sử là `UnitPrice` (giá bán thực tế tại thời điểm thanh toán) và `CostPriceSnapshot` (giá vốn đích danh của lô xuất kho). Đây không phải là sự phụ thuộc bắc cầu mà là thuộc tính nội tại của chính bản ghi giao dịch tại thời điểm cam kết dữ liệu.
+   - *Thực thi trong hệ thống:* Một lỗi kinh điển thường gặp trong các hệ thống bán hàng là bảng `OrderDetails` lưu trữ tên thương hiệu hoặc tên nhà sản xuất của sản phẩm. Trong CANMAKE BEAUTY, `OrderDetails` chỉ chứa `ProductId` và `ProductBatchId`. Từ `ProductId`, hệ thống tham chiếu tới bảng `Products`, và từ `Products` tham chiếu tiếp tới `Brands` hoặc `Suppliers`. Không có thông tin thương hiệu nào nằm trong chi tiết đơn hàng. Đặc biệt, để bảo toàn giá trị lịch sử bán hàng khi giá niêm yết của sản phẩm thay đổi trong tương lai, bảng `OrderDetails` lưu hai trường chốt chặn lịch sử là `UnitPrice` (giá bán thực tế tại thời điểm thanh toán) và `CostPriceSnapshot` (giá vốn đích danh của lô xuất kho). Đây không phải là sự phụ thuộc bắc cầu mà là thuộc tính nội tại của chính bản ghi giao dịch tại thời điểm cam kết dữ liệu.
 
 ```plantuml
 @startuml ERD_Core_Modules_Omni_Beauty
@@ -3457,7 +3557,12 @@ Batches ||--o{ OrderDetails
 > **[HƯỚNG DẪN CHÈN SƠ ĐỒ 2.20 - SƠ ĐỒ THỰC THỂ LIÊN KẾT ERD TỔNG THỂ]**
 > - **Vị trí chèn:** Ngay sau phần chứng minh các dạng chuẩn 1NF, 2NF và 3NF.
 > - **Nguồn hình ảnh:** Sinh viên render từ đoạn mã PlantUML phía trên thành file ảnh `Hinh_2_20_So_Do_ERD_Tong_The.png` và lưu trữ tại thư mục `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_2_20_So_Do_ERD_Tong_The.png`.
-> - **Tiêu đề hình:** *Sơ đồ 2.20: Sơ đồ Thực thể – Liên kết (ERD) tổng thể của các phân hệ cốt lõi trong hệ thống OMNI BEAUTY.*
+> - **Tiêu đề hình:** *Sơ đồ 2.20: Sơ đồ Thực thể – Liên kết (ERD) tổng thể của các phân hệ cốt lõi trong hệ thống CANMAKE BEAUTY.*
+
+![Sơ đồ 2.20: Sơ đồ Thực thể - Liên kết (ERD) tổng thể của các phân hệ cốt lõi](./Hinh_2_20_So_Do_ERD_Tong_The.png)
+
+*Sơ đồ 2.20: Sơ đồ Thực thể - Liên kết (ERD) tổng thể của các phân hệ cốt lõi*
+
 
 ---
 
@@ -3561,7 +3666,7 @@ Phân hệ này phản ánh bản sắc chuyên biệt của ngành bán lẻ m�
 | `SortOrder` | `int` | `INT` | Không | `DEFAULT = 0` | Thứ tự ưu tiên sắp xếp hiển thị trên thanh điều hướng. |
 | `IsActive` | `bool` | `BIT` | Không | `DEFAULT = 1` | Cờ kích hoạt trạng thái hiển thị danh mục trên Storefront. |
 
-*Phân tích thiết kế bảng Categories:* Khóa ngoại tự tham chiếu `ParentId` cho phép OMNI BEAUTY tổ chức cây danh mục linh hoạt từ Ngành hàng lớn (Chăm sóc da, Trang điểm) xuống Danh mục con cấp 1 (Làm sạch, Dưỡng ẩm) và Danh mục chi tiết cấp 2 (Tẩy trang dạng dầu, Sữa rửa mặt tạo bọt) mà không cần phải tạo thêm các bảng phân cấp cồng kềnh.
+*Phân tích thiết kế bảng Categories:* Khóa ngoại tự tham chiếu `ParentId` cho phép CANMAKE BEAUTY tổ chức cây danh mục linh hoạt từ Ngành hàng lớn (Chăm sóc da, Trang điểm) xuống Danh mục con cấp 1 (Làm sạch, Dưỡng ẩm) và Danh mục chi tiết cấp 2 (Tẩy trang dạng dầu, Sữa rửa mặt tạo bọt) mà không cần phải tạo thêm các bảng phân cấp cồng kềnh.
 
 ---
 
@@ -3918,7 +4023,7 @@ Phân hệ này đảm nhiệm toàn bộ luồng giao dịch tiền - hàng t�
 
 ##### E. Nhóm 5: Phân hệ Hồ sơ Sắc đẹp CRM, Ví điểm Loyalty, Khuyến mãi, Tài chính & Nhật ký Kiểm toán
 
-Phân hệ này hoàn thiện bức tranh quản trị toàn diện của chuỗi bán lẻ mỹ phẩm OMNI BEAUTY, dung hòa giữa mục tiêu chăm sóc cá nhân hóa khách hàng để tối đa hóa doanh thu trọn đời (LTV) và kiểm soát tài chính minh bạch cho ban giám đốc.
+Phân hệ này hoàn thiện bức tranh quản trị toàn diện của chuỗi bán lẻ mỹ phẩm CANMAKE BEAUTY, dung hòa giữa mục tiêu chăm sóc cá nhân hóa khách hàng để tối đa hóa doanh thu trọn đời (LTV) và kiểm soát tài chính minh bạch cho ban giám đốc.
 
 ###### Bảng 2.32: Đặc tả chi tiết bảng CustomerProfiles & RepurchaseSchedules (Hồ sơ Sắc đẹp CRM & Dự báo dùng hết)
 
@@ -4078,11 +4183,11 @@ Phân hệ này hoàn thiện bức tranh quản trị toàn diện của chuỗ
 
 ### 2.4.4. Thiết kế Kiến trúc Giao diện Người dùng (UI/UX Design Specifications)
 
-Giao diện người dùng trong ngành kinh doanh mỹ phẩm cao cấp đóng vai trò là điểm chạm cảm xúc quyết định tỷ lệ chuyển đổi của khách hàng, đồng thời quyết định tốc độ thao tác và sự chuẩn xác của nhân viên vận hành tại chuỗi cửa hàng. OMNI BEAUTY xây dựng ngôn ngữ thiết kế mỹ phẩm sang trọng (*Luxury Cosmetic Design System*) kết hợp kiến trúc giao diện động dựa trên dữ liệu (*Data-Driven UI*) và bốn bố cục Razor Layouts quản trị chuyên biệt hóa cao theo từng vai trò công việc.
+Giao diện người dùng trong ngành kinh doanh mỹ phẩm cao cấp đóng vai trò là điểm chạm cảm xúc quyết định tỷ lệ chuyển đổi của khách hàng, đồng thời quyết định tốc độ thao tác và sự chuẩn xác của nhân viên vận hành tại chuỗi cửa hàng. CANMAKE BEAUTY xây dựng ngôn ngữ thiết kế mỹ phẩm sang trọng (*Luxury Cosmetic Design System*) kết hợp kiến trúc giao diện động dựa trên dữ liệu (*Data-Driven UI*) và bốn bố cục Razor Layouts quản trị chuyên biệt hóa cao theo từng vai trò công việc.
 
 ##### 1. Ngôn ngữ Thiết kế Mỹ phẩm Sang trọng (Luxury Cosmetic Design System)
 
-Hệ sinh thái giao diện của OMNI BEAUTY được chuẩn hóa thông qua hệ thống thẻ định danh thiết kế (Design Tokens) lưu trữ tập trung tại `design-tokens.css`, bảo đảm sự nhất quán tuyệt đối giữa kênh bán lẻ trực tuyến Storefront và hệ thống quản trị hậu trường Admin Portal:
+Hệ sinh thái giao diện của CANMAKE BEAUTY được chuẩn hóa thông qua hệ thống thẻ định danh thiết kế (Design Tokens) lưu trữ tập trung tại `design-tokens.css`, bảo đảm sự nhất quán tuyệt đối giữa kênh bán lẻ trực tuyến Storefront và hệ thống quản trị hậu trường Admin Portal:
 - **Bảng màu chủ đạo (Color Palette):**
   + *Rose Gold (`#B76E79` / `#EC4899`):* Màu vàng hồng đại diện cho sự quý phái, thanh lịch và mềm mại của phái đẹp, được sử dụng làm màu nhấn cho các nút kêu gọi hành động (CTA), huy hiệu khuyến mãi và biểu tượng quà tặng.
   + *Deep Emerald (`#1B4D3E`):* Màu xanh ngọc lục bảo đại diện cho tiêu chuẩn Mỹ phẩm Sạch (Clean Beauty), các sản phẩm có nguồn gốc thuần chay, hữu cơ và an toàn dược học, được dùng cho các nhãn chứng nhận thành phần và biểu đồ phân tích da liễu.
@@ -4091,11 +4196,11 @@ Hệ sinh thái giao diện của OMNI BEAUTY được chuẩn hóa thông qua h
 - **Nghệ thuật chữ phân cấp (Typography Hierarchy):**
   + Giao diện ứng dụng hai bộ font chữ tối tân được nhúng trực tiếp qua Google Fonts: Bộ font `Plus Jakarta Sans` với các biến thể độ đậm từ 300 đến 800 được sử dụng cho toàn bộ nhãn giao diện, nút bấm và nội dung bài viết nhờ tỷ lệ khoảng cách chữ hoàn hảo, dễ đọc trên cả màn hình điện thoại di động và máy tính bảng; Song song đó, bộ font chuyên biệt `JetBrains Mono` được sử dụng độc quyền cho các trường dữ liệu mang tính định lượng cao như mã SKU, mã vạch Barcode EAN-13, số lô sản xuất `BatchNumber`, ngày hết hạn FEFO và các con số tiền tệ, bảo đảm các chữ số luôn thẳng hàng hoàn hảo khi hiển thị trên các bảng đối soát và hóa đơn nhiệt POS.
 - **Kiến trúc Tùy biến Giao diện Động (Data-Driven Dynamic Theme Engine):**
-  + Thay vì gán cứng bố cục trang chủ trong mã nguồn, hệ thống OMNI BEAUTY thiết kế các bảng `ThemeConfigs`, `PageLayouts`, `UiSections` và `SectionItems`. Quản trị viên nội dung có thể tự do thay đổi màu sắc chủ đạo, chuyển đổi chế độ giao diện Mùa Hè sang Chiến dịch Lễ Hội cuối năm, hoặc sắp xếp lại thứ tự các khối hiển thị (Banner Slider -> Sản phẩm Flash Sale cận date -> Danh mục nổi bật -> Trắc nghiệm Phân tích da) trực tiếp trên trang quản trị mà không cần lập trình viên phải can thiệp sửa mã HTML.
+  + Thay vì gán cứng bố cục trang chủ trong mã nguồn, hệ thống CANMAKE BEAUTY thiết kế các bảng `ThemeConfigs`, `PageLayouts`, `UiSections` và `SectionItems`. Quản trị viên nội dung có thể tự do thay đổi màu sắc chủ đạo, chuyển đổi chế độ giao diện Mùa Hè sang Chiến dịch Lễ Hội cuối năm, hoặc sắp xếp lại thứ tự các khối hiển thị (Banner Slider -> Sản phẩm Flash Sale cận date -> Danh mục nổi bật -> Trắc nghiệm Phân tích da) trực tiếp trên trang quản trị mà không cần lập trình viên phải can thiệp sửa mã HTML.
 
 ##### 2. Thiết kế Công thái học của 4 Razor Layouts Quản trị Chuyên biệt
 
-Nhận thức sâu sắc rằng mỗi chức danh nhân sự trong chuỗi bán lẻ đều có bối cảnh làm việc và áp lực thao tác hoàn toàn khác nhau, OMNI BEAUTY không sử dụng chung một bố cục quản trị đơn điệu mà xây dựng **4 Razor Layouts chuyên biệt hóa tối đa về mặt công thái học (Ergonomics)**:
+Nhận thức sâu sắc rằng mỗi chức danh nhân sự trong chuỗi bán lẻ đều có bối cảnh làm việc và áp lực thao tác hoàn toàn khác nhau, CANMAKE BEAUTY không sử dụng chung một bố cục quản trị đơn điệu mà xây dựng **4 Razor Layouts chuyên biệt hóa tối đa về mặt công thái học (Ergonomics)**:
 
 ```
 Omnichannel.Web/Areas/Admin/Views/Shared/
@@ -4131,7 +4236,7 @@ Dành riêng cho Biên tập viên nội dung (`ContentEditor`) sáng tạo các
 - **Giao diện chia đôi màn hình tương tác (Split-View Workspace):** Cửa sổ làm việc được phân đôi hoàn hảo với tỷ lệ 50:50. Phía bên trái là khung soạn thảo văn bản đa dạng định dạng (Rich Text Editor) tích hợp kéo thả hình ảnh từ kho Media; Phía bên phải là khung nhìn giả lập kết quả tìm kiếm thời gian thực (Real-time Google SERP Simulator & Social Share Card Preview).
 - Khi biên tập viên gõ tiêu đề, mô tả hoặc thay đổi hình ảnh đại diện, khung nhìn bên phải sử dụng font chữ `Roboto` chuẩn của Google để mô phỏng chính xác mẫu kết quả tìm kiếm sẽ hiển thị trên trang tìm kiếm Google, đồng thời tính toán điểm số tối ưu SEO Onpage (độ dài tiêu đề từ 50-60 ký tự, thẻ mô tả Meta Description từ 150-160 ký tự) giúp nội dung đạt thứ hạng cao nhất trên công cụ tìm kiếm.
 
-Dưới đây là bảng tổng hợp các thông số kỹ thuật và đặc trưng công thái học của 5 môi trường hiển thị trong giải pháp OMNI BEAUTY.
+Dưới đây là bảng tổng hợp các thông số kỹ thuật và đặc trưng công thái học của 5 môi trường hiển thị trong giải pháp CANMAKE BEAUTY.
 
 ##### Bảng 2.36: Bảng tổng hợp thông số thiết kế công thái học của Storefront và 4 Layout quản trị chuyên biệt
 
@@ -4147,14 +4252,14 @@ Dưới đây là bảng tổng hợp các thông số kỹ thuật và đặc t
 
 ### TIỂU KẾT CHƯƠNG 2
 
-Chương 2 của bài tập lớn môn Lập trình Web đã hoàn thành xuất sắc toàn bộ khối lượng nghiên cứu phân tích và thiết kế hệ thống cho giải pháp phần mềm Quản lý Bán hàng Chuỗi Cửa hàng Mỹ phẩm OMNI BEAUTY theo phương pháp luận hướng đối tượng (OOAD) kết hợp kiến trúc phần mềm doanh nghiệp hiện đại:
+Chương 2 của bài tập lớn môn Lập trình Web đã hoàn thành xuất sắc toàn bộ khối lượng nghiên cứu phân tích và thiết kế hệ thống cho giải pháp phần mềm Quản lý Bán hàng Chuỗi Cửa hàng Mỹ phẩm CANMAKE BEAUTY theo phương pháp luận hướng đối tượng (OOAD) kết hợp kiến trúc phần mềm doanh nghiệp hiện đại:
 
 1. **Khảo sát hiện trạng và Xác lập bài toán:** Bài tập lớn đã bóc tách tường tận quy trình vận hành thực tế tại chuỗi bán lẻ mỹ phẩm, chỉ rõ 5 điểm nghẽn nghiêm trọng của mô hình bán hàng rời rạc truyền thống (độ trễ tồn kho O2O, rủi ro tiêu hủy mỹ phẩm cận date, thất thoát hàng hóa điều chuyển, gian lận két tiền mặt thu ngân và nguy cơ kích ứng da do tương kỵ hoạt chất). Trên cơ sở đó, quy trình vận hành mục tiêu (To-Be) đã được thiết lập chặt chẽ thông qua Sơ đồ luồng vận hành hàng hóa và tài chính khép kín.
 2. **Xác định Yêu cầu và Phân rã chức năng:** Hệ thống đã định danh chính xác 11 tác nhân người dùng và dịch vụ nền, xây dựng Biểu đồ Phân rã Chức năng (BFD) bao quát 17 phân hệ nghiệp vụ, và thiết lập Ma trận 52 Điểm chạm thực tế ánh xạ chi tiết giữa màn hình giao diện, API Endpoint, Controller, Service và Bảng cơ sở dữ liệu.
 3. **Mô hình hóa Hành vi bằng UML:** Bài tập lớn đã mô hình hóa toàn diện hệ thống Use Case tổng quát và 5 biểu đồ Use Case phân rã chuyên sâu. Tám nghiệp vụ cốt lõi mang tính sống còn của chuỗi mỹ phẩm đã được đặc tả chi tiết qua Bảng đặc tả 10 mục chuẩn mực, Biểu đồ Tuần tự (Sequence Diagram) chuẩn UML và các đoạn phân tích kỹ thuật tầng xử lý Backend sâu sắc.
 4. **Thiết kế Kiến trúc và Cơ sở dữ liệu Chuẩn hóa 3NF:** Bài tập lớn đã hiện thực hóa kiến trúc Clean Architecture 4 tầng bảo đảm nguyên lý Đảo ngược Phụ thuộc (DIP), chi tiết hóa chuỗi đường ống dẫn HTTP Request Pipeline 9 bước thực tế trong `Program.cs`, và mô hình hóa thành công Biểu đồ Lớp thực thi BCE. Hệ thống Phân quyền Động PBAC 51 quyền nguyên tử kết hợp kỹ thuật cô lập dữ liệu chi nhánh (`StoreId Isolation`) đã giải quyết triệt để bài toán bảo mật đa điểm bán. Đặc biệt, Cơ sở dữ liệu `OmnichannelBeautyDb` quy mô 65 bảng dữ liệu được chứng minh đạt chuẩn 3NF tuyệt đối, đi kèm Từ điển dữ liệu chi tiết của 22 bảng thực thể cốt lõi và hệ thống 4 Razor Layouts quản trị chuyên biệt hóa cao về mặt công thái học.
 
-Những kết quả phân tích và thiết kế vững chắc trong Chương 2 là kim chỉ nam và nền tảng kỹ thuật tiên quyết để bước sang **CHƯƠNG 3: CÀI ĐẶT, TRIỂN KHAI VÀ THỰC NGHIỆM HỆ THỐNG WEBSITE QUẢN LÝ BÁN HÀNG OMNI BEAUTY**.
+Những kết quả phân tích và thiết kế vững chắc trong Chương 2 là kim chỉ nam và nền tảng kỹ thuật tiên quyết để bước sang **CHƯƠNG 3: CÀI ĐẶT, TRIỂN KHAI VÀ THỰC NGHIỆM HỆ THỐNG WEBSITE QUẢN LÝ BÁN HÀNG CANMAKE BEAUTY**.
 
 
 
@@ -4244,13 +4349,13 @@ Dưới đây là bảng phân rã chi tiết về quy mô tệp tin và vai tr�
 | **Omnichannel.Infrastructure**| 61 | 63 | Hiện thực hóa toàn bộ 25 Interfaces bằng 27 Services, quản lý kết nối SQL Server qua `ApplicationDbContext`, chặn bắt lưu vết `AuditLogs`, tích hợp API VietQR, VNPay, GHN. | `Microsoft.EntityFrameworkCore.SqlServer` (8.0.8), `Microsoft.Extensions.Caching.Memory`, `BCrypt.Net-Next`. |
 | **Omnichannel.Web** | 72 | 490 | Đón tiếp HTTP/WebSocket Request, thực thi đường ống Middleware 9 bước, xử lý điều hướng đa hình SEO 301, kết xuất giao diện qua 4 Razor Layouts và đồng bộ 2 màn hình POS CFD. | `Microsoft.AspNetCore.SignalR.Common`, `Microsoft.AspNetCore.ResponseCompression`. |
 | **Omnichannel.Tests** | 40 | 41 | Thực thi tự động 21 bộ kiểm thử cho các thuật toán trọng yếu (FEFO, PBAC, xung đột tương kỵ da liễu, đối soát két tiền mặt và tính giá vốn đích danh). | `xunit` (2.9.0), `Moq` (4.20.70), `FluentAssertions` (6.12.0), `Microsoft.EntityFrameworkCore.InMemory`. |
-| **TỔNG CỘNG SOLUTION** | **288** | **711** | **Hệ thống kiến trúc phần mềm bán lẻ mỹ phẩm hợp nhất OMNI BEAUTY hoàn chỉnh** | **Kiến trúc Clean Architecture 4 tầng chuẩn mực** |
+| **TỔNG CỘNG SOLUTION** | **288** | **711** | **Hệ thống kiến trúc phần mềm bán lẻ mỹ phẩm hợp nhất CANMAKE BEAUTY hoàn chỉnh** | **Kiến trúc Clean Architecture 4 tầng chuẩn mực** |
 
 ---
 
 ### 3.1.2. Hiện thực hóa các giải pháp kỹ thuật và thuật toán cốt lõi (Code & Algorithm Walkthrough)
 
-Tính ưu việt của giải pháp OMNI BEAUTY không chỉ nằm ở bản thiết kế lý thuyết mà được khẳng định thông qua việc cài đặt thực tế 5 giải pháp kỹ thuật và thuật toán phức tạp được xây dựng bài bản, giải quyết triệt để các bài toán hóc búa của chuỗi bán lẻ mỹ phẩm đa kênh.
+Tính ưu việt của giải pháp CANMAKE BEAUTY không chỉ nằm ở bản thiết kế lý thuyết mà được khẳng định thông qua việc cài đặt thực tế 5 giải pháp kỹ thuật và thuật toán phức tạp được xây dựng bài bản, giải quyết triệt để các bài toán hóc búa của chuỗi bán lẻ mỹ phẩm đa kênh.
 
 ---
 
@@ -4324,7 +4429,7 @@ Việc bảo mật phân quyền trong chuỗi bán lẻ đòi hỏi tính linh 
   + Nấc 1: Kiểm tra quyền tối cao `SuperAdmin` (God Mode) cho phép vượt qua tức thì.
   + Nấc 2: Tra cứu danh sách quyền hữu hiệu trong bộ nhớ đệm `MemoryCache` với thời gian sống TTL 30 phút.
   + Nấc 3: Nếu Cache Miss, truy vấn CSDL gom toàn bộ quyền từ các vai trò của người dùng (`RolePermissions`), sau đó áp dụng quy tắc ghi đè cá nhân trong `UserPermissions` (nếu `IsGranted = 1` thì cộng thêm quyền, nếu `IsGranted = 0` thì tước bỏ quyền cưỡng chế).
-- *Cách ly phiên xác thực đa đề án (Multi-Scheme Cookie Separation):* Thiết lập hai Cookie độc lập: `OmniBeauty.Admin.Session` (dành riêng cho Admin Area, SameSite=Strict, đường dẫn `/Admin`) và `OmniBeauty.Customer.Session` (dành cho Storefront). Bộ lọc `BlockAdminShoppingAttribute` chặn tuyệt đối các tài khoản quản trị sử dụng quyền nội bộ để đặt hàng lách khuyến mãi trên giao diện khách hàng.
+- *Cách ly phiên xác thực đa đề án (Multi-Scheme Cookie Separation):* Thiết lập hai Cookie độc lập: `CanmakeBeauty.Admin.Session` (dành riêng cho Admin Area, SameSite=Strict, đường dẫn `/Admin`) và `CanmakeBeauty.Customer.Session` (dành cho Storefront). Bộ lọc `BlockAdminShoppingAttribute` chặn tuyệt đối các tài khoản quản trị sử dụng quyền nội bộ để đặt hàng lách khuyến mãi trên giao diện khách hàng.
 - *Tự động ghi Nhật ký Kiểm toán (`AuditSaveChangesInterceptor`):* Kế thừa `SaveChangesInterceptor` của EF Core 8. Trước khi dữ liệu được cam kết vào SQL Server, bộ đánh chặn rà soát toàn bộ các thực thể mang trạng thái `Modified` hoặc `Deleted`, tự động tuần tự hóa thuộc tính cũ thành chuỗi JSON `OldValues` và giá trị mới thành `NewValues`, ghi vào bảng `AuditLogs` kèm IP máy trạm.
 
 ##### (3) Trích đoạn mã nguồn C# thực tế trong PermissionAuthorizationHandler.cs
@@ -4512,13 +4617,13 @@ Phương thức `RecordLedgerEntryAsync` là chốt chặn tài chính cốt t�
 
 ## 3.2. Hiện thực hóa và Minh họa giao diện các phân hệ chức năng chính
 
-Phần này trình bày chi tiết kết quả hiện thực hóa giao diện người dùng thực tế của hệ thống website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY. Toàn bộ các màn hình dưới đây được chụp trực tiếp từ hệ thống phần mềm đang vận hành thực tế trên môi trường máy chủ cục bộ và thử nghiệm, thể hiện sự kết hợp hài hòa giữa ngôn ngữ thiết kế Clean Beauty hiện đại (Modern Clean Beauty Aesthetics), tính công thái học trong vận hành chuỗi bán lẻ đa kênh (Omnichannel Ergonomics) và khả năng xử lý nghiệp vụ thông minh chuyên sâu cho ngành mỹ phẩm.
+Phần này trình bày chi tiết kết quả hiện thực hóa giao diện người dùng thực tế của hệ thống website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY. Toàn bộ các màn hình dưới đây được chụp trực tiếp từ hệ thống phần mềm đang vận hành thực tế trên môi trường máy chủ cục bộ và thử nghiệm, thể hiện sự kết hợp hài hòa giữa ngôn ngữ thiết kế Clean Beauty hiện đại (Modern Clean Beauty Aesthetics), tính công thái học trong vận hành chuỗi bán lẻ đa kênh (Omnichannel Ergonomics) và khả năng xử lý nghiệp vụ thông minh chuyên sâu cho ngành mỹ phẩm.
 
 ---
 
 ### 3.2.1. Phân hệ Giao diện Khách hàng (Luxury Storefront & Customer Portal)
 
-Phân hệ Giao diện Khách hàng của hệ thống OMNI BEAUTY được định vị theo phong cách thương mại điện tử mỹ phẩm thượng lưu (Haute Parfumerie & Luxury Cosmetics), lấy cảm hứng từ chuẩn mực thiết kế của các hệ sinh thái làm đẹp hàng đầu thế giới như Sephora và Ulta Beauty, đồng thời tối ưu hóa sâu sắc cho hành vi mua sắm đa kênh của người tiêu dùng Việt Nam. Toàn bộ giao diện được xây dựng trên ngôn ngữ thiết kế tinh tế với gam màu chủ đạo Pearl White (#FFFDFB), điểm xuyết ánh Rose Gold (#B76E79) và Deep Emerald (#1B4D3E), mang lại cảm giác sang trọng, an tâm và chuyên nghiệp.
+Phân hệ Giao diện Khách hàng của hệ thống CANMAKE BEAUTY được định vị theo phong cách thương mại điện tử mỹ phẩm thượng lưu (Haute Parfumerie & Luxury Cosmetics), lấy cảm hứng từ chuẩn mực thiết kế của các hệ sinh thái làm đẹp hàng đầu thế giới như Sephora và Ulta Beauty, đồng thời tối ưu hóa sâu sắc cho hành vi mua sắm đa kênh của người tiêu dùng Việt Nam. Toàn bộ giao diện được xây dựng trên ngôn ngữ thiết kế tinh tế với gam màu chủ đạo Pearl White (#FFFDFB), điểm xuyết ánh Rose Gold (#B76E79) và Deep Emerald (#1B4D3E), mang lại cảm giác sang trọng, an tâm và chuyên nghiệp.
 
 Dưới đây là phân tích chi tiết 7 màn hình giao diện khách hàng cốt lõi của hệ thống, đi kèm hướng dẫn thực nghiệm chụp ảnh minh chứng, mô tả bố cục thị giác và phân tích luồng xử lý dữ liệu tầng Backend kết nối cơ sở dữ liệu quan hệ.
 
@@ -4526,7 +4631,7 @@ Dưới đây là phân tích chi tiết 7 màn hình giao diện khách hàng c
 
 ### 1. Hình 3.1 – Giao diện Trang chủ Luxury, Mega Menu Đa hình và Khu vực Flash Sale / Xả hàng Cận Date FEFO
 
-Trang chủ là trung tâm điều hướng và tiếp thị trực quan của OMNI BEAUTY, tích hợp khả năng cá nhân hóa trải nghiệm người dùng, truyền tải thông điệp cam kết mỹ phẩm sạch và kích thích quyết định mua hàng thông qua các chiến dịch ưu đãi hạn dùng thông minh.
+Trang chủ là trung tâm điều hướng và tiếp thị trực quan của CANMAKE BEAUTY, tích hợp khả năng cá nhân hóa trải nghiệm người dùng, truyền tải thông điệp cam kết mỹ phẩm sạch và kích thích quyết định mua hàng thông qua các chiến dịch ưu đãi hạn dùng thông minh.
 
 > **[HƯỚNG DẪN CHỤP & CHÈN HÌNH 3.1 - GIAO DIỆN TRANG CHỦ VÀ KHU VỰC FEFO CLEARANCE]**  
 > - **Tệp hình ảnh có sẵn trong hệ thống:** `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_4_1_Giao_Dien_Trang_Chu.png`.  
@@ -4537,11 +4642,16 @@ Trang chủ là trung tâm điều hướng và tiếp thị trực quan của O
 >   + *Bước 4:* Nhấn tổ hợp phím `Alt + D` trên bàn phím để kích hoạt bảng điều khiển thuyết trình nhanh (Presentation Quick Bar) nếu cần hiển thị các phím tắt kịch bản thuyết trình bảo vệ bài tập lớn.  
 >   + *Bước 5:* Dùng công cụ Snipping Tool hoặc phím `Windows + Shift + S` chụp toàn bộ khung màn hình và chèn vào vị trí tương ứng trong báo cáo bài tập lớn.
 
+![Hình 3.1: Giao diện Trang chủ Luxury, Mega Menu Đa hình và Khu vực FEFO Smart Clearance](./Hinh_4_1_Giao_Dien_Trang_Chu.png)
+
+*Hình 3.1: Giao diện Trang chủ Luxury, Mega Menu Đa hình và Khu vực FEFO Smart Clearance*
+
+
 ```
 +--------------------------------------------------------------------------------------------------------------------+
 | [Thanh thông báo] Freeship đơn từ 500k | Hotline 1800 6868 | Tra cứu Showroom gần nhất | Phím tắt: Alt+D           |
 +--------------------------------------------------------------------------------------------------------------------+
-| [LOGO OMNI BEAUTY]   [ Ô tìm kiếm thông minh: Niacinamide, Retinol, Son dưỡng... (🔍) ]   [Wishlist] [Giỏ: (3)]    |
+| [LOGO CANMAKE BEAUTY]   [ Ô tìm kiếm thông minh: Niacinamide, Retinol, Son dưỡng... (🔍) ]   [Wishlist] [Giỏ: (3)]    |
 | MEGA MENU: Chăm sóc da (v) | Trang điểm (v) | Chăm sóc tóc | Thương hiệu Clean | Skincare Lab | Flash Sale FEFO    |
 +--------------------------------------------------------------------------------------------------------------------+
 |                                      HERO BANNER CHIẾN DỊCH THƯỢNG LƯU                                             |
@@ -4565,9 +4675,9 @@ Trang chủ là trung tâm điều hướng và tiếp thị trực quan của O
 
 #### Mô tả bố cục trực quan và các thành phần giao diện
 - **Thanh thông báo tiện ích và điều hướng thượng tầng:** Hiển thị thông điệp kích cầu miễn phí giao hàng toàn quốc cho đơn hàng từ 500.000 đồng, số điện thoại tổng đài tư vấn miễn cước, nút chọn chi nhánh showroom gần nhất và gợi ý phím tắt `Alt + D` mở bảng điều khiển thuyết trình.
-- **Header trung tâm và Mega Menu đa hình:** Logo thương hiệu OMNI BEAUTY được thiết kế cách điệu trang trọng. Ô tìm kiếm ứng dụng kỹ thuật giảm tải thao tác Debounce 300ms, hỗ trợ nhận diện danh pháp hoạt chất khoa học lẫn tên thông dụng. Hệ thống Mega Menu xổ xuống đa cấp khi rê chuột, phân loại sản phẩm theo cả công năng sử dụng, thương hiệu phân phối và nhóm hoạt chất điều trị.
+- **Header trung tâm và Mega Menu đa hình:** Logo thương hiệu CANMAKE BEAUTY được thiết kế cách điệu trang trọng. Ô tìm kiếm ứng dụng kỹ thuật giảm tải thao tác Debounce 300ms, hỗ trợ nhận diện danh pháp hoạt chất khoa học lẫn tên thông dụng. Hệ thống Mega Menu xổ xuống đa cấp khi rê chuột, phân loại sản phẩm theo cả công năng sử dụng, thương hiệu phân phối và nhóm hoạt chất điều trị.
 - **Hero Banner tương tác mượt mà:** Khối banner chính hiển thị hình ảnh độ phân giải cao quảng bá chiến dịch làm đẹp thuần chay, áp dụng kỹ thuật ưu tiên tải sớm `fetchpriority="high"` bảo đảm chỉ số LCP đạt dưới 1.2 giây.
-- **Khu vực Flash Sale xả hàng cận date FEFO:** Điểm nhấn công nghệ độc quyền của OMNI BEAUTY với đồng hồ đếm ngược chạy theo thời gian thực. Mỗi thẻ sản phẩm hiển thị đầy đủ thông tin số lô sản xuất, tháng và năm hết hạn, tỷ lệ giảm giá từ 45% đến 70%, cùng thanh đo tiến độ số lượng đã bán tạo hiệu ứng tâm lý khan hiếm chân thực.
+- **Khu vực Flash Sale xả hàng cận date FEFO:** Điểm nhấn công nghệ độc quyền của CANMAKE BEAUTY với đồng hồ đếm ngược chạy theo thời gian thực. Mỗi thẻ sản phẩm hiển thị đầy đủ thông tin số lô sản xuất, tháng và năm hết hạn, tỷ lệ giảm giá từ 45% đến 70%, cùng thanh đo tiến độ số lượng đã bán tạo hiệu ứng tâm lý khan hiếm chân thực.
 
 #### Phân tích luồng xử lý dữ liệu phía sau màn hình (Backend & Database Mapping)
 - Khi người dùng truy cập trang chủ, máy chủ ASP.NET Core kích hoạt Action `HomeController.Index()`. Để bảo đảm trang nạp tức thì trong vòng 2.85 mili-giây, hệ thống gọi `HomeSectionsViewComponent`. Thay vì gửi truy vấn trực tiếp vào SQL Server cho mỗi phiên duyệt, dịch vụ khai thác tầng bộ nhớ đệm `IMemoryCache` với khóa `Storefront_Home_Sections` có thời hạn lưu 30 phút.
@@ -4588,6 +4698,11 @@ Trang chi tiết sản phẩm là nơi hội tụ các giải pháp kỹ thuật
 >   + *Bước 3:* Nhấp vào các ô tròn Swatch màu son để kiểm tra hiệu ứng viền sáng và chuyển đổi ảnh swatch thực tế; bấm nút "Video Swatch Son Trên Da Thật" để kiểm tra trình phát video ngắn.  
 >   + *Bước 4:* Cuộn xuống phần tab "Thành phần Khoa học & EWG" để thấy bảng dữ liệu danh pháp INCI và thang điểm an toàn EWG được tô màu xanh/cam trực quan.  
 >   + *Bước 5:* Chụp ảnh toàn cảnh màn hình hoặc dùng công cụ cuộn trang (Full Page Screenshot) của trình duyệt để lưu lại ảnh sắc nét nhất.
+
+![Hình 3.2: Giao diện Chi tiết Sản phẩm Mỹ phẩm Chuẩn Quốc tế và Bảng thành phần INCI/EWG](./Hinh_4_2_Giao_Dien_Chi_Tiet_San_Pham_Full.png)
+
+*Hình 3.2: Giao diện Chi tiết Sản phẩm Mỹ phẩm Chuẩn Quốc tế và Bảng thành phần INCI/EWG*
+
 
 ```
 +--------------------------------------------------------------------------------------------------------------------+
@@ -4654,7 +4769,7 @@ Trang chi tiết sản phẩm là nơi hội tụ các giải pháp kỹ thuật
 
 ### 3. Hình 3.3 – Giao diện Khu vực Đánh giá Thực tế Đồng điệu theo Hồ sơ Làn da ("Match My Skin Twin" Reviews)
 
-Khu vực đánh giá sản phẩm của OMNI BEAUTY vượt qua giới hạn của các hệ thống bình luận sao đơn thuần bằng việc triển khai cơ chế kết nối những người tiêu dùng có cùng đặc tính làn da ("Match My Skin Twin"), gia tăng độ tin cậy và giá trị tham khảo của ý kiến cộng đồng.
+Khu vực đánh giá sản phẩm của CANMAKE BEAUTY vượt qua giới hạn của các hệ thống bình luận sao đơn thuần bằng việc triển khai cơ chế kết nối những người tiêu dùng có cùng đặc tính làn da ("Match My Skin Twin"), gia tăng độ tin cậy và giá trị tham khảo của ý kiến cộng đồng.
 
 > **[HƯỚNG DẪN CHỤP & CHÈN HÌNH 3.3 - GIAO DIỆN KHU VỰC ĐÁNH GIÁ ĐỒNG ĐIỆU HỒ SƠ LÀN DA]**  
 > - **Quy trình mở trình duyệt và chụp ảnh thực tế:**  
@@ -4663,6 +4778,11 @@ Khu vực đánh giá sản phẩm của OMNI BEAUTY vượt qua giới hạn c�
 >   + *Bước 3:* Nhấp chuột vào nút "Đã Mua Hàng Chính Hãng" để thấy danh sách các thẻ bình luận tự động lọc ngay lập tức mà không tải lại trang, hiển thị huy hiệu xanh lục chứng thực người mua hàng đã nhận lô FEFO chuẩn.  
 >   + *Bước 4:* Bấm vào nút "Viết Đánh Giá Của Bạn" để mở modal pop-up cho phép chấm điểm sao, chọn loại da, đánh giá mùi hương và tải lên ảnh thực tế.  
 >   + *Bước 5:* Dùng công cụ chụp màn hình chụp lại khối danh sách đánh giá kèm các huy hiệu loại da sinh động để chèn vào báo cáo.
+
+![Hình 3.3: Giao diện Khu vực Đánh giá Thực tế Đồng điệu theo Hồ sơ Làn da](./Hinh_4_2_Giao_Dien_Chi_Tiet_San_Pham_Full.png)
+
+*Hình 3.3: Giao diện Khu vực Đánh giá Thực tế Đồng điệu theo Hồ sơ Làn da*
+
 
 ```
 +--------------------------------------------------------------------------------------------------------------------+
@@ -4677,7 +4797,7 @@ Khu vực đánh giá sản phẩm của OMNI BEAUTY vượt qua giới hạn c�
 | [x] Tất cả (248)   [ ] Có hình ảnh (64)   [ ] Đã mua hàng chính hãng (240)   [ ] 5 Sao (218)   [ ] Cùng loại da của tôi|
 +--------------------------------------------------------------------------------------------------------------------+
 | THẺ ĐÁNH GIÁ 1: NGUYỄN HOÀNG MAI ANH               ⭐⭐⭐⭐⭐ 5.0 Sao | Ngày đăng: 28/10/2026 14:20                |
-| [✔ Đã mua hàng từ Omni Beauty - Lô FEFO Chuẩn]     HỒ SƠ LÀN DA: [ Da dầu mụn ] | [ Mối quan tâm: Lỗ chân lông ]   |
+| [✔ Đã mua hàng từ Canmake Beauty - Lô FEFO Chuẩn]     HỒ SƠ LÀN DA: [ Da dầu mụn ] | [ Mối quan tâm: Lỗ chân lông ]   |
 | ------------------------------------------------------------------------------------------------------------------ |
 | Tiêu chí trải nghiệm: [ Mùi hương: Dịu nhẹ tự nhiên ] [ Độ bám màu: 8 Giờ ] [ Cảm giác trên da: Nhẹ tênh không dính]|
 | "Màu son lên môi cực kỳ chuẩn xác giống như phần mô tả Studio thử màu trên web. Chất son mịn như nhung, không làm  |
@@ -4686,7 +4806,7 @@ Khu vực đánh giá sản phẩm của OMNI BEAUTY vượt qua giới hạn c�
 | [Ảnh chụp thật 1] [Ảnh chụp thật 2] (Khách hàng tự chụp khi nhận kiện hàng)                                        |
 +--------------------------------------------------------------------------------------------------------------------+
 | THẺ ĐÁNH GIÁ 2: TRẦN THỊ PHƯƠNG THẢO               ⭐⭐⭐⭐⭐ 5.0 Sao | Ngày đăng: 26/10/2026 09:15                |
-| [✔ Đã mua hàng từ Omni Beauty - Lô FEFO Chuẩn]     HỒ SƠ LÀN DA: [ Da hỗn hợp thiên khô ] | [ Tuổi: 24-28 ]        |
+| [✔ Đã mua hàng từ Canmake Beauty - Lô FEFO Chuẩn]     HỒ SƠ LÀN DA: [ Da hỗn hợp thiên khô ] | [ Tuổi: 24-28 ]        |
 | ------------------------------------------------------------------------------------------------------------------ |
 | Tiêu chí trải nghiệm: [ Mùi hương: Không mùi nhân tạo ] [ Độ ẩm mượt: Xuất sắc ] [ Cảm giác: Thấm nhanh dịu da ] |
 | "Mình săn được lô xả kho cận date giá giảm tới 45% nhưng nhận hàng hộp vẫn nguyên vẹn seal niêm phong, hạn dùng còn |
@@ -4699,7 +4819,7 @@ Khu vực đánh giá sản phẩm của OMNI BEAUTY vượt qua giới hạn c�
 - **Thanh lọc đánh giá thông minh đa tiêu chí:** Tích hợp các tab lọc nhanh dựa trên Alpine.js giúp người dùng chuyển đổi bộ lọc tức thời giữa các nhóm: tất cả đánh giá, đánh giá có đính kèm ảnh chụp thực tế, đánh giá từ người mua đã xác thực (Verified Buyer) và các đánh giá đạt điểm tuyệt đối 5 sao.
 - **Hệ thống huy hiệu Hồ sơ Làn da trên từng thẻ đánh giá (Skin Profile Badges):** Mỗi bình luận hiển thị ảnh đại diện cách điệu, tên khách hàng và hệ thống các huy hiệu màu chuyên sâu: loại da của người đánh giá (Da dầu mụn, Da khô, Da hỗn hợp thiên dầu, Da nhạy cảm), mối quan tâm chăm sóc da, độ tuổi và thời gian sử dụng sản phẩm.
 - **Tiêu chuẩn đo lường trải nghiệm đa giác quan:** Đánh giá không dừng lại ở mức văn bản tự do mà được chuẩn hóa thành các tiêu chí khoa học gồm Mùi hương (Scent), Độ bám màu / duy trì độ ẩm (Longevity) và Cảm giác biểu bì trên da (Skin Feel).
-- **Huy hiệu bảo chứng mua hàng chính ngạch (Verified Buyer Badge):** Biểu tượng tích xanh kèm dòng chữ "Đã mua hàng từ Omni Beauty - Lô FEFO Chuẩn", xác nhận người đánh giá đã thực sự đặt mua sản phẩm đó trên hệ thống và đã hoàn tất nhận hàng vật lý.
+- **Huy hiệu bảo chứng mua hàng chính ngạch (Verified Buyer Badge):** Biểu tượng tích xanh kèm dòng chữ "Đã mua hàng từ Canmake Beauty - Lô FEFO Chuẩn", xác nhận người đánh giá đã thực sự đặt mua sản phẩm đó trên hệ thống và đã hoàn tất nhận hàng vật lý.
 
 #### Phân tích luồng xử lý dữ liệu phía sau màn hình (Backend & Database Mapping)
 - Danh sách bình luận được kết xuất thông qua partial view `_ReviewSection.cshtml` với dữ liệu truyền từ thuộc tính `ProductDetailViewModel.Reviews`.
@@ -4720,6 +4840,11 @@ Tính năng trắc nghiệm chẩn đoán da trực tuyến đóng vai trò như
 >   + *Bước 3:* Hệ thống tự động chuyển sang Bước 2, tích chọn mối quan tâm: "Mụn Viêm & Thâm Sau Mụn" và "Lỗ Chân Lông To".  
 >   + *Bước 4:* Tại Bước 3, chọn mức ngân sách mong muốn "Tiêu Chuẩn (Standard Care - 300k đến 700k/món)".  
 >   + *Bước 5:* Màn hình kết quả xuất hiện hiển thị phác đồ 4 bước khoa học kèm nút bấm vàng kim "Thêm Trọn Bộ 4 Bước Vào Giỏ Hàng (Tiết Kiệm 15% - Mã COMBO15)". Chụp ảnh màn hình kết quả này để chèn vào báo cáo.
+
+![Hình 3.4: Giao diện Trắc nghiệm Chẩn đoán Da Thông minh (AI Routine Quiz & SmartFilter)](./Hinh_4_1_Giao_Dien_Trang_Chu.png)
+
+*Hình 3.4: Giao diện Trắc nghiệm Chẩn đoán Da Thông minh (AI Routine Quiz & SmartFilter)*
+
 
 ```
 +--------------------------------------------------------------------------------------------------------------------+
@@ -4779,6 +4904,11 @@ Khay so sánh mỹ phẩm là công cụ trợ giúp đắc lực giúp người
 >   + *Bước 4:* Bấm nút "So Sánh Ngay" để mở Modal ma trận đối sánh chi tiết `/Product/CompareMatrix`.  
 >   + *Bước 5:* Dùng công cụ chụp ảnh chụp lại toàn bộ cửa sổ Modal hiển thị bảng ma trận đối sánh nhiều dòng để chèn vào báo cáo.
 
+![Hình 3.5: Giao diện Khay So sánh Mỹ phẩm Chuyên sâu](./Hinh_4_2_Giao_Dien_Chi_Tiet_San_Pham.png)
+
+*Hình 3.5: Giao diện Khay So sánh Mỹ phẩm Chuyên sâu*
+
+
 ```
 +--------------------------------------------------------------------------------------------------------------------+
 | MA TRẬN ĐỐI SÁNH MỸ PHẨM CHUYÊN SÂU (PRODUCT COMPARISON MATRIX)                               [ ĐÓNG CỬA SỔ (X) ]  |
@@ -4824,7 +4954,7 @@ Khay so sánh mỹ phẩm là công cụ trợ giúp đắc lực giúp người
 
 ### 6. Hình 3.6 – Giao diện Giỏ hàng Thông minh, Phòng Lab Kiểm tra Xung đột Hoạt chất (Skincare Conflict Checker) & Quầy Chọn Mẫu thử Miễn phí (Free Sample Bar)
 
-Giỏ hàng của OMNI BEAUTY được thiết kế như một trung tâm kiểm duyệt an toàn da liễu tự động và kích cầu mua sắm thượng lưu, biến khâu chốt đơn đơn thuần trở thành trải nghiệm tương tác chăm sóc khách hàng chuyên sâu.
+Giỏ hàng của CANMAKE BEAUTY được thiết kế như một trung tâm kiểm duyệt an toàn da liễu tự động và kích cầu mua sắm thượng lưu, biến khâu chốt đơn đơn thuần trở thành trải nghiệm tương tác chăm sóc khách hàng chuyên sâu.
 
 > **[HƯỚNG DẪN CHỤP & CHÈN HÌNH 3.6 - GIAO DIỆN GIỎ HÀNG VÀ PHÒNG LAB CẢNH BÁO TƯƠNG KỴ]**  
 > - **Tệp hình ảnh có sẵn trong hệ thống:** `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_4_3_Giao_Dien_Gio_Hang_Va_Canh_Bao_Xung_Dot.png`.  
@@ -4835,6 +4965,11 @@ Giỏ hàng của OMNI BEAUTY được thiết kế như một trung tâm kiểm
 >   + *Bước 4:* Chú ý quan sát khung cảnh báo của Phòng Lab Da Liễu nổi bật màu đỏ cam phía trên bảng sản phẩm với nội dung: "CẢNH BÁO TƯƠNG KỴ HOẠT CHẤT DA LIỄU - CẶP RETINOL VÀ BHA" kèm lời khuyên chia lịch sử dụng sáng/tối.  
 >   + *Bước 5:* Chụp toàn bộ giao diện giỏ hàng sắc nét để chèn vào báo cáo bài tập lớn.
 
+![Hình 3.6: Giao diện Giỏ hàng Thông minh và Phòng Lab Cảnh báo Tương kỵ Hoạt chất](./Hinh_4_3_Giao_Dien_Gio_Hang_Va_Canh_Bao_Xung_Dot.png)
+
+*Hình 3.6: Giao diện Giỏ hàng Thông minh và Phòng Lab Cảnh báo Tương kỵ Hoạt chất*
+
+
 ```
 +--------------------------------------------------------------------------------------------------------------------+
 | GIỎ HÀNG CỦA BẠN (Đang chọn 2 sản phẩm cao cấp)                                       [ Tiếp tục chọn mỹ phẩm ]    |
@@ -4844,13 +4979,13 @@ Giỏ hàng của OMNI BEAUTY được thiết kế như một trung tâm kiểm
 | 🎁 CHÚC MỪNG! BẠN ĐÃ MỞ KHÓA TOÀN BỘ QUÀ TẶNG:                                                                     |
 | [✔ Đã đạt: MIỄN PHÍ VẬN CHUYỂN TOÀN QUỐC]   |   [✔ Đã đạt: TẶNG 02 MẪU THỬ SERUM MINI CAO CẤP TỰ CHỌN]            |
 +--------------------------------------------------------------------------------------------------------------------+
-| ⚠️ CẢNH BÁO PHÒNG LAB DA LIỄU OMNI BEAUTY: PHÁT HIỆN TƯƠNG KỴ HOẠT CHẤT TRONG GIỎ HÀNG (SKINCARE CONFLICT)!         |
+| ⚠️ CẢNH BÁO PHÒNG LAB DA LIỄU CANMAKE BEAUTY: PHÁT HIỆN TƯƠNG KỴ HOẠT CHẤT TRONG GIỎ HÀNG (SKINCARE CONFLICT)!         |
 | Mức độ cảnh báo: NGHIÊM TRỌNG (HIGH CONFLICT RISK)                                                                 |
 | - Cặp hoạt chất đối kháng phát hiện: [ Retinol 1.0% ] ⚡ [ Salicylic Acid (BHA 2%) ]                                |
 | - Sản phẩm liên đới trong giỏ hàng:                                                                                |
 |   + Kem Dưỡng Tái Tạo Ban Đêm Avene Retinol 30ml (Chứa Retinol)                                                    |
 |   + Dung Dịch Tẩy Tế Bào Chết Hóa Học Paula's Choice 30ml (Chứa Salicylic Acid BHA)                                |
-| - Hướng dẫn khoa học từ Bác sĩ Da liễu OMNI BEAUTY:                                                                |
+| - Hướng dẫn khoa học từ Bác sĩ Da liễu CANMAKE BEAUTY:                                                                |
 |   "Việc bôi đồng thời Retinol cùng BHA trong cùng một buổi tối có thể phá hủy hàng rào bảo vệ lipid, gây khô rát   |
 |   dữ dội, bong tróc diện rộng và tăng nguy cơ kích ứng ban đỏ.                                                     |
 |   Khuyến nghị phân chia lịch trình: Dùng BHA vào buổi tối Thứ 2-4-6 và dùng Retinol vào buổi tối Thứ 3-5-7!"        |
@@ -4876,7 +5011,7 @@ Giỏ hàng của OMNI BEAUTY được thiết kế như một trung tâm kiểm
 - **Khối tóm tắt tài chính và nút kêu gọi hành động:** Hiển thị rõ số tiền hàng, phí vận chuyển 0 đồng do đã đạt điều kiện miễn phí, số điểm thưởng thành viên VIP sẽ được tích lũy vào tài khoản và nút bấm màu vàng kim nổi bật dẫn hướng sang trang Checkout.
 
 #### Phân tích luồng xử lý dữ liệu phía sau màn hình (Backend & Database Mapping)
-- Khi nạp trang giỏ hàng, Action `CartController.Index()` trích xuất cookie giỏ hàng định dạng JSON đã mã hóa bảo vệ chống giả mạo `OmniBeauty_CartSession`. Dữ liệu được giải mã thành đối tượng `CartViewModel`.
+- Khi nạp trang giỏ hàng, Action `CartController.Index()` trích xuất cookie giỏ hàng định dạng JSON đã mã hóa bảo vệ chống giả mạo `CanmakeBeauty_CartSession`. Dữ liệu được giải mã thành đối tượng `CartViewModel`.
 - Đối với tính năng kiểm tra xung đột hoạt chất, Controller gọi dịch vụ `SkincareIngredientInteractionEngine.AnalyzeCartConflictsAsync(cartVm.Items)`. Động cơ thực hiện:
   + Lấy danh sách ID các sản phẩm có trong giỏ, truy vấn bảng `Products` nạp chuỗi thành phần `Ingredients`.
   + Phân tích chuỗi thành danh sách mã hoạt chất chuẩn hóa (như `RETINOL`, `SALICYLIC_ACID`, `GLYCOLIC_ACID`, `VITAMIN_C_LAA`, `BENZOYL_PEROXIDE`).
@@ -4897,9 +5032,14 @@ Trang thanh toán hoàn thiện trải nghiệm mua sắm bằng việc cung c�
 >   + *Bước 4:* Tại cột tóm tắt bên phải, tích chọn ô "Sử dụng điểm thưởng Loyalty (Ví có sẵn 500 điểm - tương đương giảm 50.000đ)" để kiểm tra số tiền thanh toán cuối cùng tự động trừ lùi. Chọn phương thức thanh toán "Chuyển khoản VietQR 24/7".  
 >   + *Bước 5:* Bấm nút "Xác Nhận Đặt Hàng" để chuyển sang trang hoàn tất `http://localhost:5116/Checkout/OrderSuccess`. Quan sát mã QR thanh toán động VietQR Napas247, đồng hồ đếm ngược giữ chỗ lô hàng FEFO 15 phút, và tấm Vé Nhận Hàng Ưu Tiên O2O kèm mã QR và mã PIN 6 số bí mật. Chụp ảnh màn hình này chèn vào báo cáo.
 
+![Hình 3.7: Giao diện Thanh toán Đa kênh và Vé Nhận hàng O2O](./Hinh_4_3_Giao_Dien_Gio_Hang_Va_Canh_Bao_Xung_Dot.png)
+
+*Hình 3.7: Giao diện Thanh toán Đa kênh và Vé Nhận hàng O2O*
+
+
 ```
 +--------------------------------------------------------------------------------------------------------------------+
-| THANH TOÁN ĐƠN HÀNG OMNI BEAUTY (CHECKOUT)                                              [ Quay lại giỏ hàng ]      |
+| THANH TOÁN ĐƠN HÀNG CANMAKE BEAUTY (CHECKOUT)                                              [ Quay lại giỏ hàng ]      |
 +-------------------------------------------------------------------+------------------------------------------------+
 | CỘT TRÁI (THÔNG TIN NHẬN HÀNG & PHƯƠNG THỨC THANH TOÁN):          | CỘT PHẢI (TÓM TẮT ĐƠN HÀNG & CẤN TRỪ ƯU ĐÃI):  |
 | 1. Thông Tin Khách Hàng:                                          | Mỹ phẩm trong đơn:                             |
@@ -4949,12 +5089,12 @@ Trang thanh toán hoàn thiện trải nghiệm mua sắm bằng việc cung c�
 
 ### TIỂU KẾT MỤC 3.2.1
 
-Mục 3.2.1 đã mô tả và phân tích tường tận 7 màn hình giao diện cốt lõi của Phân hệ Giao diện Khách hàng (Luxury Storefront & Customer Portal) trong hệ thống OMNI BEAUTY. Sự kết hợp nhuần nhuyễn giữa thẩm mỹ giao diện thượng lưu, tính công thái học tối ưu cho hành vi người tiêu dùng và các giải pháp xử lý dữ liệu chuẩn xác ở tầng Backend (từ bóc tách hoạt chất INCI, kiểm tra tương kỵ da liễu tự động, đến cấp phát kho FEFO và cấn trừ điểm tích lũy) đã tạo nên một nền tảng thương mại điện tử mỹ phẩm toàn diện, tin cậy và đạt chuẩn mực kỹ thuật quốc tế.
+Mục 3.2.1 đã mô tả và phân tích tường tận 7 màn hình giao diện cốt lõi của Phân hệ Giao diện Khách hàng (Luxury Storefront & Customer Portal) trong hệ thống CANMAKE BEAUTY. Sự kết hợp nhuần nhuyễn giữa thẩm mỹ giao diện thượng lưu, tính công thái học tối ưu cho hành vi người tiêu dùng và các giải pháp xử lý dữ liệu chuẩn xác ở tầng Backend (từ bóc tách hoạt chất INCI, kiểm tra tương kỵ da liễu tự động, đến cấp phát kho FEFO và cấn trừ điểm tích lũy) đã tạo nên một nền tảng thương mại điện tử mỹ phẩm toàn diện, tin cậy và đạt chuẩn mực kỹ thuật quốc tế.
 
 
 ### 3.2.2. Phân hệ Giao diện Quản trị Điều hành & Bán lẻ Đa kênh (Admin Back-Office, Smart POS, Kho Lô FEFO, Visual Site Customizer & Tài chính)
 
-Nếu phân hệ Storefront là bộ mặt thương hiệu sang trọng tiếp xúc với người tiêu dùng, thì phân hệ Quản trị Điều hành và Bán lẻ Đa kênh (Admin Back-Office & Retail System) chính là bộ máy xương sống vận hành toàn bộ chuỗi bán lẻ OMNI BEAUTY. Được thiết kế chuyên biệt theo tiêu chuẩn công thái học phần mềm doanh nghiệp, phân hệ cung cấp các công cụ sắc bén cho từng cấp quản lý và nhân viên tác nghiệp: từ bảng điều khiển điều hành số (Digital Executive Dashboard), trình thiết kế giao diện không cần lập trình (Visual Site Customizer), hệ thống ma trận phân quyền động PBAC 51 quyền hạt nhân, công cụ giám sát hạn dùng kho dược mỹ phẩm FEFO, đến màn hình máy tính tiền quầy bán lẻ Smart POS màn hình đôi và sổ cái tài chính giá vốn đích danh theo từng số lô hàng.
+Nếu phân hệ Storefront là bộ mặt thương hiệu sang trọng tiếp xúc với người tiêu dùng, thì phân hệ Quản trị Điều hành và Bán lẻ Đa kênh (Admin Back-Office & Retail System) chính là bộ máy xương sống vận hành toàn bộ chuỗi bán lẻ CANMAKE BEAUTY. Được thiết kế chuyên biệt theo tiêu chuẩn công thái học phần mềm doanh nghiệp, phân hệ cung cấp các công cụ sắc bén cho từng cấp quản lý và nhân viên tác nghiệp: từ bảng điều khiển điều hành số (Digital Executive Dashboard), trình thiết kế giao diện không cần lập trình (Visual Site Customizer), hệ thống ma trận phân quyền động PBAC 51 quyền hạt nhân, công cụ giám sát hạn dùng kho dược mỹ phẩm FEFO, đến màn hình máy tính tiền quầy bán lẻ Smart POS màn hình đôi và sổ cái tài chính giá vốn đích danh theo từng số lô hàng.
 
 Dưới đây là phân tích chi tiết 9 màn hình quản trị và vận hành cốt lõi của hệ thống, bao gồm hướng dẫn thực nghiệm chụp ảnh minh chứng từ hệ thống đang chạy thực tế, mô tả trực quan bố cục và các chỉ số giao diện, cùng phân tích chuyên sâu về nghiệp vụ, phân quyền PBAC và luồng xử lý dữ liệu tầng Backend kết nối cơ sở dữ liệu.
 
@@ -4973,9 +5113,14 @@ Trung tâm Điều hành Quản trị là tháp chỉ huy số dành riêng cho 
 >   + *Bước 4:* Quan sát thanh công cụ đầu trang với bộ lọc chi nhánh `StoreSelector`, 6 thẻ chỉ số KPI thời gian thực, biểu đồ đường cong xu hướng doanh thu Online vs POS, danh sách cảnh báo tồn kho lô hạn khẩn cấp và biểu tượng chuông thông báo đẩy SignalR ở góc phải trên cùng.  
 >   + *Bước 5:* Dùng công cụ chụp ảnh màn hình lưu lại toàn cảnh giao diện làm việc này để chèn vào báo cáo.
 
+![Hình 3.8: Giao diện Trung tâm Điều hành Admin Dashboard](./Hinh_4_4_Giao_Dien_Bang_Dieu_Khien_Admin_Dashboard.png)
+
+*Hình 3.8: Giao diện Trung tâm Điều hành Admin Dashboard*
+
+
 ```
 +--------------------------------------------------------------------------------------------------------------------+
-| OMNI BEAUTY ADMIN | Chi nhánh: [ Toàn chuỗi v ] | Kỳ báo cáo: [ Tháng này v ] | (🔔 3) [Tin nhắn: 2] [SuperAdmin v]|
+| CANMAKE BEAUTY ADMIN | Chi nhánh: [ Toàn chuỗi v ] | Kỳ báo cáo: [ Tháng này v ] | (🔔 3) [Tin nhắn: 2] [SuperAdmin v]|
 +--------------------------------------------------------------------------------------------------------------------+
 | [ THẺ 1: DOANH THU CHUỖI ]  | [ THẺ 2: ĐƠN CHỜ DUYỆT ]   | [ THẺ 3: DOANH SỐ POS ]    | [ THẺ 4: LÔ CẬN DATE FEFO] |
 | 1.845.250.000 đ            | 28 Đơn hàng mới            | 48.650.000 đ (Hôm nay)     | 12 Lô cần xả hàng          |
@@ -5036,6 +5181,11 @@ Giao diện quản trị menu mang lại khả năng tùy biến cấu trúc câ
 >   + *Bước 4:* Thử đổi đường dẫn thân thiện (Slug) của một danh mục và chuyển sang tab "Lịch Sử Chuyển Hướng SEO 301" để thấy hệ thống tự động ghi lại ánh xạ từ URL cũ sang URL mới.  
 >   + *Bước 5:* Nhấn nút "Xóa Bộ Đệm Cache Menu" để kiểm tra thông báo Toast màu xanh đồng bộ dữ liệu ra Storefront và chụp ảnh màn hình chèn vào báo cáo.
 
+![Hình 3.9: Giao diện Quản trị Cây Menu Đa hình và SEO 301](./Hinh_4_5_Giao_Dien_Quan_Tri_Menu_Da_Hinh_SEO.png)
+
+*Hình 3.9: Giao diện Quản trị Cây Menu Đa hình và SEO 301*
+
+
 ```
 +--------------------------------------------------------------------------------------------------------------------+
 | QUẢN TRỊ MENU ĐA HÌNH VÀ BẢO TOÀN THỨ HẠNG SEO 301           [+ THÊM NÚT MENU MỚI] [🧹 XÓA CACHE MENU ĐỒNG BỘ]    |
@@ -5086,16 +5236,21 @@ Visual Site Customizer là công cụ đồ họa cao cấp cho phép đội ng�
 >   + *Bước 4:* Thử kéo thả chuột hoán đổi vị trí giữa khối "Flash Sale FEFO" và khối "Bộ Sưu Tập Nổi Bật", hoặc đổi màu chủ đạo Primary Color từ Rose Gold sang Deep Wine; quan sát khung Preview bên phải đổi màu tức thì trong vòng 50ms mà không tải lại trang.  
 >   + *Bước 5:* Chụp toàn cảnh màn hình làm việc 2 cột này để chèn vào báo cáo bài tập lớn.
 
+![Hình 3.10: Giao diện Quản trị Cấu hình Giao diện & Menu](./Hinh_4_5_Giao_Dien_Quan_Tri_Menu_Da_Hinh_SEO.png)
+
+*Hình 3.10: Giao diện Quản trị Cấu hình Giao diện & Menu*
+
+
 ```
 +--------------------------------------------------------------------------------------------------------------------+
 | TRÌNH TÙY BIẾN GIAO DIỆN TRỰC QUAN (VISUAL SITE CUSTOMIZER)          [ LƯU BẢN NHÁP (DRAFT) ] [ 🚀 XUẤT BẢN THỰC TẾ ] |
 +--------------------------------------+-----------------------------------------------------------------------------+
 | SIDEBAR CẤU HÌNH (30% WIDTH)         | KHUNG LIVE PREVIEW TRỰC QUAN (70% WIDTH - CHUẨN POSTMESSAGE < 50MS)        |
-| Chọn trang: [ Trang Chủ (Home) v ]   | [ Chế độ xem: (🖥️ Máy tính)  (📱 Điện thoại) ] | URL: https://omnibeauty.vn|
+| Chọn trang: [ Trang Chủ (Home) v ]   | [ Chế độ xem: (🖥️ Máy tính)  (📱 Điện thoại) ] | URL: https://canmakebeauty.vn|
 | ------------------------------------ | --------------------------------------------------------------------------- |
 | 1. BẢNG MÀU THƯƠNG HIỆU (PALETTE):   | +-------------------------------------------------------------------------+ |
 | - Màu chủ đạo: [ ■ #B76E79 ] (Rose)  | | [Thanh thông báo] Freeship đơn từ 500k | Hotline 1800 6868               | |
-| - Màu điểm nhấn:[ ■ #1B4D3E ] (Green)| | [LOGO] OMNI BEAUTY  [ Tìm kiếm...              ]  [Wishlist] [Giỏ: 3]     | |
+| - Màu điểm nhấn:[ ■ #1B4D3E ] (Green)| | [LOGO] CANMAKE BEAUTY  [ Tìm kiếm...              ]  [Wishlist] [Giỏ: 3]     | |
 | - Màu nền trang:[ ■ #FFFDFB ] (Pearl)| | ----------------------------------------------------------------------- | |
 | ------------------------------------ | | HERO BANNER MÙA THU (ẢNH MỚI CẬP NHẬT TỨC THÌ)                          | |
 | 2. SẮP ĐẶT THỨ TỰ KHỐI (SECTIONS):   | | "ĐẠI TIỆC DƯỢC MỸ PHẨM CHUẨN FEFO - SALE ĐẾN 70%"                        | |
@@ -5124,7 +5279,7 @@ Visual Site Customizer là công cụ đồ họa cao cấp cho phép đội ng�
 
 ### 4. Hình 3.11 – Giao diện Ma trận Phân quyền Hạt nhân Động (PBAC Permission Matrix 51 Quyền x 6 Vai trò) & Nhật ký Kiểm toán (`AuditLog`)
 
-Hệ thống phân quyền PBAC kết hợp Nhật ký Kiểm toán là bức tường thành an ninh mạng vững chắc của chuỗi OMNI BEAUTY, đảm bảo kiểm soát truy cập theo nguyên tắc đặc quyền tối thiểu và truy vết mọi biến động dữ liệu quan trọng.
+Hệ thống phân quyền PBAC kết hợp Nhật ký Kiểm toán là bức tường thành an ninh mạng vững chắc của chuỗi CANMAKE BEAUTY, đảm bảo kiểm soát truy cập theo nguyên tắc đặc quyền tối thiểu và truy vết mọi biến động dữ liệu quan trọng.
 
 > **[HƯỚNG DẪN CHỤP & CHÈN HÌNH 3.11 - GIAO DIỆN MA TRẬN PHÂN QUYỀN PBAC VÀ AUDIT LOG]**  
 > - **Tệp hình ảnh có sẵn trong hệ thống:** `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_4_6_Giao_Dien_Ma_Tran_Phan_Quyen_PBAC.png`.  
@@ -5134,6 +5289,11 @@ Hệ thống phân quyền PBAC kết hợp Nhật ký Kiểm toán là bức t�
 >   + *Bước 3:* Chọn vai trò `StoreManager` trong dropdown để thấy bảng lưới 51 quyền hạt nhân chia theo 17 module nghiệp vụ với các công tắc Toggle Switch xanh lá.  
 >   + *Bước 4:* Mở tab mới truy cập `http://localhost:5116/Admin/AuditLog`, quan sát bảng nhật ký theo dõi lịch sử thao tác của các tài khoản và nhấp vào nút "Xem JSON Diff" để mở modal so sánh dữ liệu trước và sau khi sửa.  
 >   + *Bước 5:* Chụp màn hình ma trận phân quyền hoặc cửa sổ modal JSON Diff để chèn vào báo cáo.
+
+![Hình 3.11: Giao diện Ma trận Phân quyền Động PBAC và Nhật ký Kiểm toán Audit Log](./Hinh_4_6_Giao_Dien_Ma_Tran_Phan_Quyen_PBAC.png)
+
+*Hình 3.11: Giao diện Ma trận Phân quyền Động PBAC và Nhật ký Kiểm toán Audit Log*
+
 
 ```
 +--------------------------------------------------------------------------------------------------------------------+
@@ -5190,6 +5350,11 @@ Giao diện giám sát kho là công cụ thiết yếu của Thủ kho, giải 
 >   + *Bước 4:* Quan sát bảng lưới mật độ cao với các cột số lô, hạn sử dụng và hệ thống tem nhãn màu sắc: Màu Đỏ (Hết hạn), Màu Cam (Cận date <90 ngày) và Màu Xanh (An toàn).  
 >   + *Bước 5:* Bấm vào nút "Tạo Phiếu Điều Chuyển Kho" trên một lô hàng cận date để thấy modal lập phiếu điều chuyển 3 bước xuất hiện và chụp ảnh màn hình chèn vào báo cáo.
 
+![Hình 3.12: Giao diện Giám sát Kho Lô Hạn FEFO](./Hinh_4_7_Giao_Dien_Giam_Sat_Ton_Kho_FEFO.png)
+
+*Hình 3.12: Giao diện Giám sát Kho Lô Hạn FEFO*
+
+
 ```
 +--------------------------------------------------------------------------------------------------------------------+
 | GIÁM SÁT TỒN KHO LÔ HẠN FEFO | Chi nhánh: [ Showroom Cầu Giấy v ] | Lọc Date: [ Cận date <90 ngày v ] [TÌM KIẾM 🔍]|
@@ -5239,6 +5404,11 @@ Giao diện quản lý đơn hàng kết nối thông suốt giữa các giao d�
 >   + *Bước 3:* Nhấp chuột vào mã đơn hàng `#ORD-20261104-7892` hoặc đơn O2O mới phát sinh để mở trang chi tiết đơn hàng `http://localhost:5116/Admin/Order/Details/7`.  
 >   + *Bước 4:* Quan sát bảng chi tiết sản phẩm hiển thị mã số lô FEFO đích danh `BatchNumber`, ngày hết hạn và vị trí ngăn kệ kho; kiểm tra mã vận đơn đối tác Giao Hàng Nhanh GHN và nút "In Phiếu Đóng Gói Kèm Barcode".  
 >   + *Bước 5:* Chụp ảnh toàn cảnh màn hình chi tiết đơn hàng để chèn vào báo cáo.
+
+![Hình 3.13: Giao diện Quản lý Đơn hàng và Cấp phát Lô FEFO](./Hinh_4_8_Giao_Dien_Quan_Ly_Don_Hang_Cap_Phat_Lo.png)
+
+*Hình 3.13: Giao diện Quản lý Đơn hàng và Cấp phát Lô FEFO*
+
 
 ```
 +--------------------------------------------------------------------------------------------------------------------+
@@ -5290,9 +5460,14 @@ Màn hình POS là công cụ làm việc cường độ cao của Nhân viên t
 >   + *Bước 4:* Bấm phím tắt `F2` hoặc gõ số điện thoại `0912.345.678` để nạp thông tin khách hàng VIP và kiểm tra số điểm tích lũy có thể tiêu điểm; bấm nút "Giao Đơn O2O Click & Collect" để mở modal nhập mã PIN nhận hàng.  
 >   + *Bước 5:* Bấm phím `F4` bật phương thức thanh toán VietQR động và chụp ảnh toàn bộ giao diện bán hàng Kiosk để chèn vào báo cáo.
 
+![Hình 3.14: Giao diện Bán hàng tại Quầy Smart POS](./Hinh_4_9_Giao_Dien_Man_Hinh_Ban_Hang_POS.png)
+
+*Hình 3.14: Giao diện Bán hàng tại Quầy Smart POS*
+
+
 ```
 +--------------------------------------------------------------------------------------------------------------------+
-| SMART POS KIOSK - OMNI BEAUTY | Ca: SÁNG (Thu ngân: Hoàng Thu Ngân) | Điểm bán: SHOWROOM CẦU GIẤY | [🔒 ĐÓNG CA F10]  |
+| SMART POS KIOSK - CANMAKE BEAUTY | Ca: SÁNG (Thu ngân: Hoàng Thu Ngân) | Điểm bán: SHOWROOM CẦU GIẤY | [🔒 ĐÓNG CA F10]  |
 +-------------------------------------------------------------------+------------------------------------------------+
 | [F1] QUÉT MÃ VẠCH EAN-13 / SKU: [ 8935028401923               🔍] | [F2] KHÁCH HÀNG: [ 0912.345.678             🔍] |
 +-------------------------------------------------------------------+ Tên: Lê Hoàng Yến | Hạng: KIM CƯƠNG (VIP)      |
@@ -5330,7 +5505,7 @@ Màn hình POS là công cụ làm việc cường độ cao của Nhân viên t
 
 ### 8. Hình 3.15 – Giao diện Quản lý Mở/Đóng Ca Thu ngân POS & Kiểm toán Đối soát Két tiền mặt
 
-Giao diện quản lý ca bán hàng hiện thực hóa quy trình kiểm toán két tiền mù (Blind Cash Drawer Audit), thiết lập kỷ luật tài chính nghiêm ngặt nhất cho toàn bộ mạng lưới cửa hàng bán lẻ của OMNI BEAUTY.
+Giao diện quản lý ca bán hàng hiện thực hóa quy trình kiểm toán két tiền mù (Blind Cash Drawer Audit), thiết lập kỷ luật tài chính nghiêm ngặt nhất cho toàn bộ mạng lưới cửa hàng bán lẻ của CANMAKE BEAUTY.
 
 > **[HƯỚNG DẪN CHỤP & CHÈN HÌNH 3.15 - GIAO DIỆN KIỂM TOÁN ĐÓNG CA THU NGÂN]**  
 > - **Tệp hình ảnh có sẵn trong hệ thống:** `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_4_10_Giao_Dien_Dong_Mo_Ca_Va_Doi_Soat_Ket.png`.  
@@ -5340,6 +5515,11 @@ Giao diện quản lý ca bán hàng hiện thực hóa quy trình kiểm toán 
 >   + *Bước 3:* Nhập số lượng tờ tiền thực đếm trong két cho 9 mệnh giá tiền mặt Việt Nam từ 1.000đ đến 500.000đ (ví dụ: 12 tờ 500k, 25 tờ 200k, 30 tờ 100k...) để hệ thống tự động tính tổng tiền mặt thực tế.  
 >   + *Bước 4:* Bấm nút "Xác Nhận Nộp Tiền & Khóa Sổ Ca Bán Hàng" để hệ thống mở khóa bảng kết quả đối soát tự động, hiển thị số tiền kỳ vọng, số tiền thực tế và khoản chênh lệch két tiền kèm ô nhập giải trình.  
 >   + *Bước 5:* Chụp ảnh toàn cảnh cửa sổ kiểm toán két mù này để chèn vào báo cáo bài tập lớn.
+
+![Hình 3.15: Giao diện Kiểm toán Đóng ca Thu ngân và Đối soát Két tiền mù](./Hinh_4_10_Giao_Dien_Dong_Mo_Ca_Va_Doi_Soat_Ket.png)
+
+*Hình 3.15: Giao diện Kiểm toán Đóng ca Thu ngân và Đối soát Két tiền mù*
+
 
 ```
 +--------------------------------------------------------------------------------------------------------------------+
@@ -5401,6 +5581,11 @@ Giao diện tài chính là công cụ tối cao của Giám đốc Tài chính 
 >   + *Bước 4:* Quan sát bảng cân đối P&L với dòng Doanh thu thuần, dòng Giá vốn hàng bán (COGS) tính chuẩn xác theo từng số lô hàng FEFO xuất bán, Lợi nhuận gộp và Lợi nhuận ròng.  
 >   + *Bước 5:* Nhấp nút "Xuất Báo Cáo Excel (.xlsx)" để kiểm tra tính năng xuất file và chụp ảnh màn hình báo cáo tài chính chèn vào báo cáo bài tập lớn.
 
+![Hình 3.16: Giao diện Báo cáo Tài chính và Quản trị Doanh thu Toàn chuỗi](./Hinh_4_4_Giao_Dien_Bang_Dieu_Khien_Admin_Dashboard.png)
+
+*Hình 3.16: Giao diện Báo cáo Tài chính và Quản trị Doanh thu Toàn chuỗi*
+
+
 ```
 +--------------------------------------------------------------------------------------------------------------------+
 | BÁO CÁO KẾT QUẢ HOẠT ĐỘNG KINH DOANH (P&L STATEMENT) | Kỳ: [ Tháng Này v ] | Chi nhánh: [ Toàn chuỗi v ] [📊 XUẤT EXCEL] |
@@ -5448,7 +5633,7 @@ Mục 3.2.2 đã hoàn thành việc mô tả và phân tích chi tiết toàn d
 
 ## 3.3. Triển khai Kiểm thử và Đánh giá chất lượng hệ thống
 
-Kiểm thử phần mềm là giai đoạn thực nghiệm then chốt nhằm thẩm định mức độ hoàn thiện, tính ổn định và sự chuẩn xác của hệ thống website quản lý bán hàng chuỗi mỹ phẩm OMNI BEAUTY trước khi đưa vào vận hành thực tế. Quá trình kiểm thử được triển khai bài bản, kết hợp giữa các phương pháp kiểm thử tự động đa tầng với các kịch bản kiểm thử hộp đen chi tiết bám sát thực tế chuỗi bán lẻ.
+Kiểm thử phần mềm là giai đoạn thực nghiệm then chốt nhằm thẩm định mức độ hoàn thiện, tính ổn định và sự chuẩn xác của hệ thống website quản lý bán hàng chuỗi mỹ phẩm CANMAKE BEAUTY trước khi đưa vào vận hành thực tế. Quá trình kiểm thử được triển khai bài bản, kết hợp giữa các phương pháp kiểm thử tự động đa tầng với các kịch bản kiểm thử hộp đen chi tiết bám sát thực tế chuỗi bán lẻ.
 
 ---
 
@@ -5462,7 +5647,7 @@ Chiến lược kiểm thử của dự án được thiết kế dựa trên m�
 4. **Tầng 4 - Kiểm thử Hiệu năng Chịu tải Đồng thời (High-Concurrency Load Testing với `k6`):** Giả lập môi trường bùng nổ lưu lượng truy cập trong các chiến dịch Flash Sale với hàng trăm người dùng ảo gửi yêu cầu đặt hàng cùng một phần nghìn giây, nhằm phát hiện sớm các hiện tượng nghẽn cổ chai (Bottleneck), khóa chết (Deadlock) hoặc bán lố số lượng tồn kho khả dụng.
 
 ##### Dữ liệu khởi tạo kiểm thử chuẩn hóa (Seed Data)
-Để bảo đảm tính khách quan, lặp lại được và phản ánh chân thực cơ cấu tổ chức phân quyền của chuỗi bán lẻ mỹ phẩm OMNI BEAUTY, hệ thống đã khởi tạo sẵn bộ dữ liệu mẫu gồm 12 tài khoản đại diện cho 6 nhóm vai trò tác nghiệp và các điểm bán trong lớp `DbInitializer.cs` và tài liệu hướng dẫn `TEST_ACCOUNTS.md`.
+Để bảo đảm tính khách quan, lặp lại được và phản ánh chân thực cơ cấu tổ chức phân quyền của chuỗi bán lẻ mỹ phẩm CANMAKE BEAUTY, hệ thống đã khởi tạo sẵn bộ dữ liệu mẫu gồm 12 tài khoản đại diện cho 6 nhóm vai trò tác nghiệp và các điểm bán trong lớp `DbInitializer.cs` và tài liệu hướng dẫn `TEST_ACCOUNTS.md`.
 
 ###### Bảng 3.2: Danh sách 12 Tài khoản kiểm thử tiêu chuẩn theo 6 Vai trò và các Chi nhánh cửa hàng trong `DbInitializer.cs` và `TEST_ACCOUNTS.md`
 
@@ -5531,7 +5716,7 @@ Phương pháp kiểm thử hộp đen được áp dụng để kiểm chứng 
 
 | Mã bước | Hành động thực hiện | Dữ liệu đầu vào | Kết quả mong đợi | Kết quả thực tế | Trạng thái |
 |:---:|:---|:---|:---|:---|:---:|
-| 1 | Truy cập trang đăng nhập quản trị `/admin/auth/login` | Trình duyệt Chrome ẩn danh | Hiển thị form đăng nhập quản trị với logo OMNI BEAUTY và nút Quick-Fill | Giao diện hiển thị đúng chuẩn, các trường nhập liệu sẵn sàng | **PASS** |
+| 1 | Truy cập trang đăng nhập quản trị `/admin/auth/login` | Trình duyệt Chrome ẩn danh | Hiển thị form đăng nhập quản trị với logo CANMAKE BEAUTY và nút Quick-Fill | Giao diện hiển thị đúng chuẩn, các trường nhập liệu sẵn sàng | **PASS** |
 | 2 | Nhập tài khoản và mật khẩu Quản trị viên | `superadmin` / `Admin@123` | Đăng nhập thành công, sinh Cookie `AdminScheme`, chuyển hướng về `/Admin/Dashboard` | Chuyển hướng Dashboard mượt mà, hiển thị tên "Nguyễn Quản Trị" | **PASS** |
 | 3 | Mở tab mới truy cập trang chủ khách hàng `/` | Giữ nguyên phiên đăng nhập | Hiển thị giao diện Storefront, menu nhận diện tài khoản quản trị viên đăng nhập | Storefront hiển thị bình thường với thanh thông báo tiện ích | **PASS** |
 | 4 | Thử nhấp nút "Thêm vào giỏ hàng" một sản phẩm mỹ phẩm | Sản phẩm bất kỳ | Hệ thống kích hoạt cơ chế `BlockAdminShopping`, hiển thị cảnh báo không cho phép Admin mua hàng cá nhân | Hiển thị Toast cảnh báo: "Tài khoản quản trị không được dùng để đặt hàng bán lẻ" | **PASS** |
@@ -5637,6 +5822,11 @@ Trong môi trường bán lẻ mỹ phẩm, các sự kiện khuyến mại gi�
 > *Đường dẫn tệp hình ảnh có sẵn trong hệ thống:* `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_5_1_Ket_Qua_Kiem_Thu_Chiu_Tai_K6.png`.  
 > *Mô tả hình:* Ảnh chụp terminal kết quả đo kiểm công cụ `k6` thực thi kịch bản đặt hàng Flash Sale đồng thời, hiển thị các chỉ số kiểm tra đạt chuẩn 100%, tỷ lệ lỗi 5xx bằng 0.00%, và cấp phát kho thành công chính xác tuyệt đối.
 
+![Hình 3.17: Kết quả Kiểm thử Chịu tải k6 và Chống bán lố Flash Sale](./Hinh_5_1_Ket_Qua_Kiem_Thu_Chiu_Tai_K6.png)
+
+*Hình 3.17: Kết quả Kiểm thử Chịu tải k6 và Chống bán lố Flash Sale*
+
+
 ##### (1) Thiết lập kịch bản kiểm thử chịu tải cực hạn
 - **Công cụ thực thi:** `k6` phiên bản v0.50.x (Grafana Labs) chạy trên nền tảng Node.js / V8 Engine.
 - **Tập tin kịch bản nguồn:** `scripts/loadtest/fefo_flashsale_concurrency_test.js`.
@@ -5708,7 +5898,7 @@ Dưới đây là bảng tổng hợp đối chiếu giữa 5 mục tiêu nghiê
 
 ### 3.4.2. Nhìn nhận thẳng thắn một số hạn chế còn tồn tại của hệ thống
 
-Bên cạnh những kết quả nổi bật đã đạt được, do giới hạn về mặt thời gian và nguồn lực trong khuôn khổ một bài tập lớn môn học, hệ thống OMNI BEAUTY vẫn còn một số điểm hạn chế nhất định cần tiếp tục hoàn thiện:
+Bên cạnh những kết quả nổi bật đã đạt được, do giới hạn về mặt thời gian và nguồn lực trong khuôn khổ một bài tập lớn môn học, hệ thống CANMAKE BEAUTY vẫn còn một số điểm hạn chế nhất định cần tiếp tục hoàn thiện:
 - **Phụ thuộc vào kiến trúc cơ sở dữ liệu đơn máy chủ vật lý (Single Database Instance):** Mặc dù SQL Server 2022 đã được tối ưu hóa chỉ mục phức hợp rất mạnh mẽ, việc toàn bộ 65 bảng dữ liệu tập trung trên một máy chủ vật lý duy nhất có thể tiềm ẩn rủi ro trở thành điểm nghẽn cổ chai (Single Point of Failure) khi quy mô chuỗi bùng nổ lên hàng trăm showroom với hàng chục ngàn đơn hàng phát sinh đồng thời mỗi giờ.
 - **Bộ nhớ đệm phân tán chưa được triển khai hoàn chỉnh:** Hệ thống hiện đang khai thác tối đa bộ nhớ đệm nội bộ `IMemoryCache` của tiến trình ASP.NET Core. Cơ chế này hoạt động hoàn hảo trên môi trường máy chủ đơn lẻ, nhưng khi triển khai trên cụm máy chủ cân bằng tải (Web Farm / Kubernetes Cluster), việc đồng bộ làm sạch bộ đệm (Cache Invalidation) khi cập nhật menu hoặc ma trận phân quyền sẽ đòi hỏi phải tích hợp thêm giải pháp bộ nhớ đệm phân tán tập trung.
 - **Cơ chế AI Da liễu dựa trên tập luật chuyên gia (Rule-based Matrix):** Hiện tại, các quy tắc tương kỵ hoạt chất và phác đồ chăm sóc da hoạt động dựa trên tập luật cứng (Hard Rules) được các chuyên gia da liễu thẩm định nạp sẵn vào cơ sở dữ liệu. Hệ thống chưa tích hợp các mô hình học máy tự thích ứng (Machine Learning) để có thể tự động học và suy luận ra các xu hướng hoạt chất mới nổi trên thị trường từ phản hồi của cộng đồng.
@@ -5717,11 +5907,11 @@ Bên cạnh những kết quả nổi bật đã đạt được, do giới hạ
 
 ### 3.4.3. Đề xuất 4 định hướng nâng cấp và phát triển hệ thống trong tương lai (Roadmap v3.0+)
 
-Để đưa giải pháp OMNI BEAUTY trở thành một hệ sinh thái công nghệ bán lẻ mỹ phẩm toàn diện, sẵn sàng chuyển giao và ứng dụng thực tiễn cho các tập đoàn bán lẻ quy mô lớn, lộ trình nâng cấp phiên bản v3.0+ được định hướng với 4 giải pháp công nghệ mũi nhọn sau:
+Để đưa giải pháp CANMAKE BEAUTY trở thành một hệ sinh thái công nghệ bán lẻ mỹ phẩm toàn diện, sẵn sàng chuyển giao và ứng dụng thực tiễn cho các tập đoàn bán lẻ quy mô lớn, lộ trình nâng cấp phiên bản v3.0+ được định hướng với 4 giải pháp công nghệ mũi nhọn sau:
 
 ```
 +--------------------------------------------------------------------------------------------------------------------+
-| LỘ TRÌNH ĐỊNH HƯỚNG NÂNG CẤP HỆ THỐNG OMNI BEAUTY (ROADMAP v3.0+)                                                  |
+| LỘ TRÌNH ĐỊNH HƯỚNG NÂNG CẤP HỆ THỐNG CANMAKE BEAUTY (ROADMAP v3.0+)                                                  |
 +--------------------------------------------------------------------------------------------------------------------+
 | GIAI ĐOẠN 1 (Quý 1 - 2/2027): HẠ TẦNG PHÂN TÁN CLOUD-NATIVE                                                       |
 | - Triển khai cụm bộ nhớ đệm phân tán Redis Cluster L2 kết hợp thư viện HybridCache (.NET 9).                      |
@@ -5762,7 +5952,7 @@ Bên cạnh những kết quả nổi bật đã đạt được, do giới hạ
 
 ### TIỂU KẾT CHƯƠNG 3
 
-Chương 3 của bài tập lớn đã hoàn thành xuất sắc toàn bộ khối lượng công việc hiện thực hóa giải pháp phần mềm Quản lý Bán hàng cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY từ bản thiết kế trên giấy thành một hệ sinh thái ứng dụng công nghệ thông tin vận hành thực tế vững chắc, tin cậy và đạt hiệu năng cao:
+Chương 3 của bài tập lớn đã hoàn thành xuất sắc toàn bộ khối lượng công việc hiện thực hóa giải pháp phần mềm Quản lý Bán hàng cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY từ bản thiết kế trên giấy thành một hệ sinh thái ứng dụng công nghệ thông tin vận hành thực tế vững chắc, tin cậy và đạt hiệu năng cao:
 
 1. **Hiện thực hóa Kỹ thuật Vững chắc:** Toàn bộ giải pháp được tổ chức chuẩn mực theo kiến trúc Clean Architecture 4 tầng trên nền tảng .NET 8.0 LTS và SQL Server 2022. 5 thuật toán và giải pháp kỹ thuật cốt lõi (FEFO 2 giai đoạn, PBAC 3 tầng phân tán, Bóc tách da liễu EWG/INCI, Chuyển hướng SEO 301 tự động, và Thanh toán VietQR Napas247 kết hợp Sổ cái tài chính đích danh) đã được phân tích tường tận kèm mã nguồn C# thực tế.
 2. **Minh họa Giao diện Sống động:** 16 màn hình giao diện then chốt (gồm 7 màn hình Storefront khách hàng thượng lưu và 9 màn hình quản trị điều hành đa kênh) được chụp trực tiếp từ hệ thống đang chạy thực tế, phân tích chi tiết công thái học, dữ liệu hiển thị và luồng gọi API Backend tương ứng.
@@ -5779,7 +5969,7 @@ Toàn bộ những kết quả nghiên cứu lý luận, thiết kế hệ thố
 
 # KẾT LUẬN CHUNG
 
-Trong làn sóng chuyển đổi số mạnh mẽ của cuộc Cách mạng Công nghiệp lần thứ tư, thị trường bán lẻ mỹ phẩm và sản phẩm chăm sóc cá nhân tại Việt Nam đang chứng kiến sự chuyển mình sâu sắc. Mô hình kinh doanh đơn kênh hoặc đa kênh rời rạc truyền thống (Multi-channel) – nơi các cửa hàng vật lý và các kênh thương mại điện tử trực tuyến hoạt động như những ốc đảo dữ liệu độc lập – đã bộc lộ những hạn chế mang tính hệ thống: phân mảnh tồn kho, xung đột chính sách giá, rủi ro thất thoát hàng hóa cận hạn sử dụng và suy giảm trải nghiệm gắn kết của người tiêu dùng. Nhận thức rõ ràng những thách thức và cơ hội to lớn đó, bài tập lớn môn Lập trình Web với đề tài **"Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY"** đã được triển khai một cách bài bản, khoa học từ khâu nghiên cứu lý luận, khảo sát thực tiễn, phân tích thiết kế hướng đối tượng đến hiện thực hóa phần mềm và kiểm thử toàn diện trên nền tảng công nghệ hiện đại.
+Trong làn sóng chuyển đổi số mạnh mẽ của cuộc Cách mạng Công nghiệp lần thứ tư, thị trường bán lẻ mỹ phẩm và sản phẩm chăm sóc cá nhân tại Việt Nam đang chứng kiến sự chuyển mình sâu sắc. Mô hình kinh doanh đơn kênh hoặc đa kênh rời rạc truyền thống (Multi-channel) – nơi các cửa hàng vật lý và các kênh thương mại điện tử trực tuyến hoạt động như những ốc đảo dữ liệu độc lập – đã bộc lộ những hạn chế mang tính hệ thống: phân mảnh tồn kho, xung đột chính sách giá, rủi ro thất thoát hàng hóa cận hạn sử dụng và suy giảm trải nghiệm gắn kết của người tiêu dùng. Nhận thức rõ ràng những thách thức và cơ hội to lớn đó, bài tập lớn môn Lập trình Web với đề tài **"Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY"** đã được triển khai một cách bài bản, khoa học từ khâu nghiên cứu lý luận, khảo sát thực tiễn, phân tích thiết kế hướng đối tượng đến hiện thực hóa phần mềm và kiểm thử toàn diện trên nền tảng công nghệ hiện đại.
 
 ### 1. Tổng kết tiến trình nghiên cứu và Hiện thực hóa giải pháp
 
@@ -5789,7 +5979,7 @@ Trải qua toàn bộ vòng đời phát triển của một dự án công ngh�
    Bài tập lớn đã tổng hợp sâu sắc hệ thống lý luận về Hệ thống thông tin quản lý (MIS), mô hình chuyển dịch sang Bán lẻ Hợp nhất Đa kênh (Omnichannel Retail) và các tiêu chuẩn kiểm soát chất lượng chuyên ngành. Nghiên cứu đã làm rõ bản chất của chuỗi bán lẻ mỹ phẩm là ngành kinh doanh có yêu cầu kiểm soát đặc thù: quản lý hạn sử dụng ngắn theo từng lô sản xuất (Batch/Lot & Exp Date), công bố thành phần hóa mỹ phẩm theo danh pháp quốc tế INCI, thẩm định độ an toàn da liễu theo cơ sở dữ liệu quốc tế EWG Skin Deep® và tuân thủ nghiêm ngặt các quy định pháp lý của Hiệp định Mỹ phẩm ASEAN (ACCSQ) cũng như Thông tư 06/2011/TT-BYT của Bộ Y tế.
 
 2. **Khảo sát hiện trạng và Phân tích thiết kế hệ thống hướng đối tượng chuẩn mực:**
-   Áp dụng phương pháp luận Phân tích và Thiết kế Hệ thống Hướng đối tượng (OOAD) kết hợp ngôn ngữ mô hình hóa UML 2.5, tác giả đã tiến hành khảo sát thực địa chuỗi cửa hàng OMNI BEAUTY, nhận diện 52 điểm chạm thực tế (Touchpoints) trong hành trình trải nghiệm của khách hàng và quy trình tác nghiệp của nhân viên. Hệ thống đã định danh chính xác 11 tác nhân người dùng, phân rã 17 phân hệ nghiệp vụ cốt lõi, xây dựng 6 biểu đồ Use Case phân rã chuyên sâu, đặc tả chi tiết 8 kịch bản nghiệp vụ sống còn kèm theo các biểu đồ hoạt động (Activity Diagrams) và biểu đồ tuần tự (Sequence Diagrams) phản ánh luồng tương tác thực tế giữa các đối tượng.
+   Áp dụng phương pháp luận Phân tích và Thiết kế Hệ thống Hướng đối tượng (OOAD) kết hợp ngôn ngữ mô hình hóa UML 2.5, tác giả đã tiến hành khảo sát thực địa chuỗi cửa hàng CANMAKE BEAUTY, nhận diện 52 điểm chạm thực tế (Touchpoints) trong hành trình trải nghiệm của khách hàng và quy trình tác nghiệp của nhân viên. Hệ thống đã định danh chính xác 11 tác nhân người dùng, phân rã 17 phân hệ nghiệp vụ cốt lõi, xây dựng 6 biểu đồ Use Case phân rã chuyên sâu, đặc tả chi tiết 8 kịch bản nghiệp vụ sống còn kèm theo các biểu đồ hoạt động (Activity Diagrams) và biểu đồ tuần tự (Sequence Diagrams) phản ánh luồng tương tác thực tế giữa các đối tượng.
 
 3. **Thiết kế Cơ sở dữ liệu quan hệ chuẩn hóa 3NF quy mô đồ sộ:**
    Hệ thống cơ sở dữ liệu `OmnichannelBeautyDb` được thiết kế hoàn chỉnh với **65 bảng thực thể**, phân chia thành 17 phân nhóm nghiệp vụ chặt chẽ. Toàn bộ các bảng đều được chứng minh đạt chuẩn dạng chuẩn 3 (3NF) tuyệt đối, loại bỏ hoàn toàn các phụ thuộc hàm bắc cầu và dị thường dữ liệu (chèn, xóa, cập nhật). Khóa chính toàn hệ thống được đồng bộ chuẩn hóa kiểu số nguyên tăng tự động `INT IDENTITY(1,1)` kết hợp hệ thống khóa ngoại có chỉ mục phức hợp (Composite Indexes), tạo nền tảng vững chắc cho việc lưu trữ hàng triệu bản ghi giao dịch mà không làm suy giảm hiệu năng truy vấn.
@@ -5804,7 +5994,7 @@ Trải qua toàn bộ vòng đời phát triển của một dự án công ngh�
 
 ### 2. Khẳng định 5 Giá trị Thực tiễn Cốt lõi mang lại cho Doanh nghiệp Bán lẻ
 
-Không dừng lại ở một công trình nghiên cứu mang tính học thuật hay một phần mềm đồ án lý thuyết, hệ thống OMNI BEAUTY đã hiện thực hóa trọn vẹn một giải pháp phần mềm thương mại có tính ứng dụng thực tiễn cao, trực tiếp giải quyết 5 bài toán hóc búa nhất của ngành bán lẻ mỹ phẩm chuỗi tại Việt Nam:
+Không dừng lại ở một công trình nghiên cứu mang tính học thuật hay một phần mềm đồ án lý thuyết, hệ thống CANMAKE BEAUTY đã hiện thực hóa trọn vẹn một giải pháp phần mềm thương mại có tính ứng dụng thực tiễn cao, trực tiếp giải quyết 5 bài toán hóc búa nhất của ngành bán lẻ mỹ phẩm chuỗi tại Việt Nam:
 
 1. **Hợp nhất và Đồng bộ Tồn kho Đa kênh Thời gian thực (Real-time Omnichannel Inventory):**
    Xóa bỏ triệt để bức tường ngăn cách giữa kênh bán lẻ trực tuyến (Storefront Web) và các điểm bán trực tiếp tại cửa hàng (Smart POS Showroom). Khi một sản phẩm được bán ra tại bất kỳ cơ sở nào, số lượng tồn kho khả dụng sẽ tự động được cập nhật trừ lùi ngay lập tức trên toàn hệ thống trong vòng vài mili-giây. Cơ chế này loại bỏ hoàn toàn tình trạng "bán hàng ảo" (hết hàng tại kho nhưng website vẫn cho phép đặt), đồng thời kích hoạt hoàn hảo mô hình mua hàng trực tuyến nhận tại showroom trong 1 giờ (**O2O Click-and-Collect**) thông qua mã QR và mã PIN 6 số bí mật, giúp doanh nghiệp tiết kiệm chi phí đóng gói giao hàng và gia tăng mạnh mẽ lưu lượng khách ghé thăm cửa hàng vật lý.
@@ -5816,12 +6006,12 @@ Không dừng lại ở một công trình nghiên cứu mang tính học thuậ
    Phân hệ bán hàng tại quầy Kiosk POS được thiết kế chuyên biệt cho thao tác tốc độ cao, hỗ trợ máy quét mã vạch Barcode EAN-13, phím tắt F1-F12 và thanh toán quét mã VietQR động theo chuẩn EMVCo kết nối màn hình hiển thị phụ phía khách hàng (Customer-Facing Display - CFD). Điểm đột phá về mặt quản trị tài chính là cơ chế **Kiểm toán Két Tiền Mù (Blind Cash Drawer Audit)**: khi kết thúc ca làm việc, hệ thống hoàn toàn ẩn con số doanh thu phần mềm ghi nhận; nhân viên thu ngân bắt buộc phải đếm và kê khai trung thực số tờ của từng mệnh giá tiền mặt thực tế trong két. Hệ thống tự động so khớp, phát hiện chính xác mức chênh lệch thừa/thiếu đến từng đồng và bắt buộc giải trình trước khi khóa sổ ca, giúp chủ doanh nghiệp kiểm soát chặt chẽ dòng tiền mặt, triệt tiêu mọi nguy cơ gian lận và thất thoát nội bộ.
 
 4. **Nâng tầm Trải nghiệm Khách hàng với Trợ lý Da liễu AI và Minh bạch Thành phần INCI/EWG:**
-   Trong kỷ nguyên của xu hướng "Người tiêu dùng thông thái" (Skintellectuals) và trào lưu Làm đẹp Sạch (Clean Beauty), khách hàng không chỉ mua một sản phẩm mỹ phẩm mà họ mua một giải pháp khoa học cho làn da của mình. Hệ thống OMNI BEAUTY tiên phong tích hợp Động cơ Phân tích Tương kỵ Hoạt chất Da liễu (`SkincareIngredientInteractionEngine`). Khi khách hàng thêm vào giỏ hàng các sản phẩm chứa hoạt chất có nguy cơ đối kháng (như Retinol kết hợp cùng AHA/BHA ở nồng độ cao, hoặc Vitamin C tinh khiết kết hợp cùng Niacinamide), hệ thống sẽ lập tức hiển thị thông báo cảnh báo chuyên môn và đưa ra giải pháp dùng cách ngày khoa học. Kết hợp cùng bài trắc nghiệm chẩn đoán da cá nhân hóa **Routine Quiz AI 3 bước** và tính năng gợi ý phác đồ điều trị 4 bước 1-Click, hệ thống xây dựng lòng tin vững chắc nơi người tiêu dùng, nâng cao tỷ lệ chuyển đổi đơn hàng và khẳng định vị thế thương hiệu mỹ phẩm uy tín, có trách nhiệm với sức khỏe cộng đồng.
+   Trong kỷ nguyên của xu hướng "Người tiêu dùng thông thái" (Skintellectuals) và trào lưu Làm đẹp Sạch (Clean Beauty), khách hàng không chỉ mua một sản phẩm mỹ phẩm mà họ mua một giải pháp khoa học cho làn da của mình. Hệ thống CANMAKE BEAUTY tiên phong tích hợp Động cơ Phân tích Tương kỵ Hoạt chất Da liễu (`SkincareIngredientInteractionEngine`). Khi khách hàng thêm vào giỏ hàng các sản phẩm chứa hoạt chất có nguy cơ đối kháng (như Retinol kết hợp cùng AHA/BHA ở nồng độ cao, hoặc Vitamin C tinh khiết kết hợp cùng Niacinamide), hệ thống sẽ lập tức hiển thị thông báo cảnh báo chuyên môn và đưa ra giải pháp dùng cách ngày khoa học. Kết hợp cùng bài trắc nghiệm chẩn đoán da cá nhân hóa **Routine Quiz AI 3 bước** và tính năng gợi ý phác đồ điều trị 4 bước 1-Click, hệ thống xây dựng lòng tin vững chắc nơi người tiêu dùng, nâng cao tỷ lệ chuyển đổi đơn hàng và khẳng định vị thế thương hiệu mỹ phẩm uy tín, có trách nhiệm với sức khỏe cộng đồng.
 
 5. **Trao quyền Tự chủ Toàn diện cho Đội ngũ Marketing qua Trình tùy biến Giao diện No-Code Visual Customizer:**
    Thay vì phải phụ thuộc vào lập trình viên mỗi khi muốn thay đổi banner, đổi màu chủ đạo thương hiệu theo mùa lễ hội hay tổ chức một chiến dịch Flash Sale giờ vàng, hệ thống đã trang bị công cụ tùy biến giao diện trực quan **Visual Site Customizer**. Với giao diện Split-View 30:70, cơ chế kéo thả Section thời gian thực thông qua API `window.postMessage` và kiến trúc lưu trữ phân tách giữa Bản nháp (Draft) và Bản xuất bản (Published), các chuyên viên Marketing và Content Editor có thể tự do sáng tạo, điều chỉnh bố cục trang chủ và xem trước tức thì trên mô phỏng Mobile/Desktop mà không gây gián đoạn hệ thống. Khi nhấn xuất bản, toàn bộ thay đổi sẽ được áp dụng trực tiếp cho hàng ngàn khách hàng trực tuyến chỉ sau 50 mili-giây nhờ cơ chế tự động xóa bộ đệm Cache thông minh.
 
-Tóm lại, bài tập lớn môn Lập trình Web không chỉ đáp ứng xuất sắc các yêu cầu khắt khe của học phần Lập trình Web ngành Hệ thống Thông tin Quản lý, mà còn là một minh chứng sống động cho khả năng kết hợp nhuần nhuyễn giữa kiến thức quản trị kinh doanh, phân tích chuỗi bán lẻ chuyên sâu và kỹ năng kiến trúc phần mềm doanh nghiệp cấp cao. Giải pháp OMNI BEAUTY hoàn toàn đủ độ chín về mặt công nghệ và độ tin cậy về mặt nghiệp vụ để có thể triển khai thí điểm và chuyển giao thực tế cho các doanh nghiệp bán lẻ chuỗi mỹ phẩm tại Việt Nam trong giai đoạn hiện nay.
+Tóm lại, bài tập lớn môn Lập trình Web không chỉ đáp ứng xuất sắc các yêu cầu khắt khe của học phần Lập trình Web ngành Hệ thống Thông tin Quản lý, mà còn là một minh chứng sống động cho khả năng kết hợp nhuần nhuyễn giữa kiến thức quản trị kinh doanh, phân tích chuỗi bán lẻ chuyên sâu và kỹ năng kiến trúc phần mềm doanh nghiệp cấp cao. Giải pháp CANMAKE BEAUTY hoàn toàn đủ độ chín về mặt công nghệ và độ tin cậy về mặt nghiệp vụ để có thể triển khai thí điểm và chuyển giao thực tế cho các doanh nghiệp bán lẻ chuỗi mỹ phẩm tại Việt Nam trong giai đoạn hiện nay.
 
 ---
 
@@ -5873,11 +6063,11 @@ Tóm lại, bài tập lớn môn Lập trình Web không chỉ đáp ứng xu�
 
 ---
 
-## PHỤ LỤC A: DANH MỤC TỔNG HỢP TOÀN BỘ 65 BẢNG CƠ SỞ DỮ LIỆU CHUẨN 3NF THUỘC 17 PHÂN HỆ CỦA HỆ THỐNG OMNI BEAUTY
+## PHỤ LỤC A: DANH MỤC TỔNG HỢP TOÀN BỘ 65 BẢNG CƠ SỞ DỮ LIỆU CHUẨN 3NF THUỘC 17 PHÂN HỆ CỦA HỆ THỐNG CANMAKE BEAUTY
 
 Nhằm giúp Giảng viên chấm điểm và Hội đồng đánh giá bài tập lớn có cái nhìn bao quát về quy mô dữ liệu toàn diện của giải pháp phần mềm `OmnichannelBeautySolution`, Phụ lục A tổng hợp đầy đủ toàn bộ **65 bảng thực thể chuẩn hóa 3NF** trong cơ sở dữ liệu `OmnichannelBeautyDb`. Toàn bộ các bảng đều được đồng bộ khóa chính `INT IDENTITY(1,1)` và ánh xạ 100% với các lớp thực thể trong tầng `Omnichannel.Domain`.
 
-###### Bảng A.1: Bảng tổng hợp cấu trúc 65 Bảng Cơ sở dữ liệu chuẩn 3NF trong hệ thống OMNI BEAUTY
+###### Bảng A.1: Bảng tổng hợp cấu trúc 65 Bảng Cơ sở dữ liệu chuẩn 3NF trong hệ thống CANMAKE BEAUTY
 
 | STT | Tên Bảng (Entity Name) | Phân Hệ Nghiệp Vụ | Khóa Chính (PK) | Khóa Ngoại Tham Chiếu (FK) | Mô Tả Chức Năng Nghiệp Vụ Cốt Lõi |
 |:---:|:---|:---|:---|:---|:---|
@@ -6088,7 +6278,7 @@ Phụ lục C trình bày bố cục thiết kế chuẩn mực công nghiệp v
 
 ```
 ================================================================
-                          OMNI BEAUTY                          
+                          CANMAKE BEAUTY                          
               HỆ THỐNG PHÂN PHỐI MỸ PHẨM CHÍNH HÃNG            
                      SHOWROOM CẦU GIẤY                         
      Đ/c: Số 126 Đường Cầu Giấy, P. Quan Hoa, Q. Cầu Giấy, HN   
@@ -6143,7 +6333,7 @@ Website tra cứu: hoadon.beautyomnichannel.vn
 
 ```
 +---------------------------------------------------------------------------------------+
-|                                  OMNI BEAUTY                                          |
+|                                  CANMAKE BEAUTY                                          |
 |                     VÉ NHẬN HÀNG ƯU TIÊN (O2O FAST-TRACK PASS)                        |
 +---------------------------------------------------------------------------------------+
 | MÃ ĐƠN HÀNG: #ORD-O2O-202611-9921                                                    |
@@ -6186,7 +6376,7 @@ Website tra cứu: hoadon.beautyomnichannel.vn
 
 ```
 ====================================================================================================
-CÔNG TY CỔ PHẦN BÁN LẺ OMNI BEAUTY                       CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
+CÔNG TY CỔ PHẦN BÁN LẺ CANMAKE BEAUTY                       CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM
 HỆ THỐNG CHUỖI CỬA HÀNG MỸ PHẨM CHÍNH HÃNG                    Độc lập - Tự do - Hạnh phúc
 ----------------------------------                               ---------------------
                                                                Hà Nội, Ngày 04 tháng 11 năm 2026
@@ -6194,7 +6384,7 @@ HỆ THỐNG CHUỖI CỬA HÀNG MỸ PHẨM CHÍNH HÃNG                    Đ�
                        BIÊN BẢN GIAO NHẬN VÀ ĐIỀU CHUYỂN HÀNG HÓA NỘI BỘ
                                      MÃ PHIẾU: TRF-202611-003
 
-- Căn cứ Lệnh điều động phân phối hàng hóa số 88/QĐ-OB của Ban Giám đốc Chuỗi OMNI BEAUTY;
+- Căn cứ Lệnh điều động phân phối hàng hóa số 88/QĐ-OB của Ban Giám đốc Chuỗi CANMAKE BEAUTY;
 - Hôm nay, các bên liên quan tiến hành lập biên bản bàn giao điều chuyển lô hàng mỹ phẩm cụ thể như sau:
 
 I. ĐƠN VỊ VÀ ĐỊA ĐIỂM ĐIỀU CHUYỂN:
@@ -6243,7 +6433,7 @@ III. KẾT LUẬN VÀ XỬ LÝ HẠCH TOÁN TÀI CHÍNH:
 
 ```
 ====================================================================================================
-                                      OMNI BEAUTY RETAIL CHAIN
+                                      CANMAKE BEAUTY RETAIL CHAIN
                       BÁO CÁO HOẠT ĐỘNG KINH DOANH P&L VÀ ĐỐI SOÁT KÉT CA POS
                            Chi nhánh: SHOWROOM CẦU GIẤY (Mã kho: SH-CG)
                                Ngày hạch toán: 04/11/2026 (Ca số 02)

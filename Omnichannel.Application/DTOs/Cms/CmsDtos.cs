@@ -24,7 +24,7 @@ namespace Omnichannel.Application.DTOs.Cms
         public DateTime? PublishedAt { get; set; }
         public DateTime CreatedAt { get; set; }
     }
-
+// LỚP CHA: Chứa sẵn 10 thông tin (Tiêu đề, Nội dung, Ảnh bìa, Tóm tắt, Thẻ SEO...)
     public class CreatePostViewModel
     {
         [Required(ErrorMessage = "Vui lòng chọn chuyên mục bài viết")]
@@ -65,8 +65,10 @@ namespace Omnichannel.Application.DTOs.Cms
         public string? MetaDescription { get; set; }
     }
 
+// LỚP CON: Dùng dấu hai chấm ':' KẾ THỪA toàn bộ tài sản từ Lớp Cha
     public class EditPostViewModel : CreatePostViewModel
-    {
+    {// Chỉ cần viết thêm đúng 1 dòng mã bài viết!
+
         public int PostId { get; set; }
     }
 }

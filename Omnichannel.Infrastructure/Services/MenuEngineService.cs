@@ -86,11 +86,11 @@ namespace Omnichannel.Infrastructure.Services
 
             return linkType switch
             {
-                "CATEGORY" => $"/category/{slug}",
-                "PRODUCT" => $"/product/{slug}",
-                "POST" => $"/blog/{slug}",
-                "STATIC_PAGE" => $"/page/{slug}",
-                _ => string.IsNullOrEmpty(item.Url) ? "#" : item.Url
+                "CATEGORY" => $"/category/{slug}", // Chọn Danh mục -> Tự thành link Danh mục
+                "PRODUCT" => $"/product/{slug}",// Chọn Sản phẩm -> Tự thành link Sản phẩm
+                "POST" => $"/blog/{slug}",// Chọn Bài viết  -> Tự thành link Blog
+                "STATIC_PAGE" => $"/page/{slug}",// Chọn Trang     -> Tự thành link Trang tĩnh
+                _ => string.IsNullOrEmpty(item.Url) ? "#" : item.Url // Link tự do
             };
         }
 

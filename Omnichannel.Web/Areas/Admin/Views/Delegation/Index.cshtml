@@ -1,0 +1,757 @@
+@model Omnichannel.Application.DTOs.Security.DelegationHubViewModel
+@using System.Text.Json
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Trung Tâm Ủy Quyền Admin Nhỏ";
+    var subAdminsJson = JsonSerializer.Serialize(Model.SubAdmins, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+}
+
+<div class="space-y-6">
+    <!-- Page Header -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-5 border-b border-slate-200 dark:border-slate-800">
+        <div>
+            <div class="flex items-center gap-3 flex-wrap">
+                <h1 class="text-2xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2.5">
+                    <i class="fa-solid fa-user-gear text-rose-500"></i>
+                    <span>Trung Tâm Ủy Quyền Admin Nhỏ (Delegation Hub)</span>
+                </h1>
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
+                    @Model.SubAdmins.Count Admin Phòng Ban / Chi Nhánh
+                </span>
+            </div>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                Admin Tổng phân giao chức năng (checkbox), phòng ban phụ trách và hạn mức thẩm quyền cho từng Admin nhỏ (`ad1`, `ad2`, `ad3`, `ad4`...).
+            </p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5">
+            <a href="/Admin/Delegation/AuditLog" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-file-shield text-indigo-500 me-1.5"></i> Nhật Ký Ủy Quyền
+            </a>
+            <button type="button" onclick="openCreateSubAdminModal()" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-700 hover:to-pink-600 shadow-md shadow-rose-500/20 transition">
+                <i class="fa-solid fa-user-plus me-1.5"></i> Tạo Admin Nhỏ Mới
+            </button>
+        </div>
+    </div>
+
+    <!-- Cards Grid: Danh sách Admin Nhỏ -->
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5">
+        @foreach (var card in Model.SubAdmins)
+        {
+            string avatar = !string.IsNullOrWhiteSpace(card.AvatarUrl)
+                ? card.AvatarUrl
+                : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop";
+            var topRole = card.Roles.FirstOrDefault();
+
+            <div class="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-xs hover:border-rose-300 dark:hover:border-rose-700 transition flex flex-col justify-between gap-4">
+                <div>
+                    <!-- Top Identity Row -->
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-center gap-3.5 min-w-0">
+                            <img src="@avatar" alt="@card.FullName" class="w-12 h-12 rounded-2xl object-cover border-2 border-rose-200 dark:border-rose-800 shrink-0" />
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span class="font-extrabold text-slate-900 dark:text-white text-base truncate">@card.FullName</span>
+                                    <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono text-[11px] font-bold">@@@card.Username</span>
+                                    @if (!string.IsNullOrWhiteSpace(card.EmployeeCode))
+                                    {
+                                        <span class="px-2 py-0.5 rounded bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-300 font-mono text-[10px] font-bold">@card.EmployeeCode</span>
+                                    }
+                                </div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">@(card.JobTitle ?? "Quản trị viên phòng ban")</div>
+                            </div>
+                        </div>
+
+                        @if (topRole != null)
+                        {
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800 shrink-0">
+                                <i class="fa-solid fa-shield-halved text-[10px]"></i>
+                                <span>@topRole.DisplayName (Lv@(topRole.Level))</span>
+                            </span>
+                        }
+                    </div>
+
+                    <!-- KPI Metrics Strip -->
+                    <div class="grid grid-cols-3 gap-2.5 my-4 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800 text-center">
+                        <div>
+                            <div class="text-[10px] font-bold uppercase text-slate-400">Phòng Ban Phụ Trách</div>
+                            <div class="text-sm font-extrabold text-indigo-600 dark:text-indigo-400 mt-0.5">@card.AllowedDepartmentIds.Count phòng</div>
+                        </div>
+                        <div class="border-x border-slate-200/70 dark:border-slate-700">
+                            <div class="text-[10px] font-bold uppercase text-slate-400">Số Quyền Được Giao</div>
+                            <div class="text-sm font-extrabold text-rose-600 dark:text-rose-400 mt-0.5">@card.AllowedPermissionIds.Count quyền</div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] font-bold uppercase text-slate-400">Nhân Sự Quản Lý</div>
+                            <div class="text-sm font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">@card.ManagedStaffCount nhân viên</div>
+                        </div>
+                    </div>
+
+                    <!-- Departments Badges -->
+                    <div class="mb-3">
+                        <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Phạm Vi Phòng Ban Quản Lý:</div>
+                        <div class="flex flex-wrap gap-1.5">
+                            @if (card.AllowedDepartmentNames.Count > 0)
+                            {
+                                @foreach (var dName in card.AllowedDepartmentNames)
+                                {
+                                    <span class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300 border border-indigo-200/70 dark:border-indigo-800">
+                                        <i class="fa-solid fa-building-user me-1 text-[10px]"></i>@dName
+                                    </span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-xs text-slate-400 italic">Chưa gán phòng ban ủy quyền</span>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Capability Flags -->
+                    <div class="flex flex-wrap gap-1.5">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold @(card.CanCreateUser ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-400")">
+                            <i class="fa-solid @(card.CanCreateUser ? "fa-check" : "fa-xmark") me-1"></i>Tạo NV
+                        </span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold @(card.CanEditUser ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-400")">
+                            <i class="fa-solid @(card.CanEditUser ? "fa-check" : "fa-xmark") me-1"></i>Sửa/Khóa NV
+                        </span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold @(card.CanDeleteUser ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-400")">
+                            <i class="fa-solid @(card.CanDeleteUser ? "fa-check" : "fa-xmark") me-1"></i>Xóa mềm NV
+                        </span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold @(card.CanResetPassword ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-400")">
+                            <i class="fa-solid @(card.CanResetPassword ? "fa-check" : "fa-xmark") me-1"></i>Reset MK
+                        </span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold @(card.CanAssignRole ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-slate-100 text-slate-400")">
+                            <i class="fa-solid @(card.CanAssignRole ? "fa-check" : "fa-xmark") me-1"></i>Gán Role (&lt; Lv@(card.MaxGrantLevel))
+                        </span>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold @(card.CanDelegateFurther ? "bg-purple-50 text-purple-700 border border-purple-200" : "bg-slate-100 text-slate-400")">
+                            <i class="fa-solid @(card.CanDelegateFurther ? "fa-check" : "fa-xmark") me-1"></i>Ủy quyền tiếp
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Card Footer Actions -->
+                <div class="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+                    <a href="/Admin/User/Permissions/@card.UserId" class="px-3 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 transition">
+                        <i class="fa-solid fa-key text-indigo-500 me-1"></i> Quyền Cá Nhân
+                    </a>
+                    <button type="button"
+                            onclick="openScopeDrawer(@card.UserId)"
+                            class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-700 hover:to-pink-600 shadow-sm transition">
+                        <i class="fa-solid fa-sliders me-1.5"></i> Cấu Hình Phạm Vi
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal / Drawer Cấu Hình Phạm Vi (3 Tabs: Chức năng được giao | Phòng ban & Chi nhánh | Hành động cho phép) -->
+<div class="modal fade" id="scopeConfigModal" tabindex="-1" aria-labelledby="scopeConfigModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content rounded-2xl border-0 shadow-2xl overflow-hidden bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100">
+            <!-- Header -->
+            <div class="p-5 bg-gradient-to-r from-slate-900 via-rose-950 to-slate-900 text-white flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-400/30 flex items-center justify-center text-rose-300 text-lg">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                    <div>
+                        <h5 class="font-extrabold text-base mb-0" id="scopeConfigModalTitle">Cấu Hình Phạm Vi Ủy Quyền Admin Nhỏ</h5>
+                        <p class="text-xs text-slate-300 mb-0" id="scopeConfigSubtitle">Tích chọn chức năng, phòng ban và hành động cho phép</p>
+                    </div>
+                </div>
+                <button type="button" class="text-slate-300 hover:text-white" data-bs-dismiss="modal" aria-label="Đóng">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="px-5 pt-3 bg-slate-50 dark:bg-slate-800/70 border-b border-slate-200 dark:border-slate-700 flex items-center gap-2 overflow-x-auto">
+                <button type="button" onclick="switchScopeTab('tab-perms')" id="btn_tab-perms" class="scope-tab-btn px-4 py-2.5 text-xs font-extrabold border-b-2 border-rose-600 text-rose-600 flex items-center gap-2">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>1. Chức Năng Được Giao</span>
+                    <span id="selectedPermCountBadge" class="px-2 py-0.5 rounded-full text-[10px] bg-rose-100 text-rose-700">0</span>
+                </button>
+                <button type="button" onclick="switchScopeTab('tab-depts')" id="btn_tab-depts" class="scope-tab-btn px-4 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-sitemap"></i>
+                    <span>2. Phòng Ban / Chi Nhánh Quản Lý</span>
+                    <span id="selectedDeptCountBadge" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-200 text-slate-700">0</span>
+                </button>
+                <button type="button" onclick="switchScopeTab('tab-actions')" id="btn_tab-actions" class="scope-tab-btn px-4 py-2.5 text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-toggle-on"></i>
+                    <span>3. Hành Động Cho Phép & Hạn Mức</span>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body p-5" style="max-height: 68vh; overflow-y: auto;">
+                <input type="hidden" id="scope_AdminUserId" value="0" />
+
+                <!-- TAB 1: CHỨC NĂNG ĐƯỢC GIAO -->
+                <div id="tab-perms" class="scope-tab-pane space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200/80 dark:border-slate-700">
+                        <div class="relative flex-1">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                            <input type="text" id="scopePermSearch" oninput="filterScopePermissions()"
+                                   autocorrect="off" autocapitalize="off" spellcheck="false"
+                                   placeholder="Tìm kiếm quyền theo tên tiếng Việt hoặc mã Code (VD: ORDER_CONFIRM, CMS_MENU)..."
+                                   class="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs focus:outline-none focus:border-rose-500" />
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="toggleAllGrantablePermissions(true)" class="px-3 py-2 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition">
+                                <i class="fa-solid fa-check-double me-1"></i> Chọn tất cả trong phạm vi
+                            </button>
+                            <button type="button" onclick="toggleAllGrantablePermissions(false)" class="px-3 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200 transition">
+                                <i class="fa-solid fa-eraser me-1"></i> Bỏ chọn hết
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4" id="scopeModuleGroupsContainer">
+                        @foreach (var grp in Model.ModuleGroups)
+                        {
+                            <div class="scope-module-card border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden" data-module="@grp.ModuleCode">
+                                <div class="px-4 py-2.5 bg-slate-100/90 dark:bg-slate-800 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                                        <span class="font-extrabold text-xs uppercase tracking-wider text-slate-800 dark:text-white">@grp.ModuleName</span>
+                                        <span class="text-[11px] text-slate-400 font-mono">(@grp.Permissions.Count quyền)</span>
+                                    </div>
+                                    <label class="inline-flex items-center gap-2 cursor-pointer text-xs font-bold text-rose-600">
+                                        <input type="checkbox"
+                                               class="w-4 h-4 rounded text-rose-600 focus:ring-rose-500 module-select-all"
+                                               data-module="@grp.ModuleCode"
+                                               onchange="toggleModulePermissions('@grp.ModuleCode', this.checked)" />
+                                        <span>Chọn cả phân hệ</span>
+                                    </label>
+                                </div>
+
+                                <div class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 bg-white dark:bg-slate-900">
+                                    @foreach (var perm in grp.Permissions)
+                                    {
+                                        bool canGrant = perm.IsGrantableByActor;
+                                        <label class="scope-perm-item flex items-start gap-2.5 p-2.5 rounded-xl border @(canGrant ? "border-slate-200/80 dark:border-slate-800 hover:border-rose-300 cursor-pointer" : "border-slate-100 bg-slate-50/80 opacity-60 cursor-not-allowed")"
+                                               data-search="@($"{perm.Name} {perm.Code} {grp.ModuleName}".ToLowerInvariant())"
+                                               title="@(canGrant ? perm.Description ?? perm.Name : "Vượt phạm vi của bạn")">
+                                            <input type="checkbox"
+                                                   class="w-4 h-4 mt-0.5 rounded text-rose-600 focus:ring-rose-500 scope-perm-checkbox"
+                                                   value="@perm.Id"
+                                                   data-module="@grp.ModuleCode"
+                                                   data-grantable="@(canGrant ? "1" : "0")"
+                                                   onchange="updateScopeCounters()"
+                                                   @(canGrant ? "" : "disabled") />
+                                            <div class="min-w-0 flex-1">
+                                                <div class="text-xs font-bold text-slate-800 dark:text-slate-100 leading-snug">@perm.Name</div>
+                                                <div class="text-[10px] font-mono text-slate-400 mt-0.5 flex items-center gap-1.5">
+                                                    <span>@perm.Code</span>
+                                                    @if (!canGrant)
+                                                    {
+                                                        <span class="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 font-sans font-bold">Vượt phạm vi của bạn</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- TAB 2: PHÒNG BAN & CHI NHÁNH QUẢN LÝ -->
+                <div id="tab-depts" class="scope-tab-pane hidden space-y-5">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                        <!-- Cây Phòng Ban -->
+                        <div class="border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
+                            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 dark:border-slate-800">
+                                <div>
+                                    <h6 class="font-extrabold text-sm text-slate-900 dark:text-white mb-0">
+                                        <i class="fa-solid fa-building-user text-indigo-500 me-1.5"></i>Phòng Ban Được Phép Quản Lý
+                                    </h6>
+                                    <p class="text-[11px] text-slate-400 mb-0">Admin nhỏ chỉ nhìn thấy và phân quyền cho nhân sự thuộc các phòng ban được tích.</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                @foreach (var dept in Model.Departments)
+                                {
+                                    bool isRoot = !dept.ParentId.HasValue;
+                                    <label class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800 hover:border-indigo-300 cursor-pointer @(!isRoot ? "ms-5" : "bg-slate-50 dark:bg-slate-800/50")">
+                                        <div class="flex items-center gap-2.5">
+                                            <input type="checkbox"
+                                                   class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 scope-dept-checkbox"
+                                                   value="@dept.Id"
+                                                   onchange="updateScopeCounters()" />
+                                            <div>
+                                                <div class="text-xs font-bold text-slate-800 dark:text-slate-100">@dept.Name</div>
+                                                <div class="text-[10px] font-mono text-slate-400">@dept.Code</div>
+                                            </div>
+                                        </div>
+                                        @if (string.Equals(dept.Code, "BAN_GIAM_DOC", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-700">Cấp Tối Cao</span>
+                                        }
+                                    </label>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Danh sách Chi nhánh (Store) -->
+                        <div class="border border-slate-200 dark:border-slate-700 rounded-2xl p-4">
+                            <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 dark:border-slate-800">
+                                <div>
+                                    <h6 class="font-extrabold text-sm text-slate-900 dark:text-white mb-0">
+                                        <i class="fa-solid fa-store text-emerald-500 me-1.5"></i>Chi Nhánh Showroom / Kho Phụ Trách
+                                    </h6>
+                                    <p class="text-[11px] text-slate-400 mb-0">Để trống nếu Admin nhỏ quản lý theo chiều dọc Phòng ban toàn hệ thống.</p>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                @foreach (var st in Model.Stores)
+                                {
+                                    <label class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200/80 dark:border-slate-800 hover:border-emerald-300 cursor-pointer">
+                                        <div class="flex items-center gap-2.5">
+                                            <input type="checkbox"
+                                                   class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 scope-store-checkbox"
+                                                   value="@st.Id" />
+                                            <div>
+                                                <div class="text-xs font-bold text-slate-800 dark:text-slate-100">@st.Name</div>
+                                                <div class="text-[10px] font-mono text-slate-400">Mã CN: @st.Code</div>
+                                            </div>
+                                        </div>
+                                        @if (st.IsHeadquarters)
+                                        {
+                                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-700">Trụ sở / Tổng kho</span>
+                                        }
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: HÀNH ĐỘNG CHO PHÉP & TRẦN CẤP BẬC -->
+                <div id="tab-actions" class="scope-tab-pane hidden space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label class="flex items-start justify-between p-4 rounded-2xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-rose-300">
+                            <div class="pe-3">
+                                <div class="text-xs font-extrabold text-slate-900 dark:text-white">Cho phép Thêm mới nhân sự (`CanCreateUser`)</div>
+                                <div class="text-[11px] text-slate-500 mt-0.5">Được tạo tài khoản nhân viên mới trong các phòng ban thuộc Scope.</div>
+                            </div>
+                            <input type="checkbox" id="scope_CanCreateUser" class="w-5 h-5 rounded text-rose-600 mt-0.5" />
+                        </label>
+
+                        <label class="flex items-start justify-between p-4 rounded-2xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-rose-300">
+                            <div class="pe-3">
+                                <div class="text-xs font-extrabold text-slate-900 dark:text-white">Cho phép Sửa & Khóa nhân sự (`CanEditUser`)</div>
+                                <div class="text-[11px] text-slate-500 mt-0.5">Được cập nhật hồ sơ công việc và tạm khóa/mở khóa nhân viên cấp dưới.</div>
+                            </div>
+                            <input type="checkbox" id="scope_CanEditUser" class="w-5 h-5 rounded text-rose-600 mt-0.5" />
+                        </label>
+
+                        <label class="flex items-start justify-between p-4 rounded-2xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-rose-300">
+                            <div class="pe-3">
+                                <div class="text-xs font-extrabold text-slate-900 dark:text-white">Cho phép Xóa mềm nhân sự (`CanDeleteUser`)</div>
+                                <div class="text-[11px] text-slate-500 mt-0.5">Được đưa nhân sự nghỉ việc vào thùng rác và thu hồi phiên đăng nhập.</div>
+                            </div>
+                            <input type="checkbox" id="scope_CanDeleteUser" class="w-5 h-5 rounded text-rose-600 mt-0.5" />
+                        </label>
+
+                        <label class="flex items-start justify-between p-4 rounded-2xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-rose-300">
+                            <div class="pe-3">
+                                <div class="text-xs font-extrabold text-slate-900 dark:text-white">Cho phép Đặt lại mật khẩu (`CanResetPassword`)</div>
+                                <div class="text-[11px] text-slate-500 mt-0.5">Được cấp lại mật khẩu mới cho nhân viên trong phòng ban phụ trách.</div>
+                            </div>
+                            <input type="checkbox" id="scope_CanResetPassword" class="w-5 h-5 rounded text-rose-600 mt-0.5" />
+                        </label>
+
+                        <label class="flex items-start justify-between p-4 rounded-2xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-rose-300">
+                            <div class="pe-3">
+                                <div class="text-xs font-extrabold text-slate-900 dark:text-white">Cho phép Gán vai trò cấp dưới (`CanAssignRole`)</div>
+                                <div class="text-[11px] text-slate-500 mt-0.5">Được gán các Role có Level nhỏ hơn `MaxGrantLevel` và nằm trong tập quyền.</div>
+                            </div>
+                            <input type="checkbox" id="scope_CanAssignRole" class="w-5 h-5 rounded text-rose-600 mt-0.5" />
+                        </label>
+
+                        <label class="flex items-start justify-between p-4 rounded-2xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-rose-300">
+                            <div class="pe-3">
+                                <div class="text-xs font-extrabold text-slate-900 dark:text-white">Cho phép Ủy quyền tiếp (`CanDelegateFurther`)</div>
+                                <div class="text-[11px] text-slate-500 mt-0.5">Cho phép Admin này thiết lập Scope tập con cho quản lý cấp trung dưới quyền.</div>
+                            </div>
+                            <input type="checkbox" id="scope_CanDelegateFurther" class="w-5 h-5 rounded text-rose-600 mt-0.5" />
+                        </label>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+                        <label for="scope_MaxGrantLevel" class="block text-xs font-extrabold uppercase tracking-wider text-slate-700 dark:text-slate-200 mb-1.5">
+                            Trần Cấp Bậc Vai Trò Tối Đa Được Phép Gán (`MaxGrantLevel`)
+                        </label>
+                        <select id="scope_MaxGrantLevel" class="w-full sm:w-96 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-bold">
+                            <option value="50">MaxGrantLevel = 50 (Được gán Role Nhân viên Lv10 & Cửa hàng trưởng Lv30)</option>
+                            <option value="30">MaxGrantLevel = 30 (Chỉ được gán Role Nhân viên Lv10)</option>
+                            <option value="15">MaxGrantLevel = 15 (Giới hạn chặt ở Role Nhân viên Lv10)</option>
+                        </select>
+                        <p class="text-[11px] text-slate-500 mt-1.5 mb-0">
+                            Quy tắc bất biến: Admin nhỏ chỉ được gán các Role có <code>Level &lt; MaxGrantLevel</code> và <code>Level &lt; Level của chính mình</code>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                <div class="text-xs text-slate-500">
+                    <i class="fa-solid fa-shield-cat text-rose-500 me-1"></i>
+                    Mọi thay đổi thu hẹp Scope sẽ tự động kích hoạt <code>CascadeRevokeAsync</code> để thu hồi quyền vượt phạm vi ở cấp dưới.
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" data-bs-dismiss="modal" class="px-4 py-2 rounded-xl text-xs font-bold bg-white dark:bg-slate-900 text-slate-600 border border-slate-200">
+                        Đóng
+                    </button>
+                    <button type="button" id="btnSaveScope" onclick="previewAndSaveScope()" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-700 hover:to-pink-600 shadow-md">
+                        <i class="fa-solid fa-floppy-disk me-1.5"></i> Lưu Phạm Vi Ủy Quyền
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tạo Admin Nhỏ Mới -->
+<div class="modal fade" id="createSubAdminModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-2xl border-0 shadow-2xl overflow-hidden bg-white dark:bg-slate-900">
+            <div class="p-5 bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 text-white flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-purple-300">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <div>
+                        <h5 class="font-extrabold text-base mb-0">Bổ Nhiệm / Tạo Admin Nhỏ Mới</h5>
+                        <p class="text-xs text-slate-300 mb-0">Chọn nhân sự có sẵn hoặc tạo tài khoản mới + gán vai trò Level 50 + cấu hình Scope ngay</p>
+                    </div>
+                </div>
+                <button type="button" class="text-slate-300 hover:text-white" data-bs-dismiss="modal" aria-label="Đóng">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="createSubAdminForm" onsubmit="submitCreateSubAdmin(event)" class="p-5 space-y-4">
+                <!-- Chọn chế độ -->
+                <div class="grid grid-cols-2 gap-3 p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800">
+                    <button type="button" id="modeBtn_existing" onclick="setSubAdminMode('existing')" class="py-2 rounded-lg text-xs font-extrabold bg-white dark:bg-slate-900 text-rose-600 shadow-xs">
+                        <i class="fa-solid fa-user-check me-1"></i> Chọn Nhân Sự Có Sẵn
+                    </button>
+                    <button type="button" id="modeBtn_new" onclick="setSubAdminMode('new')" class="py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300">
+                        <i class="fa-solid fa-user-plus me-1"></i> Tạo Tài Khoản Admin Mới
+                    </button>
+                </div>
+                <input type="hidden" id="newSub_Mode" value="existing" />
+
+                <!-- Khối chọn nhân sự có sẵn -->
+                <div id="block_existingUser">
+                    <label for="newSub_ExistingUserId" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
+                        Chọn Nhân Sự Nội Bộ <span class="text-rose-500">*</span>
+                    </label>
+                    <select id="newSub_ExistingUserId" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold">
+                        <option value="">-- Chọn nhân sự để bổ nhiệm --</option>
+                        @foreach (var staff in Model.EligibleStaffForPromotion)
+                        {
+                            <option value="@staff.Id">@staff.FullName (@staff.Username) - @(staff.DepartmentName ?? "Chưa phân phòng")</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Khối tạo tài khoản mới -->
+                <div id="block_newUser" class="hidden space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Username <span class="text-rose-500">*</span></label>
+                            <input type="text" id="newSub_Username" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="VD: ad5" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Mật Khẩu Khởi Tạo</label>
+                            <input type="text" id="newSub_Password" value="Admin@123" autocorrect="off" autocapitalize="off" spellcheck="false" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-mono" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Họ Và Tên <span class="text-rose-500">*</span></label>
+                            <input type="text" id="newSub_FullName" placeholder="VD: Hoàng Minh Tuấn (Admin Kho)" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-600 mb-1">Email Công Vụ <span class="text-rose-500">*</span></label>
+                            <input type="email" id="newSub_Email" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="ad5@canmakebeauty.vn" class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="newSub_RoleId" class="block text-xs font-bold uppercase text-slate-600 mb-1">Vai Trò Quản Trị (Level 30-50) <span class="text-rose-500">*</span></label>
+                        <select id="newSub_RoleId" required class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold">
+                            @foreach (var r in Model.SubAdminRoles)
+                            {
+                                <option value="@r.Id">@r.DisplayName (@r.Name - Lv@(r.Level))</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label for="newSub_DeptId" class="block text-xs font-bold uppercase text-slate-600 mb-1">Phòng Ban Chủ Quản Phụ Trách <span class="text-rose-500">*</span></label>
+                        <select id="newSub_DeptId" required class="w-full px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold">
+                            @foreach (var d in Model.Departments)
+                            {
+                                <option value="@d.Id">@d.Name (@d.Code)</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" data-bs-dismiss="modal" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-600">Hủy</button>
+                    <button type="submit" id="btnCreateSubAdmin" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-rose-600 to-pink-500 shadow-md">
+                        <i class="fa-solid fa-bolt me-1"></i> Khởi Tạo & Mở Cấu Hình Scope
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const subAdminsData = @Html.Raw(subAdminsJson);
+        let scopeModalInstance = null;
+        let createSubModalInstance = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.bootstrap) {
+                const scEl = document.getElementById('scopeConfigModal');
+                if (scEl) scopeModalInstance = new bootstrap.Modal(scEl);
+                const crEl = document.getElementById('createSubAdminModal');
+                if (crEl) createSubModalInstance = new bootstrap.Modal(crEl);
+            }
+        });
+
+        function switchScopeTab(tabId) {
+            document.querySelectorAll('.scope-tab-pane').forEach(p => p.classList.add('hidden'));
+            document.getElementById(tabId)?.classList.remove('hidden');
+
+            document.querySelectorAll('.scope-tab-btn').forEach(b => {
+                b.classList.remove('border-rose-600', 'text-rose-600', 'font-extrabold');
+                b.classList.add('border-transparent', 'text-slate-500', 'font-bold');
+            });
+            const activeBtn = document.getElementById('btn_' + tabId);
+            if (activeBtn) {
+                activeBtn.classList.remove('border-transparent', 'text-slate-500', 'font-bold');
+                activeBtn.classList.add('border-rose-600', 'text-rose-600', 'font-extrabold');
+            }
+        }
+
+        function openScopeDrawer(adminUserId) {
+            const admin = subAdminsData.find(x => x.userId === adminUserId);
+            if (!admin) return;
+
+            document.getElementById('scope_AdminUserId').value = admin.userId;
+            document.getElementById('scopeConfigModalTitle').textContent = `Cấu Hình Phạm Vi Ủy Quyền: ${admin.fullName} (\x40${admin.username})`;
+            document.getElementById('scopeConfigSubtitle').textContent = `Phòng ban chính: ${admin.primaryDepartmentName || 'Chưa gán'} • Hạn mức hiện tại: MaxGrantLevel = ${admin.maxGrantLevel}`;
+
+            // Set permissions checkboxes
+            const allowedPermSet = new Set(admin.allowedPermissionIds || []);
+            document.querySelectorAll('.scope-perm-checkbox').forEach(cb => {
+                cb.checked = allowedPermSet.has(parseInt(cb.value, 10));
+            });
+
+            // Set departments checkboxes
+            const allowedDeptSet = new Set(admin.allowedDepartmentIds || []);
+            document.querySelectorAll('.scope-dept-checkbox').forEach(cb => {
+                cb.checked = allowedDeptSet.has(parseInt(cb.value, 10));
+            });
+
+            // Set stores checkboxes
+            const allowedStoreSet = new Set(admin.allowedStoreIds || []);
+            document.querySelectorAll('.scope-store-checkbox').forEach(cb => {
+                cb.checked = allowedStoreSet.has(parseInt(cb.value, 10));
+            });
+
+            // Set action switches
+            document.getElementById('scope_CanCreateUser').checked = !!admin.canCreateUser;
+            document.getElementById('scope_CanEditUser').checked = !!admin.canEditUser;
+            document.getElementById('scope_CanDeleteUser').checked = !!admin.canDeleteUser;
+            document.getElementById('scope_CanResetPassword').checked = !!admin.canResetPassword;
+            document.getElementById('scope_CanAssignRole').checked = !!admin.canAssignRole;
+            document.getElementById('scope_CanDelegateFurther').checked = !!admin.canDelegateFurther;
+            document.getElementById('scope_MaxGrantLevel').value = (admin.maxGrantLevel || 50).toString();
+
+            updateScopeCounters();
+            switchScopeTab('tab-perms');
+            if (scopeModalInstance) scopeModalInstance.show();
+        }
+
+        function updateScopeCounters() {
+            const permCount = document.querySelectorAll('.scope-perm-checkbox:checked').length;
+            const deptCount = document.querySelectorAll('.scope-dept-checkbox:checked').length;
+            document.getElementById('selectedPermCountBadge').textContent = permCount;
+            document.getElementById('selectedDeptCountBadge').textContent = deptCount;
+
+            // Update module-select-all state
+            document.querySelectorAll('.module-select-all').forEach(modCb => {
+                const mod = modCb.getAttribute('data-module');
+                const grantableInMod = Array.from(document.querySelectorAll(`.scope-perm-checkbox[data-module="${mod}"][data-grantable="1"]`));
+                modCb.checked = grantableInMod.length > 0 && grantableInMod.every(c => c.checked);
+            });
+        }
+
+        function toggleModulePermissions(moduleCode, checked) {
+            document.querySelectorAll(`.scope-perm-checkbox[data-module="${moduleCode}"][data-grantable="1"]`).forEach(cb => {
+                if (!cb.disabled) cb.checked = checked;
+            });
+            updateScopeCounters();
+        }
+
+        function toggleAllGrantablePermissions(checked) {
+            document.querySelectorAll('.scope-perm-checkbox[data-grantable="1"]').forEach(cb => {
+                if (!cb.disabled) cb.checked = checked;
+            });
+            updateScopeCounters();
+        }
+
+        function filterScopePermissions() {
+            const q = (document.getElementById('scopePermSearch').value || '').trim().toLowerCase();
+            document.querySelectorAll('.scope-module-card').forEach(card => {
+                let visibleCount = 0;
+                card.querySelectorAll('.scope-perm-item').forEach(item => {
+                    const text = item.getAttribute('data-search') || '';
+                    const matched = !q || text.includes(q);
+                    item.classList.toggle('hidden', !matched);
+                    if (matched) visibleCount++;
+                });
+                card.classList.toggle('hidden', visibleCount === 0);
+            });
+        }
+
+        function buildScopePayload() {
+            const adminUserId = parseInt(document.getElementById('scope_AdminUserId').value || '0', 10);
+            const permissionIds = Array.from(document.querySelectorAll('.scope-perm-checkbox:checked')).map(cb => parseInt(cb.value, 10));
+            const departmentIds = Array.from(document.querySelectorAll('.scope-dept-checkbox:checked')).map(cb => parseInt(cb.value, 10));
+            const storeIds = Array.from(document.querySelectorAll('.scope-store-checkbox:checked')).map(cb => parseInt(cb.value, 10));
+
+            return {
+                adminUserId,
+                canCreateUser: document.getElementById('scope_CanCreateUser').checked,
+                canEditUser: document.getElementById('scope_CanEditUser').checked,
+                canDeleteUser: document.getElementById('scope_CanDeleteUser').checked,
+                canResetPassword: document.getElementById('scope_CanResetPassword').checked,
+                canAssignRole: document.getElementById('scope_CanAssignRole').checked,
+                canDelegateFurther: document.getElementById('scope_CanDelegateFurther').checked,
+                maxGrantLevel: parseInt(document.getElementById('scope_MaxGrantLevel').value || '50', 10),
+                permissionIds,
+                departmentIds,
+                storeIds
+            };
+        }
+
+        async function previewAndSaveScope() {
+            const payload = buildScopePayload();
+            const btn = document.getElementById('btnSaveScope');
+            btn.disabled = true;
+
+            const preview = await window.adminJsonRequest('/Admin/Delegation/PreviewScopeImpact', payload, 'POST');
+            if (!preview || preview.success === false) {
+                btn.disabled = false;
+                return;
+            }
+
+            if (preview.hasImpact) {
+                const confirmRes = await Swal.fire({
+                    icon: 'warning',
+                    title: 'Cảnh báo thu hẹp phạm vi ủy quyền',
+                    html: `<div class="text-sm text-start">
+                        <p class="mb-2"><b>${preview.affectedPermissionCount} quyền</b> đã cấp cho <b>${preview.affectedUserCount} nhân viên</b> sẽ bị thu hồi (hoặc gỡ khỏi Scope hiện tại).</p>
+                        <p class="text-xs text-slate-500 mb-0">${preview.warningMessage}</p>
+                    </div>`,
+                    showCancelButton: true,
+                    confirmButtonColor: '#e11d48',
+                    confirmButtonText: 'Xác nhận lưu & thu hồi dây chuyền',
+                    cancelButtonText: 'Hủy thao tác'
+                });
+
+                if (!confirmRes.isConfirmed) {
+                    btn.disabled = false;
+                    return;
+                }
+            }
+
+            const saveRes = await window.adminJsonRequest('/Admin/Delegation/SaveScope', payload, 'POST');
+            btn.disabled = false;
+
+            if (saveRes && saveRes.success) {
+                window.showAdminToast(saveRes.message, 'success');
+                if (scopeModalInstance) scopeModalInstance.hide();
+                setTimeout(() => window.location.reload(), 650);
+            }
+        }
+
+        function openCreateSubAdminModal() {
+            setSubAdminMode('existing');
+            if (createSubModalInstance) createSubModalInstance.show();
+        }
+
+        function setSubAdminMode(mode) {
+            document.getElementById('newSub_Mode').value = mode;
+            const isNew = (mode === 'new');
+            document.getElementById('block_existingUser').classList.toggle('hidden', isNew);
+            document.getElementById('block_newUser').classList.toggle('hidden', !isNew);
+
+            document.getElementById('modeBtn_existing').className = !isNew
+                ? 'py-2 rounded-lg text-xs font-extrabold bg-white dark:bg-slate-900 text-rose-600 shadow-xs'
+                : 'py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300';
+            document.getElementById('modeBtn_new').className = isNew
+                ? 'py-2 rounded-lg text-xs font-extrabold bg-white dark:bg-slate-900 text-rose-600 shadow-xs'
+                : 'py-2 rounded-lg text-xs font-bold text-slate-600 dark:text-slate-300';
+        }
+
+        async function submitCreateSubAdmin(e) {
+            e.preventDefault();
+            const mode = document.getElementById('newSub_Mode').value;
+            const roleId = parseInt(document.getElementById('newSub_RoleId').value || '0', 10);
+            const deptId = parseInt(document.getElementById('newSub_DeptId').value || '0', 10);
+
+            const payload = {
+                mode,
+                existingUserId: mode === 'existing' ? parseInt(document.getElementById('newSub_ExistingUserId').value || '0', 10) : null,
+                username: document.getElementById('newSub_Username').value.trim(),
+                password: document.getElementById('newSub_Password').value.trim(),
+                fullName: document.getElementById('newSub_FullName').value.trim(),
+                email: document.getElementById('newSub_Email').value.trim(),
+                roleId,
+                primaryDepartmentId: deptId,
+                scope: {
+                    adminUserId: 0,
+                    canCreateUser: false,
+                    canEditUser: true,
+                    canDeleteUser: false,
+                    canResetPassword: true,
+                    canAssignRole: true,
+                    canDelegateFurther: false,
+                    maxGrantLevel: 50,
+                    departmentIds: deptId > 0 ? [deptId] : [],
+                    permissionIds: [],
+                    storeIds: []
+                }
+            };
+
+            const btn = document.getElementById('btnCreateSubAdmin');
+            btn.disabled = true;
+            const res = await window.adminJsonRequest('/Admin/Delegation/CreateSubAdmin', payload, 'POST');
+            btn.disabled = false;
+
+            if (res && res.success) {
+                window.showAdminToast(res.message, 'success');
+                if (createSubModalInstance) createSubModalInstance.hide();
+                setTimeout(() => window.location.reload(), 650);
+            }
+        }
+    </script>
+}
+

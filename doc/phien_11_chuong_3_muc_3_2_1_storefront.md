@@ -2,7 +2,7 @@
 
 ## 3.2.1. Phân hệ Giao diện Khách hàng (Luxury Storefront & Customer Portal)
 
-Phân hệ Giao diện Khách hàng của hệ thống OMNI BEAUTY được định vị theo phong cách thương mại điện tử mỹ phẩm thượng lưu (Haute Parfumerie & Luxury Cosmetics), lấy cảm hứng từ chuẩn mực thiết kế của các hệ sinh thái làm đẹp hàng đầu thế giới như Sephora và Ulta Beauty, đồng thời tối ưu hóa sâu sắc cho hành vi mua sắm đa kênh của người tiêu dùng Việt Nam. Toàn bộ giao diện được xây dựng trên ngôn ngữ thiết kế tinh tế với gam màu chủ đạo Pearl White (#FFFDFB), điểm xuyết ánh Rose Gold (#B76E79) và Deep Emerald (#1B4D3E), mang lại cảm giác sang trọng, an tâm và chuyên nghiệp.
+Phân hệ Giao diện Khách hàng của hệ thống CANMAKE BEAUTY được định vị theo phong cách thương mại điện tử mỹ phẩm thượng lưu (Haute Parfumerie & Luxury Cosmetics), lấy cảm hứng từ chuẩn mực thiết kế của các hệ sinh thái làm đẹp hàng đầu thế giới như Sephora và Ulta Beauty, đồng thời tối ưu hóa sâu sắc cho hành vi mua sắm đa kênh của người tiêu dùng Việt Nam. Toàn bộ giao diện được xây dựng trên ngôn ngữ thiết kế tinh tế với gam màu chủ đạo Pearl White (#FFFDFB), điểm xuyết ánh Rose Gold (#B76E79) và Deep Emerald (#1B4D3E), mang lại cảm giác sang trọng, an tâm và chuyên nghiệp.
 
 Dưới đây là phân tích chi tiết 7 màn hình giao diện khách hàng cốt lõi của hệ thống, đi kèm hướng dẫn thực nghiệm chụp ảnh minh chứng, mô tả bố cục thị giác và phân tích luồng xử lý dữ liệu tầng Backend kết nối cơ sở dữ liệu quan hệ.
 
@@ -10,7 +10,7 @@ Dưới đây là phân tích chi tiết 7 màn hình giao diện khách hàng c
 
 ### 1. Hình 3.1 – Giao diện Trang chủ Luxury, Mega Menu Đa hình và Khu vực Flash Sale / Xả hàng Cận Date FEFO
 
-Trang chủ là trung tâm điều hướng và tiếp thị trực quan của OMNI BEAUTY, tích hợp khả năng cá nhân hóa trải nghiệm người dùng, truyền tải thông điệp cam kết mỹ phẩm sạch và kích thích quyết định mua hàng thông qua các chiến dịch ưu đãi hạn dùng thông minh.
+Trang chủ là trung tâm điều hướng và tiếp thị trực quan của CANMAKE BEAUTY, tích hợp khả năng cá nhân hóa trải nghiệm người dùng, truyền tải thông điệp cam kết mỹ phẩm sạch và kích thích quyết định mua hàng thông qua các chiến dịch ưu đãi hạn dùng thông minh.
 
 > **[HƯỚNG DẪN CHỤP & CHÈN HÌNH 3.1 - GIAO DIỆN TRANG CHỦ VÀ KHU VỰC FEFO CLEARANCE]**  
 > - **Tệp hình ảnh có sẵn trong hệ thống:** `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_4_1_Giao_Dien_Trang_Chu.png`.  
@@ -25,7 +25,7 @@ Trang chủ là trung tâm điều hướng và tiếp thị trực quan của O
 +--------------------------------------------------------------------------------------------------------------------+
 | [Thanh thông báo] Freeship đơn từ 500k | Hotline 1800 6868 | Tra cứu Showroom gần nhất | Phím tắt: Alt+D           |
 +--------------------------------------------------------------------------------------------------------------------+
-| [LOGO OMNI BEAUTY]   [ Ô tìm kiếm thông minh: Niacinamide, Retinol, Son dưỡng... (🔍) ]   [Wishlist] [Giỏ: (3)]    |
+| [LOGO CANMAKE BEAUTY]   [ Ô tìm kiếm thông minh: Niacinamide, Retinol, Son dưỡng... (🔍) ]   [Wishlist] [Giỏ: (3)]    |
 | MEGA MENU: Chăm sóc da (v) | Trang điểm (v) | Chăm sóc tóc | Thương hiệu Clean | Skincare Lab | Flash Sale FEFO    |
 +--------------------------------------------------------------------------------------------------------------------+
 |                                      HERO BANNER CHIẾN DỊCH THƯỢNG LƯU                                             |
@@ -49,9 +49,9 @@ Trang chủ là trung tâm điều hướng và tiếp thị trực quan của O
 
 #### Mô tả bố cục trực quan và các thành phần giao diện
 - **Thanh thông báo tiện ích và điều hướng thượng tầng:** Hiển thị thông điệp kích cầu miễn phí giao hàng toàn quốc cho đơn hàng từ 500.000 đồng, số điện thoại tổng đài tư vấn miễn cước, nút chọn chi nhánh showroom gần nhất và gợi ý phím tắt `Alt + D` mở bảng điều khiển thuyết trình.
-- **Header trung tâm và Mega Menu đa hình:** Logo thương hiệu OMNI BEAUTY được thiết kế cách điệu trang trọng. Ô tìm kiếm ứng dụng kỹ thuật giảm tải thao tác Debounce 300ms, hỗ trợ nhận diện danh pháp hoạt chất khoa học lẫn tên thông dụng. Hệ thống Mega Menu xổ xuống đa cấp khi rê chuột, phân loại sản phẩm theo cả công năng sử dụng, thương hiệu phân phối và nhóm hoạt chất điều trị.
+- **Header trung tâm và Mega Menu đa hình:** Logo thương hiệu CANMAKE BEAUTY được thiết kế cách điệu trang trọng. Ô tìm kiếm ứng dụng kỹ thuật giảm tải thao tác Debounce 300ms, hỗ trợ nhận diện danh pháp hoạt chất khoa học lẫn tên thông dụng. Hệ thống Mega Menu xổ xuống đa cấp khi rê chuột, phân loại sản phẩm theo cả công năng sử dụng, thương hiệu phân phối và nhóm hoạt chất điều trị.
 - **Hero Banner tương tác mượt mà:** Khối banner chính hiển thị hình ảnh độ phân giải cao quảng bá chiến dịch làm đẹp thuần chay, áp dụng kỹ thuật ưu tiên tải sớm `fetchpriority="high"` bảo đảm chỉ số LCP đạt dưới 1.2 giây.
-- **Khu vực Flash Sale xả hàng cận date FEFO:** Điểm nhấn công nghệ độc quyền của OMNI BEAUTY với đồng hồ đếm ngược chạy theo thời gian thực. Mỗi thẻ sản phẩm hiển thị đầy đủ thông tin số lô sản xuất, tháng và năm hết hạn, tỷ lệ giảm giá từ 45% đến 70%, cùng thanh đo tiến độ số lượng đã bán tạo hiệu ứng tâm lý khan hiếm chân thực.
+- **Khu vực Flash Sale xả hàng cận date FEFO:** Điểm nhấn công nghệ độc quyền của CANMAKE BEAUTY với đồng hồ đếm ngược chạy theo thời gian thực. Mỗi thẻ sản phẩm hiển thị đầy đủ thông tin số lô sản xuất, tháng và năm hết hạn, tỷ lệ giảm giá từ 45% đến 70%, cùng thanh đo tiến độ số lượng đã bán tạo hiệu ứng tâm lý khan hiếm chân thực.
 
 #### Phân tích luồng xử lý dữ liệu phía sau màn hình (Backend & Database Mapping)
 - Khi người dùng truy cập trang chủ, máy chủ ASP.NET Core kích hoạt Action `HomeController.Index()`. Để bảo đảm trang nạp tức thì trong vòng 2.85 mili-giây, hệ thống gọi `HomeSectionsViewComponent`. Thay vì gửi truy vấn trực tiếp vào SQL Server cho mỗi phiên duyệt, dịch vụ khai thác tầng bộ nhớ đệm `IMemoryCache` với khóa `Storefront_Home_Sections` có thời hạn lưu 30 phút.
@@ -138,7 +138,7 @@ Trang chi tiết sản phẩm là nơi hội tụ các giải pháp kỹ thuật
 
 ### 3. Hình 3.3 – Giao diện Khu vực Đánh giá Thực tế Đồng điệu theo Hồ sơ Làn da ("Match My Skin Twin" Reviews)
 
-Khu vực đánh giá sản phẩm của OMNI BEAUTY vượt qua giới hạn của các hệ thống bình luận sao đơn thuần bằng việc triển khai cơ chế kết nối những người tiêu dùng có cùng đặc tính làn da ("Match My Skin Twin"), gia tăng độ tin cậy và giá trị tham khảo của ý kiến cộng đồng.
+Khu vực đánh giá sản phẩm của CANMAKE BEAUTY vượt qua giới hạn của các hệ thống bình luận sao đơn thuần bằng việc triển khai cơ chế kết nối những người tiêu dùng có cùng đặc tính làn da ("Match My Skin Twin"), gia tăng độ tin cậy và giá trị tham khảo của ý kiến cộng đồng.
 
 > **[HƯỚNG DẪN CHỤP & CHÈN HÌNH 3.3 - GIAO DIỆN KHU VỰC ĐÁNH GIÁ ĐỒNG ĐIỆU HỒ SƠ LÀN DA]**  
 > - **Quy trình mở trình duyệt và chụp ảnh thực tế:**  
@@ -161,7 +161,7 @@ Khu vực đánh giá sản phẩm của OMNI BEAUTY vượt qua giới hạn c�
 | [x] Tất cả (248)   [ ] Có hình ảnh (64)   [ ] Đã mua hàng chính hãng (240)   [ ] 5 Sao (218)   [ ] Cùng loại da của tôi|
 +--------------------------------------------------------------------------------------------------------------------+
 | THẺ ĐÁNH GIÁ 1: NGUYỄN HOÀNG MAI ANH               ⭐⭐⭐⭐⭐ 5.0 Sao | Ngày đăng: 28/10/2026 14:20                |
-| [✔ Đã mua hàng từ Omni Beauty - Lô FEFO Chuẩn]     HỒ SƠ LÀN DA: [ Da dầu mụn ] | [ Mối quan tâm: Lỗ chân lông ]   |
+| [✔ Đã mua hàng từ Canmake Beauty - Lô FEFO Chuẩn]     HỒ SƠ LÀN DA: [ Da dầu mụn ] | [ Mối quan tâm: Lỗ chân lông ]   |
 | ------------------------------------------------------------------------------------------------------------------ |
 | Tiêu chí trải nghiệm: [ Mùi hương: Dịu nhẹ tự nhiên ] [ Độ bám màu: 8 Giờ ] [ Cảm giác trên da: Nhẹ tênh không dính]|
 | "Màu son lên môi cực kỳ chuẩn xác giống như phần mô tả Studio thử màu trên web. Chất son mịn như nhung, không làm  |
@@ -170,7 +170,7 @@ Khu vực đánh giá sản phẩm của OMNI BEAUTY vượt qua giới hạn c�
 | [Ảnh chụp thật 1] [Ảnh chụp thật 2] (Khách hàng tự chụp khi nhận kiện hàng)                                        |
 +--------------------------------------------------------------------------------------------------------------------+
 | THẺ ĐÁNH GIÁ 2: TRẦN THỊ PHƯƠNG THẢO               ⭐⭐⭐⭐⭐ 5.0 Sao | Ngày đăng: 26/10/2026 09:15                |
-| [✔ Đã mua hàng từ Omni Beauty - Lô FEFO Chuẩn]     HỒ SƠ LÀN DA: [ Da hỗn hợp thiên khô ] | [ Tuổi: 24-28 ]        |
+| [✔ Đã mua hàng từ Canmake Beauty - Lô FEFO Chuẩn]     HỒ SƠ LÀN DA: [ Da hỗn hợp thiên khô ] | [ Tuổi: 24-28 ]        |
 | ------------------------------------------------------------------------------------------------------------------ |
 | Tiêu chí trải nghiệm: [ Mùi hương: Không mùi nhân tạo ] [ Độ ẩm mượt: Xuất sắc ] [ Cảm giác: Thấm nhanh dịu da ] |
 | "Mình săn được lô xả kho cận date giá giảm tới 45% nhưng nhận hàng hộp vẫn nguyên vẹn seal niêm phong, hạn dùng còn |
@@ -183,7 +183,7 @@ Khu vực đánh giá sản phẩm của OMNI BEAUTY vượt qua giới hạn c�
 - **Thanh lọc đánh giá thông minh đa tiêu chí:** Tích hợp các tab lọc nhanh dựa trên Alpine.js giúp người dùng chuyển đổi bộ lọc tức thời giữa các nhóm: tất cả đánh giá, đánh giá có đính kèm ảnh chụp thực tế, đánh giá từ người mua đã xác thực (Verified Buyer) và các đánh giá đạt điểm tuyệt đối 5 sao.
 - **Hệ thống huy hiệu Hồ sơ Làn da trên từng thẻ đánh giá (Skin Profile Badges):** Mỗi bình luận hiển thị ảnh đại diện cách điệu, tên khách hàng và hệ thống các huy hiệu màu chuyên sâu: loại da của người đánh giá (Da dầu mụn, Da khô, Da hỗn hợp thiên dầu, Da nhạy cảm), mối quan tâm chăm sóc da, độ tuổi và thời gian sử dụng sản phẩm.
 - **Tiêu chuẩn đo lường trải nghiệm đa giác quan:** Đánh giá không dừng lại ở mức văn bản tự do mà được chuẩn hóa thành các tiêu chí khoa học gồm Mùi hương (Scent), Độ bám màu / duy trì độ ẩm (Longevity) và Cảm giác biểu bì trên da (Skin Feel).
-- **Huy hiệu bảo chứng mua hàng chính ngạch (Verified Buyer Badge):** Biểu tượng tích xanh kèm dòng chữ "Đã mua hàng từ Omni Beauty - Lô FEFO Chuẩn", xác nhận người đánh giá đã thực sự đặt mua sản phẩm đó trên hệ thống và đã hoàn tất nhận hàng vật lý.
+- **Huy hiệu bảo chứng mua hàng chính ngạch (Verified Buyer Badge):** Biểu tượng tích xanh kèm dòng chữ "Đã mua hàng từ Canmake Beauty - Lô FEFO Chuẩn", xác nhận người đánh giá đã thực sự đặt mua sản phẩm đó trên hệ thống và đã hoàn tất nhận hàng vật lý.
 
 #### Phân tích luồng xử lý dữ liệu phía sau màn hình (Backend & Database Mapping)
 - Danh sách bình luận được kết xuất thông qua partial view `_ReviewSection.cshtml` với dữ liệu truyền từ thuộc tính `ProductDetailViewModel.Reviews`.
@@ -308,7 +308,7 @@ Khay so sánh mỹ phẩm là công cụ trợ giúp đắc lực giúp người
 
 ### 6. Hình 3.6 – Giao diện Giỏ hàng Thông minh, Phòng Lab Kiểm tra Xung đột Hoạt chất (Skincare Conflict Checker) & Quầy Chọn Mẫu thử Miễn phí (Free Sample Bar)
 
-Giỏ hàng của OMNI BEAUTY được thiết kế như một trung tâm kiểm duyệt an toàn da liễu tự động và kích cầu mua sắm thượng lưu, biến khâu chốt đơn đơn thuần trở thành trải nghiệm tương tác chăm sóc khách hàng chuyên sâu.
+Giỏ hàng của CANMAKE BEAUTY được thiết kế như một trung tâm kiểm duyệt an toàn da liễu tự động và kích cầu mua sắm thượng lưu, biến khâu chốt đơn đơn thuần trở thành trải nghiệm tương tác chăm sóc khách hàng chuyên sâu.
 
 > **[HƯỚNG DẪN CHỤP & CHÈN HÌNH 3.6 - GIAO DIỆN GIỎ HÀNG VÀ PHÒNG LAB CẢNH BÁO TƯƠNG KỴ]**  
 > - **Tệp hình ảnh có sẵn trong hệ thống:** `d:\Lập trình web\OmnichannelBeautySolution\doc\Hinh_4_3_Giao_Dien_Gio_Hang_Va_Canh_Bao_Xung_Dot.png`.  
@@ -328,13 +328,13 @@ Giỏ hàng của OMNI BEAUTY được thiết kế như một trung tâm kiểm
 | 🎁 CHÚC MỪNG! BẠN ĐÃ MỞ KHÓA TOÀN BỘ QUÀ TẶNG:                                                                     |
 | [✔ Đã đạt: MIỄN PHÍ VẬN CHUYỂN TOÀN QUỐC]   |   [✔ Đã đạt: TẶNG 02 MẪU THỬ SERUM MINI CAO CẤP TỰ CHỌN]            |
 +--------------------------------------------------------------------------------------------------------------------+
-| ⚠️ CẢNH BÁO PHÒNG LAB DA LIỄU OMNI BEAUTY: PHÁT HIỆN TƯƠNG KỴ HOẠT CHẤT TRONG GIỎ HÀNG (SKINCARE CONFLICT)!         |
+| ⚠️ CẢNH BÁO PHÒNG LAB DA LIỄU CANMAKE BEAUTY: PHÁT HIỆN TƯƠNG KỴ HOẠT CHẤT TRONG GIỎ HÀNG (SKINCARE CONFLICT)!         |
 | Mức độ cảnh báo: NGHIÊM TRỌNG (HIGH CONFLICT RISK)                                                                 |
 | - Cặp hoạt chất đối kháng phát hiện: [ Retinol 1.0% ] ⚡ [ Salicylic Acid (BHA 2%) ]                                |
 | - Sản phẩm liên đới trong giỏ hàng:                                                                                |
 |   + Kem Dưỡng Tái Tạo Ban Đêm Avene Retinol 30ml (Chứa Retinol)                                                    |
 |   + Dung Dịch Tẩy Tế Bào Chết Hóa Học Paula's Choice 30ml (Chứa Salicylic Acid BHA)                                |
-| - Hướng dẫn khoa học từ Bác sĩ Da liễu OMNI BEAUTY:                                                                |
+| - Hướng dẫn khoa học từ Bác sĩ Da liễu CANMAKE BEAUTY:                                                                |
 |   "Việc bôi đồng thời Retinol cùng BHA trong cùng một buổi tối có thể phá hủy hàng rào bảo vệ lipid, gây khô rát   |
 |   dữ dội, bong tróc diện rộng và tăng nguy cơ kích ứng ban đỏ.                                                     |
 |   Khuyến nghị phân chia lịch trình: Dùng BHA vào buổi tối Thứ 2-4-6 và dùng Retinol vào buổi tối Thứ 3-5-7!"        |
@@ -360,7 +360,7 @@ Giỏ hàng của OMNI BEAUTY được thiết kế như một trung tâm kiểm
 - **Khối tóm tắt tài chính và nút kêu gọi hành động:** Hiển thị rõ số tiền hàng, phí vận chuyển 0 đồng do đã đạt điều kiện miễn phí, số điểm thưởng thành viên VIP sẽ được tích lũy vào tài khoản và nút bấm màu vàng kim nổi bật dẫn hướng sang trang Checkout.
 
 #### Phân tích luồng xử lý dữ liệu phía sau màn hình (Backend & Database Mapping)
-- Khi nạp trang giỏ hàng, Action `CartController.Index()` trích xuất cookie giỏ hàng định dạng JSON đã mã hóa bảo vệ chống giả mạo `OmniBeauty_CartSession`. Dữ liệu được giải mã thành đối tượng `CartViewModel`.
+- Khi nạp trang giỏ hàng, Action `CartController.Index()` trích xuất cookie giỏ hàng định dạng JSON đã mã hóa bảo vệ chống giả mạo `CanmakeBeauty_CartSession`. Dữ liệu được giải mã thành đối tượng `CartViewModel`.
 - Đối với tính năng kiểm tra xung đột hoạt chất, Controller gọi dịch vụ `SkincareIngredientInteractionEngine.AnalyzeCartConflictsAsync(cartVm.Items)`. Động cơ thực hiện:
   + Lấy danh sách ID các sản phẩm có trong giỏ, truy vấn bảng `Products` nạp chuỗi thành phần `Ingredients`.
   + Phân tích chuỗi thành danh sách mã hoạt chất chuẩn hóa (như `RETINOL`, `SALICYLIC_ACID`, `GLYCOLIC_ACID`, `VITAMIN_C_LAA`, `BENZOYL_PEROXIDE`).
@@ -383,7 +383,7 @@ Trang thanh toán hoàn thiện trải nghiệm mua sắm bằng việc cung c�
 
 ```
 +--------------------------------------------------------------------------------------------------------------------+
-| THANH TOÁN ĐƠN HÀNG OMNI BEAUTY (CHECKOUT)                                              [ Quay lại giỏ hàng ]      |
+| THANH TOÁN ĐƠN HÀNG CANMAKE BEAUTY (CHECKOUT)                                              [ Quay lại giỏ hàng ]      |
 +-------------------------------------------------------------------+------------------------------------------------+
 | CỘT TRÁI (THÔNG TIN NHẬN HÀNG & PHƯƠNG THỨC THANH TOÁN):          | CỘT PHẢI (TÓM TẮT ĐƠN HÀNG & CẤN TRỪ ƯU ĐÃI):  |
 | 1. Thông Tin Khách Hàng:                                          | Mỹ phẩm trong đơn:                             |
@@ -433,4 +433,4 @@ Trang thanh toán hoàn thiện trải nghiệm mua sắm bằng việc cung c�
 
 ### TIỂU KẾT MỤC 3.2.1
 
-Mục 3.2.1 đã mô tả và phân tích tường tận 7 màn hình giao diện cốt lõi của Phân hệ Giao diện Khách hàng (Luxury Storefront & Customer Portal) trong hệ thống OMNI BEAUTY. Sự kết hợp nhuần nhuyễn giữa thẩm mỹ giao diện thượng lưu, tính công thái học tối ưu cho hành vi người tiêu dùng và các giải pháp xử lý dữ liệu chuẩn xác ở tầng Backend (từ bóc tách hoạt chất INCI, kiểm tra tương kỵ da liễu tự động, đến cấp phát kho FEFO và cấn trừ điểm tích lũy) đã tạo nên một nền tảng thương mại điện tử mỹ phẩm toàn diện, tin cậy và đạt chuẩn mực kỹ thuật quốc tế.
+Mục 3.2.1 đã mô tả và phân tích tường tận 7 màn hình giao diện cốt lõi của Phân hệ Giao diện Khách hàng (Luxury Storefront & Customer Portal) trong hệ thống CANMAKE BEAUTY. Sự kết hợp nhuần nhuyễn giữa thẩm mỹ giao diện thượng lưu, tính công thái học tối ưu cho hành vi người tiêu dùng và các giải pháp xử lý dữ liệu chuẩn xác ở tầng Backend (từ bóc tách hoạt chất INCI, kiểm tra tương kỵ da liễu tự động, đến cấp phát kho FEFO và cấn trừ điểm tích lũy) đã tạo nên một nền tảng thương mại điện tử mỹ phẩm toàn diện, tin cậy và đạt chuẩn mực kỹ thuật quốc tế.

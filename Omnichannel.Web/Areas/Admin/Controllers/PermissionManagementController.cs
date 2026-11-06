@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Omnichannel.Application.DTOs.Security;
@@ -36,14 +37,27 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [HasPermission("PERMISSION_MANAGE")]
-        public async Task<IActionResult> Index(int? roleId)
+        [HasPermission("PERMISSION_DELEGATE")]
+        public async Task<IActionResult> Index(int? roleId, int? userId, string? view = null)
         {
             int actorId = User.GetUserId() ?? 0;
             var actorCtx = await _delegationService.GetContextAsync(actorId);
-            var grantablePermSet = actorCtx.GrantablePermissionIds.ToHashSet();
 
-            // Loại bỏ hoàn toàn Role Customer khỏi danh sách quản trị nhân sự
+            // Nếu Admin nhỏ cố yêu cầu chế độ ma trận vai trò toàn cục -> chặn 403
+            if (!actorCtx.IsSuperAdmin && string.Equals(view, "global-matrix", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction("AccessDenied", "Auth", new
+                {
+                    area = "Admin",
+                    attemptedPath = "/Admin/PermissionManagement?view=global-matrix",
+                    message = "Chỉ Admin Tổng (SuperAdmin) mới có quyền truy cập Ma trận Vai trò toàn cục."
+                });
+            }
+
+            var grantablePermSet = actorCtx.GrantablePermissionIds.ToHashSet();
+            var assignableRoleIds = await _delegationService.GetAssignableRoleIdsAsync(actorId);
+            var assignableRoleSet = assignableRoleIds.ToHashSet();
+
             var roles = await _context.Roles
                 .AsNoTracking()
                 .Include(r => r.Department)
@@ -64,26 +78,45 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 })
                 .ToListAsync();
 
+            var assignableRoles = roles.Where(r => actorCtx.IsSuperAdmin || assignableRoleSet.Contains(r.Id)).ToList();
+
             var scopedUsersQuery = _delegationService.ApplyUserScope(
-                _context.Users.AsNoTracking().Where(u => u.IsActive),
+                _context.Users
+                    .AsNoTracking()
+                    .Include(u => u.Department)
+                    .Include(u => u.Store)
+                    .Include(u => u.UserRoles)
+                        .ThenInclude(ur => ur.Role)
+                    .Where(u => u.IsActive && !u.IsDeleted && u.UserType >= 2),
                 actorCtx);
 
             var users = await scopedUsersQuery
+                .Where(u => actorCtx.IsSuperAdmin || u.Id != actorId)
                 .OrderBy(u => u.Id)
                 .Select(u => new UserSummaryDto
                 {
                     Id = u.Id,
+                    EmployeeCode = u.EmployeeCode,
                     Username = u.Username,
                     FullName = u.FullName,
                     Email = u.Email,
                     StoreName = u.Store != null ? u.Store.Name : "Toàn hệ thống",
                     DepartmentId = u.DepartmentId,
                     DepartmentName = u.Department != null ? u.Department.Name : "Chưa phân phòng",
-                    JobTitle = u.JobTitle
+                    JobTitle = u.JobTitle,
+                    RoleNames = u.UserRoles
+                        .Where(ur => ur.Role != null && ur.Role.IsActive && ur.Role.Name != "Customer")
+                        .Select(ur => ur.Role.DisplayName ?? ur.Role.Name)
+                        .ToList(),
+                    RoleIds = u.UserRoles
+                        .Where(ur => ur.Role != null && ur.Role.IsActive && ur.Role.Name != "Customer")
+                        .Select(ur => ur.RoleId)
+                        .ToList()
                 })
                 .ToListAsync();
 
             var selectedRoleId = roleId ?? roles.FirstOrDefault()?.Id ?? 0;
+            var selectedUserId = userId ?? users.FirstOrDefault()?.Id ?? 0;
 
             var permissions = await _context.Permissions
                 .AsNoTracking()
@@ -125,9 +158,11 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             var vm = new PermissionMatrixViewModel
             {
                 Roles = roles,
+                AssignableRoles = assignableRoles,
                 Users = users,
                 ModuleGroups = moduleGroups,
                 SelectedRoleId = selectedRoleId,
+                SelectedUserId = selectedUserId,
                 ActivePermissionIdsForRole = activeRolePermIds,
                 ActorContext = actorCtx
             };
@@ -148,9 +183,6 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             return Json(new { success = true, roleId, permissionIds });
         }
 
-        /// <summary>
-        /// Lưu ma trận Role × Permission toàn cục: CHỈ SuperAdmin mới được phép thực thi.
-        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         [HasPermission("PERMISSION_MANAGE")]
@@ -159,6 +191,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             int actorId = User.GetUserId() ?? 0;
             if (!await _delegationService.IsSuperAdminAsync(actorId))
             {
+                Response.StatusCode = StatusCodes.Status403Forbidden;
                 return Json(new
                 {
                     success = false,
@@ -201,7 +234,6 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                         await _context.RolePermissions.AddRangeAsync(newMappings);
                     }
 
-                    // Cập nhật SecurityStamp cho toàn bộ user thuộc Role này để buộc làm mới claims
                     var roleUserIds = await _context.UserRoles
                         .Where(ur => ur.RoleId == dto.RoleId)
                         .Select(ur => ur.UserId)
@@ -250,6 +282,115 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             });
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [HasPermission("PERMISSION_MANAGE")]
+        public async Task<IActionResult> SaveBulkRoleMatrix([FromBody] BulkRolePermissionUpdateDto dto)
+        {
+            int actorId = User.GetUserId() ?? 0;
+            if (!await _delegationService.IsSuperAdminAsync(actorId))
+            {
+                Response.StatusCode = StatusCodes.Status403Forbidden;
+                return Json(new
+                {
+                    success = false,
+                    message = "Chỉ Quản trị viên tối cao (SuperAdmin) mới có quyền lưu Ma trận Vai trò toàn cục."
+                });
+            }
+
+            if (dto?.Roles == null || dto.Roles.Count == 0)
+            {
+                return Json(new { success = false, message = "Không có dữ liệu ma trận vai trò để lưu." });
+            }
+
+            var editableRoles = await _context.Roles
+                .Where(r => r.IsActive && r.Level > 0 && r.Level < 100 && r.Name != "SuperAdmin" && r.Name != "Customer")
+                .ToDictionaryAsync(r => r.Id);
+
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return await strategy.ExecuteAsync<IActionResult>(async () =>
+            {
+                await using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    var updatedRoleNames = new List<string>();
+                    foreach (var item in dto.Roles)
+                    {
+                        if (!editableRoles.TryGetValue(item.RoleId, out var role))
+                            continue;
+
+                        var existing = await _context.RolePermissions.Where(rp => rp.RoleId == role.Id).ToListAsync();
+                        _context.RolePermissions.RemoveRange(existing);
+
+                        var distinctPermIds = (item.PermissionIds ?? new List<int>()).Distinct().ToList();
+                        foreach (var pid in distinctPermIds)
+                        {
+                            await _context.RolePermissions.AddAsync(new RolePermission
+                            {
+                                RoleId = role.Id,
+                                PermissionId = pid
+                            });
+                        }
+
+                        updatedRoleNames.Add($"{role.Name}({distinctPermIds.Count})");
+                    }
+
+                    // Làm mới SecurityStamp toàn bộ nhân sự nội bộ (trừ SuperAdmin)
+                    var staffUsers = await _context.Users
+                        .IgnoreQueryFilters()
+                        .Where(u => u.UserType >= 2)
+                        .ToListAsync();
+                    foreach (var u in staffUsers)
+                    {
+                        u.SecurityStamp = Guid.NewGuid().ToString("N");
+                    }
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    foreach (var roleIdKey in editableRoles.Keys)
+                    {
+                        await _permissionService.InvalidateRolePermissionCacheAsync(roleIdKey);
+                    }
+
+                    await _auditLogService.LogAsync(
+                        action: "PERMISSION_BULK_MATRIX_UPDATE",
+                        entityType: "RolePermissionMatrix",
+                        entityId: "ALL_ROLES",
+                        oldValues: null,
+                        newValues: $"Lưu đồng loạt ma trận phân quyền cho {updatedRoleNames.Count} vai trò: {string.Join(", ", updatedRoleNames)}",
+                        userId: actorId,
+                        userName: User.Identity?.Name,
+                        ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1",
+                        userAgent: Request.Headers["User-Agent"].ToString());
+
+                    return Json(new
+                    {
+                        success = true,
+                        message = $"Đã lưu Ma trận Phân quyền cho {updatedRoleNames.Count} vai trò và đồng bộ Cache L1 toàn hệ thống!"
+                    });
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return Json(new { success = false, message = $"Lỗi lưu ma trận: {ex.Message}" });
+                }
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [HasPermission("PERMISSION_DELEGATE")]
+        public async Task<IActionResult> ClearAllCache()
+        {
+            var allRoles = await _context.Roles.AsNoTracking().Select(r => r.Id).ToListAsync();
+            foreach (var rId in allRoles)
+            {
+                await _permissionService.InvalidateRolePermissionCacheAsync(rId);
+            }
+            return Json(new { success = true, message = "Đã làm sạch bộ nhớ đệm phân quyền L1 (IMemoryCache) cho toàn bộ người dùng!" });
+        }
+
         [HttpGet]
         [HasPermission("PERMISSION_DELEGATE")]
         public async Task<IActionResult> GetUserOverrides(int userId)
@@ -259,7 +400,13 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             if (!actorCtx.IsSuperAdmin && actorId != userId && !await _delegationService.CanManageUserAsync(actorId, userId))
             {
-                return Json(new { success = false, message = "Nhân sự này không nằm trong phạm vi quản lý của bạn." });
+                Response.StatusCode = StatusCodes.Status403Forbidden;
+                return Json(new
+                {
+                    success = false,
+                    message = "Từ chối truy cập (403): Nhân sự này không nằm trong phạm vi phòng ban hoặc cấp bậc quản lý của bạn.",
+                    errorCode = "TARGET_OUT_OF_SCOPE"
+                });
             }
 
             var grantableSet = actorCtx.GrantablePermissionIds.ToHashSet();
@@ -267,10 +414,27 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             foreach (var item in breakdown)
             {
+                item.ModuleDisplayName = GetModuleDisplayName(item.Module);
                 item.CanActorGrant = actorCtx.IsSuperAdmin || grantableSet.Contains(item.PermissionId);
             }
 
-            return Json(new { success = true, userId, breakdown });
+            var currentRoleIds = await _context.UserRoles
+                .AsNoTracking()
+                .Where(ur => ur.UserId == userId && ur.Role.IsActive && ur.Role.Name != "Customer")
+                .Select(ur => ur.RoleId)
+                .ToListAsync();
+
+            var assignableRoleIds = await _delegationService.GetAssignableRoleIdsAsync(actorId);
+
+            return Json(new
+            {
+                success = true,
+                userId,
+                currentRoleIds,
+                assignableRoleIds,
+                canAssignRole = actorCtx.IsSuperAdmin || actorCtx.CanAssignRole,
+                breakdown
+            });
         }
 
         [HttpPost]
@@ -283,10 +447,26 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 return Json(new { success = false, message = "Tham số đặc cách phân quyền không hợp lệ." });
             }
 
+            // Khi Thu hồi quyền (Deny = false), bắt buộc phải có lý do ghi chú
+            if (dto.OverrideStatus.HasValue && dto.OverrideStatus.Value == false && string.IsNullOrWhiteSpace(dto.Reason))
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Vui lòng nhập lý do bắt buộc khi Thu hồi (Deny) quyền của nhân sự.",
+                    errorCode = "REASON_REQUIRED"
+                });
+            }
+
             int actorId = User.GetUserId() ?? 0;
             var result = !dto.OverrideStatus.HasValue
                 ? await _delegationService.RemoveUserPermissionOverrideAsync(actorId, dto.UserId, dto.PermissionId)
                 : await _delegationService.GrantUserPermissionAsync(actorId, dto.UserId, dto.PermissionId, dto.OverrideStatus.Value, dto.Reason);
+
+            if (!result.Succeeded)
+            {
+                Response.StatusCode = StatusCodes.Status403Forbidden;
+            }
 
             return Json(new
             {
@@ -299,10 +479,82 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [HasPermission("PERMISSION_DELEGATE")]
+        public async Task<IActionResult> ResetUserOverrides([FromBody] ResetUserOverridesDto dto)
+        {
+            if (dto == null || dto.UserId <= 0)
+            {
+                return Json(new { success = false, message = "Tham số người dùng không hợp lệ." });
+            }
+
+            int actorId = User.GetUserId() ?? 0;
+            var actorCtx = await _delegationService.GetContextAsync(actorId);
+
+            if (!actorCtx.IsSuperAdmin && !await _delegationService.CanManageUserAsync(actorId, dto.UserId))
+            {
+                Response.StatusCode = StatusCodes.Status403Forbidden;
+                return Json(new
+                {
+                    success = false,
+                    message = "Từ chối truy cập (403): Nhân sự này nằm ngoài phạm vi quản lý của bạn.",
+                    errorCode = "TARGET_OUT_OF_SCOPE"
+                });
+            }
+
+            var grantableSet = actorCtx.GrantablePermissionIds.ToHashSet();
+            var overrides = await _context.UserPermissions
+                .Where(up => up.UserId == dto.UserId)
+                .ToListAsync();
+
+            var removable = actorCtx.IsSuperAdmin
+                ? overrides
+                : overrides.Where(up => grantableSet.Contains(up.PermissionId)).ToList();
+
+            if (removable.Count == 0)
+            {
+                return Json(new { success = true, message = "Nhân sự này hiện không có quyền đặc cách (Override) nào trong phạm vi của bạn." });
+            }
+
+            _context.UserPermissions.RemoveRange(removable);
+
+            var targetUser = await _context.Users.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Id == dto.UserId);
+            if (targetUser != null)
+            {
+                targetUser.SecurityStamp = Guid.NewGuid().ToString("N");
+                targetUser.UpdatedAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync();
+            await _permissionService.InvalidateUserPermissionCacheAsync(dto.UserId);
+
+            await _auditLogService.LogAsync(
+                action: "DELEGATION_RESET_USER_OVERRIDES",
+                entityType: "UserPermission",
+                entityId: dto.UserId.ToString(),
+                oldValues: $"RemovedCount={removable.Count}",
+                newValues: "Khôi phục quyền mặc định theo vai trò",
+                userId: actorId,
+                userName: actorCtx.ActorUsername,
+                ipAddress: HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1",
+                userAgent: Request.Headers["User-Agent"].ToString());
+
+            return Json(new
+            {
+                success = true,
+                message = $"Đã khôi phục mặc định theo vai trò (xóa {removable.Count} quyền đặc cách cá nhân) thành công!"
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [HasPermission("PERMISSION_DELEGATE")]
         public async Task<IActionResult> SaveDelegationScope([FromBody] SaveDelegationScopeRequest request)
         {
             int actorId = User.GetUserId() ?? 0;
             var result = await _delegationService.SaveDelegationScopeAsync(actorId, request);
+            if (!result.Succeeded)
+            {
+                Response.StatusCode = StatusCodes.Status403Forbidden;
+            }
             return Json(new
             {
                 success = result.Succeeded,
@@ -313,11 +565,20 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [HasPermission("USER_ASSIGN_ROLE")]
-        public async Task<IActionResult> AssignUserRoles(int userId, [FromBody] List<int> roleIds)
+        [HasPermission("PERMISSION_DELEGATE")]
+        public async Task<IActionResult> AssignUserRoles([FromBody] AssignUserRolesRequest req)
         {
+            if (req == null || req.UserId <= 0)
+            {
+                return Json(new { success = false, message = "Tham số gán vai trò không hợp lệ." });
+            }
+
             int actorId = User.GetUserId() ?? 0;
-            var result = await _delegationService.AssignRolesAsync(actorId, userId, roleIds);
+            var result = await _delegationService.AssignRolesAsync(actorId, req.UserId, req.RoleIds ?? new List<int>());
+            if (!result.Succeeded)
+            {
+                Response.StatusCode = StatusCodes.Status403Forbidden;
+            }
             return Json(new
             {
                 success = result.Succeeded,
@@ -333,7 +594,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             return parts.Length > 1 ? parts[^1].ToUpperInvariant() : "ACCESS";
         }
 
-        private static string GetModuleDisplayName(string moduleCode) => moduleCode.ToUpperInvariant() switch
+        public static string GetModuleDisplayName(string moduleCode) => moduleCode.ToUpperInvariant() switch
         {
             "DASHBOARD" => "Tổng Quan Hệ Thống (Dashboard)",
             "CATALOG" or "PRODUCT" => "Danh Mục & Sản Phẩm (Product)",

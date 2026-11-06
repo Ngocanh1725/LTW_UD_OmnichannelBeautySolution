@@ -18,13 +18,15 @@ namespace Omnichannel.Application.DTOs.Sales
     }
 
     // Định nghĩa CartViewModel để tương thích với OrderDtos.cs
+    //// Lớp Con (Hiển thị Giỏ Hàng Web) KẾ THỪA từ Lớp Cha (Dữ liệu Giỏ Hàng)
     public class CartViewModel : CartDto
-    {
-        public decimal ShippingFee { get; set; }
+    {// Mốc được miễn phí ship (Ví dụ: 500.000 đ)
+        public decimal ShippingFee { get; set; }//thêm phí vận chuyển
         public decimal FinalTotal { get; set; }
 
         // --- LUXURY GIFT PACKAGING ---
-        public bool IsGiftWrapped { get; set; }
+        // TÍNH ĐÓNG GÓI Ở ĐÂY: Thuộc tính này CHỈ CÓ ĐỌC, KHÔNG CHO PHÉP GHI (Không có 'set')
+        public bool IsGiftWrapped { get; set; }//Thêm gói quà tặng sang trọng
         public string? GiftMessage { get; set; }
         public decimal GiftWrapFee { get; set; } = Omnichannel.Application.Common.OrderPricingConstants.LuxuryGiftWrapFee;
 
@@ -32,7 +34,7 @@ namespace Omnichannel.Application.DTOs.Sales
         public decimal FreeShippingThreshold { get; set; } = Omnichannel.Application.Common.OrderPricingConstants.FreeShippingThreshold;
         public decimal FreeShippingRemaining => Math.Max(0, FreeShippingThreshold - SubTotal);
         public decimal FreeShippingProgress => SubTotal >= FreeShippingThreshold ? 100 : (FreeShippingThreshold > 0 ? Math.Round(SubTotal / FreeShippingThreshold * 100, 1) : 100);
-        public bool IsFreeShipping => SubTotal >= FreeShippingThreshold;
+        public bool IsFreeShipping => SubTotal >= FreeShippingThreshold;//// Tự động tính Freeship
 
         // --- CROSS-SELL CAROUSEL ---
         public List<CrossSellItemDto> CrossSellItems { get; set; } = new();

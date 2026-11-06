@@ -1,11 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Omnichannel.Application.DTOs.Account;
+using Omnichannel.Application.DTOs.Security;
 using Omnichannel.Application.Interfaces.Security;
 using Omnichannel.Domain.Entities;
 using Omnichannel.Infrastructure.Data;
@@ -20,41 +23,168 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IPasswordHasherService _passwordHasher;
         private readonly IPermissionService _permissionService;
+        private readonly IDelegationService _delegationService;
 
         public UserController(
             ApplicationDbContext context,
             IPasswordHasherService passwordHasher,
-            IPermissionService permissionService)
+            IPermissionService permissionService,
+            IDelegationService delegationService)
         {
             _context = context;
             _passwordHasher = passwordHasher;
             _permissionService = permissionService;
+            _delegationService = delegationService;
         }
 
         [HttpGet]
         [HasPermission("USER_VIEW")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? departmentId = null)
         {
-            var users = await _context.Users
+            var actorId = GetCurrentActorId();
+            var actorCtx = await _delegationService.GetContextAsync(actorId);
+
+            var query = _context.Users
                 .AsNoTracking()
+                .Include(u => u.Department)
+                .Include(u => u.Manager)
+                .Include(u => u.Store)
                 .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
-                .OrderByDescending(u => u.CreatedAt)
-                .Select(u => new UserItemViewModel
+                .Where(u => u.UserType >= 2 && !u.IsDeleted);
+
+            query = _delegationService.ApplyUserScope(query, actorCtx);
+
+            if (departmentId.HasValue)
+            {
+                query = query.Where(u => u.DepartmentId == departmentId.Value);
+            }
+
+            var entities = await query
+                .OrderBy(u => u.EmployeeCode ?? "ZZZZ")
+                .ThenBy(u => u.FullName)
+                .ToListAsync();
+
+            var users = new List<UserItemViewModel>();
+            foreach (var u in entities)
+            {
+                bool canManage = actorCtx.IsSuperAdmin || await _delegationService.CanManageUserAsync(actorId, u.Id);
+                users.Add(new UserItemViewModel
                 {
                     UserId = u.Id.ToString(),
+                    EmployeeCode = u.EmployeeCode,
                     Username = u.Username,
                     FullName = u.FullName,
                     Email = u.Email,
                     PhoneNumber = u.PhoneNumber,
+                    JobTitle = u.JobTitle,
+                    DepartmentId = u.DepartmentId,
+                    DepartmentName = u.Department?.Name,
+                    ManagerName = u.Manager?.FullName,
+                    StoreName = u.Store?.Name,
                     UserType = u.UserType,
                     IsActive = u.IsActive,
+                    CanActorManage = canManage,
                     CreatedAt = u.CreatedAt,
-                    AssignedRoles = u.UserRoles.Select(ur => ur.Role.Name).ToList()
-                })
+                    AssignedRoles = u.UserRoles
+                        .Where(ur => ur.Role != null && ur.Role.Name != "Customer")
+                        .OrderByDescending(ur => ur.Role.Level)
+                        .Select(ur => !string.IsNullOrWhiteSpace(ur.Role.DisplayName) ? ur.Role.DisplayName! : ur.Role.Name)
+                        .ToList()
+                });
+            }
+
+            ViewBag.ActorContext = actorCtx;
+            ViewBag.SelectedDepartmentId = departmentId;
+            ViewBag.Departments = await _context.Departments
+                .AsNoTracking()
+                .Where(d => d.IsActive && (actorCtx.IsSuperAdmin || actorCtx.ManagedDepartmentIds.Contains(d.Id)))
+                .OrderBy(d => d.SortOrder)
                 .ToListAsync();
 
             return View(users);
+        }
+
+        [HttpGet]
+        [HasPermission("PERMISSION_DELEGATE")]
+        public async Task<IActionResult> Permissions(int id)
+        {
+            var actorId = GetCurrentActorId();
+            var actorCtx = await _delegationService.GetContextAsync(actorId);
+
+            if (!actorCtx.IsSuperAdmin && !await _delegationService.CanManageUserAsync(actorId, id))
+            {
+                return Forbid();
+            }
+
+            var targetUser = await _context.Users
+                .AsNoTracking()
+                .Include(u => u.Department)
+                .Include(u => u.Manager)
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.Id == id && u.UserType >= 2 && !u.IsDeleted);
+
+            if (targetUser == null)
+            {
+                return NotFound();
+            }
+
+            var assignableRoleIds = (await _delegationService.GetAssignableRoleIdsAsync(actorId)).ToHashSet();
+            var grantablePermissionIds = (await _delegationService.GetGrantablePermissionIdsAsync(actorId)).ToHashSet();
+
+            var allInternalRoles = await _context.Roles
+                .AsNoTracking()
+                .Include(r => r.Department)
+                .Where(r => r.IsActive && r.Level > 0 && r.Name != "Customer" && r.Name != "CUSTOMER")
+                .OrderByDescending(r => r.Level)
+                .ThenBy(r => r.Name)
+                .Select(r => new RoleDto
+                {
+                    Id = r.Id,
+                    Name = r.Name,
+                    DisplayName = !string.IsNullOrWhiteSpace(r.DisplayName) ? r.DisplayName : r.Name,
+                    Description = r.Description,
+                    Level = r.Level,
+                    DepartmentId = r.DepartmentId,
+                    DepartmentName = r.Department != null ? r.Department.Name : null,
+                    IsSystem = r.IsSystem,
+                    Color = r.Color
+                })
+                .ToListAsync();
+
+            var breakdown = await _permissionService.GetUserPermissionBreakdownAsync(id);
+            foreach (var item in breakdown)
+            {
+                item.CanActorGrant = actorCtx.IsSuperAdmin || grantablePermissionIds.Contains(item.PermissionId);
+                item.ModuleDisplayName = TranslateModuleName(item.Module);
+            }
+
+            var currentRoleIds = targetUser.UserRoles
+                .Where(ur => ur.Role != null && ur.Role.Name != "Customer")
+                .Select(ur => ur.RoleId)
+                .ToList();
+
+            var vm = new UserPermissionPageViewModel
+            {
+                TargetUserId = targetUser.Id,
+                EmployeeCode = targetUser.EmployeeCode,
+                Username = targetUser.Username,
+                FullName = targetUser.FullName,
+                Email = targetUser.Email,
+                JobTitle = targetUser.JobTitle,
+                DepartmentName = targetUser.Department?.Name,
+                ManagerName = targetUser.Manager?.FullName,
+                IsActive = targetUser.IsActive,
+                CurrentRoleIds = currentRoleIds,
+                CurrentRoles = allInternalRoles.Where(r => currentRoleIds.Contains(r.Id)).ToList(),
+                AssignableRoles = allInternalRoles.Where(r => assignableRoleIds.Contains(r.Id) || currentRoleIds.Contains(r.Id)).ToList(),
+                CanActorAssignRoles = actorCtx.IsSuperAdmin || actorCtx.CanAssignRole,
+                Permissions = breakdown,
+                ActorContext = actorCtx
+            };
+
+            return View(vm);
         }
 
         [HttpGet]
@@ -142,14 +272,20 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HasPermission("USER_EDIT")]
         public async Task<IActionResult> ToggleStatus(int userId)
         {
+            var actorId = GetCurrentActorId();
+            var actorCtx = await _delegationService.GetContextAsync(actorId);
+            if (!actorCtx.IsSuperAdmin && !await _delegationService.CanManageUserAsync(actorId, userId))
+            {
+                return Forbid();
+            }
+
             var user = await _context.Users.FindAsync(userId);
             if (user == null)
             {
                 return NotFound();
             }
 
-            var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (user.Id.ToString() == currentUserId)
+            if (user.Id == actorId)
             {
                 TempData["ErrorMessage"] = "Bạn không thể tự khóa tài khoản đang đăng nhập!";
                 return RedirectToAction(nameof(Index));
@@ -166,6 +302,31 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 : $"Đã tạm khóa tài khoản {user.Username}.";
 
             return RedirectToAction(nameof(Index));
+        }
+
+        private int GetCurrentActorId()
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.TryParse(userIdStr, out var id) ? id : 0;
+        }
+
+        private static string TranslateModuleName(string moduleCode)
+        {
+            return moduleCode switch
+            {
+                "DASHBOARD" => "Bảng Điều Khiển & Báo Cáo",
+                "POS" => "Bán Hàng Tại Quầy (POS)",
+                "ORDER" => "Đơn Hàng Đa Kênh (OMS)",
+                "PRODUCT" => "Sản Phẩm & Danh Mục",
+                "INVENTORY" => "Kho Hàng & Lô Hạn FEFO",
+                "CUSTOMER" => "Khách Hàng & Hồ Sơ CRM",
+                "PROMOTION" => "Khuyến Mãi & Loyalty",
+                "CMS" => "Giao Diện, Menu & Nội Dung (CMS)",
+                "FINANCE" => "Tài Chính & Đối Soát Lãi Lỗ",
+                "USER" => "Nhân Sự, Phòng Ban & Phân Quyền",
+                "SYSTEM" => "Cấu Hình Hệ Thống & Bảo Mật",
+                _ => moduleCode
+            };
         }
     }
 }

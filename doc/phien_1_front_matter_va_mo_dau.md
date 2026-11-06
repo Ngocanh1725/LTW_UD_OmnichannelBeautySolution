@@ -1,6 +1,6 @@
 # BÁO CÁO KHÓA LUẬN TỐT NGHIỆP ĐẠI HỌC
 
-## XÂY DỰNG WEBSITE QUẢN LÝ BÁN HÀNG CHO CHUỖI CỬA HÀNG MỸ PHẨM OMNI BEAUTY
+## XÂY DỰNG WEBSITE QUẢN LÝ BÁN HÀNG CHO CHUỖI CỬA HÀNG MỸ PHẨM CANMAKE BEAUTY
 
 ---
 
@@ -23,7 +23,7 @@
        
                  ĐỀ TÀI NGHIÊN CỨU:
        XÂY DỰNG WEBSITE QUẢN LÝ BÁN HÀNG
-    CHO CHUỖI CỬA HÀNG MỸ PHẨM OMNI BEAUTY
+    CHO CHUỖI CỬA HÀNG MỸ PHẨM CANMAKE BEAUTY
     
     
     
@@ -60,7 +60,7 @@
        
                  ĐỀ TÀI NGHIÊN CỨU:
        XÂY DỰNG WEBSITE QUẢN LÝ BÁN HÀNG
-    CHO CHUỖI CỬA HÀNG MỸ PHẨM OMNI BEAUTY
+    CHO CHUỖI CỬA HÀNG MỸ PHẨM CANMAKE BEAUTY
     
     
     
@@ -81,11 +81,11 @@
 
 ## LỜI CẢM ƠN
 
-Để hoàn thành công trình khóa luận tốt nghiệp đại học với đề tài "Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY", lời đầu tiên em xin được bày tỏ lòng biết ơn chân thành và sâu sắc nhất tới toàn thể quý Thầy Cô giáo tại Học viện Hành chính và Quản trị công, đặc biệt là các Thầy Cô trong Khoa Hệ thống thông tin và Chuyển đổi số. Trong suốt bốn năm học tập và rèn luyện dưới mái trường học viện, sự chỉ bảo tận tình, tri thức chuyên môn sâu rộng cùng lòng nhiệt huyết của các Thầy Cô đã truyền cho em nền tảng kiến thức vững chắc về phân tích thiết kế hệ thống, cơ sở dữ liệu quan hệ, kiến trúc phần mềm doanh nghiệp và tư duy giải quyết vấn đề khoa học.
+Để hoàn thành công trình khóa luận tốt nghiệp đại học với đề tài "Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY", lời đầu tiên em xin được bày tỏ lòng biết ơn chân thành và sâu sắc nhất tới toàn thể quý Thầy Cô giáo tại Học viện Hành chính và Quản trị công, đặc biệt là các Thầy Cô trong Khoa Hệ thống thông tin và Chuyển đổi số. Trong suốt bốn năm học tập và rèn luyện dưới mái trường học viện, sự chỉ bảo tận tình, tri thức chuyên môn sâu rộng cùng lòng nhiệt huyết của các Thầy Cô đã truyền cho em nền tảng kiến thức vững chắc về phân tích thiết kế hệ thống, cơ sở dữ liệu quan hệ, kiến trúc phần mềm doanh nghiệp và tư duy giải quyết vấn đề khoa học.
 
 Đặc biệt, em xin gửi lời tri ân sâu sắc nhất tới Giảng viên hướng dẫn. Thầy đã dành nhiều thời gian quý báu để định hướng đề tài, trực tiếp theo sát tiến độ, chỉ dẫn cặn kẽ từng phương pháp nghiên cứu học thuật, định hình tư duy thiết kế kiến trúc phần mềm sạch và nghiêm khắc đóng góp những ý kiến chuyên môn quý giá giúp bản báo cáo cùng sản phẩm phần mềm được hoàn thiện một cách chỉn chu, đúng chuẩn mực kỹ thuật cao nhất.
 
-Em cũng xin trân trọng gửi lời cảm ơn tới Ban Giám đốc cùng toàn thể các anh chị nhân viên tại chuỗi cửa hàng mỹ phẩm OMNI BEAUTY, từ các chi nhánh bán lẻ đến kho phân phối trung tâm. Sự nhiệt tình hỗ trợ, chia sẻ dữ liệu thực tế và tạo điều kiện cho em được tham gia khảo sát quy trình bán hàng trực tiếp, quản trị kho hàng theo lô hạn dùng và nghiệp vụ thu ngân tại quầy đã giúp đề tài gắn liền với hơi thở thực tiễn của doanh nghiệp, biến các dòng mã lệnh khô khan thành một giải pháp hữu ích cho hoạt động vận hành.
+Em cũng xin trân trọng gửi lời cảm ơn tới Ban Giám đốc cùng toàn thể các anh chị nhân viên tại chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY, từ các chi nhánh bán lẻ đến kho phân phối trung tâm. Sự nhiệt tình hỗ trợ, chia sẻ dữ liệu thực tế và tạo điều kiện cho em được tham gia khảo sát quy trình bán hàng trực tiếp, quản trị kho hàng theo lô hạn dùng và nghiệp vụ thu ngân tại quầy đã giúp đề tài gắn liền với hơi thở thực tiễn của doanh nghiệp, biến các dòng mã lệnh khô khan thành một giải pháp hữu ích cho hoạt động vận hành.
 
 Cuối cùng, con xin bày tỏ lòng biết ơn vô hạn tới cha mẹ và gia đình, những người luôn là chỗ dựa tinh thần vững chắc, thầm lặng hy sinh và tiếp thêm nghị lực cho con trên suốt chặng đường học tập. Cảm ơn tất cả những người bạn cùng lớp Hệ thống thông tin K22 đã luôn đồng hành, chia sẻ tài liệu và cùng nhau vượt qua những thử thách trong suốt những năm tháng đại học đáng nhớ.
 
@@ -101,7 +101,7 @@ Em xin chân thành cảm ơn.
 
 ## LỜI CAM ĐOAN
 
-Tôi xin cam đoan rằng khóa luận tốt nghiệp đại học với đề tài: "Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY" là công trình nghiên cứu khoa học và phát triển phần mềm độc lập của riêng cá nhân tôi, được thực hiện dưới sự hướng dẫn khoa học trực tiếp của Giảng viên hướng dẫn.
+Tôi xin cam đoan rằng khóa luận tốt nghiệp đại học với đề tài: "Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY" là công trình nghiên cứu khoa học và phát triển phần mềm độc lập của riêng cá nhân tôi, được thực hiện dưới sự hướng dẫn khoa học trực tiếp của Giảng viên hướng dẫn.
 
 Mọi số liệu khảo sát hiện trạng hoạt động kinh doanh, sơ đồ phân tích nghiệp vụ, mô hình kiến trúc phần mềm, cấu trúc cơ sở dữ liệu quan hệ gồm sáu mươi lăm bảng chuẩn hóa dạng chuẩn ba và toàn bộ mã nguồn của giải pháp phần mềm được trình bày trong cuốn khóa luận này là kết quả nghiên cứu hoàn toàn trung thực, phản ánh chính xác hiện trạng hệ thống phần mềm do chính tác giả tự tay phân tích, thiết kế, cài đặt và kiểm thử.
 
@@ -143,7 +143,7 @@ Tôi xin hoàn toàn chịu trách nhiệm trước Hội đồng chấm khóa l
     - 7.1. Đóng góp về mặt lý luận học thuật
     - 7.2. Đóng góp về mặt thực tiễn vận hành
   - 8. Bố cục của khóa luận
-- **CHƯƠNG 1: CƠ SỞ LÝ LUẬN VỀ HỆ THỐNG THÔNG TIN QUẢN LÝ BÁN HÀNG ĐA KÊNH VÀ TỔNG QUAN CHUỖI CỬA HÀNG MỸ PHẨM OMNI BEAUTY**
+- **CHƯƠNG 1: CƠ SỞ LÝ LUẬN VỀ HỆ THỐNG THÔNG TIN QUẢN LÝ BÁN HÀNG ĐA KÊNH VÀ TỔNG QUAN CHUỖI CỬA HÀNG MỸ PHẨM CANMAKE BEAUTY**
   - 1.1. Cơ sở lý luận về hệ thống thông tin quản lý và thương mại điện tử đa kênh hợp nhất
     - 1.1.1. Hệ thống thông tin và hệ thống thông tin quản lý trong doanh nghiệp bán lẻ chuỗi
     - 1.1.2. Mô hình thương mại điện tử kết hợp bán lẻ hợp nhất đa kênh trực tiếp và trực tuyến
@@ -156,11 +156,11 @@ Tôi xin hoàn toàn chịu trách nhiệm trước Hội đồng chấm khóa l
     - 1.3.2. Hệ quản trị cơ sở dữ liệu Microsoft SQL Server và công nghệ ánh xạ thực thể Entity Framework Core 8
     - 1.3.3. Công nghệ truyền thông thời gian thực SignalR, thiết kế giao diện hiện đại và tích hợp cổng thanh toán
     - 1.3.4. Phương pháp phân tích thiết kế hệ thống hướng đối tượng và mô hình kiến trúc ba lớp biên điều khiển thực thể
-  - 1.4. Tổng quan về chuỗi cửa hàng mỹ phẩm OMNI BEAUTY
+  - 1.4. Tổng quan về chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY
     - 1.4.1. Quá trình hình thành, sứ mệnh phát triển và mô hình mạng lưới điểm bán
     - 1.4.2. Cơ cấu tổ chức bộ máy nhân sự và chức năng nhiệm vụ của các bộ phận
   - Tiểu kết Chương 1
-- **CHƯƠNG 2: KHẢO SÁT, PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG WEBSITE QUẢN LÝ BÁN HÀNG CHO CHUỖI CỬA HÀNG MỸ PHẨM OMNI BEAUTY**
+- **CHƯƠNG 2: KHẢO SÁT, PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG WEBSITE QUẢN LÝ BÁN HÀNG CHO CHUỖI CỬA HÀNG MỸ PHẨM CANMAKE BEAUTY**
   - 2.1. Khảo sát hiện trạng và xác lập bài toán nghiệp vụ
     - 2.1.1. Khảo sát các quy trình hoạt động nghiệp vụ hiện tại của chuỗi cửa hàng
     - 2.1.2. Đánh giá những bất cập, hạn chế và điểm nghẽn trong vận hành thủ công
@@ -204,9 +204,9 @@ Tôi xin hoàn toàn chịu trách nhiệm trước Hội đồng chấm khóa l
 
 ## DANH MỤC CÁC TỪ VIẾT TẮT VÀ THUẬT NGỮ CHUYÊN NGÀNH
 
-Bảng danh mục dưới đây tổng hợp các thuật ngữ chuyên môn và từ viết tắt tiêu chuẩn trong lĩnh vực hệ thống thông tin quản lý, kỹ thuật phần mềm và nghiệp vụ bán lẻ mỹ phẩm, đồng thời giải thích rõ ràng vai trò và cách thức ứng dụng thực tế trong hệ thống website OMNI BEAUTY:
+Bảng danh mục dưới đây tổng hợp các thuật ngữ chuyên môn và từ viết tắt tiêu chuẩn trong lĩnh vực hệ thống thông tin quản lý, kỹ thuật phần mềm và nghiệp vụ bán lẻ mỹ phẩm, đồng thời giải thích rõ ràng vai trò và cách thức ứng dụng thực tế trong hệ thống website CANMAKE BEAUTY:
 
-| STT | Từ viết tắt / Thuật ngữ | Tên tiếng Anh đầy đủ | Giải thích ý nghĩa và cách ứng dụng thực tế tại hệ thống OMNI BEAUTY |
+| STT | Từ viết tắt / Thuật ngữ | Tên tiếng Anh đầy đủ | Giải thích ý nghĩa và cách ứng dụng thực tế tại hệ thống CANMAKE BEAUTY |
 | :---: | :--- | :--- | :--- |
 | 1 | **3NF** | Third Normal Form | Dạng chuẩn hóa cơ sở dữ liệu quan hệ thứ ba. Toàn bộ sáu mươi lăm bảng dữ liệu của hệ thống được chuẩn hóa để loại bỏ triệt để các phụ thuộc hàm bắc cầu, ngăn chặn dị thường thêm, xóa, sửa và tối ưu hóa không gian lưu trữ. |
 | 2 | **ACID** | Atomicity, Consistency, Isolation, Durability | Bốn đặc tính bảo đảm tính toàn vẹn của giao dịch cơ sở dữ liệu gồm Tính nguyên tố, Tính nhất quán, Tính cô lập và Tính bền vững. Ứng dụng trong việc xử lý thanh toán hóa đơn, trừ tồn kho và hạch toán dòng tiền két thu ngân. |
@@ -222,7 +222,7 @@ Bảng danh mục dưới đây tổng hợp các thuật ngữ chuyên môn và
 | 12 | **EAN-13** | European Article Number 13 | Chuẩn mã vạch sản phẩm quốc tế gồm mười ba chữ số được in trên bao bì từng hộp mỹ phẩm, dùng để nhận diện chính xác mã định danh mặt hàng khi nhân viên quét máy đọc mã vạch tại quầy thu ngân. |
 | 13 | **EF Core** | Entity Framework Core | Bộ công cụ ánh xạ đối tượng quan hệ hiệu năng cao của Microsoft dành cho nền tảng .NET 8, cho phép thao tác với cơ sở dữ liệu Microsoft SQL Server thông qua cú pháp truy vấn hướng đối tượng LINQ mạnh mẽ và an toàn. |
 | 14 | **EWG** | Environmental Working Group | Thang đo mức độ an toàn của thành phần hóa mỹ phẩm theo thang điểm từ một đến mười của tổ chức phi chính phủ quốc tế, được hệ thống số hóa để hiển thị mức độ lành tính của từng hoạt chất trong trang chi tiết sản phẩm. |
-| 15 | **FEFO** | First-Expired, First-Out | Nguyên tắc quản lý xuất kho ưu tiên lô hàng có hạn sử dụng gần nhất ra bán trước. Đây là giải thuật cốt lõi được lập trình tự động trong hệ thống OMNI BEAUTY nhằm triệt tiêu hoàn toàn rủi ro tồn ứ mỹ phẩm hết hạn sử dụng. |
+| 15 | **FEFO** | First-Expired, First-Out | Nguyên tắc quản lý xuất kho ưu tiên lô hàng có hạn sử dụng gần nhất ra bán trước. Đây là giải thuật cốt lõi được lập trình tự động trong hệ thống CANMAKE BEAUTY nhằm triệt tiêu hoàn toàn rủi ro tồn ứ mỹ phẩm hết hạn sử dụng. |
 | 16 | **FIFO** | First-In, First-Out | Nguyên tắc nhập trước xuất trước truyền thống, được áp dụng đối với các mặt hàng vật tư tiêu hao, bao bì đóng gói hoặc các sản phẩm phụ trợ không có ràng buộc khắt khe về thời hạn sử dụng. |
 | 17 | **HTMX** | High-power Tools for HTML | Thư viện mở rộng khả năng của tài liệu HTML, cho phép thực hiện các yêu cầu nạp tải bất đồng bộ trực tiếp thông qua các thuộc tính mở rộng mà không cần viết các đoạn mã lệnh JavaScript phức tạp, giúp tăng tốc độ tải trang. |
 | 18 | **O2O** | Online-to-Offline | Mô hình kinh doanh kết hợp trải nghiệm mua sắm trực tuyến trên website với mạng lưới cửa hàng vật lý thực tế, cho phép khách hàng chuyển đổi liền mạch giữa việc xem thông tin trên mạng và thử hàng tại điểm bán. |
@@ -241,7 +241,7 @@ Bảng danh mục dưới đây tổng hợp các thuật ngữ chuyên môn và
 
 | Ký hiệu bảng | Tên gọi bảng biểu |
 | :---: | :--- |
-| **Bảng 1.1** | Ma trận đối soát sự đáp ứng của hệ thống OMNI BEAUTY đối với các văn bản pháp quy hiện hành |
+| **Bảng 1.1** | Ma trận đối soát sự đáp ứng của hệ thống CANMAKE BEAUTY đối với các văn bản pháp quy hiện hành |
 | **Bảng 2.1** | Đặc tả chi tiết sáu nhóm tác nhân nội bộ và bốn tác nhân đối tác tham gia hệ thống |
 | **Bảng 2.2** | Danh mục yêu cầu chức năng nghiệp vụ chi tiết của phân hệ Khách hàng và phân hệ Quản trị |
 | **Bảng 2.3** | Đặc tả ca sử dụng UC-01: Quản trị ma trận phân quyền động ba tầng và cô lập chi nhánh |
@@ -295,11 +295,11 @@ Bảng danh mục dưới đây tổng hợp các thuật ngữ chuyên môn và
 
 | Ký hiệu sơ đồ | Tên gọi sơ đồ hoặc biểu đồ |
 | :---: | :--- |
-| **Sơ đồ 1.1** | Sơ đồ cơ cấu tổ chức bộ máy quản lý và chuỗi cung ứng OMNI BEAUTY |
+| **Sơ đồ 1.1** | Sơ đồ cơ cấu tổ chức bộ máy quản lý và chuỗi cung ứng CANMAKE BEAUTY |
 | **Sơ đồ 2.1** | Sơ đồ quy trình nghiệp vụ bán hàng và quản trị kho vận thủ công hiện tại |
 | **Sơ đồ 2.2** | Sơ đồ Swimlane quy trình bán lẻ đa kênh hợp nhất và điều phối tồn kho FEFO đề xuất |
-| **Sơ đồ 2.3** | Biểu đồ phân rã chức năng nghiệp vụ tổng quát của hệ thống OMNI BEAUTY |
-| **Sơ đồ 2.4** | Biểu đồ ca sử dụng tổng quát toàn bộ hệ thống OMNI BEAUTY |
+| **Sơ đồ 2.3** | Biểu đồ phân rã chức năng nghiệp vụ tổng quát của hệ thống CANMAKE BEAUTY |
+| **Sơ đồ 2.4** | Biểu đồ ca sử dụng tổng quát toàn bộ hệ thống CANMAKE BEAUTY |
 | **Sơ đồ 2.5** | Biểu đồ ca sử dụng phân rã cho nhóm tác nhân Quản trị viên tối cao |
 | **Sơ đồ 2.6** | Biểu đồ ca sử dụng phân rã cho nhóm tác nhân Quản lý chi nhánh |
 | **Sơ đồ 2.7** | Biểu đồ ca sử dụng phân rã cho nhóm tác nhân Nhân viên thu ngân tại quầy |
@@ -324,7 +324,7 @@ Bảng danh mục dưới đây tổng hợp các thuật ngữ chuyên môn và
 | Ký hiệu hình ảnh | Tên gọi hình ảnh giao diện hệ thống |
 | :---: | :--- |
 | **Hình 2.1** | Lưu đồ luồng vận hành hàng hóa và chuỗi cung ứng theo lô sản xuất |
-| **Hình 2.2** | Sơ đồ ca sử dụng tổng quát toàn bộ hệ thống OMNI BEAUTY |
+| **Hình 2.2** | Sơ đồ ca sử dụng tổng quát toàn bộ hệ thống CANMAKE BEAUTY |
 | **Hình 2.3** | Sơ đồ ca sử dụng chi tiết phân hệ Quản trị ma trận phân quyền động PBAC |
 | **Hình 2.4** | Sơ đồ ca sử dụng chi tiết phân hệ Đặt hàng trực tuyến và cấp phát tồn kho FEFO |
 | **Hình 2.5** | Sơ đồ ca sử dụng chi tiết phân hệ Quầy thu ngân thông minh Smart POS |
@@ -356,11 +356,11 @@ Trong bối cảnh nền kinh tế số và thương mại điện tử tại Vi
 
 Ngành kinh doanh mỹ phẩm và sản phẩm chăm sóc sắc đẹp là một trong những lĩnh vực có tốc độ tăng trưởng nhanh nhất nhưng cũng đồng thời đặt ra những yêu cầu quản trị nghiệp vụ phức tạp và khắt khe bậc nhất trong toàn ngành bán lẻ. Khác biệt hoàn toàn với các mặt hàng tiêu dùng thông thường hay ngành thời trang may mặc, sản phẩm mỹ phẩm mang tính nhạy cảm đặc biệt đối với sức khỏe và làn da người sử dụng. Về mặt danh mục, một sản phẩm chăm sóc da hay trang điểm thường sở hữu rất nhiều biến thể về bảng màu son, tông sắc phấn phủ hoặc các quy cách dung tích đóng gói khác nhau, đòi hỏi hệ thống quản trị phải theo dõi chính xác từng đơn vị lưu kho riêng biệt. Về mặt an toàn chất lượng, mỹ phẩm chịu sự ràng buộc nghiêm ngặt về thời hạn sử dụng theo từng lô sản xuất cùng thời hạn an toàn sau khi mở nắp niêm phong lần đầu tiên. Việc kiểm soát hạn dùng không thể thực hiện chung chung mà bắt buộc phải gắn liền với từng lô nhập kho cụ thể. Bên cạnh đó, người tiêu dùng mỹ phẩm hiện đại ngày càng am hiểu về khoa học làm đẹp, có xu hướng tìm hiểu sâu về bảng thành phần và cơ chế tác động của các hoạt chất lên từng nền da chuyên biệt như da dầu mụn, da khô hay da nhạy cảm. Do đó, việc tư vấn sản phẩm không chỉ dừng lại ở tên gọi thương hiệu mà phải dựa trên cơ sở khoa học để tránh triệt để tình trạng kích ứng da hay xung đột hoạt chất nguy hại khi sử dụng chung trong một chu trình chăm sóc.
 
-Qua quá trình khảo sát thực tế tại chuỗi cửa hàng mỹ phẩm OMNI BEAUTY, hệ thống hiện đang vận hành một Tổng kho phân phối trung tâm mang mã hiệu HQ-001 tại thành phố Hà Nội cùng mạng lưới các Showroom bán lẻ đặt tại các vị trí trọng điểm như Showroom Cầu Giấy và Showroom Quận 1 tại Thành phố Hồ Chí Minh. Hiện trạng quản lý tại chuỗi đang bộc lộ những điểm nghẽn nghiêm trọng xuất phát từ việc sử dụng các công cụ quản lý phân mảnh và quy trình vận hành mang nặng tính thủ công. Kênh bán hàng trực tuyến và quầy thu ngân tại các cửa hàng vật lý hoạt động trên hai cơ sở dữ liệu tách rời, dẫn đến tình trạng sai lệch số lượng tồn kho khả dụng theo thời gian thực. Thực trạng này thường xuyên gây ra hiện tượng bán vượt quá số lượng hàng hóa thực tế có trong kho đối với các mặt hàng đang có nhu cầu cao, khiến khách hàng trực tuyến đặt mua thành công nhưng cửa hàng không có sản phẩm để giao, làm suy giảm uy tín thương hiệu nghiêm trọng.
+Qua quá trình khảo sát thực tế tại chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY, hệ thống hiện đang vận hành một Tổng kho phân phối trung tâm mang mã hiệu HQ-001 tại thành phố Hà Nội cùng mạng lưới các Showroom bán lẻ đặt tại các vị trí trọng điểm như Showroom Cầu Giấy và Showroom Quận 1 tại Thành phố Hồ Chí Minh. Hiện trạng quản lý tại chuỗi đang bộc lộ những điểm nghẽn nghiêm trọng xuất phát từ việc sử dụng các công cụ quản lý phân mảnh và quy trình vận hành mang nặng tính thủ công. Kênh bán hàng trực tuyến và quầy thu ngân tại các cửa hàng vật lý hoạt động trên hai cơ sở dữ liệu tách rời, dẫn đến tình trạng sai lệch số lượng tồn kho khả dụng theo thời gian thực. Thực trạng này thường xuyên gây ra hiện tượng bán vượt quá số lượng hàng hóa thực tế có trong kho đối với các mặt hàng đang có nhu cầu cao, khiến khách hàng trực tuyến đặt mua thành công nhưng cửa hàng không có sản phẩm để giao, làm suy giảm uy tín thương hiệu nghiêm trọng.
 
 Bên cạnh sự xung đột về tồn kho, công tác quản trị kho tại các chi nhánh cửa hàng cũng gặp thách thức lớn khi nhân viên bán hàng thường xuất hàng theo thói quen tiện tay lấy các hộp mỹ phẩm mới nhập đặt ở phía ngoài, khiến các lô sản xuất cũ nằm sâu bên trong bị lãng quên cho đến khi cận hạn sử dụng hoặc hết hạn hoàn toàn, gây tổn thất kinh tế rất lớn do phải tiêu hủy sản phẩm. Ở khâu thanh toán tại quầy, việc quản lý dòng tiền mặt của nhân viên thu ngân qua các ca làm việc chưa có cơ chế kiểm két và đối soát chặt chẽ, dễ phát sinh thất thoát và nhầm lẫn khi bàn giao ca. Đồng thời, việc đối soát số tiền thu hộ từ các đơn vị vận chuyển giao hàng tận nơi đối với các đơn hàng trực tuyến vẫn phải nhập liệu thủ công qua các bảng tính Excel, tiềm ẩn nguy cơ sai sót cao và tiêu tốn nhiều thời gian của bộ phận kế toán.
 
-Xuất phát từ những đòi hỏi cấp bách của thực tiễn quản lý nêu trên, việc nghiên cứu và triển khai đề tài: "Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY" là hết sức cần thiết và có ý nghĩa ứng dụng thực tiễn to lớn. Đề tài hướng tới việc xây dựng một giải pháp phần mềm tổng thể, hợp nhất toàn bộ dữ liệu danh mục biến thể, đồng bộ tồn kho thời gian thực, tự động hóa giải thuật xuất kho theo hạn sử dụng, quản lý chặt chẽ ca làm việc thu ngân và bảo đảm an toàn dữ liệu đa chi nhánh dựa trên nền tảng công nghệ hiện đại.
+Xuất phát từ những đòi hỏi cấp bách của thực tiễn quản lý nêu trên, việc nghiên cứu và triển khai đề tài: "Xây dựng website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY" là hết sức cần thiết và có ý nghĩa ứng dụng thực tiễn to lớn. Đề tài hướng tới việc xây dựng một giải pháp phần mềm tổng thể, hợp nhất toàn bộ dữ liệu danh mục biến thể, đồng bộ tồn kho thời gian thực, tự động hóa giải thuật xuất kho theo hạn sử dụng, quản lý chặt chẽ ca làm việc thu ngân và bảo đảm an toàn dữ liệu đa chi nhánh dựa trên nền tảng công nghệ hiện đại.
 
 ---
 
@@ -374,7 +374,7 @@ Tại thị trường trong nước, một số chuỗi bán lẻ mỹ phẩm qu
 
 Bên cạnh các hệ thống tự phát triển của các doanh nghiệp lớn, phần lớn các chuỗi cửa hàng bán lẻ quy mô vừa và nhỏ hiện nay đang phụ thuộc vào các nền tảng phần mềm quản lý bán hàng dạng dịch vụ đóng gói phổ biến trên thị trường như KiotViet hay Sapo. Mặc dù các phần mềm này giải quyết tốt các nghiệp vụ bán hàng tổng quát như in hóa đơn, ghi nhận đơn hàng và thống kê doanh thu cơ bản, nhưng chúng lại bộc lộ những khoảng trống rất lớn khi áp dụng vào lĩnh vực mỹ phẩm chuyên sâu. Các giải pháp đóng gói đại trà này thường chỉ theo dõi tồn kho theo phương pháp bình quân hoặc quản lý số lượng tổng đơn thuần, hoàn toàn thiếu vắng cơ chế quản lý kho theo lô sản xuất gắn liền với hạn sử dụng và không hỗ trợ giải thuật tự động phân bổ lô hàng xuất bán theo nguyên tắc hết hạn trước xuất trước. Ngoài ra, các phần mềm này cũng không có các công cụ phân tích cấu trúc da liễu, không thể cảnh báo mức độ an toàn của thành phần hóa học và không có khả năng cô lập dữ liệu theo từng chi nhánh với ma trận phân quyền chi tiết.
 
-Xét về các công trình nghiên cứu khoa học và khóa luận tốt nghiệp thuộc chuyên ngành Hệ thống thông tin và Kỹ thuật phần mềm tại các trường đại học trong nước những năm vừa qua, có thể nhận thấy các đề tài về website bán hàng xuất hiện khá nhiều. Tuy nhiên, phần lớn các công trình này chỉ dừng lại ở phạm vi xây dựng một trang web thương mại điện tử đơn giản phục vụ một cửa hàng đơn lẻ, tập trung vào việc hiển thị sản phẩm và đặt hàng cơ bản. Rất ít đề tài đi sâu vào việc giải quyết bài toán cốt lõi của hệ thống thông tin quản lý chuỗi điểm bán như: kiến trúc đồng bộ trạng thái đơn hàng thời gian thực giữa quầy thu ngân và kho hàng trực tuyến, cơ chế khóa tồn kho mềm hai giai đoạn để chống bán vượt số lượng thực tế khi có nhiều giao dịch đồng thời, và phân định quyền hạn bảo mật chi tiết theo từng chi nhánh cửa hàng. Do đó, đề tài OMNI BEAUTY được xác lập nhằm giải quyết trọn vẹn những khoảng trống nghiên cứu và ứng dụng thực tiễn còn đang bị bỏ ngỏ.
+Xét về các công trình nghiên cứu khoa học và khóa luận tốt nghiệp thuộc chuyên ngành Hệ thống thông tin và Kỹ thuật phần mềm tại các trường đại học trong nước những năm vừa qua, có thể nhận thấy các đề tài về website bán hàng xuất hiện khá nhiều. Tuy nhiên, phần lớn các công trình này chỉ dừng lại ở phạm vi xây dựng một trang web thương mại điện tử đơn giản phục vụ một cửa hàng đơn lẻ, tập trung vào việc hiển thị sản phẩm và đặt hàng cơ bản. Rất ít đề tài đi sâu vào việc giải quyết bài toán cốt lõi của hệ thống thông tin quản lý chuỗi điểm bán như: kiến trúc đồng bộ trạng thái đơn hàng thời gian thực giữa quầy thu ngân và kho hàng trực tuyến, cơ chế khóa tồn kho mềm hai giai đoạn để chống bán vượt số lượng thực tế khi có nhiều giao dịch đồng thời, và phân định quyền hạn bảo mật chi tiết theo từng chi nhánh cửa hàng. Do đó, đề tài CANMAKE BEAUTY được xác lập nhằm giải quyết trọn vẹn những khoảng trống nghiên cứu và ứng dụng thực tiễn còn đang bị bỏ ngỏ.
 
 #### 2.2. Tình hình nghiên cứu và ứng dụng trên thế giới
 
@@ -392,7 +392,7 @@ Ngoài ra, các nghiên cứu quốc tế trong lĩnh vực công nghệ bán l�
 
 ##### Mục tiêu tổng quát
 
-Mục tiêu tổng quát của khóa luận là nghiên cứu, thiết kế và xây dựng thành công một hệ thống website quản lý bán hàng đa kênh hợp nhất hoàn chỉnh cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY dựa trên nền tảng công nghệ ASP.NET Core 8.0 và kiến trúc Clean Architecture bốn tầng, bảo đảm tính toàn vẹn dữ liệu, khả năng mở rộng linh hoạt, độ bảo mật cao và giải quyết triệt để các bài toán nghiệp vụ đặc thù của ngành bán lẻ mỹ phẩm chuỗi.
+Mục tiêu tổng quát của khóa luận là nghiên cứu, thiết kế và xây dựng thành công một hệ thống website quản lý bán hàng đa kênh hợp nhất hoàn chỉnh cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY dựa trên nền tảng công nghệ ASP.NET Core 8.0 và kiến trúc Clean Architecture bốn tầng, bảo đảm tính toàn vẹn dữ liệu, khả năng mở rộng linh hoạt, độ bảo mật cao và giải quyết triệt để các bài toán nghiệp vụ đặc thù của ngành bán lẻ mỹ phẩm chuỗi.
 
 ##### Các mục tiêu cụ thể
 
@@ -424,7 +424,7 @@ Bốn là, nghiên cứu chuyên sâu về các kỹ thuật lập trình hiện
 
 ##### Nhiệm vụ về mặt thực tiễn
 
-Một là, tiến hành khảo sát thực địa hiện trạng vận hành, cơ cấu tổ chức nhân sự, chuỗi cung ứng và luồng chu chuyển hàng hóa tại các chi nhánh và kho tổng của chuỗi cửa hàng mỹ phẩm OMNI BEAUTY để thu thập, phân loại các yêu cầu chức năng và yêu cầu phi chức năng của hệ thống.
+Một là, tiến hành khảo sát thực địa hiện trạng vận hành, cơ cấu tổ chức nhân sự, chuỗi cung ứng và luồng chu chuyển hàng hóa tại các chi nhánh và kho tổng của chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY để thu thập, phân loại các yêu cầu chức năng và yêu cầu phi chức năng của hệ thống.
 
 Hai là, xây dựng hoàn chỉnh hồ sơ mô hình hóa hệ thống bao gồm biểu đồ phân rã chức năng, biểu đồ ca sử dụng tổng quát và chi tiết, các biểu đồ hoạt động và biểu đồ tuần tự cho tám luồng quy trình nghiệp vụ cốt lõi nhất.
 
@@ -454,7 +454,7 @@ Phân hệ thứ hai là Hệ thống quản trị điều hành đa kênh dành
 
 ##### Phạm vi về không gian
 
-Nghiên cứu được triển khai khảo sát thực tế và thiết lập dữ liệu thực nghiệm trên toàn bộ mạng lưới hoạt động của chuỗi cửa hàng mỹ phẩm OMNI BEAUTY, bao gồm một Tổng kho phân phối trung tâm mang mã hiệu HQ-001 đặt tại địa bàn quận Cầu Giấy, thành phố Hà Nội và hệ thống các Showroom bán lẻ trực tiếp đại diện cho các vùng thị trường trọng điểm gồm Showroom Cầu Giấy tại Hà Nội và Showroom Quận 1 tại Thành phố Hồ Chí Minh.
+Nghiên cứu được triển khai khảo sát thực tế và thiết lập dữ liệu thực nghiệm trên toàn bộ mạng lưới hoạt động của chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY, bao gồm một Tổng kho phân phối trung tâm mang mã hiệu HQ-001 đặt tại địa bàn quận Cầu Giấy, thành phố Hà Nội và hệ thống các Showroom bán lẻ trực tiếp đại diện cho các vùng thị trường trọng điểm gồm Showroom Cầu Giấy tại Hà Nội và Showroom Quận 1 tại Thành phố Hồ Chí Minh.
 
 ##### Phạm vi về thời gian
 
@@ -478,7 +478,7 @@ Các tác nhân đối tác bên ngoài bao gồm: Cổng thanh toán trực tuy
 
 Phương pháp nghiên cứu lý thuyết và phân tích tài liệu: Tiến hành thu thập, đọc hiểu, phân loại và tổng hợp các tài liệu học thuật chuyên ngành, các tiêu chuẩn thiết kế kiến trúc phần mềm quốc tế và toàn bộ hệ thống văn bản quy phạm pháp luật của Nhà nước điều chỉnh hoạt động thương mại điện tử và quản lý mỹ phẩm. Phương pháp này tạo lập nền tảng lý luận vững chắc để định hình các yêu cầu kỹ thuật và pháp lý của hệ thống.
 
-Phương pháp khảo sát thực địa và phỏng vấn chuyên gia: Trực tiếp đến quan sát các hoạt động thực tế tại cửa hàng và kho hàng của chuỗi OMNI BEAUTY, phỏng vấn sâu nhân viên thu ngân, nhân viên thủ kho và quản lý chi nhánh về những khó khăn, thao tác chậm và sai sót thường gặp trong quá trình làm việc hàng ngày. Phương pháp này giúp tác giả nắm bắt chính xác các yêu cầu nghiệp vụ thực tế để xây dựng hệ thống bám sát nhu cầu sử dụng.
+Phương pháp khảo sát thực địa và phỏng vấn chuyên gia: Trực tiếp đến quan sát các hoạt động thực tế tại cửa hàng và kho hàng của chuỗi CANMAKE BEAUTY, phỏng vấn sâu nhân viên thu ngân, nhân viên thủ kho và quản lý chi nhánh về những khó khăn, thao tác chậm và sai sót thường gặp trong quá trình làm việc hàng ngày. Phương pháp này giúp tác giả nắm bắt chính xác các yêu cầu nghiệp vụ thực tế để xây dựng hệ thống bám sát nhu cầu sử dụng.
 
 Phương pháp phân tích và thiết kế hệ thống hướng đối tượng: Sử dụng ngôn ngữ mô hình hóa thống nhất UML 2.5 để trực quan hóa toàn bộ hệ thống từ góc nhìn ca sử dụng, hành vi tương tác và cấu trúc tĩnh. Kết hợp với mô hình phân tích ba lớp biên điều khiển thực thể để phân rã rõ ràng trách nhiệm của từng thành phần trong hệ thống, đồng thời áp dụng phương pháp chuẩn hóa dữ liệu để đưa mô hình cơ sở dữ liệu đạt dạng chuẩn ba, triệt tiêu mọi rủi ro dư thừa dữ liệu.
 
@@ -534,13 +534,13 @@ Thứ ba, công trình xây dựng một mô hình kiến trúc phần mềm m�
 
 #### 7.2. Đóng góp về mặt thực tiễn vận hành
 
-Về mặt thực tiễn vận hành, khóa luận đem lại những giá trị ứng dụng trực tiếp, thiết thực và rõ rệt cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY cũng như các doanh nghiệp bán lẻ tương tự:
+Về mặt thực tiễn vận hành, khóa luận đem lại những giá trị ứng dụng trực tiếp, thiết thực và rõ rệt cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY cũng như các doanh nghiệp bán lẻ tương tự:
 
 Thứ nhất, công trình cung cấp một sản phẩm phần mềm quản lý bán hàng đa kênh hoàn chỉnh, có tính ổn định cao, sẵn sàng đưa vào triển khai ứng dụng thực tế để thay thế toàn diện các công cụ quản lý thủ công rời rạc, giúp ban lãnh đạo doanh nghiệp nắm bắt chính xác và kịp thời các chỉ số kinh doanh then chốt thông qua bảng điều khiển trung tâm thời gian thực.
 
 Thứ hai, hệ thống giải quyết triệt để các bài toán tổn thất kinh tế kinh niên của doanh nghiệp bằng việc loại bỏ hoàn toàn tình trạng bán lố tồn kho gây mất uy tín với khách hàng, triệt tiêu nguy cơ tiêu hủy hàng hóa cận hạn dùng nhờ giải thuật phân bổ lô tự động, và ngăn ngừa các thất thoát tiền mặt trong quá trình bàn giao ca thu ngân tại các điểm bán lẻ.
 
-Thứ ba, hệ thống tạo ra một bước đột phá trong việc nâng cao trải nghiệm mua sắm và bảo vệ sức khỏe người tiêu dùng thông qua các công cụ công nghệ làm đẹp thông minh, giúp người mua an tâm chọn lựa sản phẩm phù hợp với làn da của mình, từ đó củng cố sự gắn kết và lòng trung thành của khách hàng đối với thương hiệu OMNI BEAUTY.
+Thứ ba, hệ thống tạo ra một bước đột phá trong việc nâng cao trải nghiệm mua sắm và bảo vệ sức khỏe người tiêu dùng thông qua các công cụ công nghệ làm đẹp thông minh, giúp người mua an tâm chọn lựa sản phẩm phù hợp với làn da của mình, từ đó củng cố sự gắn kết và lòng trung thành của khách hàng đối với thương hiệu CANMAKE BEAUTY.
 
 ---
 
@@ -548,10 +548,10 @@ Thứ ba, hệ thống tạo ra một bước đột phá trong việc nâng cao
 
 Ngoài các trang mở đầu, danh mục từ viết tắt, bảng biểu, sơ đồ, hình ảnh, phần kết luận, danh mục tài liệu tham khảo và các phụ lục đính kèm, nội dung chính của khóa luận tốt nghiệp được cấu trúc một cách khoa học, chặt chẽ và cân đối thành ba chương cụ thể như sau:
 
-**Chương 1: Cơ sở lý luận về hệ thống thông tin quản lý bán hàng đa kênh và tổng quan chuỗi cửa hàng mỹ phẩm OMNI BEAUTY.**  
-Chương này tập trung trình bày các cơ sở lý luận nền tảng về hệ thống thông tin quản lý trong ngành bán lẻ chuỗi, phân tích sâu bản chất của mô hình thương mại hợp nhất đa kênh trực tiếp và trực tuyến, cùng các đặc thù khắt khe trong quản trị danh mục và hạn dùng của ngành mỹ phẩm. Đồng thời, chương 1 đối soát toàn diện sự đáp ứng của hệ thống đối với các văn bản pháp luật hiện hành của Việt Nam về quản lý công bố mỹ phẩm và thương mại điện tử; làm rõ các cơ sở lý luận về nền tảng công nghệ ASP.NET Core 8, kiến trúc Clean Architecture, cơ sở dữ liệu quan hệ và phương pháp luận hướng đối tượng; cuối cùng giới thiệu chi tiết về lịch sử hình thành, cơ cấu tổ chức và chức năng các bộ phận của chuỗi cửa hàng OMNI BEAUTY.
+**Chương 1: Cơ sở lý luận về hệ thống thông tin quản lý bán hàng đa kênh và tổng quan chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY.**  
+Chương này tập trung trình bày các cơ sở lý luận nền tảng về hệ thống thông tin quản lý trong ngành bán lẻ chuỗi, phân tích sâu bản chất của mô hình thương mại hợp nhất đa kênh trực tiếp và trực tuyến, cùng các đặc thù khắt khe trong quản trị danh mục và hạn dùng của ngành mỹ phẩm. Đồng thời, chương 1 đối soát toàn diện sự đáp ứng của hệ thống đối với các văn bản pháp luật hiện hành của Việt Nam về quản lý công bố mỹ phẩm và thương mại điện tử; làm rõ các cơ sở lý luận về nền tảng công nghệ ASP.NET Core 8, kiến trúc Clean Architecture, cơ sở dữ liệu quan hệ và phương pháp luận hướng đối tượng; cuối cùng giới thiệu chi tiết về lịch sử hình thành, cơ cấu tổ chức và chức năng các bộ phận của chuỗi cửa hàng CANMAKE BEAUTY.
 
-**Chương 2: Khảo sát, phân tích và thiết kế hệ thống website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm OMNI BEAUTY.**  
+**Chương 2: Khảo sát, phân tích và thiết kế hệ thống website quản lý bán hàng cho chuỗi cửa hàng mỹ phẩm CANMAKE BEAUTY.**  
 Chương này là trọng tâm nghiên cứu và phân tích thiết kế của khóa luận. Nội dung chương bắt đầu bằng việc khảo sát chi tiết hiện trạng quy trình vận hành thủ công hiện tại, chỉ rõ các điểm nghẽn nghiêm trọng và đề xuất sơ đồ quy trình bán hàng đa kênh hợp nhất số hóa mới. Tiếp theo, chương tiến hành phân tích các yêu cầu chức năng và phi chức năng, xây dựng biểu đồ phân rã chức năng và mô hình hóa hệ thống bằng ngôn ngữ UML từ biểu đồ ca sử dụng tổng quát đến các đặc tả chi tiết, biểu đồ hoạt động và biểu đồ tuần tự cho tám luồng nghiệp vụ cốt lõi nhất. Phần cuối chương 2 dành cho việc thiết kế kiến trúc hệ thống bốn tầng, thiết lập ma trận phân quyền động ba tầng kiểm soát năm mươi mốt quyền hạn nguyên tử, thiết kế cơ sở dữ liệu quan hệ gồm sáu mươi lăm bảng chuẩn hóa dạng chuẩn ba kèm từ điển dữ liệu chi tiết cho các bảng cốt lõi, và xác lập các đặc tả thiết kế giao diện người dùng công thái học.
 
 **Chương 3: Triển khai cài đặt, kiểm thử hệ thống và định hướng phát triển.**  

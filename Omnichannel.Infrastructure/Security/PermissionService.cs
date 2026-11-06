@@ -215,7 +215,11 @@ namespace Omnichannel.Infrastructure.Security
 
         public async Task<List<UserPermissionDetailDto>> GetUserPermissionBreakdownAsync(int userId)
         {
-            var allPermissions = await _context.Permissions.AsNoTracking().ToListAsync();
+            var allPermissions = await _context.Permissions
+                .AsNoTracking()
+                .OrderBy(p => p.Module)
+                .ThenBy(p => p.Code)
+                .ToListAsync();
 
             var rolePermissionIds = await _context.UserRoles
                 .AsNoTracking()
@@ -227,10 +231,26 @@ namespace Omnichannel.Infrastructure.Security
                 .Distinct()
                 .ToListAsync();
 
-            var userOverrides = await _context.UserPermissions
+            var userOverridesList = await _context.UserPermissions
                 .AsNoTracking()
                 .Where(up => up.UserId == userId)
-                .ToDictionaryAsync(up => up.PermissionId, up => up);
+                .ToListAsync();
+
+            var userOverrides = userOverridesList.ToDictionary(up => up.PermissionId, up => up);
+
+            var grantorIds = userOverridesList
+                .Where(up => up.GrantedByUserId.HasValue)
+                .Select(up => up.GrantedByUserId!.Value)
+                .Distinct()
+                .ToList();
+
+            var grantorNames = grantorIds.Count > 0
+                ? await _context.Users
+                    .IgnoreQueryFilters()
+                    .AsNoTracking()
+                    .Where(u => grantorIds.Contains(u.Id))
+                    .ToDictionaryAsync(u => u.Id, u => $"{u.FullName} (@{u.Username})")
+                : new Dictionary<int, string>();
 
             var result = new List<UserPermissionDetailDto>();
 
@@ -241,17 +261,25 @@ namespace Omnichannel.Infrastructure.Security
                 bool? directOverride = hasOverride ? ovr!.IsGranted : null;
 
                 bool isEffective = directOverride ?? inherited;
+                string? grantedByName = null;
+                if (hasOverride && ovr!.GrantedByUserId.HasValue && grantorNames.TryGetValue(ovr.GrantedByUserId.Value, out var gName))
+                {
+                    grantedByName = gName;
+                }
 
                 result.Add(new UserPermissionDetailDto
                 {
                     PermissionId = perm.Id,
                     PermissionCode = perm.Code,
                     PermissionName = perm.Name,
+                    PermissionDescription = perm.Description,
                     Module = perm.Module,
                     InheritedFromRole = inherited,
                     DirectOverride = directOverride,
                     IsEffective = isEffective,
                     GrantedByUserId = hasOverride ? ovr!.GrantedByUserId : null,
+                    GrantedByName = grantedByName,
+                    GrantedAt = hasOverride ? ovr!.GrantedAt : null,
                     Reason = hasOverride ? ovr!.Reason : null
                 });
             }

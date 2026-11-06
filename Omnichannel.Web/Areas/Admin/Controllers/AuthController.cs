@@ -306,13 +306,60 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HttpGet]
         [AllowAnonymous]
         [Route("admin/auth/access-denied")]
-        public IActionResult AccessDenied(string? returnUrl = null)
+        public async Task<IActionResult> AccessDenied(string? returnUrl = null, string? attemptedPath = null, string? message = null)
         {
             Response.StatusCode = Microsoft.AspNetCore.Http.StatusCodes.Status403Forbidden;
+
+            string contactName = "Nguyễn Quản Trị (Admin Tổng - SuperAdmin)";
+            string contactTitle = "Tổng Giám Đốc Hệ Thống (SuperAdmin)";
+            string contactEmail = "superadmin@canmakebeauty.vn";
+            string? actorRole = null;
+            string? actorDept = null;
+
+            var userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int currentUserId))
+            {
+                var currentUser = await _dbContext.Users
+                    .IgnoreQueryFilters()
+                    .AsNoTracking()
+                    .Include(u => u.Department)
+                        .ThenInclude(d => d!.HeadUser)
+                    .Include(u => u.Manager)
+                    .Include(u => u.UserRoles)
+                        .ThenInclude(ur => ur.Role)
+                    .FirstOrDefaultAsync(u => u.Id == currentUserId);
+
+                if (currentUser != null)
+                {
+                    actorDept = currentUser.Department?.Name;
+                    var topRole = currentUser.UserRoles
+                        .Where(ur => ur.Role != null && ur.Role.IsActive && ur.Role.Name != "Customer")
+                        .OrderByDescending(ur => ur.Role.Level)
+                        .Select(ur => ur.Role)
+                        .FirstOrDefault();
+                    actorRole = topRole?.DisplayName ?? topRole?.Name;
+
+                    var contactUser = currentUser.Manager ?? currentUser.Department?.HeadUser;
+                    if (contactUser != null && contactUser.Id != currentUser.Id)
+                    {
+                        contactName = $"{contactUser.FullName} (@{contactUser.Username})";
+                        contactTitle = contactUser.JobTitle ?? "Trưởng phòng / Quản trị viên phụ trách";
+                        contactEmail = contactUser.Email ?? "superadmin@canmakebeauty.vn";
+                    }
+                }
+            }
+
             var vm = new AccessDeniedViewModel
             {
-                AttemptedPath = returnUrl ?? Request.Headers["Referer"].ToString(),
-                Message = "Tài khoản Quản trị viên của bạn không có đặc quyền hạt nhân (Permission) để truy cập chức năng này."
+                AttemptedPath = attemptedPath ?? returnUrl ?? Request.Headers["Referer"].ToString(),
+                ContactPersonName = contactName,
+                ContactPersonTitle = contactTitle,
+                ContactPersonEmail = contactEmail,
+                ActorRoleName = actorRole,
+                ActorDepartmentName = actorDept,
+                Message = !string.IsNullOrWhiteSpace(message)
+                    ? message
+                    : $"Bạn chưa được cấp quyền chức năng này – vui lòng liên hệ {contactName} để được cấp quyền."
             };
 
             return View(vm);
