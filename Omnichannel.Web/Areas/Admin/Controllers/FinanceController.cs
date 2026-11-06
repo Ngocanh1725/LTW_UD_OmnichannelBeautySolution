@@ -36,6 +36,10 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             _context = context;
         }
 
+        [HttpGet]
+        [HasPermission("FINANCE_PNL_VIEW")]
+        public IActionResult Index() => RedirectToAction(nameof(ProfitLoss));
+
         #region 1. Báo cáo P&L (Profit & Loss)
         [HttpGet]
         [HasPermission("FINANCE_PNL_VIEW")]

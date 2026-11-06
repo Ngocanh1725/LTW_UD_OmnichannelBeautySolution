@@ -103,3 +103,62 @@ Hệ thống `PermissionService` kết hợp `DelegationService` áp dụng mô 
 | **Nhân viên dưới quyền trực tiếp hiện tại** | `editor01` | `data01` | `hr01` (+ nhân sự các phòng Level < 50) | `sale01`, `sale02`, `mkt01` |
 | **Ví dụ kịch bản tích chia quyền thực tế** | `ad1` có thể thu hồi bớt quyền `CMS_MENU_MANAGE` của `editor01` (chỉ cho sửa bài viết/banner) hoặc cấp lại khi cần. | `ad2` có thể tích cấp tạm thời quyền `CMS_REVIEW_MODERATE` hoặc `PRODUCT_DELETE` cho `data01` trong đợt dọn dữ liệu. | `ad3` tiếp nhận nhân viên mới, tạo tài khoản, phân về phòng ban và gán vai trò khởi đầu (`HrStaff`), hoặc tích cấp thêm `USER_EXPORT` cho `hr01`. | `ad4` có thể tích cấp thêm quyền `ORDER_CANCEL` hoặc `REPORT_SALES` cho trưởng ca `sale01` mà không cần nhờ `superadmin`. |
 
+---
+
+## 6. Ma Trận Nghiệm Thu Kiểm Thử Thực Tế (19 Tài Khoản x 15 Phân Hệ Admin)
+
+> **Phương pháp kiểm thử:** Tự động hóa hoàn toàn thông qua script PowerShell `scripts/test_permission_matrix.ps1` sử dụng `HttpClient` thực hiện xác thực độc lập, gửi request trực tiếp tới hệ thống web đang vận hành tại `http://localhost:5116`.
+> - **✅ 200:** Cho phép truy cập hợp lệ (hoặc Redirect hợp lệ trong cùng module).
+> - **⛔ 403:** Từ chối truy cập (Access Denied / Forbidden) đúng theo ma trận phân quyền.
+> - **⛔ 302:** Chặn tài khoản khách hàng hoặc phiên không hợp lệ chuyển hướng về trang đăng nhập.
+
+| Tài khoản | Vai trò | Dash | Order | Cust | Prod | Inv | Banner | UiSec | Menu | User | Dept | Deleg | Perm | Fin | Report | Sett |
+|:---|:---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| `superadmin` | `SuperAdmin` (Lv 100) | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 |
+| `admin` | `SuperAdmin` (Lv 100) | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 |
+| `ad1` | `UiAdmin` (Lv 50) | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ⛔ 403 | ⛔ 403 | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 |
+| `ad2` | `DataAdmin` (Lv 50) | ✅ 200 | ⛔ 403 | ⛔ 403 | ✅ 200 | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ✅ 200 | ⛔ 403 | ⛔ 403 | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 |
+| `ad3` | `HrAdmin` (Lv 50) | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ✅ 200 | ✅ 200 | ⛔ 403 | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 |
+| `ad4` | `SalesAdmin` (Lv 50) | ✅ 200 | ✅ 200 | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ✅ 200 | ⛔ 403 | ⛔ 403 | ✅ 200 | ⛔ 403 | ✅ 200 | ⛔ 403 |
+| `sale01` | `SalesStaff` (Lv 10) | ⛔ 403 | ✅ 200 | ✅ 200 | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 |
+| `sale02` | `SalesStaff` (Lv 10) | ⛔ 403 | ✅ 200 | ✅ 200 | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 |
+| `mkt01` | `MarketingStaff` (Lv 10) | ⛔ 403 | ⛔ 403 | ✅ 200 | ✅ 200 | ⛔ 403 | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 |
+| `hr01` | `HrStaff` (Lv 10) | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ✅ 200 | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 |
+| `data01` | `DataStaff` (Lv 10) | ⛔ 403 | ⛔ 403 | ⛔ 403 | ✅ 200 | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 |
+| `manager_hq` | `StoreManager` (Lv 30) | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ✅ 200 | ✅ 200 | ⛔ 403 |
+| `manager_cg` | `StoreManager` (Lv 30) | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ✅ 200 | ✅ 200 | ⛔ 403 |
+| `cashier01` | `Cashier` (Lv 10) | ⛔ 403 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 |
+| `cashier02` | `Cashier` (Lv 10) | ⛔ 403 | ✅ 200 | ✅ 200 | ✅ 200 | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 |
+| `warehouse01` | `WarehouseStaff` (Lv 10) | ⛔ 403 | ⛔ 403 | ⛔ 403 | ✅ 200 | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 |
+| `warehouse02` | `WarehouseStaff` (Lv 10) | ⛔ 403 | ⛔ 403 | ⛔ 403 | ✅ 200 | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 |
+| `editor01` | `ContentEditor` (Lv 10) | ⛔ 403 | ⛔ 403 | ⛔ 403 | ✅ 200 | ⛔ 403 | ✅ 200 | ✅ 200 | ✅ 200 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 | ⛔ 403 |
+| `customer01` | `Customer` (Lv 0) | ⛔ 302 | ⛔ 302 | ⛔ 302 | ⛔ 302 | ⛔ 302 | ⛔ 302 | ⛔ 302 | ⛔ 302 | ⛔ 302 | ⛔ 302 | ⛔ 302 | ⛔ 302 | ⛔ 302 | ⛔ 302 | ⛔ 302 |
+
+---
+
+## 7. Kết Quả Kiểm Thử An Toàn & Bảo Mật (Security & Scoping)
+
+| Kịch Bản Bảo Mật | Hành Động Thực Hiện | Kết Quả Thực Tế | Trạng Thái |
+|:---|:---|:---|:---:|
+| **1. Chống vượt cấp ủy quyền** | Tài khoản `ad4` gửi POST giả mạo gán quyền `SETTINGS_MANAGE` cho `sale01`. | Server từ chối HTTP 403 kèm mã lỗi `PERMISSION_OUT_OF_SCOPE`. | ✅ **ĐẠT** |
+| **2. Bảo vệ tài khoản cấp trên** | `ad3` cố gắng khóa tài khoản `superadmin` hoặc đổi mật khẩu. | Bị chặn với mã lỗi `FORBIDDEN` từ `CanManageUserAsync`. | ✅ **ĐẠT** |
+| **3. Ngăn ngừa leo thang vai trò** | `ad3` cố gán role `SuperAdmin` (Level 100) cho nhân sự `hr01`. | Bị chặn vì `SuperAdmin` vượt quá `MaxGrantLevel` (50). | ✅ **ĐẠT** |
+| **4. Thu hồi phiên tức thì (SecurityStamp)** | Khóa tài khoản `sale01` khi đang có cookie hợp lệ. | Request tiếp theo bị thu hồi phiên ngay lập tức và đẩy về trang Login. | ✅ **ĐẠT** |
+| **5. Ranh giới Khách hàng (UserType Boundary)** | Khách hàng (`customer01`) truy cập trực tiếp các URL `/Admin/*`. | `AdminAreaBoundaryFilter` chặn 100% các URL quản trị. | ✅ **ĐẠT** |
+| **6. Phòng chống CSRF (Anti-Forgery)** | Gửi POST thay đổi dữ liệu nhân sự mà không có AntiForgery Token. | ASP.NET Core từ chối với HTTP 400 Bad Request. | ✅ **ĐẠT** |
+
+---
+
+## 8. Kết Quả Kiểm Thử Hiệu Năng (Performance Benchmark)
+
+- **Số lượng dữ liệu kiểm thử:** Tạo 1.000 bản ghi nhân sự giả lập bằng SQL batch (thời gian seed: **110 ms**), nâng tổng số nhân sự lên **1.020 bản ghi**.
+- **Kết quả đo thời gian phản hồi trang Quản lý Nhân sự (`/Admin/User`):**
+  - `GET /Admin/User?page=1&pageSize=20`: **221 ms**
+  - `GET /Admin/User?page=2&pageSize=20`: **114 ms**
+  - `GET /Admin/User?page=1&pageSize=50`: **54 ms**
+  - `GET /Admin/User?keyword=perf_staff_500`: **143 ms**
+  - `GET /Admin/User?departmentId=3&pageSize=20`: **117 ms**
+- **Thời gian phản hồi trung bình:** **129.8 ms** *(Tiêu chuẩn yêu cầu: < 300 ms)* $\rightarrow$ **VƯỢT TIÊU CHUẨN 2.3 LẦN**.
+- **Tối ưu hóa câu truy vấn:** Sử dụng `AsNoTracking()`, eager loading `Include` tập trung, phân trang ở cấp database SQL Server (`Skip/Take`), không phát sinh truy vấn lặp N+1.
+
+

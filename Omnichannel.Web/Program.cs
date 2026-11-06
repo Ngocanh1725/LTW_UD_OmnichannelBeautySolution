@@ -405,6 +405,13 @@ app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Alias Route cho Quản lý Kho FEFO: /Admin/Inventory -> WarehouseController
+app.MapAreaControllerRoute(
+    name: "admin_inventory_alias",
+    areaName: "Admin",
+    pattern: "Admin/Inventory/{action=Index}/{id?}",
+    defaults: new { controller = "Warehouse" });
+
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Dashboard}/{action=Index}/{id?}");

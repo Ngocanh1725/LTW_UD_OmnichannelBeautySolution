@@ -30,7 +30,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HttpGet]
         [Route("")]
         [Route("Index")]
-
+        [HasPermission("CMS_MENU_MANAGE")]
         public async Task<IActionResult> Index(int? menuId = null)
         {
             var menus = await _context.Menus
