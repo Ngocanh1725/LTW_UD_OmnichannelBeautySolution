@@ -239,13 +239,34 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 userAgent: userAgent
             );
 
-            // 8. Điều hướng sau đăng nhập
+            // 8. Điều hướng sau đăng nhập theo đúng phân hệ vai trò
             if (!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl) && model.ReturnUrl.StartsWith("/admin", StringComparison.OrdinalIgnoreCase))
             {
                 return Redirect(model.ReturnUrl);
             }
 
-            return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+            return Redirect(ResolveAdminWorkspaceUrl(new ClaimsPrincipal(claimsIdentity)));
+        }
+
+        private static string ResolveAdminWorkspaceUrl(ClaimsPrincipal principal)
+        {
+            if (principal.IsInRole("SuperAdmin") || principal.IsInRole("SUPER_ADMIN") ||
+                principal.IsInRole("StoreManager") || principal.IsInRole("STORE_MANAGER") ||
+                principal.IsInRole("UiAdmin") || principal.IsInRole("DataAdmin") ||
+                principal.IsInRole("HrAdmin") || principal.IsInRole("SalesAdmin"))
+            {
+                return "/Admin/Dashboard";
+            }
+
+            if (principal.IsInRole("SalesStaff")) return "/Admin/Order";
+            if (principal.IsInRole("MarketingStaff")) return "/Admin/Promotion";
+            if (principal.IsInRole("HrStaff")) return "/Admin/User";
+            if (principal.IsInRole("DataStaff")) return "/Admin/Product";
+            if (principal.IsInRole("Cashier") || principal.IsInRole("CASHIER")) return "/Admin/Pos";
+            if (principal.IsInRole("WarehouseStaff") || principal.IsInRole("WAREHOUSE")) return "/Admin/Warehouse";
+            if (principal.IsInRole("ContentEditor") || principal.IsInRole("CONTENT_EDITOR")) return "/Admin/Post";
+
+            return "/Admin/Dashboard";
         }
 
         // GET & POST: /admin/auth/logout hoặc /Admin/Auth/Logout
@@ -287,6 +308,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [Route("admin/auth/access-denied")]
         public IActionResult AccessDenied(string? returnUrl = null)
         {
+            Response.StatusCode = Microsoft.AspNetCore.Http.StatusCodes.Status403Forbidden;
             var vm = new AccessDeniedViewModel
             {
                 AttemptedPath = returnUrl ?? Request.Headers["Referer"].ToString(),

@@ -73,7 +73,8 @@ namespace Omnichannel.Infrastructure.Security
 
             if (effectivePermissions.Contains(normalizedCode) ||
                 effectivePermissions.Contains(alternativeCode) ||
-                effectivePermissions.Contains(requirement.PolicyName))
+                effectivePermissions.Contains(requirement.PolicyName) ||
+                (requirement.Action != null && requirement.Action.Contains('_') && effectivePermissions.Contains(requirement.Action)))
             {
                 context.Succeed(requirement);
             }

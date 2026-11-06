@@ -78,10 +78,30 @@ namespace Omnichannel.Web.Controllers
             bool isSuperOrManager = principal.IsInRole("SuperAdmin") ||
                                     principal.IsInRole("SUPER_ADMIN") ||
                                     principal.IsInRole("StoreManager") ||
-                                    principal.IsInRole("STORE_MANAGER");
+                                    principal.IsInRole("STORE_MANAGER") ||
+                                    principal.IsInRole("UiAdmin") ||
+                                    principal.IsInRole("DataAdmin") ||
+                                    principal.IsInRole("HrAdmin") ||
+                                    principal.IsInRole("SalesAdmin");
 
             if (!isSuperOrManager)
             {
+                if (principal.IsInRole("SalesStaff"))
+                {
+                    return "/Admin/Order";
+                }
+                if (principal.IsInRole("MarketingStaff"))
+                {
+                    return "/Admin/Promotion";
+                }
+                if (principal.IsInRole("HrStaff"))
+                {
+                    return "/Admin/User";
+                }
+                if (principal.IsInRole("DataStaff"))
+                {
+                    return "/Admin/Product";
+                }
                 if (principal.IsInRole("Cashier") || principal.IsInRole("CASHIER"))
                 {
                     return "/Admin/Pos";

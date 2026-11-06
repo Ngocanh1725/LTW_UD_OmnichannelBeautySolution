@@ -16,7 +16,6 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize]
-    [HasPermission("PERMISSION_DELEGATE")]
     public class PermissionManagementController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -37,7 +36,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [HasPermission("PERMISSION_DELEGATE")]
+        [HasPermission("PERMISSION_MANAGE")]
         public async Task<IActionResult> Index(int? roleId)
         {
             int actorId = User.GetUserId() ?? 0;

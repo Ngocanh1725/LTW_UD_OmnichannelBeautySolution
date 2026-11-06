@@ -32,7 +32,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [HasPermission("USER_MANAGE")]
+        [HasPermission("USER_VIEW")]
         public async Task<IActionResult> Index()
         {
             var users = await _context.Users
@@ -58,33 +58,41 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [HasPermission("USER_MANAGE")]
+        [HasPermission("USER_CREATE")]
         public async Task<IActionResult> Create()
         {
-            var roles = await _context.Roles.AsNoTracking().Where(r => r.IsActive && r.Level > 0 && r.Name != "Customer" && r.Name != "CUSTOMER").ToListAsync();
+            var roles = await _context.Roles
+                .AsNoTracking()
+                .Where(r => r.IsActive && r.Level > 0 && r.Name != "Customer" && r.Name != "CUSTOMER")
+                .ToListAsync();
             ViewBag.Roles = new SelectList(roles, "Id", "Name");
             return View(new CreateUserViewModel());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [HasPermission("USER_MANAGE")]
+        [HasPermission("USER_CREATE")]
         public async Task<IActionResult> Create(CreateUserViewModel model)
         {
             if (!ModelState.IsValid)
             {
-                var roles = await _context.Roles.AsNoTracking().Where(r => r.IsActive && r.Level > 0 && r.Name != "Customer" && r.Name != "CUSTOMER").ToListAsync();
+                var roles = await _context.Roles
+                    .AsNoTracking()
+                    .Where(r => r.IsActive && r.Level > 0 && r.Name != "Customer" && r.Name != "CUSTOMER")
+                    .ToListAsync();
                 ViewBag.Roles = new SelectList(roles, "Id", "Name");
                 return View(model);
             }
 
             string normalized = model.Username.Trim().ToUpperInvariant();
 
-            // Kiểm tra trùng username hoặc email
             if (await _context.Users.AnyAsync(u => u.Username.ToUpper() == normalized))
             {
                 ModelState.AddModelError("Username", "Tên đăng nhập này đã tồn tại.");
-                var roles = await _context.Roles.AsNoTracking().Where(r => r.IsActive && r.Level > 0 && r.Name != "Customer" && r.Name != "CUSTOMER").ToListAsync();
+                var roles = await _context.Roles
+                    .AsNoTracking()
+                    .Where(r => r.IsActive && r.Level > 0 && r.Name != "Customer" && r.Name != "CUSTOMER")
+                    .ToListAsync();
                 ViewBag.Roles = new SelectList(roles, "Id", "Name");
                 return View(model);
             }
@@ -92,7 +100,10 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             if (await _context.Users.AnyAsync(u => u.Email.ToUpper() == model.Email.Trim().ToUpper()))
             {
                 ModelState.AddModelError("Email", "Địa chỉ Email này đã được sử dụng.");
-                var roles = await _context.Roles.AsNoTracking().Where(r => r.IsActive && r.Level > 0 && r.Name != "Customer" && r.Name != "CUSTOMER").ToListAsync();
+                var roles = await _context.Roles
+                    .AsNoTracking()
+                    .Where(r => r.IsActive && r.Level > 0 && r.Name != "Customer" && r.Name != "CUSTOMER")
+                    .ToListAsync();
                 ViewBag.Roles = new SelectList(roles, "Id", "Name");
                 return View(model);
             }
@@ -111,7 +122,6 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             await _context.Users.AddAsync(newUser);
 
-            // Gán vai trò ban đầu
             if (!string.IsNullOrEmpty(model.RoleId) && int.TryParse(model.RoleId, out var roleIdInt))
             {
                 await _context.UserRoles.AddAsync(new UserRole
@@ -129,7 +139,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [HasPermission("USER_MANAGE")]
+        [HasPermission("USER_EDIT")]
         public async Task<IActionResult> ToggleStatus(int userId)
         {
             var user = await _context.Users.FindAsync(userId);
@@ -138,7 +148,6 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 return NotFound();
             }
 
-            // Không cho phép tự khóa tài khoản của chính mình
             var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (user.Id.ToString() == currentUserId)
             {

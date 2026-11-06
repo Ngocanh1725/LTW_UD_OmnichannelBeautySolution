@@ -70,12 +70,11 @@ namespace Omnichannel.Infrastructure.Data
             // Đảm bảo cột RoutineStep và Coupon COMBO15 luôn sẵn sàng
             await EnsureRoutineStepAndComboSeededAsync(context, logger);
 
-            // Đảm bảo mô hình Delegated RBAC, Phòng ban, Level vai trò và hồ sơ nhân sự luôn được đồng bộ
-            await EnsureDelegatedRbacAndDepartmentsSeededAsync(context, logger);
-
             // Seed dữ liệu chỉ chạy khi bảng rỗng (nếu đã có Products và Roles thì hệ thống đã khởi tạo hoàn tất)
             if (await context.Products.AnyAsync() && await context.Roles.AnyAsync())
             {
+                // Đảm bảo mô hình Delegated RBAC, Phòng ban, Level vai trò và hồ sơ nhân sự luôn được đồng bộ
+                await EnsureDelegatedRbacAndDepartmentsSeededAsync(context, logger);
                 // Đảm bảo đồng bộ lô hàng FEFO thật (Date xa & Cận date) cho toàn bộ sản phẩm
                 await EnsureFefoBatchesSynchronizedAsync(context, logger);
                 // Đảm bảo tồn kho showroom O2O và chiến dịch Flash Sale luôn sẵn sàng
