@@ -4,23 +4,38 @@
     Layout = "_AdminLayout";
 }
 
+<!-- Breadcrumb & Header -->
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-1 text-xs">
-                <li class="breadcrumb-item"><a href="/Admin/User" class="text-decoration-none text-muted">Nhân sự</a></li>
-                <li class="breadcrumb-item active text-dark dark:text-white fw-semibold" aria-current="page">Thêm mới</li>
+        <nav aria-label="breadcrumb" class="mb-1">
+            <ol class="breadcrumb small mb-0">
+                <li class="breadcrumb-item"><a href="/Admin/Dashboard" class="text-decoration-none text-muted"><i class="fa-solid fa-house me-1"></i>Trang chủ</a></li>
+                <li class="breadcrumb-item"><a href="/Admin/User" class="text-decoration-none text-muted">Quản Lý Nhân Sự</a></li>
+                <li class="breadcrumb-item active fw-semibold text-rose-600" aria-current="page">Thêm nhân sự mới</li>
             </ol>
         </nav>
         <h4 class="fw-bold text-slate-900 dark:text-white mb-0 d-flex align-items-center gap-2">
             <i class="fa-solid fa-user-plus text-rose-600"></i>
-            <span>Tạo Mới Tài Khoản Nhân Sự & Phân Bổ Phòng Ban</span>
+            <span>Tạo Mới Hồ Sơ Nhân Sự Nội Bộ</span>
+            <span class="badge rounded-pill font-monospace fw-normal" style="background:#fff1f2;color:#be123c;border:1px solid #fecdd3;font-size:0.72rem;">
+                UserType = 2
+            </span>
         </h4>
-        <p class="small text-muted mb-0 mt-1">Khởi tạo tài khoản nhân viên, gán vai trò ban đầu và xác lập người quản lý trực tiếp.</p>
+    </div>
+
+    <div class="d-flex align-items-center gap-2">
+        <a href="/Admin/User" class="btn btn-outline-secondary btn-sm px-3 py-2 fw-semibold rounded-3">
+            <i class="fa-solid fa-arrow-left me-1.5"></i>Quay lại danh sách
+        </a>
     </div>
 </div>
 
-<partial name="_StaffForm" model="Model" />
+<form asp-action="Create" method="post" id="createStaffForm" novalidate>
+    @Html.AntiForgeryToken()
+    <partial name="_StaffForm" model="Model" />
+</form>
+
+<partial name="_MediaPickerModal" />
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

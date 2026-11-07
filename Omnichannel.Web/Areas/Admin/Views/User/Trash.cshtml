@@ -6,20 +6,26 @@
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
-        <div class="d-flex align-items-center gap-2 mb-1">
-            <a href="/Admin/User" class="btn btn-sm btn-outline-secondary rounded-3 px-2.5 py-1">
-                <i class="fa-solid fa-arrow-left me-1"></i>Danh sách nhân sự
-            </a>
-            <span class="badge bg-danger text-white px-2.5 py-1 rounded-pill font-monospace">
-                Thùng rác (@Model.TrashPaged.TotalItems)
-            </span>
-        </div>
+        <nav aria-label="breadcrumb" class="mb-1">
+            <ol class="breadcrumb small mb-0">
+                <li class="breadcrumb-item"><a href="/Admin/Dashboard" class="text-decoration-none text-muted"><i class="fa-solid fa-house me-1"></i>Trang chủ</a></li>
+                <li class="breadcrumb-item"><a href="/Admin/User" class="text-decoration-none text-muted">Quản Lý Nhân Sự</a></li>
+                <li class="breadcrumb-item active fw-semibold text-danger" aria-current="page">Thùng rác (@Model.TrashPaged.TotalItems)</li>
+            </ol>
+        </nav>
         <h4 class="fw-bold text-slate-900 dark:text-white mb-0 d-flex align-items-center gap-2">
             <i class="fa-regular fa-trash-can text-danger"></i>
-            <span>Nhân Sự Đã Xóa Mềm (Thùng Rác)</span>
+            <span>Thùng Rác Nhân Sự (Đã Xóa Mềm)</span>
+            <span class="badge bg-danger text-white rounded-pill font-monospace" style="font-size: 0.72rem;">@Model.TrashPaged.TotalItems</span>
         </h4>
-        <p class="small text-muted mb-0 mt-1">Các tài khoản nhân sự bị xóa mềm vẫn được bảo toàn lịch sử giao dịch và có thể khôi phục lại bất kỳ lúc nào.</p>
+        <p class="small text-muted mb-0 mt-1">
+            Các hồ sơ nhân sự đã xóa mềm được lưu trữ an toàn để đảm bảo toàn vẹn lịch sử đơn hàng & kiểm toán. Bạn có thể khôi phục lại bất kỳ lúc nào.
+        </p>
     </div>
+
+    <a href="/Admin/User" class="btn btn-outline-secondary btn-sm px-3.5 py-2 fw-semibold rounded-3">
+        <i class="fa-solid fa-arrow-left me-1.5"></i>Quay lại Danh sách Nhân sự
+    </a>
 </div>
 
 <!-- Filter box -->
@@ -28,25 +34,25 @@
         <div class="col-md-5">
             <div class="input-group input-group-sm">
                 <span class="input-group-text bg-light text-muted"><i class="fa-solid fa-magnifying-glass"></i></span>
-                <input type="text" name="Keyword" class="form-control" placeholder="Tìm theo tên, username, email, mã NV..." value="@Model.Filter.Keyword" />
+                <input type="text" name="Keyword" class="form-control" placeholder="Tìm theo họ tên, username, email, mã NV..." value="@Model.Filter.Keyword" />
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <select name="DepartmentId" class="form-select form-select-sm rounded-3">
                 <option value="">-- Tất cả phòng ban --</option>
                 @foreach (var d in Model.ScopedDepartments)
                 {
-                    <option value="@d.Id" selected="@(Model.Filter.DepartmentId == d.Id ? "selected" : null)">@d.Name</option>
+                    <option value="@d.Id" selected="@(Model.Filter.DepartmentId == d.Id ? "selected" : null)">
+                        @(!string.IsNullOrEmpty(d.DisplayTreeName) ? d.DisplayTreeName : d.Name)
+                    </option>
                 }
             </select>
         </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-outline-danger btn-sm w-100 fw-semibold rounded-3">
+        <div class="col-md-3 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-danger btn-sm flex-grow-1 fw-semibold rounded-3">
                 <i class="fa-solid fa-filter me-1"></i>Lọc thùng rác
             </button>
-        </div>
-        <div class="col-md-2">
-            <a href="/Admin/User/Trash" class="btn btn-light btn-sm w-100 rounded-3">Đặt lại</a>
+            <a href="/Admin/User/Trash" class="btn btn-light border btn-sm px-3 rounded-3">Đặt lại</a>
         </div>
     </form>
 </div>
@@ -55,25 +61,3 @@
 <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white dark:bg-slate-900">
     <partial name="_TrashTable" model="Model.TrashPaged" />
 </div>
-
-@section Scripts {
-    <script>
-        async function handleStaffRestoreSubmit(event, form, staffName) {
-            event.preventDefault();
-            const confirm = await Swal.fire({
-                title: 'Khôi phục nhân sự?',
-                text: `Bạn có chắc muốn đưa nhân sự '${staffName}' trở lại danh sách hoạt động?`,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#10b981',
-                cancelButtonColor: '#94a3b8',
-                confirmButtonText: 'Khôi phục ngay',
-                cancelButtonText: 'Hủy'
-            });
-            if (confirm.isConfirmed) {
-                form.submit();
-            }
-        }
-    </script>
-}
-

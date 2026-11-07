@@ -4,11 +4,11 @@
     <table class="table table-hover align-middle mb-0 text-sm">
         <thead class="bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold uppercase tracking-wider border-b">
             <tr>
-                <th class="ps-4 py-3">Mã NV / Họ Tên</th>
+                <th class="ps-4 py-3">Nhân Sự & Mã NV</th>
                 <th class="py-3 px-3">Phòng Ban & Chức Danh</th>
-                <th class="py-3 px-3">Email & SĐT</th>
-                <th class="py-3 px-3">Người Xóa & Thời Gian</th>
-                <th class="pe-4 py-3 text-end" style="width: 140px;">Thao Tác</th>
+                <th class="py-3 px-3">Liên Hệ</th>
+                <th class="py-3 px-3">Thời Gian Xóa</th>
+                <th class="pe-4 py-3 text-end" style="width: 160px;">Khôi Phục</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -16,11 +16,11 @@
             {
                 <tr>
                     <td colspan="5" class="text-center py-5 text-muted">
-                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-muted mb-2" style="width: 48px; height: 48px;">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-light text-muted mb-2" style="width: 52px; height: 52px;">
                             <i class="fa-regular fa-trash-can fs-4"></i>
                         </div>
-                        <div class="fw-bold text-dark dark:text-white">Thùng rác trống</div>
-                        <p class="small text-muted mb-0">Không có nhân sự nào đang bị xóa mềm trong phạm vi quản lý của bạn.</p>
+                        <div class="fw-bold text-dark dark:text-white">Thùng rác đang trống</div>
+                        <p class="small text-muted mb-0">Không có nhân sự nào bị xóa mềm trong phạm vi quản lý của bạn.</p>
                     </td>
                 </tr>
             }
@@ -31,9 +31,9 @@
                     <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
                         <td class="ps-4 py-3">
                             <div class="d-flex align-items-center gap-2.5">
-                                <div class="d-inline-flex align-items-center justify-content-center rounded-3 fw-bold text-white shadow-xs flex-shrink-0 opacity-75"
-                                     style="width: 36px; height: 36px; font-size: 13px; background: #64748b;">
-                                    @(staff.FullName.Length > 0 ? staff.FullName[0].ToString().ToUpper() : "U")
+                                <div class="d-inline-flex align-items-center justify-content-center rounded-circle fw-bold text-white shadow-xs flex-shrink-0 opacity-75"
+                                     style="width: 38px; height: 38px; font-size: 14px; background: #64748b;">
+                                     @(staff.FullName.Length > 0 ? staff.FullName[0].ToString().ToUpper() : "U")
                                 </div>
                                 <div>
                                     <div class="fw-bold text-dark dark:text-white">
@@ -53,21 +53,20 @@
                         </td>
                         <td class="py-3 px-3 small">
                             <div class="text-dark dark:text-white">@staff.Email</div>
-                            <div class="text-muted font-monospace" style="font-size: 0.72rem;">@(staff.PhoneNumber ?? "Chưa có SĐT")</div>
+                            <div class="text-muted font-monospace" style="font-size: 0.72rem;">@(staff.PhoneNumber ?? "-")</div>
                         </td>
                         <td class="py-3 px-3 small">
                             <div class="fw-semibold text-danger">
-                                <i class="fa-regular fa-trash-can me-1"></i>@(staff.DeletedByName ?? "Quản trị viên")
+                                <i class="fa-regular fa-clock me-1"></i>@(staff.DeletedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")
                             </div>
-                            <div class="text-muted font-monospace" style="font-size: 0.72rem;">
-                                @(staff.DeletedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm") ?? "-")
-                            </div>
+                            <div class="text-muted" style="font-size: 0.72rem;">Bởi: @(staff.DeletedByName ?? "Quản trị viên")</div>
                         </td>
                         <td class="pe-4 py-3 text-end">
-                            <form asp-action="Restore" asp-route-id="@staff.Id" method="post" class="d-inline m-0 restore-staff-form" onsubmit="handleStaffRestoreSubmit(event, this, '@staff.FullName')">
+                            <form asp-action="Restore" asp-route-id="@staff.Id" method="post" class="d-inline m-0 restore-staff-form">
                                 @Html.AntiForgeryToken()
-                                <button type="submit" class="btn btn-sm btn-outline-success rounded-3 px-3 py-1 fw-semibold shadow-2xs" title="Khôi phục nhân sự về hoạt động">
-                                    <i class="fa-solid fa-rotate-left me-1"></i>Khôi Phục
+                                <button type="button" class="btn btn-sm btn-success text-white rounded-3 px-3 py-1.5 fw-semibold shadow-2xs"
+                                        onclick="confirmRestoreStaff(this.closest('form'), '@Html.Raw(staff.FullName.Replace("'", "\\'"))')">
+                                    <i class="fa-solid fa-rotate-left me-1"></i>Khôi phục
                                 </button>
                             </form>
                         </td>
@@ -82,8 +81,27 @@
 {
     <div class="p-3 border-top bg-white dark:bg-slate-900 d-flex flex-wrap align-items-center justify-content-between gap-3">
         <div class="small text-muted">
-            Hiển thị <span class="fw-bold text-dark dark:text-white">@Model.FromItem</span> - <span class="fw-bold text-dark dark:text-white">@Model.ToItem</span> trên tổng số <span class="fw-bold text-dark dark:text-white">@Model.TotalItems</span> nhân sự trong thùng rác
+            Hiển thị <span class="fw-bold text-dark dark:text-white">@Model.FromItem–@Model.ToItem</span> / <span class="fw-bold text-dark dark:text-white">@Model.TotalItems</span> nhân sự đã xóa
         </div>
     </div>
 }
 
+<script>
+    function confirmRestoreStaff(formEl, fullName) {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Khôi phục nhân sự?',
+                html: `Tài khoản <strong>${fullName}</strong> sẽ được khôi phục khỏi thùng rác và kích hoạt hoạt động trở lại.`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#059669',
+                cancelButtonText: 'Hủy',
+                confirmButtonText: 'Khôi phục ngay'
+            }).then((res) => {
+                if (res.isConfirmed) formEl.submit();
+            });
+        } else if (confirm('Khôi phục nhân sự ' + fullName + '?')) {
+            formEl.submit();
+        }
+    }
+</script>

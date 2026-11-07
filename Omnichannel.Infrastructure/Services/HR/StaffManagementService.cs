@@ -76,7 +76,7 @@ namespace Omnichannel.Infrastructure.Services.HR
             foreach (var u in entities)
             {
                 bool canManage = actorCtx.IsSuperAdmin || await _delegationService.CanManageUserAsync(actorId, u.Id);
-                items.Add(MapToListItemDto(u, canManage, headUserIds.Contains(u.Id)));
+                items.Add(MapToListItemDto(u, canManage, headUserIds.Contains(u.Id), actorCtx));
             }
 
             return new PagedResult<StaffListItemDto>
@@ -131,7 +131,7 @@ namespace Omnichannel.Infrastructure.Services.HR
 
             var items = entities.Select(u =>
             {
-                var dto = MapToListItemDto(u, canActorManage: actorCtx.IsSuperAdmin || actorCtx.CanDeleteUser, isHead: false);
+                var dto = MapToListItemDto(u, canActorManage: actorCtx.IsSuperAdmin || actorCtx.CanDeleteUser, isHead: false, actorCtx);
                 if (u.DeletedBy.HasValue && deletedByNames.TryGetValue(u.DeletedBy.Value, out var delName))
                 {
                     dto.DeletedByName = delName;
@@ -166,7 +166,9 @@ namespace Omnichannel.Infrastructure.Services.HR
                     u.Id,
                     u.IsActive,
                     u.CreatedAt,
+                    u.DepartmentId,
                     DeptName = u.Department != null ? u.Department.Name : "Chưa phân phòng",
+                    HasAdminRole = u.UserRoles.Any(ur => ur.Role.IsActive && ur.Role.Level >= 50),
                     Roles = u.UserRoles
                         .Where(ur => ur.Role.IsActive && ur.Role.Name != "Customer")
                         .Select(ur => !string.IsNullOrEmpty(ur.Role.DisplayName) ? ur.Role.DisplayName : ur.Role.Name)
@@ -174,6 +176,11 @@ namespace Omnichannel.Infrastructure.Services.HR
                 .ToListAsync();
 
             int trashCount = await trashQuery.CountAsync();
+            int totalCustomers = await _context.Users.AsNoTracking().CountAsync(u => u.UserType == 1 && !u.IsDeleted);
+
+            int deptCount = actorCtx.IsSuperAdmin
+                ? await _context.Departments.AsNoTracking().CountAsync(d => d.IsActive)
+                : actorCtx.ManagedDepartmentIds.Count;
 
             var stats = new StaffStatsDto
             {
@@ -181,7 +188,10 @@ namespace Omnichannel.Infrastructure.Services.HR
                 ActiveStaff = staffList.Count(u => u.IsActive),
                 LockedStaff = staffList.Count(u => !u.IsActive),
                 NewStaffLast30Days = staffList.Count(u => u.CreatedAt >= thirtyDaysAgo),
-                TrashStaff = trashCount
+                TrashStaff = trashCount,
+                DepartmentCount = deptCount,
+                AdminCount = staffList.Count(u => u.HasAdminRole),
+                TotalCustomers = totalCustomers
             };
 
             foreach (var g in staffList.GroupBy(u => u.DeptName))
@@ -222,44 +232,22 @@ namespace Omnichannel.Infrastructure.Services.HR
                 .AsNoTracking()
                 .FirstOrDefaultAsync(d => d.HeadUserId == id);
 
-            int subCount = await _context.Users
-                .AsNoTracking()
-                .CountAsync(u => u.ManagerId == id && u.UserType >= 2 && !u.IsDeleted);
-
-            var subUsers = await _context.Users
+            int? headDeptId = headDept?.Id;
+            var subEntities = await _context.Users
                 .AsNoTracking()
                 .Include(u => u.Department)
                 .Include(u => u.Store)
-                .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
-                .Where(u => u.ManagerId == id && u.UserType >= 2 && !u.IsDeleted)
+                .Include(u => u.Manager)
+                .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                .Where(u => u.UserType >= 2 && !u.IsDeleted && u.Id != id &&
+                            (u.ManagerId == id || (headDeptId.HasValue && u.DepartmentId == headDeptId.Value)))
                 .OrderBy(u => u.FullName)
-                .Take(20)
                 .ToListAsync();
-            var subordinates = subUsers.Select(u => MapToListItemDto(u, canActorManage: canManage, isHead: false)).ToList();
 
-            var ordersQuery = _context.Orders
-                .AsNoTracking()
-                .Where(o => (o.PosShift != null && o.PosShift.CashierId == id) || 
-                            (user.StoreId.HasValue && o.StoreId == user.StoreId.Value && o.OrderSource == "POS"));
-
-            int totalOrders = await ordersQuery.CountAsync();
-            decimal totalSales = totalOrders > 0
-                ? await ordersQuery.Where(o => o.OrderStatus != "CANCELLED").SumAsync(o => (decimal?)o.TotalAmount) ?? 0m
-                : 0m;
-
-            var recentOrders = await ordersQuery
-                .OrderByDescending(o => o.CreatedAt)
-                .Take(10)
-                .Select(o => new StaffRecentOrderDto
-                {
-                    Id = o.Id,
-                    OrderCode = o.OrderCode,
-                    TotalAmount = o.TotalAmount,
-                    OrderStatus = o.OrderStatus,
-                    OrderSource = o.OrderSource,
-                    CreatedAt = o.CreatedAt
-                })
-                .ToListAsync();
+            var subordinates = subEntities
+                .Select(s => MapToListItemDto(s, actorCtx.IsSuperAdmin || actorCtx.CanEditUser, false, actorCtx))
+                .ToList();
 
             var permissions = await _permissionService.GetUserPermissionBreakdownAsync(id);
 
@@ -268,7 +256,7 @@ namespace Omnichannel.Infrastructure.Services.HR
                 .AsNoTracking()
                 .Where(a => a.UserId == id || a.EntityId == userIdStr)
                 .OrderByDescending(a => a.CreatedAt)
-                .Take(20)
+                .Take(30)
                 .Select(a => new AuditLogDto
                 {
                     Id = a.Id,
@@ -285,7 +273,55 @@ namespace Omnichannel.Infrastructure.Services.HR
                 })
                 .ToListAsync();
 
-            var baseDto = MapToListItemDto(user, canManage, headDept != null);
+            // Lấy danh sách đơn hàng do nhân sự này xử lý (hoặc thuộc phòng Sale/Thu ngân)
+            bool isSalesOrPosRole = user.UserRoles.Any(ur =>
+                ur.Role != null && (ur.Role.Name.Contains("Sale") || ur.Role.Name.Contains("Cashier") || ur.Role.Name.Contains("StoreManager")))
+                || (user.Department != null && user.Department.Code == "PHONG_SALE");
+
+            var orderQuery = _context.Orders.AsNoTracking()
+                .Where(o => _context.OrderStatusHistories.Any(h => h.OrderId == o.Id && h.ChangedByUserId == id));
+
+            var handledOrders = await orderQuery
+                .OrderByDescending(o => o.CreatedAt)
+                .Take(20)
+                .Select(o => new StaffOrderSummaryDto
+                {
+                    Id = o.Id,
+                    OrderCode = o.OrderCode,
+                    CustomerName = o.CustomerName,
+                    FinalAmount = o.TotalAmount,
+                    OrderStatus = o.OrderStatus,
+                    PaymentStatus = o.PaymentStatus,
+                    Channel = o.OrderSource,
+                    OrderDate = o.CreatedAt
+                })
+                .ToListAsync();
+
+            if (handledOrders.Count == 0 && isSalesOrPosRole)
+            {
+                var fallbackOrderQuery = _context.Orders.AsNoTracking();
+                if (user.StoreId.HasValue)
+                {
+                    fallbackOrderQuery = fallbackOrderQuery.Where(o => o.StoreId == user.StoreId.Value);
+                }
+                handledOrders = await fallbackOrderQuery
+                    .OrderByDescending(o => o.CreatedAt)
+                    .Take(15)
+                    .Select(o => new StaffOrderSummaryDto
+                    {
+                        Id = o.Id,
+                        OrderCode = o.OrderCode,
+                        CustomerName = o.CustomerName,
+                        FinalAmount = o.TotalAmount,
+                        OrderStatus = o.OrderStatus,
+                        PaymentStatus = o.PaymentStatus,
+                        Channel = o.OrderSource,
+                        OrderDate = o.CreatedAt
+                    })
+                    .ToListAsync();
+            }
+
+            var baseDto = MapToListItemDto(user, canManage, headDept != null, actorCtx);
 
             return new StaffDetailDto
             {
@@ -295,6 +331,8 @@ namespace Omnichannel.Infrastructure.Services.HR
                 FullName = baseDto.FullName,
                 Email = baseDto.Email,
                 PhoneNumber = baseDto.PhoneNumber,
+                AvatarUrl = user.AvatarUrl,
+                AvatarMediaId = user.AvatarMediaId,
                 DepartmentId = baseDto.DepartmentId,
                 DepartmentName = baseDto.DepartmentName,
                 JobTitle = baseDto.JobTitle,
@@ -311,16 +349,18 @@ namespace Omnichannel.Infrastructure.Services.HR
                 CreatedAt = baseDto.CreatedAt,
                 DeletedAt = baseDto.DeletedAt,
                 CanActorManage = baseDto.CanActorManage,
+                CanActorEdit = baseDto.CanActorEdit,
+                CanActorDelete = baseDto.CanActorDelete,
+                CanActorResetPassword = baseDto.CanActorResetPassword,
+                CanActorDelegate = baseDto.CanActorDelegate,
                 IsDepartmentHead = headDept != null,
                 HeadOfDepartmentName = headDept?.Name,
                 Roles = baseDto.Roles,
                 Address = user.Address,
                 Notes = user.Notes,
-                SubordinatesCount = subCount,
+                SubordinatesCount = subordinates.Count,
                 Subordinates = subordinates,
-                TotalOrdersProcessed = totalOrders,
-                TotalSalesProcessed = totalSales,
-                RecentOrders = recentOrders,
+                HandledOrders = handledOrders,
                 EffectivePermissions = permissions,
                 RecentAuditLogs = recentLogs
             };
@@ -390,6 +430,8 @@ namespace Omnichannel.Infrastructure.Services.HR
                 Email = cleanEmail,
                 PhoneNumber = request.PhoneNumber?.Trim(),
                 EmployeeCode = request.EmployeeCode,
+                AvatarUrl = request.AvatarUrl?.Trim(),
+                AvatarMediaId = request.AvatarMediaId,
                 PasswordHash = _passwordHasher.HashPassword(request.Password),
                 UserType = 2,
                 DepartmentId = request.DepartmentId,
@@ -401,7 +443,7 @@ namespace Omnichannel.Infrastructure.Services.HR
                 HireDate = request.HireDate ?? DateTime.Today,
                 Address = request.Address?.Trim(),
                 Notes = request.Notes?.Trim(),
-                IsActive = true,
+                IsActive = request.IsActive,
                 IsDeleted = false,
                 SecurityStamp = Guid.NewGuid().ToString("N"),
                 CreatedAt = DateTime.UtcNow,
@@ -497,6 +539,14 @@ namespace Omnichannel.Infrastructure.Services.HR
             user.FullName = request.FullName.Trim();
             user.Email = cleanEmail;
             user.PhoneNumber = request.PhoneNumber?.Trim();
+            if (!string.IsNullOrWhiteSpace(request.AvatarUrl))
+            {
+                user.AvatarUrl = request.AvatarUrl.Trim();
+            }
+            if (request.AvatarMediaId.HasValue)
+            {
+                user.AvatarMediaId = request.AvatarMediaId;
+            }
             user.DepartmentId = request.DepartmentId;
             user.JobTitle = request.JobTitle?.Trim();
             user.StoreId = request.StoreId;
@@ -879,6 +929,8 @@ namespace Omnichannel.Infrastructure.Services.HR
                 .AsNoTracking()
                 .Include(u => u.Store)
                 .Include(u => u.Orders)
+                .Include(u => u.LoyaltyWallet)
+                    .ThenInclude(lw => lw!.CurrentTier)
                 .Where(u => u.UserType == 1 && !u.IsDeleted);
 
             if (!string.IsNullOrWhiteSpace(query.Keyword))
@@ -909,6 +961,10 @@ namespace Omnichannel.Infrastructure.Services.HR
                     FullName = u.FullName,
                     Email = u.Email,
                     PhoneNumber = u.PhoneNumber,
+                    AvatarUrl = u.AvatarUrl,
+                    MemberTierName = u.LoyaltyWallet != null && u.LoyaltyWallet.CurrentTier != null
+                        ? u.LoyaltyWallet.CurrentTier.TierName
+                        : "Member",
                     IsActive = u.IsActive,
                     CreatedAt = u.CreatedAt,
                     LastLoginAt = u.LastLoginAt,
@@ -1025,6 +1081,20 @@ namespace Omnichannel.Infrastructure.Services.HR
                 queryable = queryable.Where(u => u.HireDate <= query.HireTo.Value);
             }
 
+            if (!string.IsNullOrWhiteSpace(query.Ids))
+            {
+                var selectedIds = query.Ids
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(s => int.TryParse(s, out int val) ? val : 0)
+                    .Where(val => val > 0)
+                    .ToList();
+
+                if (selectedIds.Count > 0)
+                {
+                    queryable = queryable.Where(u => selectedIds.Contains(u.Id));
+                }
+            }
+
             return queryable;
         }
 
@@ -1043,8 +1113,13 @@ namespace Omnichannel.Infrastructure.Services.HR
             };
         }
 
-        private static StaffListItemDto MapToListItemDto(User u, bool canActorManage, bool isHead)
+        private static StaffListItemDto MapToListItemDto(User u, bool canActorManage, bool isHead, DelegationContextDto? actorCtx = null)
         {
+            bool canEdit = canActorManage && (actorCtx == null || actorCtx.IsSuperAdmin || (actorCtx.CanEditUser && (actorCtx.EffectivePermissionCodes.Contains("USER_EDIT") || actorCtx.EffectivePermissionCodes.Contains("USER_MANAGE"))));
+            bool canDelete = canActorManage && !isHead && (actorCtx == null || (u.Id != actorCtx.ActorId && (actorCtx.IsSuperAdmin || (actorCtx.CanDeleteUser && (actorCtx.EffectivePermissionCodes.Contains("USER_DELETE") || actorCtx.EffectivePermissionCodes.Contains("USER_MANAGE"))))));
+            bool canResetPass = canActorManage && (actorCtx == null || actorCtx.IsSuperAdmin || (actorCtx.CanResetPassword && (actorCtx.EffectivePermissionCodes.Contains("USER_RESET_PASSWORD") || actorCtx.EffectivePermissionCodes.Contains("USER_MANAGE"))));
+            bool canDelegate = canActorManage && (actorCtx == null || actorCtx.IsSuperAdmin || actorCtx.CanAssignRole || actorCtx.CanDelegateFurther || actorCtx.EffectivePermissionCodes.Contains("PERMISSION_DELEGATE") || actorCtx.EffectivePermissionCodes.Contains("USER_ASSIGN_ROLE"));
+
             return new StaffListItemDto
             {
                 Id = u.Id,
@@ -1053,6 +1128,7 @@ namespace Omnichannel.Infrastructure.Services.HR
                 FullName = u.FullName,
                 Email = u.Email,
                 PhoneNumber = u.PhoneNumber,
+                AvatarUrl = u.AvatarUrl,
                 DepartmentId = u.DepartmentId,
                 DepartmentName = u.Department?.Name,
                 JobTitle = u.JobTitle,
@@ -1069,6 +1145,10 @@ namespace Omnichannel.Infrastructure.Services.HR
                 CreatedAt = u.CreatedAt,
                 DeletedAt = u.DeletedAt,
                 CanActorManage = canActorManage,
+                CanActorEdit = canEdit,
+                CanActorDelete = canDelete,
+                CanActorResetPassword = canResetPass,
+                CanActorDelegate = canDelegate,
                 IsDepartmentHead = isHead,
                 Roles = u.UserRoles
                     .Where(ur => ur.Role != null && ur.Role.IsActive && ur.Role.Name != "Customer")
@@ -1281,12 +1361,7 @@ namespace Omnichannel.Infrastructure.Services.HR
                 ));
             }
 
-            var preamble = Encoding.UTF8.GetPreamble();
-            var contentBytes = Encoding.UTF8.GetBytes(sb.ToString());
-            var result = new byte[preamble.Length + contentBytes.Length];
-            Buffer.BlockCopy(preamble, 0, result, 0, preamble.Length);
-            Buffer.BlockCopy(contentBytes, 0, result, preamble.Length, contentBytes.Length);
-            return result;
+            return Encoding.UTF8.GetBytes(sb.ToString());
         }
 
         private static string EscapeCsv(string val)

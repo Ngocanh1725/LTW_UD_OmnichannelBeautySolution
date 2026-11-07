@@ -49,6 +49,11 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             int actorId = GetCurrentActorId();
             var actorCtx = await _delegationService.GetContextAsync(actorId);
 
+            ViewBag.ViewMode = string.IsNullOrWhiteSpace(query.ViewMode) ? "table" : query.ViewMode.ToLowerInvariant();
+            ViewBag.SortBy = string.IsNullOrWhiteSpace(query.SortBy) ? "createdAt" : query.SortBy.ToLowerInvariant();
+            ViewBag.SortDir = string.IsNullOrWhiteSpace(query.SortDir) ? "desc" : query.SortDir.ToLowerInvariant();
+            ViewBag.ActorContext = actorCtx;
+
             var paged = await _staffService.GetPagedAsync(actorId, query);
 
             if (Request.Headers["HX-Request"] == "true")
@@ -59,11 +64,6 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             var stats = await _staffService.GetStatsAsync(actorId);
             var metadata = await LoadFilterMetadataAsync(actorCtx);
 
-            int customerCount = await _context.Users.CountAsync(u => u.UserType == 1 && !u.IsDeleted);
-            int adminCount = stats.StaffByRole
-                .Where(kv => kv.Key.Contains("Admin") || kv.Key.Contains("Quản trị") || kv.Key.Contains("Giám đốc") || kv.Key.Contains("Trưởng phòng"))
-                .Sum(kv => kv.Value);
-
             var vm = new StaffIndexViewModel
             {
                 StaffPaged = paged,
@@ -73,10 +73,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 AssignableRoles = metadata.Roles,
                 ScopedStores = metadata.Stores,
                 PotentialManagers = metadata.Managers,
-                ActorContext = actorCtx,
-                CustomerCount = customerCount,
-                TotalAdmins = adminCount,
-                TotalDepartments = stats.StaffByDepartment.Count(k => k.Key != "Chưa phân phòng")
+                ActorContext = actorCtx
             };
 
             return View(vm);
@@ -96,6 +93,9 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 return PartialView("_CustomerTable", paged);
             }
 
+            int actorId = GetCurrentActorId();
+            var stats = await _staffService.GetStatsAsync(actorId);
+
             int totalCust = await _context.Users.CountAsync(u => u.UserType == 1 && !u.IsDeleted);
             int activeCust = await _context.Users.CountAsync(u => u.UserType == 1 && !u.IsDeleted && u.IsActive);
             int lockedCust = totalCust - activeCust;
@@ -106,7 +106,8 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 Filter = query,
                 TotalCustomers = totalCust,
                 ActiveCustomers = activeCust,
-                LockedCustomers = lockedCust
+                LockedCustomers = lockedCust,
+                TotalInternalStaff = stats.TotalStaff
             };
 
             return View(vm);
@@ -238,6 +239,10 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             }
 
             TempData["SuccessMessage"] = result.Message;
+            if (model.SaveAndContinue)
+            {
+                return RedirectToAction(nameof(Create));
+            }
             return RedirectToAction(nameof(Index));
         }
 
@@ -275,6 +280,8 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                     Email = detail.Email,
                     PhoneNumber = detail.PhoneNumber,
                     EmployeeCode = detail.EmployeeCode,
+                    AvatarUrl = detail.AvatarUrl,
+                    AvatarMediaId = detail.AvatarMediaId,
                     DepartmentId = detail.DepartmentId,
                     JobTitle = detail.JobTitle,
                     StoreId = detail.StoreId,
@@ -345,6 +352,10 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             }
 
             TempData["SuccessMessage"] = result.Message;
+            if (model.SaveAndContinue)
+            {
+                return RedirectToAction(nameof(Create));
+            }
             return RedirectToAction(nameof(Index));
         }
 
@@ -668,48 +679,16 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             }
             var rawDepts = await deptQuery
                 .OrderBy(d => d.SortOrder)
-                .Select(d => new { d.Id, d.Code, d.Name, d.ParentId })
+                .Select(d => new DepartmentOptionDto
+                {
+                    Id = d.Id,
+                    Code = d.Code,
+                    Name = d.Name,
+                    ParentId = d.ParentId
+                })
                 .ToListAsync();
 
-            // Xây dựng cây phòng ban (Hierarchical Tree) hiển thị thụt đầu dòng
-            var departments = new List<DepartmentOptionDto>();
-            void AddDeptNodes(int? parentId, int level)
-            {
-                var children = rawDepts.Where(d => d.ParentId == parentId).ToList();
-                foreach (var c in children)
-                {
-                    string indent = level switch
-                    {
-                        0 => "",
-                        1 => "— ",
-                        2 => "— — ",
-                        _ => new string('—', level) + " "
-                    };
-                    departments.Add(new DepartmentOptionDto
-                    {
-                        Id = c.Id,
-                        Code = c.Code,
-                        Name = c.Name,
-                        ParentId = c.ParentId,
-                        Level = level,
-                        DisplayTreeName = indent + c.Name
-                    });
-                    AddDeptNodes(c.Id, level + 1);
-                }
-            }
-            AddDeptNodes(null, 0);
-            foreach (var rem in rawDepts.Where(d => !departments.Any(x => x.Id == d.Id)))
-            {
-                departments.Add(new DepartmentOptionDto
-                {
-                    Id = rem.Id,
-                    Code = rem.Code,
-                    Name = rem.Name,
-                    ParentId = rem.ParentId,
-                    Level = 0,
-                    DisplayTreeName = rem.Name
-                });
-            }
+            var departments = BuildHierarchicalDepartments(rawDepts);
 
             var assignableRoleIds = (await _delegationService.GetAssignableRoleIdsAsync(actorCtx.ActorId)).ToHashSet();
             var roles = await _context.Roles
@@ -724,7 +703,11 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                     DisplayName = r.DisplayName ?? r.Name,
                     Description = r.Description,
                     Level = r.Level,
-                    Color = r.Color
+                    DepartmentId = r.DepartmentId,
+                    DepartmentName = r.Department != null ? r.Department.Name : null,
+                    IsSystem = r.IsSystem,
+                    Color = r.Color,
+                    PermissionCount = r.RolePermissions.Count
                 })
                 .ToListAsync();
 
@@ -740,7 +723,6 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             var managerQuery = _context.Users
                 .AsNoTracking()
-                .Include(u => u.Department)
                 .Where(u => u.UserType >= 2 && !u.IsDeleted && u.IsActive);
             managerQuery = _delegationService.ApplyUserScope(managerQuery, actorCtx);
             var managers = await managerQuery
@@ -750,6 +732,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                     Id = u.Id,
                     FullName = u.FullName,
                     Username = u.Username,
+                    Email = u.Email,
                     EmployeeCode = u.EmployeeCode,
                     JobTitle = u.JobTitle,
                     DepartmentId = u.DepartmentId,
@@ -758,6 +741,43 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 .ToListAsync();
 
             return (departments, roles, stores, managers);
+        }
+
+        private static List<DepartmentOptionDto> BuildHierarchicalDepartments(List<DepartmentOptionDto> rawDepts)
+        {
+            var result = new List<DepartmentOptionDto>();
+            var idSet = rawDepts.Select(d => d.Id).ToHashSet();
+
+            void Visit(int? parentId, int depth)
+            {
+                var children = rawDepts
+                    .Where(d => (parentId == null && (!d.ParentId.HasValue || !idSet.Contains(d.ParentId.Value))) ||
+                                (parentId != null && d.ParentId == parentId))
+                    .ToList();
+
+                foreach (var child in children)
+                {
+                    if (result.Any(r => r.Id == child.Id)) continue;
+                    child.Depth = depth;
+                    child.DisplayTreeName = depth == 0
+                        ? $"🏢 {child.Name}"
+                        : $"{new string('\u00A0', (depth - 1) * 4)}├── {child.Name}";
+                    result.Add(child);
+                    Visit(child.Id, depth + 1);
+                }
+            }
+
+            Visit(null, 0);
+            foreach (var d in rawDepts)
+            {
+                if (!result.Any(r => r.Id == d.Id))
+                {
+                    d.Depth = 0;
+                    d.DisplayTreeName = d.Name;
+                    result.Add(d);
+                }
+            }
+            return result;
         }
 
         private static string TranslateModuleName(string moduleCode)

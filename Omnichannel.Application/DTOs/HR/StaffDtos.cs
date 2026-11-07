@@ -34,6 +34,8 @@ namespace Omnichannel.Application.DTOs.HR
         public DateTime? HireTo { get; set; }
         public string? SortBy { get; set; } = "createdAt"; // name, createdAt, hireDate, lastLogin, department, code
         public string? SortDir { get; set; } = "desc"; // asc, desc
+        public string ViewMode { get; set; } = "table"; // table, card, department
+        public string? Ids { get; set; } // comma-separated IDs for selected export
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 20;
     }
@@ -55,6 +57,7 @@ namespace Omnichannel.Application.DTOs.HR
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string? PhoneNumber { get; set; }
+        public string? AvatarUrl { get; set; }
         public int? DepartmentId { get; set; }
         public string? DepartmentName { get; set; }
         public string? JobTitle { get; set; }
@@ -72,6 +75,10 @@ namespace Omnichannel.Application.DTOs.HR
         public DateTime? DeletedAt { get; set; }
         public string? DeletedByName { get; set; }
         public bool CanActorManage { get; set; }
+        public bool CanActorEdit { get; set; }
+        public bool CanActorDelete { get; set; }
+        public bool CanActorResetPassword { get; set; }
+        public bool CanActorDelegate { get; set; }
         public bool IsDepartmentHead { get; set; }
         public List<StaffRoleBadgeDto> Roles { get; set; } = new();
     }
@@ -83,6 +90,9 @@ namespace Omnichannel.Application.DTOs.HR
         public int LockedStaff { get; set; }
         public int NewStaffLast30Days { get; set; }
         public int TrashStaff { get; set; }
+        public int DepartmentCount { get; set; }
+        public int AdminCount { get; set; }
+        public int TotalCustomers { get; set; }
         public Dictionary<string, int> StaffByDepartment { get; set; } = new();
         public Dictionary<string, int> StaffByRole { get; set; } = new();
     }
@@ -115,6 +125,8 @@ namespace Omnichannel.Application.DTOs.HR
             ErrorMessage = "Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 chữ số và 1 ký tự đặc biệt.")]
         public string Password { get; set; } = string.Empty;
 
+        public string? AvatarUrl { get; set; }
+        public int? AvatarMediaId { get; set; }
         public int? DepartmentId { get; set; }
         public string? JobTitle { get; set; }
         public int? StoreId { get; set; }
@@ -124,6 +136,7 @@ namespace Omnichannel.Application.DTOs.HR
         public DateTime? HireDate { get; set; }
         public string? Address { get; set; }
         public string? Notes { get; set; }
+        public bool IsActive { get; set; } = true;
         public List<int> RoleIds { get; set; } = new();
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -162,6 +175,8 @@ namespace Omnichannel.Application.DTOs.HR
         [StringLength(30, ErrorMessage = "Mã nhân viên tối đa 30 ký tự.")]
         public string? EmployeeCode { get; set; }
 
+        public string? AvatarUrl { get; set; }
+        public int? AvatarMediaId { get; set; }
         public int? DepartmentId { get; set; }
         public string? JobTitle { get; set; }
         public int? StoreId { get; set; }
@@ -193,28 +208,29 @@ namespace Omnichannel.Application.DTOs.HR
         }
     }
 
+    public class StaffOrderSummaryDto
+    {
+        public int Id { get; set; }
+        public string OrderCode { get; set; } = string.Empty;
+        public string CustomerName { get; set; } = string.Empty;
+        public decimal FinalAmount { get; set; }
+        public string OrderStatus { get; set; } = string.Empty;
+        public string PaymentStatus { get; set; } = string.Empty;
+        public string Channel { get; set; } = string.Empty;
+        public DateTime OrderDate { get; set; }
+    }
+
     public class StaffDetailDto : StaffListItemDto
     {
+        public int? AvatarMediaId { get; set; }
         public string? Address { get; set; }
         public string? Notes { get; set; }
         public int SubordinatesCount { get; set; }
         public string? HeadOfDepartmentName { get; set; }
-        public List<StaffListItemDto> Subordinates { get; set; } = new();
-        public int TotalOrdersProcessed { get; set; }
-        public decimal TotalSalesProcessed { get; set; }
-        public List<StaffRecentOrderDto> RecentOrders { get; set; } = new();
         public List<UserPermissionDetailDto> EffectivePermissions { get; set; } = new();
         public List<AuditLogDto> RecentAuditLogs { get; set; } = new();
-    }
-
-    public class StaffRecentOrderDto
-    {
-        public int Id { get; set; }
-        public string OrderCode { get; set; } = string.Empty;
-        public decimal TotalAmount { get; set; }
-        public string OrderStatus { get; set; } = string.Empty;
-        public string OrderSource { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; }
+        public List<StaffListItemDto> Subordinates { get; set; } = new();
+        public List<StaffOrderSummaryDto> HandledOrders { get; set; } = new();
     }
 
     public class BulkStaffActionRequest
@@ -257,6 +273,9 @@ namespace Omnichannel.Application.DTOs.HR
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string? PhoneNumber { get; set; }
+        public string? AvatarUrl { get; set; }
+        public string? MemberTierName { get; set; }
+        public string? MemberTierBadgeColor { get; set; }
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? LastLoginAt { get; set; }
@@ -275,9 +294,6 @@ namespace Omnichannel.Application.DTOs.HR
         public List<StoreOptionDto> ScopedStores { get; set; } = new();
         public List<UserSummaryDto> PotentialManagers { get; set; } = new();
         public DelegationContextDto ActorContext { get; set; } = new();
-        public int CustomerCount { get; set; }
-        public int TotalAdmins { get; set; }
-        public int TotalDepartments { get; set; }
     }
 
     public class DepartmentOptionDto
@@ -286,7 +302,7 @@ namespace Omnichannel.Application.DTOs.HR
         public string Code { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public int? ParentId { get; set; }
-        public int Level { get; set; }
+        public int Depth { get; set; }
         public string DisplayTreeName { get; set; } = string.Empty;
     }
 
@@ -305,6 +321,7 @@ namespace Omnichannel.Application.DTOs.HR
         public int TotalCustomers { get; set; }
         public int ActiveCustomers { get; set; }
         public int LockedCustomers { get; set; }
+        public int TotalInternalStaff { get; set; }
     }
 
     public class StaffFormViewModel
@@ -314,6 +331,7 @@ namespace Omnichannel.Application.DTOs.HR
         public CreateStaffRequest CreateRequest { get; set; } = new();
         public UpdateStaffRequest UpdateRequest { get; set; } = new();
         public string Username { get; set; } = string.Empty;
+        public bool SaveAndContinue { get; set; }
         public List<DepartmentOptionDto> ScopedDepartments { get; set; } = new();
         public List<RoleDto> AssignableRoles { get; set; } = new();
         public List<StoreOptionDto> ScopedStores { get; set; } = new();

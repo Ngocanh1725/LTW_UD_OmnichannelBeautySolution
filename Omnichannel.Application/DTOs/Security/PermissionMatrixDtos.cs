@@ -26,6 +26,7 @@ namespace Omnichannel.Application.DTOs.Security
         public string? DepartmentName { get; set; }
         public bool IsSystem { get; set; }
         public string? Color { get; set; }
+        public int PermissionCount { get; set; }
     }
 
     public class UserSummaryDto
