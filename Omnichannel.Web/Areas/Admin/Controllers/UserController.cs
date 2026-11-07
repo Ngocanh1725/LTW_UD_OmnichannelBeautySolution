@@ -445,10 +445,11 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [HasPermission("USER_EDIT")]
-        public async Task<IActionResult> ToggleStatus(int userId)
+        public async Task<IActionResult> ToggleStatus(int id, int? userId = null)
         {
+            int targetId = id > 0 ? id : (userId ?? 0);
             int actorId = GetCurrentActorId();
-            var result = await _staffService.ToggleStatusAsync(actorId, userId);
+            var result = await _staffService.ToggleStatusAsync(actorId, targetId);
 
             if (IsAjaxRequest())
             {
@@ -473,16 +474,31 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [HasPermission("USER_RESET_PASSWORD")]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest? request = null, [FromForm] int? staffId = null)
         {
             if (request == null || request.StaffId <= 0)
             {
-                return Json(OperationResult<string>.Fail("Yêu cầu đặt lại mật khẩu không hợp lệ."));
+                if (staffId.HasValue && staffId.Value > 0)
+                {
+                    request = new ResetPasswordRequest { StaffId = staffId.Value };
+                }
+                else
+                {
+                    return Json(OperationResult<string>.Fail("Yêu cầu đặt lại mật khẩu không hợp lệ."));
+                }
             }
 
             int actorId = GetCurrentActorId();
             var result = await _staffService.ResetPasswordAsync(actorId, request);
-            return Json(result);
+            return Json(new
+            {
+                succeeded = result.Succeeded,
+                success = result.Succeeded,
+                message = result.Message,
+                data = result.Data,
+                temporaryPassword = result.Data,
+                errorCode = result.ErrorCode
+            });
         }
 
         // =========================================================================

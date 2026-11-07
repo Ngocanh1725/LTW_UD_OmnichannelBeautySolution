@@ -352,6 +352,51 @@ namespace Omnichannel.Tests.Services
             csvBytes[1].Should().Be(0xBB);
             csvBytes[2].Should().Be(0xBF);
         }
+
+        [Fact]
+        public async Task GetPagedAsync_With1000StaffRecords_RespondsUnder300Milliseconds()
+        {
+            var h = await CreateHarnessAsync();
+
+            var dummyStaff = new List<User>(1000);
+            for (int i = 1; i <= 1000; i++)
+            {
+                dummyStaff.Add(new User
+                {
+                    Username = $"perf_staff_{i}",
+                    FullName = $"Nhân Sự Kiểm Thử Hiệu Năng {i}",
+                    Email = $"perf_staff_{i}@canmake.vn",
+                    PhoneNumber = $"091{i:D7}",
+                    EmployeeCode = $"NV-P{i:D4}",
+                    PasswordHash = "HASH",
+                    UserType = 2,
+                    DepartmentId = h.DeptSales.Id,
+                    IsActive = true,
+                    IsDeleted = false,
+                    CreatedAt = DateTime.UtcNow.AddMinutes(-i)
+                });
+            }
+
+            h.Context.Users.AddRange(dummyStaff);
+            await h.Context.SaveChangesAsync();
+
+            // Warm-up query
+            _ = await h.Service.GetPagedAsync(h.SuperAdmin.Id, new StaffFilterQuery { Page = 1, PageSize = 20 });
+
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            var paged = await h.Service.GetPagedAsync(h.SuperAdmin.Id, new StaffFilterQuery
+            {
+                DepartmentId = h.DeptSales.Id,
+                Keyword = "Kiểm Thử",
+                Page = 2,
+                PageSize = 20
+            });
+            sw.Stop();
+
+            paged.TotalItems.Should().BeGreaterThanOrEqualTo(1000);
+            paged.Items.Count.Should().Be(20);
+            sw.ElapsedMilliseconds.Should().BeLessThan(300);
+        }
     }
 }
 

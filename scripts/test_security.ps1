@@ -1,5 +1,5 @@
 # scripts/test_security.ps1
-# Kiểm thử an toàn bảo mật (Security & Scope Enforcements)
+# Kiểm thử an toàn bảo mật (Security & Scope Enforcements - Phiên 8)
 
 $baseUrl = "http://localhost:5116"
 $connStr = "Server=localhost;Database=OmnichannelBeautyDb;User Id=sa;Password=12345678;TrustServerCertificate=True;"
@@ -50,6 +50,9 @@ $orderCancelPermId = [int]$cmd.ExecuteScalar()
 $cmd.CommandText = "SELECT Id FROM Users WHERE Username = 'superadmin'"
 $superAdminId = [int]$cmd.ExecuteScalar()
 
+$cmd.CommandText = "SELECT Id FROM Users WHERE Username = 'ad1'"
+$ad1Id = [int]$cmd.ExecuteScalar()
+
 $cmd.CommandText = "SELECT Id FROM Users WHERE Username = 'ad4'"
 $ad4Id = [int]$cmd.ExecuteScalar()
 
@@ -62,9 +65,33 @@ $sale01UserId = [int]$cmd.ExecuteScalar()
 $cmd.CommandText = "SELECT Id FROM Roles WHERE Name = 'SuperAdmin'"
 $superAdminRoleId = [int]$cmd.ExecuteScalar()
 
+$cmd.CommandText = "SELECT Id FROM Roles WHERE Name = 'SalesStaff'"
+$salesStaffRoleId = [int]$cmd.ExecuteScalar()
+
+$cmd.CommandText = "SELECT Id FROM Roles WHERE Name = 'MarketingStaff'"
+$mktStaffRoleId = [int]$cmd.ExecuteScalar()
+
+$cmd.CommandText = "SELECT Id FROM Users WHERE Username = 'sale02'"
+$sale02UserId = [int]$cmd.ExecuteScalar()
+
+$cmd.CommandText = "SELECT Id FROM Users WHERE Username = 'mkt01'"
+$mkt01UserId = [int]$cmd.ExecuteScalar()
+
+# Đảm bảo sale01, sale02, mkt01 đang có Role mặc định và IsActive = 1 trước khi kiểm thử
+$cmd.CommandText = @"
+UPDATE Users SET IsActive = 1, IsDeleted = 0 WHERE Id IN ($sale01UserId, $sale02UserId, $mkt01UserId);
+IF NOT EXISTS (SELECT 1 FROM UserRoles WHERE UserId = $sale01UserId AND RoleId = $salesStaffRoleId)
+    INSERT INTO UserRoles (UserId, RoleId, AssignedByUserId, AssignedAt) VALUES ($sale01UserId, $salesStaffRoleId, $superAdminId, GETUTCDATE());
+IF NOT EXISTS (SELECT 1 FROM UserRoles WHERE UserId = $sale02UserId AND RoleId = $salesStaffRoleId)
+    INSERT INTO UserRoles (UserId, RoleId, AssignedByUserId, AssignedAt) VALUES ($sale02UserId, $salesStaffRoleId, $superAdminId, GETUTCDATE());
+IF NOT EXISTS (SELECT 1 FROM UserRoles WHERE UserId = $mkt01UserId AND RoleId = $mktStaffRoleId)
+    INSERT INTO UserRoles (UserId, RoleId, AssignedByUserId, AssignedAt) VALUES ($mkt01UserId, $mktStaffRoleId, $superAdminId, GETUTCDATE());
+"@
+$cmd.ExecuteNonQuery() | Out-Null
+
 $conn.Close()
 
-Write-Host "Tải cấu hình ID: SuperAdmin=$superAdminId, ad4=$ad4Id, hr01=$hr01Id, sale01=$sale01UserId, SETTINGS_MANAGE=$settingsPermId, SuperAdminRole=$superAdminRoleId" -ForegroundColor Gray
+Write-Host "Tải cấu hình ID: SuperAdmin=$superAdminId, ad1=$ad1Id, ad4=$ad4Id, hr01=$hr01Id, sale01=$sale01UserId, SETTINGS_MANAGE=$settingsPermId, ORDER_CANCEL=$orderCancelPermId, SuperAdminRole=$superAdminRoleId" -ForegroundColor Gray
 
 # -----------------------------------------------------------------------------------------
 # Test Case 1: ad4 gửi POST giả mạo cấp quyền vượt scope (SETTINGS_MANAGE) cho sale01
@@ -91,49 +118,54 @@ if ([int]$resp1.StatusCode -eq 403 -or $resp1Content -like "*false*") {
     Write-Host "  -> ĐẠT: Yêu cầu bị chặn 403 / Thất bại đúng như thiết kế! (Status: $([int]$resp1.StatusCode))" -ForegroundColor Green
     Write-Host "     Phản hồi server: $resp1Content" -ForegroundColor Gray
 } else {
-    Write-Host "  -> THẤT BẠI: Server không chặn yêu cầu vượt scope! Status: $([int]$resp1.StatusCode)" -ForegroundColor Red
+    throw "THẤT BẠI: Server không chặn yêu cầu vượt scope! Status: $([int]$resp1.StatusCode)"
 }
 
 # -----------------------------------------------------------------------------------------
-# Test Case 2: ad3 cố sửa superadmin & ad3 cố gán role SuperAdmin cho hr01
+# Test Case 2: ad3 cố sửa superadmin, ad1, ad4 & cố gán role SuperAdmin cho hr01
 # -----------------------------------------------------------------------------------------
-Write-Host "`n[Test 2] ad3 cố sửa tài khoản cấp trên (superadmin) & gán role SuperAdmin..." -ForegroundColor Yellow
+Write-Host "`n[Test 2] ad3 cố sửa superadmin, ad1, ad4 & cố gán role SuperAdmin cho hr01..." -ForegroundColor Yellow
 $clientAd3 = New-Client
 $null = Login-Admin $clientAd3 "ad3" "Admin@123"
 $tokenAd3 = Get-AdminToken $clientAd3
 
-# Thử POST ToggleStatus trên superadmin
-$req2a = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, "$baseUrl/Admin/User/ToggleStatus?userId=$superAdminId")
-$req2a.Headers.Add("RequestVerificationToken", $tokenAd3)
-$req2a.Headers.Add("X-Requested-With", "XMLHttpRequest")
-$req2a.Content = [System.Net.Http.StringContent]::new("", [System.Text.Encoding]::UTF8, "application/x-www-form-urlencoded")
-$resp2a = $clientAd3.SendAsync($req2a).GetAwaiter().GetResult()
-$resp2aContent = $resp2a.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+foreach ($target in @(
+    @{ Name = "superadmin"; Id = $superAdminId },
+    @{ Name = "ad1";        Id = $ad1Id },
+    @{ Name = "ad4";        Id = $ad4Id }
+)) {
+    # Thử GET trang Edit và POST ToggleStatus
+    $editTry = $clientAd3.GetAsync("$baseUrl/Admin/User/Edit/$($target.Id)").GetAwaiter().GetResult()
+    $reqToggle = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, "$baseUrl/Admin/User/ToggleStatus/$($target.Id)")
+    $reqToggle.Headers.Add("RequestVerificationToken", $tokenAd3)
+    $reqToggle.Headers.Add("X-Requested-With", "XMLHttpRequest")
+    $reqToggle.Content = [System.Net.Http.StringContent]::new("", [System.Text.Encoding]::UTF8, "application/x-www-form-urlencoded")
+    $respToggle = $clientAd3.SendAsync($reqToggle).GetAwaiter().GetResult()
+    $respToggleContent = $respToggle.Content.ReadAsStringAsync().GetAwaiter().GetResult()
 
-if ($resp2aContent -like "*FORBIDDEN*" -or $resp2aContent -like "*không có quyền*") {
-    Write-Host "  -> ĐẠT: ad3 cố khóa superadmin bị chặn thành công! (ErrorCode: FORBIDDEN)" -ForegroundColor Green
-    Write-Host "     Phản hồi server: $resp2aContent" -ForegroundColor Gray
-} else {
-    Write-Host "  -> THẤT BẠI: ad3 có thể thao tác trên superadmin!" -ForegroundColor Red
+    if (([int]$editTry.StatusCode -eq 403 -or [int]$editTry.StatusCode -eq 302) -and ($respToggleContent -like "*FORBIDDEN*" -or $respToggleContent -like "*false*")) {
+        Write-Host "  -> ĐẠT: ad3 cố sửa/khóa $($target.Name) bị chặn thành công! (GET Edit=$([int]$editTry.StatusCode), POST Toggle=$respToggleContent)" -ForegroundColor Green
+    } else {
+        throw "THẤT BẠI: ad3 có thể thao tác trên $($target.Name)!"
+    }
 }
 
-# Thử gán role SuperAdmin qua BulkAction
+# Thử gán role SuperAdmin qua BulkAction cho hr01
 $req2b = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, "$baseUrl/Admin/User/Bulk")
 $req2b.Headers.Add("RequestVerificationToken", $tokenAd3)
 $bulkJson = @{
     StaffIds = @($hr01Id)
     Action = "assignrole"
-    Parameter = $superAdminRoleId.ToString()
+    TargetRoleId = $superAdminRoleId
 } | ConvertTo-Json
 $req2b.Content = [System.Net.Http.StringContent]::new($bulkJson, [System.Text.Encoding]::UTF8, "application/json")
 $resp2b = $clientAd3.SendAsync($req2b).GetAwaiter().GetResult()
 $resp2bContent = $resp2b.Content.ReadAsStringAsync().GetAwaiter().GetResult()
 
-if ([int]$resp2b.StatusCode -eq 403 -or $resp2bContent -like "*false*" -or $resp2bContent -like "*0/*") {
-    Write-Host "  -> ĐẠT: ad3 gán role SuperAdmin cho hr01 bị chặn thành công!" -ForegroundColor Green
-    Write-Host "     Phản hồi server: $resp2bContent" -ForegroundColor Gray
+if ([int]$resp2b.StatusCode -eq 403 -or $resp2bContent -like '*"succeededCount":0*' -or $resp2bContent -like "*false*") {
+    Write-Host "  -> ĐẠT: ad3 gán role SuperAdmin cho hr01 bị chặn thành công! ($resp2bContent)" -ForegroundColor Green
 } else {
-    Write-Host "  -> THẤT BẠI: ad3 có thể gán vai trò vượt cấp!" -ForegroundColor Red
+    throw "THẤT BẠI: ad3 có thể gán vai trò vượt cấp! $resp2bContent"
 }
 
 # -----------------------------------------------------------------------------------------
@@ -143,53 +175,100 @@ Write-Host "`n[Test 3] Khóa sale01 khi đang có phiên đăng nhập hoạt đ
 $clientSale01 = New-Client
 $null = Login-Admin $clientSale01 "sale01" "Admin@123"
 
-# Kiểm tra sale01 truy cập /Admin/Order thành công trước khi khóa
 $preLock = $clientSale01.GetAsync("$baseUrl/Admin/Order").GetAwaiter().GetResult()
 Write-Host "  -> Trước khi khóa: Status $([int]$preLock.StatusCode) (Hoạt động bình thường)." -ForegroundColor Gray
 
-# Khóa tài khoản sale01 trong DB và cập nhật SecurityStamp
-$conn.Open()
-$cmd = $conn.CreateCommand()
-$cmd.CommandText = "UPDATE Users SET IsActive = 0, SecurityStamp = NEWID() WHERE Username = 'sale01'"
-$cmd.ExecuteNonQuery()
-$conn.Close()
+# Khóa tài khoản sale01 qua API của SuperAdmin (tự động đổi SecurityStamp + xóa cache)
+$clientSuper = New-Client
+$null = Login-Admin $clientSuper "superadmin" "Admin@123"
+$tokenSuper = Get-AdminToken $clientSuper
+
+# Làm mới cache quyền cho sale02, mkt01 qua Bulk Unlock
+$syncReq = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, "$baseUrl/Admin/User/Bulk")
+$syncReq.Headers.Add("RequestVerificationToken", $tokenSuper)
+$syncJson = @{ StaffIds = @($sale02UserId, $mkt01UserId); Action = "unlock" } | ConvertTo-Json
+$syncReq.Content = [System.Net.Http.StringContent]::new($syncJson, [System.Text.Encoding]::UTF8, "application/json")
+$null = $clientSuper.SendAsync($syncReq).GetAwaiter().GetResult()
+
+$lockReq = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, "$baseUrl/Admin/User/ToggleStatus/$sale01UserId")
+$lockReq.Headers.Add("RequestVerificationToken", $tokenSuper)
+$lockReq.Headers.Add("X-Requested-With", "XMLHttpRequest")
+$lockReq.Content = [System.Net.Http.StringContent]::new("", [System.Text.Encoding]::UTF8, "application/x-www-form-urlencoded")
+$null = $clientSuper.SendAsync($lockReq).GetAwaiter().GetResult()
 
 # Request tiếp theo của sale01
 $postLock = $clientSale01.GetAsync("$baseUrl/Admin/Order").GetAwaiter().GetResult()
 $postLockLoc = if ($postLock.Headers.Location) { $postLock.Headers.Location.ToString() } else { "" }
 
 if ([int]$postLock.StatusCode -eq 403 -or ([int]$postLock.StatusCode -eq 302 -and ($postLockLoc -like "*login*" -or $postLockLoc -like "*access-denied*"))) {
-    Write-Host "  -> ĐẠT: Phiên làm việc của sale01 bị vô hiệu hóa tức thì! (Status: $([int]$postLock.StatusCode), Loc: $postLockLoc)" -ForegroundColor Green
+    Write-Host "  -> ĐẠT: Phiên làm việc của sale01 bị vô hiệu hóa tức thì qua SecurityStamp! (Status: $([int]$postLock.StatusCode), Loc: $postLockLoc)" -ForegroundColor Green
 } else {
-    Write-Host "  -> THẤT BẠI: sale01 vẫn tiếp tục truy cập được sau khi bị khóa!" -ForegroundColor Red
+    throw "THẤT BẠI: sale01 vẫn tiếp tục truy cập được sau khi bị khóa!"
 }
 
 # Mở khóa lại cho sale01
-$conn.Open()
-$cmd = $conn.CreateCommand()
-$cmd.CommandText = "UPDATE Users SET IsActive = 1, SecurityStamp = NEWID() WHERE Username = 'sale01'"
-$cmd.ExecuteNonQuery()
-$conn.Close()
+$unlockReq = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, "$baseUrl/Admin/User/ToggleStatus/$sale01UserId")
+$unlockReq.Headers.Add("RequestVerificationToken", $tokenSuper)
+$unlockReq.Headers.Add("X-Requested-With", "XMLHttpRequest")
+$unlockReq.Content = [System.Net.Http.StringContent]::new("", [System.Text.Encoding]::UTF8, "application/x-www-form-urlencoded")
+$null = $clientSuper.SendAsync($unlockReq).GetAwaiter().GetResult()
 
 # -----------------------------------------------------------------------------------------
 # Test Case 4: Thu hẹp scope của ad4 -> Cascade revoke trên sale01
 # -----------------------------------------------------------------------------------------
-Write-Host "`n[Test 4] Kiểm tra thu hẹp scope ad4 -> Cascade Revoke các quyền cấp dưới..." -ForegroundColor Yellow
-$clientSuper = New-Client
-$null = Login-Admin $clientSuper "superadmin" "Admin@123"
-$tokenSuper = Get-AdminToken $clientSuper
+Write-Host "`n[Test 4] Kiểm tra thu hẹp scope ad4 -> Cascade Revoke quyền ORDER_CANCEL trên sale01..." -ForegroundColor Yellow
 
-# Bước 4.1: Cấp ORDER_CANCEL cho sale01
-$grantReq = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, "$baseUrl/Admin/PermissionManagement/SaveUserOverride")
-$grantReq.Headers.Add("RequestVerificationToken", $tokenSuper)
-$grantJson = @{
+# Bước 4.0: Đảm bảo Scope chuẩn 18 quyền & 2 phòng ban của ad4 trước khi test
+$conn.Open()
+$cmd = $conn.CreateCommand()
+$cmd.CommandText = @"
+SELECT Id FROM Permissions WHERE Code IN (
+    'DASHBOARD_VIEW','DASHBOARD_ANALYTICS','ORDER_VIEW','ORDER_CREATE','ORDER_EDIT','ORDER_CANCEL','ORDER_CONFIRM',
+    'CUSTOMER_VIEW','CUSTOMER_CREATE','CUSTOMER_EDIT','CUSTOMER_PROFILE_VIEW','PROMOTION_MANAGE','COUPON_MANAGE',
+    'VOUCHER_MANAGE','LOYALTY_VIEW','LOYALTY_ADJUST_POINTS','LOYALTY_TIER_MANAGE','REPORT_SALES'
+)
+"@
+$reader = $cmd.ExecuteReader()
+$origAd4Perms = @()
+while ($reader.Read()) { $origAd4Perms += [int]$reader.GetValue(0) }
+$reader.Close()
+
+$cmd.CommandText = "SELECT Id FROM Departments WHERE Code IN ('PHONG_SALE','PHONG_MARKETING')"
+$reader2 = $cmd.ExecuteReader()
+$origAd4Depts = @()
+while ($reader2.Read()) { $origAd4Depts += [int]$reader2.GetValue(0) }
+$reader2.Close()
+$conn.Close()
+
+$initScopeReq = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, "$baseUrl/Admin/Delegation/SaveScope")
+$initScopeReq.Headers.Add("RequestVerificationToken", $tokenSuper)
+$initScopeJson = @{
+    AdminUserId = $ad4Id
+    CanCreateUser = $false
+    CanEditUser = $true
+    CanDeleteUser = $false
+    CanResetPassword = $true
+    CanAssignRole = $true
+    CanDelegateFurther = $false
+    MaxGrantLevel = 50
+    PermissionIds = $origAd4Perms
+    DepartmentIds = $origAd4Depts
+    StoreIds = @()
+} | ConvertTo-Json
+$initScopeReq.Content = [System.Net.Http.StringContent]::new($initScopeJson, [System.Text.Encoding]::UTF8, "application/json")
+$null = $clientSuper.SendAsync($initScopeReq).GetAwaiter().GetResult()
+
+# Bước 4.1: ad4 cấp quyền ORDER_CANCEL cho sale01
+$grantByAd4Req = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, "$baseUrl/Admin/PermissionManagement/SaveUserOverride")
+$grantByAd4Req.Headers.Add("RequestVerificationToken", $tokenAd4)
+$grantByAd4Json = @{
     UserId = $sale01UserId
     PermissionId = $orderCancelPermId
     OverrideStatus = $true
-    Reason = "Test Cascade"
+    Reason = "ad4 cấp ORDER_CANCEL cho trưởng ca sale01"
 } | ConvertTo-Json
-$grantReq.Content = [System.Net.Http.StringContent]::new($grantJson, [System.Text.Encoding]::UTF8, "application/json")
-$grantResp = $clientSuper.SendAsync($grantReq).GetAwaiter().GetResult()
+$grantByAd4Req.Content = [System.Net.Http.StringContent]::new($grantByAd4Json, [System.Text.Encoding]::UTF8, "application/json")
+$grantByAd4Resp = $clientAd4.SendAsync($grantByAd4Req).GetAwaiter().GetResult()
 
 $conn.Open()
 $cmd = $conn.CreateCommand()
@@ -197,28 +276,58 @@ $cmd.CommandText = "SELECT COUNT(1) FROM UserPermissions WHERE UserId = $sale01U
 $hasOverrideBefore = [int]$cmd.ExecuteScalar()
 $conn.Close()
 
-# Bước 4.2: Thu hồi override bằng Delegation API
-$removeReq = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, "$baseUrl/Admin/PermissionManagement/SaveUserOverride")
-$removeReq.Headers.Add("RequestVerificationToken", $tokenSuper)
-$removeJson = @{
-    UserId = $sale01UserId
-    PermissionId = $orderCancelPermId
-    OverrideStatus = $null
-    Reason = "Cleanup Cascade"
+# Bước 4.2: SuperAdmin thu hẹp Scope của ad4 (bỏ ORDER_CANCEL khỏi PermissionIds của ad4)
+$narrowedPerms = @($origAd4Perms | Where-Object { $_ -ne $orderCancelPermId })
+$narrowReq = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, "$baseUrl/Admin/Delegation/SaveScope")
+$narrowReq.Headers.Add("RequestVerificationToken", $tokenSuper)
+$narrowJson = @{
+    AdminUserId = $ad4Id
+    CanCreateUser = $false
+    CanEditUser = $true
+    CanDeleteUser = $false
+    CanResetPassword = $true
+    CanAssignRole = $true
+    CanDelegateFurther = $false
+    MaxGrantLevel = 50
+    PermissionIds = $narrowedPerms
+    DepartmentIds = $origAd4Depts
+    StoreIds = @()
 } | ConvertTo-Json
-$removeReq.Content = [System.Net.Http.StringContent]::new($removeJson, [System.Text.Encoding]::UTF8, "application/json")
-$removeResp = $clientSuper.SendAsync($removeReq).GetAwaiter().GetResult()
+$narrowReq.Content = [System.Net.Http.StringContent]::new($narrowJson, [System.Text.Encoding]::UTF8, "application/json")
+$narrowResp = $clientSuper.SendAsync($narrowReq).GetAwaiter().GetResult()
+$narrowRespContent = $narrowResp.Content.ReadAsStringAsync().GetAwaiter().GetResult()
 
+# Kiểm tra trong DB xem quyền ORDER_CANCEL của sale01 đã bị cascade-revoke chưa
 $conn.Open()
 $cmd = $conn.CreateCommand()
-$cmd.CommandText = "SELECT COUNT(1) FROM UserPermissions WHERE UserId = $sale01UserId AND PermissionId = $orderCancelPermId"
+$cmd.CommandText = "SELECT COUNT(1) FROM UserPermissions WHERE UserId = $sale01UserId AND PermissionId = $orderCancelPermId AND IsGranted = 1"
 $hasOverrideAfter = [int]$cmd.ExecuteScalar()
 $conn.Close()
 
-if ($hasOverrideBefore -ge 1 -and $hasOverrideAfter -eq 0) {
-    Write-Host "  -> ĐẠT: Quản lý và cascade thu hồi quyền đặc cách hoạt động chính xác! (Trước: $hasOverrideBefore, Sau: $hasOverrideAfter)" -ForegroundColor Green
+# Bước 4.3: Khôi phục lại Scope chuẩn cho ad4
+$restoreScopeReq = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, "$baseUrl/Admin/Delegation/SaveScope")
+$restoreScopeReq.Headers.Add("RequestVerificationToken", $tokenSuper)
+$restoreScopeJson = @{
+    AdminUserId = $ad4Id
+    CanCreateUser = $false
+    CanEditUser = $true
+    CanDeleteUser = $false
+    CanResetPassword = $true
+    CanAssignRole = $true
+    CanDelegateFurther = $false
+    MaxGrantLevel = 50
+    PermissionIds = $origAd4Perms
+    DepartmentIds = $origAd4Depts
+    StoreIds = @()
+} | ConvertTo-Json
+$restoreScopeReq.Content = [System.Net.Http.StringContent]::new($restoreScopeJson, [System.Text.Encoding]::UTF8, "application/json")
+$null = $clientSuper.SendAsync($restoreScopeReq).GetAwaiter().GetResult()
+
+if ($hasOverrideBefore -eq 1 -and $hasOverrideAfter -eq 0) {
+    Write-Host "  -> ĐẠT: Khi thu hẹp scope của ad4, quyền ORDER_CANCEL đã cấp cho sale01 bị Cascade Revoke tự động! (Trước: $hasOverrideBefore, Sau: $hasOverrideAfter)" -ForegroundColor Green
+    Write-Host "     Phản hồi SaveScope: $narrowRespContent" -ForegroundColor Gray
 } else {
-    Write-Host "  -> THẤT BẠI: Thu hồi quyền đặc cách không khớp!" -ForegroundColor Red
+    throw "THẤT BẠI: Cascade revoke không khớp! (Before=$hasOverrideBefore, After=$hasOverrideAfter)"
 }
 
 # -----------------------------------------------------------------------------------------
@@ -242,7 +351,7 @@ $adminTryLoc = if ($adminTry.Headers.Location) { $adminTry.Headers.Location.ToSt
 if ([int]$adminTry.StatusCode -eq 403 -or ([int]$adminTry.StatusCode -eq 302 -and $adminTryLoc -like "*login*")) {
     Write-Host "  -> ĐẠT: Khách hàng bị chặn tuyệt đối khỏi phân hệ Admin! Status: $([int]$adminTry.StatusCode), Loc: $adminTryLoc" -ForegroundColor Green
 } else {
-    Write-Host "  -> THẤT BẠI: Khách hàng có thể truy cập /Admin!" -ForegroundColor Red
+    throw "THẤT BẠI: Khách hàng có thể truy cập /Admin!"
 }
 
 # -----------------------------------------------------------------------------------------
@@ -252,7 +361,6 @@ Write-Host "`n[Test 6] Gửi POST thay đổi dữ liệu mà không có AntiFor
 $clientNoAf = New-Client
 $null = Login-Admin $clientNoAf "superadmin" "Admin@123"
 
-# Gửi POST không có header hay token form
 $req6 = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::Post, "$baseUrl/Admin/User/ToggleStatus/$sale01UserId")
 $req6.Content = [System.Net.Http.StringContent]::new("", [System.Text.Encoding]::UTF8, "application/x-www-form-urlencoded")
 $resp6 = $clientNoAf.SendAsync($req6).GetAwaiter().GetResult()
@@ -260,7 +368,7 @@ $resp6 = $clientNoAf.SendAsync($req6).GetAwaiter().GetResult()
 if ([int]$resp6.StatusCode -eq 400) {
     Write-Host "  -> ĐẠT: Thiếu AntiForgery Token bị máy chủ từ chối với HTTP 400 Bad Request đúng chuẩn ASP.NET Core!" -ForegroundColor Green
 } else {
-    Write-Host "  -> THẤT BẠI: Server trả về status: $([int]$resp6.StatusCode)" -ForegroundColor Red
+    throw "THẤT BẠI: Server trả về status: $([int]$resp6.StatusCode)"
 }
 
 Write-Host "`n================================================================================" -ForegroundColor Cyan

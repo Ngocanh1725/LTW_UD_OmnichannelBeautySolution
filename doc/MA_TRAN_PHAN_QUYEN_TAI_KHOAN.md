@@ -141,11 +141,12 @@ Hệ thống `PermissionService` kết hợp `DelegationService` áp dụng mô 
 | Kịch Bản Bảo Mật | Hành Động Thực Hiện | Kết Quả Thực Tế | Trạng Thái |
 |:---|:---|:---|:---:|
 | **1. Chống vượt cấp ủy quyền** | Tài khoản `ad4` gửi POST giả mạo gán quyền `SETTINGS_MANAGE` cho `sale01`. | Server từ chối HTTP 403 kèm mã lỗi `PERMISSION_OUT_OF_SCOPE`. | ✅ **ĐẠT** |
-| **2. Bảo vệ tài khoản cấp trên** | `ad3` cố gắng khóa tài khoản `superadmin` hoặc đổi mật khẩu. | Bị chặn với mã lỗi `FORBIDDEN` từ `CanManageUserAsync`. | ✅ **ĐẠT** |
+| **2. Bảo vệ tài khoản cấp trên & ngang cấp** | `ad3` cố gắng sửa/khóa tài khoản `superadmin`, `ad1`, `ad4`. | Bị chặn 100% với mã lỗi `FORBIDDEN` từ `CanManageUserAsync`. | ✅ **ĐẠT** |
 | **3. Ngăn ngừa leo thang vai trò** | `ad3` cố gán role `SuperAdmin` (Level 100) cho nhân sự `hr01`. | Bị chặn vì `SuperAdmin` vượt quá `MaxGrantLevel` (50). | ✅ **ĐẠT** |
-| **4. Thu hồi phiên tức thì (SecurityStamp)** | Khóa tài khoản `sale01` khi đang có cookie hợp lệ. | Request tiếp theo bị thu hồi phiên ngay lập tức và đẩy về trang Login. | ✅ **ĐẠT** |
-| **5. Ranh giới Khách hàng (UserType Boundary)** | Khách hàng (`customer01`) truy cập trực tiếp các URL `/Admin/*`. | `AdminAreaBoundaryFilter` chặn 100% các URL quản trị. | ✅ **ĐẠT** |
-| **6. Phòng chống CSRF (Anti-Forgery)** | Gửi POST thay đổi dữ liệu nhân sự mà không có AntiForgery Token. | ASP.NET Core từ chối với HTTP 400 Bad Request. | ✅ **ĐẠT** |
+| **4. Thu hồi phiên tức thì (SecurityStamp)** | Khóa tài khoản `sale01` khi đang có cookie hợp lệ. | Request tiếp theo bị thu hồi phiên ngay lập tức và đẩy về trang Login (HTTP 302). | ✅ **ĐẠT** |
+| **5. Thu hồi dây chuyền (Cascade Revoke)** | SuperAdmin thu hẹp scope của `ad4` (bỏ `ORDER_CANCEL` mà `ad4` đã cấp cho `sale01`). | Quyền `ORDER_CANCEL` trên `sale01` bị tự động thu hồi tức thì trong DB & Cache. | ✅ **ĐẠT** |
+| **6. Ranh giới Khách hàng (UserType Boundary)** | Khách hàng (`customer01`) truy cập trực tiếp các URL `/Admin/*`. | `AdminAreaBoundaryFilter` chặn 100% các URL quản trị. | ✅ **ĐẠT** |
+| **7. Phòng chống CSRF (Anti-Forgery)** | Gửi POST thay đổi dữ liệu nhân sự mà không có AntiForgery Token. | ASP.NET Core từ chối với HTTP 400 Bad Request. | ✅ **ĐẠT** |
 
 ---
 
