@@ -17,12 +17,17 @@ namespace Omnichannel.Infrastructure.Data
         }
 
         // 1. PhÃ¢n há»‡ Äá»‹nh danh & Báº£o máº­t
+        public DbSet<Department> Departments => Set<Department>();
         public DbSet<Role> Roles => Set<Role>();
         public DbSet<Permission> Permissions => Set<Permission>();
         public DbSet<User> Users => Set<User>();
         public DbSet<UserRole> UserRoles => Set<UserRole>();
         public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
         public DbSet<UserPermission> UserPermissions => Set<UserPermission>();
+        public DbSet<AdminDelegationScope> AdminDelegationScopes => Set<AdminDelegationScope>();
+        public DbSet<AdminDelegationPermission> AdminDelegationPermissions => Set<AdminDelegationPermission>();
+        public DbSet<AdminDelegationDepartment> AdminDelegationDepartments => Set<AdminDelegationDepartment>();
+        public DbSet<AdminDelegationStore> AdminDelegationStores => Set<AdminDelegationStore>();
 
         // 2. PhÃ¢n há»‡ CMS & Navigation
         public DbSet<Menu> Menus => Set<Menu>();
@@ -32,9 +37,15 @@ namespace Omnichannel.Infrastructure.Data
         public DbSet<Post> Posts => Set<Post>();
         public DbSet<StaticPage> StaticPages => Set<StaticPage>();
         public DbSet<ProductReview> ProductReviews => Set<ProductReview>();
+        public DbSet<ReviewHelpfulVote> ReviewHelpfulVotes => Set<ReviewHelpfulVote>();
+        public DbSet<ProductQuestion> ProductQuestions => Set<ProductQuestion>();
+        public DbSet<ProductAnswer> ProductAnswers => Set<ProductAnswer>();
         public DbSet<MediaAsset> MediaAssets => Set<MediaAsset>();
         public DbSet<ThemeConfig> ThemeConfigs => Set<ThemeConfig>();
         public DbSet<UiSection> UiSections => Set<UiSection>();
+        public DbSet<PageLayout> PageLayouts => Set<PageLayout>();
+        public DbSet<LayoutSection> LayoutSections => Set<LayoutSection>();
+        public DbSet<SectionItem> SectionItems => Set<SectionItem>();
 
         // 3. Phân hệ Hàng hóa & Kho FEFO
         public DbSet<Category> Categories => Set<Category>();
@@ -63,6 +74,8 @@ namespace Omnichannel.Infrastructure.Data
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
         public DbSet<Invoice> Invoices => Set<Invoice>();
+        public DbSet<OrderStatusHistory> OrderStatusHistories => Set<OrderStatusHistory>();
+        public DbSet<OrderReturnRequest> OrderReturnRequests => Set<OrderReturnRequest>();
 
         // 5. Phân hệ Nhật ký & Kiểm toán (Audit Log)
         public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
@@ -81,6 +94,8 @@ namespace Omnichannel.Infrastructure.Data
         public DbSet<LoyaltyWallet> LoyaltyWallets => Set<LoyaltyWallet>();
         public DbSet<PointTransaction> PointTransactions => Set<PointTransaction>();
         public DbSet<Voucher> Vouchers => Set<Voucher>();
+        public DbSet<LoyaltyCheckIn> LoyaltyCheckIns => Set<LoyaltyCheckIn>();
+        public DbSet<LoyaltyReferral> LoyaltyReferrals => Set<LoyaltyReferral>();
 
         // 9. Phân hệ Khuyến mãi & Coupon (Promotion Engine)
         public DbSet<Promotion> Promotions => Set<Promotion>();
@@ -117,6 +132,7 @@ namespace Omnichannel.Infrastructure.Data
         // 17. Phân hệ Chăm sóc khách hàng & Giữ chân (Wishlist & Back-In-Stock Alerts)
         public DbSet<WishlistItem> WishlistItems => Set<WishlistItem>();
         public DbSet<StockAlert> StockAlerts => Set<StockAlert>();
+        public DbSet<ProductSubscription> ProductSubscriptions => Set<ProductSubscription>();
 
         // 18. Phân hệ Outbox & Chống trùng lặp (Transactional Outbox & Idempotency)
         public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
@@ -129,20 +145,54 @@ namespace Omnichannel.Infrastructure.Data
             // =========================================================================
             // 1. Cáº¤U HÃŒNH PHÃ‚N Há»† Äá»ŠNH DANH & Báº¢O Máº¬T (IDENTITY & SECURITY)
             // =========================================================================
+            modelBuilder.Entity<Department>(entity =>
+            {
+                entity.HasIndex(d => d.Code).IsUnique().HasDatabaseName("IX_Departments_Code");
+
+                entity.HasOne(d => d.Parent)
+                      .WithMany(d => d.Children)
+                      .HasForeignKey(d => d.ParentId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(d => d.HeadUser)
+                      .WithMany()
+                      .HasForeignKey(d => d.HeadUserId)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasIndex(u => u.Username).IsUnique().HasDatabaseName("IX_Users_Username");
                 entity.HasIndex(u => u.Email).IsUnique().HasDatabaseName("IX_Users_Email");
+                entity.HasIndex(u => u.EmployeeCode)
+                      .IsUnique()
+                      .HasFilter("[EmployeeCode] IS NOT NULL")
+                      .HasDatabaseName("UQ_Users_EmployeeCode");
 
                 entity.HasOne(u => u.Store)
                       .WithMany(s => s.Users)
                       .HasForeignKey(u => u.StoreId)
                       .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(u => u.Department)
+                      .WithMany(d => d.Users)
+                      .HasForeignKey(u => u.DepartmentId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(u => u.Manager)
+                      .WithMany(u => u.Subordinates)
+                      .HasForeignKey(u => u.ManagerId)
+                      .OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<Role>(entity =>
             {
                 entity.HasIndex(r => r.Name).IsUnique().HasDatabaseName("IX_Roles_Name");
+
+                entity.HasOne(r => r.Department)
+                      .WithMany(d => d.Roles)
+                      .HasForeignKey(r => r.DepartmentId)
+                      .OnDelete(DeleteBehavior.SetNull);
             });
 
             modelBuilder.Entity<Permission>(entity =>
@@ -163,6 +213,11 @@ namespace Omnichannel.Infrastructure.Data
                       .WithMany(r => r.UserRoles)
                       .HasForeignKey(ur => ur.RoleId)
                       .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ur => ur.AssignedByUser)
+                      .WithMany()
+                      .HasForeignKey(ur => ur.AssignedByUserId)
+                      .OnDelete(DeleteBehavior.NoAction);
             });
 
             modelBuilder.Entity<RolePermission>(entity =>
@@ -192,6 +247,71 @@ namespace Omnichannel.Infrastructure.Data
                 entity.HasOne(up => up.Permission)
                       .WithMany(p => p.UserPermissions)
                       .HasForeignKey(up => up.PermissionId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(up => up.GrantedByUser)
+                      .WithMany()
+                      .HasForeignKey(up => up.GrantedByUserId)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<AdminDelegationScope>(entity =>
+            {
+                entity.HasIndex(s => s.AdminUserId).IsUnique().HasDatabaseName("UQ_AdminDelegationScopes_AdminUserId");
+
+                entity.HasOne(s => s.AdminUser)
+                      .WithOne(u => u.DelegationScope)
+                      .HasForeignKey<AdminDelegationScope>(s => s.AdminUserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(s => s.GrantedByUser)
+                      .WithMany()
+                      .HasForeignKey(s => s.GrantedByUserId)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<AdminDelegationPermission>(entity =>
+            {
+                entity.HasKey(adp => new { adp.AdminDelegationScopeId, adp.PermissionId });
+
+                entity.HasOne(adp => adp.Scope)
+                      .WithMany(s => s.AllowedPermissions)
+                      .HasForeignKey(adp => adp.AdminDelegationScopeId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(adp => adp.Permission)
+                      .WithMany(p => p.DelegationPermissions)
+                      .HasForeignKey(adp => adp.PermissionId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<AdminDelegationDepartment>(entity =>
+            {
+                entity.HasKey(add => new { add.AdminDelegationScopeId, add.DepartmentId });
+
+                entity.HasOne(add => add.Scope)
+                      .WithMany(s => s.AllowedDepartments)
+                      .HasForeignKey(add => add.AdminDelegationScopeId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(add => add.Department)
+                      .WithMany(d => d.DelegationDepartments)
+                      .HasForeignKey(add => add.DepartmentId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<AdminDelegationStore>(entity =>
+            {
+                entity.HasKey(ads => new { ads.AdminDelegationScopeId, ads.StoreId });
+
+                entity.HasOne(ads => ads.Scope)
+                      .WithMany(s => s.AllowedStores)
+                      .HasForeignKey(ads => ads.AdminDelegationScopeId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ads => ads.Store)
+                      .WithMany()
+                      .HasForeignKey(ads => ads.StoreId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
@@ -325,6 +445,81 @@ namespace Omnichannel.Infrastructure.Data
                       .OnDelete(DeleteBehavior.SetNull);
             });
 
+            modelBuilder.Entity<ReviewHelpfulVote>(entity =>
+            {
+                entity.HasIndex(v => new { v.ReviewId, v.UserId })
+                      .HasFilter("[UserId] IS NOT NULL")
+                      .IsUnique()
+                      .HasDatabaseName("IX_ReviewHelpfulVotes_Review_User");
+
+                entity.HasIndex(v => new { v.ReviewId, v.AnonymousKey })
+                      .HasFilter("[AnonymousKey] IS NOT NULL")
+                      .IsUnique()
+                      .HasDatabaseName("IX_ReviewHelpfulVotes_Review_AnonymousKey");
+
+                entity.HasOne(v => v.Review)
+                      .WithMany(r => r.HelpfulVotes)
+                      .HasForeignKey(v => v.ReviewId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(v => v.User)
+                      .WithMany()
+                      .HasForeignKey(v => v.UserId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<ProductQuestion>(entity =>
+            {
+                entity.HasIndex(q => new { q.ProductId, q.IsApproved, q.CreatedAt })
+                      .HasDatabaseName("IX_ProductQuestions_Product_Approved_Created");
+
+                entity.HasOne(q => q.Product)
+                      .WithMany(p => p.Questions)
+                      .HasForeignKey(q => q.ProductId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(q => q.User)
+                      .WithMany()
+                      .HasForeignKey(q => q.UserId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<ProductSubscription>(entity =>
+            {
+                entity.HasIndex(s => new { s.ProductId, s.Status, s.Type })
+                      .HasDatabaseName("IX_ProductSubscriptions_Product_Status_Type");
+
+                entity.HasIndex(s => new { s.UserId, s.ProductId, s.Type, s.Status })
+                      .HasFilter("[UserId] IS NOT NULL")
+                      .HasDatabaseName("IX_ProductSubscriptions_User_Product_Type_Status");
+
+                entity.HasOne(s => s.Product)
+                      .WithMany(p => p.Subscriptions)
+                      .HasForeignKey(s => s.ProductId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(s => s.User)
+                      .WithMany()
+                      .HasForeignKey(s => s.UserId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<ProductAnswer>(entity =>
+            {
+                entity.HasIndex(a => new { a.QuestionId, a.IsApproved, a.CreatedAt })
+                      .HasDatabaseName("IX_ProductAnswers_Question_Approved_Created");
+
+                entity.HasOne(a => a.Question)
+                      .WithMany(q => q.Answers)
+                      .HasForeignKey(a => a.QuestionId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(a => a.User)
+                      .WithMany()
+                      .HasForeignKey(a => a.UserId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
             // =========================================================================
             // 3. Cáº¤U HÃŒNH PHÃ‚N Há»† HÃ€NG HÃ“A & KHO FEFO (INVENTORY & WAREHOUSE)
             // =========================================================================
@@ -349,6 +544,8 @@ namespace Omnichannel.Infrastructure.Data
                 entity.HasIndex(p => p.Barcode).IsUnique().HasDatabaseName("IX_Products_Barcode");
                 entity.HasIndex(p => p.Slug).IsUnique().HasDatabaseName("IX_Products_Slug");
                 entity.HasIndex(p => new { p.CategoryId, p.IsActive }).HasDatabaseName("IX_Products_Category_Active");
+                entity.HasIndex(p => new { p.IsActive, p.IsFeatured }).HasDatabaseName("IX_Products_IsActive_IsFeatured");
+                entity.HasIndex(p => p.BrandId).HasDatabaseName("IX_Products_BrandId");
 
                 // Check constraints: SellingPrice >= 0, CostPrice >= 0
                 entity.ToTable(t =>
@@ -399,6 +596,8 @@ namespace Omnichannel.Infrastructure.Data
 
             modelBuilder.Entity<ProductBatch>(entity =>
             {
+                entity.HasIndex(b => new { b.ProductId, b.ExpDate }).HasDatabaseName("IX_ProductBatches_ProductId_ExpDate");
+
                 entity.HasOne(b => b.ProductVariant)
                       .WithMany(v => v.Batches)
                       .HasForeignKey(b => b.ProductVariantId)
@@ -503,6 +702,7 @@ namespace Omnichannel.Infrastructure.Data
                       .HasDatabaseName("IX_ProductBatches_FEFO_Lookup");
 
                 entity.HasIndex(pb => pb.BatchNumber).HasDatabaseName("IX_ProductBatches_BatchNumber");
+                entity.HasIndex(pb => new { pb.ProductId, pb.ExpDate }).HasDatabaseName("IX_ProductBatches_ProductId_ExpDate");
 
                 entity.HasOne(pb => pb.Product)
                       .WithMany(p => p.Batches)
@@ -610,6 +810,22 @@ namespace Omnichannel.Infrastructure.Data
                       .HasForeignKey(o => o.StoreId)
                       .OnDelete(DeleteBehavior.Restrict);
 
+                entity.HasOne(o => o.PickupStore)
+                      .WithMany()
+                      .HasForeignKey(o => o.PickupStoreId)
+                      .OnDelete(DeleteBehavior.NoAction);
+
+                entity.Property(o => o.DeliveryMethod)
+                      .HasMaxLength(30)
+                      .HasDefaultValue("HOME_DELIVERY");
+
+                entity.HasIndex(o => new { o.DeliveryMethod, o.PickupStoreId, o.OrderStatus })
+                      .HasDatabaseName("IX_Orders_PickupStore_Status");
+
+                entity.HasIndex(o => o.PickupCode)
+                      .HasFilter("[PickupCode] IS NOT NULL")
+                      .HasDatabaseName("IX_Orders_PickupCode");
+
                 entity.HasOne(o => o.PosShift)
                       .WithMany(ps => ps.Orders)
                       .HasForeignKey(o => o.PosShiftId)
@@ -646,6 +862,37 @@ namespace Omnichannel.Infrastructure.Data
                 entity.HasOne(i => i.Cashier)
                       .WithMany()
                       .HasForeignKey(i => i.CashierId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<OrderStatusHistory>(entity =>
+            {
+                entity.HasIndex(osh => new { osh.OrderId, osh.CreatedAt })
+                      .HasDatabaseName("IX_OrderStatusHistories_OrderId_CreatedAt");
+
+                entity.HasOne(osh => osh.Order)
+                      .WithMany(o => o.StatusHistories)
+                      .HasForeignKey(osh => osh.OrderId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<OrderReturnRequest>(entity =>
+            {
+                entity.HasIndex(orr => orr.RequestCode)
+                      .IsUnique()
+                      .HasDatabaseName("IX_OrderReturnRequests_RequestCode");
+
+                entity.HasIndex(orr => new { orr.OrderId, orr.Status })
+                      .HasDatabaseName("IX_OrderReturnRequests_OrderId_Status");
+
+                entity.HasOne(orr => orr.Order)
+                      .WithMany(o => o.ReturnRequests)
+                      .HasForeignKey(orr => orr.OrderId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(orr => orr.User)
+                      .WithMany()
+                      .HasForeignKey(orr => orr.UserId)
                       .OnDelete(DeleteBehavior.SetNull);
             });
 
@@ -756,6 +1003,10 @@ namespace Omnichannel.Infrastructure.Data
             modelBuilder.Entity<LoyaltyWallet>(entity =>
             {
                 entity.HasIndex(lw => lw.UserId).IsUnique().HasDatabaseName("IX_LoyaltyWallets_UserId");
+                entity.HasIndex(lw => lw.ReferralCode)
+                      .HasFilter("[ReferralCode] IS NOT NULL")
+                      .IsUnique()
+                      .HasDatabaseName("IX_LoyaltyWallets_ReferralCode");
 
                 entity.HasOne(lw => lw.User)
                       .WithOne(u => u.LoyaltyWallet)
@@ -768,6 +1019,53 @@ namespace Omnichannel.Infrastructure.Data
                       .OnDelete(DeleteBehavior.Restrict);
 
                 entity.Property(lw => lw.TotalSpend12Months).HasColumnType("decimal(18,2)");
+            });
+
+            modelBuilder.Entity<LoyaltyCheckIn>(entity =>
+            {
+                entity.HasIndex(ci => new { ci.UserId, ci.CheckInDate })
+                      .IsUnique()
+                      .HasDatabaseName("IX_LoyaltyCheckIns_UserId_CheckInDate");
+
+                entity.HasOne(ci => ci.User)
+                      .WithMany()
+                      .HasForeignKey(ci => ci.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(ci => ci.Wallet)
+                      .WithMany(lw => lw.CheckIns)
+                      .HasForeignKey(ci => ci.WalletId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(ci => ci.PointTransaction)
+                      .WithMany()
+                      .HasForeignKey(ci => ci.PointTransactionId)
+                      .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            modelBuilder.Entity<LoyaltyReferral>(entity =>
+            {
+                entity.HasIndex(r => r.ReferredUserId)
+                      .IsUnique()
+                      .HasDatabaseName("IX_LoyaltyReferrals_ReferredUserId");
+
+                entity.HasIndex(r => new { r.ReferrerUserId, r.Status })
+                      .HasDatabaseName("IX_LoyaltyReferrals_ReferrerUserId_Status");
+
+                entity.HasOne(r => r.ReferrerUser)
+                      .WithMany()
+                      .HasForeignKey(r => r.ReferrerUserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(r => r.ReferredUser)
+                      .WithMany()
+                      .HasForeignKey(r => r.ReferredUserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(r => r.CompletedOrder)
+                      .WithMany()
+                      .HasForeignKey(r => r.CompletedOrderId)
+                      .OnDelete(DeleteBehavior.SetNull);
             });
 
             modelBuilder.Entity<PointTransaction>(entity =>
@@ -921,6 +1219,7 @@ namespace Omnichannel.Infrastructure.Data
             modelBuilder.Entity<Alert>(entity =>
             {
                 entity.HasIndex(a => new { a.Type, a.EntityKey }).HasDatabaseName("IX_Alerts_Type_EntityKey");
+                entity.HasIndex(a => new { a.EntityKey, a.CreatedAt }).HasDatabaseName("IX_Alerts_EntityKey_CreatedAt");
                 entity.HasIndex(a => new { a.IsRead, a.CreatedAt }).HasDatabaseName("IX_Alerts_IsRead_CreatedAt");
             });
 
@@ -985,7 +1284,8 @@ namespace Omnichannel.Infrastructure.Data
             // =========================================================================
             // 19. BỘ LỌC TRUY VẤN TOÀN CỤC (GLOBAL QUERY FILTERS CHO SOFT DELETE & ISACTIVE)
             // =========================================================================
-            modelBuilder.Entity<User>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<Department>().HasQueryFilter(e => e.IsActive);
+            modelBuilder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Role>().HasQueryFilter(e => e.IsActive);
             modelBuilder.Entity<Product>().HasQueryFilter(e => e.IsActive);
             modelBuilder.Entity<Category>().HasQueryFilter(e => e.IsActive);
@@ -1016,6 +1316,11 @@ namespace Omnichannel.Infrastructure.Data
                       .WithMany()
                       .HasForeignKey(e => e.CreatedBy)
                       .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(e => e.UploadedByStaff)
+                      .WithMany()
+                      .HasForeignKey(e => e.UploadedByStaffId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // 2. Cấu hình bảng ThemeConfigs
@@ -1030,16 +1335,56 @@ namespace Omnichannel.Infrastructure.Data
                       .WithMany()
                       .HasForeignKey(e => e.FaviconMediaId)
                       .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.LogoMediaAsset)
+                      .WithMany()
+                      .HasForeignKey(e => e.LogoMediaAssetId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.FaviconMediaAsset)
+                      .WithMany()
+                      .HasForeignKey(e => e.FaviconMediaAssetId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // 3. Cấu hình bảng UiSections
             modelBuilder.Entity<UiSection>(entity =>
             {
                 entity.HasIndex(e => e.SectionCode).IsUnique().HasDatabaseName("IX_UiSections_SectionCode");
+                entity.HasIndex(e => new { e.IsVisible, e.DisplayOrder }).HasDatabaseName("IX_UiSections_IsVisible_DisplayOrder");
                 entity.HasOne(e => e.BackgroundMedia)
                       .WithMany()
                       .HasForeignKey(e => e.BackgroundMediaId)
                       .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            // 3b. Cấu hình bảng Dynamic CMS PageLayouts, LayoutSections, SectionItems
+            modelBuilder.Entity<PageLayout>(entity =>
+            {
+                entity.HasIndex(e => e.PageKey).IsUnique().HasDatabaseName("IX_PageLayouts_PageKey");
+            });
+
+            modelBuilder.Entity<LayoutSection>(entity =>
+            {
+                entity.HasIndex(e => new { e.PageLayoutId, e.OrderIndex }).HasDatabaseName("IX_LayoutSections_PageLayout_Order");
+                entity.HasOne(e => e.PageLayout)
+                      .WithMany(p => p.LayoutSections)
+                      .HasForeignKey(e => e.PageLayoutId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<SectionItem>(entity =>
+            {
+                entity.HasIndex(e => new { e.LayoutSectionId, e.OrderIndex }).HasDatabaseName("IX_SectionItems_Section_Order");
+                entity.HasOne(e => e.LayoutSection)
+                      .WithMany(s => s.SectionItems)
+                      .HasForeignKey(e => e.LayoutSectionId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.MediaAsset)
+                      .WithMany()
+                      .HasForeignKey(e => e.MediaAssetId)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // 4. Cấu hình quan hệ khóa ngoại Media với Product, Category, Brand, Banner, Post, User
@@ -1099,17 +1444,9 @@ namespace Omnichannel.Infrastructure.Data
             public System.Collections.Generic.List<Microsoft.EntityFrameworkCore.ChangeTracking.PropertyEntry> TemporaryProperties { get; } = new();
         }
 
-        public override async Task<int> SaveChangesAsync(System.Threading.CancellationToken cancellationToken = default)
+        public override Task<int> SaveChangesAsync(System.Threading.CancellationToken cancellationToken = default)
         {
-            var auditEntries = CaptureAuditEntries();
-            var result = await base.SaveChangesAsync(cancellationToken);
-
-            if (auditEntries != null && auditEntries.Count > 0)
-            {
-                await PersistAuditEntriesAsync(auditEntries, cancellationToken);
-            }
-
-            return result;
+            return base.SaveChangesAsync(cancellationToken);
         }
 
         private System.Collections.Generic.List<AuditEntry> CaptureAuditEntries()

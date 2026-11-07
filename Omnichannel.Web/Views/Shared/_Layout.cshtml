@@ -14,23 +14,26 @@
     <link rel="canonical" href="@(ViewData["CanonicalUrl"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
     <meta name="robots" content="@(ViewData["Robots"] ?? "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1")" />
 
-    <!-- Brand Identity & Dynamic Favicon from Database -->
-    <link rel="icon" type="image/x-icon" href="@theme.FaviconUrl" />
-    <link rel="icon" type="image/png" sizes="32x32" href="@theme.FaviconUrl" />
-    <link rel="apple-touch-icon" sizes="180x180" href="@theme.FaviconUrl" />
+    <!-- Brand Identity & Favicon Suite (CANMAKE BEAUTY) -->
+    <link rel="icon" type="image/svg+xml" href="@Brand.FaviconSvgUrl" />
+    <link rel="icon" type="image/x-icon" href="@Brand.FaviconUrl" />
+    <link rel="icon" type="image/png" sizes="32x32" href="@Brand.Favicon32Url" />
+    <link rel="apple-touch-icon" sizes="180x180" href="@Brand.AppleTouchIconUrl" />
+    <link rel="manifest" href="@Brand.ManifestUrl" />
+    <meta name="theme-color" content="@Brand.ThemeColor" />
 
     <!-- Open Graph & Social Sharing -->
     <meta property="og:type" content="@(ViewData["OgType"] ?? "website")" />
-    <meta property="og:site_name" content="@theme.BrandName" />
-    <meta property="og:title" content="@(ViewData["Title"] != null ? $"{ViewData["Title"]} - Omni Beauty" : "Omni Beauty | Luxury Cosmetics & Skincare")" />
+    <meta property="og:site_name" content="@Brand.Name" />
+    <meta property="og:title" content="@(ViewData["Title"] != null ? $"{ViewData["Title"]} - {Brand.ShortName}" : $"{Brand.ShortName} | Luxury Cosmetics & Skincare")" />
     <meta property="og:description" content="@(ViewData["Description"] ?? "Hệ thống mua sắm mỹ phẩm cao cấp đa kênh tiên phong công nghệ hạn sử dụng FEFO. Cam kết 100% chính hãng, giao hàng tốc hành 2H.")" />
     <meta property="og:url" content="@(ViewData["CanonicalUrl"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")" />
-    <meta property="og:image" content="@(ViewData["OgImage"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{theme.LogoUrl}")" />
+    <meta property="og:image" content="@(ViewData["OgImage"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Brand.OgImageUrl}")" />
     <meta property="og:locale" content="vi_VN" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="@(ViewData["Title"] != null ? $"{ViewData["Title"]} - Omni Beauty" : "Omni Beauty | Luxury Cosmetics & Skincare")" />
+    <meta name="twitter:title" content="@(ViewData["Title"] != null ? $"{ViewData["Title"]} - {Brand.ShortName}" : $"{Brand.ShortName} | Luxury Cosmetics & Skincare")" />
     <meta name="twitter:description" content="@(ViewData["Description"] ?? "Hệ thống mua sắm mỹ phẩm cao cấp đa kênh tiên phong công nghệ hạn sử dụng FEFO. Cam kết 100% chính hãng, giao hàng tốc hành 2H.")" />
-    <meta name="twitter:image" content="@(ViewData["OgImage"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{theme.LogoUrl}")" />
+    <meta name="twitter:image" content="@(ViewData["OgImage"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Brand.OgImageUrl}")" />
 
     <!-- Schema.org JSON-LD: Organization & WebSite (Google Rich Results Standard) -->
     <script type="application/ld+json">
@@ -40,19 +43,19 @@
         {
           "@@type": "Organization",
           "@@id": "@(Context.Request.Scheme)://@(Context.Request.Host)/#organization",
-          "name": "@theme.BrandName",
-          "alternateName": "Omnichannel Beauty Solution",
+          "name": "@Brand.Name",
+          "alternateName": "@Brand.ShortName",
           "url": "@(Context.Request.Scheme)://@(Context.Request.Host)/",
           "logo": {
             "@@type": "ImageObject",
             "@@id": "@(Context.Request.Scheme)://@(Context.Request.Host)/#logo",
-            "url": "@(Context.Request.Scheme)://@(Context.Request.Host)@theme.LogoUrl",
-            "caption": "@theme.BrandName - Luxury Cosmetics & Skincare"
+            "url": "@(Context.Request.Scheme)://@(Context.Request.Host)@Brand.LogoUrl",
+            "caption": "@Brand.Name - Luxury Cosmetics & Skincare"
           },
-          "image": "@(Context.Request.Scheme)://@(Context.Request.Host)@theme.LogoUrl",
+          "image": "@(Context.Request.Scheme)://@(Context.Request.Host)@Brand.OgImageUrl",
           "description": "Hệ thống mua sắm mỹ phẩm cao cấp đa kênh tiên phong công nghệ hạn sử dụng FEFO. Cam kết 100% chính hãng, giao hàng tốc hành 2H.",
-          "telephone": "1900 8888",
-          "email": "hotro@omnibeauty.vn",
+          "telephone": "@Brand.Hotline",
+          "email": "@Brand.Email",
           "address": {
             "@@type": "PostalAddress",
             "streetAddress": "68 Nguyễn Huệ, Phường Bến Nghé, Quận 1",
@@ -70,17 +73,17 @@
             }
           ],
           "sameAs": [
-            "https://www.facebook.com/omnibeauty.vn",
-            "https://www.instagram.com/omnibeauty.official",
-            "https://www.tiktok.com/@@omnibeauty.vn",
-            "https://www.youtube.com/@@omnibeautyvietnam"
+            "https://www.facebook.com/canmakebeauty.vn",
+            "https://www.instagram.com/canmakebeauty.official",
+            "https://www.tiktok.com/@@canmakebeauty.vn",
+            "https://www.youtube.com/@@canmakebeautyvietnam"
           ]
         },
         {
           "@@type": "WebSite",
           "@@id": "@(Context.Request.Scheme)://@(Context.Request.Host)/#website",
           "url": "@(Context.Request.Scheme)://@(Context.Request.Host)/",
-          "name": "OMNI BEAUTY",
+          "name": "@Brand.Name",
           "description": "Mỹ Phẩm & Dược Mỹ Phẩm Cao Cấp Chuẩn Hạn Dùng FEFO",
           "publisher": {
             "@@id": "@(Context.Request.Scheme)://@(Context.Request.Host)/#organization"
@@ -98,10 +101,10 @@
     }
     </script>
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts: Fully Certified Vietnamese Font Stack (Quicksand, Plus Jakarta Sans, Playfair Display, Lora, Inter, Montserrat) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
 
     <!-- FontAwesome 6.5.1 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
@@ -109,17 +112,18 @@
     <!-- NProgress Page Loading Bar -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.css" />
     <style>
+        [x-cloak] { display: none !important; }
         #nprogress .bar {
-            background: linear-gradient(90deg, #ec4899, #f43f5e, #8b5cf6) !important;
+            background: linear-gradient(90deg, #E8618C, #B8336A, #F7C6D4) !important;
             height: 3px !important;
-            box-shadow: 0 0 10px rgba(236, 72, 153, 0.7);
+            box-shadow: 0 0 10px rgba(232, 97, 140, 0.7);
         }
         #nprogress .peg {
-            box-shadow: 0 0 10px #ec4899, 0 0 5px #f43f5e !important;
+            box-shadow: 0 0 10px #E8618C, 0 0 5px #B8336A !important;
         }
         #nprogress .spinner-icon {
-            border-top-color: #ec4899 !important;
-            border-left-color: #ec4899 !important;
+            border-top-color: #E8618C !important;
+            border-left-color: #E8618C !important;
         }
     </style>
 
@@ -139,21 +143,26 @@
             theme: {
                 extend: {
                     colors: {
-                        'pastel-rose': '#fdf2f4',
-                        'pastel-nude': '#faecef',
-                        'pastel-cream': '#fff9f6',
-                        'rose-gold': '#b76e79',
+                        'pastel-rose': '#FFF4F7',
+                        'pastel-nude': '#FCE7EF',
+                        'pastel-cream': '#FFF4F7',
+                        'rose-gold': '#E8618C',
                         'nude-gold': '#C5A880',
                         'champagne-gold': '#d4af37',
-                        'charcoal': '#18181b',
-                        'dark-muted': '#3f3f46',
-                        'soft-border': '#f1d8dd',
-                        'blush': '#f5d6da',
-                        'magenta-accent': '#d63384'
+                        'charcoal': '#2B1B24',
+                        'dark-muted': '#4A3540',
+                        'soft-border': '#F7C6D4',
+                        'blush': '#F7C6D4',
+                        'magenta-accent': '#B8336A',
+                        'primary-rose': '#E8618C',
+                        'deep-berry': '#B8336A',
+                        'petal-cream': '#FFF4F7',
+                        'ink': '#2B1B24'
                     },
                     fontFamily: {
-                        'serif': ['Playfair Display', 'Cormorant Garamond', 'Georgia', 'serif'],
-                        'sans': ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+                        'serif': ['Playfair Display', 'Lora', 'Georgia', 'serif'],
+                        'sans': ['Plus Jakarta Sans', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                        'brand': ['Quicksand', 'Plus Jakarta Sans', 'sans-serif'],
                         'mono': ['JetBrains Mono', 'monospace']
                     }
                 }
@@ -161,15 +170,17 @@
         }
     </script>
 
-    <!-- HTMX, Alpine.js, SignalR & SweetAlert2 -->
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+    <!-- HTMX, Alpine.js, SignalR & SweetAlert2 with Defer for Non-blocking Render -->
+    <script src="https://unpkg.com/htmx.org@1.9.10/dist/htmx.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/json-enc.js"></script>
+    <script defer src="~/js/site.js" asp-append-version="true"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/@@alpinejs/collapse@@3.13.5/dist/cdn.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.5/dist/cdn.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body x-data="{ cartOpen: false, quickViewOpen: false, mobileMenuOpen: false }" class="min-h-full flex flex-col antialiased selection:bg-pink-100 selection:text-magenta-accent bg-[#fffdfd]">
+<body x-data="storefrontApp()" hx-ext="json-enc" class="min-h-full flex flex-col antialiased font-sans selection:bg-pink-100 selection:text-magenta-accent bg-[#fffdfd]">
     @Html.AntiForgeryToken()
 
     <!-- Modular Header (Top Announcement + Glass Sticky Header + Mega Nav) -->
@@ -186,16 +197,16 @@
     <!-- Modular Footer -->
     <partial name="_Footer" />
 
-    <!-- Mini Cart Drawer (Off-Canvas Right) -->
-    <partial name="_MiniCartDrawer" />
+    <!-- Quick Cart Drawer (Lazy Mounted via template x-if) -->
+    <partial name="_QuickCartDrawer" />
 
-    <!-- Quick View Modal (Alpine.js) -->
+    <!-- Quick View Modal (Lazy Mounted via template x-if) -->
     <partial name="_QuickViewModal" />
 
-    <!-- Floating Back-to-Top Button -->
+    <!-- Floating Back-to-Top Button với Passive Scroll Listener -->
     <button type="button"
             x-data="{ showTop: false }" 
-            @@scroll.window="showTop = (window.pageYOffset > 300)" 
+            @@scroll.window.passive="showTop = (window.pageYOffset > 300)" 
             x-show="showTop" 
             x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 translate-y-4 scale-75"
@@ -204,13 +215,13 @@
             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
             x-transition:leave-end="opacity-0 translate-y-4 scale-75"
             @@click="window.scrollTo({ top: 0, behavior: 'smooth' })" 
-            class="fixed bottom-36 sm:bottom-24 right-7 z-40 h-10 w-10 rounded-full bg-charcoal/90 text-white hover:bg-magenta-accent shadow-xl flex items-center justify-center transition-all duration-300 border border-slate-700/50 hover:scale-110 group"
+            class="fixed bottom-36 sm:bottom-24 right-7 z-40 h-10 w-10 rounded-full bg-charcoal/90 text-white hover:bg-magenta-accent shadow-xl flex items-center justify-center transition-all duration-300 border border-slate-700/50 hover:scale-110 group will-change-transform"
             aria-label="Cuộn về đầu trang"
             style="display: none;">
         <i class="fa-solid fa-arrow-up text-xs text-rose-gold group-hover:text-white transition-colors"></i>
     </button>
 
-    <!-- AI Chatbot Assistant Widget phong cách OMNI BEAUTY -->
+    <!-- AI Chatbot Assistant Widget phong cách CANMAKE BEAUTY -->
     <partial name="_ChatbotWidget" />
 
     <!-- Mobile Bottom Navigation Bar -->
@@ -236,20 +247,18 @@
     <!-- Global Toast Notifications Container -->
     <div id="storefrontToastContainer" class="fixed bottom-20 lg:bottom-6 right-6 z-50 flex flex-col gap-2.5 max-w-sm pointer-events-none" role="status" aria-live="polite"></div>
 
-    <!-- Site Scripts -->
-    <script src="~/js/site.js" asp-append-version="true"></script>
 
     @if (User.Identity?.IsAuthenticated == true)
     {
         <!-- Customer Realtime Order & System Notification via SignalR -->
         <script>
-            document.addEventListener('DOMContentLoaded', function () {
+            window.addEventListener('load', function () {
                 if (!window.signalR) return;
 
                 try {
                     const customerHubConnection = new signalR.HubConnectionBuilder()
                         .withUrl("/notificationHub")
-                        .withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+                        .withAutomaticReconnect([0, 3000, 10000]) // Giới hạn số lần thử kết nối lại
                         .build();
 
                     customerHubConnection.on("ReceiveNotification", function (payload, arg2) {
@@ -347,18 +356,26 @@
     }
 
     <!-- NProgress Script & Page Navigation Hooks -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/nprogress/0.2.0/nprogress.min.js"></script>
     <script>
-        if (typeof NProgress !== 'undefined') {
-            NProgress.configure({ showSpinner: false, speed: 300, minimum: 0.15 });
-            window.addEventListener('beforeunload', function () {
-                NProgress.start();
-            });
-            document.addEventListener('DOMContentLoaded', function () {
+        window.addEventListener('load', function () {
+            if (typeof NProgress !== 'undefined') {
+                NProgress.configure({ showSpinner: false, speed: 300, minimum: 0.15 });
+                window.addEventListener('beforeunload', function () {
+                    NProgress.start();
+                });
                 NProgress.done();
-            });
-        }
+            }
+        });
     </script>
+
+    <!-- Khay So Sánh Mỹ Phẩm Nổi Cố Định (GAP-03: Phiên C3) -->
+    <partial name="_CompareDrawer" />
+
+    <!-- Demo Presenter HUD (GAP-12: Phiên E1 - Chỉ render khi DemoMode:Enabled = true) -->
+    <partial name="_DemoPresenterHud" />
+
+    <partial name="_LivePreviewScript" />
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

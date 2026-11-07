@@ -33,6 +33,18 @@ namespace Omnichannel.Application.DTOs.Cms
         public DateTime? AdminRepliedAt { get; set; }
         public string? AdminReplyBy { get; set; }
 
+        public bool IsSkinTwinMatch { get; set; }
+
+        public DateTime CreatedAt { get; set; }
+    }
+
+    public class ReviewPhotoGalleryDto
+    {
+        public int ReviewId { get; set; }
+        public string ImageUrl { get; set; } = string.Empty;
+        public int Rating { get; set; }
+        public string UserName { get; set; } = "Khách hàng";
+        public string? SkinType { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 
@@ -62,6 +74,8 @@ namespace Omnichannel.Application.DTOs.Cms
         public bool? IsVerifiedPurchase { get; set; }
         public bool? HasImages { get; set; }
         public string? Tab { get; set; } // "all", "images", "verified", "5star"
+        public string? SkinType { get; set; }
+        public string? SortBy { get; set; }
         public int Page { get; set; } = 1;
         public int PageSize { get; set; } = 10;
     }

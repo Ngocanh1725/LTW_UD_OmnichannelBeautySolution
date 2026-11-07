@@ -1,0 +1,79 @@
+<script id="cms-live-preview-script">
+    (function() {
+        console.log('[CMS LivePreview] Đã kích hoạt Live Preview Engine.');
+
+        window.addEventListener('message', function(event) {
+            if (!event.data || typeof event.data !== 'object') return;
+            const msg = event.data;
+            console.log('[CMS LivePreview] Nhận message:', msg);
+
+            // 1. Cập nhật màu sắc chủ đạo qua CSS Variables thời gian thực
+            if (msg.type === 'UPDATE_THEME_COLOR') {
+                const prop = msg.property;
+                const val = msg.value;
+                if (!prop || !val) return;
+
+                document.documentElement.style.setProperty(prop, val);
+
+                if (prop === '--primary-color' || prop === '--color-primary') {
+                    document.documentElement.style.setProperty('--color-primary', val);
+                    document.documentElement.style.setProperty('--primary-color', val);
+                    document.querySelectorAll('.bg-magenta-accent, .bg-theme-primary').forEach(el => el.style.backgroundColor = val);
+                    document.querySelectorAll('.text-magenta-accent, .text-theme-primary').forEach(el => el.style.color = val);
+                    document.querySelectorAll('.border-magenta-accent, .border-theme-primary').forEach(el => el.style.borderColor = val);
+                } else if (prop === '--secondary-color' || prop === '--color-secondary') {
+                    document.documentElement.style.setProperty('--color-secondary', val);
+                    document.documentElement.style.setProperty('--secondary-color', val);
+                } else if (prop === '--accent-color' || prop === '--color-accent') {
+                    document.documentElement.style.setProperty('--color-accent', val);
+                    document.documentElement.style.setProperty('--accent-color', val);
+                }
+            }
+
+            // 2. Đảo thứ tự Section thời gian thực
+            if (msg.type === 'REORDER_SECTIONS' && Array.isArray(msg.order)) {
+                const container = document.getElementById('dynamic-sections-container') || document.querySelector('main');
+                if (container) {
+                    msg.order.forEach(id => {
+                        const el = container.querySelector(`[data-section-id="${id}"], [data-section-key="${id}"], #section-${id}`);
+                        if (el) {
+                            container.appendChild(el);
+                            el.classList.add('transition-all', 'duration-500');
+                            el.style.outline = '2px solid rgba(225, 29, 72, 0.4)';
+                            setTimeout(() => { el.style.outline = 'none'; }, 800);
+                        }
+                    });
+                }
+            }
+
+            // 3. Bật/Tắt hiển thị Section
+            if (msg.type === 'TOGGLE_SECTION') {
+                const el = document.querySelector(`[data-section-id="${msg.sectionId}"], [data-section-key="${msg.sectionKey}"], #section-${msg.sectionId}`);
+                if (el) {
+                    el.style.display = msg.isVisible ? '' : 'none';
+                }
+            }
+
+            // 4. Cập nhật Text Tiêu đề / Phụ đề trực tiếp
+            if (msg.type === 'UPDATE_SECTION_TEXT') {
+                const el = document.querySelector(`[data-section-id="${msg.sectionId}"], [data-section-key="${msg.sectionKey}"], #section-${msg.sectionId}`);
+                if (el) {
+                    const titleEl = el.querySelector('[data-cms-title]') || el.querySelector('h1, h2');
+                    const subEl = el.querySelector('[data-cms-subtitle]') || el.querySelector('p');
+                    if (titleEl && msg.title !== undefined) titleEl.textContent = msg.title;
+                    if (subEl && msg.subtitle !== undefined) subEl.textContent = msg.subtitle;
+                }
+            }
+
+            // 5. Cập nhật ảnh banner / thumbnail
+            if (msg.type === 'UPDATE_SECTION_IMAGE') {
+                const el = document.querySelector(`[data-section-id="${msg.sectionId}"], [data-section-key="${msg.sectionKey}"], #section-${msg.sectionId}`);
+                if (el && msg.imageUrl) {
+                    const img = el.querySelector(`[data-item-id="${msg.itemId}"] img, img[data-cms-img], img`);
+                    if (img) img.src = msg.imageUrl;
+                }
+            }
+        });
+    })();
+</script>
+

@@ -1,125 +1,985 @@
-@model IEnumerable<Omnichannel.Application.DTOs.Account.UserItemViewModel>
+@model Omnichannel.Application.DTOs.HR.StaffIndexViewModel
 @{
-    ViewData["Title"] = "Quản Lý Nhân Sự & Phân Quyền";
+    ViewData["Title"] = "Quản Lý Nhân Sự & Cơ Cấu Tổ Chức";
     Layout = "_AdminLayout";
+    string currentViewMode = (Model.Filter.ViewMode ?? "table").ToLowerInvariant();
+    bool hasAdvancedFilter = !string.IsNullOrEmpty(Model.Filter.Gender)
+        || Model.Filter.HireFrom.HasValue
+        || Model.Filter.HireTo.HasValue
+        || Model.Filter.CreatedFrom.HasValue
+        || Model.Filter.CreatedTo.HasValue
+        || Model.Filter.StoreId.HasValue
+        || Model.Filter.ManagerId.HasValue;
 }
 
-<!-- Admin Page Header Component -->
-<div class="admin-page-header">
-    <div class="admin-page-header__left">
-        <h1 class="admin-page-title">
-            <i class="fa-solid fa-users text-rose-500"></i>
-            Danh Sách Nhân Sự & Tài Khoản
+<style>
+    .hr-sticky-filter {
+        position: sticky;
+        top: 64px;
+        z-index: 25;
+        backdrop-filter: blur(10px);
+    }
+    .kpi-card-interactive {
+        cursor: pointer;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+    .kpi-card-interactive:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px -4px rgba(225, 29, 72, 0.12) !important;
+        border-color: #fda4af !important;
+    }
+    .htmx-indicator-skeleton {
+        display: none;
+    }
+    .htmx-request .htmx-indicator-skeleton {
+        display: block;
+    }
+    .htmx-request #staffTableContent {
+        opacity: 0.35;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+    .skeleton-line {
+        height: 14px;
+        border-radius: 6px;
+        background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+        background-size: 200% 100%;
+        animation: hrSkeletonShimmer 1.4s infinite;
+    }
+    @@keyframes hrSkeletonShimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+</style>
+
+<!-- 1. Page Header & Action Buttons -->
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb small text-muted mb-1">
+                <li class="breadcrumb-item">
+                    <a href="/Admin/Dashboard" class="text-decoration-none text-muted">
+                        <i class="fa-solid fa-house-chimney me-1"></i>@Brand.DisplayName
+                    </a>
+                </li>
+                <li class="breadcrumb-item">Hệ Thống & Nhân Sự</li>
+                <li class="breadcrumb-item active text-rose-600 fw-semibold" aria-current="page">Quản Lý Nhân Sự</li>
+            </ol>
+        </nav>
+        <h1 class="h4 fw-bold text-slate-900 dark:text-white mb-0 d-flex align-items-center gap-2">
+            <span class="rounded-3 bg-rose-50 text-rose-600 p-2 d-inline-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                <i class="fa-solid fa-users-gear"></i>
+            </span>
+            <span>Quản Lý Nhân Sự</span>
         </h1>
-        <ul class="admin-breadcrumb">
-            <li><a href="/Admin/Dashboard">Omnichannel Beauty</a></li>
-            <li class="admin-breadcrumb-separator"><i class="fa-solid fa-chevron-right"></i></li>
-            <li class="text-rose-600 font-semibold">Nhân Sự & Phân Quyền</li>
-        </ul>
     </div>
-    <div class="admin-page-actions">
-        <a href="/Admin/User/Create" class="admin-btn admin-btn--primary">
-            <i class="fa-solid fa-user-plus me-1"></i> Thêm Mới Nhân Sự
+
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        <a asp-any-permission="DEPARTMENT_VIEW,DEPARTMENT_MANAGE" href="/Admin/Department"
+           class="btn btn-outline-secondary btn-sm px-3 py-2 fw-semibold rounded-3 bg-white dark:bg-slate-800">
+            <i class="fa-solid fa-sitemap me-1.5 text-indigo-600"></i>Sơ Đồ Tổ Chức
         </a>
+
+        <div class="dropdown" asp-permission="USER_EXPORT">
+            <button class="btn btn-outline-secondary btn-sm px-3 py-2 fw-semibold rounded-3 dropdown-toggle bg-white dark:bg-slate-800"
+                    type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-solid fa-file-excel me-1.5 text-emerald-600"></i>Xuất Excel
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 small py-1.5">
+                <li>
+                    <button type="button" class="dropdown-item py-1.5" onclick="triggerExport('xlsx')">
+                        <i class="fa-solid fa-file-excel text-success me-2"></i>Xuất Excel (.xlsx) theo bộ lọc
+                    </button>
+                </li>
+                <li>
+                    <button type="button" class="dropdown-item py-1.5" onclick="triggerExport('csv')">
+                        <i class="fa-solid fa-file-csv text-primary me-2"></i>Xuất CSV (UTF-8 BOM)
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        @if (Model.ActorContext.IsSuperAdmin || Model.ActorContext.CanDeleteUser)
+        {
+            <a asp-permission="USER_DELETE" href="/Admin/User/Trash"
+               class="btn btn-outline-danger btn-sm px-3 py-2 fw-semibold rounded-3 position-relative bg-white dark:bg-slate-800">
+                <i class="fa-regular fa-trash-can me-1.5"></i>Thùng Rác
+                @if (Model.Stats.TrashStaff > 0)
+                {
+                    <span class="badge rounded-pill bg-danger ms-1">@Model.Stats.TrashStaff</span>
+                }
+            </a>
+        }
+
+        @if (Model.ActorContext.IsSuperAdmin || Model.ActorContext.CanCreateUser)
+        {
+            <a asp-permission="USER_CREATE" href="/Admin/User/Create"
+               class="btn btn-primary-gradient btn-sm px-3.5 py-2 text-white fw-semibold rounded-3 shadow-xs">
+                <i class="fa-solid fa-plus me-1.5"></i>Thêm nhân sự
+            </a>
+        }
     </div>
 </div>
 
-@if (!Model.Any())
-{
-    <!-- Admin Empty State Component -->
-    <div class="admin-empty-state">
-        <div class="admin-empty-state__icon">
-            <i class="fa-solid fa-user-xmark"></i>
+<!-- 2. Navigation Tabs: Nhân sự nội bộ vs Tài khoản khách hàng -->
+<div class="border-bottom border-slate-200 dark:border-slate-800 mb-4">
+    <ul class="nav nav-tabs border-0 gap-2" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active fw-bold border-0 border-bottom border-3 border-rose-600 text-rose-600 bg-transparent px-3 py-2.5 d-flex align-items-center gap-2"
+               href="/Admin/User" aria-current="page">
+                <i class="fa-solid fa-user-shield"></i>
+                <span>Nhân sự nội bộ</span>
+                <span class="badge rounded-pill bg-rose-100 text-rose-700 px-2 py-0.5" style="font-size: 0.72rem;">@Model.Stats.TotalStaff</span>
+            </a>
+        </li>
+        <li class="nav-item" role="presentation" asp-permission="CUSTOMER_VIEW">
+            <a class="nav-link fw-semibold border-0 text-muted hover:text-dark bg-transparent px-3 py-2.5 d-flex align-items-center gap-2"
+               href="/Admin/User/Customers">
+                <i class="fa-solid fa-users-viewfinder text-indigo-500"></i>
+                <span>Tài khoản khách hàng</span>
+                <span class="badge rounded-pill bg-slate-100 text-slate-700 px-2 py-0.5" style="font-size: 0.72rem;">@Model.Stats.TotalCustomers</span>
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- 3. 6 Thẻ KPI (Click thẻ = Áp bộ lọc tương ứng) -->
+<div class="row g-2.5 mb-4">
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card border border-slate-200/80 dark:border-slate-800 shadow-xs rounded-4 h-100 p-3 bg-white dark:bg-slate-900 kpi-card-interactive"
+             onclick="applyKpiQuickFilter('all')" role="button" tabindex="0" aria-label="Lọc tổng nhân sự">
+            <div class="d-flex align-items-center justify-content-between">
+                <span class="text-muted fw-semibold text-uppercase" style="font-size: 0.68rem;">Tổng Nhân Sự</span>
+                <span class="rounded-3 bg-rose-50 text-rose-600 p-1.5 px-2"><i class="fa-solid fa-users"></i></span>
+            </div>
+            <div class="h4 fw-bolder mb-0 mt-1 text-slate-900 dark:text-white">@Model.Stats.TotalStaff</div>
+            <div class="text-muted mt-1" style="font-size: 0.68rem;">Bấm để xem tất cả</div>
         </div>
-        <h3 class="admin-empty-state__title">Chưa Có Nhân Sự Nào</h3>
-        <p class="admin-empty-state__description">
-            Hệ thống hiện tại chưa ghi nhận hồ sơ nhân sự nào. Bấm nút bên dưới để tạo tài khoản đầu tiên cho chi nhánh hoặc trụ sở.
-        </p>
-        <a href="/Admin/User/Create" class="admin-btn admin-btn--primary">
-            <i class="fa-solid fa-user-plus me-1"></i> Tạo Nhân Sự Đầu Tiên
-        </a>
     </div>
-}
-else
-{
-    <!-- Admin Data Table Component -->
-    <div class="admin-table-container">
-        <table class="admin-table admin-table--striped">
-            <thead>
-                <tr>
-                    <th style="width: 280px;">Họ Và Tên / Username</th>
-                    <th>Email & Số Điện Thoại</th>
-                    <th>Vai Trò Phân Bổ</th>
-                    <th>Trạng Thái</th>
-                    <th>Ngày Tạo</th>
-                    <th class="col-numeric" style="width: 120px;">Hành Động</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var user in Model)
-                {
-                    <tr>
-                        <td>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="user-avatar-badge" style="width: 40px; height: 40px; font-size: 15px; font-weight: 700; border-radius: var(--radius-lg);">
-                                    @(user.FullName.Length > 0 ? user.FullName[0].ToString().ToUpper() : "U")
-                                </div>
-                                <div>
-                                    <div class="fw-bold text-dark" style="font-size: 0.9375rem;">@user.FullName</div>
-                                    <div class="text-muted font-mono-numeric" style="font-size: 12px;">@@@user.Username</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="small fw-semibold text-dark">@user.Email</div>
-                            <div class="text-muted" style="font-size: 12px;">@(user.PhoneNumber ?? "Chưa có SĐT")</div>
-                        </td>
-                        <td>
-                            <div class="d-flex flex-wrap gap-1">
-                                @foreach (var role in user.AssignedRoles)
-                                {
-                                    <span class="admin-badge admin-badge--neutral">
-                                        <i class="fa-solid fa-id-badge text-rose-500" style="font-size: 10px;"></i>
-                                        @role
-                                    </span>
-                                }
-                            </div>
-                        </td>
-                        <td>
-                            @if (user.IsActive)
+
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card border border-slate-200/80 dark:border-slate-800 shadow-xs rounded-4 h-100 p-3 bg-white dark:bg-slate-900 kpi-card-interactive"
+             onclick="applyKpiQuickFilter('active')" role="button" tabindex="0" aria-label="Lọc nhân sự đang hoạt động">
+            <div class="d-flex align-items-center justify-content-between">
+                <span class="text-muted fw-semibold text-uppercase" style="font-size: 0.68rem;">Đang Hoạt Động</span>
+                <span class="rounded-3 bg-success-subtle text-success p-1.5 px-2"><i class="fa-solid fa-user-check"></i></span>
+            </div>
+            <div class="h4 fw-bolder mb-0 mt-1 text-success">@Model.Stats.ActiveStaff</div>
+            <div class="text-muted mt-1" style="font-size: 0.68rem;">Lọc tài khoản Active</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card border border-slate-200/80 dark:border-slate-800 shadow-xs rounded-4 h-100 p-3 bg-white dark:bg-slate-900 kpi-card-interactive"
+             onclick="applyKpiQuickFilter('locked')" role="button" tabindex="0" aria-label="Lọc nhân sự đang khóa">
+            <div class="d-flex align-items-center justify-content-between">
+                <span class="text-muted fw-semibold text-uppercase" style="font-size: 0.68rem;">Đang Khóa</span>
+                <span class="rounded-3 bg-danger-subtle text-danger p-1.5 px-2"><i class="fa-solid fa-user-lock"></i></span>
+            </div>
+            <div class="h4 fw-bolder mb-0 mt-1 text-danger">@Model.Stats.LockedStaff</div>
+            <div class="text-muted mt-1" style="font-size: 0.68rem;">Lọc tài khoản bị khóa</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card border border-slate-200/80 dark:border-slate-800 shadow-xs rounded-4 h-100 p-3 bg-white dark:bg-slate-900 kpi-card-interactive"
+             onclick="applyKpiQuickFilter('new30d')" role="button" tabindex="0" aria-label="Lọc nhân sự mới 30 ngày">
+            <div class="d-flex align-items-center justify-content-between">
+                <span class="text-muted fw-semibold text-uppercase" style="font-size: 0.68rem;">Mới 30 Ngày</span>
+                <span class="rounded-3 bg-indigo-50 text-indigo-600 p-1.5 px-2"><i class="fa-solid fa-user-plus"></i></span>
+            </div>
+            <div class="h4 fw-bolder mb-0 mt-1 text-indigo-600">@Model.Stats.NewStaffLast30Days</div>
+            <div class="text-muted mt-1" style="font-size: 0.68rem;">Tuyển mới 30 ngày qua</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card border border-slate-200/80 dark:border-slate-800 shadow-xs rounded-4 h-100 p-3 bg-white dark:bg-slate-900 kpi-card-interactive"
+             onclick="switchStaffViewMode('department')" role="button" tabindex="0" aria-label="Xem nhóm theo phòng ban">
+            <div class="d-flex align-items-center justify-content-between">
+                <span class="text-muted fw-semibold text-uppercase" style="font-size: 0.68rem;">Số Phòng Ban</span>
+                <span class="rounded-3 bg-amber-50 text-amber-600 p-1.5 px-2" style="background:#fffbeb;color:#d97706;"><i class="fa-solid fa-building-user"></i></span>
+            </div>
+            <div class="h4 fw-bolder mb-0 mt-1 text-amber-600" style="color:#d97706;">@Model.Stats.DepartmentCount</div>
+            <div class="text-muted mt-1" style="font-size: 0.68rem;">Nhóm theo phòng ban</div>
+        </div>
+    </div>
+
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card border border-slate-200/80 dark:border-slate-800 shadow-xs rounded-4 h-100 p-3 bg-white dark:bg-slate-900 kpi-card-interactive"
+             onclick="document.getElementById('filterRoleIdSelect').focus()" role="button" tabindex="0" aria-label="Số admin quản trị">
+            <div class="d-flex align-items-center justify-content-between">
+                <span class="text-muted fw-semibold text-uppercase" style="font-size: 0.68rem;">Admin Quản Trị</span>
+                <span class="rounded-3 bg-purple-50 text-purple-600 p-1.5 px-2" style="background:#f5f3ff;color:#7c3aed;"><i class="fa-solid fa-user-tie"></i></span>
+            </div>
+            <div class="h4 fw-bolder mb-0 mt-1" style="color:#7c3aed;">@Model.Stats.AdminCount</div>
+            <div class="text-muted mt-1" style="font-size: 0.68rem;">Cấp quản lý (Lv ≥ 50)</div>
+        </div>
+    </div>
+</div>
+
+<!-- 4. Thanh Lọc Sticky + Bộ Lọc Nâng Cao + Chips + Chế Độ Xem -->
+<div class="card border border-slate-200/90 dark:border-slate-800 shadow-sm rounded-4 mb-3 bg-white/95 dark:bg-slate-900/95 hr-sticky-filter">
+    <div class="card-body p-3">
+        <form id="staffFilterForm" method="get" action="/Admin/User"
+              hx-get="/Admin/User"
+              hx-target="#staffTableContent"
+              hx-push-url="true"
+              hx-swap="innerHTML show:no-scroll"
+              onsubmit="resetPageBeforeSubmit()">
+
+            <div class="row g-2 align-items-center">
+                <!-- Tìm kiếm Debounce 400ms -->
+                <div class="col-12 col-md-4 col-xl-3">
+                    <label for="filterKeywordInput" class="visually-hidden">Tìm kiếm nhân sự</label>
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light dark:bg-slate-800 border-end-0 text-muted">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" id="filterKeywordInput" name="Keyword" class="form-control border-start-0"
+                               placeholder="Tìm tên, username, email, SĐT, mã NV..."
+                               value="@Model.Filter.Keyword"
+                               autocorrect="off" autocapitalize="off" spellcheck="false"
+                               oninput="debouncedFilterSubmit()" />
+                    </div>
+                </div>
+
+                <!-- Phòng ban (Dạng cây) -->
+                <div class="col-6 col-md-3 col-xl-2">
+                    <label for="filterDepartmentIdSelect" class="visually-hidden">Lọc theo phòng ban</label>
+                    <select id="filterDepartmentIdSelect" name="DepartmentId" class="form-select form-select-sm rounded-3" onchange="submitStaffFilterForm()">
+                        <option value="">-- Phòng ban (Tất cả) --</option>
+                        @foreach (var d in Model.ScopedDepartments)
+                        {
+                            <option value="@d.Id" data-label="@d.Name" selected="@(Model.Filter.DepartmentId == d.Id ? "selected" : null)">
+                                @(string.IsNullOrEmpty(d.DisplayTreeName) ? d.Name : d.DisplayTreeName)
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Vai trò -->
+                <div class="col-6 col-md-3 col-xl-2">
+                    <label for="filterRoleIdSelect" class="visually-hidden">Lọc theo vai trò</label>
+                    <select id="filterRoleIdSelect" name="RoleId" class="form-select form-select-sm rounded-3" onchange="submitStaffFilterForm()">
+                        <option value="">-- Vai trò (Tất cả) --</option>
+                        @foreach (var r in Model.AssignableRoles)
+                        {
+                            <option value="@r.Id" data-label="@r.DisplayName" selected="@(Model.Filter.RoleId == r.Id ? "selected" : null)">
+                                @r.DisplayName (Lv@r.Level)
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <!-- Trạng thái -->
+                <div class="col-6 col-md-2 col-xl-2">
+                    <label for="filterStatusSelect" class="visually-hidden">Lọc theo trạng thái</label>
+                    <select id="filterStatusSelect" name="Status" class="form-select form-select-sm rounded-3" onchange="submitStaffFilterForm()">
+                        <option value="all" selected="@(Model.Filter.Status == "all" || string.IsNullOrEmpty(Model.Filter.Status) ? "selected" : null)">-- Mọi trạng thái --</option>
+                        <option value="active" selected="@(Model.Filter.Status == "active" ? "selected" : null)">Đang hoạt động</option>
+                        <option value="locked" selected="@(Model.Filter.Status == "locked" ? "selected" : null)">Đang khóa</option>
+                    </select>
+                </div>
+
+                <!-- Nút Bộ lọc nâng cao & Chế độ xem -->
+                <div class="col-6 col-md-12 col-xl-3 d-flex align-items-center justify-content-end gap-1.5">
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-3 px-2.5 py-1 fw-semibold"
+                            data-bs-toggle="collapse" data-bs-target="#advancedFilterCollapse"
+                            aria-expanded="@(hasAdvancedFilter ? "true" : "false")" aria-controls="advancedFilterCollapse">
+                        <i class="fa-solid fa-sliders me-1 text-rose-600"></i>Nâng cao
+                    </button>
+
+                    <!-- View Mode Switcher: Bảng | Thẻ | Phòng ban -->
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Chế độ hiển thị danh sách">
+                        <button type="button" id="btnViewTable"
+                                class="btn @(currentViewMode == "table" ? "btn-dark text-white" : "btn-outline-secondary")"
+                                onclick="switchStaffViewMode('table')" title="Chế độ Bảng">
+                            <i class="fa-solid fa-table-list"></i>
+                        </button>
+                        <button type="button" id="btnViewCard"
+                                class="btn @(currentViewMode == "card" ? "btn-dark text-white" : "btn-outline-secondary")"
+                                onclick="switchStaffViewMode('card')" title="Chế độ Thẻ (Card)">
+                            <i class="fa-solid fa-grip"></i>
+                        </button>
+                        <button type="button" id="btnViewDept"
+                                class="btn @(currentViewMode == "department" ? "btn-dark text-white" : "btn-outline-secondary")"
+                                onclick="switchStaffViewMode('department')" title="Nhóm theo Phòng ban">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </button>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary-gradient btn-sm px-2.5 py-1 text-white fw-semibold rounded-3" title="Áp dụng lọc">
+                        <i class="fa-solid fa-check"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Khối Bộ lọc nâng cao (Collapse) -->
+            <div class="collapse @(hasAdvancedFilter ? "show" : "") mt-2.5 pt-2.5 border-top" id="advancedFilterCollapse">
+                <div class="row g-2 align-items-end">
+                    <div class="col-6 col-md-3 col-xl-2">
+                        <label for="filterStoreIdSelect" class="form-label small text-muted mb-1" style="font-size: 0.72rem;">Chi nhánh làm việc</label>
+                        <select id="filterStoreIdSelect" name="StoreId" class="form-select form-select-sm rounded-3" onchange="submitStaffFilterForm()">
+                            <option value="">-- Tất cả chi nhánh --</option>
+                            @foreach (var s in Model.ScopedStores)
                             {
-                                <span class="admin-badge admin-badge--success">
-                                    <span class="admin-badge__dot"></span> Hoạt động
-                                </span>
+                                <option value="@s.Id" data-label="@s.Name" selected="@(Model.Filter.StoreId == s.Id ? "selected" : null)">@s.Name</option>
                             }
-                            else
+                        </select>
+                    </div>
+
+                    <div class="col-6 col-md-3 col-xl-2">
+                        <label for="filterManagerIdSelect" class="form-label small text-muted mb-1" style="font-size: 0.72rem;">Người quản lý trực tiếp</label>
+                        <select id="filterManagerIdSelect" name="ManagerId" class="form-select form-select-sm rounded-3" onchange="submitStaffFilterForm()">
+                            <option value="">-- Tất cả quản lý --</option>
+                            @foreach (var m in Model.PotentialManagers)
                             {
-                                <span class="admin-badge admin-badge--danger">
-                                    <span class="admin-badge__dot"></span> Đã khóa
-                                </span>
+                                <option value="@m.Id" data-label="@m.FullName" selected="@(Model.Filter.ManagerId == m.Id ? "selected" : null)">@m.FullName (@@@m.Username)</option>
                             }
-                        </td>
-                        <td class="small text-muted font-mono-numeric">@user.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td class="col-numeric">
-                            <form asp-action="ToggleStatus" asp-route-userId="@user.UserId" method="post" class="d-inline">
-                                @Html.AntiForgeryToken()
-                                @if (user.IsActive)
-                                {
-                                    <button type="submit" class="admin-btn admin-btn--ghost admin-btn--sm text-rose-600" title="Tạm khóa tài khoản" onclick="return confirm('Bạn có chắc chắn muốn khóa tài khoản này?')">
-                                        <i class="fa-solid fa-user-lock"></i>
-                                    </button>
-                                }
-                                else
-                                {
-                                    <button type="submit" class="admin-btn admin-btn--ghost admin-btn--sm text-emerald-600" title="Mở khóa tài khoản">
-                                        <i class="fa-solid fa-lock-open"></i>
-                                    </button>
-                                }
-                            </form>
-                        </td>
-                    </tr>
+                        </select>
+                    </div>
+
+                    <div class="col-6 col-md-2 col-xl-2">
+                        <label for="filterGenderSelect" class="form-label small text-muted mb-1" style="font-size: 0.72rem;">Giới tính</label>
+                        <select id="filterGenderSelect" name="Gender" class="form-select form-select-sm rounded-3" onchange="submitStaffFilterForm()">
+                            <option value="">-- Tất cả --</option>
+                            <option value="Nam" selected="@(Model.Filter.Gender == "Nam" ? "selected" : null)">Nam</option>
+                            <option value="Nữ" selected="@(Model.Filter.Gender == "Nữ" ? "selected" : null)">Nữ</option>
+                            <option value="Khác" selected="@(Model.Filter.Gender == "Khác" ? "selected" : null)">Khác</option>
+                        </select>
+                    </div>
+
+                    <div class="col-6 col-md-2 col-xl-2">
+                        <label for="filterHireFromInput" class="form-label small text-muted mb-1" style="font-size: 0.72rem;">Vào làm từ ngày</label>
+                        <input type="date" id="filterHireFromInput" name="HireFrom" class="form-control form-control-sm rounded-3"
+                               value="@(Model.Filter.HireFrom?.ToString("yyyy-MM-dd"))" onchange="submitStaffFilterForm()" />
+                    </div>
+
+                    <div class="col-6 col-md-2 col-xl-2">
+                        <label for="filterHireToInput" class="form-label small text-muted mb-1" style="font-size: 0.72rem;">Đến ngày</label>
+                        <input type="date" id="filterHireToInput" name="HireTo" class="form-control form-control-sm rounded-3"
+                               value="@(Model.Filter.HireTo?.ToString("yyyy-MM-dd"))" onchange="submitStaffFilterForm()" />
+                    </div>
+
+                    <div class="col-6 col-md-2 col-xl-2">
+                        <label for="filterCreatedFromInput" class="form-label small text-muted mb-1" style="font-size: 0.72rem;">Tạo từ ngày</label>
+                        <input type="date" id="filterCreatedFromInput" name="CreatedFrom" class="form-control form-control-sm rounded-3"
+                               value="@(Model.Filter.CreatedFrom?.ToString("yyyy-MM-dd"))" onchange="submitStaffFilterForm()" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden state inputs -->
+            <input type="hidden" name="Page" id="staffPageInput" value="@Model.Filter.Page" />
+            <input type="hidden" name="PageSize" id="staffPageSizeInput" value="@Model.Filter.PageSize" />
+            <input type="hidden" name="SortBy" id="staffSortByInput" value="@Model.Filter.SortBy" />
+            <input type="hidden" name="SortDir" id="staffSortDirInput" value="@Model.Filter.SortDir" />
+            <input type="hidden" name="ViewMode" id="staffViewModeInput" value="@currentViewMode" />
+
+            <!-- Active Filter Chips Bar -->
+            <div id="activeFilterChipsBar" class="d-flex flex-wrap align-items-center gap-1.5 mt-2.5 pt-2 border-top d-none">
+                <span class="small text-muted fw-semibold me-1" style="font-size: 0.72rem;">
+                    <i class="fa-solid fa-filter text-rose-500 me-1"></i>Đang lọc:
+                </span>
+                <div id="activeFilterChipsList" class="d-flex flex-wrap align-items-center gap-1.5"></div>
+                <button type="button" class="btn btn-link btn-sm text-danger text-decoration-none p-0 ms-2 fw-semibold"
+                        style="font-size: 0.74rem;" onclick="resetAllStaffFilters()">
+                    <i class="fa-solid fa-xmark me-1"></i>Xóa tất cả
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 5. Thanh Hành Động Hàng Loạt (Floating Bulk Action Bar khi chọn ≥ 1 dòng) -->
+<div id="bulkActionBar" class="card border-0 shadow-sm rounded-4 mb-3 bg-rose-50 dark:bg-slate-800 p-3 d-none" style="border: 1px solid #fecdd3 !important;">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-rose-600 text-white px-2.5 py-1 rounded-pill" id="selectedStaffCountBadge">0</span>
+            <span class="small fw-bold text-dark dark:text-white">nhân sự đang được chọn</span>
+            <button type="button" class="btn btn-link btn-sm text-muted text-decoration-none p-0 ms-1" onclick="toggleSelectAllStaff(false)">
+                (Bỏ chọn)
+            </button>
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            @if (Model.ActorContext.IsSuperAdmin || Model.ActorContext.CanEditUser)
+            {
+                <button asp-permission="USER_EDIT" type="button" class="btn btn-sm btn-outline-success bg-white rounded-3 fw-semibold" onclick="executeBulkAction('unlock')">
+                    <i class="fa-solid fa-lock-open me-1"></i>Mở Khóa
+                </button>
+                <button asp-permission="USER_EDIT" type="button" class="btn btn-sm btn-outline-warning bg-white rounded-3 fw-semibold" onclick="executeBulkAction('lock')">
+                    <i class="fa-solid fa-user-lock me-1"></i>Khóa
+                </button>
+                <button asp-permission="USER_EDIT" type="button" class="btn btn-sm btn-outline-primary bg-white rounded-3 fw-semibold" onclick="openBulkAssignDeptModal()">
+                    <i class="fa-solid fa-building-user me-1"></i>Chuyển Phòng Ban
+                </button>
+            }
+            @if (Model.ActorContext.IsSuperAdmin || Model.ActorContext.CanAssignRole)
+            {
+                <button asp-any-permission="USER_ASSIGN_ROLE,PERMISSION_DELEGATE" type="button" class="btn btn-sm btn-outline-indigo bg-white rounded-3 fw-semibold" onclick="openBulkAssignRoleModal()">
+                    <i class="fa-solid fa-id-badge me-1"></i>Gán Vai Trò
+                </button>
+            }
+            <button asp-permission="USER_EXPORT" type="button" class="btn btn-sm btn-outline-secondary bg-white rounded-3 fw-semibold" onclick="exportSelectedStaffRows('xlsx')">
+                <i class="fa-solid fa-file-export text-emerald-600 me-1"></i>Xuất Các Dòng Đã Chọn
+            </button>
+            @if (Model.ActorContext.IsSuperAdmin || Model.ActorContext.CanDeleteUser)
+            {
+                <button asp-permission="USER_DELETE" type="button" class="btn btn-sm btn-danger rounded-3 fw-semibold" onclick="executeBulkAction('delete')">
+                    <i class="fa-regular fa-trash-can me-1"></i>Xóa
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- 6. Khung Dữ Liệu Bảng Nhân Sự + Skeleton Loading -->
+<div class="card border-0 shadow-sm rounded-4 bg-white dark:bg-slate-900 position-relative" id="staffTableContainer">
+    <!-- Skeleton Loading khi HTMX đang tải -->
+    <div class="htmx-indicator-skeleton p-4 border-bottom">
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="skeleton-line" style="width: 40px; height: 40px; border-radius: 50%;"></div>
+            <div class="flex-grow-1">
+                <div class="skeleton-line mb-2" style="width: 35%;"></div>
+                <div class="skeleton-line" style="width: 20%;"></div>
+            </div>
+            <div class="skeleton-line" style="width: 15%;"></div>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <div class="skeleton-line" style="width: 40px; height: 40px; border-radius: 50%;"></div>
+            <div class="flex-grow-1">
+                <div class="skeleton-line mb-2" style="width: 45%;"></div>
+                <div class="skeleton-line" style="width: 25%;"></div>
+            </div>
+            <div class="skeleton-line" style="width: 15%;"></div>
+        </div>
+    </div>
+
+    <div id="staffTableContent">
+        <partial name="_StaffTable" model="Model.StaffPaged" />
+    </div>
+</div>
+
+<!-- Modal Đặt lại Mật Khẩu -->
+<div class="modal fade" id="resetPasswordModal" tabindex="-1" aria-labelledby="resetPasswordModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-amber-500 text-white border-0 rounded-top-4" style="background: linear-gradient(135deg, #d97706, #ea580c);">
+                <h5 class="modal-title h6 fw-bold mb-0" id="resetPasswordModalTitle">
+                    <i class="fa-solid fa-key me-2"></i>Đặt Lại Mật Khẩu Nhân Sự
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body p-4">
+                <input type="hidden" id="reset_StaffId" />
+                <p class="small text-muted mb-3">
+                    Đang cấp lại mật khẩu cho nhân sự: <strong id="reset_StaffName" class="text-dark dark:text-white"></strong>
+                </p>
+
+                <div class="mb-3">
+                    <label for="reset_NewPasswordInput" class="form-label small fw-bold text-dark dark:text-white">Mật khẩu mới (Tùy chọn)</label>
+                    <div class="input-group">
+                        <input type="text" id="reset_NewPasswordInput" class="form-control font-monospace"
+                               placeholder="Để trống để hệ thống tự sinh mật khẩu mạnh..." autocomplete="new-password" />
+                        <button type="button" class="btn btn-outline-secondary" onclick="generateRandomPasswordForModal()" title="Tạo mật khẩu ngẫu nhiên">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        </button>
+                    </div>
+                    <div class="form-text small" style="font-size: 0.72rem;">
+                        Mật khẩu mới sẽ được hiển thị <strong>1 lần duy nhất</strong> sau khi xác nhận để bạn sao chép.
+                    </div>
+                </div>
+
+                <div class="form-check form-switch mb-2">
+                    <input class="form-check-input" type="checkbox" id="reset_RequireChangeCb" checked>
+                    <label class="form-check-label small text-dark dark:text-white" for="reset_RequireChangeCb">
+                        Bắt buộc đổi mật khẩu ở lần đăng nhập kế tiếp
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                <button type="button" class="btn btn-light rounded-3 fw-semibold" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn text-white rounded-3 fw-semibold px-4" style="background:#d97706;" onclick="submitResetPassword()">
+                    <i class="fa-solid fa-check me-1"></i>Xác Nhận Cấp Lại
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Chuyển Phòng Ban Hàng Loạt -->
+<div class="modal fade" id="bulkDeptModal" tabindex="-1" aria-labelledby="bulkDeptModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-primary text-white border-0 rounded-top-4">
+                <h5 class="modal-title h6 fw-bold mb-0" id="bulkDeptModalTitle">
+                    <i class="fa-solid fa-building-user me-2"></i>Chuyển Phòng Ban Hàng Loạt
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body p-4">
+                <label for="bulkTargetDeptSelect" class="form-label small fw-bold text-dark dark:text-white">Chọn phòng ban đích</label>
+                <select id="bulkTargetDeptSelect" class="form-select rounded-3">
+                    <option value="">-- Chọn phòng ban --</option>
+                    @foreach (var d in Model.ScopedDepartments)
+                    {
+                        <option value="@d.Id">@(string.IsNullOrEmpty(d.DisplayTreeName) ? d.Name : d.DisplayTreeName) (@d.Code)</option>
+                    }
+                </select>
+            </div>
+            <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                <button type="button" class="btn btn-light rounded-3 fw-semibold" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary rounded-3 fw-semibold px-4" onclick="confirmBulkAssignDepartment()">
+                    <i class="fa-solid fa-check me-1"></i>Áp Dụng
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Gán Vai Trò Hàng Loạt -->
+<div class="modal fade" id="bulkRoleModal" tabindex="-1" aria-labelledby="bulkRoleModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header text-white border-0 rounded-top-4" style="background:#4f46e5;">
+                <h5 class="modal-title h6 fw-bold mb-0" id="bulkRoleModalTitle">
+                    <i class="fa-solid fa-id-badge me-2"></i>Gán Vai Trò Hàng Loạt
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body p-4">
+                <label for="bulkTargetRoleSelect" class="form-label small fw-bold text-dark dark:text-white">Chọn vai trò cần gán</label>
+                <select id="bulkTargetRoleSelect" class="form-select rounded-3">
+                    <option value="">-- Chọn vai trò --</option>
+                    @foreach (var r in Model.AssignableRoles)
+                    {
+                        <option value="@r.Id">@r.DisplayName (Cấp bậc: Lv@r.Level)</option>
+                    }
+                </select>
+            </div>
+            <div class="modal-footer border-0 pt-0 px-4 pb-4">
+                <button type="button" class="btn btn-light rounded-3 fw-semibold" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn text-white rounded-3 fw-semibold px-4" style="background:#4f46e5;" onclick="confirmBulkAssignRole()">
+                    <i class="fa-solid fa-check me-1"></i>Gán Ngay
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let resetPasswordModalInstance = null;
+        let bulkDeptModalInstance = null;
+        let bulkRoleModalInstance = null;
+        let filterDebounceTimer = null;
+
+        function debouncedFilterSubmit() {
+            clearTimeout(filterDebounceTimer);
+            filterDebounceTimer = setTimeout(() => {
+                submitStaffFilterForm();
+            }, 400);
+        }
+
+        function resetPageBeforeSubmit() {
+            renderActiveFilterChips();
+        }
+
+        function submitStaffFilterForm(resetPage = true) {
+            if (resetPage) {
+                document.getElementById('staffPageInput').value = 1;
+            }
+            renderActiveFilterChips();
+            const form = document.getElementById('staffFilterForm');
+            if (window.htmx) {
+                htmx.trigger(form, 'submit');
+            } else {
+                form.submit();
+            }
+        }
+
+        function goToStaffPage(page) {
+            document.getElementById('staffPageInput').value = page;
+            submitStaffFilterForm(false);
+        }
+
+        function changeStaffPageSize(size) {
+            document.getElementById('staffPageSizeInput').value = size;
+            submitStaffFilterForm(true);
+        }
+
+        function sortStaffBy(column) {
+            const sortByInput = document.getElementById('staffSortByInput');
+            const sortDirInput = document.getElementById('staffSortDirInput');
+            if (sortByInput.value.toLowerCase() === column.toLowerCase()) {
+                sortDirInput.value = sortDirInput.value.toLowerCase() === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortByInput.value = column;
+                sortDirInput.value = 'asc';
+            }
+            submitStaffFilterForm(false);
+        }
+
+        function switchStaffViewMode(mode) {
+            document.getElementById('staffViewModeInput').value = mode;
+            ['Table', 'Card', 'Dept'].forEach(k => {
+                const btn = document.getElementById('btnView' + k);
+                if (!btn) return;
+                const target = k === 'Dept' ? 'department' : k.toLowerCase();
+                if (target === mode) {
+                    btn.className = 'btn btn-dark text-white';
+                } else {
+                    btn.className = 'btn btn-outline-secondary';
                 }
-            </tbody>
-        </table>
-    </div>
+            });
+            submitStaffFilterForm(false);
+        }
+
+        function applyKpiQuickFilter(type) {
+            const statusSelect = document.getElementById('filterStatusSelect');
+            const createdFromInput = document.getElementById('filterCreatedFromInput');
+
+            if (type === 'all') {
+                statusSelect.value = 'all';
+                createdFromInput.value = '';
+            } else if (type === 'active') {
+                statusSelect.value = 'active';
+                createdFromInput.value = '';
+            } else if (type === 'locked') {
+                statusSelect.value = 'locked';
+                createdFromInput.value = '';
+            } else if (type === 'new30d') {
+                statusSelect.value = 'all';
+                const d = new Date();
+                d.setDate(d.getDate() - 30);
+                createdFromInput.value = d.toISOString().split('T')[0];
+            }
+            submitStaffFilterForm(true);
+        }
+
+        function resetAllStaffFilters() {
+            document.getElementById('filterKeywordInput').value = '';
+            document.getElementById('filterDepartmentIdSelect').value = '';
+            document.getElementById('filterRoleIdSelect').value = '';
+            document.getElementById('filterStatusSelect').value = 'all';
+            document.getElementById('filterStoreIdSelect').value = '';
+            document.getElementById('filterManagerIdSelect').value = '';
+            document.getElementById('filterGenderSelect').value = '';
+            document.getElementById('filterHireFromInput').value = '';
+            document.getElementById('filterHireToInput').value = '';
+            document.getElementById('filterCreatedFromInput').value = '';
+            submitStaffFilterForm(true);
+        }
+
+        function clearSingleFilter(fieldId, defaultVal = '') {
+            const el = document.getElementById(fieldId);
+            if (el) {
+                el.value = defaultVal;
+                submitStaffFilterForm(true);
+            }
+        }
+
+        function renderActiveFilterChips() {
+            const list = document.getElementById('activeFilterChipsList');
+            const bar = document.getElementById('activeFilterChipsBar');
+            if (!list || !bar) return;
+
+            list.innerHTML = '';
+            const chips = [];
+
+            const kw = document.getElementById('filterKeywordInput').value.trim();
+            if (kw) chips.push({ label: `Từ khóa: "${kw}"`, id: 'filterKeywordInput', def: '' });
+
+            const deptSel = document.getElementById('filterDepartmentIdSelect');
+            if (deptSel.value) {
+                const txt = deptSel.options[deptSel.selectedIndex]?.getAttribute('data-label') || deptSel.options[deptSel.selectedIndex]?.text;
+                chips.push({ label: `Phòng: ${txt.trim()}`, id: 'filterDepartmentIdSelect', def: '' });
+            }
+
+            const roleSel = document.getElementById('filterRoleIdSelect');
+            if (roleSel.value) {
+                const txt = roleSel.options[roleSel.selectedIndex]?.getAttribute('data-label') || roleSel.options[roleSel.selectedIndex]?.text;
+                chips.push({ label: `Vai trò: ${txt.trim()}`, id: 'filterRoleIdSelect', def: '' });
+            }
+
+            const statusSel = document.getElementById('filterStatusSelect');
+            if (statusSel.value && statusSel.value !== 'all') {
+                chips.push({ label: `Trạng thái: ${statusSel.value === 'active' ? 'Đang hoạt động' : 'Đang khóa'}`, id: 'filterStatusSelect', def: 'all' });
+            }
+
+            const storeSel = document.getElementById('filterStoreIdSelect');
+            if (storeSel.value) {
+                const txt = storeSel.options[storeSel.selectedIndex]?.getAttribute('data-label') || storeSel.options[storeSel.selectedIndex]?.text;
+                chips.push({ label: `Chi nhánh: ${txt.trim()}`, id: 'filterStoreIdSelect', def: '' });
+            }
+
+            const mgrSel = document.getElementById('filterManagerIdSelect');
+            if (mgrSel.value) {
+                const txt = mgrSel.options[mgrSel.selectedIndex]?.getAttribute('data-label') || mgrSel.options[mgrSel.selectedIndex]?.text;
+                chips.push({ label: `Quản lý: ${txt.trim()}`, id: 'filterManagerIdSelect', def: '' });
+            }
+
+            const genderSel = document.getElementById('filterGenderSelect');
+            if (genderSel.value) {
+                chips.push({ label: `Giới tính: ${genderSel.value}`, id: 'filterGenderSelect', def: '' });
+            }
+
+            const hireFrom = document.getElementById('filterHireFromInput').value;
+            if (hireFrom) chips.push({ label: `Vào làm từ: ${hireFrom}`, id: 'filterHireFromInput', def: '' });
+
+            const hireTo = document.getElementById('filterHireToInput').value;
+            if (hireTo) chips.push({ label: `Vào làm đến: ${hireTo}`, id: 'filterHireToInput', def: '' });
+
+            const createdFrom = document.getElementById('filterCreatedFromInput').value;
+            if (createdFrom) chips.push({ label: `Tạo từ: ${createdFrom}`, id: 'filterCreatedFromInput', def: '' });
+
+            if (chips.length === 0) {
+                bar.classList.add('d-none');
+                return;
+            }
+
+            bar.classList.remove('d-none');
+            chips.forEach(c => {
+                const span = document.createElement('span');
+                span.className = 'badge bg-rose-50 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-pill d-inline-flex align-items-center gap-1.5 fw-semibold';
+                span.style.fontSize = '0.72rem';
+                span.style.background = '#fff1f2';
+                span.style.color = '#be123c';
+                span.innerHTML = `<span>${c.label}</span><button type="button" class="btn-close" style="font-size: 0.5rem;" aria-label="Xóa lọc" onclick="clearSingleFilter('${c.id}', '${c.def}')"></button>`;
+                list.appendChild(span);
+            });
+        }
+
+        function copyToClipboard(text, label) {
+            if (!text) return;
+            navigator.clipboard.writeText(text).then(() => {
+                window.showAdminToast(`Đã sao chép ${label}: ${text}`, 'success');
+            });
+        }
+
+        function triggerExport(format) {
+            const form = document.getElementById('staffFilterForm');
+            const params = new URLSearchParams(new FormData(form));
+            params.set('format', format);
+            window.location.href = '/Admin/User/Export?' + params.toString();
+        }
+
+        function exportSelectedStaffRows(format) {
+            const ids = getSelectedStaffIds();
+            if (ids.length === 0) return;
+            const params = new URLSearchParams();
+            params.set('format', format || 'xlsx');
+            params.set('Ids', ids.join(','));
+            window.location.href = '/Admin/User/Export?' + params.toString();
+        }
+
+        function toggleSelectAllStaff(checked) {
+            document.querySelectorAll('.staff-select-cb').forEach(cb => cb.checked = checked);
+            updateBulkActionToolbar();
+        }
+
+        function updateBulkActionToolbar() {
+            const selected = getSelectedStaffIds();
+            const bar = document.getElementById('bulkActionBar');
+            const badge = document.getElementById('selectedStaffCountBadge');
+            if (badge) badge.textContent = selected.length;
+
+            if (selected.length > 0) {
+                bar.classList.remove('d-none');
+            } else {
+                bar.classList.add('d-none');
+                const allCb = document.getElementById('selectAllStaffCb');
+                if (allCb) allCb.checked = false;
+            }
+        }
+
+        function getSelectedStaffIds() {
+            return Array.from(document.querySelectorAll('.staff-select-cb:checked')).map(cb => parseInt(cb.value, 10));
+        }
+
+        async function quickToggleStaffStatus(staffId, fullName, currentlyActive, switchEl = null) {
+            const actionText = currentlyActive ? 'tạm khóa' : 'mở khóa';
+            const confirmRes = await Swal.fire({
+                title: `Xác nhận ${actionText} tài khoản?`,
+                html: `Bạn có chắc chắn muốn <strong>${actionText}</strong> tài khoản nhân sự <strong>${fullName}</strong>?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: currentlyActive ? '#d97706' : '#059669',
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy'
+            });
+
+            if (!confirmRes.isConfirmed) {
+                if (switchEl) switchEl.checked = currentlyActive;
+                return;
+            }
+
+            const res = await window.adminJsonRequest(`/Admin/User/ToggleStatus/${staffId}`, null, 'POST');
+            if (res && res.succeeded) {
+                window.showAdminToast(res.message, 'success');
+                submitStaffFilterForm(false);
+            } else if (switchEl) {
+                switchEl.checked = currentlyActive;
+            }
+        }
+
+        async function executeBulkAction(action) {
+            const ids = getSelectedStaffIds();
+            if (ids.length === 0) return;
+
+            let actionName = action === 'delete' ? 'xóa mềm (chuyển vào thùng rác)' : (action === 'lock' ? 'tạm khóa' : 'mở khóa');
+            const confirmRes = await Swal.fire({
+                title: `Xác nhận ${actionName} ${ids.length} nhân sự?`,
+                text: 'Các tài khoản ngoài phạm vi hoặc Trưởng phòng sẽ tự động được bảo vệ.',
+                icon: action === 'delete' ? 'warning' : 'question',
+                showCancelButton: true,
+                confirmButtonColor: action === 'delete' ? '#dc2626' : '#e11d48',
+                confirmButtonText: 'Xác nhận thực hiện',
+                cancelButtonText: 'Hủy'
+            });
+            if (!confirmRes.isConfirmed) return;
+
+            const res = await window.adminJsonRequest('/Admin/User/Bulk', {
+                action: action,
+                staffIds: ids
+            });
+
+            if (res && res.success) {
+                window.showAdminToast(res.message || 'Thao tác hàng loạt thành công.', 'success');
+                setTimeout(() => window.location.reload(), 600);
+            }
+        }
+
+        function openBulkAssignDeptModal() {
+            const ids = getSelectedStaffIds();
+            if (ids.length === 0) return;
+            if (!bulkDeptModalInstance) bulkDeptModalInstance = new bootstrap.Modal(document.getElementById('bulkDeptModal'));
+            bulkDeptModalInstance.show();
+        }
+
+        async function confirmBulkAssignDepartment() {
+            const deptId = parseInt(document.getElementById('bulkTargetDeptSelect').value, 10);
+            if (!deptId) {
+                window.showAdminToast('Vui lòng chọn phòng ban cần chuyển đến!', 'warning');
+                return;
+            }
+            const ids = getSelectedStaffIds();
+            if (bulkDeptModalInstance) bulkDeptModalInstance.hide();
+
+            const res = await window.adminJsonRequest('/Admin/User/Bulk', {
+                action: 'assigndepartment',
+                staffIds: ids,
+                targetDepartmentId: deptId
+            });
+
+            if (res && res.success) {
+                window.showAdminToast(res.message, 'success');
+                setTimeout(() => window.location.reload(), 600);
+            }
+        }
+
+        function openBulkAssignRoleModal() {
+            const ids = getSelectedStaffIds();
+            if (ids.length === 0) return;
+            if (!bulkRoleModalInstance) bulkRoleModalInstance = new bootstrap.Modal(document.getElementById('bulkRoleModal'));
+            bulkRoleModalInstance.show();
+        }
+
+        async function confirmBulkAssignRole() {
+            const roleId = parseInt(document.getElementById('bulkTargetRoleSelect').value, 10);
+            if (!roleId) {
+                window.showAdminToast('Vui lòng chọn vai trò cần gán!', 'warning');
+                return;
+            }
+            const ids = getSelectedStaffIds();
+            if (bulkRoleModalInstance) bulkRoleModalInstance.hide();
+
+            const res = await window.adminJsonRequest('/Admin/User/Bulk', {
+                action: 'assignrole',
+                staffIds: ids,
+                targetRoleId: roleId
+            });
+
+            if (res && res.success) {
+                window.showAdminToast(res.message, 'success');
+                setTimeout(() => window.location.reload(), 600);
+            }
+        }
+
+        function openResetPasswordModal(staffId, fullName, username) {
+            document.getElementById('reset_StaffId').value = staffId;
+            document.getElementById('reset_StaffName').textContent = `${fullName} (\x40${username})`;
+            document.getElementById('reset_NewPasswordInput').value = '';
+            if (!resetPasswordModalInstance) resetPasswordModalInstance = new bootstrap.Modal(document.getElementById('resetPasswordModal'));
+            resetPasswordModalInstance.show();
+        }
+
+        function generateRandomPasswordForModal() {
+            const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!#$%&*+';
+            let pwd = 'Canmake2026!';
+            for (let i = 0; i < 6; i++) {
+                pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('reset_NewPasswordInput').value = pwd;
+        }
+
+        async function submitResetPassword() {
+            const staffId = parseInt(document.getElementById('reset_StaffId').value, 10);
+            const newPassword = (document.getElementById('reset_NewPasswordInput').value || '').trim();
+            const requireChange = document.getElementById('reset_RequireChangeCb').checked;
+
+            if (resetPasswordModalInstance) resetPasswordModalInstance.hide();
+
+            const res = await window.adminJsonRequest('/Admin/User/ResetPassword', {
+                staffId: staffId,
+                newPassword: newPassword,
+                requireChangeOnLogin: requireChange
+            });
+
+            if (res && res.succeeded) {
+                const tempPwd = res.data;
+                const modalRes = await Swal.fire({
+                    title: 'Mật Khẩu Tạm Đã Cấp!',
+                    html: `
+                        <p class="small text-muted mb-2">Mật khẩu tạm chỉ hiển thị <strong>1 lần duy nhất</strong>:</p>
+                        <div class="p-3 rounded-3 bg-slate-100 border font-monospace fs-5 fw-bold text-rose-600 mb-2">${tempPwd}</div>
+                        <p class="small text-muted mb-0">Bấm nút bên dưới để sao chép và gửi bảo mật cho nhân sự.</p>
+                    `,
+                    icon: 'success',
+                    confirmButtonColor: '#e11d48',
+                    confirmButtonText: '<i class="fa-regular fa-copy me-1"></i>Sao chép mật khẩu'
+                });
+                if (modalRes.isConfirmed && navigator.clipboard) {
+                    navigator.clipboard.writeText(tempPwd);
+                    window.showAdminToast('Đã sao chép mật khẩu tạm vào bộ nhớ tạm!', 'success');
+                }
+            }
+        }
+
+        async function confirmDeleteStaff(staffId, fullName, username) {
+            const confirmRes = await Swal.fire({
+                title: 'Xác nhận xóa mềm nhân sự?',
+                html: `Đưa hồ sơ <strong>${fullName}</strong> (<code>\x40${username}</code>) vào thùng rác?<br/><span class="small text-muted">Toàn bộ lịch sử đơn hàng và kiểm toán vẫn được bảo toàn.</span>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                confirmButtonText: 'Đưa vào thùng rác',
+                cancelButtonText: 'Hủy'
+            });
+
+            if (!confirmRes.isConfirmed) return;
+
+            const res = await window.adminJsonRequest(`/Admin/User/Delete/${staffId}`, null, 'POST');
+            if (res && res.succeeded) {
+                window.showAdminToast(res.message, 'success');
+                setTimeout(() => window.location.reload(), 600);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderActiveFilterChips();
+        });
+    </script>
 }

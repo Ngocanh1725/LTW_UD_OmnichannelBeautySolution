@@ -1,0 +1,8 @@
+"Name","Path","Status","Cold_TTFB_ms","Warm_Avg_ms","Warm_Min_ms","Warm_Max_ms"
+"Trang chủ","/","200","37.2","7","4.4","15.2"
+"Tìm kiếm","/tim-kiem","200","1444","26.2","21.8","33"
+"Danh mục trang điểm","/category/trang-diem","200","4381","23.9","21.4","28.6"
+"Chi tiết sản phẩm","/san-pham/son-kem-li-romand-zero-velvet-tint-02-joyful","200","2852.1","19.3","17.6","21.4"
+"Giỏ hàng","/Cart","200","679.3","10","7.5","12.6"
+"Thanh toán (Checkout)","/Checkout","200","37.7","15.2","11.8","18.5"
+"Admin Dashboard","/Admin/Dashboard","200","2153.2","63.8","59.7","71.6"

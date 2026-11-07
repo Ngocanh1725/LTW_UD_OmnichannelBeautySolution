@@ -1,0 +1,54 @@
+@startuml Kien_Truc_Clean_Architecture_4_Tang_Omni_Beauty
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Times New Roman"
+skinparam defaultFontSize 12
+skinparam roundCorner 8
+skinparam shadowing false
+skinparam ArrowColor #1B4F72
+skinparam ArrowThickness 1.5
+skinparam ArrowFontSize 11
+skinparam packageStyle rectangle
+
+' ========================================================
+' TẦNG 1: PRESENTATION LAYER (GIAO DIỆN & ĐIỂM CHẠM)
+' ========================================================
+package "1. PRESENTATION LAYER (Omnichannel.Web)" as PresLayer #EBF5FB {
+    rectangle "<b>Các thành phần giao diện & Điểm chạm</b>\n- 40 Bộ điều khiển (Storefront Controllers & Admin Area Controllers)\n- Giao diện Razor Views, ViewComponents, Partial Views\n- Kênh thời gian thực SignalR Hubs (Realtime Notifications)\n- Bộ lọc tùy biến (Action Filters, Exception & Authorization Filters)" as PresComp #D4E6F1
+}
+
+' ========================================================
+' TẦNG 2: APPLICATION LAYER (NGHIỆP VỤ ỨNG DỤNG)
+' ========================================================
+package "2. APPLICATION LAYER (Omnichannel.Application)" as AppLayer #FEF9E7 {
+    rectangle "<b>Các bản hợp đồng trừu tượng & Điều phối luồng nghiệp vụ</b>\n- 25 Giao diện Dịch vụ (IOrderWorkflowService, IInventoryAllocationEngine, IPosShiftService...)\n- 37 Bộ cấu trúc truyền tải dữ liệu (Data Transfer Objects - DTOs & ViewModels)\n- Bộ điều phối luồng ca sử dụng (Business Rules Orchestrators)\n- Tiêu chuẩn quy tắc nghiệp vụ (Business Rule Specifications & Enums)" as AppComp #FDEBD0
+}
+
+' ========================================================
+' TẦNG 3: DOMAIN CORE LAYER (LÕI NGHIỆP VỤ NỘI TẠI)
+' ========================================================
+package "3. DOMAIN CORE LAYER (Omnichannel.Domain)" as DomainLayer #EAFAF1 {
+    rectangle "<b>Lõi nghiệp vụ độc lập & Bất biến (Zero Dependencies)</b>\n- 65 Thực thể thuần C# (POCO Entities: ProductBatches, StoreInventories, PosShifts, Orders...)\n- Bất biến miền & Logic nội tại (GetAvailableQuantity, IsNearExpiration, ValidatePrice)\n- Định nghĩa sự kiện nội miền (Domain Events) & Kiểu dữ liệu liệt kê (Enums)\n- Cụm đối tượng tổng hợp (Aggregates & Value Objects)" as DomainComp #D5F5E3
+}
+
+' ========================================================
+' TẦNG 4: INFRASTRUCTURE LAYER (HẠ TẦNG & TRUY XUẤT)
+' ========================================================
+package "4. INFRASTRUCTURE LAYER (Omnichannel.Infrastructure)" as InfraLayer #F4ECF7 {
+    rectangle "<b>Hiện thực hóa hạ tầng, Dữ liệu & Tích hợp ngoài</b>\n- Ngữ cảnh CSDL Entity Framework Core 8 (ApplicationDbContext & ChangeTracker Interceptor)\n- 27 Dịch vụ cài đặt thực tế (OrderWorkflowService, InventoryAllocationEngine...)\n- Cơ chế bảo mật phân quyền động PBAC & Bộ nhớ đệm (IMemoryCache)\n- Cổng tích hợp dịch vụ ngoài (VietQR, Cổng thanh toán VNPay/MoMo, Vận chuyển GHN)" as InfraComp #E8DAEF
+}
+
+' ========================================================
+' MỐI QUAN HỆ PHỤ THUỘC (THE DEPENDENCY RULE & DIP)
+' ========================================================
+
+PresComp -[#1B4F72,bold]-> AppComp : "phụ thuộc vào (references)\n[Gọi thực thi ca sử dụng qua Interfaces]"
+
+AppComp -[#1B4F72,bold]-> DomainComp : "phụ thuộc vào (references)\n[Thao tác trực tiếp trên Domain Entities]"
+
+InfraComp -[#27AE60,dashed,bold]-> AppComp : "triển khai thực tế (implements)\n[Hiện thực hóa 25 Service Interfaces]"
+
+InfraComp -[#1B4F72,dashed]-> DomainComp : "ánh xạ & bảo toàn (maps)\n[Cấu hình Fluent API & Migration 65 bảng]"
+
+PresComp .[#8E44AD,dashed].> InfraComp : "đăng ký thùng chứa phụ thuộc (IoC DI)\n[Đăng ký Scoped Services tại Program.cs]"
+
+@enduml

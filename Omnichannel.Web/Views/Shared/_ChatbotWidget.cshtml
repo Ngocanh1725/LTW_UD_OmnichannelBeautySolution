@@ -1,9 +1,9 @@
 @* 
-    _ChatbotWidget.cshtml - AI Chatbot Hỗ Trợ Khách Hàng Chuẩn Phong Cách OMNI BEAUTY
+    _ChatbotWidget.cshtml - AI Chatbot Hỗ Trợ Khách Hàng Chuẩn Phong Cách CANMAKE BEAUTY
 *@
 
 <style>
-    /* Bo góc 24px chuẩn OMNI BEAUTY */
+    /* Bo góc 24px chuẩn CANMAKE BEAUTY */
     .omni-chat-panel {
         border-radius: 24px !important;
     }
@@ -87,7 +87,7 @@
 </style>
 
 <div id="beautyChatWidget" class="relative z-50">
-    <!-- 1. FLOATING LAUNCHER BUTTON PHONG CÁCH OMNI BEAUTY (Góc phải dưới) -->
+    <!-- 1. FLOATING LAUNCHER BUTTON PHONG CÁCH CANMAKE BEAUTY (Góc phải dưới) -->
     <div id="chatLauncherContainer" class="fixed bottom-20 sm:bottom-6 right-6 z-50 flex items-center gap-3">
         <!-- Floating Teaser Tooltip -->
         <div id="chatTeaserBubble" 
@@ -97,19 +97,19 @@
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
-            <span class="font-semibold text-slate-800">OMNI BEAUTY AI:</span>
+            <span class="font-semibold text-slate-800">CANMAKE BEAUTY AI:</span>
             <span class="text-slate-600">Hỏi đáp thành phần & tra cứu HSD FEFO ngay!</span>
             <button type="button" onclick="event.stopPropagation(); dismissChatTeaser();" class="text-slate-400 hover:text-slate-600 ml-1" aria-label="Đóng gợi ý">
                 <i class="fa-solid fa-xmark text-[11px]"></i>
             </button>
         </div>
 
-        <!-- Main Launcher Button: Avatar tròn OMNI BEAUTY với đèn xanh online phát sáng -->
+        <!-- Main Launcher Button: Avatar tròn CANMAKE BEAUTY với đèn xanh online phát sáng -->
         <button id="chatLauncherBtn" 
                 type="button" 
                 onclick="toggleChatPanel()"
                 class="relative h-15 w-15 sm:h-16 sm:w-16 rounded-full bg-gradient-to-tr from-rose-500 via-pink-600 to-purple-700 text-white shadow-[0_10px_30px_rgba(225,29,72,0.4)] hover:shadow-[0_14px_36px_rgba(225,29,72,0.55)] hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center group focus:outline-none focus:ring-4 focus:ring-pink-300/50 p-1"
-                aria-label="Mở OMNI BEAUTY AI Chatbot">
+                aria-label="Mở CANMAKE BEAUTY AI Chatbot">
             
             <!-- Avatar Logo Tròn Nội Bộ -->
             <div class="w-full h-full rounded-full bg-gradient-to-tr from-rose-600 via-pink-500 to-purple-600 flex items-center justify-center overflow-hidden border-2 border-white/80 shadow-inner">
@@ -139,7 +139,7 @@
     <div id="chatPanel" 
          class="hidden fixed inset-0 sm:inset-auto sm:bottom-24 sm:right-6 z-50 w-full sm:w-[420px] h-full sm:h-[620px] sm:max-h-[85vh] bg-white omni-chat-panel shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-pink-100 flex-col overflow-hidden transition-all duration-300">
         
-        <!-- HEADER SANG TRỌNG OMNI BEAUTY -->
+        <!-- HEADER SANG TRỌNG CANMAKE BEAUTY -->
         <div class="px-5 py-4 bg-gradient-to-r from-rose-600 via-pink-600 to-purple-700 text-white flex items-center justify-between shadow-sm flex-shrink-0">
             <div class="flex items-center gap-3">
                 <!-- Avatar Logo Tròn Trong Header Có Đèn Xanh Online -->
@@ -153,7 +153,7 @@
                 <div>
                     <div class="flex items-center gap-1.5">
                         <h3 class="font-bold text-base leading-tight text-white flex items-center gap-1 tracking-tight">
-                            OMNI BEAUTY AI
+                            CANMAKE BEAUTY AI
                         </h3>
                         <span class="bg-white/25 text-[9px] px-1.5 py-0.5 rounded-full font-black tracking-wider uppercase text-amber-200 border border-white/30">
                             ONLINE
@@ -238,7 +238,7 @@
 
 <script>
     // =========================================================================
-    // OMNI BEAUTY AI ASSISTANT - CLIENT LOGIC & SPECIALIZED ENGINE
+    // CANMAKE BEAUTY AI ASSISTANT - CLIENT LOGIC & SPECIALIZED ENGINE
     // =========================================================================
 
     const CHAT_STORAGE_KEY = 'omni_beauty_chat_messages_v2';
@@ -265,7 +265,7 @@
     const CLIENT_RULES = [
         {
             keywords: ['chống nắng cho da dầu mụn', 'chống nắng kiềm dầu', 'kem chống nắng da dầu', 'kem chống nắng cho da dầu mụn'],
-            reply: `☀️ **TƯ VẤN CHUYÊN GIA: KEM CHỐNG NẮNG CHO DA DẦU MỤN**\n\nLàn da dầu mụn cần kem chống nắng phổ rộng **SPF50+ PA++++**, kết cấu sữa mỏng nhẹ, kiềm dầu thông minh suốt 8-12H và không gây bí tắc cổ nang lông (Non-comedogenic).\n\n👇 **Top sản phẩm khuyên dùng chuẩn y khoa từ CSDL OMNI BEAUTY:**`,
+            reply: `☀️ **TƯ VẤN CHUYÊN GIA: KEM CHỐNG NẮNG CHO DA DẦU MỤN**\n\nLàn da dầu mụn cần kem chống nắng phổ rộng **SPF50+ PA++++**, kết cấu sữa mỏng nhẹ, kiềm dầu thông minh suốt 8-12H và không gây bí tắc cổ nang lông (Non-comedogenic).\n\n👇 **Top sản phẩm khuyên dùng chuẩn y khoa từ CSDL CANMAKE BEAUTY:**`,
             actionUrl: '/category/kem-chong-nang',
             actionText: 'Xem Tất Cả Kem Chống Nắng',
             chips: DEFAULT_PROMPT_CHIPS,
@@ -292,7 +292,7 @@
         },
         {
             keywords: ['flash sale cận date', 'cận date giảm sâu', 'cận date', 'sale cận date', 'xả hàng cận date', 'fefo'],
-            reply: `⚡ **CHƯƠNG TRÌNH FLASH SALE CẬN DATE - GIẢM SÂU 40% - 70%**\n\nOmnichannel Beauty tiên phong áp dụng quản trị kho **FEFO (First Expired, First Out)**:\n- 🏷️ Giảm sâu 40% - 70% cho sản phẩm có hạn dùng 3-6 tháng.\n- ❄️ 100% lưu kho chuẩn phòng mát 22°C - 25°C, chất lượng hoàn hảo.\n- 🔍 Minh bạch số lô và hạn dùng trên từng sản phẩm.\n\n👇 **Các deal cận date FEFO nổi bật:**`,
+            reply: `⚡ **CHƯƠNG TRÌNH FLASH SALE CẬN DATE - GIẢM SÂU 40% - 70%**\n\nCanmake Beauty tiên phong áp dụng quản trị kho **FEFO (First Expired, First Out)**:\n- 🏷️ Giảm sâu 40% - 70% cho sản phẩm có hạn dùng 3-6 tháng.\n- ❄️ 100% lưu kho chuẩn phòng mát 22°C - 25°C, chất lượng hoàn hảo.\n- 🔍 Minh bạch số lô và hạn dùng trên từng sản phẩm.\n\n👇 **Các deal cận date FEFO nổi bật:**`,
             actionUrl: '/Promotion',
             actionText: 'Khám Phá Flash Sale Cận Date',
             chips: DEFAULT_PROMPT_CHIPS,
@@ -310,7 +310,7 @@
         },
         {
             keywords: ['hạn sử dụng của serum estée lauder', 'serum estée lauder', 'estee lauder', 'serum estee', 'anr'],
-            reply: `👑 **TRA CỨU HẠN SỬ DỤNG: SERUM ESTÉE LAUDER ADVANCED NIGHT REPAIR (ANR)**\n\nThông tin lô hàng nhập khẩu chính hãng tại kho OMNI BEAUTY:\n- 📦 **Mã Lô (Batch Code)**: \`EST-ANR-202506-B2\`\n- 📅 **Ngày Sản Xuất (MFG)**: 20/06/2025\n- ⏳ **Hạn Sử Dụng (EXP)**: **20/06/2028** *(Chuẩn 36 tháng kể từ NSX)*\n- 🕒 **Hạn Mở Nắp (PAO)**: 24 Tháng\n- 🛡️ Nhập khẩu chính ngạch từ **Công ty TNHH Estée Lauder Việt Nam**, đủ tem phụ tiếng Việt và tem chống giả.\n\n👇 **Sản phẩm Serum Estée Lauder ANR chính hãng có sẵn tại cửa hàng:**`,
+            reply: `👑 **TRA CỨU HẠN SỬ DỤNG: SERUM ESTÉE LAUDER ADVANCED NIGHT REPAIR (ANR)**\n\nThông tin lô hàng nhập khẩu chính hãng tại kho CANMAKE BEAUTY:\n- 📦 **Mã Lô (Batch Code)**: \`EST-ANR-202506-B2\`\n- 📅 **Ngày Sản Xuất (MFG)**: 20/06/2025\n- ⏳ **Hạn Sử Dụng (EXP)**: **20/06/2028** *(Chuẩn 36 tháng kể từ NSX)*\n- 🕒 **Hạn Mở Nắp (PAO)**: 24 Tháng\n- 🛡️ Nhập khẩu chính ngạch từ **Công ty TNHH Estée Lauder Việt Nam**, đủ tem phụ tiếng Việt và tem chống giả.\n\n👇 **Sản phẩm Serum Estée Lauder ANR chính hãng có sẵn tại cửa hàng:**`,
             actionUrl: '/Shop?category=skincare',
             actionText: 'Xem Serum Estée Lauder',
             chips: DEFAULT_PROMPT_CHIPS,
@@ -370,17 +370,20 @@
         }
     ];
 
-    document.addEventListener('DOMContentLoaded', function () {
-        initChatWidget();
-    });
+    let isChatInitialized = false;
 
-    function initChatWidget() {
+    document.addEventListener('DOMContentLoaded', function () {
+        // Chỉ ẩn teaser nếu người dùng đã bấm tắt trước đó; không nạp tin nhắn sớm
         const teaserDismissed = localStorage.getItem(TEASER_DISMISSED_KEY);
         if (teaserDismissed) {
             const teaser = document.getElementById('chatTeaserBubble');
             if (teaser) teaser.style.display = 'none';
         }
+    });
 
+    function initChatWidget() {
+        if (isChatInitialized) return;
+        isChatInitialized = true;
         renderSavedMessages();
         updateQuickRepliesBar(DEFAULT_PROMPT_CHIPS);
     }
@@ -404,6 +407,11 @@
         }
 
         if (isChatOpen) {
+            // Lazy load nội dung chat lần đầu khi người dùng mở panel
+            if (!isChatInitialized) {
+                initChatWidget();
+            }
+
             panel.classList.remove('hidden');
             panel.classList.add('flex', 'omni-chat-slide-up');
             openIcon.classList.add('hidden');
@@ -449,7 +457,7 @@
         stream.innerHTML = '';
 
         if (msgs.length === 0) {
-            // Lời chào mừng cá nhân hóa OMNI BEAUTY kèm các nút gợi ý câu hỏi nhanh
+            // Lời chào mừng cá nhân hóa CANMAKE BEAUTY kèm các nút gợi ý câu hỏi nhanh
             appendWelcomeGreeting();
             return;
         }
@@ -479,7 +487,7 @@
         bubble.className = 'flex justify-start items-start gap-2.5';
 
         const greetingText = `
-            Xin chào bạn! 👋 Mình là <strong>AI Beauty Advisor</strong> - chuyên viên tư vấn sắc đẹp trí tuệ nhân tạo của <strong>OMNI BEAUTY</strong>.<br/><br/>
+            Xin chào bạn! 👋 Mình là <strong>AI Beauty Advisor</strong> - chuyên viên tư vấn sắc đẹp trí tuệ nhân tạo của <strong>CANMAKE BEAUTY</strong>.<br/><br/>
             Mình có thể hỗ trợ bạn phân tích thành phần dược mỹ phẩm chuyên sâu (BHA, Retinol, Niacinamide, B5...), tra cứu hạn dùng chuẩn FEFO và chính sách đổi trả hàng.<br/><br/>
             ✨ <em>Mời bạn chọn một trong các câu hỏi nhanh bên dưới để nhận câu trả lời ngay lập tức:</em>
         `;
@@ -601,7 +609,7 @@
                     <div class="w-36 flex-shrink-0 bg-white border border-pink-100 hover:border-pink-300 rounded-2xl p-2.5 shadow-xs hover:shadow-md transition text-left flex flex-col justify-between group">
                         <div>
                             <div class="w-full h-24 bg-pink-50/40 rounded-xl overflow-hidden mb-2 relative">
-                                <img src="${p.imageUrl || '/images/default-product.png'}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='/images/default-product.png'">
+                                <img src="${p.imageUrl || '/images/products/_placeholder.webp'}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='/images/products/_placeholder.webp'">
                                 ${badgeHtml}
                             </div>
                             <div class="text-[11px] font-bold text-slate-800 line-clamp-2 leading-tight mb-1 group-hover:text-rose-600 transition-colors" title="${p.name}">${p.name}</div>
@@ -746,7 +754,7 @@
                 setTyping(false);
 
                 appendBotBubble({
-                    reply: data.reply || "Cảm ơn bạn, OMNI BEAUTY AI đã ghi nhận yêu cầu.",
+                    reply: data.reply || "Cảm ơn bạn, CANMAKE BEAUTY AI đã ghi nhận yêu cầu.",
                     actionUrl: data.actionUrl,
                     actionText: data.actionText,
                     productSuggestions: data.productSuggestions,
@@ -781,7 +789,7 @@
         }
 
         return {
-            reply: `Cảm ơn bạn đã nhắn tin cho OMNI BEAUTY AI! 💖\n\nMình có thể hỗ trợ tốt nhất về **Thành phần dược mỹ phẩm**, **Tra cứu HSD lô hàng FEFO**, **Kem chống nắng da dầu mụn** hoặc **Chính sách đổi trả hàng**.\n\nMời bạn chọn một trong các câu hỏi nhanh bên dưới để mình giải đáp ngay nhé!`,
+            reply: `Cảm ơn bạn đã nhắn tin cho CANMAKE BEAUTY AI! 💖\n\nMình có thể hỗ trợ tốt nhất về **Thành phần dược mỹ phẩm**, **Tra cứu HSD lô hàng FEFO**, **Kem chống nắng da dầu mụn** hoặc **Chính sách đổi trả hàng**.\n\nMời bạn chọn một trong các câu hỏi nhanh bên dưới để mình giải đáp ngay nhé!`,
             actionUrl: '/Shop',
             actionText: 'Khám Phá Cửa Hàng',
             chips: DEFAULT_PROMPT_CHIPS

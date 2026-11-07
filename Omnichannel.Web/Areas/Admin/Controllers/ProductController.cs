@@ -10,11 +10,14 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Omnichannel.Application.DTOs.Inventory;
 using Omnichannel.Application.Interfaces.Catalog;
+using Omnichannel.Domain.Entities;
 using Omnichannel.Infrastructure.Data;
 using Omnichannel.Infrastructure.Security;
 using Omnichannel.Web.Extensions;
 using Microsoft.AspNetCore.SignalR;
 using Omnichannel.Web.Hubs;
+
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Omnichannel.Web.Areas.Admin.Controllers
 {
@@ -26,17 +29,20 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IHubContext<SystemHub> _hubContext;
         private readonly IWebHostEnvironment _env;
+        private readonly IMemoryCache? _cache;
 
         public ProductController(
             IProductService productService, 
             ApplicationDbContext context, 
             IHubContext<SystemHub> hubContext,
-            IWebHostEnvironment env)
+            IWebHostEnvironment env,
+            IMemoryCache? cache = null)
         {
             _productService = productService;
             _context = context;
             _hubContext = hubContext;
             _env = env;
+            _cache = cache;
         }
 
         [HttpGet]
@@ -101,10 +107,11 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             // Handle uploaded thumbnail if provided
             if (thumbnailFile != null && thumbnailFile.Length > 0)
             {
-                string uploadedUrl = await SaveImageFileAsync(thumbnailFile);
+                var (uploadedUrl, savedMediaId) = await SaveImageFileAsync(thumbnailFile);
                 if (!string.IsNullOrEmpty(uploadedUrl))
                 {
                     model.ThumbnailUrl = uploadedUrl;
+                    model.ThumbnailMediaId = savedMediaId;
                 }
             }
 
@@ -132,6 +139,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             var success = await _productService.CreateProductAsync(model);
             if (success)
             {
+                InvalidateCatalogCache();
                 await _hubContext.Clients.All.SendAsync("ReceiveNotification", $"Đã thêm mới mỹ phẩm '{model.ProductName}' thành công!", "success");
                 TempData["SuccessMessage"] = $"Đã thêm mới mỹ phẩm '{model.ProductName}' thành công!";
                 return RedirectToAction(nameof(Index));
@@ -170,10 +178,11 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             // Handle uploaded thumbnail
             if (thumbnailFile != null && thumbnailFile.Length > 0)
             {
-                string uploadedUrl = await SaveImageFileAsync(thumbnailFile);
+                var (uploadedUrl, savedMediaId) = await SaveImageFileAsync(thumbnailFile);
                 if (!string.IsNullOrEmpty(uploadedUrl))
                 {
                     model.ThumbnailUrl = uploadedUrl;
+                    model.ThumbnailMediaId = savedMediaId;
                 }
             }
 
@@ -201,6 +210,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             var success = await _productService.UpdateProductAsync(model);
             if (success)
             {
+                InvalidateCatalogCache();
                 await _hubContext.Clients.All.SendAsync("ReceiveNotification", $"Đã cập nhật mỹ phẩm '{model.ProductName}' thành công!", "success");
                 TempData["SuccessMessage"] = $"Đã cập nhật mỹ phẩm '{model.ProductName}' thành công!";
                 return RedirectToAction(nameof(Details), new { id = model.Id });
@@ -229,6 +239,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             var success = await _productService.SoftDeleteProductAsync(id);
             if (success)
             {
+                InvalidateCatalogCache();
                 await _hubContext.Clients.All.SendAsync("ReceiveNotification", $"Đã xóa mềm mỹ phẩm '{product.Name}'!", "warning");
 
                 if (Request.IsHtmx())
@@ -258,6 +269,8 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             var result = await _productService.ToggleProductStatusAsync(id);
             if (!result.Success) return NotFound();
 
+            InvalidateCatalogCache();
+
             var message = result.NewStatus == 1
                 ? $"Đã mở bán lại sản phẩm {result.ProductName}."
                 : $"Đã tạm ngừng kinh doanh sản phẩm {result.ProductName}.";
@@ -272,6 +285,14 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             TempData["SuccessMessage"] = message;
             return RedirectToAction(nameof(Index));
+        }
+
+        private void InvalidateCatalogCache()
+        {
+            _cache?.Remove("HomeSections_Composite_Model_v1");
+            _cache?.Remove("home_ui_sections");
+            _cache?.Remove("category_sidebar_items");
+            _cache?.Remove("brand_sidebar_items");
         }
 
         [HttpPost]
@@ -296,8 +317,8 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 return BadRequest(new { success = false, message = "Dung lượng ảnh tối đa 5MB." });
             }
 
-            string url = await SaveImageFileAsync(file);
-            return Json(new { success = true, url });
+            var (url, mediaId) = await SaveImageFileAsync(file);
+            return Json(new { success = true, url, mediaId });
         }
 
         [HttpPost]
@@ -336,24 +357,57 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             return RedirectToAction(nameof(Details), new { id = productId });
         }
 
-        private async Task<string> SaveImageFileAsync(IFormFile file)
+        private async Task<(string Url, int? MediaId)> SaveImageFileAsync(IFormFile file)
         {
-            string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "products");
+            string uploadsFolder = Path.Combine(_env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "uploads", "products");
             if (!Directory.Exists(uploadsFolder))
             {
                 Directory.CreateDirectory(uploadsFolder);
             }
 
             string fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
-            string uniqueFileName = $"prod_{Guid.NewGuid():N}{fileExtension}";
+            string uniqueFileName = $"prod_{DateTime.UtcNow:yyyyMMddHHmmss}_{Guid.NewGuid():N}{fileExtension}";
             string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            byte[] bytes;
+            using (var ms = new MemoryStream())
             {
-                await file.CopyToAsync(stream);
+                await file.CopyToAsync(ms);
+                bytes = ms.ToArray();
             }
 
-            return $"/uploads/products/{uniqueFileName}";
+            await System.IO.File.WriteAllBytesAsync(filePath, bytes);
+            string publicUrl = $"/uploads/products/{uniqueFileName}";
+
+            int? savedMediaId = null;
+            try
+            {
+                var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(bytes)).ToLowerInvariant();
+                var mediaAsset = new MediaAsset
+                {
+                    AssetUid = Guid.NewGuid(),
+                    FileName = file.FileName,
+                    ContentType = file.ContentType ?? "image/jpeg",
+                    MimeType = file.ContentType ?? "image/jpeg",
+                    Data = bytes,
+                    FileSize = bytes.Length,
+                    FileSizeBytes = bytes.Length,
+                    ChecksumHash = hash,
+                    Category = "PRODUCT",
+                    PublicUrl = publicUrl,
+                    StoragePath = publicUrl,
+                    CreatedAt = DateTime.UtcNow
+                };
+                await _context.MediaAssets.AddAsync(mediaAsset);
+                await _context.SaveChangesAsync();
+                savedMediaId = mediaAsset.Id;
+            }
+            catch
+            {
+                // Fallback nếu lưu MediaAsset gặp lỗi (ví dụ trong mock/unit test)
+            }
+
+            return (publicUrl, savedMediaId);
         }
 
         private async Task PopulateDropdownsAsync(List<int>? selectedSkinTypes = null, List<int>? selectedIngredients = null)

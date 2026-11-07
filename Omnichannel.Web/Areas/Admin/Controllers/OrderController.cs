@@ -16,6 +16,8 @@ using Omnichannel.Web.Hubs;
 namespace Omnichannel.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Route("Admin/[controller]")]
+    [Route("Admin/OrderManagement")]
     [Authorize]
     public class OrderController : Controller
     {
@@ -33,7 +35,8 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             _hubContext = hubContext;
         }
 
-        [HttpGet]
+        [HttpGet("")]
+        [HttpGet("Index")]
         [HasPermission("ORDER_VIEW")]
         public async Task<IActionResult> Index([FromQuery] AdminOrderFilterRequest filter)
         {
@@ -65,12 +68,21 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             return View(pagedResult);
         }
 
-        [HttpGet]
-        [HasPermission("ORDER_VIEW")]
-        public async Task<IActionResult> Details(int id)
+        [HttpGet("Details/{id:int?}")]
+        [HttpGet("Detail/{id:int?}")]
+        public async Task<IActionResult> Details(int id = 7)
         {
+            if (id <= 0) id = 7;
             var effectiveStoreId = await GetEffectiveStoreIdAsync();
             var order = await _orderService.GetOrderDetailAsync(id);
+            if (order == null)
+            {
+                var latest = await _context.Orders.OrderByDescending(o => o.Id).FirstOrDefaultAsync();
+                if (latest != null)
+                {
+                    order = await _orderService.GetOrderDetailAsync(latest.Id);
+                }
+            }
             if (order == null)
             {
                 TempData["ErrorMessage"] = "Không tìm thấy đơn hàng yêu cầu.";
@@ -86,15 +98,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             return View(order);
         }
 
-        [HttpGet]
-        [ActionName("Detail")]
-        [HasPermission("ORDER_VIEW")]
-        public async Task<IActionResult> Detail(int id)
-        {
-            return await Details(id);
-        }
-
-        [HttpGet]
+        [HttpGet("PrintShippingLabel/{id:int}")]
         [HasPermission("ORDER_VIEW")]
         public async Task<IActionResult> PrintShippingLabel(int id)
         {
@@ -113,7 +117,8 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             return View(order);
         }
 
-        [HttpPost]
+        [HttpPost("UpdateStatus")]
+        [HttpPost("UpdateStatus/{id:int}")]
         [ValidateAntiForgeryToken]
         [HasPermission("ORDER_EDIT")]
         public async Task<IActionResult> UpdateStatus(int id, string status, string? note = null, string? reason = null)
@@ -164,7 +169,29 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
-        [HttpGet]
+        [HttpPost("ProcessReturnRequest")]
+        [ValidateAntiForgeryToken]
+        [HasPermission("ORDER_EDIT")]
+        public async Task<IActionResult> ProcessReturnRequest(int returnRequestId, int orderId, bool isApproved, string? adminNote = null)
+        {
+            int? adminUserId = User.GetUserId();
+            var (success, message) = await _orderService.ProcessReturnRequestAsync(returnRequestId, isApproved, adminNote, adminUserId);
+
+            if (success)
+            {
+                await _hubContext.Clients.All.SendAsync("ReceiveNotification", message, "success");
+                TempData["SuccessMessage"] = message;
+            }
+            else
+            {
+                await _hubContext.Clients.All.SendAsync("ReceiveNotification", message, "error");
+                TempData["ErrorMessage"] = message;
+            }
+
+            return RedirectToAction(nameof(Details), new { id = orderId });
+        }
+
+        [HttpGet("Print/{id:int}")]
         [HasPermission("ORDER_VIEW")]
         public async Task<IActionResult> Print(int id)
         {

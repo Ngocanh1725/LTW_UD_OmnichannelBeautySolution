@@ -103,7 +103,7 @@ namespace Omnichannel.Web.Controllers
                 var topAlert = latestAlerts.FirstOrDefault();
                 if (topAlert != null)
                 {
-                    await _hubContext.Clients.All.SendAsync("ReceiveAlert", new
+                    await _hubContext.Clients.Group("Managers").SendAsync("ReceiveAlert", new
                     {
                         alert = topAlert,
                         newCount,

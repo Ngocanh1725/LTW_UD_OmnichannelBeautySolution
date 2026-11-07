@@ -23,9 +23,14 @@ namespace Omnichannel.Application.Interfaces.Cms
         Task<bool> ToggleHideReviewAsync(int reviewId, bool isHidden, string? adminNote = null, CancellationToken ct = default);
 
         /// <summary>
-        /// Lấy danh sách đánh giá đã được duyệt của sản phẩm cho khách hàng xem trên storefront
+        /// Lấy danh sách đánh giá đã được duyệt của sản phẩm cho khách hàng xem trên storefront (tương thích ngược)
         /// </summary>
-        Task<List<ProductReviewDto>> GetProductReviewsAsync(int productId, int page = 1, int pageSize = 10, int? ratingFilter = null, string? filterTab = null, CancellationToken ct = default);
+        Task<List<ProductReviewDto>> GetProductReviewsAsync(int productId, int page, int pageSize, int? ratingFilter, string? filterTab, CancellationToken ct);
+
+        /// <summary>
+        /// Lấy danh sách đánh giá đã được duyệt của sản phẩm cho khách hàng xem trên storefront kèm lọc Skin Twin và sắp xếp
+        /// </summary>
+        Task<List<ProductReviewDto>> GetProductReviewsAsync(int productId, int page = 1, int pageSize = 10, int? ratingFilter = null, string? filterTab = null, string? skinTypeFilter = null, string? sortBy = null, CancellationToken ct = default);
 
         /// <summary>
         /// Thống kê đánh giá của sản phẩm: điểm trung bình và phân bố tỷ lệ từng số sao
@@ -38,9 +43,19 @@ namespace Omnichannel.Application.Interfaces.Cms
         Task<int> VoteHelpfulAsync(int reviewId, CancellationToken ct = default);
 
         /// <summary>
-        /// Thêm phản hồi chính thức từ Chuyên viên CSKH Omni Beauty
+        /// Bình chọn hữu ích có kiểm tra chống trùng lặp (Anti-duplicate Helpful Vote)
         /// </summary>
-        Task<bool> AddAdminReplyAsync(int reviewId, string replyContent, string replyBy = "Chuyên viên CSKH Omni Beauty", CancellationToken ct = default);
+        Task<(bool Success, int NewCount, string Message)> VoteHelpfulWithCheckAsync(int reviewId, int? userId, string? anonymousKey, CancellationToken ct = default);
+
+        /// <summary>
+        /// Lấy danh sách ảnh chụp swatch thực tế từ khách hàng (Customer Real Photo Gallery)
+        /// </summary>
+        Task<List<ReviewPhotoGalleryDto>> GetCustomerReviewImagesAsync(int productId, int limit = 12, CancellationToken ct = default);
+
+        /// <summary>
+        /// Thêm phản hồi chính thức từ Chuyên viên CSKH Canmake Beauty
+        /// </summary>
+        Task<bool> AddAdminReplyAsync(int reviewId, string replyContent, string replyBy = "Chuyên viên CSKH Canmake Beauty", CancellationToken ct = default);
 
         /// <summary>
         /// Lấy danh sách các đánh giá đang chờ duyệt (Moderation Queue) cho Admin

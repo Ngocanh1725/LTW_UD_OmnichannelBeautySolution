@@ -1,0 +1,690 @@
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="relative overflow-hidden bg-gradient-to-br from-rose-50 via-white to-amber-50/40 py-10 md:py-14 border-b border-rose-100">
+    <div class="container mx-auto px-4 max-w-6xl">
+        <!-- Breadcrumb & Switcher -->
+        <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <nav class="flex items-center gap-2 text-xs text-slate-500">
+                <a href="/" class="hover:text-rose-600 transition">Trang chủ</a>
+                <span>/</span>
+                <a href="/tu-van-da" class="hover:text-rose-600 transition">Tư vấn da AI</a>
+                <span>/</span>
+                <span class="text-slate-900 font-semibold">Phân tích da bằng ảnh (AI Skin Advisor)</span>
+            </nav>
+            <div class="inline-flex rounded-full bg-white p-1 shadow-sm border border-rose-100">
+                <a href="/tu-van-da" class="px-4 py-1.5 rounded-full text-xs font-medium text-slate-600 hover:text-rose-600 transition">
+                    📋 Trắc nghiệm câu hỏi
+                </a>
+                <a href="/phan-tich-da" class="px-4 py-1.5 rounded-full text-xs font-bold bg-rose-600 text-white shadow-sm">
+                    📸 Phân tích da bằng ảnh AI
+                </a>
+            </div>
+        </div>
+
+        <!-- Hero Heading -->
+        <div class="text-center max-w-3xl mx-auto mb-8">
+            <span class="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold bg-rose-100 text-rose-700 mb-3">
+                <i class="ph-fill ph-sparkle"></i> CÔNG NGHỆ AI SKIN ADVISOR CHUẨN OLAY & HASAKI CLINIC
+            </span>
+            <h1 class="text-2xl md:text-4xl font-serif font-bold text-slate-900 tracking-tight mb-3">
+                Chẩn Đoán 5 Chỉ Số Làn Da &amp; Thiết Kế Routine 4 Bước Bằng Ảnh Selfie
+            </h1>
+            <p class="text-sm md:text-base text-slate-600">
+                Tải lên ảnh chụp chính diện không trang điểm để AI quét đa điểm 5 chỉ số sinh học làn da:
+                <strong>Độ dầu, Độ ẩm, Mụn ẩn, Sắc tố Melanin &amp; Độ nhạy cảm</strong>.
+            </p>
+        </div>
+
+        <!-- Privacy & Medical Disclaimer Banner -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-4xl mx-auto mb-8">
+            <div class="flex items-start gap-3 p-3.5 rounded-2xl bg-emerald-50/90 border border-emerald-200 text-emerald-900 text-xs leading-relaxed">
+                <i class="ph-fill ph-shield-check text-lg text-emerald-600 shrink-0 mt-0.5"></i>
+                <div>
+                    <strong class="font-bold block mb-0.5">Cam kết quyền riêng tư (Zero-Storage Privacy):</strong>
+                    Ảnh selfie của bạn chỉ được xử lý tức thì trong bộ nhớ RAM và <strong>xóa vĩnh viễn ngay sau khi phân tích</strong>, tuyệt đối không lưu trữ lâu dài trên máy chủ.
+                </div>
+            </div>
+            <div class="flex items-start gap-3 p-3.5 rounded-2xl bg-amber-50/90 border border-amber-200 text-amber-900 text-xs leading-relaxed">
+                <i class="ph-fill ph-info text-lg text-amber-600 shrink-0 mt-0.5"></i>
+                <div>
+                    <strong class="font-bold block mb-0.5">Lưu ý chuyên môn:</strong>
+                    <span id="skinMedicalDisclaimerText">Kết quả mang tính tham khảo, không thay thế chẩn đoán da liễu.</span> Nếu bạn có bệnh lý da liễu cấp tính, vui lòng tham vấn bác sĩ chuyên khoa.
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload & Camera Workspace -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <!-- Left Column: Upload / Preview Card -->
+            <div class="lg:col-span-5 bg-white rounded-3xl shadow-sm border border-rose-100 p-6">
+                <h2 class="text-base font-bold text-slate-900 mb-1 flex items-center gap-2">
+                    <i class="ph-duotone ph-camera text-rose-600 text-xl"></i>
+                    Bước 1: Cung cấp ảnh khuôn mặt
+                </h2>
+                <p class="text-xs text-slate-500 mb-4">
+                    Hỗ trợ định dạng <strong>JPG, PNG, WEBP</strong> (Tối đa <strong>5MB</strong>). Nên chụp nơi đủ ánh sáng tự nhiên.
+                </p>
+
+                <!-- Dropzone -->
+                <div id="skinDropzone"
+                     class="relative border-2 border-dashed border-rose-200 hover:border-rose-400 rounded-2xl p-6 text-center transition cursor-pointer bg-rose-50/30">
+                    <input type="file" id="skinImageInput" accept="image/jpeg,image/png,image/webp" class="hidden" />
+
+                    <div id="skinUploadPrompt">
+                        <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-3">
+                            <i class="ph-duotone ph-cloud-arrow-up text-3xl"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-slate-800 mb-1">Nhấn để chọn ảnh hoặc kéo thả vào đây</p>
+                        <p class="text-xs text-slate-500">JPG, PNG, WEBP • Dung lượng &le; 5MB</p>
+                    </div>
+
+                    <!-- Preview Container -->
+                    <div id="skinPreviewContainer" class="hidden">
+                        <div class="relative w-48 h-48 mx-auto rounded-2xl overflow-hidden shadow-md border-2 border-rose-200 mb-3 bg-slate-900">
+                            <img id="skinPreviewImg" src="" alt="Selfie Preview" class="w-full h-full object-cover" />
+                            <!-- Scanning Laser Animation Overlay -->
+                            <div id="skinScanOverlay" class="hidden absolute inset-0 bg-slate-900/35 flex flex-col items-center justify-center">
+                                <div class="w-full h-1 bg-gradient-to-r from-transparent via-rose-400 to-transparent animate-pulse shadow-lg"></div>
+                                <span class="mt-2 px-2.5 py-1 rounded-full bg-black/70 text-white text-[11px] font-semibold">
+                                    Đang quét 5 vùng da...
+                                </span>
+                            </div>
+                        </div>
+                        <p id="skinSelectedFileName" class="text-xs font-medium text-slate-700 truncate max-w-xs mx-auto mb-1"></p>
+                        <button type="button" id="btnResetSkinImage" class="text-xs text-rose-600 hover:underline font-medium">
+                            Đổi bức ảnh khác
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sample Demo Preset Buttons (Convenient for Live Presentation) -->
+                <div class="mt-4 pt-4 border-t border-slate-100">
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                        Hoặc thử nhanh bằng mẫu khuôn mặt giả lập (Demo):
+                    </p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button"
+                                onclick="window.OmniSkinAnalyzer.loadSamplePreset('oily_acne', 'Mẫu 1: Nền da dầu mụn chữ T')"
+                                class="px-2.5 py-2 rounded-xl border border-slate-200 hover:border-rose-400 hover:bg-rose-50/50 text-xs font-medium text-slate-700 transition text-center">
+                            ✨ Mẫu Da Dầu Mụn
+                        </button>
+                        <button type="button"
+                                onclick="window.OmniSkinAnalyzer.loadSamplePreset('dry_pigment', 'Mẫu 2: Nền da khô & sắc tố')"
+                                class="px-2.5 py-2 rounded-xl border border-slate-200 hover:border-rose-400 hover:bg-rose-50/50 text-xs font-medium text-slate-700 transition text-center">
+                            💧 Mẫu Da Khô Thâm
+                        </button>
+                        <button type="button"
+                                onclick="window.OmniSkinAnalyzer.loadSamplePreset('sensitive_combo', 'Mẫu 3: Da hỗn hợp nhạy cảm')"
+                                class="px-2.5 py-2 rounded-xl border border-slate-200 hover:border-rose-400 hover:bg-rose-50/50 text-xs font-medium text-slate-700 transition text-center">
+                            🌿 Mẫu Da Nhạy Cảm
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Error Alert Box -->
+                <div id="skinErrorAlert" class="hidden mt-4 p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium flex items-start gap-2">
+                    <i class="ph-fill ph-warning-circle text-base shrink-0 mt-0.5"></i>
+                    <span id="skinErrorMessage"></span>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="button"
+                        id="btnRunSkinAnalysis"
+                        class="mt-5 w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white font-bold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 disabled:opacity-50">
+                    <i class="ph-bold ph-magic-wand text-lg"></i>
+                    <span>Bắt Đầu Phân Tích Da Bằng AI</span>
+                </button>
+            </div>
+
+            <!-- Right Column: Analysis Results (Radar Chart + 4-Step Routine) -->
+            <div class="lg:col-span-7">
+                <!-- Empty State before analysis -->
+                <div id="skinEmptyState" class="bg-white rounded-3xl shadow-sm border border-rose-100 p-8 text-center">
+                    <div class="w-20 h-20 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-4">
+                        <i class="ph-duotone ph-chart-polar text-4xl"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-900 mb-2">
+                        Biểu Đồ Radar 5 Chỉ Số &amp; Phác Đồ Cá Nhân Hóa
+                    </h3>
+                    <p class="text-xs md:text-sm text-slate-500 max-w-md mx-auto mb-6">
+                        Sau khi tải ảnh lên và bấm <strong>"Bắt Đầu Phân Tích Da Bằng AI"</strong>, hệ thống sẽ vẽ biểu đồ Radar 5 trục sinh học và đề xuất bộ Routine 4 bước tương thích 100% với làn da của bạn.
+                    </p>
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 max-w-lg mx-auto text-xs">
+                        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                            <span class="font-bold text-rose-600 block">01. Oil</span>
+                            <span class="text-slate-500 text-[11px]">Độ tiết dầu</span>
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                            <span class="font-bold text-sky-600 block">02. Hydration</span>
+                            <span class="text-slate-500 text-[11px]">Độ ngậm nước</span>
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                            <span class="font-bold text-amber-600 block">03. Acne</span>
+                            <span class="text-slate-500 text-[11px]">Mụn &amp; Bít tắc</span>
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                            <span class="font-bold text-purple-600 block">04. Pigment</span>
+                            <span class="text-slate-500 text-[11px]">Thâm &amp; Sắc tố</span>
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 col-span-2 sm:col-span-1">
+                            <span class="font-bold text-emerald-600 block">05. Sensitive</span>
+                            <span class="text-slate-500 text-[11px]">Độ nhạy cảm</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Populated Result Card -->
+                <div id="skinResultContainer" class="hidden space-y-6">
+                    <!-- Radar + Skin Type Summary Card -->
+                    <div class="bg-white rounded-3xl shadow-sm border border-rose-100 p-6">
+                        <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b border-slate-100">
+                            <div>
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-rose-600 block">
+                                    KẾT QUẢ CHẨN ĐOÁN AI SKIN ADVISOR
+                                </span>
+                                <h3 id="resSkinTypeTitle" class="text-xl font-bold text-slate-900 mt-0.5">
+                                    Da hỗn hợp thiên dầu
+                                </h3>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span id="resProviderBadge" class="px-3 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">
+                                    Engine: Deterministic SHA-256
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                            <!-- 5-Axis SVG Radar Chart -->
+                            <div class="md:col-span-6 flex flex-col items-center">
+                                <div class="w-64 h-64 relative">
+                                    <svg id="skinRadarSvg" viewBox="0 0 260 260" class="w-full h-full overflow-visible">
+                                        <!-- Background Pentagons (20%, 40%, 60%, 80%, 100%) -->
+                                        <g id="radarGridLayers" stroke="#e2e8f0" stroke-width="1" fill="none"></g>
+                                        <!-- Axis Lines -->
+                                        <g id="radarAxisLines" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="3,3"></g>
+                                        <!-- Data Polygon -->
+                                        <polygon id="radarDataPolygon"
+                                                 points="130,130 130,130 130,130 130,130 130,130"
+                                                 fill="rgba(225, 29, 72, 0.22)"
+                                                 stroke="#e11d48"
+                                                 stroke-width="2.5" />
+                                        <!-- Vertex Dots & Labels -->
+                                        <g id="radarDataPoints"></g>
+                                        <g id="radarAxisLabels" class="text-[10px] font-bold fill-slate-700"></g>
+                                    </svg>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-1">
+                                    Mã định danh ảnh (SHA-256): <code id="resImageHash" class="font-mono text-slate-600"></code>
+                                </p>
+                            </div>
+
+                            <!-- 5 Progress Bars & Detected Concerns -->
+                            <div class="md:col-span-6 space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-xs font-semibold mb-1">
+                                        <span class="text-slate-700">💧 Độ tiết dầu (Oil)</span>
+                                        <span id="scoreValOil" class="text-rose-600 font-bold">0/100</span>
+                                    </div>
+                                    <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
+                                        <div id="scoreBarOil" class="h-full bg-rose-500 rounded-full transition-all duration-500" style="width:0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-semibold mb-1">
+                                        <span class="text-slate-700">🌊 Độ ngậm nước (Hydration)</span>
+                                        <span id="scoreValHydration" class="text-sky-600 font-bold">0/100</span>
+                                    </div>
+                                    <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
+                                        <div id="scoreBarHydration" class="h-full bg-sky-500 rounded-full transition-all duration-500" style="width:0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-semibold mb-1">
+                                        <span class="text-slate-700">🔴 Mụn &amp; Bít tắc (Acne)</span>
+                                        <span id="scoreValAcne" class="text-amber-600 font-bold">0/100</span>
+                                    </div>
+                                    <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
+                                        <div id="scoreBarAcne" class="h-full bg-amber-500 rounded-full transition-all duration-500" style="width:0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-semibold mb-1">
+                                        <span class="text-slate-700">☀️ Sắc tố &amp; Thâm (Pigmentation)</span>
+                                        <span id="scoreValPigmentation" class="text-purple-600 font-bold">0/100</span>
+                                    </div>
+                                    <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
+                                        <div id="scoreBarPigmentation" class="h-full bg-purple-500 rounded-full transition-all duration-500" style="width:0%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-xs font-semibold mb-1">
+                                        <span class="text-slate-700">🌿 Độ nhạy cảm (Sensitivity)</span>
+                                        <span id="scoreValSensitivity" class="text-emerald-600 font-bold">0/100</span>
+                                    </div>
+                                    <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
+                                        <div id="scoreBarSensitivity" class="h-full bg-emerald-500 rounded-full transition-all duration-500" style="width:0%"></div>
+                                    </div>
+                                </div>
+
+                                <div class="pt-2">
+                                    <span class="text-[11px] font-bold uppercase text-slate-400 block mb-1.5">
+                                        Vấn đề trọng tâm phát hiện:
+                                    </span>
+                                    <div id="resConcernTags" class="flex flex-wrap gap-1.5"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="resSummaryAssessment" class="mt-4 p-3.5 rounded-2xl bg-rose-50/70 border border-rose-100 text-xs text-slate-700 leading-relaxed">
+                        </div>
+                    </div>
+
+                    <!-- 4-Step Recommended Routine Card -->
+                    <div class="bg-white rounded-3xl shadow-sm border border-rose-100 p-6">
+                        <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
+                            <div>
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 block">
+                                    PHÁC ĐỒ DƯỢC MỸ PHẨM ĐỀ XUẤT
+                                </span>
+                                <h3 id="resRoutineTitle" class="text-lg font-bold text-slate-900">
+                                    Routine 4 Bước Cá Nhân Hóa
+                                </h3>
+                            </div>
+                            <button type="button"
+                                    id="btnAddSkinRoutineToCart"
+                                    class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-rose-600 text-white text-xs font-bold shadow-sm transition flex items-center gap-2">
+                                <i class="ph-bold ph-shopping-bag-open text-base"></i>
+                                <span>Thêm trọn bộ vào giỏ (Giảm 15%)</span>
+                            </button>
+                        </div>
+
+                        <div id="resRoutineStepsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+    window.OmniSkinAnalyzer = (function () {
+        const maxBytes = 5 * 1024 * 1024; // 5MB
+        let currentBlob = null;
+        let currentFileName = '';
+        let currentRoutineProductIds = [];
+
+        const dropzone = document.getElementById('skinDropzone');
+        const fileInput = document.getElementById('skinImageInput');
+        const uploadPrompt = document.getElementById('skinUploadPrompt');
+        const previewContainer = document.getElementById('skinPreviewContainer');
+        const previewImg = document.getElementById('skinPreviewImg');
+        const selectedFileName = document.getElementById('skinSelectedFileName');
+        const btnReset = document.getElementById('btnResetSkinImage');
+        const btnAnalyze = document.getElementById('btnRunSkinAnalysis');
+        const errorAlert = document.getElementById('skinErrorAlert');
+        const errorMsg = document.getElementById('skinErrorMessage');
+        const scanOverlay = document.getElementById('skinScanOverlay');
+        const emptyState = document.getElementById('skinEmptyState');
+        const resultContainer = document.getElementById('skinResultContainer');
+        const btnAddRoutine = document.getElementById('btnAddSkinRoutineToCart');
+
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorAlert.classList.remove('hidden');
+        }
+
+        function clearError() {
+            errorMsg.textContent = '';
+            errorAlert.classList.add('hidden');
+        }
+
+        function setFileSelection(blob, fileName, previewDataUrl) {
+            clearError();
+            if (!blob) return;
+
+            if (blob.size > maxBytes) {
+                showError('Dung lượng ảnh vượt quá giới hạn tối đa 5MB. Vui lòng chọn ảnh nhỏ hơn 5MB.');
+                return;
+            }
+
+            currentBlob = blob;
+            currentFileName = fileName || 'selfie.png';
+            previewImg.src = previewDataUrl;
+            selectedFileName.textContent = `${currentFileName} (${(blob.size / 1024).toFixed(1)} KB)`;
+            uploadPrompt.classList.add('hidden');
+            previewContainer.classList.remove('hidden');
+        }
+
+        function handleFile(file) {
+            if (!file) return;
+            if (file.size > maxBytes) {
+                showError('Dung lượng ảnh vượt quá giới hạn tối đa 5MB. Vui lòng chọn ảnh nhỏ hơn 5MB.');
+                return;
+            }
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes((file.type || '').toLowerCase())) {
+                showError('Định dạng tệp không hợp lệ. Chỉ chấp nhận ảnh JPG, PNG hoặc WEBP.');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                setFileSelection(file, file.name, e.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Generate a deterministic synthetic portrait PNG in browser Canvas for 1-click demo
+        function loadSamplePreset(presetKey, label) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 320;
+            canvas.height = 320;
+            const ctx = canvas.getContext('2d');
+
+            // Fill background & portrait silhouette based on preset
+            const bgMap = {
+                'oily_acne': ['#fde2e4', '#f8ad9d', '#e07a5f'],
+                'dry_pigment': ['#fdf0d5', '#f3d5b5', '#bc6c25'],
+                'sensitive_combo': ['#ffe5ec', '#ffc2d1', '#fb6f92']
+            };
+            const palette = bgMap[presetKey] || bgMap['oily_acne'];
+
+            const grad = ctx.createLinearGradient(0, 0, 320, 320);
+            grad.addColorStop(0, palette[0]);
+            grad.addColorStop(1, palette[1]);
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 320, 320);
+
+            // Face oval
+            ctx.fillStyle = '#f9dcc4';
+            ctx.beginPath();
+            ctx.ellipse(160, 155, 78, 98, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // AI scan mesh lines
+            ctx.strokeStyle = palette[2];
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(82, 58, 156, 196);
+
+            ctx.fillStyle = '#334155';
+            ctx.font = 'bold 13px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(label, 160, 292);
+
+            const dataUrl = canvas.toDataURL('image/png');
+            canvas.toBlob(function (blob) {
+                setFileSelection(blob, presetKey + '_demo.png', dataUrl);
+            }, 'image/png');
+        }
+
+        // Draw 5-axis SVG Radar Chart
+        function renderRadarChart(scores) {
+            const cx = 130, cy = 130, maxR = 88;
+            const axes = [
+                { key: 'oil', label: 'Dầu (' + scores.oil + ')' },
+                { key: 'hydration', label: 'Độ ẩm (' + scores.hydration + ')' },
+                { key: 'acne', label: 'Mụn (' + scores.acne + ')' },
+                { key: 'pigmentation', label: 'Sắc tố (' + scores.pigmentation + ')' },
+                { key: 'sensitivity', label: 'Nhạy cảm (' + scores.sensitivity + ')' }
+            ];
+
+            const gridGroup = document.getElementById('radarGridLayers');
+            const axisGroup = document.getElementById('radarAxisLines');
+            const pointsGroup = document.getElementById('radarDataPoints');
+            const labelsGroup = document.getElementById('radarAxisLabels');
+            const polygon = document.getElementById('radarDataPolygon');
+
+            gridGroup.innerHTML = '';
+            axisGroup.innerHTML = '';
+            pointsGroup.innerHTML = '';
+            labelsGroup.innerHTML = '';
+
+            function polarToCartesian(angleIndex, ratio) {
+                const angle = (Math.PI * 2 * angleIndex) / 5 - Math.PI / 2;
+                return {
+                    x: cx + maxR * ratio * Math.cos(angle),
+                    y: cy + maxR * ratio * Math.sin(angle)
+                };
+            }
+
+            // 5 concentric pentagons
+            [0.2, 0.4, 0.6, 0.8, 1.0].forEach(level => {
+                const pts = axes.map((_, idx) => {
+                    const p = polarToCartesian(idx, level);
+                    return `${p.x.toFixed(1)},${p.y.toFixed(1)}`;
+                }).join(' ');
+                const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                poly.setAttribute('points', pts);
+                gridGroup.appendChild(poly);
+            });
+
+            // Axis lines & outer labels
+            const dataCoords = [];
+            axes.forEach((axis, idx) => {
+                const outer = polarToCartesian(idx, 1.0);
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', cx);
+                line.setAttribute('y1', cy);
+                line.setAttribute('x2', outer.x.toFixed(1));
+                line.setAttribute('y2', outer.y.toFixed(1));
+                axisGroup.appendChild(line);
+
+                const labelPos = polarToCartesian(idx, 1.24);
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', labelPos.x.toFixed(1));
+                text.setAttribute('y', labelPos.y.toFixed(1));
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'middle');
+                text.textContent = axis.label;
+                labelsGroup.appendChild(text);
+
+                const val = Math.max(0, Math.min(100, scores[axis.key] || 0)) / 100.0;
+                const pt = polarToCartesian(idx, val);
+                dataCoords.push(`${pt.x.toFixed(1)},${pt.y.toFixed(1)}`);
+
+                const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                dot.setAttribute('cx', pt.x.toFixed(1));
+                dot.setAttribute('cy', pt.y.toFixed(1));
+                dot.setAttribute('r', '4');
+                dot.setAttribute('fill', '#e11d48');
+                dot.setAttribute('stroke', '#ffffff');
+                dot.setAttribute('stroke-width', '1.5');
+                pointsGroup.appendChild(dot);
+            });
+
+            polygon.setAttribute('points', dataCoords.join(' '));
+        }
+
+        function renderAnalysisResponse(data) {
+            emptyState.classList.add('hidden');
+            resultContainer.classList.remove('hidden');
+
+            document.getElementById('resSkinTypeTitle').textContent = data.skinType || 'Da hỗn hợp';
+            document.getElementById('resProviderBadge').textContent =
+                data.providerUsed === 'GeminiVisionAI'
+                    ? '✨ Gemini Vision AI'
+                    : '🔒 Chế độ Offline Deterministic (SHA-256)';
+            document.getElementById('resImageHash').textContent = (data.imageSha256Hash || '').substring(0, 16) + '...';
+
+            const scores = data.scores || { oil: 50, hydration: 50, acne: 30, pigmentation: 30, sensitivity: 30 };
+            renderRadarChart(scores);
+
+            const updateBar = (suffix, val) => {
+                document.getElementById('scoreVal' + suffix).textContent = `${val}/100`;
+                document.getElementById('scoreBar' + suffix).style.width = `${val}%`;
+            };
+            updateBar('Oil', scores.oil);
+            updateBar('Hydration', scores.hydration);
+            updateBar('Acne', scores.acne);
+            updateBar('Pigmentation', scores.pigmentation);
+            updateBar('Sensitivity', scores.sensitivity);
+
+            const concernTags = document.getElementById('resConcernTags');
+            concernTags.innerHTML = '';
+            (data.concerns || []).forEach(c => {
+                const span = document.createElement('span');
+                span.className = 'px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-xs font-medium';
+                span.textContent = c;
+                concernTags.appendChild(span);
+            });
+
+            document.getElementById('resSummaryAssessment').textContent = data.summaryAssessment || '';
+
+            // Render 4-step routine
+            const routine = data.recommendedRoutine;
+            const stepsGrid = document.getElementById('resRoutineStepsGrid');
+            stepsGrid.innerHTML = '';
+            currentRoutineProductIds = [];
+
+            if (routine && routine.steps && routine.steps.length > 0) {
+                document.getElementById('resRoutineTitle').textContent = routine.routineTitle || 'Routine 4 Bước Cá Nhân Hóa';
+                routine.steps.forEach(step => {
+                    const p = step.selectedProduct;
+                    if (p && p.productId) {
+                        currentRoutineProductIds.push(p.productId);
+                    }
+                    const card = document.createElement('div');
+                    card.className = 'p-4 rounded-2xl border border-slate-100 bg-slate-50/70 flex gap-3.5 items-start';
+                    card.innerHTML = `
+                        <img src="${(p && p.thumbnailUrl) ? p.thumbnailUrl : '/images/products/_placeholder.webp'}"
+                             alt="${p ? p.productName : step.stepName}"
+                             class="w-16 h-16 rounded-xl object-cover bg-white border border-slate-200 shrink-0" />
+                        <div class="min-w-0 flex-1">
+                            <span class="text-[11px] font-bold uppercase text-rose-600 block">${step.stepName}</span>
+                            <a href="${p ? '/san-pham/' + p.slug : '#'}" class="text-xs font-bold text-slate-900 hover:text-rose-600 line-clamp-2 mt-0.5">
+                                ${p ? p.productName : 'Sản phẩm gợi ý'}
+                            </a>
+                            <p class="text-[11px] text-slate-500 mt-1 line-clamp-1">${step.usageGuide || ''}</p>
+                            <div class="mt-1.5 text-xs font-bold text-rose-600">
+                                ${p ? Number(p.effectivePrice || p.price || 0).toLocaleString('vi-VN') + ' ₫' : ''}
+                            </div>
+                        </div>
+                    `;
+                    stepsGrid.appendChild(card);
+                });
+            }
+        }
+
+        async function runAnalysis() {
+            clearError();
+            if (!currentBlob) {
+                showError('Vui lòng tải lên ảnh selfie hoặc chọn 1 mẫu Demo trước khi phân tích.');
+                return;
+            }
+
+            scanOverlay.classList.remove('hidden');
+            btnAnalyze.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('image', currentBlob, currentFileName || 'selfie.png');
+
+                const resp = await fetch('/api/skin-analysis/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const json = await resp.json();
+                if (!resp.ok || !json.success) {
+                    showError(json.message || 'Không thể phân tích ảnh. Vui lòng kiểm tra định dạng tệp.');
+                    return;
+                }
+
+                renderAnalysisResponse(json.data);
+            } catch (err) {
+                showError('Lỗi kết nối máy chủ khi phân tích ảnh: ' + err.message);
+            } finally {
+                scanOverlay.classList.add('hidden');
+                btnAnalyze.disabled = false;
+            }
+        }
+
+        async function addRoutineToCart() {
+            if (!currentRoutineProductIds.length) return;
+            btnAddRoutine.disabled = true;
+            try {
+                const resp = await fetch('/api/quiz/add-routine-to-cart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        productIds: currentRoutineProductIds,
+                        couponCode: 'COMBO15'
+                    })
+                });
+                const json = await resp.json();
+                if (json.success) {
+                    if (window.showToast) {
+                        window.showToast(json.message || 'Đã thêm trọn bộ Routine 4 bước vào giỏ hàng!', 'success');
+                    } else {
+                        alert(json.message || 'Đã thêm trọn bộ Routine 4 bước vào giỏ hàng!');
+                    }
+                    const badge = document.querySelector('#cart-count-badge, .cart-count-badge');
+                    if (badge && json.cartCount !== undefined) {
+                        badge.textContent = json.cartCount;
+                    }
+                } else {
+                    showError(json.message || 'Không thể thêm trọn bộ vào giỏ hàng.');
+                }
+            } catch (err) {
+                showError('Lỗi khi thêm trọn bộ vào giỏ: ' + err.message);
+            } finally {
+                btnAddRoutine.disabled = false;
+            }
+        }
+
+        if (dropzone) {
+            dropzone.addEventListener('click', function (e) {
+                if (e.target === btnReset || btnReset.contains(e.target)) return;
+                fileInput.click();
+            });
+            dropzone.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                dropzone.classList.add('border-rose-500');
+            });
+            dropzone.addEventListener('dragleave', function () {
+                dropzone.classList.remove('border-rose-500');
+            });
+            dropzone.addEventListener('drop', function (e) {
+                e.preventDefault();
+                dropzone.classList.remove('border-rose-500');
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    handleFile(e.dataTransfer.files[0]);
+                }
+            });
+        }
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function () {
+                if (fileInput.files && fileInput.files[0]) {
+                    handleFile(fileInput.files[0]);
+                }
+            });
+        }
+
+        if (btnReset) {
+            btnReset.addEventListener('click', function (e) {
+                e.stopPropagation();
+                currentBlob = null;
+                fileInput.value = '';
+                previewContainer.classList.add('hidden');
+                uploadPrompt.classList.remove('hidden');
+                clearError();
+            });
+        }
+
+        if (btnAnalyze) {
+            btnAnalyze.addEventListener('click', runAnalysis);
+        }
+
+        if (btnAddRoutine) {
+            btnAddRoutine.addEventListener('click', addRoutineToCart);
+        }
+
+        return {
+            loadSamplePreset
+        };
+    })();
+</script>
+}

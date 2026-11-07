@@ -37,6 +37,12 @@ namespace Omnichannel.Application.DTOs.Loyalty
         public List<VoucherDto> AvailableVouchers { get; set; } = new();
         public List<PointTransactionDto> RecentTransactions { get; set; } = new();
         public List<MemberTierPrivilegeDto> TierPrivileges { get; set; } = new();
+
+        // Gamification (GAP-08 - Phiên C7)
+        public DailyCheckInStatusDto CheckInStatus { get; set; } = new();
+        public ReferralDashboardDto ReferralInfo { get; set; } = new();
+        public List<BeautyMissionDto> BeautyMissions { get; set; } = new();
+        public List<RewardCatalogItemDto> RewardsCatalog { get; set; } = new();
     }
 
     public class MemberTierPrivilegeDto

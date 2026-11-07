@@ -3,13 +3,15 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - POS Quầy Thu Ngân Bán Lẻ</title>
+    <title>@ViewData["Title"] - @Brand.ShortName POS Quầy Thu Ngân Bán Lẻ</title>
     <!-- Brand Identity & Multi-Resolution Favicons -->
+    <link rel="icon" type="image/svg+xml" href="~/images/branding/favicon.svg" />
     <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
     <link rel="icon" type="image/png" sizes="32x32" href="~/images/branding/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="~/images/branding/favicon-192x192.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="~/images/branding/favicon-512x512.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="~/images/branding/apple-touch-icon.png" />
+    <link rel="manifest" href="~/site.webmanifest" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -53,7 +55,7 @@
         }
 
         .pos-workspace {
-            height: calc(100vh - 58px);
+            height: calc(100vh - 58px - 42px);
             overflow: hidden;
         }
 
@@ -170,6 +172,9 @@
             } catch (e) { }
         }
     </script>
+    <!-- Demo Presenter HUD (GAP-12: Phiên E1 - Chỉ render khi DemoMode:Enabled = true) -->
+    <partial name="_DemoPresenterHud" />
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

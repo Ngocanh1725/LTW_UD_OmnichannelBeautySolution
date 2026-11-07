@@ -1,0 +1,389 @@
+<!-- ===================================================================== -->
+<!-- FLOATING COMPARE DRAWER & QUICK COMPARE MODAL (GAP-03: PHIÊN C3)     -->
+<!-- Chuẩn Beauty Retail Sephora / Paula's Choice / Hasaki / Ulta         -->
+<!-- Tối đa 3 sản phẩm • Cảnh báo khác nhóm • Đơn giá VNĐ/ml             -->
+<!-- ===================================================================== -->
+
+<div x-data="omniCompareDrawer()" 
+     x-init="init()" 
+     x-cloak 
+     class="relative">
+
+    <!-- 1. MINI FLOATING PILL BUTTON (Khi Drawer bị thu gọn và có sản phẩm) -->
+    <div x-show="!isExpanded && ids.length > 0"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 translate-y-6 scale-90"
+         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-90"
+         class="fixed bottom-6 right-6 z-40">
+        <button type="button" 
+                @@click="isExpanded = true"
+                class="flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-magenta-accent to-pink-600 text-white font-bold text-xs shadow-2xl hover:shadow-pink-500/40 hover:scale-105 active:scale-95 transition-all cursor-pointer border-2 border-white">
+            <i class="fa-solid fa-scale-balanced text-sm animate-pulse"></i>
+            <span>So Sánh Mỹ Phẩm</span>
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white text-magenta-accent text-[11px] font-black"
+                  x-text="ids.length"></span>
+        </button>
+    </div>
+
+    <!-- 2. MAIN FLOATING COMPARE DRAWER (Ghim cố định ở đáy màn hình) -->
+    <div x-show="isExpanded && ids.length > 0"
+         x-transition:enter="transition ease-out duration-300 transform"
+         x-transition:enter-start="translate-y-full opacity-0"
+         x-transition:enter-end="translate-y-0 opacity-100"
+         x-transition:leave="transition ease-in duration-200 transform"
+         x-transition:leave-start="translate-y-0 opacity-100"
+         x-transition:leave-end="translate-y-full opacity-0"
+         class="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t-2 border-pink-200 shadow-[0_-8px_30px_rgba(0,0,0,0.12)]">
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4">
+                
+                <!-- Cột trái: Tiêu đề & Nút thao tác nhanh -->
+                <div class="flex items-center justify-between w-full md:w-auto gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-pink-500 to-magenta-accent text-white flex items-center justify-center text-sm shadow-md">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-bold text-charcoal text-xs sm:text-sm">So Sánh Mỹ Phẩm</h4>
+                                <span class="px-2 py-0.5 rounded-full bg-pink-100 text-magenta-accent text-[10px] font-extrabold"
+                                      x-text="`${ids.length}/3 sản phẩm`"></span>
+                            </div>
+                            <p class="text-[11px] text-slate-500 hidden sm:block">Đơn giá VNĐ/ml • Hoạt chất vàng • Điểm an toàn EWG</p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button type="button" 
+                                @@click="clearAll()"
+                                class="text-xs text-slate-400 hover:text-rose-600 transition flex items-center gap-1 font-medium cursor-pointer"
+                                title="Gỡ bỏ tất cả">
+                            <i class="fa-solid fa-trash-can text-[11px]"></i>
+                            <span class="hidden sm:inline">Xóa hết</span>
+                        </button>
+                        <button type="button" 
+                                @@click="isExpanded = false"
+                                class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-xs transition cursor-pointer"
+                                title="Thu gọn khay">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cột giữa: 3 Khay sản phẩm Slots (Tối đa 3 theo đặc tả) -->
+                <div class="grid grid-cols-3 gap-2 w-full md:flex-1 md:max-w-2xl">
+                    <template x-for="(slotIndex) in [0, 1, 2]" :key="slotIndex">
+                        <div class="relative rounded-2xl border transition-all h-16 sm:h-18 flex items-center p-2"
+                             :class="items[slotIndex] 
+                                ? 'bg-pink-50/40 border-pink-200 shadow-xs' 
+                                : 'bg-slate-50/60 border-dashed border-slate-200 flex items-center justify-center'">
+                            
+                            <!-- Khi có sản phẩm -->
+                            <template x-if="items[slotIndex]">
+                                <div class="flex items-center gap-2 w-full overflow-hidden">
+                                    <img :src="items[slotIndex].thumbnailUrl || '/images/products/_placeholder.webp'" 
+                                         :alt="items[slotIndex].name"
+                                         class="w-12 h-12 rounded-xl object-contain bg-white border border-slate-100 shrink-0 p-1" />
+                                    <div class="flex-1 min-w-0 pr-4">
+                                        <p class="text-[11px] font-bold text-slate-800 truncate" x-text="items[slotIndex].name"></p>
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            <span class="text-[11px] font-mono font-bold text-magenta-accent" 
+                                                  x-text="formatCurrency(items[slotIndex].finalPrice)"></span>
+                                            <template x-if="items[slotIndex].unitPriceRatioFormatted">
+                                                <span class="text-[9px] font-mono text-slate-400 truncate"
+                                                      x-text="`(${items[slotIndex].unitPriceRatioFormatted})`"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <!-- Nút gỡ sản phẩm -->
+                                    <button type="button" 
+                                            @@click="removeItem(items[slotIndex].id)"
+                                            class="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-white hover:bg-rose-500 text-slate-400 hover:text-white flex items-center justify-center text-[10px] shadow-xs transition cursor-pointer"
+                                            title="Gỡ sản phẩm">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                            </template>
+
+                            <!-- Khi ô còn trống -->
+                            <template x-if="!items[slotIndex]">
+                                <div class="text-center text-slate-300">
+                                    <i class="fa-solid fa-plus text-xs block mb-0.5"></i>
+                                    <span class="text-[10px] font-medium" x-text="`Thêm SP ${slotIndex + 1}`"></span>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Cột phải: Nút hành động So sánh -->
+                <div class="flex items-center gap-2 w-full md:w-auto justify-end">
+                    <!-- Nút xem nhanh Modal -->
+                    <button type="button" 
+                            @@click="openQuickModal()"
+                            class="px-3.5 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition active:scale-95 cursor-pointer flex items-center gap-1.5"
+                            title="Xem bảng so sánh ngay trên màn hình hiện tại">
+                        <i class="fa-solid fa-eye text-xs text-rose-500"></i>
+                        <span class="hidden lg:inline">Xem Nhanh</span>
+                    </button>
+
+                    <!-- Nút mở trang so sánh toàn diện -->
+                    <a :href="`/Product/Compare?ids=${ids.join(',')}`"
+                       class="flex-1 sm:flex-initial px-5 py-2.5 rounded-2xl bg-gradient-to-r from-magenta-accent to-pink-600 hover:from-rose-600 hover:to-magenta-accent text-white font-bold text-xs shadow-md hover:shadow-lg transition active:scale-95 flex items-center justify-center gap-2 text-center cursor-pointer">
+                        <i class="fa-solid fa-scale-balanced text-xs"></i>
+                        <span>So Sánh Ngay</span>
+                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. POPUP MODAL QUICK COMPARE (Xem trực tiếp không rời trang) -->
+    <div x-show="isModalOpen" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto bg-charcoal/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6"
+         style="display: none;">
+        
+        <div @@click.away="isModalOpen = false"
+             class="bg-white rounded-3xl shadow-2xl border border-pink-100 max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+            
+            <!-- Modal Header -->
+            <div class="p-4 sm:p-5 border-b border-slate-100 bg-gradient-to-r from-pink-50/60 to-purple-50/40 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-magenta-accent text-white flex items-center justify-center text-base shadow-sm">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-charcoal text-sm sm:text-base">Đối Chiếu Mỹ Phẩm Chuyên Sâu</h3>
+                        <p class="text-xs text-slate-500">Đơn giá VNĐ/ml • EWG Skin Deep • Hoạt chất & Hạn dùng FEFO</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <a :href="`/Product/Compare?ids=${ids.join(',')}`"
+                       class="text-xs font-bold text-magenta-accent hover:underline flex items-center gap-1 mr-2">
+                        <span>Mở toàn màn hình</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+                    </a>
+                    <button type="button" 
+                            @@click="isModalOpen = false"
+                            class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-sm transition cursor-pointer">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Body (Nạp nội dung partial) -->
+            <div class="p-4 sm:p-6 overflow-y-auto flex-1">
+                <!-- Loading State -->
+                <div x-show="isModalLoading" class="py-16 text-center">
+                    <i class="fa-solid fa-circle-notch fa-spin text-3xl text-magenta-accent mb-3"></i>
+                    <p class="text-xs text-slate-500 font-medium">Đang bóc tách thành phần và tính toán đơn giá/ml...</p>
+                </div>
+
+                <!-- Partial Content -->
+                <div x-show="!isModalLoading" x-html="modalHtml"></div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between shrink-0">
+                <span class="text-xs text-slate-500">
+                    <i class="fa-solid fa-shield-halved text-emerald-500 mr-1"></i>
+                    Dữ liệu kiểm nghiệm chuẩn Viện Da Liễu & Dược Điển Quốc Tế
+                </span>
+                <button type="button" 
+                        @@click="isModalOpen = false"
+                        class="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition cursor-pointer">
+                    Đóng
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- Global Compare Script (Quản lý state Client Side và API) -->
+<script>
+    function omniCompareDrawer() {
+        return {
+            ids: [],
+            items: [],
+            isExpanded: true,
+            isModalOpen: false,
+            isModalLoading: false,
+            modalHtml: '',
+
+            init() {
+                this.loadFromStorage();
+                this.fetchQuickItems();
+
+                // Đăng ký global interface cho toàn trang web
+                window.omniCompare = {
+                    toggle: (id, name, categoryId, categoryName) => this.toggleProduct(id, name, categoryId, categoryName),
+                    add: (id, name, categoryId, categoryName) => this.addProduct(id, name, categoryId, categoryName),
+                    remove: (id) => this.removeItem(id),
+                    clear: () => this.clearAll(),
+                    has: (id) => this.ids.includes(parseInt(id)),
+                    getIds: () => [...this.ids],
+                    getCount: () => this.ids.length
+                };
+
+                // Lắng nghe sự kiện đồng bộ từ các tab hoặc component khác
+                window.addEventListener('omni:compare-updated', (e) => {
+                    if (e.detail && Array.isArray(e.detail.ids)) {
+                        this.ids = e.detail.ids;
+                        this.fetchQuickItems();
+                    }
+                });
+            },
+
+            loadFromStorage() {
+                try {
+                    const raw = localStorage.getItem('omni_compare_product_ids');
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        if (Array.isArray(parsed)) {
+                            this.ids = parsed.map(n => parseInt(n)).filter(n => !isNaN(n) && n > 0).slice(0, 3);
+                        }
+                    }
+                } catch (e) {
+                    this.ids = [];
+                }
+            },
+
+            saveToStorage() {
+                try {
+                    localStorage.setItem('omni_compare_product_ids', JSON.stringify(this.ids));
+                    window.dispatchEvent(new CustomEvent('omni:compare-updated', { detail: { ids: this.ids } }));
+                } catch (e) { }
+            },
+
+            async fetchQuickItems() {
+                if (this.ids.length === 0) {
+                    this.items = [];
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`/api/compare/quick-items?ids=${this.ids.join(',')}`);
+                    if (res.ok) {
+                        this.items = await res.json();
+                    }
+                } catch (err) {
+                    console.debug("[Compare] Lỗi nạp quick items:", err);
+                }
+            },
+
+            toggleProduct(id, name, categoryId, categoryName) {
+                const numId = parseInt(id);
+                if (this.ids.includes(numId)) {
+                    this.removeItem(numId);
+                    this.showToast('info', `Đã gỡ sản phẩm khỏi danh sách so sánh.`);
+                } else {
+                    if (this.ids.length >= 3) {
+                        if (window.Swal) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Đã đạt giới hạn so sánh (Tối đa 3 sản phẩm)!',
+                                text: 'Bạn chỉ có thể so sánh tối đa 3 sản phẩm cùng một lúc để đảm bảo đối chiếu trực quan (chuẩn Hasaki & Ulta). Vui lòng gỡ bớt một sản phẩm.',
+                                confirmButtonColor: '#d63384',
+                                confirmButtonText: 'Đã hiểu'
+                            });
+                        } else {
+                            alert('Chỉ có thể so sánh tối đa 3 sản phẩm cùng lúc!');
+                        }
+                        return;
+                    }
+
+                    // Cảnh báo nếu khác nhóm danh mục
+                    if (this.items.length > 0 && categoryId) {
+                        const existingCat = this.items.find(it => it.categoryId && it.categoryId !== categoryId);
+                        if (existingCat) {
+                            this.showToast('warning', `Lưu ý: Bạn đang so sánh khác nhóm danh mục (${categoryName || 'Sản phẩm khác'}). So sánh cùng công dụng sẽ chuẩn xác nhất!`);
+                        }
+                    }
+
+                    this.ids.push(numId);
+                    this.saveToStorage();
+                    this.isExpanded = true;
+                    this.fetchQuickItems();
+                    this.showToast('success', `Đã thêm vào khay so sánh mỹ phẩm! (${this.ids.length}/3)`);
+                }
+            },
+
+            addProduct(id, name, categoryId, categoryName) {
+                const numId = parseInt(id);
+                if (!this.ids.includes(numId)) {
+                    this.toggleProduct(numId, name, categoryId, categoryName);
+                }
+            },
+
+            removeItem(id) {
+                const numId = parseInt(id);
+                this.ids = this.ids.filter(x => x !== numId);
+                this.items = this.items.filter(x => x.id !== numId);
+                this.saveToStorage();
+            },
+
+            clearAll() {
+                this.ids = [];
+                this.items = [];
+                this.saveToStorage();
+                this.showToast('info', 'Đã xóa toàn bộ sản phẩm khỏi khay so sánh.');
+            },
+
+            async openQuickModal() {
+                if (this.ids.length === 0) return;
+                this.isModalOpen = true;
+                this.isModalLoading = true;
+
+                try {
+                    const res = await fetch(`/Product/Compare?ids=${this.ids.join(',')}&isModal=true`);
+                    if (res.ok) {
+                        this.modalHtml = await res.text();
+                    } else {
+                        this.modalHtml = '<p class="text-rose-500 text-center py-8">Không thể nạp bảng so sánh lúc này.</p>';
+                    }
+                } catch (e) {
+                    this.modalHtml = '<p class="text-rose-500 text-center py-8">Lỗi kết nối máy chủ.</p>';
+                } finally {
+                    this.isModalLoading = false;
+                }
+            },
+
+            formatCurrency(val) {
+                if (!val && val !== 0) return '';
+                return new Intl.NumberFormat('vi-VN').format(val) + ' ₫';
+            },
+
+            showToast(icon, message) {
+                if (window.Swal) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: icon,
+                        title: message,
+                        showConfirmButton: false,
+                        timer: 3500,
+                        timerProgressBar: true,
+                        customClass: {
+                            popup: 'rounded-2xl shadow-xl border border-pink-100 font-sans text-xs'
+                        }
+                    });
+                }
+            }
+        };
+    }
+</script>

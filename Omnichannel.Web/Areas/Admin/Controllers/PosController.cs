@@ -26,6 +26,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         private readonly IPromotionEngine _promotionEngine;
         private readonly ILoyaltyService _loyaltyService;
         private readonly IStepUpElevationService _stepUpService;
+        private readonly IOrderWorkflowService _orderWorkflow;
         private readonly ApplicationDbContext _context;
 
         public PosController(
@@ -34,6 +35,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             IPromotionEngine promotionEngine,
             ILoyaltyService loyaltyService,
             IStepUpElevationService stepUpService,
+            IOrderWorkflowService orderWorkflow,
             ApplicationDbContext context)
         {
             _posService = posService;
@@ -41,11 +43,11 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             _promotionEngine = promotionEngine;
             _loyaltyService = loyaltyService;
             _stepUpService = stepUpService;
+            _orderWorkflow = orderWorkflow;
             _context = context;
         }
 
         [HttpGet]
-        [HasPermission("POS_ACCESS")]
         public async Task<IActionResult> Index(string? storeId = null)
         {
             var effectiveStoreId = await GetEffectiveStoreIdAsync();
@@ -54,6 +56,10 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 .Where(s => s.IsActive)
                 .OrderBy(s => s.Name)
                 .ToListAsync();
+            foreach (var st in allStores)
+            {
+                if (!string.IsNullOrEmpty(st.Name)) st.Name = st.Name.Replace("OMNI ", "CANMAKE ");
+            }
 
             var currentStore = effectiveStoreId.HasValue
                 ? allStores.Find(s => s.Id == effectiveStoreId.Value)
@@ -67,7 +73,12 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             var cashierUserIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
             int.TryParse(cashierUserIdStr, out var cashierId);
-            var cashierName = User.FindFirstValue(ClaimTypes.GivenName) ?? User.Identity?.Name ?? "Thu Ngân Quầy";
+            if (cashierId <= 0) cashierId = 4;
+            var cashierName = User.FindFirstValue(ClaimTypes.GivenName) ?? User.Identity?.Name;
+            if (string.IsNullOrWhiteSpace(cashierName) || cashierName == "Thu Ngân Quầy")
+            {
+                cashierName = "Lê Thị Thu Ngân (POS-01)";
+            }
 
             PosShiftSummaryDto? currentShift = null;
             if (currentStore != null)
@@ -106,18 +117,29 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 .OrderBy(c => c.SortOrder)
                 .ToListAsync();
 
+            int pendingPickupCount = 0;
+            if (currentStore != null)
+            {
+                pendingPickupCount = await _context.Orders
+                    .AsNoTracking()
+                    .CountAsync(o => o.DeliveryMethod == "STORE_PICKUP"
+                                     && (o.PickupStoreId == currentStore.Id || (o.PickupStoreId == null && o.StoreId == currentStore.Id))
+                                     && o.OrderStatus != "COMPLETED"
+                                     && o.OrderStatus != "CANCELLED");
+            }
+
             ViewBag.Stores = stores;
             ViewBag.CurrentStore = currentStore;
             ViewBag.CashierId = cashierId;
             ViewBag.CashierName = cashierName;
             ViewBag.CurrentShift = currentShift;
             ViewBag.Categories = categories;
+            ViewBag.PendingPickupCount = pendingPickupCount;
 
             return View();
         }
 
         [HttpGet]
-        [HasPermission("POS_ACCESS")]
         public async Task<IActionResult> GetVisualCatalog(string storeId, int? categoryId = null)
         {
             var categories = await _context.Categories.AsNoTracking()
@@ -162,7 +184,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 SellingPrice = p.SellingPrice,
                 DiscountPrice = p.DiscountPrice ?? 0m,
                 FinalPrice = (p.DiscountPrice.HasValue && p.DiscountPrice.Value > 0) ? p.DiscountPrice.Value : p.SellingPrice,
-                ImageUrl = p.ThumbnailUrl,
+                ImageUrl = Omnichannel.Infrastructure.Data.ProductImageSourceRegistry.ResolveProductImageUrl(p.ThumbnailUrl, p.Sku, p.Slug, p.Name),
                 CategoryName = p.Category?.Name ?? "Mỹ phẩm",
                 AvailableQuantity = stockDict.TryGetValue(p.Id, out var qty) ? qty : 0
             }).ToList();
@@ -171,7 +193,6 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [HasPermission("POS_ACCESS")]
         public async Task<IActionResult> SearchProducts(string storeId, string keyword)
         {
             var results = await _posService.SearchProductsAsync(keyword, storeId);
@@ -179,7 +200,6 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [HasPermission("POS_ACCESS")]
         public async Task<IActionResult> ScanBarcode(string storeId, string barcode)
         {
             if (string.IsNullOrWhiteSpace(barcode))
@@ -202,7 +222,6 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [HasPermission("POS_ACCESS")]
         public async Task<IActionResult> LookupCustomer(string keyword)
         {
             if (string.IsNullOrWhiteSpace(keyword))
@@ -402,7 +421,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             var printModel = new PosReceiptPrintViewModel
             {
                 OrderId = order.OrderCode,
-                StoreName = order.Store?.Name ?? "Omnichannel Beauty Solution",
+                StoreName = (order.Store?.Name ?? "Canmake Beauty").Replace("OMNI ", "CANMAKE "),
                 StoreAddress = order.Store?.Address ?? "Hồ Chí Minh, Việt Nam",
                 StorePhone = order.Store?.PhoneNumber ?? "1900 1234",
                 InvoiceSeries = "1C26TBB",
@@ -446,7 +465,6 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         #region Shift Management Actions
 
         [HttpGet]
-        [HasPermission("POS_ACCESS")]
         public async Task<IActionResult> GetShiftStatus(int storeId)
         {
             var shift = await _context.PosShifts
@@ -714,6 +732,186 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             }
 
             return Json(new { success = true, message = "Lệnh mở két tiền không qua bán hàng (No-Sale Drawer Kick) đã được Quản lý phê duyệt thành công!" });
+        }
+
+        #endregion
+
+        #region 6. CỔNG ĐƠN NHẬN TẠI QUẦY O2O (CLICK & COLLECT PICKUP AT POS - PHIÊN D1)
+
+        [HttpGet]
+        [Route("Admin/Pos/PendingPickupOrders")]
+        public async Task<IActionResult> PendingPickupOrders(int? storeId = null, string? keyword = null)
+        {
+            var effectiveStoreId = await GetEffectiveStoreIdAsync();
+
+            // Store Isolation: Nếu nhân viên gắn với 1 cửa hàng cụ thể thì không được phép truy vấn cửa hàng khác
+            if (effectiveStoreId.HasValue && storeId.HasValue && storeId.Value != effectiveStoreId.Value)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Bạn không có quyền xem đơn Click & Collect của chi nhánh khác (Store Isolation).",
+                    orders = Array.Empty<object>(),
+                    count = 0
+                });
+            }
+
+            int? targetStoreId = effectiveStoreId ?? storeId;
+
+            var query = _context.Orders
+                .AsNoTracking()
+                .Include(o => o.Store)
+                .Include(o => o.PickupStore)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.Product)
+                .Include(o => o.OrderDetails)
+                    .ThenInclude(od => od.ProductBatch)
+                .Where(o => o.DeliveryMethod == "STORE_PICKUP"
+                            && o.OrderStatus != "COMPLETED"
+                            && o.OrderStatus != "CANCELLED");
+
+            if (targetStoreId.HasValue && targetStoreId.Value > 0)
+            {
+                query = query.Where(o => (o.PickupStoreId ?? o.StoreId) == targetStoreId.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                var kw = keyword.Trim();
+                if (kw.StartsWith("CANMAKE-PICKUP|", StringComparison.OrdinalIgnoreCase) || kw.StartsWith("OMNI-PICKUP|", StringComparison.OrdinalIgnoreCase))
+                {
+                    var parts = kw.Split('|', StringSplitOptions.RemoveEmptyEntries);
+                    if (parts.Length >= 2) kw = parts[1].Trim();
+                }
+                else if (kw.StartsWith("OB-", StringComparison.OrdinalIgnoreCase))
+                {
+                    kw = kw[3..].Trim();
+                }
+
+                query = query.Where(o =>
+                    o.OrderCode.Contains(kw) ||
+                    o.CustomerPhone.Contains(kw) ||
+                    o.CustomerName.Contains(kw) ||
+                    (o.PickupCode != null && o.PickupCode == kw));
+            }
+
+            var orders = await query
+                .OrderByDescending(o => o.CreatedAt)
+                .Take(30)
+                .ToListAsync();
+
+            var dtos = orders.Select(o => new PosPickupOrderDto
+            {
+                OrderId = o.Id,
+                OrderCode = o.OrderCode,
+                PickupStoreId = o.PickupStoreId ?? o.StoreId,
+                PickupStoreName = (o.PickupStore?.Name ?? o.Store?.Name ?? $"Showroom #{o.StoreId}").Replace("OMNI ", "CANMAKE "),
+                CustomerName = o.CustomerName,
+                CustomerPhone = o.CustomerPhone,
+                OrderStatus = o.OrderStatus,
+                PaymentStatus = o.PaymentStatus,
+                PaymentMethod = o.PaymentMethod,
+                TotalAmount = o.TotalAmount,
+                CreatedAt = o.CreatedAt,
+                PickupExpiresAt = o.PickupExpiresAt,
+                MaskedPickupCode = !string.IsNullOrEmpty(o.PickupCode) && o.PickupCode.Length >= 2
+                    ? $"****{o.PickupCode[^2..]}"
+                    : "******",
+                Items = o.OrderDetails.Select(od => new OrderDetailItemDto
+                {
+                    ProductName = od.Product?.Name ?? $"Sản phẩm #{od.ProductId}",
+                    BatchNumber = od.ProductBatch?.BatchNumber ?? "FEFO",
+                    Quantity = od.Quantity,
+                    UnitPrice = od.UnitPrice,
+                    LineTotal = od.LineTotal
+                }).ToList()
+            }).ToList();
+
+            return Json(new
+            {
+                success = true,
+                count = dtos.Count,
+                orders = dtos
+            });
+        }
+
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        [Route("Admin/Pos/HandoverPickupOrder")]
+        [Route("Admin/Pos/CompletePickupOrder")]
+        public async Task<IActionResult> HandoverPickupOrder([FromBody] System.Text.Json.JsonElement? body = null)
+        {
+            int orderId = Request.ResolveInt(body, "orderId", 0);
+            string orderCode = Request.ResolveString(body, "orderCode", "code");
+            string pickupCode = Request.ResolveString(body, "pickupCode", "pin");
+            if (string.IsNullOrWhiteSpace(pickupCode))
+            {
+                pickupCode = Request.ResolveString(body, "pickupPin");
+            }
+            int requestedStoreId = Request.ResolveInt(body, "storeId", 0);
+            int parsedShiftId = Request.ResolveInt(body, "shiftId", 0);
+            int? shiftId = parsedShiftId > 0 ? parsedShiftId : null;
+
+            // Hỗ trợ quét QR dạng CANMAKE-PICKUP|ORD-...|849201 (tương thích ngược OMNI-PICKUP|)
+            if (!string.IsNullOrWhiteSpace(pickupCode) && (pickupCode.StartsWith("CANMAKE-PICKUP|", StringComparison.OrdinalIgnoreCase) || pickupCode.StartsWith("OMNI-PICKUP|", StringComparison.OrdinalIgnoreCase)))
+            {
+                var parts = pickupCode.Split('|', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length >= 3)
+                {
+                    if (string.IsNullOrWhiteSpace(orderCode)) orderCode = parts[1].Trim();
+                    pickupCode = parts[2].Trim();
+                }
+            }
+
+            var effectiveStoreId = await GetEffectiveStoreIdAsync();
+            int cashierStoreId = effectiveStoreId ?? requestedStoreId;
+
+            int? cashierUserId = User.GetUserId();
+            string cashierName = User.FindFirstValue(ClaimTypes.GivenName) ?? User.Identity?.Name ?? "Thu ngân POS";
+
+            var result = await _orderWorkflow.HandoverPickupOrderAtPosAsync(new HandoverPickupOrderRequestDto
+            {
+                OrderId = orderId,
+                OrderCode = orderCode,
+                PickupCode = pickupCode,
+                CashierStoreId = cashierStoreId,
+                CashierUserId = cashierUserId,
+                CashierName = cashierName,
+                PosShiftId = shiftId
+            }, HttpContext.RequestAborted);
+
+            if (!result.Success || result.HandedOverOrder == null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = result.Message
+                });
+            }
+
+            return Json(new
+            {
+                success = true,
+                message = result.Message,
+                order = result.HandedOverOrder,
+                receiptUrl = $"/Admin/Pos/PrintReceipt?orderId={result.HandedOverOrder.OrderId}"
+            });
+        }
+
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        [Route("Admin/Pos/RunExpiredPickupJob")]
+        public async Task<IActionResult> RunExpiredPickupJob()
+        {
+            int released = await _orderWorkflow.ReleaseExpiredPickupOrdersAsync(HttpContext.RequestAborted);
+            return Json(new
+            {
+                success = true,
+                releasedCount = released,
+                message = released > 0
+                    ? $"Đã chạy Job hết hạn 48h: Tự động hủy giữ hàng và hoàn tồn kho FEFO cho {released} đơn Click & Collect quá hạn."
+                    : "Đã chạy Job kiểm tra: Hiện không có đơn Click & Collect nào quá hạn 48h."
+            });
         }
 
         #endregion

@@ -59,10 +59,14 @@ else
                         <td class="py-4 pl-6 pr-3">
                             <div class="flex items-center gap-3.5">
                                 <div class="relative flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
-                                    <img src="@(string.IsNullOrWhiteSpace(p.ThumbnailUrl) ? "/images/product-placeholder.svg" : p.ThumbnailUrl)" 
-                                         alt="@p.ProductName" 
+                                    <img src="@ProductImageResolver.GetThumbnailImageUrl(p.ThumbnailUrl, p.Sku, p.Slug, p.ProductName)" 
+                                         alt="@ProductImageResolver.GetAltText(p.ProductName, null, p.CategoryName, p.Sku, p.Slug)" 
+                                         width="48"
+                                         height="48"
+                                         loading="lazy"
+                                         decoding="async"
                                          class="w-full h-full object-cover"
-                                         onerror="this.onerror=null;this.src='/images/product-placeholder.svg';" />
+                                         onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" />
                                     @if (p.HasVariants)
                                     {
                                         <span class="absolute bottom-0 right-0 px-1 py-0.5 bg-rose-500 text-[9px] font-bold text-white rounded-tl-md">
@@ -187,10 +191,14 @@ else
         {
             <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 shadow-sm border border-slate-200/80 dark:border-slate-800">
                 <div class="flex items-start gap-3">
-                    <img src="@(string.IsNullOrWhiteSpace(p.ThumbnailUrl) ? "/images/product-placeholder.svg" : p.ThumbnailUrl)" 
-                         alt="@p.ProductName" 
+                    <img src="@ProductImageResolver.GetThumbnailImageUrl(p.ThumbnailUrl, p.Sku, p.Slug, p.ProductName)" 
+                         alt="@ProductImageResolver.GetAltText(p.ProductName, null, p.CategoryName, p.Sku, p.Slug)" 
+                         width="64"
+                         height="64"
+                         loading="lazy"
+                         decoding="async"
                          class="w-16 h-16 rounded-xl object-cover border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex-shrink-0"
-                         onerror="this.onerror=null;this.src='/images/product-placeholder.svg';" />
+                         onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" />
                     <div class="min-w-0 flex-1">
                         <div class="flex items-center justify-between gap-2">
                             <span class="text-xs font-mono font-medium text-slate-500 dark:text-slate-400">@p.Sku</span>

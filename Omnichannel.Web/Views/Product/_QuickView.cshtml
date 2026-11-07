@@ -1,85 +1,32 @@
 @model Omnichannel.Domain.Entities.Product
 @{
     var p = Model;
-    var gallery = new List<string>();
-    if (!string.IsNullOrEmpty(p.ThumbnailUrl)) gallery.Add(p.ThumbnailUrl);
-    if (!string.IsNullOrEmpty(p.ImagesJson))
-    {
-        try
-        {
-            var imgs = System.Text.Json.JsonSerializer.Deserialize<List<string>>(p.ImagesJson);
-            if (imgs != null)
-            {
-                foreach (var img in imgs)
-                {
-                    if (!string.IsNullOrEmpty(img) && !gallery.Contains(img)) gallery.Add(img);
-                }
-            }
-        }
-        catch { }
-    }
-    if (gallery.Count < 2)
-    {
-        gallery.Add("https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=600&h=600&fit=crop");
-        gallery.Add("https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&h=600&fit=crop");
-    }
-    var gallery3 = gallery.Take(3).ToList();
-    var firstImg = gallery3.FirstOrDefault() ?? "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&h=600&fit=crop";
+    var gallery3 = ProductImageResolver.GetGalleryImageUrls(p.ThumbnailUrl, p.ImagesJson, p.Sku, p.Slug, p.Name).Take(3).ToList();
+    var firstImg = gallery3.FirstOrDefault() ?? ProductImageResolver.PlaceholderUrl;
+    var altText = ProductImageResolver.GetAltText(p.Name, p.Brand?.Name, p.Category?.Name, p.Sku, p.Slug);
     var originalPrice = p.SellingPrice * 1.25m;
     var isColorVariant = p.Variants != null && p.Variants.Any(v => !string.IsNullOrEmpty(v.SwatchColorHex) || !string.IsNullOrEmpty(v.ColorHex));
     var bestBatch = p.Batches?.Where(b => b.CurrentQuantity > 0).OrderBy(b => b.ExpDate).FirstOrDefault();
     var clearancePrice = Math.Round(p.SellingPrice * 0.55m / 1000m) * 1000m;
 }
 
-<div class="grid grid-cols-1 md:grid-cols-12 gap-6 p-6 sm:p-8" x-data="{
-    activeImg: '@firstImg',
-    quantity: 1,
-    selectedBatchType: 'fresh',
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 p-6 sm:p-8" x-data="quickViewItemComponent({
+    productId: @p.Id,
+    firstImg: '@firstImg',
     freshPrice: @(p.Variants != null && p.Variants.Any() ? p.Variants.First().SellingPrice : p.SellingPrice),
     clearancePrice: @clearancePrice,
-    selectedPrice: @(p.Variants != null && p.Variants.Any() ? p.Variants.First().SellingPrice : p.SellingPrice),
-    selectedVariantName: '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Variants != null && p.Variants.Any() ? p.Variants.First().VariantName : p.Name))',
-    
-    selectBatch(type) {
-        this.selectedBatchType = type;
-        this.selectedPrice = (type === 'clearance') ? this.clearancePrice : this.freshPrice;
-    },
-    
-    selectVariant(name, price, img) {
-        this.selectedVariantName = name;
-        this.freshPrice = price;
-        this.clearancePrice = Math.round(price * 0.55 / 1000) * 1000;
-        this.selectedPrice = (this.selectedBatchType === 'clearance') ? this.clearancePrice : this.freshPrice;
-        if (img) this.activeImg = img;
-    },
-
-    addToCartFromQuickView() {
-        const batchNote = this.selectedBatchType === 'clearance' ? ' [Lô Cận Date -45%]' : ' [Lô Mới Nhất]';
-        const finalName = this.selectedVariantName + batchNote;
-        addToCart(@p.Id, finalName, this.selectedPrice, this.activeImg, this.quantity);
-        
-        // Đóng QuickView và mở MiniCart Drawer ngay tức thì
-        if (window.Alpine) {
-            const bodyEl = document.querySelector('body');
-            if (bodyEl && bodyEl.__x && bodyEl.__x.$data) {
-                bodyEl.__x.$data.quickViewOpen = false;
-                setTimeout(() => {
-                    bodyEl.__x.$data.cartOpen = true;
-                    if (window.htmx) {
-                        htmx.trigger('body', 'reloadMiniCart');
-                    }
-                }, 250);
-            }
-        }
-    }
-}">
+    variantName: '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Variants != null && p.Variants.Any() ? p.Variants.First().VariantName : p.Name))'
+})">
     <!-- CỘT TRÁI: GALLERY 3 ẢNH -->
     <div class="md:col-span-5 space-y-3">
         <!-- Ảnh Chính Lớn -->
-        <div class="relative aspect-square rounded-2xl overflow-hidden bg-slate-50 border border-slate-200/80 shadow-xs">
+        <div class="relative aspect-square rounded-2xl overflow-hidden bg-slate-50 border border-slate-200/80 shadow-xs" style="aspect-ratio: 1/1;">
             <img :src="activeImg" 
+                 width="400"
+                 height="400"
+                 decoding="async"
                  alt="@p.Name" 
-                 class="w-full h-full object-cover transition-all duration-300" />
+                 class="w-full h-full object-cover transition-all duration-300 will-change-transform" />
             
             <div class="absolute top-3 left-3 z-10">
                 <span class="badge-fefo-fresh text-[10px] px-2.5 py-0.5 shadow-sm">
@@ -110,7 +57,7 @@
         <div class="space-y-1.5">
             <div class="flex items-center justify-between text-[11px] text-slate-500">
                 <span class="font-bold text-rose-gold uppercase tracking-wider">
-                    @(p.Brand?.Name ?? p.ManufacturerName ?? "OMNICHANNEL BEAUTY")
+                    @(p.Brand?.Name ?? p.ManufacturerName ?? "CANMAKE BEAUTY")
                 </span>
                 <span class="font-mono text-slate-400">SKU: @p.Sku</span>
             </div>

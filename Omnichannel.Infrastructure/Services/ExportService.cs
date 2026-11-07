@@ -36,7 +36,7 @@ namespace Omnichannel.Infrastructure.Services
             ws.Style.Font.FontSize = 10;
 
             // 1. Tiêu đề chính
-            ws.Cell("A1").Value = "HỆ THỐNG QUẢN LÝ BÁN LẺ MỸ PHẨM OMNICHANNEL BEAUTY SUITE";
+            ws.Cell("A1").Value = "HỆ THỐNG QUẢN LÝ BÁN LẺ MỸ PHẨM CANMAKE BEAUTY";
             ws.Cell("A1").Style.Font.FontSize = 14;
             ws.Cell("A1").Style.Font.Bold = true;
             ws.Cell("A1").Style.Font.FontColor = XLColor.FromArgb(124, 58, 237); // Purple 600
@@ -190,7 +190,7 @@ namespace Omnichannel.Infrastructure.Services
             ws.Style.Font.FontSize = 10;
 
             // Tiêu đề
-            ws.Cell("A1").Value = "OMNICHANNEL BEAUTY SUITE - BÁO CÁO TÀI CHÍNH";
+            ws.Cell("A1").Value = "CANMAKE BEAUTY - BÁO CÁO TÀI CHÍNH";
             ws.Cell("A1").Style.Font.FontSize = 14;
             ws.Cell("A1").Style.Font.Bold = true;
             ws.Cell("A1").Style.Font.FontColor = XLColor.FromArgb(79, 70, 229); // Indigo 600
@@ -317,7 +317,7 @@ namespace Omnichannel.Infrastructure.Services
                         {
                             row.RelativeItem().Column(c =>
                             {
-                                c.Item().Text("OMNICHANNEL BEAUTY SUITE").FontSize(14).Bold().FontColor(Colors.Indigo.Medium);
+                                c.Item().Text("CANMAKE BEAUTY").FontSize(14).Bold().FontColor(Colors.Indigo.Medium);
                                 c.Item().Text("BÁO CÁO LÃI LỖ & HIỆU QUẢ KINH DOANH (P&L REPORT)").FontSize(11).Bold();
                                 c.Item().Text($"Kỳ báo cáo: Từ {pnl.FromDate:dd/MM/yyyy} đến {pnl.ToDate:dd/MM/yyyy}").FontSize(8).Italic().FontColor(Colors.Grey.Medium);
                             });
@@ -462,7 +462,7 @@ namespace Omnichannel.Infrastructure.Services
                         col.Item().LineHorizontal(0.5f).LineColor(Colors.Grey.Lighten2);
                         col.Item().PaddingTop(3).Row(row =>
                         {
-                            row.RelativeItem().Text("Tài liệu nội bộ - Omnichannel Beauty Solution © 2026").FontSize(7).FontColor(Colors.Grey.Medium);
+                            row.RelativeItem().Text("Tài liệu nội bộ - Canmake Beauty © 2026").FontSize(7).FontColor(Colors.Grey.Medium);
                             row.RelativeItem().AlignRight().Text(x =>
                             {
                                 x.Span("Trang ");
@@ -490,7 +490,7 @@ namespace Omnichannel.Infrastructure.Services
             ws.Style.Font.FontSize = 10;
 
             // 1. Tiêu đề
-            ws.Cell("A1").Value = "OMNICHANNEL BEAUTY SUITE - PHÂN HỆ TÀI CHÍNH KẾ TOÁN";
+            ws.Cell("A1").Value = "CANMAKE BEAUTY - PHÂN HỆ TÀI CHÍNH KẾ TOÁN";
             ws.Cell("A1").Style.Font.FontSize = 14;
             ws.Cell("A1").Style.Font.Bold = true;
             ws.Cell("A1").Style.Font.FontColor = XLColor.FromArgb(79, 70, 229);

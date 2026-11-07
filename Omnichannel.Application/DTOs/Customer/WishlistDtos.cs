@@ -10,12 +10,12 @@ namespace Omnichannel.Application.DTOs.Customer
         public string ProductName { get; set; } = string.Empty;
         public string Slug { get; set; } = string.Empty;
         public string Sku { get; set; } = string.Empty;
-        public string ThumbnailUrl { get; set; } = "/images/branding/default-product.png";
+        public string ThumbnailUrl { get; set; } = "/images/products/_placeholder.webp";
         public decimal Price { get; set; }
         public decimal? OriginalPrice { get; set; }
         public int DiscountPercent { get; set; }
         public string CategoryName { get; set; } = "Mỹ Phẩm";
-        public string BrandName { get; set; } = "Omni Beauty";
+        public string BrandName { get; set; } = "Canmake Beauty";
         public bool IsInStock { get; set; } = true;
         public int StockQuantity { get; set; } = 10;
         public double Rating { get; set; } = 4.9;

@@ -1,0 +1,879 @@
+@model Omnichannel.Application.DTOs.HR.StaffFormViewModel
+@{
+    bool isEdit = Model.IsEditMode;
+    string currentAvatar = isEdit ? (Model.UpdateRequest.AvatarUrl ?? "") : (Model.CreateRequest.AvatarUrl ?? "");
+    string currentName = isEdit ? Model.UpdateRequest.FullName : Model.CreateRequest.FullName;
+    string currentGender = (isEdit ? Model.UpdateRequest.Gender : Model.CreateRequest.Gender) ?? "Nữ";
+    int? currentDeptId = isEdit ? Model.UpdateRequest.DepartmentId : Model.CreateRequest.DepartmentId;
+    int? currentStoreId = isEdit ? Model.UpdateRequest.StoreId : Model.CreateRequest.StoreId;
+    int? currentManagerId = isEdit ? Model.UpdateRequest.ManagerId : Model.CreateRequest.ManagerId;
+    var selectedRoleIds = (isEdit ? Model.UpdateRequest.RoleIds : Model.CreateRequest.RoleIds) ?? new List<int>();
+    string initialChar = !string.IsNullOrWhiteSpace(currentName) ? currentName.Trim()[0].ToString().ToUpper() : "N";
+}
+
+<input type="hidden" asp-for="IsEditMode" />
+<input type="hidden" asp-for="StaffId" />
+<input type="hidden" asp-for="Username" />
+<input type="hidden" asp-for="SaveAndContinue" id="saveAndContinueInput" value="false" />
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger border-0 shadow-xs rounded-4 p-3 mb-4 d-flex align-items-start gap-2.5" role="alert">
+        <i class="fa-solid fa-triangle-exclamation text-danger fs-5 mt-0.5"></i>
+        <div class="small">
+            <div class="fw-bold mb-1">Vui lòng kiểm tra lại thông tin biểu mẫu:</div>
+            <div asp-validation-summary="All" class="mb-0 ps-3"></div>
+        </div>
+    </div>
+}
+
+<div class="row g-4">
+    <!-- Cột trái: Section 1 (Thông tin cá nhân) + Section 2 (Thông tin công việc) -->
+    <div class="col-lg-8">
+        <!-- SECTION 1: THÔNG TIN CÁ NHÂN -->
+        <div class="card border-0 shadow-sm rounded-4 bg-white dark:bg-slate-900 mb-4 overflow-hidden">
+            <div class="card-header bg-white dark:bg-slate-900 border-bottom px-4 py-3 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2.5">
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-rose-50 text-rose-600" style="width: 34px; height: 34px; background:#fff1f2; color:#e11d48;">
+                        <i class="fa-solid fa-user-check"></i>
+                    </span>
+                    <div>
+                        <h6 class="fw-bold text-slate-900 dark:text-white mb-0">1. Thông Tin Cá Nhân</h6>
+                        <div class="text-muted" style="font-size: 0.74rem;">Ảnh đại diện, họ tên, ngày sinh, giới tính và thông tin liên hệ</div>
+                    </div>
+                </div>
+                <span class="badge bg-light text-muted border font-monospace">Phần 1/4</span>
+            </div>
+
+            <div class="card-body p-4">
+                <!-- Avatar Upload Row -->
+                <div class="d-flex flex-wrap align-items-center gap-3.5 pb-4 mb-4 border-bottom border-slate-100 dark:border-slate-800">
+                    <div class="position-relative flex-shrink-0">
+                        <img id="staffAvatarPreviewImg"
+                             src="@(string.IsNullOrWhiteSpace(currentAvatar) ? "" : currentAvatar)"
+                             alt="Avatar preview"
+                             class="rounded-circle object-fit-cover border shadow-xs @(string.IsNullOrWhiteSpace(currentAvatar) ? "d-none" : "")"
+                             style="width: 76px; height: 76px;" />
+                        <div id="staffAvatarPlaceholder"
+                             class="rounded-circle fw-bold text-white shadow-xs d-flex align-items-center justify-content-center @(string.IsNullOrWhiteSpace(currentAvatar) ? "" : "d-none")"
+                             style="width: 76px; height: 76px; font-size: 26px; background: linear-gradient(135deg, #e11d48, #9333ea);">
+                            @initialChar
+                        </div>
+                    </div>
+
+                    <div class="flex-grow-1">
+                        <div class="fw-bold text-dark dark:text-white small mb-1">Ảnh đại diện nhân sự</div>
+                        <p class="text-muted mb-2" style="font-size: 0.76rem;">
+                            Chọn ảnh từ thư viện Media hoặc tải lên ảnh chân dung rõ mặt (JPG, PNG, WebP).
+                        </p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary rounded-3 px-3 fw-semibold" onclick="openStaffAvatarPicker()">
+                                <i class="fa-regular fa-image me-1.5"></i>Chọn / Tải ảnh từ Media
+                            </button>
+                            <button type="button" id="btnRemoveStaffAvatar"
+                                    class="btn btn-sm btn-outline-danger rounded-3 px-2.5 @(string.IsNullOrWhiteSpace(currentAvatar) ? "d-none" : "")"
+                                    onclick="clearStaffAvatar()">
+                                <i class="fa-regular fa-trash-can me-1"></i>Xóa ảnh
+                            </button>
+                        </div>
+                        @if (!isEdit)
+                        {
+                            <input type="hidden" asp-for="CreateRequest.AvatarUrl" id="staffAvatarUrlInput" />
+                            <input type="hidden" asp-for="CreateRequest.AvatarMediaId" id="staffAvatarMediaIdInput" />
+                        }
+                        else
+                        {
+                            <input type="hidden" asp-for="UpdateRequest.AvatarUrl" id="staffAvatarUrlInput" />
+                            <input type="hidden" asp-for="UpdateRequest.AvatarMediaId" id="staffAvatarMediaIdInput" />
+                        }
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <!-- Họ và tên -->
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-dark dark:text-white">
+                            Họ và tên đầy đủ <span class="text-danger">*</span>
+                        </label>
+                        @if (!isEdit)
+                        {
+                            <input asp-for="CreateRequest.FullName" id="staffFullNameInput" class="form-control rounded-3"
+                                   placeholder="Ví dụ: Nguyễn Thị Minh Anh" oninput="updateAvatarInitial(this.value)" />
+                            <span asp-validation-for="CreateRequest.FullName" class="text-danger small d-block mt-1"></span>
+                        }
+                        else
+                        {
+                            <input asp-for="UpdateRequest.FullName" id="staffFullNameInput" class="form-control rounded-3"
+                                   placeholder="Ví dụ: Nguyễn Thị Minh Anh" oninput="updateAvatarInitial(this.value)" />
+                            <span asp-validation-for="UpdateRequest.FullName" class="text-danger small d-block mt-1"></span>
+                        }
+                    </div>
+
+                    <!-- Giới tính (Radio) -->
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-dark dark:text-white d-block">
+                            Giới tính
+                        </label>
+                        @{
+                            string genderFieldName = isEdit ? "UpdateRequest.Gender" : "CreateRequest.Gender";
+                        }
+                        <div class="d-flex align-items-center gap-2 pt-1" role="radiogroup" aria-label="Chọn giới tính">
+                            @foreach (var g in new[] { ("Nữ", "fa-venus", "#e11d48"), ("Nam", "fa-mars", "#2563eb"), ("Khác", "fa-genderless", "#64748b") })
+                            {
+                                bool isGChecked = string.Equals(currentGender, g.Item1, StringComparison.OrdinalIgnoreCase);
+                                <label class="flex-fill border rounded-3 py-1.5 px-3 d-flex align-items-center justify-content-center gap-1.5 cursor-pointer gender-radio-card @(isGChecked ? "border-danger bg-rose-50/50 fw-bold" : "bg-light/50")"
+                                       style="cursor: pointer;">
+                                    <input type="radio" name="@genderFieldName" value="@g.Item1" class="form-check-input m-0"
+                                           checked="@(isGChecked ? "checked" : null)" onchange="highlightGenderCards()" />
+                                    <i class="fa-solid @g.Item2" style="color: @g.Item3; font-size: 0.8rem;"></i>
+                                    <span class="small text-dark dark:text-white">@g.Item1</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Ngày sinh -->
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-dark dark:text-white">
+                            Ngày sinh <span class="text-muted fw-normal">(≥ 16 tuổi)</span>
+                        </label>
+                        @if (!isEdit)
+                        {
+                            <input asp-for="CreateRequest.DateOfBirth" type="date" class="form-control rounded-3"
+                                   max="@DateTime.Today.AddYears(-16).ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="CreateRequest.DateOfBirth" class="text-danger small d-block mt-1"></span>
+                        }
+                        else
+                        {
+                            <input asp-for="UpdateRequest.DateOfBirth" type="date" class="form-control rounded-3"
+                                   max="@DateTime.Today.AddYears(-16).ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="UpdateRequest.DateOfBirth" class="text-danger small d-block mt-1"></span>
+                        }
+                    </div>
+
+                    <!-- Số điện thoại -->
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-dark dark:text-white">
+                            Số điện thoại di động
+                        </label>
+                        @if (!isEdit)
+                        {
+                            <input asp-for="CreateRequest.PhoneNumber" type="tel" inputmode="numeric" class="form-control rounded-3 font-monospace"
+                                   placeholder="0901234567" maxlength="10" />
+                            <span asp-validation-for="CreateRequest.PhoneNumber" class="text-danger small d-block mt-1"></span>
+                        }
+                        else
+                        {
+                            <input asp-for="UpdateRequest.PhoneNumber" type="tel" inputmode="numeric" class="form-control rounded-3 font-monospace"
+                                   placeholder="0901234567" maxlength="10" />
+                            <span asp-validation-for="UpdateRequest.PhoneNumber" class="text-danger small d-block mt-1"></span>
+                        }
+                    </div>
+
+                    <!-- Email -->
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-dark dark:text-white">
+                            Email công việc <span class="text-danger">*</span>
+                        </label>
+                        @if (!isEdit)
+                        {
+                            <input asp-for="CreateRequest.Email" id="staffEmailInput" type="email" class="form-control rounded-3"
+                                   placeholder="ten.nv@canmake.vn" autocorrect="off" autocapitalize="off" spellcheck="false"
+                                   onblur="validateUniqueEmail(this.value)" />
+                            <span asp-validation-for="CreateRequest.Email" class="text-danger small d-block mt-1"></span>
+                        }
+                        else
+                        {
+                            <input asp-for="UpdateRequest.Email" id="staffEmailInput" type="email" class="form-control rounded-3"
+                                   placeholder="ten.nv@canmake.vn" autocorrect="off" autocapitalize="off" spellcheck="false"
+                                   onblur="validateUniqueEmail(this.value)" />
+                            <span asp-validation-for="UpdateRequest.Email" class="text-danger small d-block mt-1"></span>
+                        }
+                        <div id="emailCheckMsg" class="small mt-1" aria-live="polite"></div>
+                    </div>
+
+                    <!-- Địa chỉ -->
+                    <div class="col-12">
+                        <label class="form-label small fw-bold text-dark dark:text-white">
+                            Địa chỉ thường trú / Liên hệ
+                        </label>
+                        @if (!isEdit)
+                        {
+                            <input asp-for="CreateRequest.Address" class="form-control rounded-3"
+                                   placeholder="Số nhà, đường/phố, phường/xã, quận/huyện, tỉnh/thành phố..." />
+                        }
+                        else
+                        {
+                            <input asp-for="UpdateRequest.Address" class="form-control rounded-3"
+                                   placeholder="Số nhà, đường/phố, phường/xã, quận/huyện, tỉnh/thành phố..." />
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: THÔNG TIN CÔNG VIỆC -->
+        <div class="card border-0 shadow-sm rounded-4 bg-white dark:bg-slate-900 mb-4 overflow-hidden">
+            <div class="card-header bg-white dark:bg-slate-900 border-bottom px-4 py-3 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2.5">
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-indigo-50 text-indigo-600" style="width: 34px; height: 34px; background:#eef2ff; color:#4f46e5;">
+                        <i class="fa-solid fa-briefcase"></i>
+                    </span>
+                    <div>
+                        <h6 class="fw-bold text-slate-900 dark:text-white mb-0">2. Thông Tin Công Việc & Tổ Chức</h6>
+                        <div class="text-muted" style="font-size: 0.74rem;">Mã nhân viên, phòng ban trực thuộc, người quản lý trực tiếp và chi nhánh làm việc</div>
+                    </div>
+                </div>
+                <span class="badge bg-light text-muted border font-monospace">Phần 2/4</span>
+            </div>
+
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <!-- Mã nhân viên (tự sinh, cho sửa) -->
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-dark dark:text-white">
+                            Mã nhân viên (Employee Code)
+                        </label>
+                        <div class="input-group">
+                            @if (!isEdit)
+                            {
+                                <input asp-for="CreateRequest.EmployeeCode" id="staffCodeInput" class="form-control font-monospace rounded-start-3"
+                                       placeholder="VD: NV-1025" autocorrect="off" autocapitalize="off" spellcheck="false"
+                                       onblur="validateUniqueCode(this.value)" />
+                            }
+                            else
+                            {
+                                <input asp-for="UpdateRequest.EmployeeCode" id="staffCodeInput" class="form-control font-monospace rounded-start-3"
+                                       placeholder="VD: NV-1025" autocorrect="off" autocapitalize="off" spellcheck="false"
+                                       onblur="validateUniqueCode(this.value)" />
+                            }
+                            <button type="button" class="btn btn-outline-secondary px-2.5" onclick="generateEmployeeCode()" title="Tự sinh mã nhân viên">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            </button>
+                        </div>
+                        @if (!isEdit)
+                        {
+                            <span asp-validation-for="CreateRequest.EmployeeCode" class="text-danger small d-block mt-1"></span>
+                        }
+                        else
+                        {
+                            <span asp-validation-for="UpdateRequest.EmployeeCode" class="text-danger small d-block mt-1"></span>
+                        }
+                        <div id="codeCheckMsg" class="small mt-1" aria-live="polite"></div>
+                    </div>
+
+                    <!-- Phòng ban (dạng cây) -->
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-dark dark:text-white">
+                            Phòng ban trực thuộc
+                        </label>
+                        @{
+                            string deptFieldName = isEdit ? "UpdateRequest.DepartmentId" : "CreateRequest.DepartmentId";
+                        }
+                        <select name="@deptFieldName" id="staffDepartmentSelect" class="form-select rounded-3" onchange="filterManagersByDepartment(this.value)">
+                            <option value="">-- Chọn phòng ban --</option>
+                            @foreach (var d in Model.ScopedDepartments)
+                            {
+                                string treeLabel = !string.IsNullOrEmpty(d.DisplayTreeName) ? d.DisplayTreeName : d.Name;
+                                <option value="@d.Id" data-code="@d.Code" selected="@(currentDeptId == d.Id ? "selected" : null)">
+                                    @treeLabel (@d.Code)
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Chức danh -->
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-dark dark:text-white">
+                            Chức danh công việc
+                        </label>
+                        @if (!isEdit)
+                        {
+                            <input asp-for="CreateRequest.JobTitle" class="form-control rounded-3" placeholder="VD: Chuyên viên Tư vấn & Sale" />
+                            <span asp-validation-for="CreateRequest.JobTitle" class="text-danger small d-block mt-1"></span>
+                        }
+                        else
+                        {
+                            <input asp-for="UpdateRequest.JobTitle" class="form-control rounded-3" placeholder="VD: Chuyên viên Tư vấn & Sale" />
+                            <span asp-validation-for="UpdateRequest.JobTitle" class="text-danger small d-block mt-1"></span>
+                        }
+                    </div>
+
+                    <!-- Người quản lý trực tiếp (lọc theo phòng ban) -->
+                    <div class="col-md-5">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-label small fw-bold text-dark dark:text-white mb-1">
+                                Người quản lý trực tiếp
+                            </label>
+                            <button type="button" id="btnToggleAllManagers" class="btn btn-link p-0 text-decoration-none" style="font-size: 0.7rem;" onclick="toggleShowAllManagers()">
+                                Hiện tất cả phòng ban
+                            </button>
+                        </div>
+                        @{
+                            string mgrFieldName = isEdit ? "UpdateRequest.ManagerId" : "CreateRequest.ManagerId";
+                        }
+                        <select name="@mgrFieldName" id="staffManagerSelect" class="form-select rounded-3">
+                            <option value="">-- Không chỉ định / Báo cáo cấp cao --</option>
+                            @foreach (var m in Model.PotentialManagers)
+                            {
+                                <option value="@m.Id" data-dept-id="@(m.DepartmentId?.ToString() ?? "")" selected="@(currentManagerId == m.Id ? "selected" : null)">
+                                    @m.FullName (@($"@{m.Username}") - @(m.JobTitle ?? "Quản lý"))
+                                </option>
+                            }
+                        </select>
+                        <div id="managerFilterHint" class="text-muted mt-1" style="font-size: 0.7rem;"></div>
+                    </div>
+
+                    <!-- Chi nhánh làm việc -->
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-dark dark:text-white">
+                            Chi nhánh / Cửa hàng
+                        </label>
+                        @{
+                            string storeFieldName = isEdit ? "UpdateRequest.StoreId" : "CreateRequest.StoreId";
+                        }
+                        <select name="@storeFieldName" class="form-select rounded-3">
+                            <option value="">Trụ sở chính (Văn phòng trung tâm)</option>
+                            @foreach (var s in Model.ScopedStores)
+                            {
+                                <option value="@s.Id" selected="@(currentStoreId == s.Id ? "selected" : null)">
+                                    @s.Name (@s.Code)
+                                </option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Ngày vào làm -->
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-dark dark:text-white">
+                            Ngày vào làm
+                        </label>
+                        @if (!isEdit)
+                        {
+                            <input asp-for="CreateRequest.HireDate" type="date" class="form-control rounded-3"
+                                   max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="CreateRequest.HireDate" class="text-danger small d-block mt-1"></span>
+                        }
+                        else
+                        {
+                            <input asp-for="UpdateRequest.HireDate" type="date" class="form-control rounded-3"
+                                   max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                            <span asp-validation-for="UpdateRequest.HireDate" class="text-danger small d-block mt-1"></span>
+                        }
+                    </div>
+
+                    <!-- Ghi chú công việc -->
+                    <div class="col-12">
+                        <label class="form-label small fw-bold text-dark dark:text-white">
+                            Ghi chú công việc / Hồ sơ nhân sự
+                        </label>
+                        @if (!isEdit)
+                        {
+                            <textarea asp-for="CreateRequest.Notes" rows="2" class="form-control rounded-3"
+                                      placeholder="Ghi chú ca làm việc, hợp đồng thử việc, kỹ năng chuyên môn..."></textarea>
+                        }
+                        else
+                        {
+                            <textarea asp-for="UpdateRequest.Notes" rows="2" class="form-control rounded-3"
+                                      placeholder="Ghi chú ca làm việc, hợp đồng thử việc, kỹ năng chuyên môn..."></textarea>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột phải: Section 3 (Tài khoản & Bảo mật) + Section 4 (Vai trò) -->
+    <div class="col-lg-4">
+        <!-- SECTION 3: TÀI KHOẢN & BẢO MẬT -->
+        <div class="card border-0 shadow-sm rounded-4 bg-white dark:bg-slate-900 mb-4 overflow-hidden">
+            <div class="card-header bg-white dark:bg-slate-900 border-bottom px-4 py-3 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2.5">
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-amber-50 text-amber-600" style="width: 34px; height: 34px; background:#fffbeb; color:#d97706;">
+                        <i class="fa-solid fa-key"></i>
+                    </span>
+                    <div>
+                        <h6 class="fw-bold text-slate-900 dark:text-white mb-0">3. Tài Khoản & Bảo Mật</h6>
+                        <div class="text-muted" style="font-size: 0.74rem;">Thông tin đăng nhập và trạng thái</div>
+                    </div>
+                </div>
+                <span class="badge bg-light text-muted border font-monospace">Phần 3/4</span>
+            </div>
+
+            <div class="card-body p-4">
+                <!-- Username -->
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-dark dark:text-white">
+                        Tên đăng nhập (Username) <span class="text-danger">*</span>
+                    </label>
+                    @if (!isEdit)
+                    {
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted font-monospace">@@</span>
+                            <input asp-for="CreateRequest.Username" id="staffUsernameInput" class="form-control font-monospace rounded-end-3"
+                                   placeholder="vd: sale03" autocorrect="off" autocapitalize="off" spellcheck="false"
+                                   oninput="this.value = this.value.toLowerCase()"
+                                   onblur="validateUniqueUsername(this.value)" />
+                        </div>
+                        <div class="text-muted mt-1" style="font-size: 0.7rem;">Chỉ gồm chữ thường <code>a-z</code>, số <code>0-9</code>, dấu <code>.</code> hoặc <code>_</code> (3–50 ký tự).</div>
+                        <span asp-validation-for="CreateRequest.Username" class="text-danger small d-block mt-1"></span>
+                        <div id="usernameCheckMsg" class="small mt-1" aria-live="polite"></div>
+                    }
+                    else
+                    {
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-muted font-monospace">@@</span>
+                            <input type="text" class="form-control bg-light font-monospace" value="@Model.Username" readonly disabled />
+                            <span class="input-group-text bg-slate-100 text-muted small">Cố định</span>
+                        </div>
+                        <div class="text-muted mt-1" style="font-size: 0.7rem;">Tên đăng nhập là định danh bất biến trên nhật ký kiểm toán.</div>
+                    }
+                </div>
+
+                <!-- Password (Only when creating) -->
+                @if (!isEdit)
+                {
+                    <div class="mb-3">
+                        <label asp-for="CreateRequest.Password" class="form-label small fw-bold text-dark dark:text-white">
+                            Mật khẩu khởi tạo <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group">
+                            <input asp-for="CreateRequest.Password" type="password" id="staffPasswordInput"
+                                   class="form-control font-monospace" placeholder="Tối thiểu 8 ký tự..."
+                                   oninput="evaluatePasswordStrength(this.value)" />
+                            <button type="button" class="btn btn-outline-secondary px-2.5" onclick="togglePasswordVisibility()" title="Hiện / Ẩn mật khẩu" aria-label="Hiện hoặc ẩn mật khẩu">
+                                <i class="fa-regular fa-eye" id="pwdToggleIcon"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-primary px-2.5" onclick="generateRandomPassword()" title="Tạo mật khẩu mạnh ngẫu nhiên">
+                                <i class="fa-solid fa-dice"></i>
+                            </button>
+                        </div>
+                        <span asp-validation-for="CreateRequest.Password" class="text-danger small d-block mt-1"></span>
+
+                        <!-- Password Strength Meter -->
+                        <div class="mt-2">
+                            <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 0.72rem;">
+                                <span class="text-muted">Độ mạnh mật khẩu:</span>
+                                <span id="pwdStrengthLabel" class="fw-bold text-muted">Chưa nhập</span>
+                            </div>
+                            <div class="progress rounded-pill" style="height: 6px;">
+                                <div id="pwdStrengthBar" class="progress-bar bg-secondary" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="row g-1 mt-2 text-muted" style="font-size: 0.7rem;">
+                                <div class="col-6" id="ruleLen"><i class="fa-regular fa-circle me-1"></i>Tối thiểu 8 ký tự</div>
+                                <div class="col-6" id="ruleCase"><i class="fa-regular fa-circle me-1"></i>Chữ HOA & thường</div>
+                                <div class="col-6" id="ruleNum"><i class="fa-regular fa-circle me-1"></i>Có chữ số (0-9)</div>
+                                <div class="col-6" id="ruleSpec"><i class="fa-regular fa-circle me-1"></i>Ký tự đặc biệt (!@@#$)</div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Trạng thái hoạt động -->
+                <div class="p-3 rounded-3 border bg-slate-50/70 dark:bg-slate-800/50 d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="fw-bold small text-dark dark:text-white">Trạng thái tài khoản</div>
+                        <div class="text-muted" style="font-size: 0.72rem;">Cho phép nhân sự đăng nhập hệ thống</div>
+                    </div>
+                    <div class="form-check form-switch m-0">
+                        @if (!isEdit)
+                        {
+                            <input asp-for="CreateRequest.IsActive" class="form-check-input" type="checkbox" role="switch" style="width: 2.5em; height: 1.3em; cursor: pointer;" />
+                        }
+                        else
+                        {
+                            <input asp-for="UpdateRequest.IsActive" class="form-check-input" type="checkbox" role="switch" style="width: 2.5em; height: 1.3em; cursor: pointer;" />
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 4: VAI TRÒ ĐƯỢC PHÉP GÁN -->
+        <div class="card border-0 shadow-sm rounded-4 bg-white dark:bg-slate-900 mb-4 overflow-hidden">
+            <div class="card-header bg-white dark:bg-slate-900 border-bottom px-4 py-3 d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2.5">
+                    <span class="d-inline-flex align-items-center justify-content-center rounded-3 bg-emerald-50 text-emerald-600" style="width: 34px; height: 34px; background:#ecfdf5; color:#059669;">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </span>
+                    <div>
+                        <h6 class="fw-bold text-slate-900 dark:text-white mb-0">4. Vai Trò Đảm Nhiệm</h6>
+                        <div class="text-muted" style="font-size: 0.74rem;">Chỉ hiện vai trò trong phạm vi ủy quyền</div>
+                    </div>
+                </div>
+                <span class="badge bg-light text-muted border font-monospace">Phần 4/4</span>
+            </div>
+
+            <div class="card-body p-4">
+                @{
+                    string roleFieldName = isEdit ? "UpdateRequest.RoleIds" : "CreateRequest.RoleIds";
+                }
+                @if (Model.AssignableRoles.Count == 0)
+                {
+                    <div class="text-center py-4 text-muted small">
+                        <i class="fa-solid fa-lock fs-4 d-block mb-2 text-warning"></i>
+                        Bạn không có vai trò nào khả dụng để gán trong phạm vi ủy quyền hiện tại.
+                    </div>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-2.5" style="max-height: 420px; overflow-y: auto;">
+                        @foreach (var r in Model.AssignableRoles)
+                        {
+                            bool isRoleChecked = selectedRoleIds.Contains(r.Id);
+                            string badgeColor = !string.IsNullOrEmpty(r.Color) ? r.Color : "#64748b";
+                            <label class="border rounded-3 p-3 d-flex align-items-start gap-2.5 cursor-pointer role-select-card transition-all @(isRoleChecked ? "border-danger bg-rose-50/40 shadow-2xs" : "bg-white dark:bg-slate-800")"
+                                   style="cursor: pointer;">
+                                <input type="checkbox" name="@roleFieldName" value="@r.Id"
+                                       class="form-check-input mt-1 flex-shrink-0"
+                                       checked="@(isRoleChecked ? "checked" : null)"
+                                       onchange="toggleRoleCardHighlight(this)" />
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-1 mb-1">
+                                        <span class="fw-bold small text-dark dark:text-white">@(r.DisplayName ?? r.Name)</span>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <span class="badge rounded-pill font-monospace"
+                                                  style="background-color: @(badgeColor)18; color: @badgeColor; border: 1px solid @(badgeColor)40; font-size: 0.65rem;">
+                                                Lv@r.Level
+                                            </span>
+                                            <span class="badge bg-slate-100 text-slate-700 border rounded-pill" style="font-size: 0.65rem;" title="Số quyền chức năng mặc định của vai trò này">
+                                                <i class="fa-solid fa-key me-0.5 text-warning"></i>@r.PermissionCount quyền
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="text-muted font-monospace mb-1" style="font-size: 0.68rem;">
+                                        @r.Name @(string.IsNullOrEmpty(r.DepartmentName) ? "" : $"• {r.DepartmentName}")
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(r.Description))
+                                    {
+                                        <div class="text-muted" style="font-size: 0.73rem; line-height: 1.35;">
+                                            @r.Description
+                                        </div>
+                                    }
+                                </div>
+                            </label>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sticky Footer Action Bar -->
+<div class="card border-0 shadow-sm rounded-4 bg-white dark:bg-slate-900 p-3 px-4 mt-2 sticky-bottom z-20 border-top">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="small text-muted d-flex align-items-center gap-2">
+            <i class="fa-solid fa-circle-info text-primary"></i>
+            <span>Các trường đánh dấu <strong class="text-danger">*</strong> là bắt buộc. Dữ liệu được kiểm toán tự động.</span>
+        </div>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <a href="/Admin/User" class="btn btn-light border rounded-3 px-3.5 py-2 fw-semibold small">
+                <i class="fa-solid fa-xmark me-1"></i>Hủy
+            </a>
+            <button type="submit" class="btn btn-outline-primary rounded-3 px-3.5 py-2 fw-semibold small" onclick="submitStaffForm(true)">
+                <i class="fa-solid fa-plus-circle me-1"></i>@(isEdit ? "Lưu & Tiếp tục sửa" : "Lưu & Thêm mới")
+            </button>
+            <button type="submit" class="btn btn-primary-gradient text-white rounded-3 px-4 py-2 fw-semibold small shadow-xs" onclick="submitStaffForm(false)">
+                <i class="fa-solid fa-floppy-disk me-1.5"></i>@(isEdit ? "Lưu Thay Đổi" : "Lưu Nhân Sự")
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let isStaffFormDirty = false;
+    let isSubmittingStaffForm = false;
+    let showAllManagersMode = false;
+    const currentStaffIdForCheck = @(Model.StaffId);
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form');
+        if (form) {
+            form.addEventListener('input', () => { isStaffFormDirty = true; });
+            form.addEventListener('change', () => { isStaffFormDirty = true; });
+            form.addEventListener('submit', () => { isSubmittingStaffForm = true; });
+        }
+
+        window.addEventListener('beforeunload', function (e) {
+            if (isStaffFormDirty && !isSubmittingStaffForm) {
+                e.preventDefault();
+                e.returnValue = 'Bạn có thay đổi chưa lưu. Bạn có chắc chắn muốn rời trang?';
+            }
+        });
+
+        // Auto-generate employee code if creating and empty
+        const codeInput = document.getElementById('staffCodeInput');
+        const isEditMode = @(isEdit ? "true" : "false");
+        if (!isEditMode && codeInput && !codeInput.value.trim()) {
+            generateEmployeeCode();
+        }
+
+        // Initial manager filtering by selected department
+        const deptSelect = document.getElementById('staffDepartmentSelect');
+        if (deptSelect && deptSelect.value) {
+            filterManagersByDepartment(deptSelect.value);
+        }
+    });
+
+    function submitStaffForm(saveAndContinue) {
+        isSubmittingStaffForm = true;
+        const input = document.getElementById('saveAndContinueInput');
+        if (input) input.value = saveAndContinue ? 'true' : 'false';
+    }
+
+    // 1. Media Picker for Avatar
+    function openStaffAvatarPicker() {
+        if (typeof openMediaPicker === 'function') {
+            openMediaPicker(function (asset) {
+                if (!asset || !asset.publicUrl) return;
+                document.getElementById('staffAvatarUrlInput').value = asset.publicUrl;
+                document.getElementById('staffAvatarMediaIdInput').value = asset.id || '';
+                const img = document.getElementById('staffAvatarPreviewImg');
+                const placeholder = document.getElementById('staffAvatarPlaceholder');
+                const removeBtn = document.getElementById('btnRemoveStaffAvatar');
+                img.src = asset.publicUrl;
+                img.classList.remove('d-none');
+                placeholder.classList.add('d-none');
+                removeBtn.classList.remove('d-none');
+                isStaffFormDirty = true;
+            });
+        }
+    }
+
+    function clearStaffAvatar() {
+        document.getElementById('staffAvatarUrlInput').value = '';
+        document.getElementById('staffAvatarMediaIdInput').value = '';
+        document.getElementById('staffAvatarPreviewImg').classList.add('d-none');
+        document.getElementById('staffAvatarPlaceholder').classList.remove('d-none');
+        document.getElementById('btnRemoveStaffAvatar').classList.add('d-none');
+        isStaffFormDirty = true;
+    }
+
+    function updateAvatarInitial(fullName) {
+        const placeholder = document.getElementById('staffAvatarPlaceholder');
+        if (!placeholder) return;
+        const trimmed = (fullName || '').trim();
+        placeholder.textContent = trimmed.length > 0 ? trimmed.charAt(0).toUpperCase() : 'N';
+    }
+
+    function highlightGenderCards() {
+        document.querySelectorAll('.gender-radio-card').forEach(card => {
+            const radio = card.querySelector('input[type="radio"]');
+            if (radio && radio.checked) {
+                card.classList.add('border-danger', 'fw-bold');
+            } else {
+                card.classList.remove('border-danger', 'fw-bold');
+            }
+        });
+    }
+
+    function toggleRoleCardHighlight(checkbox) {
+        const card = checkbox.closest('.role-select-card');
+        if (!card) return;
+        if (checkbox.checked) {
+            card.classList.add('border-danger', 'bg-rose-50/40', 'shadow-2xs');
+        } else {
+            card.classList.remove('border-danger', 'bg-rose-50/40', 'shadow-2xs');
+        }
+    }
+
+    // 2. Employee Code Generator & Manager Filter
+    function generateEmployeeCode() {
+        const num = Math.floor(1000 + Math.random() * 9000);
+        const codeInput = document.getElementById('staffCodeInput');
+        if (codeInput) {
+            codeInput.value = 'NV-' + num;
+            validateUniqueCode(codeInput.value);
+        }
+    }
+
+    function filterManagersByDepartment(deptId) {
+        const mgrSelect = document.getElementById('staffManagerSelect');
+        const hintEl = document.getElementById('managerFilterHint');
+        if (!mgrSelect) return;
+
+        let matchCount = 0;
+        Array.from(mgrSelect.options).forEach(opt => {
+            if (!opt.value) return; // keep default option
+            const optDept = opt.getAttribute('data-dept-id') || '';
+            if (!deptId || showAllManagersMode || optDept === String(deptId)) {
+                opt.hidden = false;
+                if (deptId && optDept === String(deptId)) matchCount++;
+            } else {
+                opt.hidden = true;
+            }
+        });
+
+        // If no manager in that department, show all automatically so user isn't stuck
+        if (deptId && matchCount === 0 && !showAllManagersMode) {
+            Array.from(mgrSelect.options).forEach(opt => { opt.hidden = false; });
+            if (hintEl) hintEl.textContent = 'Phòng ban này chưa có quản lý riêng — đang hiển thị danh sách quản lý toàn hệ thống.';
+        } else if (deptId && !showAllManagersMode) {
+            if (hintEl) hintEl.textContent = `Đang lọc ${matchCount} người quản lý thuộc phòng ban đã chọn.`;
+        } else {
+            if (hintEl) hintEl.textContent = 'Đang hiển thị tất cả người quản lý trong phạm vi.';
+        }
+    }
+
+    function toggleShowAllManagers() {
+        showAllManagersMode = !showAllManagersMode;
+        const btn = document.getElementById('btnToggleAllManagers');
+        if (btn) btn.textContent = showAllManagersMode ? 'Chỉ lọc theo phòng ban' : 'Hiện tất cả phòng ban';
+        const deptSelect = document.getElementById('staffDepartmentSelect');
+        filterManagersByDepartment(deptSelect ? deptSelect.value : '');
+    }
+
+    // 3. Password Generator, Visibility & Strength Meter
+    function togglePasswordVisibility() {
+        const input = document.getElementById('staffPasswordInput');
+        const icon = document.getElementById('pwdToggleIcon');
+        if (!input) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fa-regular fa-eye-slash';
+        } else {
+            input.type = 'password';
+            icon.className = 'fa-regular fa-eye';
+        }
+    }
+
+    function generateRandomPassword() {
+        const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+        const lower = 'abcdefghijkmnpqrstuvwxyz';
+        const digits = '23456789';
+        const specials = '!#$%&*+?';
+        const all = upper + lower + digits + specials;
+
+        let pwd = '';
+        pwd += upper.charAt(Math.floor(Math.random() * upper.length));
+        pwd += lower.charAt(Math.floor(Math.random() * lower.length));
+        pwd += digits.charAt(Math.floor(Math.random() * digits.length));
+        pwd += specials.charAt(Math.floor(Math.random() * specials.length));
+        for (let i = 0; i < 6; i++) {
+            pwd += all.charAt(Math.floor(Math.random() * all.length));
+        }
+
+        const input = document.getElementById('staffPasswordInput');
+        if (input) {
+            input.value = pwd;
+            input.type = 'text';
+            const icon = document.getElementById('pwdToggleIcon');
+            if (icon) icon.className = 'fa-regular fa-eye-slash';
+            evaluatePasswordStrength(pwd);
+            isStaffFormDirty = true;
+        }
+    }
+
+    function evaluatePasswordStrength(pwd) {
+        const bar = document.getElementById('pwdStrengthBar');
+        const label = document.getElementById('pwdStrengthLabel');
+        if (!bar || !label) return;
+
+        const hasLen = pwd.length >= 8;
+        const hasCase = /[a-z]/.test(pwd) && /[A-Z]/.test(pwd);
+        const hasNum = /\d/.test(pwd);
+        const hasSpec = /[^a-zA-Z0-9]/.test(pwd);
+
+        updateRuleIndicator('ruleLen', hasLen);
+        updateRuleIndicator('ruleCase', hasCase);
+        updateRuleIndicator('ruleNum', hasNum);
+        updateRuleIndicator('ruleSpec', hasSpec);
+
+        const score = [hasLen, hasCase, hasNum, hasSpec].filter(Boolean).length;
+        if (!pwd) {
+            bar.style.width = '0%';
+            bar.className = 'progress-bar bg-secondary';
+            label.textContent = 'Chưa nhập';
+            label.className = 'fw-bold text-muted';
+        } else if (score <= 1) {
+            bar.style.width = '25%';
+            bar.className = 'progress-bar bg-danger';
+            label.textContent = 'Yếu (Cần bổ sung)';
+            label.className = 'fw-bold text-danger';
+        } else if (score === 2) {
+            bar.style.width = '50%';
+            bar.className = 'progress-bar bg-warning';
+            label.textContent = 'Trung bình';
+            label.className = 'fw-bold text-warning';
+        } else if (score === 3) {
+            bar.style.width = '75%';
+            bar.className = 'progress-bar bg-info';
+            label.textContent = 'Khá';
+            label.className = 'fw-bold text-info';
+        } else {
+            bar.style.width = '100%';
+            bar.className = 'progress-bar bg-success';
+            label.textContent = 'Rất mạnh (Đạt chuẩn)';
+            label.className = 'fw-bold text-success';
+        }
+    }
+
+    function updateRuleIndicator(id, passed) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const text = el.textContent.trim();
+        if (passed) {
+            el.className = 'col-6 text-success fw-semibold';
+            el.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i>${text}`;
+        } else {
+            el.className = 'col-6 text-muted';
+            el.innerHTML = `<i class="fa-regular fa-circle me-1"></i>${text}`;
+        }
+    }
+
+    // 4. Realtime Uniqueness Checks
+    async function validateUniqueUsername(username) {
+        const msgEl = document.getElementById('usernameCheckMsg');
+        if (!msgEl) return;
+        const val = (username || '').trim();
+        if (!val) { msgEl.innerHTML = ''; return; }
+        if (!/^[a-z0-9._]{3,50}$/.test(val)) {
+            msgEl.className = 'small mt-1 text-danger';
+            msgEl.innerHTML = '<i class="fa-solid fa-circle-xmark me-1"></i>Username chỉ gồm chữ thường a-z, số 0-9, dấu chấm hoặc gạch dưới (3–50 ký tự).';
+            return;
+        }
+        const res = await fetch(`/Admin/User/CheckUsername?username=${encodeURIComponent(val)}&excludeId=${currentStaffIdForCheck}`);
+        const isAvailable = await res.json();
+        if (!isAvailable) {
+            msgEl.className = 'small mt-1 text-danger fw-semibold';
+            msgEl.innerHTML = '<i class="fa-solid fa-circle-xmark me-1"></i>Tên đăng nhập này đã có người sử dụng!';
+        } else {
+            msgEl.className = 'small mt-1 text-success';
+            msgEl.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i>Tên đăng nhập hợp lệ và khả dụng.';
+        }
+    }
+
+    async function validateUniqueEmail(email) {
+        const msgEl = document.getElementById('emailCheckMsg');
+        if (!msgEl) return;
+        const val = (email || '').trim();
+        if (!val || val.indexOf('\x40') === -1) { msgEl.innerHTML = ''; return; }
+        const res = await fetch(`/Admin/User/CheckEmail?email=${encodeURIComponent(val)}&excludeId=${currentStaffIdForCheck}`);
+        const isAvailable = await res.json();
+        if (!isAvailable) {
+            msgEl.className = 'small mt-1 text-danger fw-semibold';
+            msgEl.innerHTML = '<i class="fa-solid fa-circle-xmark me-1"></i>Địa chỉ Email này đã được đăng ký cho tài khoản khác!';
+        } else {
+            msgEl.className = 'small mt-1 text-success';
+            msgEl.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i>Email hợp lệ.';
+        }
+    }
+
+    async function validateUniqueCode(code) {
+        const msgEl = document.getElementById('codeCheckMsg');
+        if (!msgEl) return;
+        const val = (code || '').trim();
+        if (!val) { msgEl.innerHTML = ''; return; }
+        const res = await fetch(`/Admin/User/CheckEmployeeCode?code=${encodeURIComponent(val)}&excludeId=${currentStaffIdForCheck}`);
+        const isAvailable = await res.json();
+        if (!isAvailable) {
+            msgEl.className = 'small mt-1 text-danger fw-semibold';
+            msgEl.innerHTML = '<i class="fa-solid fa-circle-xmark me-1"></i>Mã nhân viên này đã tồn tại!';
+        } else {
+            msgEl.className = 'small mt-1 text-success';
+            msgEl.innerHTML = '<i class="fa-solid fa-circle-check me-1"></i>Mã nhân viên khả dụng.';
+        }
+    }
+</script>
+

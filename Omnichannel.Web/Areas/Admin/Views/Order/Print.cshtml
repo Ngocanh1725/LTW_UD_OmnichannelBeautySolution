@@ -198,8 +198,9 @@
         <!-- Header -->
         <div class="header">
             <div>
-                <div class="brand-title">OMNICHANNEL BEAUTY</div>
-                <div class="brand-sub">LUXURY COSMETICS & WELLNESS SUITE</div>
+                <img src="@Brand.LogoMonoUrl" alt="Canmake Beauty" style="height: 34px; width: auto; display: block; margin-bottom: 6px;" />
+                <div class="brand-title">@Brand.Name</div>
+                <div class="brand-sub">@Brand.Slogan.ToUpperInvariant()</div>
                 <div class="store-info">
                     <div><strong>Chi nhánh:</strong> @Model.StoreName</div>
                     <div><strong>Địa chỉ:</strong> @Model.StoreAddress</div>
@@ -304,7 +305,7 @@
 
         <!-- Footer -->
         <div class="footer-note">
-            <p><strong>Cảm ơn quý khách đã tin tưởng và mua sắm tại Omnichannel Beauty!</strong></p>
+            <p><strong>Cảm ơn quý khách đã tin tưởng và mua sắm tại @Brand.DisplayName!</strong></p>
             <p style="margin-top: 4px; font-size: 11px;">Quý khách vui lòng kiểm tra kỹ hàng hóa và hóa đơn trước khi rời quầy hoặc thanh toán cho shipper.</p>
         </div>
     </div>

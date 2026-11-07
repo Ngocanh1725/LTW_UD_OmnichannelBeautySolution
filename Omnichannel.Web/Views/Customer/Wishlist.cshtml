@@ -1,7 +1,7 @@
 @using System.Text.Encodings.Web
 @model Omnichannel.Application.DTOs.Customer.WishlistPageViewModel
 @{
-    ViewData["Title"] = "Danh Sách Yêu Thích (Wishlist) - Omni Beauty";
+    ViewData["Title"] = "Danh Sách Yêu Thích (Wishlist) - Canmake Beauty";
     Layout = "_Layout";
 }
 
@@ -51,6 +51,9 @@
             </a>
             <a href="/Wishlist" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-magenta-accent/10 text-magenta-accent border border-magenta-accent/20 shadow-xs">
                 <i class="fa-solid fa-heart text-magenta-accent"></i> Danh Sách Yêu Thích
+            </a>
+            <a href="/Customer/Subscriptions" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-bell text-purple-500"></i> Sản Phẩm Theo Dõi
             </a>
         </div>
 
@@ -118,7 +121,7 @@
                             <img src="@item.ThumbnailUrl" 
                                  alt="@item.ProductName" 
                                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                 onerror="this.src='/images/branding/default-product.png'" />
+                                 onerror="this.src='/images/products/_placeholder.webp'" />
 
                             <!-- Stock Status Badge (Top-Left) -->
                             <div class="absolute top-3 left-3 z-10">

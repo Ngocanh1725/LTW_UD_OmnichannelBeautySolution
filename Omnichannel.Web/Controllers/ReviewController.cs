@@ -43,9 +43,96 @@ namespace Omnichannel.Web.Controllers
             return null;
         }
 
+        private string GetOrCreateAnonymousVoteKey()
+        {
+            const string cookieName = "canmake_anon_vote_key";
+            if (Request.Cookies.TryGetValue(cookieName, out var existingKey) && !string.IsNullOrWhiteSpace(existingKey))
+            {
+                return existingKey;
+            }
+
+            var newKey = $"anon_{Guid.NewGuid():N}";
+            Response.Cookies.Append(cookieName, newKey, new CookieOptions
+            {
+                HttpOnly = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddDays(90)
+            });
+            return newKey;
+        }
+
         /// <summary>
-        /// API Lấy danh sách đánh giá sản phẩm có phân trang và bộ lọc nhanh:
-        /// all | images | verified | 5star
+        /// Kiểm tra định dạng tệp ảnh an toàn bằng cả Extension, MIME Type và Magic Bytes (File Signature)
+        /// Chặn đứng tệp thực thi .exe đổi tên thành .jpg
+        /// </summary>
+        public static bool IsValidImageFile(IFormFile file)
+        {
+            if (file == null || file.Length == 0 || file.Length > 2 * 1024 * 1024) // Tối đa 2MB/ảnh
+            {
+                return false;
+            }
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            var ext = Path.GetExtension(file.FileName)?.ToLowerInvariant();
+            if (string.IsNullOrEmpty(ext) || !allowedExtensions.Contains(ext))
+            {
+                return false;
+            }
+
+            var allowedMimeTypes = new[] { "image/jpeg", "image/jpg", "image/png", "image/webp" };
+            var mime = file.ContentType?.ToLowerInvariant();
+            if (string.IsNullOrEmpty(mime) || !allowedMimeTypes.Contains(mime))
+            {
+                return false;
+            }
+
+            try
+            {
+                using var stream = file.OpenReadStream();
+                if (stream.Length < 4) return false;
+
+                var header = new byte[12];
+                int bytesRead = stream.Read(header, 0, Math.Min(12, (int)stream.Length));
+                if (bytesRead < 4) return false;
+
+                // Chặn tệp thực thi Windows PE / MZ (.exe, .dll)
+                if (header[0] == 0x4D && header[1] == 0x5A) // "MZ"
+                {
+                    return false;
+                }
+
+                // Kiểm tra JPEG (FF D8 FF)
+                if (ext == ".jpg" || ext == ".jpeg")
+                {
+                    return header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF;
+                }
+
+                // Kiểm tra PNG (89 50 4E 47 0D 0A 1A 0A)
+                if (ext == ".png")
+                {
+                    return bytesRead >= 8 &&
+                           header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47 &&
+                           header[4] == 0x0D && header[5] == 0x0A && header[6] == 0x1A && header[7] == 0x0A;
+                }
+
+                // Kiểm tra WEBP ("RIFF" .... "WEBP")
+                if (ext == ".webp")
+                {
+                    return bytesRead >= 12 &&
+                           header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46 &&
+                           header[8] == 0x57 && header[9] == 0x45 && header[10] == 0x42 && header[11] == 0x50;
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// API Lấy danh sách đánh giá sản phẩm có phân trang, bộ lọc Skin Twin và sắp xếp
         /// </summary>
         [HttpGet]
         [Route("Review/GetReviews")]
@@ -53,6 +140,8 @@ namespace Omnichannel.Web.Controllers
             [FromQuery] int productId,
             [FromQuery] string? filter = "all",
             [FromQuery] int? rating = null,
+            [FromQuery] string? skinType = null,
+            [FromQuery] string? sortBy = "newest",
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 10)
         {
@@ -63,7 +152,7 @@ namespace Omnichannel.Web.Controllers
 
             try
             {
-                var reviews = await _reviewService.GetProductReviewsAsync(productId, page, pageSize, rating, filter);
+                var reviews = await _reviewService.GetProductReviewsAsync(productId, page, pageSize, rating, filter, skinType, sortBy);
                 var stats = await _reviewService.GetReviewStatsAsync(productId);
 
                 return Json(new
@@ -71,6 +160,8 @@ namespace Omnichannel.Web.Controllers
                     success = true,
                     productId,
                     filter = filter ?? "all",
+                    skinType = skinType ?? "all",
+                    sortBy = sortBy ?? "newest",
                     page,
                     pageSize,
                     total = reviews.Count,
@@ -83,6 +174,22 @@ namespace Omnichannel.Web.Controllers
                 _logger.LogError(ex, "Lỗi khi lấy danh sách đánh giá sản phẩm {ProductId}", productId);
                 return StatusCode(500, new { success = false, message = "Không thể tải danh sách đánh giá" });
             }
+        }
+
+        /// <summary>
+        /// API Lấy bộ sưu tập ảnh thực tế từ khách hàng (Customer Swatch Photo Gallery)
+        /// </summary>
+        [HttpGet]
+        [Route("Review/GetGallery")]
+        public async Task<IActionResult> GetGallery([FromQuery] int productId, [FromQuery] int limit = 12)
+        {
+            if (productId <= 0)
+            {
+                return BadRequest(new { success = false, message = "ProductId không hợp lệ" });
+            }
+
+            var photos = await _reviewService.GetCustomerReviewImagesAsync(productId, limit);
+            return Json(new { success = true, productId, total = photos.Count, photos });
         }
 
         /// <summary>
@@ -102,8 +209,7 @@ namespace Omnichannel.Web.Controllers
         }
 
         /// <summary>
-        /// API Gửi đánh giá sản phẩm mới kèm tải lên tối đa 3 ảnh chụp thực tế
-        /// Hỗ trợ cả 2 route: /Review/Submit và /Product/SubmitReview
+        /// API Gửi đánh giá sản phẩm mới kèm tải lên tối đa 3 ảnh chụp thực tế (Giới hạn 2MB, kiểm tra Magic Bytes)
         /// </summary>
         [HttpPost]
         [Route("Review/Submit")]
@@ -126,20 +232,15 @@ namespace Omnichannel.Web.Controllers
             }
 
             int? userId = GetCurrentUserId();
-
-            // Xử lý lưu ảnh chụp thực tế nếu có
             var uploadedImageUrls = new List<string>();
 
-            // Nếu client đã gửi URL ảnh sẵn
             if (request.ExistingImages != null && request.ExistingImages.Any())
             {
                 uploadedImageUrls.AddRange(request.ExistingImages.Take(3));
             }
 
-            // Xử lý tệp tin tải lên (tối đa 3 ảnh)
             if (request.Photos != null && request.Photos.Count > 0)
             {
-                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
                 var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "reviews");
                 if (!Directory.Exists(uploadsFolder))
                 {
@@ -151,12 +252,16 @@ namespace Omnichannel.Web.Controllers
                 {
                     if (file == null || file.Length == 0) continue;
 
-                    // Giới hạn dung lượng 5MB
-                    if (file.Length > 5 * 1024 * 1024) continue;
+                    if (!IsValidImageFile(file))
+                    {
+                        return BadRequest(new
+                        {
+                            success = false,
+                            message = $"Tệp '{file.FileName}' không hợp lệ! Chỉ chấp nhận ảnh thật (.jpg, .png, .webp) tối đa 2MB."
+                        });
+                    }
 
                     var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-                    if (!allowedExtensions.Contains(ext)) continue;
-
                     var uniqueFileName = $"review_{request.ProductId}_{DateTime.UtcNow.Ticks}_{Guid.NewGuid():N}{ext}";
                     var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
@@ -207,7 +312,7 @@ namespace Omnichannel.Web.Controllers
         }
 
         /// <summary>
-        /// API Bình chọn hữu ích (Helpful thumbs-up vote)
+        /// API Bình chọn hữu ích (Helpful thumbs-up vote) có chống trùng lặp
         /// </summary>
         [HttpPost]
         [Route("Review/VoteHelpful")]
@@ -220,13 +325,17 @@ namespace Omnichannel.Web.Controllers
 
             try
             {
-                int newHelpfulCount = await _reviewService.VoteHelpfulAsync(request.ReviewId);
+                int? userId = GetCurrentUserId();
+                string? anonKey = userId.HasValue ? null : GetOrCreateAnonymousVoteKey();
+
+                var result = await _reviewService.VoteHelpfulWithCheckAsync(request.ReviewId, userId, anonKey);
                 return Json(new
                 {
-                    success = true,
+                    success = result.Success,
+                    alreadyVoted = !result.Success,
                     reviewId = request.ReviewId,
-                    helpfulCount = newHelpfulCount,
-                    message = "Cảm ơn bạn đã ghi nhận đánh giá này hữu ích!"
+                    helpfulCount = result.NewCount,
+                    message = result.Message
                 });
             }
             catch (Exception ex)
@@ -245,13 +354,9 @@ namespace Omnichannel.Web.Controllers
         public string? Content { get; set; }
         public string? SkinType { get; set; }
         public string? AgeRange { get; set; }
-
-        // --- 3 Tiêu chí phụ đặc trưng mỹ phẩm ---
         public string? Scent { get; set; }
         public string? Longevity { get; set; }
         public string? SkinFeel { get; set; }
-
-        // --- Ảnh upload ---
         public List<IFormFile>? Photos { get; set; }
         public List<string>? ExistingImages { get; set; }
     }

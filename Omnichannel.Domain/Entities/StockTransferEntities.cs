@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Omnichannel.Domain.Common;
-
+//Quản lý phiếu điều chuyển hàng hóa qua lại giữa các chi nhánh (Ví dụ: Chuyển từ Kho Tổng sang Chi nhánh Quận 1).
 namespace Omnichannel.Domain.Entities
 {
     /// <summary>

@@ -34,7 +34,7 @@ namespace Omnichannel.Tests.Services
                 new RolePermission { RoleId = role.Id, PermissionId = perm2.Id }
             );
 
-            var user = new User { Username = "cashier_test", Email = "cashier@test.com", PasswordHash = "hash" };
+            var user = new User { Username = "cashier_test", Email = "cashier@test.com", PasswordHash = "hash", UserType = 2, IsActive = true };
             context.Users.Add(user);
             await context.SaveChangesAsync();
 
@@ -68,7 +68,7 @@ namespace Omnichannel.Tests.Services
 
             context.RolePermissions.Add(new RolePermission { RoleId = role.Id, PermissionId = permView.Id });
 
-            var user = new User { Username = "staff_special", Email = "staff@test.com", PasswordHash = "hash" };
+            var user = new User { Username = "staff_special", Email = "staff@test.com", PasswordHash = "hash", UserType = 2, IsActive = true };
             context.Users.Add(user);
             await context.SaveChangesAsync();
 
@@ -106,7 +106,7 @@ namespace Omnichannel.Tests.Services
                 new RolePermission { RoleId = role.Id, PermissionId = permEdit.Id }
             );
 
-            var user = new User { Username = "manager_restricted", Email = "mgr@test.com", PasswordHash = "hash" };
+            var user = new User { Username = "manager_restricted", Email = "mgr@test.com", PasswordHash = "hash", UserType = 2, IsActive = true };
             context.Users.Add(user);
             await context.SaveChangesAsync();
 
@@ -159,7 +159,7 @@ namespace Omnichannel.Tests.Services
             var memoryCache = new MemoryCache(new MemoryCacheOptions());
             var service = new PermissionService(context, memoryCache);
 
-            var user = new User { Id = 50, Username = "u50", Email = "u50@test.com", PasswordHash = "h" };
+            var user = new User { Id = 50, Username = "u50", Email = "u50@test.com", PasswordHash = "h", UserType = 2, IsActive = true };
             context.Users.Add(user);
             await context.SaveChangesAsync();
 

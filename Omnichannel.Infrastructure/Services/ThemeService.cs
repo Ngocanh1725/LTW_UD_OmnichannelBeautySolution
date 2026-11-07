@@ -43,45 +43,50 @@ namespace Omnichannel.Infrastructure.Services
 
             if (theme == null)
             {
-                _logger.LogInformation("Chưa có cấu hình Theme trong CSDL, sử dụng cấu hình mặc định OMNI BEAUTY.");
+                _logger.LogInformation("Chưa có cấu hình Theme trong CSDL, sử dụng cấu hình mặc định CANMAKE BEAUTY.");
                 theme = new ThemeConfig
                 {
-                    BrandName = "OMNI BEAUTY",
-                    Slogan = "Hệ Thống Bán Lẻ Mỹ Phẩm Cao Cấp Tiên Phong Công Nghệ FEFO",
-                    PrimaryColor = "#E11D48",
-                    SecondaryColor = "#BE185D",
-                    AccentColor = "#F59E0B",
-                    FontFamily = "'Inter', sans-serif",
-                    AnnouncementBarText = "✨ Chào mừng bạn đến với OMNI BEAUTY - Miễn phí vận chuyển cho đơn hàng từ 300K ✨",
+                    BrandName = "CANMAKE BEAUTY",
+                    Slogan = "Canmake Beauty – Hệ Thống Mỹ Phẩm Đa Kênh Chính Hãng",
+                    PrimaryColor = "#E8618C",
+                    SecondaryColor = "#B8336A",
+                    AccentColor = "#F7C6D4",
+                    FontFamily = "'Quicksand', 'Plus Jakarta Sans', sans-serif",
+                    AnnouncementBarText = "✨ Chào mừng bạn đến với CANMAKE BEAUTY - Miễn phí vận chuyển cho đơn hàng từ 300K ✨",
                     AnnouncementBarActive = true,
-                    AnnouncementBarBgColor = "#881337",
+                    AnnouncementBarBgColor = "#B8336A",
                     Hotline = "1900 8888",
-                    ContactEmail = "hotro@omnibeauty.vn",
+                    ContactEmail = "hotro@canmakebeauty.vn",
                     Address = "68 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh",
-                    FooterCopyright = "© 2026 OMNI BEAUTY. Tất cả quyền được bảo lưu.",
+                    FooterCopyright = "© 2026 CANMAKE BEAUTY. Tất cả quyền được bảo lưu.",
                     IsActive = true,
                     UpdatedAt = DateTime.UtcNow
                 };
             }
 
+            bool isLegacyBrand = !string.IsNullOrWhiteSpace(theme.BrandName) &&
+                                 theme.BrandName.StartsWith("OMNI ", StringComparison.OrdinalIgnoreCase);
+
             var dto = new ThemeConfigDto
             {
                 Id = theme.Id,
-                BrandName = theme.BrandName,
-                Slogan = theme.Slogan,
-                PrimaryColor = theme.PrimaryColor,
-                SecondaryColor = theme.SecondaryColor,
-                AccentColor = theme.AccentColor,
+                BrandName = isLegacyBrand ? "CANMAKE BEAUTY" : theme.BrandName,
+                Slogan = isLegacyBrand ? "Canmake Beauty – Hệ Thống Mỹ Phẩm Đa Kênh Chính Hãng" : theme.Slogan,
+                PrimaryColor = isLegacyBrand && theme.PrimaryColor == "#E11D48" ? "#E8618C" : theme.PrimaryColor,
+                SecondaryColor = isLegacyBrand && theme.SecondaryColor == "#BE185D" ? "#B8336A" : theme.SecondaryColor,
+                AccentColor = isLegacyBrand && theme.AccentColor == "#F59E0B" ? "#F7C6D4" : theme.AccentColor,
                 FontFamily = theme.FontFamily,
-                LogoMediaId = theme.LogoMediaId,
-                FaviconMediaId = theme.FaviconMediaId,
-                AnnouncementBarText = theme.AnnouncementBarText,
+                LogoMediaId = isLegacyBrand ? null : theme.LogoMediaId,
+                FaviconMediaId = isLegacyBrand ? null : theme.FaviconMediaId,
+                AnnouncementBarText = isLegacyBrand
+                    ? "✨ Chào mừng bạn đến với CANMAKE BEAUTY - Miễn phí vận chuyển cho đơn hàng từ 300K ✨"
+                    : theme.AnnouncementBarText,
                 AnnouncementBarActive = theme.AnnouncementBarActive,
-                AnnouncementBarBgColor = theme.AnnouncementBarBgColor,
+                AnnouncementBarBgColor = isLegacyBrand && theme.AnnouncementBarBgColor == "#881337" ? "#B8336A" : theme.AnnouncementBarBgColor,
                 Hotline = theme.Hotline,
-                ContactEmail = theme.ContactEmail,
+                ContactEmail = isLegacyBrand ? "hotro@canmakebeauty.vn" : theme.ContactEmail,
                 Address = theme.Address,
-                FooterCopyright = theme.FooterCopyright,
+                FooterCopyright = isLegacyBrand ? "© 2026 CANMAKE BEAUTY. Tất cả quyền được bảo lưu." : theme.FooterCopyright,
                 CustomCss = theme.CustomCss
             };
 

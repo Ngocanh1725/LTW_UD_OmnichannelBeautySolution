@@ -1,6 +1,6 @@
 @model Omnichannel.Application.DTOs.Reports.DashboardViewModel
 @{
-    ViewData["Title"] = "Bảng Điều Khiển Quản Trị - Executive Retail Analytics";
+    ViewData["Title"] = "Bảng Điều Khiển Quản Trị - Executive Decision Center";
     Layout = "_AdminLayout";
     var userDisplayName = User.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value 
                           ?? User.Identity?.Name 
@@ -8,59 +8,48 @@
 }
 
 <style>
-    /* Staggered Fade-in Animations */
+    /* Staggered Animations */
     @@keyframes fadeInUpStagger {
-        from {
-            opacity: 0;
-            transform: translateY(18px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(16px); }
+        to { opacity: 1; transform: translateY(0); }
     }
-    .animate-stagger-1 { animation: fadeInUpStagger 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
-    .animate-stagger-2 { animation: fadeInUpStagger 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both; }
-    .animate-stagger-3 { animation: fadeInUpStagger 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both; }
-    .animate-stagger-4 { animation: fadeInUpStagger 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both; }
-    .animate-stagger-5 { animation: fadeInUpStagger 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.45s both; }
+    .animate-stagger-1 { animation: fadeInUpStagger 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .animate-stagger-2 { animation: fadeInUpStagger 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both; }
+    .animate-stagger-3 { animation: fadeInUpStagger 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.20s both; }
+    .animate-stagger-4 { animation: fadeInUpStagger 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.28s both; }
+    .animate-stagger-5 { animation: fadeInUpStagger 0.4s cubic-bezier(0.16, 1, 0.3, 1) 0.36s both; }
 
-    /* Card Glow & Hover Transition */
     .beauty-card-hover {
-        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s ease;
+        transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.22s ease, border-color 0.22s ease;
     }
     .beauty-card-hover:hover {
-        transform: translateY(-4px);
+        transform: translateY(-3px);
     }
 
-    /* Smooth HTMX Live Swap Transition */
-    #kpiRealtimeWrapper {
-        transition: opacity 0.3s ease;
+    /* Heatmap Cells */
+    .heatmap-cell {
+        transition: all 0.2s ease;
     }
-    #kpiRealtimeWrapper.htmx-swapping {
-        opacity: 0.4;
-    }
-    #kpiRealtimeWrapper.htmx-settling {
-        opacity: 1;
+    .heatmap-cell:hover {
+        transform: scale(1.08);
+        z-index: 10;
+        box-shadow: 0 4px 12px rgba(225, 29, 72, 0.35);
     }
 
     /* Flash Sale Glow Button */
     .btn-clearance-glow {
         background: linear-gradient(135deg, #e11d48 0%, #be123c 50%, #9f1239 100%);
         box-shadow: 0 4px 14px 0 rgba(225, 29, 72, 0.39);
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .btn-clearance-glow:hover {
         box-shadow: 0 6px 20px rgba(225, 29, 72, 0.55);
         transform: translateY(-1px) scale(1.02);
     }
-    .btn-clearance-glow:active {
-        transform: translateY(0) scale(0.98);
-    }
 
     /* Toast Notification */
     #toastNotification {
-        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         transform: translateY(100px);
         opacity: 0;
         pointer-events: none;
@@ -72,11 +61,13 @@
     }
 </style>
 
+<div class="dashboard-desktop-scale" style="zoom: 0.84;">
+
 <!-- =========================================================================
-     1. HEADER SECTION (Cá nhân hóa + Clock Alpine.js + Nút nhanh)
+     1. HEADER SECTION (Cá nhân hóa + Clock Alpine.js + Live Status)
      ========================================================================= -->
-<div class="mb-8 animate-stagger-1">
-    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-6 border-b border-slate-200/80 dark:border-slate-800">
+<div class="mb-6 animate-stagger-1">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 pb-5 border-b border-slate-200/80 dark:border-slate-800">
         <div>
             <div class="flex items-center gap-3 mb-1.5 flex-wrap">
                 <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
@@ -85,7 +76,7 @@
                 @if (Model.IsStoreScoped)
                 {
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shadow-sm">
-                        <i class="fa-solid fa-store"></i> Chi nhánh: @Model.CurrentStoreName
+                        <i class="fa-solid fa-store"></i> Chi nhánh: @Model.CurrentStoreName (Store Isolation)
                     </span>
                 }
                 else
@@ -95,11 +86,11 @@
                     </span>
                 }
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 shadow-sm">
-                    <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span> Executive Live 30s
+                    <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span> Trung Tâm Ra Quyết Định (Executive Decision Center)
                 </span>
             </div>
             <p class="text-slate-500 dark:text-slate-400 text-sm">
-                Trung tâm phân tích bán lẻ đa kênh & Kiểm soát rủi ro tồn kho FEFO theo tiêu chuẩn Dược Mỹ Phẩm.
+                Phân tích bán lẻ đa kênh, Phễu chuyển đổi thương mại điện tử, Phân khúc RFM và Điều phối tồn kho FEFO theo tiêu chuẩn Dược Mỹ Phẩm.
             </p>
         </div>
 
@@ -125,143 +116,464 @@
                 <span x-text="timeStr" class="font-mono text-slate-900 dark:text-white font-bold"></span>
             </div>
 
-            <!-- Nút Hành Động Nhanh -->
+            <!-- Nút Bán POS F1 & Kho FEFO -->
             <a href="/Admin/Pos" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-rose-600 to-pink-500 hover:from-rose-700 hover:to-pink-600 shadow-md shadow-rose-500/25 transition active:scale-95">
-                <i class="fa-solid fa-cash-register"></i> Bán tại quầy POS (F1)
+                <i class="fa-solid fa-cash-register"></i> POS Quầy (F1)
             </a>
-            <a href="#fefoRiskSection" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-300 dark:border-amber-800 shadow-sm transition active:scale-95">
-                <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Kho Cận Date FEFO
-            </a>
-            <a href="/Admin/Report" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-sm transition active:scale-95">
-                <i class="fa-solid fa-chart-line text-indigo-500"></i> Báo cáo BI chi tiết
+            <a href="/Admin/StockTransfer" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 shadow-sm transition active:scale-95">
+                <i class="fa-solid fa-truck-ramp-box text-amber-500"></i> Điều Chuyển Kho
             </a>
         </div>
     </div>
 </div>
 
 <!-- =========================================================================
-     2. 6 THẺ CHỈ SỐ KPI HÀNG ĐẦU (EXECUTIVE METRIC CARDS - LIVE HTMX 30s)
+     GLOBAL FILTER BAR (Khoảng thời gian 7/30/90 ngày + Kênh + Cửa hàng)
      ========================================================================= -->
-@{
-    var initialKpiDto = new Omnichannel.Application.DTOs.Reports.RealtimeKpiDto
-    {
-        TodayRevenue = Model.TodayRevenue,
-        TodayRevenueFormatted = Model.TodayRevenue.ToString("N0") + " đ",
-        MonthRevenue = Model.MonthRevenue,
-        MonthRevenueFormatted = Model.MonthRevenue.ToString("N0") + " đ",
-        TodayOrderCount = Model.TodayOrderCount,
-        MonthTotalOrders = Model.MonthTotalOrders,
-        MonthOnlineOrders = Model.MonthOnlineOrders,
-        MonthPosOrders = Model.MonthPosOrders,
-        CustomerRetentionRate = Model.CustomerRetentionRate,
-        FefoRiskInventoryValue = Model.FefoRiskInventoryValue,
-        FefoRiskInventoryValueFormatted = Model.FefoRiskInventoryValue.ToString("N0") + " đ",
-        FefoRiskBatchCount = Model.FefoRiskBatchCount,
-        TotalInventoryValue = Model.TotalInventoryValue,
-        TotalInventoryValueFormatted = Model.TotalInventoryValueFormatted,
-        NewCustomersThisMonth = Model.NewCustomersThisMonth,
-        TotalProducts = Model.TotalProducts,
-        TotalStores = Model.TotalStores,
-        TodayVsYesterdayRevenueGrowth = Model.TodayVsYesterdayRevenueGrowth,
-        MonthVsLastMonthRevenueGrowth = Model.MonthVsLastMonthRevenueGrowth,
-        TodayVsYesterdayOrderGrowth = Model.TodayVsYesterdayOrderGrowth,
-        LastUpdated = DateTime.Now.ToString("HH:mm:ss")
-    };
-}
-<div id="kpiRealtimeWrapper" 
-     hx-get="/Admin/Dashboard/GetRealtimeStats" 
-     hx-trigger="every 30s" 
-     hx-swap="innerHTML"
-     class="mb-8 animate-stagger-2">
-    @await Html.PartialAsync("_RealtimeKpis", initialKpiDto)
+<div class="mb-6 animate-stagger-1">
+    <form method="get" action="/Admin/Dashboard" class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <!-- Nút chọn nhanh kỳ lọc: 7 / 30 / 90 ngày / Tùy chỉnh -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider me-1">
+                    <i class="fa-solid fa-calendar-days text-rose-500 me-1"></i>Kỳ báo cáo:
+                </span>
+                <a href="/Admin/Dashboard?days=7&channel=@Model.SelectedChannel@(Model.SelectedStoreId.HasValue ? $"&storeId={Model.SelectedStoreId}" : "")"
+                   class="px-3 py-1.5 rounded-xl text-xs font-bold transition @(Model.SelectedPeriodType == "7" ? "bg-rose-600 text-white shadow-sm" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700")">
+                    7 Ngày
+                </a>
+                <a href="/Admin/Dashboard?days=30&channel=@Model.SelectedChannel@(Model.SelectedStoreId.HasValue ? $"&storeId={Model.SelectedStoreId}" : "")"
+                   class="px-3 py-1.5 rounded-xl text-xs font-bold transition @(Model.SelectedPeriodType == "30" ? "bg-rose-600 text-white shadow-sm" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700")">
+                    30 Ngày
+                </a>
+                <a href="/Admin/Dashboard?days=90&channel=@Model.SelectedChannel@(Model.SelectedStoreId.HasValue ? $"&storeId={Model.SelectedStoreId}" : "")"
+                   class="px-3 py-1.5 rounded-xl text-xs font-bold transition @(Model.SelectedPeriodType == "90" ? "bg-rose-600 text-white shadow-sm" : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700")">
+                    90 Ngày (Quý)
+                </a>
+
+                <!-- Custom Range Datepicker Inputs -->
+                <div class="flex items-center gap-2 ms-2 ps-2 border-s border-slate-200 dark:border-slate-800">
+                    <input type="date" name="fromDate" value="@Model.FilterFromDate.ToString("yyyy-MM-dd")" 
+                           class="px-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-mono focus:ring-1 focus:ring-rose-500 outline-none" />
+                    <span class="text-xs text-slate-400">→</span>
+                    <input type="date" name="toDate" value="@Model.FilterToDate.ToString("yyyy-MM-dd")" 
+                           class="px-2.5 py-1 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-mono focus:ring-1 focus:ring-rose-500 outline-none" />
+                </div>
+            </div>
+
+            <!-- Bộ lọc Kênh & Cửa hàng -->
+            <div class="flex items-center gap-3 flex-wrap">
+                <!-- Kênh Bán Hàng -->
+                <div class="flex items-center gap-1.5">
+                    <label class="text-xs font-bold text-slate-500 dark:text-slate-400">Kênh:</label>
+                    <select name="channel" onchange="this.form.submit()" 
+                            class="px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:ring-1 focus:ring-rose-500 outline-none">
+                        <option value="ALL" selected="@(Model.SelectedChannel == "ALL")">🌐 Tất Cả Kênh</option>
+                        <option value="ONLINE" selected="@(Model.SelectedChannel == "ONLINE")">🛍️ Online Storefront (Web/App)</option>
+                        <option value="POS" selected="@(Model.SelectedChannel == "POS")">🏬 Bán Lẻ POS (Tại Quầy)</option>
+                    </select>
+                </div>
+
+                <!-- Cửa hàng (Tôn trọng Store Isolation) -->
+                <div class="flex items-center gap-1.5">
+                    <label class="text-xs font-bold text-slate-500 dark:text-slate-400">Cửa hàng:</label>
+                    @if (Model.IsStoreScoped)
+                    {
+                        <input type="hidden" name="storeId" value="@Model.CurrentStoreId" />
+                        <span class="px-3 py-1.5 text-xs font-bold rounded-xl bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                            🔒 @Model.CurrentStoreName
+                        </span>
+                    }
+                    else
+                    {
+                        <select name="storeId" onchange="this.form.submit()" 
+                                class="px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 focus:ring-1 focus:ring-rose-500 outline-none">
+                            <option value="" selected="@(!Model.SelectedStoreId.HasValue)">🏢 Toàn bộ chi nhánh</option>
+                            @foreach (var store in Model.AvailableStores)
+                            {
+                                <option value="@store.Id" selected="@(Model.SelectedStoreId == store.Id)">@store.Name</option>
+                            }
+                        </select>
+                    }
+                </div>
+
+                <button type="submit" class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-slate-900 hover:bg-slate-800 dark:bg-slate-700 dark:hover:bg-slate-600 transition shadow-sm">
+                    <i class="fa-solid fa-filter me-1"></i> Lọc dữ liệu
+                </button>
+            </div>
+        </div>
+    </form>
 </div>
 
 <!-- =========================================================================
-     3. 3 BIỂU ĐỒ TRỰC QUAN HÓA DỮ LIỆU (CHART.JS)
-     - Line Chart: Doanh thu 7 ngày gần nhất (so sánh với tuần trước)
-     - Doughnut Chart: Tỷ trọng doanh thu theo kênh bán (POS vs Online)
-     - Bar Chart: Doanh thu phân bổ theo chi nhánh
+     2. 6 THẺ KPI TRUNG TÂM CÓ SO SÁNH KỲ TRƯỚC (▲▼ %) — 100% TỪ SQL THẬT
      ========================================================================= -->
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8 animate-stagger-3">
-    <!-- Cột Trái (8/12): Doanh Thu 7 Ngày Gần Nhất (So Sánh Tuần Này vs Tuần Trước) -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6 animate-stagger-2">
+    <!-- KPI 1: Doanh Thu Thuần -->
+    <div class="beauty-card-hover group relative bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm overflow-hidden flex flex-col justify-between">
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600"></div>
+        <div>
+            <div class="flex items-start justify-between mb-2">
+                <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 flex items-center justify-center text-base font-bold border border-rose-200 dark:border-rose-800">
+                    <i class="fa-solid fa-coins"></i>
+                </div>
+                <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold @(Model.PeriodNetRevenueGrowth >= 0 ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200" : "bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200")">
+                    <i class="fa-solid @(Model.PeriodNetRevenueGrowth >= 0 ? "fa-arrow-trend-up" : "fa-arrow-trend-down")"></i>
+                    @(Model.PeriodNetRevenueGrowth >= 0 ? "+" : "")@Model.PeriodNetRevenueGrowth%
+                </span>
+            </div>
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Doanh Thu Thuần</div>
+            <div class="text-xl font-extrabold text-rose-600 dark:text-rose-400 font-mono tracking-tight truncate" title="@Model.PeriodNetRevenue.ToString("N0") đ">
+                @Model.PeriodNetRevenue.ToString("N0") <span class="text-xs font-normal">đ</span>
+            </div>
+        </div>
+        <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-400">
+            <span>Kỳ trước: @Model.PrevPeriodNetRevenue.ToString("N0") đ</span>
+            <span class="font-bold text-rose-500">@Model.SelectedDays ngày</span>
+        </div>
+    </div>
+
+    <!-- KPI 2: Số Đơn Hàng -->
+    <div class="beauty-card-hover group relative bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm overflow-hidden flex flex-col justify-between">
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+        <div>
+            <div class="flex items-start justify-between mb-2">
+                <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 flex items-center justify-center text-base font-bold border border-indigo-200 dark:border-indigo-800">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold @(Model.PeriodOrderCountGrowth >= 0 ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200" : "bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200")">
+                    <i class="fa-solid @(Model.PeriodOrderCountGrowth >= 0 ? "fa-arrow-trend-up" : "fa-arrow-trend-down")"></i>
+                    @(Model.PeriodOrderCountGrowth >= 0 ? "+" : "")@Model.PeriodOrderCountGrowth%
+                </span>
+            </div>
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Số Đơn Hàng</div>
+            <div class="text-xl font-extrabold text-indigo-600 dark:text-indigo-400 font-mono tracking-tight">
+                @Model.PeriodOrderCount.ToString("N0") <span class="text-xs font-normal text-slate-400">đơn</span>
+            </div>
+        </div>
+        <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-400">
+            <span>Kỳ trước: @Model.PrevPeriodOrderCount đơn</span>
+            <span class="font-bold text-indigo-500">Thành công</span>
+        </div>
+    </div>
+
+    <!-- KPI 3: AOV (Giá trị đơn trung bình) -->
+    <div class="beauty-card-hover group relative bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm overflow-hidden flex flex-col justify-between">
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 to-blue-600"></div>
+        <div>
+            <div class="flex items-start justify-between mb-2">
+                <div class="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 dark:bg-sky-950/60 dark:text-sky-400 flex items-center justify-center text-base font-bold border border-sky-200 dark:border-sky-800">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+                <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold @(Model.PeriodAovGrowth >= 0 ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200" : "bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200")">
+                    <i class="fa-solid @(Model.PeriodAovGrowth >= 0 ? "fa-arrow-trend-up" : "fa-arrow-trend-down")"></i>
+                    @(Model.PeriodAovGrowth >= 0 ? "+" : "")@Model.PeriodAovGrowth%
+                </span>
+            </div>
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">AOV (Đơn Trung Bình)</div>
+            <div class="text-xl font-extrabold text-sky-600 dark:text-sky-400 font-mono tracking-tight truncate" title="@Model.PeriodAov.ToString("N0") đ">
+                @Model.PeriodAov.ToString("N0") <span class="text-xs font-normal">đ</span>
+            </div>
+        </div>
+        <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-400">
+            <span>Kỳ trước: @Model.PrevPeriodAov.ToString("N0") đ</span>
+            <span class="font-bold text-sky-500">Giỏ hàng</span>
+        </div>
+    </div>
+
+    <!-- KPI 4: Tỷ Lệ Hủy Đơn -->
+    <div class="beauty-card-hover group relative bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm overflow-hidden flex flex-col justify-between">
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-600"></div>
+        <div>
+            <div class="flex items-start justify-between mb-2">
+                <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400 flex items-center justify-center text-base font-bold border border-amber-200 dark:border-amber-800">
+                    <i class="fa-solid fa-ban"></i>
+                </div>
+                <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold @(Model.PeriodCancellationRateDiff <= 0 ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200" : "bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200")">
+                    @(Model.PeriodCancellationRateDiff > 0 ? "+" : "")@Model.PeriodCancellationRateDiff%
+                </span>
+            </div>
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Tỷ Lệ Hủy Đơn</div>
+            <div class="text-xl font-extrabold text-amber-600 dark:text-amber-400 font-mono tracking-tight">
+                @Model.PeriodCancellationRate% <span class="text-xs font-normal text-slate-400">(@Model.PeriodCancelledOrders/@Model.PeriodAllOrdersIncludingCancelled)</span>
+            </div>
+        </div>
+        <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-400">
+            <span>Kỳ trước: @Model.PrevPeriodCancellationRate%</span>
+            <span class="font-bold @(Model.PeriodCancellationRate <= 5 ? "text-emerald-500" : "text-amber-500")">Kiểm soát</span>
+        </div>
+    </div>
+
+    <!-- KPI 5: Khách Hàng Mới -->
+    <div class="beauty-card-hover group relative bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm overflow-hidden flex flex-col justify-between">
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-600"></div>
+        <div>
+            <div class="flex items-start justify-between mb-2">
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 flex items-center justify-center text-base font-bold border border-emerald-200 dark:border-emerald-800">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+                <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold @(Model.PeriodNewCustomersGrowth >= 0 ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200" : "bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200")">
+                    <i class="fa-solid @(Model.PeriodNewCustomersGrowth >= 0 ? "fa-arrow-trend-up" : "fa-arrow-trend-down")"></i>
+                    @(Model.PeriodNewCustomersGrowth >= 0 ? "+" : "")@Model.PeriodNewCustomersGrowth%
+                </span>
+            </div>
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Khách Hàng Mới</div>
+            <div class="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono tracking-tight">
+                @Model.PeriodNewCustomers.ToString("N0") <span class="text-xs font-normal text-slate-400">khách</span>
+            </div>
+        </div>
+        <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-400">
+            <span>Kỳ trước: @Model.PrevPeriodNewCustomers khách</span>
+            <span class="font-bold text-emerald-500">Mở rộng</span>
+        </div>
+    </div>
+
+    <!-- KPI 6: Giá Trị Cận Date FEFO -->
+    <div class="beauty-card-hover group relative bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-sm overflow-hidden flex flex-col justify-between">
+        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-amber-500"></div>
+        <div>
+            <div class="flex items-start justify-between mb-2">
+                <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 flex items-center justify-center text-base font-bold border border-rose-200 dark:border-rose-800">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200">
+                    ≤90 Ngày
+                </span>
+            </div>
+            <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Cận Date FEFO</div>
+            <div class="text-xl font-extrabold text-rose-600 dark:text-rose-400 font-mono tracking-tight truncate" title="@Model.FefoRiskInventoryValue.ToString("N0") đ">
+                @Model.FefoRiskInventoryValue.ToString("N0") <span class="text-xs font-normal">đ</span>
+            </div>
+        </div>
+        <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] text-slate-400">
+            <span>@Model.FefoRiskBatchCount lô rủi ro</span>
+            <a href="#fefoRiskSection" class="font-bold text-rose-500 hover:underline">Xả kho →</a>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     CẢNH BÁO THÔNG MINH & GỢI Ý ĐIỀU CHUYỂN KHO TỰ ĐỘNG (SMART ACTIONABLE ALERTS)
+     (Thay thế hoàn toàn dữ liệu hardcode giả lập bằng truy vấn DB thật)
+     ========================================================================= -->
+<div class="mb-6 animate-stagger-2">
+    <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/30 rounded-2xl p-5 shadow-lg text-white">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-indigo-500/20 mb-4 gap-2">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-400 shadow-sm shadow-indigo-500/30">
+                    <i class="fa-solid fa-robot text-base animate-pulse"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm sm:text-base font-bold tracking-tight text-white flex items-center gap-2">
+                        <span>Trung Tâm Cảnh Báo Vận Hành & Tối Ưu Tồn Kho Đa Kênh</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                            @(Model.LowStockAlerts.Count + Model.SmartTransferSuggestions.Count + (Model.FefoRiskBatchCount > 0 ? 1 : 0)) Khuyến Nghị
+                        </span>
+                    </h3>
+                    <p class="text-[11px] text-slate-400">Tự động phát hiện điểm nghẽn tồn kho theo ROP, cảnh báo FEFO cận date và đề xuất lệnh điều chuyển liên chi nhánh</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> Realtime DB Scan
+                </span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Alert 1: Rủi ro FEFO cận date -->
+            <div class="bg-slate-800/60 border border-rose-500/40 rounded-xl p-3.5 hover:bg-slate-800/90 transition flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                            <i class="fa-solid fa-triangle-exclamation"></i> FEFO CRITICAL
+                        </span>
+                        <span class="text-[10px] font-mono text-slate-400">≤ 90 Ngày</span>
+                    </div>
+                    <div class="text-xs font-bold text-slate-100 mb-1">
+                        @if (Model.FefoRiskBatchCount > 0)
+                        {
+                            <span>Ghi nhận @Model.FefoRiskBatchCount lô mỹ phẩm cận hạn dùng</span>
+                        }
+                        else
+                        {
+                            <span>Kho hàng an toàn: Chưa phát hiện lô cận date</span>
+                        }
+                    </div>
+                    <p class="text-[11px] text-slate-300 leading-relaxed">
+                        Tổng giá trị hàng có nguy cơ hết hạn: <strong class="text-rose-400 font-mono">@Model.FefoRiskInventoryValue.ToString("N0") đ</strong>. Khuyến nghị kích hoạt Smart Flash Sale giảm 50% để thu hồi vốn.
+                    </p>
+                </div>
+                <div class="mt-3 pt-2.5 border-t border-slate-700/60 flex items-center justify-between">
+                    <span class="text-[10px] text-slate-400">Lô rủi ro: <strong class="text-rose-300">@Model.FefoRiskBatchCount</strong></span>
+                    <a href="#fefoRiskSection" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-white bg-rose-600 hover:bg-rose-500 transition shadow-sm">
+                        Xả kho FEFO <i class="fa-solid fa-arrow-right text-[9px] ms-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Alert 2: SKU chạm ngưỡng Reorder Point (ROP) -->
+            <div class="bg-slate-800/60 border border-amber-500/40 rounded-xl p-3.5 hover:bg-slate-800/90 transition flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                            <i class="fa-solid fa-box-open"></i> ĐỨT GÃY TỒN KHO (ROP)
+                        </span>
+                        <span class="text-[10px] font-mono text-slate-400">@Model.LowStockAlerts.Count SKU</span>
+                    </div>
+                    <div class="text-xs font-bold text-slate-100 mb-1">
+                        @if (Model.LowStockAlerts.Any())
+                        {
+                            var topLow = Model.LowStockAlerts.First();
+                            <span>@topLow.ProductName (@topLow.StoreName) còn @topLow.AvailableQuantity sp</span>
+                        }
+                        else
+                        {
+                            <span>Mọi sản phẩm đều đạt định mức an toàn</span>
+                        }
+                    </div>
+                    <p class="text-[11px] text-slate-300 leading-relaxed">
+                        Phát hiện @Model.LowStockAlerts.Count sản phẩm có lượng tồn kho khả dụng thấp hơn hoặc bằng ngưỡng an toàn (ROP ≤ 15). Cần nhập bổ sung hoặc điều chuyển.
+                    </p>
+                </div>
+                <div class="mt-3 pt-2.5 border-t border-slate-700/60 flex items-center justify-between">
+                    <span class="text-[10px] text-slate-400">Cảnh báo: <strong class="text-amber-300">@Model.LowStockAlerts.Count sp</strong></span>
+                    <a href="/Admin/Warehouse" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-slate-900 bg-amber-400 hover:bg-amber-300 transition shadow-sm">
+                        Quản lý kho <i class="fa-solid fa-arrow-right text-[9px] ms-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Alert 3: Gợi ý Điều Chuyển Kho Liên Chi Nhánh (Smart Transfer) -->
+            <div class="bg-slate-800/60 border border-sky-500/40 rounded-xl p-3.5 hover:bg-slate-800/90 transition flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                            <i class="fa-solid fa-truck-ramp-box"></i> CÂN BẰNG KHO O2O
+                        </span>
+                        <span class="text-[10px] font-mono text-slate-400">Tự động gợi ý</span>
+                    </div>
+                    <div class="text-xs font-bold text-slate-100 mb-1">
+                        @if (Model.SmartTransferSuggestions.Any())
+                        {
+                            var t = Model.SmartTransferSuggestions.First();
+                            <span>Chuyển @t.SuggestedTransferQty sp từ @t.FromStoreName → @t.ToStoreName</span>
+                        }
+                        else
+                        {
+                            <span>Tồn kho các chi nhánh đang ở mức cân bằng</span>
+                        }
+                    </div>
+                    <p class="text-[11px] text-slate-300 leading-relaxed">
+                        @if (Model.SmartTransferSuggestions.Any())
+                        {
+                            var t = Model.SmartTransferSuggestions.First();
+                            <span>Sản phẩm <strong>@t.ProductName</strong> (@t.Sku) đang dư tại @t.FromStoreName (@t.FromStoreAvailable sp) nhưng thiếu tại @t.ToStoreName (@t.ToStoreAvailable sp).</span>
+                        }
+                        else
+                        {
+                            <span>Hệ thống theo dõi tự động luồng hàng giữa các chi nhánh để tối ưu tồn kho không bị đọng vốn.</span>
+                        }
+                    </p>
+                </div>
+                <div class="mt-3 pt-2.5 border-t border-slate-700/60 flex items-center justify-between">
+                    <span class="text-[10px] text-slate-400">Lệnh gợi ý: <strong class="text-sky-300">@Model.SmartTransferSuggestions.Count</strong></span>
+                    @if (Model.SmartTransferSuggestions.Any())
+                    {
+                        <a href="@Model.SmartTransferSuggestions.First().ActionUrl" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-white bg-sky-600 hover:bg-sky-500 transition shadow-sm">
+                            Tạo lệnh chuyển kho <i class="fa-solid fa-arrow-right text-[9px] ms-1"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="/Admin/StockTransfer" class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-white bg-slate-700 hover:bg-slate-600 transition shadow-sm">
+                            Xem chuyển kho <i class="fa-solid fa-arrow-right text-[9px] ms-1"></i>
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     3. BIỂU ĐỒ DOANH THU THEO NGÀY (ONLINE VS POS) & CƠ CẤU DOANH MỤC
+     ========================================================================= -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6 animate-stagger-3">
+    <!-- Cột Trái (8/12): Line Chart Doanh Thu Kỳ Đã Lọc (Online Storefront vs Bán Lẻ POS) -->
     <div class="lg:col-span-8">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm h-full flex flex-col justify-between">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm h-full flex flex-col justify-between">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-4 gap-2">
                 <div>
                     <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <i class="fa-solid fa-chart-line text-rose-500"></i>
-                        Doanh Thu 7 Ngày Gần Nhất (So Sánh Tuần Này vs Tuần Trước)
+                        Biến Động Doanh Thu @Model.SelectedDays Ngày (Online Web/App vs POS Tại Quầy)
                     </h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Đối chiếu doanh số thực tế 7 ngày vừa qua so với cùng kỳ tuần trước</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Dữ liệu thực tế 100% từ giao dịch cơ sở dữ liệu theo tiêu chuẩn Executive BI</p>
                 </div>
-                <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
-                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Tuần Này
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Online
                     </span>
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
-                        <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> Tuần Trước
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
+                        <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> POS
                     </span>
-                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-extrabold @(Model.Revenue7DaysComparison.GrowthRate >= 0 ? "bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-800" : "bg-rose-50 text-rose-600 border border-rose-200 dark:bg-rose-950/60 dark:text-rose-400 dark:border-rose-800")">
-                        @(Model.Revenue7DaysComparison.GrowthRate >= 0 ? "+" : "")@Model.Revenue7DaysComparison.GrowthRate%
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Tổng hợp nhất
                     </span>
                 </div>
             </div>
 
-            <div class="relative flex-grow" style="min-height: 310px;">
-                <canvas id="revenueTrend7DaysChart"></canvas>
+            <div class="relative flex-grow" style="min-height: 290px;">
+                <canvas id="revenueTrendChart"></canvas>
             </div>
 
             <div class="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between text-xs text-slate-500 gap-3">
-                <div class="flex items-center gap-4">
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-calendar-week text-rose-500"></i>Tuần này: <strong class="text-slate-800 dark:text-white font-mono">@Model.Revenue7DaysComparison.CurrentWeekTotal.ToString("N0") đ</strong></span>
-                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left text-indigo-500"></i>Tuần trước: <strong class="text-slate-800 dark:text-white font-mono">@Model.Revenue7DaysComparison.PreviousWeekTotal.ToString("N0") đ</strong></span>
+                <div class="flex items-center gap-4 flex-wrap">
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-globe text-rose-500"></i>Online: <strong class="text-slate-800 dark:text-white font-mono">@(Model.DailyChannelRevenues.Sum(x => x.OnlineRevenue).ToString("N0")) đ</strong></span>
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-cash-register text-indigo-500"></i>POS: <strong class="text-slate-800 dark:text-white font-mono">@(Model.DailyChannelRevenues.Sum(x => x.PosRevenue).ToString("N0")) đ</strong></span>
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-coins text-emerald-500"></i>Tổng cộng: <strong class="text-slate-800 dark:text-white font-mono">@(Model.DailyChannelRevenues.Sum(x => x.TotalRevenue).ToString("N0")) đ</strong></span>
                 </div>
                 <div class="font-mono font-bold text-slate-800 dark:text-white">
-                    Tăng trưởng: <span class="@(Model.Revenue7DaysComparison.GrowthRate >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400") font-extrabold">@(Model.Revenue7DaysComparison.GrowthRate >= 0 ? "+" : "")@Model.Revenue7DaysComparison.GrowthRate%</span>
+                    Tăng trưởng kỳ: <span class="@(Model.PeriodNetRevenueGrowth >= 0 ? "text-emerald-600" : "text-rose-600")">@(Model.PeriodNetRevenueGrowth >= 0 ? "+" : "")@Model.PeriodNetRevenueGrowth%</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Cột Phải (4/12): Doughnut Chart Tỷ Trọng Doanh Thu Theo Kênh Bán (POS vs Online) -->
+    <!-- Cột Phải (4/12): Doughnut Chart Cơ Cấu Doanh Thu Theo Danh Mục Mỹ Phẩm -->
     <div class="lg:col-span-4">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm h-full flex flex-col justify-between">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm h-full flex flex-col justify-between">
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-4">
                 <div>
                     <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <i class="fa-solid fa-chart-pie text-pink-500"></i>
-                        Kênh Bán Hàng
+                        Cơ Cấu Danh Mục
                     </h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Tỷ trọng POS Tại Quầy vs Storefront Online</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Tỷ trọng doanh số theo phân loại mỹ phẩm</p>
                 </div>
                 <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-pink-50 dark:bg-pink-950/60 text-pink-600 dark:text-pink-400 border border-pink-200 dark:border-pink-800">
-                    Omnichannel
+                    Categories
                 </span>
             </div>
 
-            <div class="relative flex items-center justify-center py-2" style="min-height: 230px;">
-                <div style="width: 220px; height: 220px; position: relative;">
-                    <canvas id="channelRevenueDoughnutChart"></canvas>
+            <div class="relative flex items-center justify-center py-2" style="min-height: 220px;">
+                <div style="width: 210px; height: 210px; position: relative;">
+                    <canvas id="categoryRevenueDoughnutChart"></canvas>
                 </div>
             </div>
 
-            <!-- Legend Phân Tách Kênh Bán -->
-            <div class="pt-4 mt-2 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2.5 max-h-[170px] overflow-y-auto">
-                @foreach (var ch in Model.ChannelDistributions)
+            <!-- Legend Danh Mục -->
+            <div class="pt-3 mt-2 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-2 max-h-[160px] overflow-y-auto">
+                @foreach (var cat in Model.CategoryRevenues)
                 {
-                    var chColor = ch.ChannelKey.ToUpper() switch
-                    {
-                        "POS" or "STORE" or "OFFLINE" => "#e11d48",
-                        "WEBSITE" or "ONLINE" => "#6366f1",
-                        _ => "#0ea5e9"
-                    };
                     <div class="flex items-center justify-between text-xs">
                         <div class="flex items-center gap-2 min-w-0">
-                            <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: @chColor;"></span>
-                            <span class="font-semibold text-slate-700 dark:text-slate-200 truncate" title="@ch.ChannelName">@ch.ChannelName</span>
+                            <span class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: @cat.Color;"></span>
+                            <span class="font-semibold text-slate-700 dark:text-slate-200 truncate" title="@cat.CategoryName">@cat.CategoryName</span>
                         </div>
                         <div class="font-mono text-slate-800 dark:text-slate-300 font-bold flex-shrink-0 text-right">
-                            @ch.Revenue.ToString("N0") đ <span class="text-slate-400 font-normal">(@ch.Percentage%)</span>
+                            @cat.Revenue.ToString("N0") đ <span class="text-slate-400 font-normal">(@cat.Percentage%)</span>
                         </div>
                     </div>
                 }
@@ -271,10 +583,498 @@
 </div>
 
 <!-- =========================================================================
-     4. BẢNG CẢNH BÁO KHO HÀNG CẬN DATE (FEFO RISK MONITOR TABLE - TOP 10 SẢN PHẨM)
+     4. PHỄU CHUYỂN ĐỔI 5 BƯỚC & HEATMAP GIỜ × THỨ ĐẶT HÀNG
      ========================================================================= -->
-<div id="fefoRiskSection" class="mb-8 animate-stagger-4">
-    <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm overflow-hidden">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6 animate-stagger-3">
+    <!-- Cột Trái (6/12): Phễu Chuyển Đổi (Conversion Funnel 5 Bước) -->
+    <div class="lg:col-span-6">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm h-full flex flex-col justify-between">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-filter-circle-dollar text-rose-500"></i>
+                        Phễu Chuyển Đổi Thương Mại Điện Tử (Conversion Funnel)
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Hành trình khách hàng từ Xem sản phẩm đến Hoàn tất đơn hàng</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200">
+                    CR Chung: @Model.ConversionFunnel.OverallConversionRate%
+                </span>
+            </div>
+
+            <!-- Các Bước Trong Phễu -->
+            <div class="space-y-3 flex-grow flex flex-col justify-center">
+                <!-- Bước 1: Xem sản phẩm -->
+                <div>
+                    <div class="flex items-center justify-between text-xs mb-1">
+                        <span class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center text-[10px] font-bold">1</span>
+                            Xem Sản Phẩm (Product Views)
+                        </span>
+                        <span class="font-mono font-bold text-slate-900 dark:text-white">@Model.ConversionFunnel.ProductViews.ToString("N0") lượt</span>
+                    </div>
+                    <div class="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-rose-500 to-pink-500 rounded-lg" style="width: 100%"></div>
+                    </div>
+                </div>
+
+                <!-- Bước 2: Thêm giỏ hàng -->
+                <div>
+                    <div class="flex items-center justify-between text-xs mb-1">
+                        <span class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center text-[10px] font-bold">2</span>
+                            Thêm Vào Giỏ (Add to Cart)
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] font-bold text-rose-500">@Model.ConversionFunnel.ViewToCartRate%</span>
+                            <span class="font-mono font-bold text-slate-900 dark:text-white">@Model.ConversionFunnel.AddToCartCount.ToString("N0")</span>
+                        </div>
+                    </div>
+                    <div class="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-pink-500 to-indigo-500 rounded-lg" style="width: @Math.Max(5, Math.Min(100, Model.ConversionFunnel.ViewToCartRate * 2.5m))%"></div>
+                    </div>
+                </div>
+
+                <!-- Bước 3: Bắt đầu Checkout -->
+                <div>
+                    <div class="flex items-center justify-between text-xs mb-1">
+                        <span class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center text-[10px] font-bold">3</span>
+                            Tiến Hành Thanh Toán (Checkout)
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] font-bold text-indigo-500">@Model.ConversionFunnel.CartToCheckoutRate%</span>
+                            <span class="font-mono font-bold text-slate-900 dark:text-white">@Model.ConversionFunnel.CheckoutCount.ToString("N0")</span>
+                        </div>
+                    </div>
+                    <div class="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-indigo-500 to-sky-500 rounded-lg" style="width: @Math.Max(5, Math.Min(100, Model.ConversionFunnel.CartToCheckoutRate))%"></div>
+                    </div>
+                </div>
+
+                <!-- Bước 4: Đặt hàng thành công -->
+                <div>
+                    <div class="flex items-center justify-between text-xs mb-1">
+                        <span class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center text-[10px] font-bold">4</span>
+                            Đặt Hàng Thành Công (Orders Placed)
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] font-bold text-sky-500">@Model.ConversionFunnel.CheckoutToOrderRate%</span>
+                            <span class="font-mono font-bold text-slate-900 dark:text-white">@Model.ConversionFunnel.OrdersPlacedCount.ToString("N0")</span>
+                        </div>
+                    </div>
+                    <div class="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-sky-500 to-teal-500 rounded-lg" style="width: @Math.Max(5, Math.Min(100, Model.ConversionFunnel.CheckoutToOrderRate))%"></div>
+                    </div>
+                </div>
+
+                <!-- Bước 5: Hoàn tất & Đã nhận hàng -->
+                <div>
+                    <div class="flex items-center justify-between text-xs mb-1">
+                        <span class="font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                            <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-bold">5</span>
+                            Hoàn Tất Đơn Hàng (Completed)
+                        </span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] font-bold text-emerald-500">@Model.ConversionFunnel.OrderToCompleteRate%</span>
+                            <span class="font-mono font-bold text-slate-900 dark:text-white">@Model.ConversionFunnel.OrdersCompletedCount.ToString("N0")</span>
+                        </div>
+                    </div>
+                    <div class="h-4 w-full bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-teal-500 to-emerald-500 rounded-lg" style="width: @Math.Max(5, Math.Min(100, Model.ConversionFunnel.OrderToCompleteRate))%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-400">
+                <i class="fa-solid fa-circle-info text-rose-500 me-1"></i>
+                <span>@Model.ConversionFunnel.MethodologyNote</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột Phải (6/12): Heatmap Giờ × Thứ Đặt Hàng (7 Ngày × 6 Khung Giờ) -->
+    <div class="lg:col-span-6">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm h-full flex flex-col justify-between">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-4 gap-2">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-fire text-amber-500"></i>
+                        Heatmap Giờ × Thứ Đặt Hàng (Khung Giờ Cao Điểm)
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Tần suất phát sinh đơn hàng phân bổ theo thời gian (giờ VN UTC+7)</p>
+                </div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200">
+                    <i class="fa-solid fa-bolt text-amber-500"></i> Đỉnh: @Model.PeakOrderTimeWindow
+                </span>
+            </div>
+
+            <!-- Ma Trận Heatmap -->
+            <div class="overflow-x-auto flex-grow flex items-center">
+                <table class="w-full text-center border-collapse text-xs">
+                    <thead>
+                        <tr class="text-slate-400 text-[11px]">
+                            <th class="py-1 px-1 text-left w-14 font-semibold">Thứ</th>
+                            <th class="py-1 px-1 font-semibold">00-04h</th>
+                            <th class="py-1 px-1 font-semibold">04-08h</th>
+                            <th class="py-1 px-1 font-semibold">08-12h</th>
+                            <th class="py-1 px-1 font-semibold">12-16h</th>
+                            <th class="py-1 px-1 font-semibold">16-20h</th>
+                            <th class="py-1 px-1 font-semibold">20-24h</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            string[] dayLabels = { "T2", "T3", "T4", "T5", "T6", "T7", "CN" };
+                        }
+                        @for (int d = 0; d < 7; d++)
+                        {
+                            <tr>
+                                <td class="py-1.5 px-1 text-left font-bold text-slate-600 dark:text-slate-300">@dayLabels[d]</td>
+                                @for (int s = 0; s < 6; s++)
+                                {
+                                    var cell = Model.OrderHeatmapCells.FirstOrDefault(c => c.DayIndex == d && c.SlotIndex == s);
+                                    int count = cell?.OrderCount ?? 0;
+                                    int intensity = cell?.IntensityPercent ?? 0;
+                                    string bgStyle;
+                                    string textColor;
+                                    if (count == 0)
+                                    {
+                                        bgStyle = "background-color: rgba(241, 245, 249, 0.5);";
+                                        textColor = "text-slate-300 dark:text-slate-700";
+                                    }
+                                    else if (intensity < 30)
+                                    {
+                                        bgStyle = "background-color: rgba(254, 205, 211, 0.6);";
+                                        textColor = "text-rose-800 font-bold";
+                                    }
+                                    else if (intensity < 70)
+                                    {
+                                        bgStyle = "background-color: rgba(251, 113, 133, 0.75);";
+                                        textColor = "text-white font-bold";
+                                    }
+                                    else
+                                    {
+                                        bgStyle = "background-color: rgba(225, 29, 72, 0.95);";
+                                        textColor = "text-white font-extrabold";
+                                    }
+
+                                    <td class="p-1">
+                                        <div class="heatmap-cell rounded-lg py-2 px-1 text-[11px] font-mono cursor-pointer @textColor"
+                                             style="@bgStyle"
+                                             title="@(cell?.DayName ?? "") (@(cell?.SlotLabel ?? "")): @count đơn, Doanh thu: @((cell?.Revenue ?? 0).ToString("N0")) đ">
+                                            @count
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+                <div class="flex items-center gap-1.5">
+                    <span>Mức độ:</span>
+                    <span class="w-3 h-3 rounded bg-slate-100 dark:bg-slate-800 inline-block"></span> 0
+                    <span class="w-3 h-3 rounded bg-rose-200 inline-block ms-1"></span> Thấp
+                    <span class="w-3 h-3 rounded bg-rose-400 inline-block ms-1"></span> Vừa
+                    <span class="w-3 h-3 rounded bg-rose-600 inline-block ms-1"></span> Cao
+                </div>
+                <span>Thích hợp canh giờ Flash Sale & Chiến dịch đẩy tin</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     5. PHÂN KHÚC KHÁCH HÀNG RFM (RECENCY - FREQUENCY - MONETARY SCORING 1-5)
+     KÈM NÚT XUẤT CSV & 1-CLICK TẠO VOUCHER NHẮM MỤC TIÊU (ACTIONABLE BI)
+     ========================================================================= -->
+<div class="mb-6 animate-stagger-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-5 gap-3">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center text-sm font-bold border border-purple-200 dark:border-purple-800">
+                        <i class="fa-solid fa-users-viewfinder"></i>
+                    </span>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white">
+                        Phân Khúc Khách Hàng RFM (Recency – Frequency – Monetary)
+                    </h3>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-50 text-purple-600 border border-purple-200">
+                        Chấm điểm 1–5
+                    </span>
+                </div>
+                <p class="text-xs text-slate-400 mt-1">
+                    Thuật toán tự động chấm điểm R (Số ngày chưa mua), F (Tần suất mua), M (Tổng chi tiêu) để phân loại và thực hiện hành động giữ chân khách hàng (Actionable Retention).
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="/Admin/Dashboard/ExportRfmSegment?segment=ALL" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 transition">
+                    <i class="fa-solid fa-file-csv text-emerald-500"></i> Xuất Toàn Bộ RFM (.csv)
+                </a>
+            </div>
+        </div>
+
+        <!-- 4 Thẻ Phân Khúc RFM -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+            @foreach (var seg in Model.RfmSegments)
+            {
+                var borderClass = seg.SegmentCode switch
+                {
+                    "VIP" => "border-rose-400/60 bg-rose-50/20 dark:bg-rose-950/20",
+                    "LOYAL" => "border-indigo-400/60 bg-indigo-50/20 dark:bg-indigo-950/20",
+                    "AT_RISK" => "border-amber-400/60 bg-amber-50/30 dark:bg-amber-950/20 ring-1 ring-amber-400/30",
+                    _ => "border-slate-300 dark:border-slate-700 bg-slate-50/30 dark:bg-slate-800/20"
+                };
+                var iconClass = seg.SegmentCode switch
+                {
+                    "VIP" => "fa-crown text-rose-500",
+                    "LOYAL" => "fa-heart text-indigo-500",
+                    "AT_RISK" => "fa-user-clock text-amber-500",
+                    _ => "fa-moon text-slate-400"
+                };
+
+                <div class="rounded-2xl border @borderClass p-4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
+                                <i class="fa-solid @iconClass"></i> @seg.SegmentName
+                            </span>
+                            <span class="font-mono text-xs font-bold px-2 py-0.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                                @seg.SharePercentage%
+                            </span>
+                        </div>
+                        <div class="text-2xl font-extrabold font-mono text-slate-900 dark:text-white mb-1">
+                            @seg.CustomerCount <span class="text-xs font-normal text-slate-400">khách</span>
+                        </div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                            Tổng chi tiêu: <strong class="font-mono text-slate-800 dark:text-slate-200">@seg.TotalMonetary.ToString("N0") đ</strong>
+                        </div>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-3 leading-tight">
+                            @seg.Description
+                        </p>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between gap-2">
+                        <a href="/Admin/Dashboard/ExportRfmSegment?segment=@seg.SegmentCode" 
+                           title="Xuất file CSV danh sách nhóm này"
+                           class="px-2.5 py-1 rounded-lg text-[10px] font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 transition">
+                            <i class="fa-solid fa-download"></i> CSV
+                        </a>
+                        <button type="button" 
+                                onclick="createTargetedVoucher('@seg.SegmentCode', @seg.SuggestedDiscountPercent, this)"
+                                class="px-3 py-1 rounded-lg text-[10px] font-bold text-white bg-gradient-to-r @(seg.SegmentCode == "AT_RISK" ? "from-amber-600 to-orange-500 hover:from-amber-700" : "from-rose-600 to-pink-500 hover:from-rose-700") transition shadow-sm flex items-center gap-1">
+                            <i class="fa-solid fa-ticket"></i> Tạo Voucher -@seg.SuggestedDiscountPercent.ToString("N0")%
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Bảng 6 Khách Hàng Tiêu Biểu Trong Kỳ -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                    <tr class="text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 font-bold bg-slate-50/50 dark:bg-slate-800/20">
+                        <th class="py-2.5 px-3">Khách Hàng / SĐT</th>
+                        <th class="py-2.5 px-3 text-center">Phân Khúc</th>
+                        <th class="py-2.5 px-3 text-center">Điểm RFM (R-F-M)</th>
+                        <th class="py-2.5 px-3 text-center">Số Ngày Chưa Mua</th>
+                        <th class="py-2.5 px-3 text-center">Số Đơn Hàng</th>
+                        <th class="py-2.5 px-3 text-right">Tổng Chi Tiêu</th>
+                        <th class="py-2.5 px-3 text-center">Hành Động Khuyến Nghị</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80">
+                    @foreach (var cust in Model.RfmCustomers.Take(6))
+                    {
+                        var badgeColor = cust.SegmentCode switch
+                        {
+                            "VIP" => "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300",
+                            "LOYAL" => "bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/60 dark:text-indigo-300",
+                            "AT_RISK" => "bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300",
+                            _ => "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300"
+                        };
+                        <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                            <td class="py-2.5 px-3">
+                                <div class="font-bold text-slate-900 dark:text-slate-100">@cust.CustomerName</div>
+                                <div class="font-mono text-[11px] text-slate-400">@cust.Phone</div>
+                            </td>
+                            <td class="py-2.5 px-3 text-center">
+                                <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold border @badgeColor">
+                                    @cust.SegmentName
+                                </span>
+                            </td>
+                            <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-700 dark:text-slate-300">
+                                <span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800">@cust.RScore</span> -
+                                <span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800">@cust.FScore</span> -
+                                <span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800">@cust.MScore</span>
+                            </td>
+                            <td class="py-2.5 px-3 text-center font-mono">
+                                @cust.RecencyDays ngày trước
+                            </td>
+                            <td class="py-2.5 px-3 text-center font-mono font-bold">
+                                @cust.FrequencyOrders đơn
+                            </td>
+                            <td class="py-2.5 px-3 text-right font-mono font-bold text-rose-600 dark:text-rose-400">
+                                @cust.MonetaryTotal.ToString("N0") đ
+                            </td>
+                            <td class="py-2.5 px-3 text-center">
+                                @if (cust.SegmentCode == "AT_RISK")
+                                {
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-amber-600">
+                                        <i class="fa-solid fa-bell animate-pulse"></i> Cần Win-Back ngay
+                                    </span>
+                                }
+                                else if (cust.SegmentCode == "VIP")
+                                {
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600">
+                                        <i class="fa-solid fa-gem"></i> Chăm sóc 1-1
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-[11px] text-slate-400">Tương tác định kỳ</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     6. TOP 10 SẢN PHẨM & TOP 10 THƯƠNG HIỆU BÁN CHẠY NHẤT
+     ========================================================================= -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6 animate-stagger-4">
+    <!-- Cột Trái (6/12): Top 10 Sản Phẩm Bán Chạy -->
+    <div class="lg:col-span-6">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm h-full flex flex-col justify-between">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-3">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span>🏆</span> Top 10 Sản Phẩm Bán Chạy Nhất (@Model.SelectedDays Ngày)
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Xếp hạng theo doanh số và sản lượng tiêu thụ thực tế</p>
+                </div>
+                <a href="/Admin/Product" class="text-xs font-bold text-rose-600 hover:underline">Tất cả sản phẩm →</a>
+            </div>
+
+            <div class="overflow-x-auto flex-grow max-h-[380px] overflow-y-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 font-bold sticky top-0 bg-white dark:bg-slate-900">
+                            <th class="py-2 px-2 text-center w-8">#</th>
+                            <th class="py-2 px-3">Mỹ Phẩm / SKU</th>
+                            <th class="py-2 px-3 text-right">Số Bán</th>
+                            <th class="py-2 px-3 text-right">Doanh Thu</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80">
+                        @{ int pRank = 1; }
+                        @foreach (var prod in Model.TopProducts)
+                        {
+                            <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                                <td class="py-2 px-2 text-center font-mono font-bold text-slate-400">
+                                    @if (pRank <= 3)
+                                    {
+                                        <span class="w-5 h-5 rounded-full inline-flex items-center justify-center text-white text-[10px] font-bold @(pRank == 1 ? "bg-amber-500" : (pRank == 2 ? "bg-slate-400" : "bg-amber-700"))">@pRank</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@pRank</span>
+                                    }
+                                </td>
+                                <td class="py-2 px-3">
+                                    <div class="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[200px]" title="@prod.ProductName">
+                                        @prod.ProductName
+                                    </div>
+                                    <span class="font-mono text-[10px] text-slate-400">@prod.Sku</span>
+                                </td>
+                                <td class="py-2 px-3 text-right font-mono font-bold text-slate-700 dark:text-slate-300">
+                                    @prod.QuantitySold
+                                </td>
+                                <td class="py-2 px-3 text-right font-mono font-bold text-rose-600 dark:text-rose-400">
+                                    @prod.TotalRevenue.ToString("N0") đ
+                                </td>
+                            </tr>
+                            pRank++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột Phải (6/12): Top 10 Thương Hiệu Bán Chạy -->
+    <div class="lg:col-span-6">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm h-full flex flex-col justify-between">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-3">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span>✨</span> Top 10 Thương Hiệu Bán Chạy Nhất (@Model.SelectedDays Ngày)
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Xếp hạng các nhãn hàng mỹ phẩm đóng góp doanh thu lớn nhất</p>
+                </div>
+                <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-600 border border-indigo-200">
+                    Brands
+                </span>
+            </div>
+
+            <div class="overflow-x-auto flex-grow max-h-[380px] overflow-y-auto">
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 font-bold sticky top-0 bg-white dark:bg-slate-900">
+                            <th class="py-2 px-2 text-center w-8">#</th>
+                            <th class="py-2 px-3">Thương Hiệu</th>
+                            <th class="py-2 px-3 text-right">Số Bán</th>
+                            <th class="py-2 px-3 text-right">Doanh Thu</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80">
+                        @{ int bRank = 1; }
+                        @foreach (var brand in Model.TopBrands)
+                        {
+                            <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                                <td class="py-2 px-2 text-center font-mono font-bold text-slate-400">
+                                    @if (bRank <= 3)
+                                    {
+                                        <span class="w-5 h-5 rounded-full inline-flex items-center justify-center text-white text-[10px] font-bold @(bRank == 1 ? "bg-amber-500" : (bRank == 2 ? "bg-slate-400" : "bg-amber-700"))">@bRank</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@bRank</span>
+                                    }
+                                </td>
+                                <td class="py-2 px-3 font-bold text-slate-800 dark:text-slate-200 truncate max-w-[200px]" title="@brand.BrandName">
+                                    @brand.BrandName
+                                </td>
+                                <td class="py-2 px-3 text-right font-mono font-bold text-slate-700 dark:text-slate-300">
+                                    @brand.QuantitySold
+                                </td>
+                                <td class="py-2 px-3 text-right font-mono font-bold text-indigo-600 dark:text-indigo-400">
+                                    @brand.TotalRevenue.ToString("N0") đ
+                                </td>
+                            </tr>
+                            bRank++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     7. BẢNG CẢNH BÁO KHO HÀNG CẬN DATE (FEFO RISK MONITOR - TOP 10)
+     ========================================================================= -->
+<div id="fefoRiskSection" class="mb-6 animate-stagger-5">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-4 gap-3">
             <div>
                 <div class="flex items-center gap-2.5">
@@ -282,31 +1082,29 @@
                         <i class="fa-solid fa-triangle-exclamation"></i>
                     </span>
                     <h3 class="text-base font-bold text-slate-900 dark:text-white">
-                        Bảng Cảnh Báo Kho Hàng Cận Date (FEFO Risk Monitor - Top 10 Sản Phẩm)
+                        Bảng Cảnh Báo Kho Hàng Cận Date (FEFO Risk Monitor - Top 10 Lô Cận Nhất)
                     </h3>
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-rose-50 text-rose-600 border border-rose-200">
                         ≤ 90 Ngày
                     </span>
                 </div>
                 <p class="text-xs text-slate-400 mt-1">
-                    Thuật toán FEFO (First-Expired, First-Out) kiểm soát hạn dùng mỹ phẩm. Thao tác 1 chạm đẩy sang <strong>Flash Sale Smart Clearance</strong> để thu hồi vốn tức thì.
+                    Thuật toán FEFO (First-Expired, First-Out) kiểm soát hạn dùng mỹ phẩm. Nhấn 1 nút để tự động đẩy lô hàng sang Flash Sale Smart Clearance giảm giá tức thì.
                 </p>
             </div>
-            <div class="flex items-center gap-2">
-                <a href="/Admin/Warehouse" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition">
-                    <i class="fa-solid fa-warehouse"></i> Quản lý kho FEFO
-                </a>
-            </div>
+            <a href="/Admin/Warehouse" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 transition">
+                <i class="fa-solid fa-warehouse"></i> Quản lý kho FEFO
+            </a>
         </div>
 
         @if (!Model.NearExpiryBatches.Any())
         {
-            <div class="text-center py-12 text-slate-400">
-                <div class="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-500 mx-auto flex items-center justify-center text-2xl mb-3 border border-emerald-200 dark:border-emerald-800">
+            <div class="text-center py-10 text-slate-400">
+                <div class="w-14 h-14 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-500 mx-auto flex items-center justify-center text-2xl mb-2 border border-emerald-200">
                     <i class="fa-solid fa-shield-check"></i>
                 </div>
                 <div class="text-sm font-bold text-slate-700 dark:text-slate-200">Kho hàng đang ở trạng thái an toàn tuyệt đối!</div>
-                <div class="text-xs text-slate-400 mt-1">Không có lô hàng mỹ phẩm nào cận date dưới 90 ngày.</div>
+                <div class="text-xs text-slate-400 mt-1">Không có lô mỹ phẩm nào cận hạn dùng dưới 90 ngày.</div>
             </div>
         }
         else
@@ -315,106 +1113,64 @@
                 <table class="w-full text-left text-xs border-collapse">
                     <thead>
                         <tr class="text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 font-bold bg-slate-50/50 dark:bg-slate-800/20">
-                            <th class="py-3 px-3 text-center" style="width: 44px;">#</th>
-                            <th class="py-3 px-3">Mỹ Phẩm / Mã SKU</th>
-                            <th class="py-3 px-3">Mã Lô (Batch)</th>
-                            <th class="py-3 px-3 text-center">Tồn Kho</th>
-                            <th class="py-3 px-3">Ngày Hết Hạn (EXP)</th>
-                            <th class="py-3 px-3 text-center">Thời Gian Còn</th>
-                            <th class="py-3 px-3 text-right">Giá Trị Rủi Ro</th>
-                            <th class="py-3 px-3 text-center">Thao Tác Nhanh</th>
+                            <th class="py-2.5 px-3 text-center w-8">#</th>
+                            <th class="py-2.5 px-3">Mỹ Phẩm / SKU</th>
+                            <th class="py-2.5 px-3">Mã Lô (Batch)</th>
+                            <th class="py-2.5 px-3 text-center">Tồn Kho</th>
+                            <th class="py-2.5 px-3">Ngày Hết Hạn</th>
+                            <th class="py-2.5 px-3 text-center">Thời Gian Còn</th>
+                            <th class="py-2.5 px-3 text-right">Giá Trị Rủi Ro</th>
+                            <th class="py-2.5 px-3 text-center">Thao Tác Nhanh</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80">
-                        @{ int batchIndex = 1; }
+                        @{ int bIdx = 1; }
                         @foreach (var batch in Model.NearExpiryBatches)
                         {
-                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition group" id="batch-row-@batch.BatchId">
-                                <td class="py-3.5 px-3 text-center font-mono font-bold text-slate-400">
-                                    @batchIndex
-                                </td>
-                                <td class="py-3.5 px-3">
-                                    <div class="flex items-center gap-3">
-                                        @if (!string.IsNullOrEmpty(batch.ThumbnailUrl))
-                                        {
-                                            <img src="@batch.ThumbnailUrl" alt="@batch.ProductName" class="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-700 flex-shrink-0" />
-                                        }
-                                        else
-                                        {
-                                            <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-500 flex items-center justify-center text-sm font-bold flex-shrink-0 border border-rose-200 dark:border-rose-800">
-                                                <i class="fa-solid fa-spray-can-sparkles"></i>
-                                            </div>
-                                        }
-                                        <div class="min-w-0">
-                                            <div class="font-bold text-slate-900 dark:text-slate-100 truncate max-w-[240px]" title="@batch.ProductName">
-                                                @batch.ProductName
-                                            </div>
-                                            <div class="flex items-center gap-2 mt-0.5">
-                                                <span class="font-mono text-[11px] text-slate-400">@batch.Sku</span>
-                                                <span class="text-slate-300 dark:text-slate-700">•</span>
-                                                <span class="text-[11px] text-slate-500 dark:text-slate-400">@batch.StoreName</span>
-                                            </div>
-                                        </div>
+                            <tr class="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition" id="batch-row-@batch.BatchId">
+                                <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-400">@bIdx</td>
+                                <td class="py-2.5 px-3">
+                                    <div class="font-bold text-slate-900 dark:text-slate-100 truncate max-w-[220px]" title="@batch.ProductName">
+                                        @batch.ProductName
+                                    </div>
+                                    <div class="flex items-center gap-1.5 text-[11px] text-slate-400 font-mono">
+                                        <span>@batch.Sku</span>
+                                        <span>•</span>
+                                        <span>@batch.StoreName</span>
                                     </div>
                                 </td>
-                                <td class="py-3.5 px-3">
-                                    <span class="inline-block px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-[11px] font-bold rounded-lg border border-slate-200 dark:border-slate-700">
+                                <td class="py-2.5 px-3">
+                                    <span class="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-[11px] font-bold rounded">
                                         @batch.BatchNumber
                                     </span>
                                 </td>
-                                <td class="py-3.5 px-3 text-center">
-                                    <span class="font-mono font-extrabold text-slate-900 dark:text-white text-sm">
-                                        @batch.CurrentQuantity
-                                    </span>
-                                    <span class="text-slate-400 text-[10px] block">sản phẩm</span>
+                                <td class="py-2.5 px-3 text-center font-mono font-bold text-slate-900 dark:text-white">
+                                    @batch.CurrentQuantity
                                 </td>
-                                <td class="py-3.5 px-3">
-                                    <div class="font-mono font-bold text-slate-800 dark:text-slate-200">
-                                        @batch.ExpDate.ToString("dd/MM/yyyy")
-                                    </div>
-                                    <div class="text-[10px] text-slate-400">
-                                        SX: @batch.ManufacturingDate.ToString("dd/MM/yyyy")
-                                    </div>
+                                <td class="py-2.5 px-3 font-mono">
+                                    @batch.ExpDate.ToString("dd/MM/yyyy")
                                 </td>
-                                <td class="py-3.5 px-3 text-center">
+                                <td class="py-2.5 px-3 text-center">
                                     @if (batch.DaysRemaining <= 30)
                                     {
-                                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full font-mono text-xs font-extrabold bg-rose-100 text-rose-700 border border-rose-300 dark:bg-rose-950 dark:text-rose-300 dark:border-rose-800 animate-pulse shadow-sm">
-                                            <i class="fa-solid fa-triangle-exclamation"></i> Còn @batch.DaysRemaining ngày
-                                        </span>
-                                    }
-                                    else if (batch.DaysRemaining <= 60)
-                                    {
-                                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full font-mono text-xs font-bold bg-orange-100 text-orange-800 border border-orange-300 dark:bg-orange-950 dark:text-orange-300 dark:border-orange-800 shadow-sm">
-                                            <i class="fa-solid fa-hourglass-half"></i> Còn @batch.DaysRemaining ngày
+                                        <span class="px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold bg-rose-100 text-rose-700 border border-rose-300 animate-pulse">
+                                            Còn @batch.DaysRemaining ngày
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full font-mono text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800 shadow-sm">
-                                            <i class="fa-solid fa-clock"></i> Còn @batch.DaysRemaining ngày
+                                        <span class="px-2.5 py-0.5 rounded-full font-mono text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                                            Còn @batch.DaysRemaining ngày
                                         </span>
                                     }
                                 </td>
-                                <td class="py-3.5 px-3 text-right">
-                                    <div class="font-mono font-extrabold text-rose-600 dark:text-rose-400 text-sm">
-                                        @batch.TotalRiskValue.ToString("N0") đ
-                                    </div>
-                                    @if (batch.ClearanceDiscountPercent.HasValue && batch.ClearanceDiscountPercent > 0)
-                                    {
-                                        <span class="inline-block mt-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800">
-                                            Flash Sale -@batch.ClearanceDiscountPercent%
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-[10px] text-slate-400">Nguyên giá</span>
-                                    }
+                                <td class="py-2.5 px-3 text-right font-mono font-bold text-rose-600 dark:text-rose-400">
+                                    @batch.TotalRiskValue.ToString("N0") đ
                                 </td>
-                                <td class="py-3.5 px-3 text-center">
+                                <td class="py-2.5 px-3 text-center">
                                     @if (batch.ClearanceDiscountPercent.HasValue && batch.ClearanceDiscountPercent > 0)
                                     {
-                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                                        <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                             <i class="fa-solid fa-circle-check text-emerald-500"></i> Đã Flash Sale (-@batch.ClearanceDiscountPercent%)
                                         </span>
                                     }
@@ -422,320 +1178,112 @@
                                     {
                                         <button type="button" 
                                                 onclick="pushToFlashSale(@batch.BatchId, '@batch.BatchNumber', '@batch.ProductName.Replace("'", "\\'")', this)"
-                                                class="btn-clearance-glow inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white shadow-sm transition active:scale-95 cursor-pointer">
-                                            <i class="fa-solid fa-bolt text-yellow-300"></i>
-                                            Đẩy sang Flash Sale Smart Clearance
+                                                class="btn-clearance-glow px-3 py-1 rounded-lg text-[11px] font-bold text-white shadow-sm transition active:scale-95 cursor-pointer">
+                                            <i class="fa-solid fa-bolt text-yellow-300"></i> Đẩy Flash Sale -50%
                                         </button>
                                     }
                                 </td>
                             </tr>
-                            batchIndex++;
+                            bIdx++;
                         }
                     </tbody>
                 </table>
             </div>
         }
-
-        <div class="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
-            <span>Thuật toán FEFO tự động liên kết với trang chủ Flash Sale để tăng thanh khoản</span>
-            <span class="text-rose-500 font-semibold"><i class="fa-solid fa-shield-virus me-1"></i>Hạn sử dụng minh bạch</span>
-        </div>
     </div>
 </div>
 
 <!-- =========================================================================
-     5. BẢNG DỮ LIỆU BỔ TRỢ (Top 5 Mỹ Phẩm Bán Chạy & Doanh Thu Chi Nhánh)
+     8. ĐƠN HÀNG MỚI NHẤT
      ========================================================================= -->
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8 animate-stagger-5">
-    <!-- Cột Trái (6/12): 🏆 Top 5 Bán Chạy -->
-    <div class="lg:col-span-6">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm h-full flex flex-col justify-between">
-            <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-4">
-                <div>
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <span class="text-xl">🏆</span>
-                        Top 5 Mỹ Phẩm Bán Chạy Nhất
-                    </h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Sản phẩm có lượng xuất kho và doanh thu dẫn đầu chuỗi</p>
-                </div>
-                <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                    Hot Sellers
-                </span>
-            </div>
-
-            <div class="flex-grow">
-                @if (!Model.TopProducts.Any())
-                {
-                    <div class="text-center py-8 text-slate-400">
-                        <i class="fa-solid fa-basket-shopping text-3xl mb-2 text-slate-300 dark:text-slate-700"></i>
-                        <div class="text-sm">Chưa có giao dịch bán lẻ nào phát sinh.</div>
-                    </div>
-                }
-                else
-                {
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs border-collapse">
-                            <thead>
-                                <tr class="text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 font-bold">
-                                    <th class="py-2.5 px-2 text-center" style="width: 44px;">#</th>
-                                    <th class="py-2.5 px-3">Mỹ Phẩm / SKU</th>
-                                    <th class="py-2.5 px-3 text-right">Số Bán</th>
-                                    <th class="py-2.5 px-3 text-right">Doanh Số</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80">
-                                @{ int rankIdx = 1; }
-                                @foreach (var prod in Model.TopProducts)
-                                {
-                                    <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
-                                        <td class="py-3 px-2 text-center">
-                                            @if (rankIdx == 1)
-                                            {
-                                                <span class="w-7 h-7 rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-white font-extrabold flex items-center justify-center text-xs shadow-sm mx-auto">1</span>
-                                            }
-                                            else if (rankIdx == 2)
-                                            {
-                                                <span class="w-7 h-7 rounded-full bg-slate-300 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-extrabold flex items-center justify-center text-xs mx-auto">2</span>
-                                            }
-                                            else if (rankIdx == 3)
-                                            {
-                                                <span class="w-7 h-7 rounded-full bg-amber-700/80 text-white font-extrabold flex items-center justify-center text-xs mx-auto">3</span>
-                                            }
-                                            else
-                                            {
-                                                <span class="font-mono text-slate-400 font-bold">@rankIdx</span>
-                                            }
-                                        </td>
-                                        <td class="py-3 px-3">
-                                            <div class="flex items-center gap-3">
-                                                @if (!string.IsNullOrEmpty(prod.ThumbnailUrl))
-                                                {
-                                                    <img src="@prod.ThumbnailUrl" alt="@prod.ProductName" class="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-slate-700 flex-shrink-0" />
-                                                }
-                                                else
-                                                {
-                                                    <div class="w-10 h-10 rounded-xl bg-pink-50 dark:bg-pink-950/60 text-pink-600 dark:text-pink-400 flex items-center justify-center text-sm font-bold flex-shrink-0 border border-pink-200 dark:border-pink-800">
-                                                        <i class="fa-solid fa-spray-can-sparkles"></i>
-                                                    </div>
-                                                }
-                                                <div class="min-w-0">
-                                                    <div class="font-bold text-slate-800 dark:text-slate-200 truncate max-w-[200px]" title="@prod.ProductName">@prod.ProductName</div>
-                                                    <span class="font-mono text-[11px] text-slate-400">@prod.Sku</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="py-3 px-3 text-right">
-                                            <span class="inline-block px-2 py-0.5 rounded-md font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                                                @prod.QuantitySold
-                                            </span>
-                                        </td>
-                                        <td class="py-3 px-3 text-right font-mono font-extrabold text-rose-600 dark:text-rose-400">
-                                            @prod.TotalRevenue.ToString("N0") đ
-                                        </td>
-                                    </tr>
-                                    rankIdx++;
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-            </div>
-
-            <div class="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800">
-                <a href="/Admin/Product" class="inline-flex items-center justify-center w-full gap-2 py-2 text-xs font-bold text-rose-600 hover:text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition">
-                    Xem Toàn Bộ Danh Mục Mỹ Phẩm <i class="fa-solid fa-arrow-right"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Cột Phải (6/12): Bar Chart Ngang Doanh Thu Chi Nhánh -->
-    <div class="lg:col-span-6">
-        <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm h-full flex flex-col justify-between">
-            <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-4">
-                <div>
-                    <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <i class="fa-solid fa-chart-column text-emerald-500"></i>
-                        Doanh Thu Theo Chi Nhánh
-                    </h3>
-                    <p class="text-xs text-slate-400 mt-0.5">So sánh năng lực doanh số giữa các showroom & kho</p>
-                </div>
-                <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                    Showroom Hub
-                </span>
-            </div>
-
-            <div class="relative flex-grow" style="min-height: 220px;">
-                <canvas id="storeBarChart"></canvas>
-            </div>
-
-            <div class="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400">
-                <span>Dữ liệu đồng bộ trực tiếp từ POS các chi nhánh</span>
-                <span class="text-emerald-500 font-semibold"><i class="fa-solid fa-signal me-1"></i>Trực tuyến</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- =========================================================================
-     6. RECENT ACTIVITY FEED (Cuối Trang: Đơn Hàng Mới Nhất)
-     ========================================================================= -->
-<div class="mb-8 animate-stagger-5">
-    <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-4 gap-2">
+<div class="mb-6 animate-stagger-5">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-sm">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-3">
             <div>
                 <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                    <span class="text-xl">📋</span>
-                    Đơn Hàng Mới Nhất Toàn Chuỗi
+                    <span>📋</span> Đơn Hàng Giao Dịch Mới Nhất
                 </h3>
-                <p class="text-xs text-slate-400 mt-0.5">5 giao dịch bán lẻ và đặt hàng trực tuyến vừa phát sinh</p>
+                <p class="text-xs text-slate-400 mt-0.5">5 đơn hàng vừa hoàn tất hoặc đang xử lý trong kỳ lọc</p>
             </div>
-            <a href="/Admin/Report" class="inline-flex items-center gap-1 text-xs font-bold text-rose-600 dark:text-rose-400 hover:text-rose-700 transition">
-                Xem tất cả đơn hàng →
-            </a>
+            <a href="/Admin/Report" class="text-xs font-bold text-rose-600 hover:underline">Xem tất cả đơn hàng →</a>
         </div>
 
-        @if (!Model.RecentOrders.Any())
-        {
-            <div class="text-center py-10 text-slate-400">
-                <i class="fa-solid fa-receipt text-3xl mb-2 text-slate-300 dark:text-slate-700"></i>
-                <div class="text-sm">Chưa có đơn hàng nào được tạo trong hệ thống.</div>
-            </div>
-        }
-        else
-        {
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs border-collapse">
-                    <thead>
-                        <tr class="text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 font-bold">
-                            <th class="py-3 px-4">Khách Hàng / Mã Đơn</th>
-                            <th class="py-3 px-4 text-center">Kênh Bán</th>
-                            <th class="py-3 px-4 text-right">Tổng Tiền</th>
-                            <th class="py-3 px-4 text-center">Trạng Thái</th>
-                            <th class="py-3 px-4 text-right">Thời Gian</th>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                    <tr class="text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-800 font-bold">
+                        <th class="py-2.5 px-3">Khách Hàng / Mã Đơn</th>
+                        <th class="py-2.5 px-3 text-center">Kênh Bán</th>
+                        <th class="py-2.5 px-3 text-right">Tổng Tiền</th>
+                        <th class="py-2.5 px-3 text-center">Trạng Thái</th>
+                        <th class="py-2.5 px-3 text-right">Thời Gian</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80">
+                    @foreach (var ord in Model.RecentOrders)
+                    {
+                        <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
+                            <td class="py-2.5 px-3">
+                                <div class="font-bold text-slate-800 dark:text-slate-200">@ord.CustomerName</div>
+                                <div class="font-mono text-slate-400 text-[11px]">@ord.OrderCode</div>
+                            </td>
+                            <td class="py-2.5 px-3 text-center">
+                                @if (ord.OrderSource == "POS" || ord.OrderSource == "STORE")
+                                {
+                                    <span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-rose-50 text-rose-600 border border-rose-200">
+                                        <i class="fa-solid fa-cash-register"></i> POS Quầy
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="px-2 py-0.5 rounded-full font-bold text-[10px] bg-indigo-50 text-indigo-600 border border-indigo-200">
+                                        <i class="fa-solid fa-globe"></i> Website
+                                    </span>
+                                }
+                            </td>
+                            <td class="py-2.5 px-3 text-right font-mono font-extrabold text-slate-900 dark:text-white">
+                                @ord.TotalAmount.ToString("N0") đ
+                            </td>
+                            <td class="py-2.5 px-3 text-center">
+                                <span class="px-2 py-0.5 rounded-full font-semibold text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-200">
+                                    @ord.OrderStatus
+                                </span>
+                            </td>
+                            <td class="py-2.5 px-3 text-right font-mono text-slate-400 text-[11px]">
+                                @ord.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800/80">
-                        @foreach (var ord in Model.RecentOrders)
-                        {
-                            <tr class="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
-                                <td class="py-3.5 px-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-pink-500 to-rose-400 text-white font-bold flex items-center justify-center text-xs flex-shrink-0 shadow-sm">
-                                            @(ord.CustomerName.Length > 0 ? ord.CustomerName[0].ToString().ToUpper() : "C")
-                                        </div>
-                                        <div>
-                                            <div class="font-bold text-slate-800 dark:text-slate-200">@ord.CustomerName</div>
-                                            <div class="font-mono text-slate-400 text-[11px]">@ord.OrderCode</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-3.5 px-4 text-center">
-                                    @if (ord.OrderSource == "POS" || ord.OrderSource == "STORE")
-                                    {
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold text-[11px] bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
-                                            <i class="fa-solid fa-cash-register"></i> POS Quầy
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-bold text-[11px] bg-indigo-50 text-indigo-600 dark:bg-indigo-950/60 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
-                                            <i class="fa-solid fa-globe"></i> Website
-                                        </span>
-                                    }
-                                </td>
-                                <td class="py-3.5 px-4 text-right font-mono font-extrabold text-slate-900 dark:text-white">
-                                    @ord.TotalAmount.ToString("N0") đ
-                                </td>
-                                <td class="py-3.5 px-4 text-center">
-                                    @if (ord.OrderStatus == "COMPLETED" || ord.OrderStatus == "5")
-                                    {
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-semibold text-[11px] bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                                            <i class="fa-solid fa-circle-check"></i> Hoàn tất
-                                        </span>
-                                    }
-                                    else if (ord.OrderStatus == "PROCESSING" || ord.OrderStatus == "CONFIRMED")
-                                    {
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-semibold text-[11px] bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                                            <i class="fa-solid fa-clock"></i> Đang xử lý
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-semibold text-[11px] bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                                            @ord.OrderStatus
-                                        </span>
-                                    }
-                                </td>
-                                <td class="py-3.5 px-4 text-right font-mono text-slate-400 text-[11px]">
-                                    @ord.CreatedAt.ToString("dd/MM/yyyy HH:mm")
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
 <!-- =========================================================================
-     TOAST NOTIFICATION MODAL CHO SMART CLEARANCE
+     TOAST NOTIFICATION MODAL CHO SMART CLEARANCE & VOUCHER CREATION
      ========================================================================= -->
 <div id="toastNotification" class="fixed bottom-6 right-6 z-50 max-w-md bg-slate-900/95 dark:bg-slate-800/95 text-white backdrop-blur-xl border border-rose-500/30 rounded-2xl p-4 shadow-2xl flex items-start gap-3">
-    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-lg flex-shrink-0 shadow-lg shadow-rose-500/40">
+    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-lg flex-shrink-0 shadow-lg shadow-rose-500/40" id="toastIcon">
         <i class="fa-solid fa-bolt text-yellow-300"></i>
     </div>
     <div class="flex-grow">
-        <div class="font-bold text-sm text-rose-300" id="toastTitle">Flash Sale Smart Clearance</div>
-        <div class="text-xs text-slate-200 mt-0.5" id="toastMessage">Đã kích hoạt chương trình thanh lý cho lô hàng cận date thành công!</div>
+        <div class="font-bold text-sm text-rose-300" id="toastTitle">Thông Báo Vận Hành</div>
+        <div class="text-xs text-slate-200 mt-0.5" id="toastMessage">Thao tác hoàn tất thành công!</div>
     </div>
     <button onclick="hideToast()" class="text-slate-400 hover:text-white p-1 text-sm">
         <i class="fa-solid fa-xmark"></i>
     </button>
 </div>
 
+</div>
+
 @section Scripts {
-    <!-- Thư viện Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script>
-        // Alpine Counter Animation Component
-        function kpiCounter(targetValue, isCurrency = false) {
-            return {
-                current: 0,
-                target: targetValue,
-                display: isCurrency ? '0 đ' : '0',
-                init() {
-                    const duration = 1200; // 1.2s
-                    const startTime = performance.now();
-                    const step = (now) => {
-                        const elapsed = now - startTime;
-                        const progress = Math.min(elapsed / duration, 1);
-                        const ease = 1 - Math.pow(1 - progress, 3);
-                        this.current = Math.floor(ease * this.target);
-                        this.display = isCurrency 
-                            ? this.current.toLocaleString('vi-VN') + ' đ'
-                            : this.current.toLocaleString('vi-VN');
-                        if (progress < 1) {
-                            requestAnimationFrame(step);
-                        } else {
-                            this.current = this.target;
-                            this.display = isCurrency 
-                                ? this.target.toLocaleString('vi-VN') + ' đ'
-                                : this.target.toLocaleString('vi-VN');
-                        }
-                    };
-                    requestAnimationFrame(step);
-                }
-            };
-        }
-
-        // =====================================================================
-        // THAO TÁC NHANH: ĐẨY LÔ HÀNG SANG FLASH SALE SMART CLEARANCE
-        // =====================================================================
         let toastTimeout;
-        function showToast(title, message) {
+        function showToast(title, message, isSuccess = true) {
             const toast = document.getElementById('toastNotification');
             document.getElementById('toastTitle').textContent = title;
             document.getElementById('toastMessage').textContent = message;
@@ -743,7 +1291,7 @@
             clearTimeout(toastTimeout);
             toastTimeout = setTimeout(() => {
                 hideToast();
-            }, 4500);
+            }, 5000);
         }
 
         function hideToast() {
@@ -751,6 +1299,47 @@
             toast.classList.remove('show');
         }
 
+        // 1-Click Tạo Voucher Nhắm Mục Tiêu cho phân khúc RFM
+        async function createTargetedVoucher(segmentCode, discountPercent, btnElement) {
+            const originalContent = btnElement.innerHTML;
+            btnElement.disabled = true;
+            btnElement.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Đang tạo...';
+
+            try {
+                const response = await fetch('/Admin/Dashboard/CreateTargetedVoucher', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        segmentCode: segmentCode,
+                        discountPercent: discountPercent
+                    })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showToast('Voucher Đã Phát Hành! 🎟️', data.message);
+                    btnElement.outerHTML = `
+                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <i class="fa-solid fa-circle-check text-emerald-500"></i> ${data.couponCode}
+                        </span>
+                    `;
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra khi tạo Voucher.');
+                    btnElement.disabled = false;
+                    btnElement.innerHTML = originalContent;
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Lỗi kết nối khi gửi yêu cầu. Vui lòng thử lại.');
+                btnElement.disabled = false;
+                btnElement.innerHTML = originalContent;
+            }
+        }
+
+        // Đẩy lô hàng cận date sang Flash Sale Smart Clearance
         async function pushToFlashSale(batchId, batchNumber, productName, btnElement) {
             const originalContent = btnElement.innerHTML;
             btnElement.disabled = true;
@@ -770,29 +1359,13 @@
                 });
 
                 const data = await response.json();
-
                 if (data.success) {
-                    showToast('Flash Sale Activated! ⚡', data.message || `Đã kích hoạt Flash Sale Smart Clearance giảm 50% cho lô ${batchNumber}!`);
-                    
-                    // Cập nhật nút thành badge thành công
+                    showToast('Flash Sale Activated! ⚡', data.message || `Đã kích hoạt Flash Sale cho lô ${batchNumber}!`);
                     btnElement.outerHTML = `
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                        <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                             <i class="fa-solid fa-circle-check text-emerald-500"></i> Đã Flash Sale (-50%)
                         </span>
                     `;
-
-                    // Cập nhật cột giá trị rủi ro trên dòng tương ứng
-                    const row = document.getElementById(`batch-row-${batchId}`);
-                    if (row) {
-                        const riskCell = row.children[6];
-                        if (riskCell) {
-                            const subSpan = riskCell.querySelector('span');
-                            if (subSpan) {
-                                subSpan.className = "inline-block mt-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-800";
-                                subSpan.textContent = "Flash Sale -50%";
-                            }
-                        }
-                    }
                 } else {
                     alert(data.message || 'Có lỗi xảy ra khi đẩy sang Flash Sale.');
                     btnElement.disabled = false;
@@ -800,7 +1373,7 @@
                 }
             } catch (err) {
                 console.error(err);
-                alert('Lỗi kết nối khi gửi yêu cầu. Vui lòng thử lại.');
+                alert('Lỗi kết nối khi gửi yêu cầu.');
                 btnElement.disabled = false;
                 btnElement.innerHTML = originalContent;
             }
@@ -808,139 +1381,105 @@
 
         document.addEventListener('DOMContentLoaded', function () {
             // =================================================================
-            // 1. BIỂU ĐỒ LINE: Doanh Thu 7 Ngày Gần Nhất (So Sánh Tuần Này vs Tuần Trước)
+            // 1. BIỂU ĐỒ LINE: Biến Động Doanh Thu Kỳ Đã Lọc (Online vs POS vs Tổng)
             // =================================================================
-            const lineLabels7 = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Revenue7DaysComparison.DayLabels));
-            const lineCurrentWeekData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Revenue7DaysComparison.CurrentWeekRevenues));
-            const linePreviousWeekData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Revenue7DaysComparison.PreviousWeekRevenues));
+            const lineLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyChannelRevenues.Select(x => x.Date)));
+            const lineOnlineData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyChannelRevenues.Select(x => x.OnlineRevenue)));
+            const linePosData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyChannelRevenues.Select(x => x.PosRevenue)));
+            const lineTotalData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DailyChannelRevenues.Select(x => x.TotalRevenue)));
 
-            const ctxLine7 = document.getElementById('revenueTrend7DaysChart').getContext('2d');
-            
-            // Gradients
-            const gradCur = ctxLine7.createLinearGradient(0, 0, 0, 300);
-            gradCur.addColorStop(0, 'rgba(225, 29, 72, 0.28)');
-            gradCur.addColorStop(1, 'rgba(225, 29, 72, 0.0)');
-
-            new Chart(ctxLine7, {
-                type: 'line',
-                data: {
-                    labels: lineLabels7,
-                    datasets: [
-                        {
-                            label: 'Tuần Này (7 Ngày)',
-                            data: lineCurrentWeekData,
-                            borderColor: '#e11d48',
-                            backgroundColor: gradCur,
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.35,
-                            pointBackgroundColor: '#ffffff',
-                            pointBorderColor: '#e11d48',
-                            pointBorderWidth: 2.5,
-                            pointRadius: 4.5,
-                            pointHoverRadius: 7,
-                            pointHoverBackgroundColor: '#e11d48',
-                            pointHoverBorderColor: '#ffffff'
-                        },
-                        {
-                            label: 'Tuần Trước',
-                            data: linePreviousWeekData,
-                            borderColor: '#6366f1',
-                            borderDash: [5, 5],
-                            backgroundColor: 'transparent',
-                            borderWidth: 2.2,
-                            fill: false,
-                            tension: 0.35,
-                            pointBackgroundColor: '#ffffff',
-                            pointBorderColor: '#6366f1',
-                            pointBorderWidth: 2,
-                            pointRadius: 3.5,
-                            pointHoverRadius: 6,
-                            pointHoverBackgroundColor: '#6366f1',
-                            pointHoverBorderColor: '#ffffff'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: {
-                        mode: 'index',
-                        intersect: false
-                    },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                            align: 'end',
-                            labels: {
-                                boxWidth: 12,
-                                boxHeight: 12,
-                                usePointStyle: true,
-                                pointStyle: 'circle',
-                                font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' },
-                                color: '#64748b'
+            const chartEl = document.getElementById('revenueTrendChart');
+            if (chartEl) {
+                const ctxLine = chartEl.getContext('2d');
+                new Chart(ctxLine, {
+                    type: 'line',
+                    data: {
+                        labels: lineLabels,
+                        datasets: [
+                            {
+                                label: 'Online Storefront (Web/App)',
+                                data: lineOnlineData,
+                                borderColor: '#e11d48',
+                                backgroundColor: 'rgba(225, 29, 72, 0.12)',
+                                borderWidth: 2.5,
+                                fill: true,
+                                tension: 0.35,
+                                pointRadius: 2.5
+                            },
+                            {
+                                label: 'Bán Lẻ POS (Tại Quầy)',
+                                data: linePosData,
+                                borderColor: '#6366f1',
+                                backgroundColor: 'rgba(99, 102, 241, 0.08)',
+                                borderWidth: 2.5,
+                                fill: true,
+                                tension: 0.35,
+                                pointRadius: 2.5
+                            },
+                            {
+                                label: 'Tổng Doanh Thu Hợp Nhất',
+                                data: lineTotalData,
+                                borderColor: '#10b981',
+                                borderDash: [5, 4],
+                                borderWidth: 2,
+                                fill: false,
+                                tension: 0.35,
+                                pointRadius: 2
                             }
-                        },
-                        tooltip: {
-                            backgroundColor: '#0f172a',
-                            titleColor: '#f8fafc',
-                            bodyColor: '#e2e8f0',
-                            padding: 12,
-                            borderRadius: 12,
-                            callbacks: {
-                                label: function (context) {
-                                    const val = Number(context.raw).toLocaleString('vi-VN') + ' đ';
-                                    return ` ${context.dataset.label}: ${val}`;
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                align: 'end',
+                                labels: { boxWidth: 10, usePointStyle: true, font: { size: 11, weight: '600' } }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (ctx) {
+                                        return ` ${ctx.dataset.label}: ${Number(ctx.raw).toLocaleString('vi-VN')} đ`;
+                                    }
                                 }
                             }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: {
-                                font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' },
-                                color: '#94a3b8'
-                            }
                         },
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(226, 232, 240, 0.4)',
-                                borderDash: [4, 4]
-                            },
-                            ticks: {
-                                font: { family: "'JetBrains Mono', monospace", size: 10 },
-                                color: '#94a3b8',
-                                callback: function (value) {
-                                    if (value >= 1000000) return (value / 1000000) + 'M';
-                                    if (value >= 1000) return (value / 1000) + 'k';
-                                    return value;
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (val) {
+                                        if (val >= 1000000) return (val / 1000000).toFixed(0) + 'M';
+                                        if (val >= 1000) return (val / 1000).toFixed(0) + 'k';
+                                        return val;
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            });
+                });
+            }
 
             // =================================================================
-            // 2. BIỂU ĐỒ DOUGHNUT: Tỷ Trọng Doanh Thu Theo Kênh Bán (POS vs Online)
+            // 2. BIỂU ĐỒ DOUGHNUT: Cơ Cấu Danh Mục Mỹ Phẩm
             // =================================================================
-            const channelLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChannelDistributions.Select(c => c.ChannelName)));
-            const channelData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChannelDistributions.Select(c => c.Revenue)));
-            const channelColors = ['#e11d48', '#6366f1', '#0ea5e9', '#10b981'];
+            const catLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoryRevenues.Select(c => c.CategoryName)));
+            const catData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoryRevenues.Select(c => c.Revenue)));
+            const catColors = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.CategoryRevenues.Select(c => c.Color)));
 
-            const ctxDoughnutChan = document.getElementById('channelRevenueDoughnutChart').getContext('2d');
-            new Chart(ctxDoughnutChan, {
+            const ctxDoughnutCat = document.getElementById('categoryRevenueDoughnutChart').getContext('2d');
+            new Chart(ctxDoughnutCat, {
                 type: 'doughnut',
                 data: {
-                    labels: channelLabels,
+                    labels: catLabels,
                     datasets: [{
-                        data: channelData,
-                        backgroundColor: channelColors,
-                        borderWidth: 3,
-                        borderColor: '#ffffff',
+                        data: catData,
+                        backgroundColor: catColors.length > 0 ? catColors : ['#e11d48', '#6366f1', '#0ea5e9', '#10b981'],
+                        borderWidth: 2,
                         hoverOffset: 6
                     }]
                 },
@@ -950,88 +1489,17 @@
                     plugins: {
                         legend: { display: false },
                         tooltip: {
-                            backgroundColor: '#0f172a',
-                            titleColor: '#f8fafc',
-                            bodyColor: '#e2e8f0',
-                            padding: 11,
-                            borderRadius: 12,
                             callbacks: {
-                                label: function (context) {
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const val = Number(context.raw);
+                                label: function (ctx) {
+                                    const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                    const val = Number(ctx.raw);
                                     const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
-                                    return ` ${context.label}: ${val.toLocaleString('vi-VN')} đ (${pct}%)`;
+                                    return ` ${ctx.label}: ${val.toLocaleString('vi-VN')} đ (${pct}%)`;
                                 }
                             }
                         }
                     },
-                    cutout: '72%'
-                }
-            });
-
-            // =================================================================
-            // 3. BIỂU ĐỒ BAR NGANG: Doanh Thu Theo Chi Nhánh
-            // =================================================================
-            const storeLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.StoreDistributions.Select(s => s.StoreName)));
-            const storeData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.StoreDistributions.Select(s => s.Revenue)));
-
-            const ctxBar = document.getElementById('storeBarChart').getContext('2d');
-            new Chart(ctxBar, {
-                type: 'bar',
-                data: {
-                    labels: storeLabels,
-                    datasets: [{
-                        label: 'Doanh thu (VNĐ)',
-                        data: storeData,
-                        backgroundColor: ['#10b981', '#06b6d4', '#f59e0b', '#8b5cf6'],
-                        borderRadius: 8,
-                        barThickness: 20
-                    }]
-                },
-                options: {
-                    indexAxis: 'y',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            backgroundColor: '#0f172a',
-                            titleColor: '#f8fafc',
-                            bodyColor: '#e2e8f0',
-                            padding: 10,
-                            borderRadius: 10,
-                            callbacks: {
-                                label: function (context) {
-                                    return ' Doanh thu: ' + Number(context.raw).toLocaleString('vi-VN') + ' đ';
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(226, 232, 240, 0.4)',
-                                borderDash: [4, 4]
-                            },
-                            ticks: {
-                                font: { family: "'JetBrains Mono', monospace", size: 10 },
-                                color: '#94a3b8',
-                                callback: function (value) {
-                                    if (value >= 1000000) return (value / 1000000) + 'M';
-                                    if (value >= 1000) return (value / 1000) + 'k';
-                                    return value;
-                                }
-                            }
-                        },
-                        y: {
-                            grid: { display: false },
-                            ticks: {
-                                font: { family: "'Plus Jakarta Sans', sans-serif", weight: '600', size: 11 },
-                                color: '#475569'
-                            }
-                        }
-                    }
+                    cutout: '70%'
                 }
             });
         });

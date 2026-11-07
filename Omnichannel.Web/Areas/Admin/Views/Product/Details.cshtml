@@ -117,10 +117,10 @@
             <!-- Thumbnail card -->
             <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
                 <div class="aspect-square rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
-                    <img src="@(string.IsNullOrWhiteSpace(Model.ThumbnailUrl) ? "/images/product-placeholder.svg" : Model.ThumbnailUrl)" 
+                    <img src="@(string.IsNullOrWhiteSpace(Model.ThumbnailUrl) ? "/images/products/_placeholder.webp" : Model.ThumbnailUrl)" 
                          alt="@Model.Name" 
                          class="w-full h-full object-contain p-4"
-                         onerror="this.onerror=null;this.src='/images/product-placeholder.svg';" />
+                         onerror="this.onerror=null;this.src='/images/products/_placeholder.webp';" />
                 </div>
                 <div class="flex items-center justify-between text-xs pt-2 border-t border-slate-100 dark:border-slate-800">
                     <span class="text-slate-500 dark:text-slate-400">Trạng thái mở bán:</span>

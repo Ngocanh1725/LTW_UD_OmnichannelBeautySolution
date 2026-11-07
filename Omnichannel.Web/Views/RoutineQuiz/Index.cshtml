@@ -1,0 +1,566 @@
+@{
+    ViewData["Title"] = "Trắc Nghiệm Da & Routine Quiz 4 Bước | Canmake Beauty Advisor";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="min-h-screen bg-gradient-to-b from-pastel-rose/40 via-white to-pastel-rose/20 py-10 sm:py-16" 
+     x-data="routineQuizComponent()">
+    
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+
+        <!-- HEADER BANNER: PHONG CÁCH TẠP CHÍ LÀM ĐẸP (SEPHORA STYLE) -->
+        <div class="text-center space-y-4 max-w-3xl mx-auto">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-pink-500/10 via-magenta-accent/15 to-purple-500/10 border border-magenta-accent/30 text-magenta-accent text-xs font-bold tracking-widest uppercase shadow-xs">
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-500 animate-spin" style="animation-duration: 3s;"></i>
+                <span>SEPHORA & HASAKI BEAUTY ADVISOR</span>
+            </div>
+            <h1 class="font-serif text-3xl sm:text-5xl font-extrabold text-charcoal tracking-tight leading-tight">
+                Trắc Nghiệm Da Liễu & Phác Đồ 4 Bước
+            </h1>
+            <p class="text-sm sm:text-base text-slate-600 font-sans leading-relaxed">
+                Chỉ mất <strong class="text-charcoal font-bold">30 giây</strong> để giải mã làn da của bạn. Nhận phác đồ dược mỹ phẩm cá nhân hóa chuẩn y khoa và đặc quyền <strong class="text-magenta-accent font-bold">mua trọn bộ 1-Click tiết kiệm 15%</strong>.
+            </p>
+            <div class="pt-2">
+                <a href="/phan-tich-da" class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-rose-200 hover:border-rose-400 text-rose-600 text-xs font-bold shadow-xs hover:shadow transition">
+                    <i class="fa-solid fa-camera-retro"></i>
+                    <span>Chuyển sang Phân tích da bằng ảnh AI (Radar 5 chỉ số) &rarr;</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- PROGRESS BAR 3 BƯỚC -->
+        <div x-show="step <= 3" class="max-w-xl mx-auto">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-500 mb-2">
+                <span :class="step >= 1 ? 'text-magenta-accent' : ''">1. Loại Da</span>
+                <span :class="step >= 2 ? 'text-magenta-accent' : ''">2. Mối Quan Tâm</span>
+                <span :class="step >= 3 ? 'text-magenta-accent' : ''">3. Ngân Sách</span>
+            </div>
+            <div class="w-full bg-rose-100 rounded-full h-2.5 overflow-hidden">
+                <div class="bg-gradient-to-r from-magenta-accent to-pink-500 h-2.5 rounded-full transition-all duration-500"
+                     :style="`width: ${(step / 3) * 100}%`"></div>
+            </div>
+        </div>
+
+        <!-- BƯỚC 1: CHỌN LOẠI DA -->
+        <div x-show="step === 1" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-6">
+            <div class="text-center space-y-1">
+                <h2 class="font-serif text-2xl font-bold text-charcoal">Bước 1: Hiện tại làn da của bạn thuộc nhóm nào?</h2>
+                <p class="text-xs text-slate-500">Chọn đặc điểm tương đồng nhất với tình trạng da sau khi rửa mặt 30 phút</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <!-- Da Dầu -->
+                <button type="button" @@click="selectSkinType('da-dau')"
+                        :class="selectedSkinType === 'da-dau' ? 'border-magenta-accent ring-2 ring-magenta-accent/20 bg-pink-50/60 shadow-md' : 'border-slate-200 bg-white hover:border-pink-300 hover:shadow-xs'"
+                        class="p-6 rounded-3xl border-2 text-left transition-all duration-200 space-y-3 cursor-pointer group">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                        <i class="fa-solid fa-droplet"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-charcoal text-base group-hover:text-magenta-accent transition">Da Dầu (Oily Skin)</h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Đổ nhiều dầu toàn mặt, lỗ chân lông to, dễ bóng nhờn và thường xuyên nổi mụn sưng viêm.</p>
+                    </div>
+                </button>
+
+                <!-- Da Khô -->
+                <button type="button" @@click="selectSkinType('da-kho')"
+                        :class="selectedSkinType === 'da-kho' ? 'border-magenta-accent ring-2 ring-magenta-accent/20 bg-pink-50/60 shadow-md' : 'border-slate-200 bg-white hover:border-pink-300 hover:shadow-xs'"
+                        class="p-6 rounded-3xl border-2 text-left transition-all duration-200 space-y-3 cursor-pointer group">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                        <i class="fa-solid fa-sun"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-charcoal text-base group-hover:text-magenta-accent transition">Da Khô (Dry Skin)</h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Bề mặt căng rát, bong tróc vảy nhỏ khi thời tiết lạnh, thiếu hụt độ ẩm và màng lipid tự nhiên.</p>
+                    </div>
+                </button>
+
+                <!-- Da Nhạy Cảm -->
+                <button type="button" @@click="selectSkinType('da-nhay-cam')"
+                        :class="selectedSkinType === 'da-nhay-cam' ? 'border-magenta-accent ring-2 ring-magenta-accent/20 bg-pink-50/60 shadow-md' : 'border-slate-200 bg-white hover:border-pink-300 hover:shadow-xs'"
+                        class="p-6 rounded-3xl border-2 text-left transition-all duration-200 space-y-3 cursor-pointer group">
+                    <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                        <i class="fa-solid fa-shield-heart"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-charcoal text-base group-hover:text-magenta-accent transition">Da Nhạy Cảm (Sensitive)</h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Dễ ửng đỏ, châm chích khi đổi mỹ phẩm hoặc thời tiết, màng bảo vệ mỏng manh cần phục hồi.</p>
+                    </div>
+                </button>
+
+                <!-- Da Hỗn Hợp -->
+                <button type="button" @@click="selectSkinType('da-hon-hop')"
+                        :class="selectedSkinType === 'da-hon-hop' ? 'border-magenta-accent ring-2 ring-magenta-accent/20 bg-pink-50/60 shadow-md' : 'border-slate-200 bg-white hover:border-pink-300 hover:shadow-xs'"
+                        class="p-6 rounded-3xl border-2 text-left transition-all duration-200 space-y-3 cursor-pointer group">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                        <i class="fa-solid fa-circle-half-stroke"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-charcoal text-base group-hover:text-magenta-accent transition">Da Hỗn Hợp (Combination)</h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Đổ dầu vùng chữ T (trán, mũi, cằm) nhưng lại khô hoặc bình thường ở hai bên má.</p>
+                    </div>
+                </button>
+
+                <!-- Da Thường -->
+                <button type="button" @@click="selectSkinType('da-thuong')"
+                        :class="selectedSkinType === 'da-thuong' ? 'border-magenta-accent ring-2 ring-magenta-accent/20 bg-pink-50/60 shadow-md' : 'border-slate-200 bg-white hover:border-pink-300 hover:shadow-xs'"
+                        class="p-6 rounded-3xl border-2 text-left transition-all duration-200 space-y-3 cursor-pointer group sm:col-span-2 lg:col-span-1">
+                    <div class="w-12 h-12 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-charcoal text-base group-hover:text-magenta-accent transition">Da Thường (Normal Skin)</h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Cân bằng ẩm - dầu lý tưởng, bề mặt mịn màng, ít khuyết điểm, muốn duy trì độ đàn hồi trẻ trung.</p>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- BƯỚC 2: CHỌN MỐI QUAN TÂM HÀNG ĐẦU -->
+        <div x-show="step === 2" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-6">
+            <div class="text-center space-y-1">
+                <h2 class="font-serif text-2xl font-bold text-charcoal">Bước 2: Mối quan tâm hoặc vấn đề bạn muốn khắc phục nhất?</h2>
+                <p class="text-xs text-slate-500">Hệ thống sẽ định hướng hoạt chất đặc trị chính (BHA, B5, Niacinamide, Retinol...) dựa trên lựa chọn này</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <!-- Trị Mụn -->
+                <button type="button" @@click="selectConcern('acne')"
+                        :class="selectedConcern === 'acne' ? 'border-magenta-accent ring-2 ring-magenta-accent/20 bg-pink-50/60 shadow-md' : 'border-slate-200 bg-white hover:border-pink-300 hover:shadow-xs'"
+                        class="p-6 rounded-3xl border-2 text-left transition-all duration-200 space-y-3 cursor-pointer group">
+                    <div class="w-12 h-12 rounded-2xl bg-red-100 text-red-700 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                        <i class="fa-solid fa-shield-virus"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-charcoal text-base group-hover:text-magenta-accent transition">Trị Mụn & Giảm Dầu Thừa</h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Kháng viêm, gom cồi mụn, thông thoáng bã nhờn với Salicylic Acid (BHA) & Tràm Trà.</p>
+                    </div>
+                </button>
+
+                <!-- Cấp Ẩm Phục Hồi -->
+                <button type="button" @@click="selectConcern('hydration')"
+                        :class="selectedConcern === 'hydration' ? 'border-magenta-accent ring-2 ring-magenta-accent/20 bg-pink-50/60 shadow-md' : 'border-slate-200 bg-white hover:border-pink-300 hover:shadow-xs'"
+                        class="p-6 rounded-3xl border-2 text-left transition-all duration-200 space-y-3 cursor-pointer group">
+                    <div class="w-12 h-12 rounded-2xl bg-cyan-100 text-cyan-700 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                        <i class="fa-solid fa-bottle-droplet"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-charcoal text-base group-hover:text-magenta-accent transition">Cấp Ẩm & Phục Hồi Màng Ẩm</h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Cấp nước đa tầng, làm dịu da rát đỏ sau treatment với B5 (Panthenol) & Hyaluronic Acid.</p>
+                    </div>
+                </button>
+
+                <!-- Làm Sáng & Mờ Thâm -->
+                <button type="button" @@click="selectConcern('brightening')"
+                        :class="selectedConcern === 'brightening' ? 'border-magenta-accent ring-2 ring-magenta-accent/20 bg-pink-50/60 shadow-md' : 'border-slate-200 bg-white hover:border-pink-300 hover:shadow-xs'"
+                        class="p-6 rounded-3xl border-2 text-left transition-all duration-200 space-y-3 cursor-pointer group">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                        <i class="fa-solid fa-sparkles"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-charcoal text-base group-hover:text-magenta-accent transition">Làm Sáng Da & Mờ Thâm Nám</h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Dưỡng da đều màu, mờ đốm nâu và thâm mụn với Niacinamide tinh khiết & Vitamin C.</p>
+                    </div>
+                </button>
+
+                <!-- Chống Lão Hóa -->
+                <button type="button" @@click="selectConcern('anti_aging')"
+                        :class="selectedConcern === 'anti_aging' ? 'border-magenta-accent ring-2 ring-magenta-accent/20 bg-pink-50/60 shadow-md' : 'border-slate-200 bg-white hover:border-pink-300 hover:shadow-xs'"
+                        class="p-6 rounded-3xl border-2 text-left transition-all duration-200 space-y-3 cursor-pointer group">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-charcoal text-base group-hover:text-magenta-accent transition">Chống Lão Hóa & Nếp Nhăn</h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Tăng sinh collagen nội sinh, nâng cơ và tăng độ đàn hồi với Retinol & Peptides sinh học.</p>
+                    </div>
+                </button>
+
+                <!-- Se Khít Lỗ Chân Lông -->
+                <button type="button" @@click="selectConcern('pore_minimizing')"
+                        :class="selectedConcern === 'pore_minimizing' ? 'border-magenta-accent ring-2 ring-magenta-accent/20 bg-pink-50/60 shadow-md' : 'border-slate-200 bg-white hover:border-pink-300 hover:shadow-xs'"
+                        class="p-6 rounded-3xl border-2 text-left transition-all duration-200 space-y-3 cursor-pointer group sm:col-span-2 lg:col-span-1">
+                    <div class="w-12 h-12 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center text-xl group-hover:scale-110 transition">
+                        <i class="fa-solid fa-circle-dot"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-charcoal text-base group-hover:text-magenta-accent transition">Se Khít Lỗ Chân Lông</h3>
+                        <p class="text-xs text-slate-500 mt-1 leading-relaxed">Kiềm dầu sâu trong phễu chân lông, cải thiện bề mặt da sần sùi với BHA & Niacinamide.</p>
+                    </div>
+                </button>
+            </div>
+
+            <div class="flex justify-start">
+                <button type="button" @@click="step = 1" class="text-xs font-bold text-slate-500 hover:text-magenta-accent flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-arrow-left"></i> Quay lại Bước 1
+                </button>
+            </div>
+        </div>
+
+        <!-- BƯỚC 3: CHỌN PHÂN KHÚC NGÂN SÁCH -->
+        <div x-show="step === 3" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="space-y-6">
+            <div class="text-center space-y-1">
+                <h2 class="font-serif text-2xl font-bold text-charcoal">Bước 3: Ngân sách dự kiến cho trọn bộ 4 bước?</h2>
+                <p class="text-xs text-slate-500">Canmake Beauty sẽ lựa chọn các sản phẩm tối ưu tỷ lệ hiệu quả/chi phí cho bạn</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                <!-- Tiết kiệm -->
+                <button type="button" @@click="finishQuiz('economy')"
+                        class="p-6 rounded-3xl border-2 border-slate-200 bg-white hover:border-magenta-accent hover:shadow-lg transition-all duration-200 text-center space-y-3 group cursor-pointer">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+                        <i class="fa-solid fa-piggy-bank"></i>
+                    </div>
+                    <h3 class="font-bold text-charcoal text-base group-hover:text-magenta-accent">Học Sinh / Tiết Kiệm</h3>
+                    <p class="text-xs text-slate-500">Ưu tiên các dòng dược mỹ phẩm bình dân, hiệu quả thực tế cao (Dưới 1.500.000₫/bộ).</p>
+                    <div class="text-xs font-bold text-emerald-600 font-mono-numeric">Tối ưu chi phí</div>
+                </button>
+
+                <!-- Tiêu chuẩn -->
+                <button type="button" @@click="finishQuiz('standard')"
+                        class="p-6 rounded-3xl border-2 border-magenta-accent bg-pink-50/50 shadow-md hover:shadow-xl transition-all duration-200 text-center space-y-3 group cursor-pointer relative">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-magenta-accent text-white text-[10px] font-extrabold uppercase tracking-wider">
+                        Phổ biến nhất
+                    </div>
+                    <div class="w-14 h-14 mx-auto rounded-full bg-magenta-accent/20 text-magenta-accent flex items-center justify-center text-2xl group-hover:scale-110 transition">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <h3 class="font-bold text-charcoal text-base text-magenta-accent">Tiêu Chuẩn Chuẩn Spa</h3>
+                    <p class="text-xs text-slate-500">Thương hiệu quốc tế uy tín (La Roche-Posay, Cerave, Paula's Choice - Khoảng 1.5M - 3M).</p>
+                    <div class="text-xs font-bold text-magenta-accent font-mono-numeric">Khuyên dùng cao nhất</div>
+                </button>
+
+                <!-- Cao cấp / Luxury -->
+                <button type="button" @@click="finishQuiz('premium')"
+                        class="p-6 rounded-3xl border-2 border-slate-200 bg-white hover:border-magenta-accent hover:shadow-lg transition-all duration-200 text-center space-y-3 group cursor-pointer">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-2xl group-hover:scale-110 transition">
+                        <i class="fa-solid fa-crown"></i>
+                    </div>
+                    <h3 class="font-bold text-charcoal text-base group-hover:text-magenta-accent">Haute Luxury</h3>
+                    <p class="text-xs text-slate-500">Dòng tinh hoa cao cấp (Dior, Lancôme, Estée Lauder - Trên 3.000.000₫/bộ).</p>
+                    <div class="text-xs font-bold text-amber-600 font-mono-numeric">Đẳng cấp quý phái</div>
+                </button>
+            </div>
+
+            <div class="flex justify-start">
+                <button type="button" @@click="step = 2" class="text-xs font-bold text-slate-500 hover:text-magenta-accent flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-arrow-left"></i> Quay lại Bước 2
+                </button>
+            </div>
+        </div>
+
+        <!-- MÀN HÌNH CHỜ PHÂN TÍCH (AI ANALYZING LOADER) -->
+        <div x-show="isLoading" class="py-16 text-center space-y-6 max-w-md mx-auto">
+            <div class="relative w-24 h-24 mx-auto">
+                <div class="absolute inset-0 rounded-full border-4 border-rose-200 border-t-magenta-accent animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-magenta-accent text-2xl">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+            </div>
+            <div class="space-y-2">
+                <h3 class="font-serif text-xl font-bold text-charcoal">Beauty AI Advisor Đang Phân Tích...</h3>
+                <p class="text-xs text-slate-500">Đối soát tương kỵ hoạt chất, nồng độ pH sinh học và chọn lọc 4 sản phẩm tương thích cao nhất.</p>
+            </div>
+        </div>
+
+        <!-- MÀN HÌNH KẾT QUẢ: PHÁC ĐỒ 4 BƯỚC THEO TIMELINE & 1-CLICK COMBO -->
+        <div x-show="step === 4 && result != null" x-transition:enter="transition ease-out duration-500 transform" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="space-y-10">
+            
+            <!-- BANNER CHẨN ĐOÁN CHUYÊN KHOA -->
+            <div class="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-charcoal via-slate-900 to-charcoal text-white shadow-xl relative overflow-hidden space-y-4">
+                <div class="absolute -right-16 -top-16 w-64 h-64 bg-magenta-accent/20 rounded-full blur-3xl pointer-events-none"></div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+                    <div>
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-magenta-accent text-white text-[10px] font-bold uppercase tracking-wider mb-2">
+                            <span>✦ PHÁC ĐỒ DA LIỄU ĐƯỢC CÂN CHỈNH ✦</span>
+                        </div>
+                        <h2 class="font-serif text-2xl sm:text-3xl font-bold" x-text="result.routineTitle"></h2>
+                    </div>
+                    <button type="button" @@click="resetQuiz()" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold backdrop-blur-md transition self-start sm:self-auto flex items-center gap-2">
+                        <i class="fa-solid fa-arrows-rotate text-[11px]"></i> Làm lại trắc nghiệm
+                    </button>
+                </div>
+
+                <div class="flex items-start gap-3 bg-white/5 p-4 rounded-2xl border border-white/10">
+                    <i class="fa-solid fa-user-doctor text-magenta-accent text-xl mt-1 shrink-0"></i>
+                    <p class="text-xs sm:text-sm text-slate-200 leading-relaxed font-sans" x-text="result.dermatologistAdvice"></p>
+                </div>
+            </div>
+
+            <!-- TIMELINE 4 BƯỚC SẢN PHẨM -->
+            <div class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-serif text-xl sm:text-2xl font-bold text-charcoal flex items-center gap-2">
+                        <i class="fa-solid fa-layer-group text-magenta-accent text-lg"></i>
+                        <span>Chi Tiết Phác Đồ 4 Bước Khoa Học</span>
+                    </h3>
+                    <span class="text-xs font-bold text-slate-500" x-text="result.steps.length + ' Sản phẩm chuẩn FEFO'"></span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <template x-for="(stepItem, index) in result.steps" :key="stepItem.stepCode">
+                        <div class="p-6 rounded-3xl bg-white border border-rose-100 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 relative group">
+                            
+                            <!-- Step Order Badge -->
+                            <div class="flex items-center justify-between">
+                                <span class="px-3 py-1 rounded-full bg-pastel-rose text-magenta-accent font-bold text-xs" x-text="stepItem.stepName"></span>
+                                <span class="text-[10px] text-slate-400 font-mono" x-text="'SKU: ' + stepItem.selectedProduct.sku"></span>
+                            </div>
+
+                            <!-- Product Info -->
+                            <div class="flex items-start gap-4">
+                                <img :src="stepItem.selectedProduct.thumbnailUrl || '/images/products/_placeholder.webp'" 
+                                     :alt="stepItem.selectedProduct.productName"
+                                     class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-2xl border border-slate-100 group-hover:scale-105 transition shrink-0 bg-slate-50" />
+                                
+                                <div class="space-y-1.5 flex-1 min-w-0">
+                                    <div class="text-[10px] font-bold uppercase text-slate-400" x-text="stepItem.selectedProduct.brandName"></div>
+                                    <a :href="'/product/detail/' + stepItem.selectedProduct.slug" 
+                                       target="_blank"
+                                       class="font-bold text-sm text-charcoal hover:text-magenta-accent transition line-clamp-2 block" 
+                                       x-text="stepItem.selectedProduct.productName"></a>
+                                    
+                                    <div class="flex items-baseline gap-2 pt-1">
+                                        <span class="font-mono-numeric font-bold text-base text-charcoal" 
+                                              x-text="new Intl.NumberFormat('vi-VN').format(stepItem.selectedProduct.effectivePrice) + ' ₫'"></span>
+                                        <span x-show="stepItem.selectedProduct.discountPrice && stepItem.selectedProduct.discountPrice < stepItem.selectedProduct.price" 
+                                              class="font-mono-numeric text-xs text-slate-400 line-through" 
+                                              x-text="new Intl.NumberFormat('vi-VN').format(stepItem.selectedProduct.price) + ' ₫'"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Key Ingredients Pills -->
+                            <div class="space-y-1.5 pt-2 border-t border-slate-100">
+                                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Hoạt chất vàng:</div>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <template x-for="ing in stepItem.selectedProduct.keyIngredients" :key="ing">
+                                        <span class="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 text-[10px] font-semibold border border-amber-200/60" x-text="ing"></span>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <!-- Usage Guide -->
+                            <div class="p-3 rounded-2xl bg-slate-50 text-[11px] text-slate-600 flex items-start gap-2">
+                                <i class="fa-solid fa-lightbulb text-amber-500 mt-0.5 shrink-0"></i>
+                                <span x-text="stepItem.usageGuide"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- THANH TỔNG HỢP GIÁ & NÚT MUA TRỌN BỘ 1-CLICK (COMBO DISCOUNT 15%) -->
+            <div class="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-pink-50 via-white to-rose-50 border-2 border-magenta-accent/40 shadow-xl space-y-6">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    
+                    <div class="space-y-2">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 text-white text-xs font-bold uppercase tracking-wider shadow-sm">
+                            <i class="fa-solid fa-tag"></i>
+                            <span>ĐẶC QUYỀN COMBO TIẾT KIỆM 15%</span>
+                        </div>
+                        <h4 class="font-serif text-2xl font-bold text-charcoal">Trọn Gói 4 Bước Chăm Sóc Sắc Đẹp Chuyên Sâu</h4>
+                        <p class="text-xs text-slate-500">Áp dụng tự động mã voucher <strong class="text-magenta-accent font-mono">COMBO15</strong> khi bấm mua cả bộ.</p>
+                    </div>
+
+                    <!-- Pricing Display -->
+                    <div class="text-left lg:text-right space-y-1">
+                        <div class="text-xs text-slate-400">
+                            Giá gốc từng món: 
+                            <span class="font-mono-numeric line-through" x-text="new Intl.NumberFormat('vi-VN').format(result.originalTotalPrice) + ' ₫'"></span>
+                        </div>
+                        <div class="text-xs font-bold text-rose-600">
+                            Tiết kiệm combo (-15%): 
+                            <span class="font-mono-numeric" x-text="'-' + new Intl.NumberFormat('vi-VN').format(result.comboDiscountAmount) + ' ₫'"></span>
+                        </div>
+                        <div class="text-2xl sm:text-4xl font-extrabold text-magenta-accent font-mono-numeric" 
+                             x-text="new Intl.NumberFormat('vi-VN').format(result.finalComboPrice) + ' ₫'"></div>
+                    </div>
+                </div>
+
+                <!-- 1-CLICK CTA ACTION BUTTON -->
+                <div class="pt-4 border-t border-rose-200/60 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="text-xs text-slate-500 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-check text-emerald-600 text-base"></i>
+                        <span>Cam kết 100% Date xa > 18 tháng chuẩn FEFO • Đổi trả 7 ngày</span>
+                    </div>
+
+                    <button type="button" 
+                            id="btnBuyCombo"
+                            @@click="addRoutineToCart()"
+                            :disabled="isAddingToCart"
+                            class="w-full sm:w-auto px-10 py-4 rounded-full bg-gradient-to-r from-magenta-accent via-pink-600 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold text-sm sm:text-base shadow-xl shadow-magenta-accent/30 hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center gap-3 cursor-pointer">
+                        <span x-show="!isAddingToCart" class="flex items-center gap-2">
+                            <i class="fa-solid fa-cart-shopping"></i>
+                            <span>Thêm Trọn Bộ 4 Bước Vào Giỏ Hàng (-15%)</span>
+                        </span>
+                        <span x-show="isAddingToCart" class="flex items-center gap-2" style="display: none;">
+                            <i class="fa-solid fa-circle-notch fa-spin"></i>
+                            <span>Đang kích hoạt ưu đãi combo...</span>
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+function routineQuizComponent() {
+    return {
+        step: 1,
+        selectedSkinType: '',
+        selectedConcern: '',
+        selectedBudget: 'standard',
+        isLoading: false,
+        isAddingToCart: false,
+        result: null,
+
+        selectSkinType(skinType) {
+            this.selectedSkinType = skinType;
+            this.step = 2;
+            window.scrollTo({ top: 120, behavior: 'smooth' });
+        },
+
+        selectConcern(concern) {
+            this.selectedConcern = concern;
+            this.step = 3;
+            window.scrollTo({ top: 120, behavior: 'smooth' });
+        },
+
+        async finishQuiz(budgetTier) {
+            this.selectedBudget = budgetTier;
+            this.isLoading = true;
+            this.step = 3.5;
+            window.scrollTo({ top: 120, behavior: 'smooth' });
+
+            try {
+                const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                const response = await fetch('/api/quiz/recommend', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        skinType: this.selectedSkinType,
+                        skinConcern: this.selectedConcern,
+                        budgetTier: this.selectedBudget
+                    })
+                });
+
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                const data = await response.json();
+
+                if (data.success && data.data) {
+                    this.result = data.data;
+                    this.step = 4;
+                } else {
+                    alert(data.message || 'Không thể tạo gợi ý phác đồ.');
+                    this.step = 1;
+                }
+            } catch (err) {
+                console.error('Quiz recommendation error:', err);
+                alert('Có lỗi xảy ra khi kết nối máy chủ phân tích da.');
+                this.step = 1;
+            } finally {
+                this.isLoading = false;
+                window.scrollTo({ top: 120, behavior: 'smooth' });
+            }
+        },
+
+        resetQuiz() {
+            this.step = 1;
+            this.selectedSkinType = '';
+            this.selectedConcern = '';
+            this.result = null;
+            window.scrollTo({ top: 100, behavior: 'smooth' });
+        },
+
+        async addRoutineToCart() {
+            if (!this.result || !this.result.steps || !this.result.steps.length) return;
+            this.isAddingToCart = true;
+
+            const productIds = this.result.steps
+                .map(s => s.selectedProduct?.productId)
+                .filter(id => id && id > 0);
+
+            try {
+                const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+                const response = await fetch('/api/quiz/add-routine-to-cart', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        productIds: productIds,
+                        couponCode: this.result.comboCouponCode || 'COMBO15'
+                    })
+                });
+
+                if (!response.ok) {
+                    if (response.status === 403) {
+                        alert('Tài khoản quản trị viên không được phép tạo giỏ hàng hoặc mua sắm cá nhân.');
+                        return;
+                    }
+                    throw new Error('HTTP ' + response.status);
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Cập nhật số lượng giỏ hàng trên Header & Drawer
+                    const newCount = result.cartCount || result.totalItems || 4;
+                    document.querySelectorAll('#miniCartCountBadge, [data-cart-count], .cart-badge-count').forEach(badge => {
+                        badge.innerText = newCount;
+                        badge.classList.remove('hidden');
+                    });
+
+                    // Cập nhật tổng tiền giỏ hàng trên Header
+                    const newTotal = result.cartTotalFormatted || result.finalTotal;
+                    if (newTotal) {
+                        document.querySelectorAll('#miniCartHeaderTotal, [data-cart-total]').forEach(el => {
+                            el.innerText = newTotal;
+                        });
+                    }
+
+                    // Đồng bộ qua HTMX nếu có
+                    if (window.htmx) {
+                        htmx.trigger('body', 'reloadMiniCart');
+                    }
+
+                    // Bắn Toast thông báo chuẩn giao diện
+                    if (typeof showStorefrontToast === 'function') {
+                        showStorefrontToast(result.message || 'Đã thêm trọn bộ 4 bước vào giỏ hàng với ưu đãi -15%!', 'success');
+                    } else {
+                        alert(result.message || 'Đã thêm trọn bộ 4 bước vào giỏ hàng thành công!');
+                    }
+
+                    // Tự động mở MiniCart Drawer trượt ra mượt mà
+                    setTimeout(() => {
+                        if (typeof openMiniCart === 'function') {
+                            openMiniCart();
+                        } else {
+                            const btn = document.getElementById('btnOpenMiniCart');
+                            if (btn) btn.click();
+                        }
+                    }, 300);
+
+                } else {
+                    alert(result.message || 'Không thể thêm trọn bộ vào giỏ hàng.');
+                }
+            } catch (err) {
+                console.error('Lỗi thêm routine vào giỏ hàng:', err);
+                alert('Có lỗi xảy ra khi thêm vào giỏ hàng: ' + err.message);
+            } finally {
+                this.isAddingToCart = false;
+            }
+        }
+    };
+}
+</script>
+

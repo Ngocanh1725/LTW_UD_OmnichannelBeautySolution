@@ -37,7 +37,7 @@ namespace Omnichannel.Web.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            ViewData["Title"] = "Chẩn Đoán Làn Da Cùng Chuyên Gia AI - OMNI BEAUTY";
+            ViewData["Title"] = "Chẩn Đoán Làn Da Cùng Chuyên Gia AI - CANMAKE BEAUTY";
             ViewData["Description"] = "Trợ lý da liễu AI phân tích chỉ số sinh học da, vẽ biểu đồ radar 5 trục và gợi ý phác đồ chăm sóc tương thích 100%.";
             return View();
         }
@@ -420,7 +420,7 @@ namespace Omnichannel.Web.Controllers
                         CategoryName = p.Category?.Name ?? "Dược Mỹ Phẩm",
                         Price = effectivePrice,
                         OriginalPrice = p.DiscountPrice.HasValue ? p.SellingPrice : null,
-                        ThumbnailUrl = p.ThumbnailUrl ?? "/images/default-product.png",
+                        ThumbnailUrl = ProductImageSourceRegistry.ResolveProductImageUrl(p.ThumbnailUrl, p.Sku, p.Slug, p.Name),
                         Rating = p.Reviews.Any() ? Math.Round(p.Reviews.Average(r => r.Rating), 1) : 5.0,
                         ReviewCount = p.Reviews.Count,
                         MatchScore = finalPercent,

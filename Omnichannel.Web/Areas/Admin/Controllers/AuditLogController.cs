@@ -12,6 +12,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
     [Authorize]
+    [HasPermission("SETTINGS_VIEW")]
     public class AuditLogController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -31,12 +32,6 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             int page = 1,
             int pageSize = 20)
         {
-            // Bảo mật PBAC: Chỉ SuperAdmin hoặc người dùng có quyền xem Audit Log / Settings
-            if (!User.IsInRole("SuperAdmin") && !User.IsInRole("SUPER_ADMIN") && !User.HasClaim("Permission", "SETTINGS_VIEW"))
-            {
-                return Forbid();
-            }
-
             var query = _context.AuditLogs.AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(entityType))
@@ -105,17 +100,17 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             ViewBag.TotalCount = totalCount;
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);
 
-            ViewBag.AvailableEntityTypes = await _context.AuditLogs
-                .Select(a => a.EntityType)
-                .Distinct()
-                .OrderBy(e => e)
-                .ToListAsync();
+            // Danh sách EntityTypes & Actions chuẩn hóa cho hệ thống mỹ phẩm, tránh Full Table Scan 90.000+ dòng
+            ViewBag.AvailableEntityTypes = new List<string>
+            {
+                "Alert", "Banner", "Category", "Customer", "Inventory", "Menu", "Order",
+                "Product", "ProductBatch", "Promotion", "Role", "Store", "StoreInventory", "User"
+            };
 
-            ViewBag.AvailableActions = await _context.AuditLogs
-                .Select(a => a.Action)
-                .Distinct()
-                .OrderBy(a => a)
-                .ToListAsync();
+            ViewBag.AvailableActions = new List<string>
+            {
+                "CREATE", "UPDATE", "DELETE", "LOGIN", "STATUS_CHANGE", "IMPORT", "EXPORT", "TRANSFER", "ASSIGN_PERMISSION"
+            };
 
             return View(items);
         }

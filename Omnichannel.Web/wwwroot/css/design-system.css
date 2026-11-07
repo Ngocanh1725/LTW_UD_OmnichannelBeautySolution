@@ -1,8 +1,8 @@
 /**
  * ============================================================================
- * OMNICHANNEL BEAUTY SOLUTION - DESIGN SYSTEM
- * Style: Luxury Beauty / Premium Cosmetics (Rose Gold, Champagne, Warm Nude)
- * Version: 2.0.0
+ * CANMAKE BEAUTY SOLUTION - DESIGN SYSTEM
+ * Style: Canmake Beauty Pink-Toned Palette (#E8618C, #B8336A, #F7C6D4, #FFF4F7, #2B1B24)
+ * Version: 2.1.0
  * ============================================================================
  */
 
@@ -11,25 +11,26 @@
    ============================================================================ */
 :root {
     /* --- COLOR PALETTE: Primary Rose / Pink --- */
-    --rose-50: #fff1f2;
-    --rose-100: #ffe4e6;
-    --rose-200: #fecdd3;
-    --rose-300: #fda4af;
-    --rose-400: #fb7185;
-    --rose-500: #f43f5e;
-    --rose-600: #e11d48; /* Primary Brand Rose */
-    --rose-700: #be123c;
-    --rose-800: #9f1239;
-    --rose-900: #881337;
+    --rose-50: #FFF4F7;
+    --rose-100: #FDE8EF;
+    --rose-200: #F7C6D4;
+    --rose-300: #F29BB5;
+    --rose-400: #ED7EA1;
+    --rose-500: #E8618C; /* Primary Rose */
+    --rose-600: #B8336A; /* Deep Berry */
+    --rose-700: #962353;
+    --rose-800: #7A1A42;
+    --rose-900: #5E1232;
 
     /* Metallic & Warm Beauty Accents */
-    --rose-gold: #b76e79;
-    --rose-gold-light: #e8b4b8;
-    --rose-gold-dark: #8c4f58;
-    --pastel-rose: #fdf2f4;
-    --pastel-nude: #faecef;
-    --blush: #f5d6da;
-    --magenta-accent: #d63384;
+    --rose-gold: #E8618C;
+    --rose-gold-light: #F7C6D4;
+    --rose-gold-dark: #B8336A;
+    --pastel-rose: #FFF4F7;
+    --pastel-nude: #FAECEF;
+    --blush: #F7C6D4;
+    --magenta-accent: #B8336A;
+    --ink: #2B1B24;
 
     /* --- COLOR PALETTE: Accent Gold --- */
     --gold-50: #fefce8;
@@ -98,7 +99,7 @@
     --text-muted: #94a3b8;
 
     /* --- TYPOGRAPHY SCALE --- */
-    --font-serif: 'Playfair Display', 'Cormorant Garamond', 'Georgia', serif;
+    --font-serif: 'Playfair Display', 'Lora', 'Georgia', serif;
     --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
 
@@ -192,19 +193,7 @@ html.dark {
     --color-info-text: #38bdf8;
 }
 
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]):not(.light) {
-        --bg-page: #090d16;
-        --bg-surface: #111827;
-        --bg-surface-elevated: #1e293b;
-        --bg-surface-subtle: #1e1b2e;
-        --border-subtle: #2d2638;
-        --border-medium: #334155;
-        --text-primary: #f8fafc;
-        --text-secondary: #94a3b8;
-        --text-muted: #64748b;
-    }
-}
+/* Đã gỡ bỏ @media (prefers-color-scheme: dark) tự động để toàn bộ hệ thống đồng nhất nền trắng sáng (Light Mode) trừ khi người dùng chủ động bật class .dark */
 
 /* ============================================================================
    3. TYPOGRAPHY CLASSES & HELPERS
@@ -423,8 +412,8 @@ html.dark {
     width: 100%;
     overflow-x: auto;
     border-radius: var(--radius-xl);
-    border: 1px solid var(--border-subtle);
-    background: var(--bg-surface);
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
     box-shadow: var(--shadow-card);
 }
 
@@ -434,24 +423,26 @@ html.dark {
     border-spacing: 0;
     text-align: left;
     font-size: var(--text-body);
+    background: #ffffff;
 }
 
 .admin-table th {
-    background: var(--bg-surface-subtle);
-    color: var(--text-secondary);
+    background: #f8fafc;
+    color: #475569;
     font-weight: 700;
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     padding: var(--space-4) var(--space-5);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: 1px solid #e2e8f0;
     white-space: nowrap;
 }
 
 .admin-table td {
     padding: var(--space-4) var(--space-5);
-    color: var(--text-primary);
-    border-bottom: 1px solid var(--border-subtle);
+    background: #ffffff;
+    color: #1e293b;
+    border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
     transition: background 0.15s ease;
 }
@@ -461,11 +452,11 @@ html.dark {
 }
 
 .admin-table tbody tr:hover td {
-    background: rgba(225, 29, 72, 0.02);
+    background: #fff4f7 !important;
 }
 
 .admin-table--striped tbody tr:nth-child(even) td {
-    background: var(--slate-50);
+    background: #ffffff;
 }
 
 .admin-table .col-numeric {
@@ -1158,7 +1149,7 @@ html.dark {
 }
 
 /* ============================================================================
-   7. LUXURY BEAUTY REUSABLE UI COMPONENTS (OMNI BEAUTY DESIGN SYSTEM)
+   7. LUXURY BEAUTY REUSABLE UI COMPONENTS (CANMAKE BEAUTY DESIGN SYSTEM)
    ============================================================================ */
 
 /* --- 7.1 LUXURY GLASSMORPHISM CARD --- */

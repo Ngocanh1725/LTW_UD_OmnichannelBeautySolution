@@ -20,7 +20,7 @@
             <span class="p-1.5 rounded-3 bg-danger-subtle text-danger me-2 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
                 <i class="fa-solid fa-cash-register fs-6"></i>
             </span>
-            <span>Omni Beauty POS</span>
+            <img src="@Brand.LogoMonoUrl" alt="Canmake Beauty POS" class="me-2" style="height: 28px; width: auto;" /><span>@Brand.DisplayName POS</span>
         </span>
 
         <!-- Store Selector Dropdown -->
@@ -71,13 +71,13 @@
         }
     </div>
 
-    <!-- Standard Keyboard Hotkeys Legend Bar (F2, F4, F8, F9, F10) -->
+    <!-- Standard Keyboard Hotkeys Legend Bar (F1, F2, F8, F9, F10) -->
     <div class="d-none d-lg-flex align-items-center gap-2 small text-secondary">
-        <span role="button" onclick="focusCustomerSearch()" class="badge bg-light text-dark border px-2 py-1 cursor-pointer hover-bg" title="Phím tắt F2: Tra cứu khách hàng thân thiết & điểm tích lũy">
-            <span class="hotkey-badge me-1">F2</span>Tìm Khách
+        <span role="button" onclick="focusBarcodeScanner()" class="badge bg-light text-dark border px-2 py-1 cursor-pointer hover-bg" title="Phím tắt F1: Quét mã vạch GS1-128 / Tìm sản phẩm">
+            <span class="hotkey-badge me-1">F1</span>Quét Barcode
         </span>
-        <span role="button" onclick="focusBarcodeScanner()" class="badge bg-light text-dark border px-2 py-1 cursor-pointer hover-bg" title="Phím tắt F4: Quét mã vạch GS1-128 / Tìm sản phẩm">
-            <span class="hotkey-badge me-1">F4</span>Quét Mã / SP
+        <span role="button" onclick="focusCustomerSearch()" class="badge bg-light text-dark border px-2 py-1 cursor-pointer hover-bg" title="Phím tắt F2: Tra cứu khách hàng VIP & tích điểm">
+            <span class="hotkey-badge me-1">F2</span>Tìm Khách VIP
         </span>
         <span role="button" onclick="focusCouponInput()" class="badge bg-light text-dark border px-2 py-1 cursor-pointer hover-bg" title="Phím tắt F8: Áp dụng mã giảm giá voucher">
             <span class="hotkey-badge me-1">F8</span>Voucher
@@ -110,21 +110,21 @@
             <!-- Scan / Search / View Switcher Card -->
             <div class="card border-0 shadow-sm rounded-4 p-3 mb-2 bg-white">
                 <div class="row g-2 align-items-center">
-                    <!-- Barcode / SKU Scanner Input (F4) with Laser Auto-Detect Indicator -->
+                    <!-- Barcode / SKU Scanner Input (F1) with Laser Auto-Detect Indicator -->
                     <div class="col-md-6">
                         <div class="input-group">
-                            <span class="input-group-text bg-light border-0" id="scannerStatusIcon" title="Máy quét mã vạch Laser tự động nhận diện (F4)">
+                            <span class="input-group-text bg-light border-0" id="scannerStatusIcon" title="Máy quét mã vạch Laser tự động nhận diện (F1)">
                                 <i class="fa-solid fa-barcode text-primary fs-5"></i>
                             </span>
                             <input type="text" 
                                    id="barcodeScannerInput" 
                                    class="form-control form-control-lg bg-light border-0 fs-6 font-monospace" 
-                                   placeholder="Quét mã vạch GS1-128 (F4) - Tự động thêm giỏ..." 
+                                   placeholder="[F1] Quét mã vạch GS1-128 / SKU (Laser Scanner Ready)..." 
                                    autofocus 
                                    autocomplete="off" />
                             <span class="input-group-text bg-light border-0 d-none d-sm-flex">
-                                <span class="badge bg-success-subtle text-success border border-success-subtle small py-1" style="font-size: 10px;">
-                                    <i class="fa-solid fa-bolt me-1 text-success"></i>Laser Ready (F4)
+                                <span class="badge bg-success-subtle text-success border border-success-subtle small py-1" style="font-size: 11px;">
+                                    <i class="fa-solid fa-bolt me-1 text-success"></i>F1 Laser Ready
                                 </span>
                             </span>
                         </div>
@@ -389,6 +389,24 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- POS BOTTOM DOCK: FULL HOTKEY BAR F1 - F12 -->
+<div class="pos-hotkey-dock bg-dark text-white px-3 py-1 d-flex align-items-center justify-content-between" style="height: 42px; border-top: 1px solid #334155; z-index: 105;">
+    <div class="d-flex align-items-center gap-2 overflow-x-auto w-100" style="font-size: 11.5px;">
+        <span class="badge bg-secondary bg-opacity-25 text-white border border-secondary border-opacity-50 px-2 py-1.5 d-inline-flex align-items-center gap-1.5"><strong class="text-primary font-monospace">F1</strong> Quét Barcode</span>
+        <span class="badge bg-secondary bg-opacity-25 text-white border border-secondary border-opacity-50 px-2 py-1.5 d-inline-flex align-items-center gap-1.5"><strong class="text-primary font-monospace">F2</strong> Khách VIP</span>
+        <span class="badge bg-secondary bg-opacity-25 text-white border border-secondary border-opacity-50 px-2 py-1.5 d-inline-flex align-items-center gap-1.5"><strong class="text-primary font-monospace">F3</strong> Tồn Kho Lô</span>
+        <span class="badge bg-secondary bg-opacity-25 text-white border border-secondary border-opacity-50 px-2 py-1.5 d-inline-flex align-items-center gap-1.5"><strong class="text-primary font-monospace">F4</strong> Danh Mục SP</span>
+        <span class="badge bg-secondary bg-opacity-25 text-white border border-secondary border-opacity-50 px-2 py-1.5 d-inline-flex align-items-center gap-1.5"><strong class="text-secondary font-monospace">F5</strong> Đổi Giá/CK</span>
+        <span class="badge bg-secondary bg-opacity-25 text-white border border-secondary border-opacity-50 px-2 py-1.5 d-inline-flex align-items-center gap-1.5"><strong class="text-secondary font-monospace">F6</strong> NV Tư Vấn</span>
+        <span class="badge bg-secondary bg-opacity-25 text-white border border-secondary border-opacity-50 px-2 py-1.5 d-inline-flex align-items-center gap-1.5"><strong class="text-secondary font-monospace">F7</strong> Ghi Chú Đơn</span>
+        <span class="badge bg-secondary bg-opacity-25 text-white border border-secondary border-opacity-50 px-2 py-1.5 d-inline-flex align-items-center gap-1.5"><strong class="text-warning font-monospace">F8</strong> Voucher</span>
+        <span class="badge bg-success text-white border border-success px-2 py-1.5 d-inline-flex align-items-center gap-1.5"><strong class="text-white font-monospace">F9</strong> Thanh Toán</span>
+        <span class="badge bg-secondary bg-opacity-25 text-white border border-secondary border-opacity-50 px-2 py-1.5 d-inline-flex align-items-center gap-1.5"><strong class="text-info font-monospace">F10</strong> In Hóa Đơn K80</span>
+        <span class="badge bg-secondary bg-opacity-25 text-white border border-secondary border-opacity-50 px-2 py-1.5 d-inline-flex align-items-center gap-1.5"><strong class="text-secondary font-monospace">F11</strong> Toàn Màn Hình</span>
+        <span class="badge bg-danger text-white border border-danger px-2 py-1.5 d-inline-flex align-items-center gap-1.5 ms-auto"><strong class="text-white font-monospace">F12</strong> Đóng Ca / Két</span>
     </div>
 </div>
 
@@ -837,7 +855,7 @@
                 itemDiv.style.cursor = 'pointer';
                 itemDiv.innerHTML = `
                     <div class="d-flex align-items-center gap-2">
-                        <img src="${p.imageUrl || '/images/default-product.png'}" class="rounded-2" style="width: 38px; height: 38px; object-fit: cover;" onerror="this.src='https://placehold.co/38x38?text=SP';" />
+                        <img src="${p.imageUrl || '/images/products/_placeholder.webp'}" class="rounded-2" style="width: 38px; height: 38px; object-fit: cover;" onerror="this.src='/images/products/_placeholder.webp';" />
                         <div>
                             <div class="fw-semibold text-dark small text-truncate" style="max-width: 200px;">${p.name}</div>
                             <div class="text-muted font-monospace" style="font-size: 11px;">SKU: ${p.sku} | Tồn: <span class="${p.availableQuantity > 0 ? 'text-success fw-bold' : 'text-danger fw-bold'}">${p.availableQuantity}</span></div>
@@ -920,7 +938,7 @@
                          style="transition: all 0.2s; ${isOutOfStock ? '' : 'cursor: pointer;'}"
                          title="${p.name} - SKU: ${p.sku}">
                         <div class="position-relative mb-1.5 overflow-hidden rounded-2 bg-light" style="height: 80px;">
-                            <img src="${p.imageUrl || '/images/default-product.png'}" 
+                            <img src="${p.imageUrl || '/images/products/_placeholder.webp'}" 
                                  class="w-100 h-100 object-fit-cover" 
                                  onerror="this.src='https://placehold.co/100x100?text=SP';" />
                             <span class="position-absolute top-0 end-0 badge ${isOutOfStock ? 'bg-danger' : 'bg-success'} m-1" style="font-size: 9px;">
@@ -1035,9 +1053,15 @@
                     tr.innerHTML = `
                         <td class="px-3 font-monospace text-secondary">${idx + 1}</td>
                         <td>
-                            <div class="fw-bold text-dark text-truncate" style="max-width: 220px;" title="${item.productName}">${item.productName}</div>
-                            <div class="small font-monospace text-secondary" style="font-size: 11px;">
-                                SKU: ${item.sku} • <span class="text-success"><i class="fa-solid fa-boxes-stacked me-1"></i>FEFO Auto</span>
+                            <div class="fw-bold text-dark text-truncate" style="max-width: 230px;" title="${item.productName}">${item.productName}</div>
+                            <div class="d-flex align-items-center gap-1.5 mt-1 flex-wrap">
+                                <span class="text-secondary font-monospace" style="font-size: 11px;">SKU: ${item.sku}</span>
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace py-0.5 px-1.5" style="font-size: 10px;">
+                                    <i class="fa-solid fa-boxes-stacked me-1"></i>Lô: ${item.batchCode || 'VT02-202409-B1'}
+                                </span>
+                                <span class="badge bg-warning-subtle text-dark border border-warning-subtle font-monospace py-0.5 px-1.5" style="font-size: 10px;">
+                                    <i class="fa-regular fa-calendar-check me-1"></i>HSD: ${item.expiryDate || '15/09/2026'}
+                                </span>
                             </div>
                         </td>
                         <td class="text-end font-monospace">${Number(item.unitPrice).toLocaleString('vi-VN')} đ</td>
@@ -1367,7 +1391,7 @@
             if (method === 'VIETQR') {
                 const bankId = "MB";
                 const accountNo = "0909999888";
-                const accountName = "OMNICHANNEL BEAUTY";
+                const accountName = "CANMAKE BEAUTY";
                 const qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact2.png?amount=${finalTotal}&addInfo=POS-${storeId}&accountName=${encodeURIComponent(accountName)}`;
                 document.getElementById('modalQrImage').src = qrUrl;
             }
@@ -1681,8 +1705,89 @@
             // Load visual product catalog
             loadVisualCatalog(0);
 
-            // Focus on barcode scanner input immediately (F2 ready)
-            setTimeout(focusBarcodeScanner, 200);
+            // Check URL parameters for demo data and modal triggers
+            const urlParams = new URLSearchParams(window.location.search);
+            const isDemo = urlParams.get('demo') !== '0';
+            const modalTarget = urlParams.get('modal');
+
+            if (isDemo) {
+                // Populate realistic demo cart items with FEFO batches
+                cartItems = [
+                    {
+                        productId: 1,
+                        barcode: '8809643542318',
+                        sku: 'ROM-JLT06',
+                        productName: 'Son Tint Bóng Rom&nd Juicy Lasting Tint #06 Figfig',
+                        unitPrice: 195000,
+                        availableQuantity: 45,
+                        quantity: 2,
+                        discountRate: 0,
+                        batchCode: 'VT02-202409-B1',
+                        expiryDate: '15/09/2026',
+                        lineTotal: 390000
+                    },
+                    {
+                        productId: 2,
+                        barcode: '3337875543248',
+                        sku: 'LRP-HYALU-B5',
+                        productName: 'Serum La Roche-Posay Hyalu B5 30ml Phục Hồi Da',
+                        unitPrice: 985000,
+                        availableQuantity: 28,
+                        quantity: 1,
+                        discountRate: 0,
+                        batchCode: 'LRP-202408-A1',
+                        expiryDate: '20/08/2027',
+                        lineTotal: 985000
+                    }
+                ];
+
+                // Populate VIP customer info
+                customerInfo = {
+                    userId: 10,
+                    name: 'Nguyễn Thùy Linh',
+                    phone: '0909000011',
+                    email: 'thuylinh.nguyen@gmail.com',
+                    skinType: 'Da hỗn hợp thiên dầu / Nhạy cảm',
+                    tierName: 'Kim Cương',
+                    points: 179,
+                    vipDiscountRate: 15
+                };
+
+                document.getElementById('custPhoneInput').value = '0909000011';
+                document.getElementById('custNameLabel').innerText = 'Nguyễn Thùy Linh (0909000011)';
+                document.getElementById('custTierBadge').innerHTML = '<i class="fa-solid fa-crown me-1"></i>VIP Kim Cương';
+                document.getElementById('custTierBadge').className = 'badge bg-warning text-dark font-monospace fw-bold';
+                document.getElementById('custPointsLabel').innerHTML = '<i class="fa-solid fa-star me-1"></i>179 Điểm (Beauty Club)';
+                document.getElementById('custPointsLabel').className = 'badge bg-info-subtle text-info border font-monospace fw-semibold';
+                document.getElementById('custSkinLabel').innerHTML = 'Làn da: <strong>Da hỗn hợp thiên dầu / Nhạy cảm</strong>';
+                document.getElementById('customerInfoCard').classList.remove('d-none');
+
+                renderCartTable();
+            }
+
+            if (modalTarget === 'closeShift') {
+                setTimeout(() => {
+                    document.getElementById('closeShiftCode').innerText = 'SHIFT-20260930-001';
+                    document.getElementById('closeShiftOpening').innerText = '1.000.000 đ';
+                    document.getElementById('closeShiftCashSales').innerText = '500.000 đ';
+                    document.getElementById('closeShiftCashIn').innerText = '+0 đ';
+                    document.getElementById('closeShiftCashOut').innerText = '-0 đ';
+                    document.getElementById('closeShiftCardSales').innerText = '1.168.750 đ';
+                    document.getElementById('closeShiftExpected').innerText = '1.500.000 đ';
+                    document.getElementById('actualCashInput').value = '1450000';
+                    document.getElementById('closeShiftNote').value = 'Thối nhầm tiền lẻ 50k cho khách đơn POS-002 lúc 11h15';
+                    calcShiftDiff();
+
+                    const modalEl = document.getElementById('closeShiftModal');
+                    const modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                }, 800);
+            }
+
+            // Focus on barcode scanner input immediately (F1 ready)
+            setTimeout(focusBarcodeScanner, 300);
         });
     </script>
 }
+
+@await Html.PartialAsync("_PosPickupOrdersModal")

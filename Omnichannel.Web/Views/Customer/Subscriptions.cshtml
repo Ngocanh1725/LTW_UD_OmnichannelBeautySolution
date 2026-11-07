@@ -1,0 +1,292 @@
+@using System.Text.Encodings.Web
+@model List<Omnichannel.Application.DTOs.Notifications.CustomerSubscriptionDto>
+@{
+    ViewData["Title"] = "Sản Phẩm Đang Theo Dõi - Canmake Beauty";
+    Layout = "_Layout";
+    var backInStockCount = Model.Count(s => s.Type == "BACK_IN_STOCK");
+    var priceDropCount = Model.Count(s => s.Type == "PRICE_DROP");
+}
+
+<div class="min-h-screen bg-slate-50/70 pb-20 pt-6" x-data="customerSubscriptions(@Model.Count)">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Breadcrumb & Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+                <nav class="flex items-center gap-2 text-xs text-slate-400 mb-1.5">
+                    <a href="/" class="hover:text-magenta-accent transition">Trang Chủ</a>
+                    <span>/</span>
+                    <a href="/Customer/Dashboard" class="hover:text-magenta-accent transition">Khách Hàng</a>
+                    <span>/</span>
+                    <span class="text-charcoal font-semibold">Sản Phẩm Đang Theo Dõi</span>
+                </nav>
+                <h1 class="text-2xl sm:text-3xl font-serif font-bold text-charcoal flex items-center gap-2.5">
+                    <span>Sản Phẩm Đang Theo Dõi</span>
+                    <span class="inline-flex items-center gap-1.5 text-xs font-sans font-bold px-2.5 py-1 rounded-full bg-magenta-accent/10 text-magenta-accent border border-magenta-accent/20">
+                        <i class="fa-solid fa-bell text-magenta-accent text-[11px]"></i>
+                        <span id="subTotalCount">@Model.Count</span> Đăng ký
+                    </span>
+                </h1>
+                <p class="text-sm text-slate-500 mt-1">
+                    Nhận thông báo Realtime & Email tự động ngay khi mỹ phẩm hết hàng về lại kho hoặc giảm giá chạm mức bạn mong đợi.
+                </p>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="/Shop" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-charcoal text-white hover:bg-magenta-accent text-xs font-bold transition shadow-sm">
+                    <i class="fa-solid fa-bag-shopping text-rose-gold"></i> Tiếp Tục Mua Sắm
+                </a>
+            </div>
+        </div>
+
+        <!-- Portal Navigation Tabs (VIP Card | Orders | Addresses | Wishlist | Subscriptions) -->
+        <div class="bg-white rounded-2xl p-1.5 border border-slate-200 shadow-sm mb-8 flex flex-wrap items-center gap-1">
+            <a href="/Customer/Dashboard" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-crown text-amber-500"></i> Thẻ VIP & Điểm Thưởng
+            </a>
+            <a href="/Customer/Orders" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-bag-shopping text-blue-500"></i> Đơn Hàng Của Tôi
+            </a>
+            <a href="/Customer/Addresses" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-location-dot text-rose-gold"></i> Sổ Địa Chỉ Nhận Hàng
+            </a>
+            <a href="/Wishlist" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-heart text-pink-500"></i> Danh Sách Yêu Thích
+            </a>
+            <a href="/Customer/Subscriptions" class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-magenta-accent/10 text-magenta-accent border border-magenta-accent/20 shadow-xs">
+                <i class="fa-solid fa-bell text-magenta-accent"></i> Đang Theo Dõi (@Model.Count)
+            </a>
+        </div>
+
+        <!-- Filter Sub-Tabs -->
+        @if (Model.Any())
+        {
+            <div class="flex items-center gap-2 mb-6 overflow-x-auto pb-1" id="subFilterBar">
+                <button type="button" 
+                        @@click="filter = 'all'" 
+                        :class="filter === 'all' ? 'bg-charcoal text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'"
+                        class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                    <span>Tất Cả</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px]" :class="filter === 'all' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'">@Model.Count</span>
+                </button>
+
+                <button type="button" 
+                        @@click="filter = 'back_in_stock'" 
+                        :class="filter === 'back_in_stock' ? 'bg-amber-600 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'"
+                        class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                    <i class="fa-solid fa-boxes-stacked text-xs"></i>
+                    <span>Chờ Hàng Về</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px]" :class="filter === 'back_in_stock' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'">@backInStockCount</span>
+                </button>
+
+                <button type="button" 
+                        @@click="filter = 'price_drop'" 
+                        :class="filter === 'price_drop' ? 'bg-emerald-600 text-white shadow-xs' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'"
+                        class="px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-trend-down text-xs"></i>
+                    <span>Chờ Giảm Giá</span>
+                    <span class="px-1.5 py-0.5 rounded-full text-[10px]" :class="filter === 'price_drop' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'">@priceDropCount</span>
+                </button>
+            </div>
+        }
+
+        <!-- Subscription Items Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="subCardsGrid">
+            @foreach (var item in Model)
+            {
+                var isBackInStock = item.Type == "BACK_IN_STOCK";
+                var isNotified = item.Status == "NOTIFIED";
+                var cardType = isBackInStock ? "back_in_stock" : "price_drop";
+
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-md transition p-4 flex flex-col justify-between sub-card"
+                     id="sub-card-@item.Id"
+                     x-show="filter === 'all' || filter === '@cardType'"
+                     data-type="@cardType">
+                    
+                    <div>
+                        <!-- Top Badges -->
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            @if (isBackInStock)
+                            {
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                    <i class="fa-solid fa-box-open text-[10px]"></i> Báo Khi Có Hàng
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                    <i class="fa-solid fa-arrow-trend-down text-[10px]"></i> Theo Dõi Giảm Giá
+                                </span>
+                            }
+
+                            <!-- Status Badge -->
+                            @if (isNotified)
+                            {
+                                <span class="inline-flex items-center gap-1 text-[11px] font-bold text-magenta-accent bg-pink-50 px-2 py-0.5 rounded-full border border-pink-200">
+                                    <i class="fa-solid fa-circle-check"></i> Đã gửi thông báo
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                                    <i class="fa-solid fa-clock"></i> Đang theo dõi
+                                </span>
+                            }
+                        </div>
+
+                        <!-- Product Info Row -->
+                        <div class="flex gap-3 mb-4">
+                            <a href="/san-pham/@item.ProductSlug" class="shrink-0 w-20 h-20 rounded-xl overflow-hidden bg-slate-100 border border-slate-200/60 block hover:opacity-90 transition">
+                                <img src="@(string.IsNullOrEmpty(item.ProductThumbnailUrl) ? "/images/products/_placeholder.webp" : item.ProductThumbnailUrl)" 
+                                     alt="@item.ProductName" 
+                                     class="w-full h-full object-cover"
+                                     loading="lazy" />
+                            </a>
+
+                            <div class="flex-1 min-w-0">
+                                <a href="/san-pham/@item.ProductSlug" class="font-serif font-bold text-sm text-charcoal hover:text-magenta-accent transition line-clamp-2 block mb-1">
+                                    @item.ProductName
+                                </a>
+
+                                <div class="flex items-baseline gap-2">
+                                    <span class="text-sm font-bold text-charcoal">@item.CurrentPrice.ToString("N0") đ</span>
+                                </div>
+
+                                @if (!isBackInStock && item.TargetPrice.HasValue)
+                                {
+                                    <div class="mt-1 text-xs text-emerald-700 font-medium flex items-center gap-1">
+                                        <i class="fa-solid fa-bullseye text-[10px]"></i>
+                                        <span>Mục tiêu: ≤ @item.TargetPrice.Value.ToString("N0") đ</span>
+                                    </div>
+                                }
+
+                                @if (isBackInStock)
+                                {
+                                    <div class="mt-1 text-xs font-medium">
+                                        @if (item.IsInStock)
+                                        {
+                                            <span class="text-emerald-600 flex items-center gap-1">
+                                                <i class="fa-solid fa-circle text-[8px]"></i> Đã có hàng (Còn @item.AvailableStock)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-rose-500 flex items-center gap-1">
+                                                <i class="fa-solid fa-circle text-[8px]"></i> Tạm thời hết hàng
+                                            </span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="text-[11px] text-slate-400 mb-3 flex items-center gap-1.5">
+                            <i class="fa-regular fa-calendar"></i>
+                            <span>Đăng ký ngày: @item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
+                        @if (item.IsInStock)
+                        {
+                            <a href="/san-pham/@item.ProductSlug" 
+                               class="flex-1 py-2 px-3 rounded-xl bg-magenta-accent hover:bg-[#b0276a] text-white text-xs font-bold text-center transition flex items-center justify-center gap-1.5 shadow-xs">
+                                <i class="fa-solid fa-cart-shopping text-xs"></i>
+                                <span>Mua Ngay</span>
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="/san-pham/@item.ProductSlug" 
+                               class="flex-1 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold text-center transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+                                <span>Xem Sản Phẩm</span>
+                            </a>
+                        }
+
+                        <button type="button" 
+                                @@click="unsubscribe(@item.Id, '@Html.Raw(JavaScriptEncoder.Default.Encode(item.ProductName))')"
+                                class="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition border border-transparent hover:border-rose-200 text-xs"
+                                title="Hủy theo dõi sản phẩm này">
+                            <i class="fa-regular fa-trash-can text-sm"></i>
+                        </button>
+                    </div>
+
+                </div>
+            }
+        </div>
+
+        <!-- Empty State -->
+        <div class="bg-white rounded-3xl p-12 text-center border border-slate-200 shadow-sm max-w-lg mx-auto my-12 @(Model.Any() ? "hidden" : "")" id="subEmptyState">
+            <div class="w-20 h-20 mx-auto rounded-full bg-pink-50 flex items-center justify-center text-magenta-accent text-3xl mb-4">
+                <i class="fa-regular fa-bell-slash"></i>
+            </div>
+            <h3 class="text-lg font-serif font-bold text-charcoal mb-2">Chưa Có Sản Phẩm Theo Dõi Nào</h3>
+            <p class="text-sm text-slate-500 mb-6">
+                Khi gặp sản phẩm hết hàng hoặc muốn chờ giảm giá, hãy nhấn nút "Báo tôi khi có hàng" hoặc "Theo dõi giảm giá" trên trang chi tiết sản phẩm.
+            </p>
+            <a href="/Shop" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-magenta-accent text-white font-bold text-xs uppercase tracking-wider hover:bg-[#b0276a] transition shadow-md">
+                <i class="fa-solid fa-bag-shopping"></i> Khám Phá Mỹ Phẩm Ngay
+            </a>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    function customerSubscriptions(initialCount) {
+        return {
+            filter: 'all',
+            count: initialCount,
+            async unsubscribe(subId, productName) {
+                if (!confirm(`Bạn có chắc muốn hủy theo dõi sản phẩm "${productName}" không?`)) {
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`/api/subscription/unsubscribe/${subId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        const card = document.getElementById(`sub-card-${subId}`);
+                        if (card) {
+                            card.style.transition = 'all 0.3s ease';
+                            card.style.opacity = '0';
+                            card.style.transform = 'scale(0.9)';
+                            setTimeout(() => {
+                                card.remove();
+                                this.count--;
+                                const totalEl = document.getElementById('subTotalCount');
+                                if (totalEl) totalEl.innerText = this.count;
+
+                                const remainingCards = document.querySelectorAll('.sub-card');
+                                if (remainingCards.length === 0) {
+                                    const emptyEl = document.getElementById('subEmptyState');
+                                    const filterEl = document.getElementById('subFilterBar');
+                                    if (emptyEl) emptyEl.classList.remove('hidden');
+                                    if (filterEl) filterEl.classList.add('hidden');
+                                }
+                            }, 300);
+                        }
+
+                        if (typeof showStorefrontToast === 'function') {
+                            showStorefrontToast(data.message, 'success');
+                        } else {
+                            alert(data.message);
+                        }
+                    } else {
+                        alert(data.message || 'Không thể hủy theo dõi.');
+                    }
+                } catch (e) {
+                    console.error('Lỗi khi hủy theo dõi:', e);
+                    alert('Đã xảy ra lỗi khi kết nối máy chủ.');
+                }
+            }
+        };
+    }
+</script>
+

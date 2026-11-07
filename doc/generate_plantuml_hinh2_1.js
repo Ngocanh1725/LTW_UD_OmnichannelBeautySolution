@@ -1,0 +1,139 @@
+const fs = require('fs');
+const zlib = require('zlib');
+
+function encode64(data) {
+  let r = '';
+  for (let i = 0; i < data.length; i += 3) {
+    if (i + 2 == data.length) {
+      r += append3bytes(data[i], data[i + 1], 0);
+    } else if (i + 1 == data.length) {
+      r += append3bytes(data[i], 0, 0);
+    } else {
+      r += append3bytes(data[i], data[i + 1], data[i + 2]);
+    }
+  }
+  return r;
+}
+
+function append3bytes(b1, b2, b3) {
+  let c1 = b1 >> 2;
+  let c2 = ((b1 & 0x3) << 4) | (b2 >> 4);
+  let c3 = ((b2 & 0xF) << 2) | (b3 >> 6);
+  let c4 = b3 & 0x3F;
+  return encode6bit(c1 & 0x3F) + encode6bit(c2 & 0x3F) + encode6bit(c3 & 0x3F) + encode6bit(c4 & 0x3F);
+}
+
+function encode6bit(b) {
+  if (b < 10) return String.fromCharCode(48 + b);
+  b -= 10;
+  if (b < 26) return String.fromCharCode(65 + b);
+  b -= 26;
+  if (b < 26) return String.fromCharCode(97 + b);
+  b -= 26;
+  if (b == 0) return '-';
+  if (b == 1) return '_';
+  return '?';
+}
+
+const puml = `@startuml Hinh2_1_Luong_Van_Hanh_Hang_Hoa_Omni_Beauty
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Times New Roman"
+skinparam defaultFontSize 12
+skinparam roundCorner 8
+skinparam shadowing false
+skinparam ArrowColor #1B4F72
+skinparam ArrowThickness 1.5
+skinparam ArrowFontSize 11
+skinparam linetype ortho
+
+' ========================================================
+' ĐỊNH NGHĨA CÁC PHÂN VÙNG VÀ ĐỐI TƯỢNG NGHIỆP VỤ
+' ========================================================
+
+package "1. ĐẦU VÀO: NHÀ CUNG CẤP & MUA HÀNG" #EBF5FB {
+    entity "Nhà cung cấp Dược mỹ phẩm\\n(L'Oreal, Paula's Choice...)" as NCC #D4E6F1
+    rectangle "Đơn đặt hàng mua (PO)\\n+ COA kiểm nghiệm\\n+ Phiếu công bố mỹ phẩm" as PO #AED6F1
+}
+
+package "2. TỔNG KHO PHÂN PHỐI (KHO MIỀN NAM - WH-MN)" #FEF9E7 {
+    rectangle "Tiếp nhận & Kiểm định chất lượng\\n(Kiểm đếm tem phụ, hạn dùng)" as QC #FDEBD0
+    database "Quản lý Lô sản xuất\\n(ProductBatches: BatchNo, MfgDate, ExpDate)" as Batches #FAD7A0
+    rectangle "Động cơ Giám sát FEFO\\n- Xanh (>90 ngày): Tồn an toàn\\n- Vàng (30-90 ngày): Cận date\\n- Đỏ (<30 ngày): Khóa xuất bán" as FEFO_Engine #F8C471
+    rectangle "Thanh lý / Xả kho cận date\\n(Chiết khấu tự động 30% - 50%)" as Clearance #F5B041
+}
+
+package "3. ĐIỀU CHUYỂN KHO LIÊN CHI NHÁNH (STOCK TRANSFER ENGINE)" #E8F8F5 {
+    rectangle "Bước 1: Đề xuất chuyển kho\\n(Status = PENDING)" as Trf_Pending #D1F2EB
+    rectangle "Bước 2: Xuất vận chuyển theo FEFO\\n(Status = SHIPPED / IN TRANSIT)\\nTrừ tồn vật lý tại kho xuất" as Trf_Shipped #A3E4D7
+    rectangle "Bước 3: Kiểm đếm & Tiếp nhận\\n(Status = COMPLETED)\\nGhi tăng tồn tại kho nhận" as Trf_Completed #76D7C4
+}
+
+package "4. MẠNG LƯỚI ĐIỂM BÁN LẺ & KÊNH BÁN HÀNG" #FDEDEC {
+    package "KÊNH TRỰC TIẾP: SHOWROOM (SH-Q1 & SH-BD)" #FADBD8 {
+        rectangle "Quản lý Ca bán hàng POS\\n- Mở ca: Khai báo két tiền lẻ\\n- Trong ca: Ghi nhận nộp/rút tiền\\n- Đóng ca: Đối soát két mù\\n(Difference = Actual - Expected)" as PosShift #F5B7B1
+        rectangle "Giao diện POS Touchscreen\\n- Quét mã vạch quốc tế EAN-13\\n- Chỉ định lô cận hạn nhất\\n- Tích điểm thành viên VIP" as POS_Sale #F1948A
+        rectangle "Thanh toán tại quầy\\n(Tiền mặt / VietQR / Quẹt thẻ POS)\\nIn hóa đơn nhiệt K80 + Mã tra cứu" as PosPay #E74C3C
+    }
+    
+    package "KÊNH TRỰC TUYẾN: E-COMMERCE WEBSITE" #E8DAEF {
+        rectangle "Storefront & Bộ lọc da SmartFilter\\n- Mega Menu đa cấp chuẩn SEO\\n- Động cơ chẩn đoán tương kỵ da\\n- Trợ lý AI gợi ý Routine" as Web_Storefront #D7BDE2
+        rectangle "Giỏ hàng & Cấp phát 2 giai đoạn\\n- Giai đoạn 1: Soft Reserve (15p)\\n- Giai đoạn 2: Hard Deduct khi trả tiền" as Web_Alloc #BB8FCE
+        rectangle "Cổng thanh toán & Vận chuyển\\n- VNPay / MoMo / Thẻ / COD\\n- Điều phối đơn: BOPIS hoặc Ship GHN" as Web_Pay #8E44AD
+    }
+}
+
+package "5. KHÁCH HÀNG & HẬU MÃI" #EAFAF1 {
+    actor "Khách hàng Mua sắm\\n(VIP & Khách vãng lai)" as Customer #D5F5E3
+    rectangle "Quy trình Đổi trả / Thu hồi\\n- Tiếp nhận yêu cầu kích ứng/lỗi\\n- Phân loại: Tái nhập kho vs Chờ hủy" as Return_Process #A9DFBF
+}
+
+package "6. HẠCH TOÁN SỔ CÁI & BÁO CÁO TÀI CHÍNH" #F2F4F4 {
+    database "Sổ cái Kế toán Chi nhánh\\n(FinancialLedgers: Nợ/Có, Doanh thu,\\nGiá vốn COGS, Lệch két, Công nợ)" as Ledger #BDC3C7
+    rectangle "Bảng điều khiển Quản trị\\n(Admin Dashboard KPIs: Doanh thu,\\nCảnh báo rủi ro AI thời gian thực)" as Dashboard #95A5A6
+}
+
+' ========================================================
+' CÁC LUỒNG LIÊN KẾT (VẬN HÀNH HÀNG HÓA & DỮ LIỆU)
+' ========================================================
+
+NCC --> PO : 1. Xác nhận đơn mua & cung cấp hàng
+PO --> QC : 2. Giao hàng đến Tổng kho WH-MN
+QC --> Batches : 3. Nhập dữ liệu Lô (Mfg/ExpDate)
+Batches --> FEFO_Engine : 4. Phân loại mức độ hạn dùng
+FEFO_Engine --> Clearance : 4a. Hàng cận date (<30 ngày)
+
+' Luồng điều chuyển kho
+FEFO_Engine --> Trf_Pending : 5a. Đề xuất điều phối hàng
+Trf_Pending --> Trf_Shipped : 5b. Duyệt & Xuất kho theo FEFO
+Trf_Shipped --> Trf_Completed : 5c. Vận chuyển & Giao nhận
+Trf_Completed --> PosShift : 6a. Nhập tồn Showroom Q1 / Ba Đình
+FEFO_Engine --> Web_Alloc : 6b. Cung cấp tồn kho cho Website
+
+' Luồng bán hàng POS
+PosShift --> POS_Sale : 7a. Mở ca & Bắt đầu phiên bán
+POS_Sale --> PosPay : 7b. Quét mã vạch & Tính tiền
+PosPay --> Customer : 8a. Bàn giao mỹ phẩm & Hóa đơn
+PosPay --> Ledger : 8b. Ghi nhận doanh thu & Tiền két
+
+' Luồng bán hàng Web
+Web_Storefront --> Web_Alloc : 7c. Khách chọn sản phẩm & Routine
+Web_Alloc --> Web_Pay : 7d. Khóa giữ chỗ & Thanh toán
+Web_Pay --> Customer : 8c. Giao hàng tận nơi hoặc nhận tại quầy (BOPIS)
+Web_Pay --> Ledger : 8d. Ghi nhận doanh thu trực tuyến
+
+' Luồng hậu mãi & hoàn tiền
+Customer --> Return_Process : 9a. Yêu cầu đổi trả do kích ứng/lỗi
+Return_Process --> Batches : 9b. Hàng nguyên vẹn -> Tái nhập kho
+Return_Process --> Ledger : 9c. Hoàn tiền & Ghi giảm doanh thu
+
+' Đồng bộ dữ liệu quản trị
+Ledger --> Dashboard : 10. Tổng hợp số liệu lên Dashboard
+@enduml`;
+
+fs.writeFileSync('doc/Hinh_2_1_Luong_Van_Hanh_Hang_Hoa.puml', puml, 'utf8');
+
+const deflated = zlib.deflateRawSync(Buffer.from(puml, 'utf8'));
+const encoded = encode64(deflated);
+console.log('SVG URL: https://www.plantuml.com/plantuml/svg/' + encoded);
+console.log('PNG URL: https://www.plantuml.com/plantuml/png/' + encoded);

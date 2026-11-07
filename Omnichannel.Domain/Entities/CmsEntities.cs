@@ -291,7 +291,7 @@ namespace Omnichannel.Domain.Entities
 
         public int HelpfulCount { get; set; } = 0; // Số lượt bình chọn hữu ích (Helpful thumbs-up vote)
 
-        // Phản hồi chính thức từ Chuyên viên CSKH Omni Beauty
+        // Phản hồi chính thức từ Chuyên viên CSKH Canmake Beauty
         [MaxLength(1000)]
         public string? AdminReply { get; set; }
 
@@ -299,7 +299,7 @@ namespace Omnichannel.Domain.Entities
         public DateTime? AdminRepliedAt { get; set; }
 
         [MaxLength(100)]
-        public string? AdminReplyBy { get; set; } // Ví dụ: "Chuyên viên CSKH Omni Beauty"
+        public string? AdminReplyBy { get; set; } // Ví dụ: "Chuyên viên CSKH Canmake Beauty"
 
         [Column(TypeName = "datetime2(7)")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -311,6 +311,98 @@ namespace Omnichannel.Domain.Entities
         public virtual Product Product { get; set; } = null!;
         public virtual User? User { get; set; }
         public virtual Order? Order { get; set; }
+        public virtual ICollection<ReviewHelpfulVote> HelpfulVotes { get; set; } = new List<ReviewHelpfulVote>();
+    }
+
+    [Table("ReviewHelpfulVotes")]
+    public class ReviewHelpfulVote
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+
+        public int ReviewId { get; set; }
+
+        public int? UserId { get; set; }
+
+        [MaxLength(100)]
+        public string? AnonymousKey { get; set; } // IP fingerprint / Cookie token cho khach vang lai
+
+        [Column(TypeName = "datetime2(7)")]
+        public DateTime VotedAt { get; set; } = DateTime.UtcNow;
+
+        // Navigation
+        public virtual ProductReview Review { get; set; } = null!;
+        public virtual User? User { get; set; }
+    }
+
+    [Table("ProductQuestions")]
+    public class ProductQuestion
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+
+        public int ProductId { get; set; }
+
+        public int? UserId { get; set; }
+
+        [MaxLength(100)]
+        public string? AuthorName { get; set; }
+
+        [Required]
+        [MaxLength(1000)]
+        public string Content { get; set; } = string.Empty;
+
+        public bool IsApproved { get; set; } = true; // Hien thi truc tiep hoac qua kiem duyet
+
+        public bool IsHidden { get; set; } = false;
+
+        [Column(TypeName = "datetime2(7)")]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        [Column(TypeName = "datetime2(7)")]
+        public DateTime? UpdatedAt { get; set; }
+
+        // Navigation
+        public virtual Product Product { get; set; } = null!;
+        public virtual User? User { get; set; }
+        public virtual ICollection<ProductAnswer> Answers { get; set; } = new List<ProductAnswer>();
+    }
+
+    [Table("ProductAnswers")]
+    public class ProductAnswer
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+
+        public int QuestionId { get; set; }
+
+        public int? UserId { get; set; }
+
+        [MaxLength(100)]
+        public string? AuthorName { get; set; }
+
+        [Required]
+        [MaxLength(2000)]
+        public string Content { get; set; } = string.Empty;
+
+        public bool IsOfficial { get; set; } = false; // Phan hoi chinh thuc tu Chuyen vien CSKH / Duoc si
+
+        public bool IsApproved { get; set; } = true;
+
+        public bool IsHidden { get; set; } = false;
+
+        [Column(TypeName = "datetime2(7)")]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        [Column(TypeName = "datetime2(7)")]
+        public DateTime? UpdatedAt { get; set; }
+
+        // Navigation
+        public virtual ProductQuestion Question { get; set; } = null!;
+        public virtual User? User { get; set; }
     }
 
     [Table("SlugRedirects")]

@@ -67,8 +67,17 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [HasPermission("CMS_POST_MANAGE")]
-        public async Task<IActionResult> Create(CreatePostViewModel model)
+        public async Task<IActionResult> Create(CreatePostViewModel model, IFormFile? thumbnailFile = null)
         {
+            if (thumbnailFile != null && thumbnailFile.Length > 0)
+            {
+                var savedUrl = await SavePostThumbnailFileAsync(thumbnailFile);
+                if (!string.IsNullOrEmpty(savedUrl))
+                {
+                    model.ThumbnailUrl = savedUrl;
+                }
+            }
+
             if (!ModelState.IsValid)
             {
                 var categories = await _context.PostCategories.Where(c => c.IsActive).ToListAsync();
@@ -147,8 +156,17 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [HasPermission("CMS_POST_MANAGE")]
-        public async Task<IActionResult> Edit(EditPostViewModel model)
+        public async Task<IActionResult> Edit(EditPostViewModel model, IFormFile? thumbnailFile = null)
         {
+            if (thumbnailFile != null && thumbnailFile.Length > 0)
+            {
+                var savedUrl = await SavePostThumbnailFileAsync(thumbnailFile);
+                if (!string.IsNullOrEmpty(savedUrl))
+                {
+                    model.ThumbnailUrl = savedUrl;
+                }
+            }
+
             if (!ModelState.IsValid)
             {
                 var categories = await _context.PostCategories.Where(c => c.IsActive).ToListAsync();
@@ -187,6 +205,55 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             TempData["SuccessMessage"] = $"Đã cập nhật bài viết '{post.Title}' thành công!";
             return RedirectToAction(nameof(Index));
+        }
+
+        private async Task<string> SavePostThumbnailFileAsync(IFormFile file)
+        {
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(ext)) return string.Empty;
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "posts");
+            if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+            var safeName = System.Text.RegularExpressions.Regex.Replace(Path.GetFileNameWithoutExtension(file.FileName), @"[^a-zA-Z0-9_\-]", "-");
+            var uniqueFileName = $"post_{DateTime.UtcNow:yyyyMMddHHmmss}_{Guid.NewGuid().ToString("N")[..6]}_{safeName}{ext}";
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            byte[] bytes;
+            using (var ms = new MemoryStream())
+            {
+                await file.CopyToAsync(ms);
+                bytes = ms.ToArray();
+            }
+
+            await System.IO.File.WriteAllBytesAsync(filePath, bytes);
+            var publicUrl = $"/uploads/posts/{uniqueFileName}";
+
+            try
+            {
+                var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(bytes)).ToLowerInvariant();
+                var mediaAsset = new MediaAsset
+                {
+                    AssetUid = Guid.NewGuid(),
+                    FileName = file.FileName,
+                    ContentType = file.ContentType ?? "image/jpeg",
+                    MimeType = file.ContentType ?? "image/jpeg",
+                    Data = bytes,
+                    FileSize = bytes.Length,
+                    FileSizeBytes = bytes.Length,
+                    ChecksumHash = hash,
+                    Category = "CMS",
+                    PublicUrl = publicUrl,
+                    StoragePath = publicUrl,
+                    CreatedAt = DateTime.UtcNow
+                };
+                await _context.MediaAssets.AddAsync(mediaAsset);
+                await _context.SaveChangesAsync();
+            }
+            catch { }
+
+            return publicUrl;
         }
 
         [HttpPost]

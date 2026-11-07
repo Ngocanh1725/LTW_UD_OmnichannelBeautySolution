@@ -1,9 +1,27 @@
+@using Microsoft.AspNetCore.Authentication
+@using System.Security.Claims
+@using Omnichannel.Application.Common
 @inject Omnichannel.Application.Interfaces.Cms.IThemeService ThemeService
 @{
     var theme = await ThemeService.GetCurrentThemeAsync();
+    var adminAuthResult = Context.RequestServices?.GetService(typeof(IAuthenticationService)) != null
+        ? await Context.AuthenticateAsync(AuthConstants.AdminCookieScheme)
+        : null;
+    var adminPrincipal = (adminAuthResult?.Succeeded == true && adminAuthResult.Principal?.Identity?.IsAuthenticated == true)
+        ? adminAuthResult.Principal
+        : null;
+
+    bool isStaffLogged = adminPrincipal != null ||
+        (User?.Identity?.IsAuthenticated == true &&
+         (User.HasClaim("IsStaff", "true") || User.IsInRole("SuperAdmin") || User.IsInRole("SUPER_ADMIN") || User.IsInRole("StoreManager") || User.IsInRole("STORE_MANAGER") || User.IsInRole("Cashier") || User.IsInRole("WarehouseStaff") || User.IsInRole("ContentEditor")));
+    bool isCustomerLogged = !isStaffLogged && User?.Identity?.IsAuthenticated == true;
+    var activePrincipal = adminPrincipal ?? User;
+    string displayUserName = activePrincipal?.FindFirst(ClaimTypes.GivenName)?.Value
+        ?? activePrincipal?.Identity?.Name
+        ?? "Tài Khoản";
 }
-@* Omnichannel Beauty Suite - Storefront Header Partial *@
-<header class="w-full relative z-40">
+@* Canmake Beauty - Storefront Header Partial *@
+<header class="w-full relative z-40" x-data="instantSearch()" x-init="init()">
     <style>
         @@keyframes tickerMarquee {
             0% { transform: translateX(0); }
@@ -21,15 +39,6 @@
         /* Luxury Mega Menu Display on Hover */
         .group:hover > .mega-menu-content,
         .has-mega-menu:hover .mega-menu-content {
-            display: block !important;
-            opacity: 1 !important;
-            visibility: visible !important;
-            pointer-events: auto !important;
-            transform: translateY(0) scale(1) !important;
-        }
-
-        /* Luxury Live Search Popover Display on Focus */
-        .search-input-wrapper:focus-within #liveSearchResultsPopover {
             display: block !important;
             opacity: 1 !important;
             visibility: visible !important;
@@ -80,6 +89,10 @@
 
                 <div class="hidden lg:flex items-center gap-3 text-[11px] font-semibold text-slate-300">
                     <span class="text-slate-600">|</span>
+                    <a href="/tra-cuu-don-hang" class="hover:text-magenta-accent transition flex items-center gap-1">
+                        <i class="fa-solid fa-truck-fast text-amber-400"></i> Tra cứu đơn hàng
+                    </a>
+                    <span class="text-slate-600">|</span>
                     <a href="/stores" class="hover:text-magenta-accent transition flex items-center gap-1">
                         <i class="fa-solid fa-location-dot text-rose-gold"></i> Showroom
                     </a>
@@ -103,51 +116,59 @@
                     <i class="fa-solid fa-bars-staggered text-xl"></i>
                 </button>
 
-                <!-- Brand Logo (Omni Beauty - Dynamic Theme Engine) -->
-                <a href="/" class="brand-logo-wrapper flex items-center gap-2.5 sm:gap-3 group shrink-0" title="@theme.BrandName - @(theme.Slogan ?? "Luxury Cosmetics")">
-                    <div class="brand-logo-badge relative shrink-0">
-                        <img src="@theme.LogoUrl" 
-                             alt="@theme.BrandName Logo" 
-                             class="brand-logo-img h-10 w-10 sm:h-11 sm:w-11 object-cover rounded-full" 
-                             onerror="this.onerror=null; this.src='@theme.LogoUrl'" />
-                    </div>
-                    <div class="flex flex-col items-start leading-none">
-                        <span class="brand-logo-text text-lg sm:text-2xl font-serif font-bold text-charcoal tracking-[0.16em] transition group-hover:text-magenta-accent">
-                            @theme.BrandName
-                        </span>
-                        <span class="text-[8px] sm:text-[9.5px] font-bold tracking-[0.32em] text-magenta-accent uppercase mt-0.5">
-                            @(theme.Slogan ?? "LUXURY COSMETICS")
-                        </span>
-                    </div>
+                <!-- Brand Logo (Canmake Beauty - Horizontal SVG Identity) -->
+                <a href="/" class="brand-logo-wrapper flex items-center gap-2.5 sm:gap-3 group shrink-0" title="@theme.BrandName - @(theme.Slogan ?? Brand.Slogan)">
+                    <img src="@Brand.LogoUrl" 
+                         alt="@theme.BrandName Logo" 
+                         class="h-10 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]" 
+                         onerror="this.onerror=null; this.src='/images/branding/canmake-logo-horizontal.svg'" />
+                    <span class="sr-only">@theme.BrandName</span>
                 </a>
 
-                <!-- Live AJAX Search Bar with Luxury Popover -->
+                <!-- Live Sephora/Hasaki Instant Search Bar with Luxury Popover -->
                 <div class="search-input-wrapper hidden md:block relative z-50 flex-1 max-w-lg mx-4"
-                     x-data="{ searchFocused: false }"
-                     @@click.outside="searchFocused = false"
-                     @@keydown.escape="searchFocused = false">
+                     @@click.outside="close()"
+                     @@keydown.escape.window="close()">
                     
-                    <form action="/tim-kiem" method="GET" class="relative">
-                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <!form action="/tim-kiem" method="GET" x-on:submit="handleSubmit($event)" class="relative">
+                        <i class="fa-solid absolute left-4 top-1/2 -translate-y-1/2 text-sm transition-colors"
+                           :class="isLoading ? 'fa-spinner fa-spin text-magenta-accent' : 'fa-magnifying-glass text-slate-400'"></i>
+                        
                         <input type="text" 
                                name="q" 
-                               id="storefrontSearchInput" 
-                               hx-get="/Product/LiveSearch" 
-                               hx-trigger="input delay:300ms, keyup delay:300ms, focus" 
-                               hx-target="#searchResultsContent" 
-                               @@focus="searchFocused = true"
-                               @@click="searchFocused = true"
+                               id="storefrontSearchInput"
+                               x-ref="searchInput"
+                               x-model="query"
+                               @@focus="onFocus()"
+                               @@input="onInput()"
+                               @@keydown.arrow-down.prevent="selectNext()"
+                               @@keydown.arrow-up.prevent="selectPrev()"
+                               @@keydown.enter="handleEnter($event)"
                                placeholder="Tìm son lì, kem chống nắng, serum HA & B5, nước hoa..." 
-                               class="search-input-beauty w-full pl-11 pr-10 py-2.5 rounded-full border border-slate-200 focus:border-magenta-accent focus:ring-2 focus:ring-magenta-accent/20 bg-slate-50/60 hover:bg-white text-sm outline-none transition-all placeholder:text-slate-400 font-sans" 
+                               class="search-input-beauty w-full pl-11 pr-16 py-2.5 rounded-full border border-slate-200 focus:border-magenta-accent focus:ring-2 focus:ring-magenta-accent/20 bg-slate-50/70 hover:bg-white text-sm outline-none transition-all placeholder:text-slate-400 font-sans shadow-2xs" 
                                autocomplete="off" />
-                        <button type="submit" class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-magenta-accent transition" aria-label="Tìm kiếm">
+
+                        <!-- Quick Clear Button -->
+                        <button type="button" 
+                                x-show="query && query.length > 0"
+                                @@click="clearQuery()"
+                                class="absolute right-10 top-1/2 -translate-y-1/2 h-5 w-5 flex items-center justify-center text-slate-400 hover:text-charcoal hover:bg-slate-200/60 rounded-full text-xs transition"
+                                style="display: none;"
+                                aria-label="Xóa từ khóa">
+                            <i class="fa-solid fa-xmark text-[11px]"></i>
+                        </button>
+
+                        <!-- Submit Arrow Button -->
+                        <button type="submit" 
+                                class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-magenta-accent transition" 
+                                aria-label="Tìm kiếm">
                             <i class="fa-solid fa-arrow-right text-xs"></i>
                         </button>
-                    </form>
+                    </!form>
 
-                    <!-- AJAX Results Popover with 2 Tabs -->
+                    <!-- Instant Search Results Dropdown Popover -->
                     <div id="liveSearchResultsPopover" 
-                         x-show="searchFocused"
+                         x-show="isOpen"
                          @@click.stop
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-2 scale-98"
@@ -155,21 +176,248 @@
                          x-transition:leave="transition ease-in duration-150"
                          x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                          x-transition:leave-end="opacity-0 translate-y-2 scale-98"
-                         class="search-results-dropdown absolute top-full left-0 right-0 mt-2 bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl border border-rose-100/90 p-3 z-50">
-                        <div id="searchResultsContent"
-                             hx-get="/Product/LiveSearch"
-                             hx-trigger="load"
-                             hx-target="this">
-                            <div class="py-6 px-4 text-center text-slate-400 text-xs">
-                                <i class="fa-solid fa-spinner fa-spin text-magenta-accent text-base mb-2"></i>
-                                <div>Đang tải gợi ý làm đẹp cao cấp...</div>
+                         style="display: none;"
+                         class="search-results-dropdown absolute top-full left-0 right-0 mt-2 bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl border border-rose-100/90 p-3.5 z-50 max-h-[520px] overflow-y-auto">
+                        
+                        <!-- STATE 1: RECENT SEARCHES & TRENDING (Khi chưa nhập hoặc < 2 ký tự) -->
+                        <template x-if="!query || query.trim().length < 2">
+                            <div class="space-y-4">
+                                <!-- Recent Searches -->
+                                <template x-if="recentSearches.length > 0">
+                                    <div>
+                                        <div class="flex items-center justify-between px-1 mb-2">
+                                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                                <i class="fa-regular fa-clock text-magenta-accent"></i>
+                                                <span>Tìm Kiếm Gần Đây</span>
+                                            </span>
+                                            <button type="button" 
+                                                    @@click="clearRecentSearches()"
+                                                    class="text-[10px] font-semibold text-magenta-accent hover:underline">
+                                                Xóa tất cả
+                                            </button>
+                                        </div>
+                                        <div class="flex flex-wrap gap-1.5 px-1">
+                                            <template x-for="(term, rIdx) in recentSearches" :key="'recent-' + rIdx">
+                                                <div class="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 hover:bg-pastel-rose text-slate-700 hover:text-magenta-accent border border-slate-200/80 text-xs font-medium transition cursor-pointer"
+                                                     :class="isItemActive('recent', term) ? 'bg-pastel-rose text-magenta-accent ring-1 ring-magenta-accent' : ''"
+                                                     @@click="selectTerm(term)">
+                                                    <i class="fa-solid fa-magnifying-glass text-[10px] text-slate-400 group-hover:text-magenta-accent"></i>
+                                                    <span x-text="term"></span>
+                                                    <button type="button" 
+                                                            @@click.stop="removeRecentSearch(term)"
+                                                            class="ml-0.5 text-slate-400 hover:text-rose-600 transition p-0.5"
+                                                            title="Xóa mục này">
+                                                        <i class="fa-solid fa-xmark text-[10px]"></i>
+                                                    </button>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Trending Keywords -->
+                                <div>
+                                    <div class="px-1 mb-2">
+                                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                                            <i class="fa-solid fa-fire text-amber-500"></i>
+                                            <span>Xu Hướng Tìm Kiếm Hôm Nay</span>
+                                            <span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-rose-100 text-rose-700">HOT</span>
+                                        </span>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1.5 px-1">
+                                        <template x-for="(kw, kIdx) in suggestions.hotKeywords" :key="'hot-' + kIdx">
+                                            <button type="button"
+                                                    @@click="selectTerm(kw)"
+                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 hover:bg-pastel-rose text-slate-700 hover:text-magenta-accent border border-slate-200/70 text-xs font-semibold transition group"
+                                                    :class="isItemActive('keyword', kw) ? 'bg-pastel-rose text-magenta-accent ring-1 ring-magenta-accent' : ''">
+                                                <i class="fa-solid fa-magnifying-glass text-[10px] text-slate-400 group-hover:text-magenta-accent"></i>
+                                                <span x-text="kw"></span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <!-- Featured Categories Quick Jump -->
+                                <template x-if="suggestions.categories && suggestions.categories.length > 0">
+                                    <div class="pt-2 border-t border-slate-100">
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2 px-1">
+                                            Khám Phá Danh Mục Nổi Bật
+                                        </span>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <template x-for="cat in suggestions.categories.slice(0, 4)" :key="'cat-feat-' + cat.id">
+                                                <a :href="'/tim-kiem?categorySlug=' + cat.slug"
+                                                   class="flex items-center gap-2 p-2 rounded-xl bg-pastel-rose/40 hover:bg-pastel-rose border border-rose-100/60 transition group">
+                                                    <div class="w-7 h-7 rounded-lg bg-white flex items-center justify-center text-magenta-accent shadow-2xs group-hover:scale-105 transition shrink-0">
+                                                        <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+                                                    </div>
+                                                    <div class="min-w-0">
+                                                        <div class="text-xs font-bold text-charcoal group-hover:text-magenta-accent truncate" x-text="cat.name"></div>
+                                                        <div class="text-[10px] text-slate-400" x-text="cat.productCount + ' sản phẩm'"></div>
+                                                    </div>
+                                                </a>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
                             </div>
-                        </div>
+                        </template>
+
+                        <!-- STATE 2: ACTIVE SEARCH SUGGESTIONS (Khi đã nhập >= 2 ký tự) -->
+                        <template x-if="query && query.trim().length >= 2">
+                            <div>
+                                <!-- Loading indicator -->
+                                <template x-if="isLoading">
+                                    <div class="py-5 text-center text-slate-400 text-xs">
+                                        <i class="fa-solid fa-spinner fa-spin text-magenta-accent text-base mb-1.5"></i>
+                                        <div>Đang tải gợi ý làm đẹp cao cấp...</div>
+                                    </div>
+                                </template>
+
+                                <!-- Search Results Content -->
+                                <template x-if="!isLoading">
+                                    <div>
+                                        <!-- Brands & Categories Badges -->
+                                        <template x-if="(suggestions.brands && suggestions.brands.length > 0) || (suggestions.categories && suggestions.categories.length > 0)">
+                                            <div class="mb-3 space-y-2 border-b border-slate-100 pb-2.5">
+                                                <!-- Brands -->
+                                                <template x-if="suggestions.brands && suggestions.brands.length > 0">
+                                                    <div class="flex items-center gap-1.5 flex-wrap px-1">
+                                                        <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider mr-1">Thương hiệu:</span>
+                                                        <template x-for="b in suggestions.brands" :key="'b-' + b.id">
+                                                            <a :href="'/tim-kiem?brand=' + encodeURIComponent(b.name)"
+                                                               class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 hover:bg-magenta-accent hover:text-white text-slate-700 text-xs font-semibold transition"
+                                                               :class="isItemActive('brand', b.name) ? 'bg-magenta-accent text-white ring-1 ring-magenta-accent' : ''">
+                                                                <i class="fa-solid fa-certificate text-[9px] text-amber-500"></i>
+                                                                <span x-html="highlightMatch(b.name, query)"></span>
+                                                                <span class="text-[10px] opacity-75" x-text="'(' + b.productCount + ')'"></span>
+                                                            </a>
+                                                        </template>
+                                                    </div>
+                                                </template>
+
+                                                <!-- Categories -->
+                                                <template x-if="suggestions.categories && suggestions.categories.length > 0">
+                                                    <div class="flex items-center gap-1.5 flex-wrap px-1">
+                                                        <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider mr-1">Danh mục:</span>
+                                                        <template x-for="c in suggestions.categories" :key="'c-' + c.id">
+                                                            <a :href="'/tim-kiem?categorySlug=' + c.slug"
+                                                               class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 hover:bg-magenta-accent hover:text-white text-magenta-accent text-xs font-semibold transition"
+                                                               :class="isItemActive('category', c.slug) ? 'bg-magenta-accent text-white ring-1 ring-magenta-accent' : ''">
+                                                                <span x-html="highlightMatch(c.name, query)"></span>
+                                                            </a>
+                                                        </template>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+
+                                        <!-- Products List -->
+                                        <template x-if="suggestions.products && suggestions.products.length > 0">
+                                            <div>
+                                                <div class="px-1 mb-2 flex items-center justify-between">
+                                                    <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
+                                                        Sản Phẩm Gợi Ý (<span x-text="suggestions.totalMatches"></span>)
+                                                    </span>
+                                                    <span class="text-[10px] text-slate-400 hidden sm:inline">
+                                                        Dùng phím <kbd class="px-1 py-0.5 bg-slate-100 rounded text-[9px] font-mono">↑</kbd> <kbd class="px-1 py-0.5 bg-slate-100 rounded text-[9px] font-mono">↓</kbd> để chọn
+                                                    </span>
+                                                </div>
+                                                
+                                                <div class="space-y-1.5 max-h-[320px] overflow-y-auto pr-1 divide-y divide-slate-100/70">
+                                                    <template x-for="p in suggestions.products" :key="'p-' + p.id">
+                                                        <a :href="'/san-pham/' + p.slug" 
+                                                           class="flex items-center gap-3 p-2 rounded-xl hover:bg-pastel-rose/80 transition border border-transparent hover:border-pink-100 group"
+                                                           :class="isItemActive('product', p.name) ? 'bg-pastel-rose border-pink-200 ring-1 ring-magenta-accent/30' : ''">
+                                                            
+                                                            <!-- Product Thumbnail -->
+                                                            <div class="relative shrink-0">
+                                                                <img :src="p.imageUrl" 
+                                                                     :alt="p.name" 
+                                                                     class="w-12 h-12 rounded-xl object-cover border border-slate-200/80 group-hover:border-magenta-accent/40 shadow-2xs group-hover:scale-105 transition duration-200" 
+                                                                     loading="lazy" />
+                                                                <template x-if="p.isFeatured">
+                                                                    <span class="absolute -top-1 -left-1 text-[8px] bg-charcoal text-white font-bold px-1 rounded-sm shadow-2xs">HOT</span>
+                                                                </template>
+                                                            </div>
+
+                                                            <!-- Product Info -->
+                                                            <div class="flex-1 min-w-0">
+                                                                <div class="flex items-center gap-1.5 mb-0.5">
+                                                                    <span class="text-[9px] font-bold text-rose-gold uppercase tracking-wider truncate" x-text="p.brandName"></span>
+                                                                    <span class="text-slate-300">•</span>
+                                                                    <span class="text-[9px] text-slate-500 truncate" x-text="p.categoryName"></span>
+                                                                </div>
+
+                                                                <h4 class="text-xs font-bold text-slate-800 truncate group-hover:text-magenta-accent transition leading-tight" 
+                                                                    x-html="highlightMatch(p.name, query)"></h4>
+
+                                                                <div class="flex items-baseline gap-2 mt-1">
+                                                                    <span class="text-xs font-bold text-charcoal font-mono-numeric" 
+                                                                          x-text="formatPrice(p.salePrice || p.price)"></span>
+                                                                    <template x-if="p.salePrice && p.salePrice < p.price">
+                                                                        <span class="text-[10px] text-slate-400 line-through font-mono-numeric" 
+                                                                              x-text="formatPrice(p.price)"></span>
+                                                                    </template>
+                                                                </div>
+                                                            </div>
+                                                        </a>
+                                                    </template>
+                                                </div>
+
+                                                <!-- View All Footer Button -->
+                                                <a :href="'/tim-kiem?q=' + encodeURIComponent(query)"
+                                                   @@click="saveRecentSearch(query)"
+                                                   class="w-full flex items-center justify-center gap-2 mt-2.5 py-2 px-4 rounded-xl bg-pastel-rose text-magenta-accent hover:bg-magenta-accent hover:text-white font-bold text-xs transition duration-200 shadow-2xs"
+                                                   :class="isItemActive('view_all', query) ? 'bg-magenta-accent text-white' : ''">
+                                                    <span>Xem tất cả <span x-text="suggestions.totalMatches"></span> kết quả cho "<span x-text="query"></span>"</span>
+                                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                                </a>
+                                            </div>
+                                        </template>
+
+                                        <!-- Fallback Empty State -->
+                                        <template x-if="(!suggestions.products || suggestions.products.length === 0) && (!suggestions.brands || suggestions.brands.length === 0) && (!suggestions.categories || suggestions.categories.length === 0)">
+                                            <div class="py-6 px-4 text-center">
+                                                <div class="h-10 w-10 rounded-full bg-pastel-rose text-magenta-accent flex items-center justify-center mx-auto mb-2 text-base">
+                                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                                </div>
+                                                <h5 class="text-xs font-bold text-slate-800 mb-1">Không tìm thấy sản phẩm phù hợp</h5>
+                                                <p class="text-[11px] text-slate-500 max-w-xs mx-auto mb-3">
+                                                    Rất tiếc không có sản phẩm nào khớp với "<span class="font-bold text-charcoal" x-text="query"></span>".
+                                                </p>
+                                                <div>
+                                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Từ khóa gợi ý:</span>
+                                                    <div class="flex flex-wrap gap-1.5 justify-center">
+                                                        <template x-for="kw in suggestions.hotKeywords" :key="'empty-kw-' + kw">
+                                                            <button type="button"
+                                                                    @@click="selectTerm(kw)"
+                                                                    class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-pastel-rose text-slate-700 hover:text-magenta-accent text-xs font-semibold transition">
+                                                                <i class="fa-solid fa-magnifying-glass text-[9px] text-slate-400 mr-1"></i>
+                                                                <span x-text="kw"></span>
+                                                            </button>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
                     </div>
                 </div>
 
                 <!-- Utilities: Wishlist, Account, Mini-Cart Drawer Trigger -->
                 <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+                    <!-- Mobile Search Trigger Button -->
+                    <button type="button" 
+                            @@click="toggleMobileSearch()" 
+                            class="md:hidden p-2.5 text-slate-700 hover:text-magenta-accent transition rounded-full hover:bg-pastel-rose focus:outline-none" 
+                            aria-label="Mở tìm kiếm nhanh"
+                            title="Tìm kiếm">
+                        <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                    </button>
+
                     <!-- Wishlist Link -->
                     <a href="/wishlist" class="relative p-2.5 text-slate-700 hover:text-magenta-accent transition rounded-full hover:bg-pastel-rose" title="Sản phẩm yêu thích">
                         <i class="fa-regular fa-heart text-lg"></i>
@@ -268,38 +516,98 @@
 
                     <!-- Account Menu Dropdown -->
                     <div class="relative group" x-data="{ userMenuOpen: false }">
-                        <a href="/Account/Login" class="p-2.5 text-slate-700 hover:text-magenta-accent transition rounded-full hover:bg-pastel-rose flex items-center gap-1.5" title="Tài khoản">
-                            <i class="fa-regular fa-user text-lg"></i>
-                            <span class="hidden xl:inline text-xs font-semibold">Tài Khoản</span>
-                        </a>
-                        <div class="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 hidden group-hover:block hover:block transition animate-in fade-in z-50">
-                            <div class="px-3 py-2 border-b border-slate-100 mb-1">
-                                <div class="text-xs font-bold text-charcoal">Khách Hàng Thân Thiết</div>
-                                <div class="text-[10px] text-slate-400">Đăng nhập để tích điểm Loyalty</div>
+                        @if (isStaffLogged)
+                        {
+                            <a href="/Admin/Dashboard" class="p-2.5 text-magenta-accent hover:text-charcoal transition rounded-full bg-pastel-rose/80 hover:bg-pastel-rose flex items-center gap-1.5" title="Tài khoản vận hành: @displayUserName">
+                                <i class="fa-solid fa-user-shield text-base"></i>
+                                <span class="hidden xl:inline text-xs font-bold max-w-[120px] truncate">@displayUserName</span>
+                            </a>
+                            <div class="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-rose-100 p-2 hidden group-hover:block hover:block transition animate-in fade-in z-50">
+                                <div class="px-3 py-2 border-b border-slate-100 mb-1">
+                                    <div class="text-xs font-bold text-charcoal truncate">@displayUserName</div>
+                                    <div class="text-[10px] font-semibold text-magenta-accent">Nhân sự & Quản trị viên</div>
+                                </div>
+                                <a href="/Admin/Dashboard" class="block px-3 py-2 text-xs font-bold text-magenta-accent hover:bg-pastel-rose rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-gauge-high w-4 text-magenta-accent"></i> Bảng Điều Khiển Quản Trị
+                                </a>
+                                <a href="/Admin/Pos" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-cash-register w-4 text-emerald-600"></i> Quầy Thu Ngân POS
+                                </a>
+                                <a href="/Admin/Warehouse" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-boxes-stacked w-4 text-amber-500"></i> Quản Trị Kho & FEFO
+                                </a>
+                                <a href="/Admin/Banner" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-regular fa-images w-4 text-blue-500"></i> Quản Lý Banner & CMS
+                                </a>
+                                <div class="border-t border-slate-100 my-1"></div>
+                                <a href="/Account/Logout" class="block px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-right-from-bracket w-4"></i> Đăng Xuất
+                                </a>
                             </div>
-                            <a href="/Account/Login" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition">
-                                <i class="fa-solid fa-arrow-right-to-bracket mr-2 text-slate-400"></i> Đăng Nhập
+                        }
+                        else if (isCustomerLogged)
+                        {
+                            <a href="/Customer/Dashboard" class="p-2.5 text-slate-700 hover:text-magenta-accent transition rounded-full hover:bg-pastel-rose flex items-center gap-1.5" title="Tài khoản: @displayUserName">
+                                <i class="fa-solid fa-circle-user text-lg text-magenta-accent"></i>
+                                <span class="hidden xl:inline text-xs font-bold max-w-[120px] truncate">@displayUserName</span>
                             </a>
-                            <a href="/Account/Register" class="block px-3 py-2 text-xs font-bold text-magenta-accent hover:bg-pastel-rose rounded-xl transition">
-                                <i class="fa-solid fa-gift mr-2 text-warning"></i> Đăng Ký (+50 Điểm)
+                            <div class="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 hidden group-hover:block hover:block transition animate-in fade-in z-50">
+                                <div class="px-3 py-2 border-b border-slate-100 mb-1">
+                                    <div class="text-xs font-bold text-charcoal truncate">@displayUserName</div>
+                                    <div class="text-[10px] text-slate-400">Thành viên thân thiết Canmake</div>
+                                </div>
+                                <a href="/Customer/Dashboard" class="block px-3 py-2 text-xs font-bold text-amber-800 hover:bg-amber-50/70 rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-crown w-4 text-amber-500"></i> Thẻ VIP & Điểm Thưởng
+                                </a>
+                                <a href="/Customer/Orders" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-bag-shopping w-4 text-blue-500"></i> Đơn Hàng Của Tôi
+                                </a>
+                                <a href="/Customer/Addresses" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-location-dot w-4 text-rose-gold"></i> Sổ Địa Chỉ Nhận Hàng
+                                </a>
+                                <a href="/orders/tracking" class="block px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-truck-fast w-4 text-slate-400"></i> Tra cứu đơn hàng
+                                </a>
+                                <a href="/Account/ChangePassword" class="block px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-key w-4 text-slate-400"></i> Đổi Mật Khẩu
+                                </a>
+                                <div class="border-t border-slate-100 my-1"></div>
+                                <a href="/Account/Logout" class="block px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-right-from-bracket w-4"></i> Đăng Xuất
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <a href="/Account/Login" class="p-2.5 text-slate-700 hover:text-magenta-accent transition rounded-full hover:bg-pastel-rose flex items-center gap-1.5" title="Tài khoản">
+                                <i class="fa-regular fa-user text-lg"></i>
+                                <span class="hidden xl:inline text-xs font-semibold">Tài Khoản</span>
                             </a>
-                            <a href="/Customer/Dashboard" class="block px-3 py-2 text-xs font-bold text-amber-800 hover:bg-amber-50/70 rounded-xl transition flex items-center gap-2">
-                                <i class="fa-solid fa-crown text-amber-500"></i> Thẻ VIP & Điểm Thưởng
-                            </a>
-                            <a href="/Customer/Orders" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
-                                <i class="fa-solid fa-bag-shopping text-blue-500"></i> Đơn Hàng Của Tôi
-                            </a>
-                            <a href="/Customer/Addresses" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
-                                <i class="fa-solid fa-location-dot text-rose-gold"></i> Sổ Địa Chỉ Nhận Hàng
-                            </a>
-                            <a href="/orders/tracking" class="block px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition">
-                                <i class="fa-solid fa-truck-fast mr-2 text-slate-400"></i> Tra cứu đơn hàng
-                            </a>
-                            <div class="border-t border-slate-100 my-1"></div>
-                            <a href="/Admin/Dashboard" class="block px-3 py-2 text-xs font-bold text-magenta-accent hover:bg-pastel-rose rounded-xl transition flex items-center gap-2">
-                                <i class="fa-solid fa-shield-halved text-magenta-accent"></i> Quản Trị Hệ Thống
-                            </a>
-                        </div>
+                            <div class="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 hidden group-hover:block hover:block transition animate-in fade-in z-50">
+                                <div class="px-3 py-2 border-b border-slate-100 mb-1">
+                                    <div class="text-xs font-bold text-charcoal">Khách Hàng Thân Thiết</div>
+                                    <div class="text-[10px] text-slate-400">Đăng nhập để tích điểm Loyalty</div>
+                                </div>
+                                <a href="/Account/Login" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition">
+                                    <i class="fa-solid fa-arrow-right-to-bracket mr-2 text-slate-400"></i> Đăng Nhập
+                                </a>
+                                <a href="/Account/Register" class="block px-3 py-2 text-xs font-bold text-magenta-accent hover:bg-pastel-rose rounded-xl transition">
+                                    <i class="fa-solid fa-gift mr-2 text-warning"></i> Đăng Ký (+50 Điểm)
+                                </a>
+                                <a href="/Customer/Dashboard" class="block px-3 py-2 text-xs font-bold text-amber-800 hover:bg-amber-50/70 rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-crown text-amber-500"></i> Thẻ VIP & Điểm Thưởng
+                                </a>
+                                <a href="/Customer/Orders" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-bag-shopping text-blue-500"></i> Đơn Hàng Của Tôi
+                                </a>
+                                <a href="/Customer/Addresses" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
+                                    <i class="fa-solid fa-location-dot text-rose-gold"></i> Sổ Địa Chỉ Nhận Hàng
+                                </a>
+                                <a href="/orders/tracking" class="block px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition">
+                                    <i class="fa-solid fa-truck-fast mr-2 text-slate-400"></i> Tra cứu đơn hàng
+                                </a>
+                            </div>
+                        }
                     </div>
 
                     <!-- Mini Cart Trigger Button -->
@@ -315,205 +623,187 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Mega Navigation Bar (Desktop) -->
-    <nav aria-label="Thanh điều hướng chính" class="nav-mega-wrapper hidden lg:block bg-pastel-rose/70 border-b border-soft-border/80 sticky top-20 z-30 backdrop-blur-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-            <div class="flex items-center">
-                <!-- All Departments Button with 4-Column Mega Menu -->
-                <div class="relative group mr-4">
-                    <a href="/tim-kiem" class="bg-magenta-accent text-white px-6 py-3.5 text-xs font-bold uppercase tracking-wider flex items-center gap-3 rounded-t-2xl hover:bg-[#b0276a] transition-colors shadow-sm">
-                        <i class="fa-solid fa-bars text-sm"></i>
-                        <span>Danh Mục Mỹ Phẩm</span>
-                        <i class="fa-solid fa-angle-down text-[10px] text-white/70 group-hover:rotate-180 transition-transform duration-300"></i>
-                    </a>
+        <!-- Mobile Instant Search Drawer (Shown on small screens) -->
+        <div x-show="mobileSearchOpen"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-2"
+             style="display: none;"
+             class="md:hidden border-t border-rose-100/90 bg-white/98 backdrop-blur-xl px-4 py-3 shadow-xl">
+            
+            <!form action="/tim-kiem" method="GET" x-on:submit="handleSubmit($event)" class="relative mb-2">
+                <i class="fa-solid absolute left-3.5 top-1/2 -translate-y-1/2 text-xs transition-colors"
+                   :class="isLoading ? 'fa-spinner fa-spin text-magenta-accent' : 'fa-magnifying-glass text-slate-400'"></i>
+                
+                <input type="text" 
+                       name="q" 
+                       x-ref="mobileSearchInput"
+                       x-model="query"
+                       @@focus="onFocus()"
+                       @@input="onInput()"
+                       @@keydown.arrow-down.prevent="selectNext()"
+                       @@keydown.arrow-up.prevent="selectPrev()"
+                       @@keydown.enter="handleEnter($event)"
+                       placeholder="Tìm son lì, kem chống nắng, serum..." 
+                       class="w-full pl-9 pr-16 py-2 rounded-full border border-slate-200 focus:border-magenta-accent text-xs focus:outline-none bg-slate-50 focus:bg-white transition" 
+                       autocomplete="off" />
 
-                    <!-- Mega Menu Dropdown 4 Cột với Backdrop Blur -->
-                    <div class="mega-menu-content absolute top-full left-0 w-[960px] bg-white/95 backdrop-blur-xl shadow-2xl rounded-3xl border border-rose-100/90 p-7 z-50 invisible opacity-0 translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto">
-                        <div class="grid grid-cols-4 gap-6">
-                            <!-- Cột 1: Danh mục nhóm da & makeup -->
+                <!-- Mobile Clear Button -->
+                <button type="button" 
+                        x-show="query && query.length > 0"
+                        @@click="clearQuery()"
+                        class="absolute right-12 top-1/2 -translate-y-1/2 h-5 w-5 flex items-center justify-center text-slate-400 hover:text-charcoal rounded-full text-xs"
+                        style="display: none;"
+                        aria-label="Xóa từ khóa">
+                    <i class="fa-solid fa-xmark text-[11px]"></i>
+                </button>
+
+                <!-- Mobile Close Drawer Button -->
+                <button type="button" 
+                        @@click="toggleMobileSearch()"
+                        class="absolute right-2.5 top-1/2 -translate-y-1/2 px-2 py-1 text-[11px] font-bold text-slate-500 hover:text-magenta-accent transition">
+                    Đóng
+                </button>
+            </!form>
+
+            <!-- Mobile Suggestions Content -->
+            <div x-show="isOpen" class="max-h-[380px] overflow-y-auto space-y-3 pt-1">
+                <!-- Mobile State 1: Recents & Trending when query < 2 chars -->
+                <template x-if="!query || query.trim().length < 2">
+                    <div class="space-y-3">
+                        <!-- Recent Searches -->
+                        <template x-if="recentSearches.length > 0">
                             <div>
-                                <h4 class="font-serif font-bold text-charcoal text-sm mb-3.5 pb-2 border-b border-rose-100 flex items-center gap-2">
-                                    <i class="fa-solid fa-layer-group text-rose-gold text-xs"></i>
-                                    <span>Nhóm Da & Makeup</span>
-                                </h4>
-                                <div class="space-y-4">
-                                    <div>
-                                        <div class="text-[10px] font-bold text-rose-gold uppercase tracking-wider mb-1.5">Chăm Sóc & Phục Hồi</div>
-                                        <ul class="space-y-2 text-xs text-slate-600 font-sans">
-                                            <li><a href="/tim-kiem?categorySlug=sua-rua-mat" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Sữa Rửa Mặt Dịu Nhẹ</a></li>
-                                            <li><a href="/tim-kiem?categorySlug=serum-tinh-chat" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Serum B5 & HA Phục Hồi</a></li>
-                                            <li><a href="/tim-kiem?categorySlug=kem-chong-nang" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Kem Chống Nắng Phổ Rộng</a></li>
-                                        </ul>
-                                    </div>
-                                    <div>
-                                        <div class="text-[10px] font-bold text-rose-gold uppercase tracking-wider mb-1.5">Trang Điểm Cao Cấp</div>
-                                        <ul class="space-y-2 text-xs text-slate-600 font-sans">
-                                            <li><a href="/tim-kiem?categorySlug=son-moi" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Son Lì & Son Bóng Căng Mọng</a></li>
-                                            <li><a href="/tim-kiem?categorySlug=kem-nen-cushion" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Cushion Mỏng Nhẹ Tự Nhiên</a></li>
-                                            <li><a href="/tim-kiem?categorySlug=phan-mat" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Phấn Mắt & Má Hồng Lâu Trôi</a></li>
-                                        </ul>
-                                    </div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                                        <i class="fa-regular fa-clock text-magenta-accent"></i>
+                                        <span>Tìm kiếm gần đây</span>
+                                    </span>
+                                    <button type="button" @@click="clearRecentSearches()" class="text-[9px] font-semibold text-magenta-accent hover:underline">
+                                        Xóa tất cả
+                                    </button>
+                                </div>
+                                <div class="flex flex-wrap gap-1">
+                                    <template x-for="(term, rIdx) in recentSearches" :key="'m-recent-' + rIdx">
+                                        <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-medium cursor-pointer"
+                                             @@click="selectTerm(term)">
+                                            <span x-text="term"></span>
+                                            <button type="button" @@click.stop="removeRecentSearch(term)" class="text-slate-400 hover:text-rose-600 p-0.5">
+                                                <i class="fa-solid fa-xmark text-[9px]"></i>
+                                            </button>
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
+                        </template>
 
-                            <!-- Cột 2: Thương hiệu đình đám -->
-                            <div>
-                                <h4 class="font-serif font-bold text-charcoal text-sm mb-3.5 pb-2 border-b border-rose-100 flex items-center gap-2">
-                                    <i class="fa-solid fa-crown text-amber-500 text-xs"></i>
-                                    <span>Thương Hiệu Đình Đám</span>
-                                </h4>
-                                <ul class="space-y-2 text-xs font-medium text-slate-700">
-                                    <li>
-                                        <a href="/tim-kiem?brand=Dior" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
-                                            <span class="font-bold">Dior</span>
-                                            <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Haute Parfumerie</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="/tim-kiem?brand=Lancome" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
-                                            <span class="font-bold">Lancôme</span>
-                                            <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Tinh hoa Pháp</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="/tim-kiem?brand=MAC" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
-                                            <span class="font-bold">MAC Cosmetics</span>
-                                            <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Makeup Artist</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="/tim-kiem?brand=Estee Lauder" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
-                                            <span class="font-bold">Estée Lauder</span>
-                                            <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Chống lão hóa</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="/tim-kiem?brand=YSL" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
-                                            <span class="font-bold">YSL Beauty</span>
-                                            <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Quyến rũ</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="/tim-kiem?brand=Chanel" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
-                                            <span class="font-bold">Chanel</span>
-                                            <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Kinh điển</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="/tim-kiem?brand=Kiehls" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
-                                            <span class="font-bold">Kiehl's</span>
-                                            <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Từ năm 1851</span>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="/tim-kiem?brand=La Roche-Posay" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
-                                            <span class="font-bold">La Roche-Posay</span>
-                                            <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Dược mỹ phẩm</span>
-                                        </a>
-                                    </li>
-                                </ul>
+                        <!-- Trending Keywords -->
+                        <div>
+                            <div class="mb-1.5">
+                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+                                    <i class="fa-solid fa-fire text-amber-500"></i>
+                                    <span>Từ khóa thịnh hành</span>
+                                </span>
                             </div>
-
-                            <!-- Cột 3: Sản phẩm bán chạy có ảnh nhỏ (Best Sellers) -->
-                            <div>
-                                <h4 class="font-serif font-bold text-charcoal text-sm mb-3.5 pb-2 border-b border-rose-100 flex items-center gap-2">
-                                    <i class="fa-solid fa-fire text-rose-500 text-xs"></i>
-                                    <span>Sản Phẩm Bán Chạy</span>
-                                </h4>
-                                <div class="space-y-3">
-                                    <!-- Best Seller 1 -->
-                                    <a href="/tim-kiem?q=Serum" class="flex items-center gap-3 p-2 rounded-xl bg-slate-50/70 hover:bg-pastel-rose hover:border-pink-200 border border-transparent transition group">
-                                        <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=100&h=100&fit=crop" 
-                                             alt="Serum La Roche-Posay" 
-                                             class="w-12 h-12 rounded-lg object-cover border border-slate-200 group-hover:scale-105 transition shrink-0" />
-                                        <div class="flex-1 min-w-0">
-                                            <div class="text-[9px] font-bold text-rose-gold uppercase truncate">La Roche-Posay</div>
-                                            <div class="text-xs font-bold text-slate-800 truncate group-hover:text-magenta-accent">Serum Hyalu B5 30ml</div>
-                                            <div class="flex items-center justify-between mt-0.5">
-                                                <span class="text-xs font-bold text-charcoal font-mono-numeric">980.000₫</span>
-                                                <span class="text-[9px] text-amber-500">★★★★★ 5.0</span>
-                                            </div>
-                                        </div>
-                                    </a>
-
-                                    <!-- Best Seller 2 -->
-                                    <a href="/tim-kiem?q=Dior" class="flex items-center gap-3 p-2 rounded-xl bg-slate-50/70 hover:bg-pastel-rose hover:border-pink-200 border border-transparent transition group">
-                                        <img src="https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=100&h=100&fit=crop" 
-                                             alt="Son Dior Rouge Forever" 
-                                             class="w-12 h-12 rounded-lg object-cover border border-slate-200 group-hover:scale-105 transition shrink-0" />
-                                        <div class="flex-1 min-w-0">
-                                            <div class="text-[9px] font-bold text-rose-gold uppercase truncate">Christian Dior</div>
-                                            <div class="text-xs font-bold text-slate-800 truncate group-hover:text-magenta-accent">Rouge Dior 999 Velvet</div>
-                                            <div class="flex items-center justify-between mt-0.5">
-                                                <span class="text-xs font-bold text-charcoal font-mono-numeric">1.150.000₫</span>
-                                                <span class="text-[9px] text-amber-500">★★★★★ 5.0</span>
-                                            </div>
-                                        </div>
-                                    </a>
-
-                                    <!-- Best Seller 3 -->
-                                    <a href="/tim-kiem?q=Anessa" class="flex items-center gap-3 p-2 rounded-xl bg-slate-50/70 hover:bg-pastel-rose hover:border-pink-200 border border-transparent transition group">
-                                        <img src="https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=100&h=100&fit=crop" 
-                                             alt="Kem Chống Nắng Anessa" 
-                                             class="w-12 h-12 rounded-lg object-cover border border-slate-200 group-hover:scale-105 transition shrink-0" />
-                                        <div class="flex-1 min-w-0">
-                                            <div class="text-[9px] font-bold text-rose-gold uppercase truncate">Anessa Shiseido</div>
-                                            <div class="text-xs font-bold text-slate-800 truncate group-hover:text-magenta-accent">Perfect UV Sunscreen 60ml</div>
-                                            <div class="flex items-center justify-between mt-0.5">
-                                                <span class="text-xs font-bold text-charcoal font-mono-numeric">550.000₫</span>
-                                                <span class="text-[9px] text-amber-500">★★★★★ 4.9</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-
-                            <!-- Cột 4: Banner khuyến mãi mini có ảnh đại diện thương hiệu -->
-                            <div class="rounded-2xl overflow-hidden relative bg-gradient-to-br from-rose-50 via-white to-pink-50/80 p-5 border border-rose-200/60 flex flex-col justify-between shadow-xs">
-                                <div>
-                                    <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-magenta-accent/10 text-magenta-accent text-[9px] font-bold tracking-widest uppercase mb-2">
-                                        ✦ VIP PRIVILEGE 2026 ✦
-                                    </div>
-                                    <h5 class="font-serif font-bold text-charcoal text-base leading-snug">
-                                        Đặc Quyền Hội Viên & Quà Tặng Dior
-                                    </h5>
-                                    <div class="my-3 rounded-xl overflow-hidden border border-rose-200/50 shadow-2xs">
-                                        <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&h=220&fit=crop" 
-                                             alt="Banner Khuyến Mãi Mỹ Phẩm Cao Cấp" 
-                                             class="w-full h-24 object-cover hover:scale-105 transition duration-300" />
-                                    </div>
-                                    <p class="text-[11px] text-slate-600 font-sans leading-relaxed">
-                                        Tặng bộ Travel Kit Full-size Dior & Lancôme cho đơn hàng từ 1.500.000₫. Date cam kết > 18 tháng chuẩn FEFO.
-                                    </p>
-                                </div>
-                                <a href="/tim-kiem?brand=Dior" class="inline-flex items-center justify-center gap-2 mt-4 px-4 py-2 rounded-xl bg-magenta-accent text-white text-xs font-bold hover:bg-[#b0276a] transition shadow-xs">
-                                    <span>Khám Phá Ngay</span>
-                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                                </a>
+                            <div class="flex flex-wrap gap-1">
+                                <template x-for="(kw, kIdx) in suggestions.hotKeywords" :key="'m-hot-' + kIdx">
+                                    <button type="button" @@click="selectTerm(kw)"
+                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 text-magenta-accent text-[11px] font-semibold">
+                                        <i class="fa-solid fa-magnifying-glass text-[9px] text-magenta-accent/60"></i>
+                                        <span x-text="kw"></span>
+                                    </button>
+                                </template>
                             </div>
                         </div>
                     </div>
-                </div>
+                </template>
 
-                <!-- Navigation Links with Mega Menu from Database / Fallback -->
-                @await Component.InvokeAsync("DynamicMenu", new { menuCode = "HEADER_MAIN" })
-            </div>
+                <!-- Mobile State 2: Active Results when query >= 2 chars -->
+                <template x-if="query && query.trim().length >= 2">
+                    <div>
+                        <!-- Loading spinner -->
+                        <template x-if="isLoading">
+                            <div class="py-4 text-center text-slate-400 text-xs">
+                                <i class="fa-solid fa-spinner fa-spin text-magenta-accent text-base mb-1"></i>
+                                <div>Đang tìm kiếm...</div>
+                            </div>
+                        </template>
 
-            <!-- Trust rating & AI Beauty Advisor Button -->
-            <div class="flex items-center gap-3">
-                <a href="/Product/SmartFilter" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 text-white text-xs font-bold shadow-xs hover:shadow-pink-500/25 hover:scale-105 active:scale-95 transition-all">
-                    <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
-                    <span>AI Beauty Advisor</span>
-                </a>
-                <div class="hidden xl:flex text-xs font-bold text-slate-500 items-center gap-1.5">
-                    <span class="text-amber-500 text-sm">★★★★★</span>
-                    <span>4.9/5</span>
-                </div>
+                        <!-- Results -->
+                        <template x-if="!isLoading">
+                            <div class="space-y-2">
+                                <!-- Brands & Categories Chips -->
+                                <template x-if="(suggestions.brands && suggestions.brands.length > 0) || (suggestions.categories && suggestions.categories.length > 0)">
+                                    <div class="flex items-center gap-1 flex-wrap pb-1.5 border-b border-slate-100">
+                                        <template x-for="b in suggestions.brands" :key="'m-b-' + b.id">
+                                            <a :href="'/tim-kiem?brand=' + encodeURIComponent(b.name)"
+                                               class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold">
+                                                <span x-html="highlightMatch(b.name, query)"></span>
+                                            </a>
+                                        </template>
+                                        <template x-for="c in suggestions.categories" :key="'m-c-' + c.id">
+                                            <a :href="'/tim-kiem?categorySlug=' + c.slug"
+                                               class="px-2 py-0.5 rounded-full bg-rose-50 text-magenta-accent text-[10px] font-bold">
+                                                <span x-html="highlightMatch(c.name, query)"></span>
+                                            </a>
+                                        </template>
+                                    </div>
+                                </template>
+
+                                <!-- Products -->
+                                <template x-if="suggestions.products && suggestions.products.length > 0">
+                                    <div class="space-y-1.5 divide-y divide-slate-100/70">
+                                        <template x-for="p in suggestions.products" :key="'m-p-' + p.id">
+                                            <a :href="'/san-pham/' + p.slug" class="flex items-center gap-2.5 pt-1.5 group">
+                                                <img :src="p.imageUrl" :alt="p.name" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shrink-0" loading="lazy" />
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="text-[9px] font-bold text-rose-gold uppercase truncate" x-text="p.brandName"></div>
+                                                    <h4 class="text-xs font-bold text-slate-800 truncate" x-html="highlightMatch(p.name, query)"></h4>
+                                                    <div class="text-xs font-bold text-charcoal font-mono-numeric" x-text="formatPrice(p.salePrice || p.price)"></div>
+                                                </div>
+                                            </a>
+                                        </template>
+
+                                        <!-- View all on mobile -->
+                                        <div class="pt-2">
+                                            <a :href="'/tim-kiem?q=' + encodeURIComponent(query)"
+                                               @@click="saveRecentSearch(query)"
+                                               class="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-xl bg-pastel-rose text-magenta-accent font-bold text-xs">
+                                                <span>Xem tất cả kết quả</span>
+                                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Mobile Empty State -->
+                                <template x-if="(!suggestions.products || suggestions.products.length === 0) && (!suggestions.brands || suggestions.brands.length === 0)">
+                                    <div class="py-4 text-center">
+                                        <p class="text-xs text-slate-500 mb-2">Không tìm thấy sản phẩm cho "<span class="font-bold" x-text="query"></span>"</p>
+                                        <div class="flex flex-wrap gap-1 justify-center">
+                                            <template x-for="kw in suggestions.hotKeywords.slice(0, 4)" :key="'m-empty-kw-' + kw">
+                                                <button type="button" @@click="selectTerm(kw)" class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-semibold">
+                                                    <span x-text="kw"></span>
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
+                </template>
             </div>
         </div>
-    </nav>
+    </div>
+
+    <!-- Mega Navigation Bar (Desktop) - Extracted & Lazy Loaded Component -->
+    <partial name="_MegaNav" />
+
 </header>
 
 <script>
@@ -598,6 +888,273 @@
                 }
                 if (item.url) {
                     window.location.href = item.url;
+                }
+            }
+        };
+    }
+
+    function instantSearch() {
+        return {
+            query: '',
+            isOpen: false,
+            isLoading: false,
+            mobileSearchOpen: false,
+            suggestions: {
+                query: '',
+                normalizedQuery: '',
+                products: [],
+                brands: [],
+                categories: [],
+                hotKeywords: [],
+                totalMatches: 0
+            },
+            recentSearches: [],
+            selectedIndex: -1,
+            flatItems: [],
+            debounceTimer: null,
+
+            init() {
+                this.loadRecentSearches();
+                this.fetchDefaultSuggestions();
+            },
+
+            loadRecentSearches() {
+                try {
+                    const stored = localStorage.getItem('omni_recent_searches');
+                    if (stored) {
+                        const parsed = JSON.parse(stored);
+                        if (Array.isArray(parsed)) {
+                            this.recentSearches = parsed.slice(0, 5);
+                        }
+                    }
+                } catch (e) {
+                    this.recentSearches = [];
+                }
+            },
+
+            saveRecentSearch(term) {
+                if (!term || !term.trim()) return;
+                const clean = term.trim();
+                this.recentSearches = [clean, ...this.recentSearches.filter(t => t.toLowerCase() !== clean.toLowerCase())].slice(0, 5);
+                try {
+                    localStorage.setItem('omni_recent_searches', JSON.stringify(this.recentSearches));
+                } catch (e) { }
+                this.updateFlatItems();
+            },
+
+            removeRecentSearch(term) {
+                this.recentSearches = this.recentSearches.filter(t => t.toLowerCase() !== term.toLowerCase());
+                try {
+                    localStorage.setItem('omni_recent_searches', JSON.stringify(this.recentSearches));
+                } catch (e) { }
+                this.updateFlatItems();
+            },
+
+            clearRecentSearches() {
+                this.recentSearches = [];
+                try {
+                    localStorage.removeItem('omni_recent_searches');
+                } catch (e) { }
+                this.updateFlatItems();
+            },
+
+            onFocus() {
+                this.isOpen = true;
+                this.selectedIndex = -1;
+                if (!this.query || this.query.trim().length < 2) {
+                    if (!this.suggestions.hotKeywords || this.suggestions.hotKeywords.length === 0) {
+                        this.fetchDefaultSuggestions();
+                    } else {
+                        this.updateFlatItems();
+                    }
+                } else {
+                    this.updateFlatItems();
+                }
+            },
+
+            onInput() {
+                if (this.debounceTimer) clearTimeout(this.debounceTimer);
+                this.selectedIndex = -1;
+                const q = this.query ? this.query.trim() : '';
+
+                if (q.length < 2) {
+                    this.isLoading = false;
+                    this.isOpen = true;
+                    this.fetchDefaultSuggestions();
+                    return;
+                }
+
+                this.isOpen = true;
+                this.isLoading = true;
+                this.debounceTimer = setTimeout(() => {
+                    this.fetchSuggestions(q);
+                }, 250);
+            },
+
+            async fetchSuggestions(q) {
+                try {
+                    const res = await fetch('/api/search/suggest?q=' + encodeURIComponent(q));
+                    if (res.ok) {
+                        const data = await res.json();
+                        this.suggestions = data;
+                        this.updateFlatItems();
+                    }
+                } catch (e) {
+                    console.error('Lỗi tìm kiếm gợi ý:', e);
+                } finally {
+                    this.isLoading = false;
+                }
+            },
+
+            async fetchDefaultSuggestions() {
+                try {
+                    const res = await fetch('/api/search/suggest?q=');
+                    if (res.ok) {
+                        const data = await res.json();
+                        this.suggestions = data;
+                        this.updateFlatItems();
+                    }
+                } catch (e) { }
+            },
+
+            selectTerm(term) {
+                this.query = term;
+                this.saveRecentSearch(term);
+                window.location.href = '/tim-kiem?q=' + encodeURIComponent(term);
+            },
+
+            clearQuery() {
+                this.query = '';
+                this.selectedIndex = -1;
+                this.fetchDefaultSuggestions();
+                this.isOpen = true;
+                if (this.$refs.searchInput) this.$refs.searchInput.focus();
+            },
+
+            close() {
+                this.isOpen = false;
+                this.selectedIndex = -1;
+            },
+
+            toggleMobileSearch() {
+                this.mobileSearchOpen = !this.mobileSearchOpen;
+                if (this.mobileSearchOpen) {
+                    this.isOpen = true;
+                    this.$nextTick(() => {
+                        if (this.$refs.mobileSearchInput) this.$refs.mobileSearchInput.focus();
+                    });
+                } else {
+                    this.isOpen = false;
+                }
+            },
+
+            updateFlatItems() {
+                const items = [];
+                const q = this.query ? this.query.trim() : '';
+
+                if (q.length >= 2) {
+                    if (this.suggestions.brands && Array.isArray(this.suggestions.brands)) {
+                        this.suggestions.brands.forEach(b => {
+                            items.push({ type: 'brand', url: '/tim-kiem?brand=' + encodeURIComponent(b.name), title: b.name, id: b.name });
+                        });
+                    }
+                    if (this.suggestions.categories && Array.isArray(this.suggestions.categories)) {
+                        this.suggestions.categories.forEach(c => {
+                            items.push({ type: 'category', url: '/tim-kiem?categorySlug=' + encodeURIComponent(c.slug), title: c.name, id: c.slug });
+                        });
+                    }
+                    if (this.suggestions.products && Array.isArray(this.suggestions.products)) {
+                        this.suggestions.products.forEach(p => {
+                            items.push({ type: 'product', url: '/san-pham/' + p.slug, title: p.name, id: p.name });
+                        });
+                    }
+                    if (items.length > 0) {
+                        items.push({ type: 'view_all', url: '/tim-kiem?q=' + encodeURIComponent(q), title: 'Xem tất cả kết quả', id: q });
+                    }
+                } else {
+                    if (this.recentSearches && Array.isArray(this.recentSearches)) {
+                        this.recentSearches.forEach(term => {
+                            items.push({ type: 'recent', url: '/tim-kiem?q=' + encodeURIComponent(term), title: term, id: term });
+                        });
+                    }
+                    if (this.suggestions.hotKeywords && Array.isArray(this.suggestions.hotKeywords)) {
+                        this.suggestions.hotKeywords.forEach(kw => {
+                            items.push({ type: 'keyword', url: '/tim-kiem?q=' + encodeURIComponent(kw), title: kw, id: kw });
+                        });
+                    }
+                }
+                this.flatItems = items;
+            },
+
+            isItemActive(type, id) {
+                if (this.selectedIndex < 0 || this.selectedIndex >= this.flatItems.length) return false;
+                const current = this.flatItems[this.selectedIndex];
+                return current.type === type && current.id === id;
+            },
+
+            selectNext() {
+                if (!this.isOpen) {
+                    this.isOpen = true;
+                    return;
+                }
+                if (this.flatItems.length === 0) return;
+                this.selectedIndex = (this.selectedIndex + 1) % this.flatItems.length;
+            },
+
+            selectPrev() {
+                if (!this.isOpen) {
+                    this.isOpen = true;
+                    return;
+                }
+                if (this.flatItems.length === 0) return;
+                this.selectedIndex = (this.selectedIndex - 1 + this.flatItems.length) % this.flatItems.length;
+            },
+
+            handleEnter(event) {
+                if (this.selectedIndex >= 0 && this.selectedIndex < this.flatItems.length) {
+                    event.preventDefault();
+                    const item = this.flatItems[this.selectedIndex];
+                    this.saveRecentSearch(item.title);
+                    window.location.href = item.url;
+                } else if (this.query && this.query.trim().length > 0) {
+                    this.saveRecentSearch(this.query.trim());
+                }
+            },
+
+            handleSubmit(event) {
+                if (this.selectedIndex >= 0 && this.selectedIndex < this.flatItems.length) {
+                    event.preventDefault();
+                    const item = this.flatItems[this.selectedIndex];
+                    this.saveRecentSearch(item.title);
+                    window.location.href = item.url;
+                } else if (this.query && this.query.trim().length > 0) {
+                    this.saveRecentSearch(this.query.trim());
+                }
+            },
+
+            formatPrice(val) {
+                if (!val) return '0 ₫';
+                return new Intl.NumberFormat('vi-VN').format(val) + ' ₫';
+            },
+
+            escapeHtml(str) {
+                if (!str) return '';
+                return String(str).replace(/[&<>"']/g, function(m) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+                });
+            },
+
+            highlightMatch(text, query) {
+                if (!text) return '';
+                const safe = this.escapeHtml(text);
+                if (!query || !query.trim()) return safe;
+
+                try {
+                    const qClean = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(`(${qClean})`, 'gi');
+                    return safe.replace(regex, '<mark class="bg-pink-100 text-magenta-accent font-bold px-0.5 rounded">$1</mark>');
+                } catch (e) {
+                    return safe;
                 }
             }
         };

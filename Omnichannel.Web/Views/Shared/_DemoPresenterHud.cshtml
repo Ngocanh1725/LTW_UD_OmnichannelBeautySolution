@@ -1,0 +1,535 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
+@{
+    bool isDemoMode = string.Equals(Configuration["DemoMode:Enabled"], "true", StringComparison.OrdinalIgnoreCase);
+    if (!isDemoMode)
+    {
+        return; // Tuyệt đối không render bất kỳ mã HTML nào khi DemoMode:Enabled = false
+    }
+}
+
+<style>
+    /* Demo Presenter HUD Styles */
+    #demoPresenterHudDrawer {
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
+        transform: translateY(120%);
+        opacity: 0;
+        pointer-events: none;
+    }
+    #demoPresenterHudDrawer.is-open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .hud-backdrop {
+        background: rgba(15, 23, 42, 0.65);
+        backdrop-filter: blur(8px);
+    }
+    .hud-glass-card {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%);
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(244, 63, 94, 0.25);
+    }
+    .stage-item {
+        transition: all 0.2s ease;
+    }
+    .stage-item.is-completed {
+        opacity: 0.65;
+        border-color: rgba(52, 211, 153, 0.4);
+    }
+    .stage-item:hover {
+        opacity: 1;
+        transform: translateY(-1px);
+    }
+</style>
+
+<!-- =========================================================================
+     FLOATING TRIGGER BUTTON (GÓC TRÁI DƯỚI MÀN HÌNH - PHÍM TẮT ALT + D)
+     ========================================================================= -->
+<div id="demoPresenterTriggerBtn" class="fixed bottom-4 left-4 z-50">
+    <button type="button" 
+            onclick="toggleDemoPresenterHud()"
+            class="group inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-bold text-white bg-slate-900/90 hover:bg-slate-900 dark:bg-slate-800/90 border border-rose-500/40 shadow-xl shadow-rose-500/20 backdrop-blur-md transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            title="Mở Bảng Điều Khiển Thuyết Trình (Phím tắt: Alt + D)">
+        <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+        </span>
+        <span class="font-extrabold tracking-tight bg-gradient-to-r from-rose-400 via-pink-400 to-amber-300 bg-clip-text text-transparent">
+            🎙️ DEMO HUD
+        </span>
+        <span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-800 text-slate-300 border border-slate-700 group-hover:border-rose-400/50">
+            Alt+D
+        </span>
+    </button>
+</div>
+
+<!-- =========================================================================
+     PRESENTER HUD DRAWER / MODAL CONTAINER
+     ========================================================================= -->
+<div id="demoPresenterHudDrawer" class="fixed inset-x-0 bottom-0 z-50 p-2 sm:p-4 max-w-5xl mx-auto">
+    <div class="hud-glass-card border border-rose-500/30 rounded-3xl p-4 sm:p-5 text-white shadow-2xl overflow-hidden">
+        
+        <!-- 1. HEADER & TIMER BAR -->
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-slate-700/80 mb-4 gap-3">
+            <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-500/20 text-rose-300 border border-rose-500/40 tracking-wider uppercase">
+                        Kịch Bản Thuyết Trình 10 Phút
+                    </span>
+                    <h2 class="text-base font-extrabold tracking-tight text-white flex items-center gap-2">
+                        <span>🎙️ Trợ Lý Thuyết Trình Bán Lẻ Đa Kênh (Presenter HUD)</span>
+                    </h2>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">
+                    Hành trình Persona <strong>"Lê Ngọc Linh" (24 tuổi - Khách hàng VIP)</strong>: Từ Routine Quiz AI đến Nhận Hàng Showroom 1h.
+                </p>
+            </div>
+
+            <!-- Đồng hồ đếm ngược 10:00 & Điều khiển -->
+            <div class="flex items-center gap-3 bg-slate-800/80 px-4 py-2 rounded-2xl border border-slate-700/80 flex-shrink-0">
+                <div class="flex flex-col items-center">
+                    <span class="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Thời gian bảo vệ</span>
+                    <div id="hudTimerDisplay" class="font-mono text-xl sm:text-2xl font-extrabold text-emerald-400 tracking-wider">
+                        10:00
+                    </div>
+                </div>
+                <div class="flex items-center gap-1.5 ms-2 ps-2 border-s border-slate-700">
+                    <button type="button" id="hudTimerPlayBtn" onclick="toggleHudTimer()" class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 flex items-center justify-center text-xs transition cursor-pointer" title="Bắt đầu / Tạm dừng">
+                        <i class="fa-solid fa-play" id="hudTimerPlayIcon"></i>
+                    </button>
+                    <button type="button" onclick="resetHudTimer()" class="w-8 h-8 rounded-xl bg-slate-700/60 text-slate-300 hover:bg-slate-700 flex items-center justify-center text-xs transition cursor-pointer" title="Đặt lại 10:00">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                    <button type="button" onclick="toggleDemoPresenterHud()" class="w-8 h-8 rounded-xl bg-slate-700/60 text-slate-300 hover:text-white hover:bg-rose-600/50 flex items-center justify-center text-xs transition cursor-pointer ms-2" title="Đóng HUD (Alt + D)">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thanh tiến độ thời gian (10 phút) -->
+        <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden mb-4">
+            <div id="hudTimerProgressBar" class="h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 transition-all duration-1000" style="width: 100%;"></div>
+        </div>
+
+        <!-- 2. BỘ NÚT 1-CLICK CHUYỂN ĐỔI VAI TRÒ (PERSONA SWITCHER) -->
+        <div class="mb-4 bg-slate-800/60 p-3 rounded-2xl border border-slate-700/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-xs font-bold border border-indigo-500/30">
+                    <i class="fa-solid fa-user-gear"></i>
+                </span>
+                <div>
+                    <div class="text-xs font-bold text-white">Chuyển Đổi Nhanh Tài Khoản (1-Click Switch Persona)</div>
+                    <div class="text-[11px] text-slate-400">Tự động nạp Cookie xác thực & phân quyền PBAC tương ứng</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+                <button type="button" onclick="quickSwitchPersona('customer')" class="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-rose-600/90 hover:bg-rose-600 border border-rose-500/50 transition active:scale-95 shadow-sm">
+                    🛍️ Khách Hàng Lê Ngọc Linh
+                </button>
+                <button type="button" onclick="quickSwitchPersona('cashier')" class="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-emerald-600/90 hover:bg-emerald-600 border border-emerald-500/50 transition active:scale-95 shadow-sm">
+                    🏪 Thu Ngân Showroom (POS)
+                </button>
+                <button type="button" onclick="quickSwitchPersona('superadmin')" class="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-indigo-600/90 hover:bg-indigo-600 border border-indigo-500/50 transition active:scale-95 shadow-sm">
+                    👑 Quản Trị Viên (SuperAdmin)
+                </button>
+                <button type="button" onclick="resetDemoData1Click()" class="px-3 py-1.5 rounded-xl text-xs font-bold text-amber-200 bg-amber-950/60 hover:bg-amber-900/80 border border-amber-600/60 transition active:scale-95 shadow-sm" title="Khôi phục toàn bộ CSDL về trạng thái chuẩn trong 2 giây">
+                    <i class="fa-solid fa-rotate text-amber-400 me-1"></i> Reset Demo Data
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. DANH SÁCH 6 CHẶNG DEMO CHI TIẾT (THEO DOC 04) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[300px] overflow-y-auto pr-1">
+            
+            <!-- Chặng 1: Storefront & Routine Quiz Da Liễu AI -->
+            <div id="stageCard1" class="stage-item bg-slate-800/70 border border-slate-700/80 rounded-2xl p-3 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-start justify-between mb-1.5">
+                        <span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-300 font-mono">
+                            ⏱️ 00:00 - 01:30
+                        </span>
+                        <label class="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-300 cursor-pointer">
+                            <input type="checkbox" id="stageCheck1" onchange="toggleStageCompletion(1)" class="w-3.5 h-3.5 rounded accent-emerald-500" />
+                            Đã diễn
+                        </label>
+                    </div>
+                    <div class="text-xs font-bold text-white mb-1">
+                        1. Khám Phá & Routine Quiz AI
+                    </div>
+                    <p class="text-[11px] text-slate-300 leading-tight mb-2.5">
+                        Tìm kiếm tức thì "serum", làm trắc nghiệm phân tích da 4 bước và thêm trọn bộ phác đồ vào giỏ hàng.
+                    </p>
+                </div>
+                <div class="pt-2 border-t border-slate-700/60 flex items-center gap-1.5 flex-wrap">
+                    <a href="/" class="px-2 py-1 rounded-lg text-[10px] font-bold text-slate-200 bg-slate-700 hover:bg-slate-600 transition">
+                        🌐 Trang Chủ
+                    </a>
+                    <a href="/tu-van-da" class="px-2 py-1 rounded-lg text-[10px] font-bold text-white bg-rose-600 hover:bg-rose-500 transition">
+                        🧪 Routine Quiz AI
+                    </a>
+                    <button type="button" onclick="seedCartRoutine(this)" class="px-2 py-1 rounded-lg text-[10px] font-bold text-amber-200 bg-amber-950/60 border border-amber-600/50 hover:bg-amber-900 transition">
+                        ⚡ Nạp Combo Giỏ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chặng 2: PDP Khay So Sánh & Studio Thử Màu Son -->
+            <div id="stageCard2" class="stage-item bg-slate-800/70 border border-slate-700/80 rounded-2xl p-3 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-start justify-between mb-1.5">
+                        <span class="inline-flex items-center gap-1 text-[10px] font-bold text-pink-300 font-mono">
+                            ⏱️ 01:30 - 03:30
+                        </span>
+                        <label class="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-300 cursor-pointer">
+                            <input type="checkbox" id="stageCheck2" onchange="toggleStageCompletion(2)" class="w-3.5 h-3.5 rounded accent-emerald-500" />
+                            Đã diễn
+                        </label>
+                    </div>
+                    <div class="text-xs font-bold text-white mb-1">
+                        2. Khay So Sánh & Thử Màu Son
+                    </div>
+                    <p class="text-[11px] text-slate-300 leading-tight mb-2.5">
+                        So sánh đối chiếu giá/ml & an toàn EWG; mở Studio thử màu son trên 4 tông da Châu Á với hiệu ứng Velvet Matte.
+                    </p>
+                </div>
+                <div class="pt-2 border-t border-slate-700/60 flex items-center gap-1.5 flex-wrap">
+                    <a href="/san-pham/son-thoi-mac-matte-lipstick" class="px-2 py-1 rounded-lg text-[10px] font-bold text-white bg-pink-600 hover:bg-pink-500 transition">
+                        💄 Studio Thử Son
+                    </a>
+                    <a href="/san-pham/kem-duong-phuc-hoi-la-roche-posay-cicaplast-baume-b5-plus" class="px-2 py-1 rounded-lg text-[10px] font-bold text-slate-200 bg-slate-700 hover:bg-slate-600 transition">
+                        🧴 Kem B5 La Roche
+                    </a>
+                </div>
+            </div>
+
+            <!-- Chặng 3: Giỏ Hàng - Cảnh Báo Tương Kỵ & Sample Bar -->
+            <div id="stageCard3" class="stage-item bg-slate-800/70 border border-slate-700/80 rounded-2xl p-3 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-start justify-between mb-1.5">
+                        <span class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-300 font-mono">
+                            ⏱️ 03:30 - 05:00
+                        </span>
+                        <label class="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-300 cursor-pointer">
+                            <input type="checkbox" id="stageCheck3" onchange="toggleStageCompletion(3)" class="w-3.5 h-3.5 rounded accent-emerald-500" />
+                            Đã diễn
+                        </label>
+                    </div>
+                    <div class="text-xs font-bold text-white mb-1">
+                        3. Giỏ Hàng & Tương Kỵ Dược Lý
+                    </div>
+                    <p class="text-[11px] text-slate-300 leading-relaxed mb-2.5">
+                        Kích hoạt Banner AI cảnh báo tương kỵ Retinol + BHA, nấc quà tặng VIP và chọn mẫu thử miễn phí tại Sample Bar.
+                    </p>
+                </div>
+                <div class="pt-2 border-t border-slate-700/60 flex items-center gap-1.5 flex-wrap">
+                    <a href="/cart" class="px-2 py-1 rounded-lg text-[10px] font-bold text-white bg-amber-600 hover:bg-amber-500 transition">
+                        🛍️ Tới Giỏ Hàng
+                    </a>
+                    <button type="button" onclick="seedCartConflict(this)" class="px-2 py-1 rounded-lg text-[10px] font-bold text-rose-200 bg-rose-950/60 border border-rose-600/50 hover:bg-rose-900 transition">
+                        ⚠️ Nạp Giỏ Tương Kỵ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chặng 4: Đặt Hàng O2O "Click & Collect Nhận Sau 1 Giờ" -->
+            <div id="stageCard4" class="stage-item bg-slate-800/70 border border-slate-700/80 rounded-2xl p-3 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-start justify-between mb-1.5">
+                        <span class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-300 font-mono">
+                            ⏱️ 05:00 - 06:30
+                        </span>
+                        <label class="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-300 cursor-pointer">
+                            <input type="checkbox" id="stageCheck4" onchange="toggleStageCompletion(4)" class="w-3.5 h-3.5 rounded accent-emerald-500" />
+                            Đã diễn
+                        </label>
+                    </div>
+                    <div class="text-xs font-bold text-white mb-1">
+                        4. Đặt Hàng O2O Click & Collect
+                    </div>
+                    <p class="text-[11px] text-slate-300 leading-tight mb-2.5">
+                        Chọn tab "Nhận tại cửa hàng" (Freeship 0₫, giữ hàng 48h), đổi điểm Loyalty và nhận Vé điện tử QR + Mã PIN 6 số.
+                    </p>
+                </div>
+                <div class="pt-2 border-t border-slate-700/60 flex items-center gap-1.5 flex-wrap">
+                    <a href="/checkout" class="px-2 py-1 rounded-lg text-[10px] font-bold text-white bg-indigo-600 hover:bg-indigo-500 transition">
+                        💳 Tới Checkout
+                    </a>
+                    <a href="/Customer/Orders" class="px-2 py-1 rounded-lg text-[10px] font-bold text-slate-200 bg-slate-700 hover:bg-slate-600 transition">
+                        📦 Lịch Sử Đơn
+                    </a>
+                </div>
+            </div>
+
+            <!-- Chặng 5: Thu Ngân POS Quét PIN & Bàn Giao Hàng -->
+            <div id="stageCard5" class="stage-item bg-slate-800/70 border border-slate-700/80 rounded-2xl p-3 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-start justify-between mb-1.5">
+                        <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-300 font-mono">
+                            ⏱️ 06:30 - 08:30
+                        </span>
+                        <label class="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-300 cursor-pointer">
+                            <input type="checkbox" id="stageCheck5" onchange="toggleStageCompletion(5)" class="w-3.5 h-3.5 rounded accent-emerald-500" />
+                            Đã diễn
+                        </label>
+                    </div>
+                    <div class="text-xs font-bold text-white mb-1">
+                        5. Thu Ngân POS Bàn Giao Hàng
+                    </div>
+                    <p class="text-[11px] text-slate-300 leading-tight mb-2.5">
+                        Chuyển sang Cashier, mở danh sách đơn Click & Collect tại Showroom, nhập mã PIN 6 số để bàn giao và trừ kho 1 lần duy nhất.
+                    </p>
+                </div>
+                <div class="pt-2 border-t border-slate-700/60 flex items-center gap-1.5 flex-wrap">
+                    <a href="/Admin/Pos" target="_blank" class="px-2 py-1 rounded-lg text-[10px] font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition">
+                        🏪 Mở POS (Tab mới)
+                    </a>
+                    <button type="button" onclick="quickSwitchPersona('cashier')" class="px-2 py-1 rounded-lg text-[10px] font-bold text-slate-200 bg-slate-700 hover:bg-slate-600 transition">
+                        🔑 Đăng nhập Cashier
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chặng 6: Executive Decision Center & Tổng Kết USPs -->
+            <div id="stageCard6" class="stage-item bg-slate-800/70 border border-slate-700/80 rounded-2xl p-3 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-start justify-between mb-1.5">
+                        <span class="inline-flex items-center gap-1 text-[10px] font-bold text-sky-300 font-mono">
+                            ⏱️ 08:30 - 10:00
+                        </span>
+                        <label class="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-300 cursor-pointer">
+                            <input type="checkbox" id="stageCheck6" onchange="toggleStageCompletion(6)" class="w-3.5 h-3.5 rounded accent-emerald-500" />
+                            Đã diễn
+                        </label>
+                    </div>
+                    <div class="text-xs font-bold text-white mb-1">
+                        6. Dashboard & Tổng Kết USPs
+                    </div>
+                    <p class="text-[11px] text-slate-300 leading-tight mb-2.5">
+                        Xem doanh thu đơn vừa xong cập nhật realtime, phân tích phễu chuyển đổi, phân khúc RFM và tạo 1-click Voucher Win-back.
+                    </p>
+                </div>
+                <div class="pt-2 border-t border-slate-700/60 flex items-center gap-1.5 flex-wrap">
+                    <a href="/Admin/Dashboard" class="px-2 py-1 rounded-lg text-[10px] font-bold text-white bg-sky-600 hover:bg-sky-500 transition">
+                        📊 Decision Center
+                    </a>
+                    <button type="button" onclick="quickSwitchPersona('superadmin')" class="px-2 py-1 rounded-lg text-[10px] font-bold text-slate-200 bg-slate-700 hover:bg-slate-600 transition">
+                        👑 Đăng nhập Admin
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Presenter HUD Global State & Timer Controller
+    let hudTimerInterval = null;
+    let hudRemainingSeconds = 600; // 10 minutes = 600 seconds
+    let isHudTimerRunning = false;
+
+    function toggleDemoPresenterHud() {
+        const drawer = document.getElementById('demoPresenterHudDrawer');
+        if (drawer) {
+            drawer.classList.toggle('is-open');
+        }
+    }
+
+    // Keyboard Shortcut Alt + D (or Option + D on Mac)
+    document.addEventListener('keydown', function (e) {
+        if (e.altKey && (e.key === 'd' || e.key === 'D' || e.keyCode === 68)) {
+            e.preventDefault();
+            toggleDemoPresenterHud();
+        }
+    });
+
+    function updateHudTimerDisplay() {
+        const minutes = Math.floor(hudRemainingSeconds / 60);
+        const seconds = hudRemainingSeconds % 60;
+        const displayStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        
+        const displayEl = document.getElementById('hudTimerDisplay');
+        const progressEl = document.getElementById('hudTimerProgressBar');
+        
+        if (displayEl) {
+            displayEl.textContent = displayStr;
+            if (hudRemainingSeconds <= 120) {
+                displayEl.className = "font-mono text-xl sm:text-2xl font-extrabold text-rose-400 animate-pulse tracking-wider";
+                if (progressEl) progressEl.className = "h-full bg-gradient-to-r from-rose-500 to-red-600 transition-all duration-1000";
+            } else if (hudRemainingSeconds <= 300) {
+                displayEl.className = "font-mono text-xl sm:text-2xl font-extrabold text-amber-400 tracking-wider";
+                if (progressEl) progressEl.className = "h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all duration-1000";
+            } else {
+                displayEl.className = "font-mono text-xl sm:text-2xl font-extrabold text-emerald-400 tracking-wider";
+                if (progressEl) progressEl.className = "h-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 transition-all duration-1000";
+            }
+        }
+
+        if (progressEl) {
+            const pct = Math.max(0, (hudRemainingSeconds / 600) * 100);
+            progressEl.style.width = pct + '%';
+        }
+    }
+
+    function toggleHudTimer() {
+        const playIcon = document.getElementById('hudTimerPlayIcon');
+        if (isHudTimerRunning) {
+            clearInterval(hudTimerInterval);
+            isHudTimerRunning = false;
+            if (playIcon) playIcon.className = "fa-solid fa-play";
+        } else {
+            isHudTimerRunning = true;
+            if (playIcon) playIcon.className = "fa-solid fa-pause";
+            hudTimerInterval = setInterval(() => {
+                if (hudRemainingSeconds > 0) {
+                    hudRemainingSeconds--;
+                    updateHudTimerDisplay();
+                } else {
+                    clearInterval(hudTimerInterval);
+                    isHudTimerRunning = false;
+                    if (playIcon) playIcon.className = "fa-solid fa-play";
+                    alert("⏰ ĐÃ HẾT 10 PHÚT THUYẾT TRÌNH! Vui lòng chuyển sang phần Hỏi - Đáp với Hội đồng.");
+                }
+            }, 1000);
+        }
+    }
+
+    function resetHudTimer() {
+        clearInterval(hudTimerInterval);
+        isHudTimerRunning = false;
+        hudRemainingSeconds = 600;
+        const playIcon = document.getElementById('hudTimerPlayIcon');
+        if (playIcon) playIcon.className = "fa-solid fa-play";
+        updateHudTimerDisplay();
+    }
+
+    // Toggle Stage Completion Checkbox (persisted in localStorage)
+    function toggleStageCompletion(stageNum) {
+        const checkbox = document.getElementById(`stageCheck${stageNum}`);
+        const card = document.getElementById(`stageCard${stageNum}`);
+        if (checkbox && card) {
+            if (checkbox.checked) {
+                card.classList.add('is-completed');
+                localStorage.setItem(`omni_demo_stage_${stageNum}`, 'true');
+            } else {
+                card.classList.remove('is-completed');
+                localStorage.removeItem(`omni_demo_stage_${stageNum}`);
+            }
+        }
+    }
+
+    // Initialize checkboxes from localStorage
+    document.addEventListener('DOMContentLoaded', function () {
+        for (let i = 1; i <= 6; i++) {
+            const isDone = localStorage.getItem(`omni_demo_stage_${i}`) === 'true';
+            const checkbox = document.getElementById(`stageCheck${i}`);
+            const card = document.getElementById(`stageCard${i}`);
+            if (checkbox && card && isDone) {
+                checkbox.checked = true;
+                card.classList.add('is-completed');
+            }
+        }
+    });
+
+    // 1-Click Quick Switch Persona API
+    async function quickSwitchPersona(role) {
+        try {
+            const res = await fetch('/api/demo/quick-switch-persona', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ persona: role })
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (window.Swal) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Chuyển Đổi Persona Thành Công! 🎭',
+                        text: `Đã đăng nhập vai trò: ${data.displayName} (${data.persona.toUpperCase()})`,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = data.redirectUrl || window.location.href;
+                    });
+                } else {
+                    alert(`Đã chuyển sang vai trò: ${data.displayName}`);
+                    window.location.href = data.redirectUrl || window.location.href;
+                }
+            } else {
+                alert(data.message || 'Lỗi khi chuyển đổi vai trò.');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Lỗi kết nối khi gửi yêu cầu chuyển đổi.');
+        }
+    }
+
+    // Nạp giỏ hàng combo Routine 3 bước
+    async function seedCartRoutine(btn) {
+        const orig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        try {
+            const res = await fetch('/api/demo/seed-cart-routine', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message || 'Đã nạp combo Routine 3 bước vào giỏ hàng!');
+                window.location.href = data.cartUrl || '/cart';
+            } else {
+                alert(data.message || 'Có lỗi xảy ra.');
+                btn.disabled = false;
+                btn.innerHTML = orig;
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Lỗi kết nối.');
+            btn.disabled = false;
+            btn.innerHTML = orig;
+        }
+    }
+
+    // Nạp giỏ hàng kích hoạt Cảnh báo Tương kỵ Dược lý AI
+    async function seedCartConflict(btn) {
+        const orig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        try {
+            const res = await fetch('/api/demo/seed-cart-conflict', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                alert(data.message || 'Đã nạp 2 sản phẩm Retinol + BHA gây tương kỵ!');
+                window.location.href = data.cartUrl || '/cart';
+            } else {
+                alert(data.message || 'Có lỗi xảy ra.');
+                btn.disabled = false;
+                btn.innerHTML = orig;
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Lỗi kết nối.');
+            btn.disabled = false;
+            btn.innerHTML = orig;
+        }
+    }
+
+    // 1-Click Reset Demo Data
+    async function resetDemoData1Click() {
+        if (!confirm('Bạn có chắc chắn muốn khôi phục toàn bộ CSDL về trạng thái chuẩn trong 2 giây?')) {
+            return;
+        }
+        try {
+            const res = await fetch('/api/demo/reset-data', { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                alert('Khôi phục dữ liệu Demo thành công! ' + (data.message || ''));
+                window.location.reload();
+            } else {
+                alert(data.message || 'Có lỗi khi khôi phục.');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Lỗi kết nối khi gửi yêu cầu reset.');
+        }
+    }
+</script>
+

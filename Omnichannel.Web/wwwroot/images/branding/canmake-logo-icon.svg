@@ -1,0 +1,18 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-labelledby="canmakeIconTitle canmakeIconDesc">
+  <title id="canmakeIconTitle">CANMAKE BEAUTY Icon</title>
+  <desc id="canmakeIconDesc">Biểu tượng Blooming Heart Monogram chữ C ôm chữ M tạo hình trái tim và cánh hoa kèm ngôi sao 4 cánh của CANMAKE BEAUTY.</desc>
+  <defs>
+    <linearGradient id="cmBgGrad" x1="10%" y1="10%" x2="90%" y2="90%">
+      <stop offset="0%" stop-color="#FFF4F7" />
+      <stop offset="100%" stop-color="#F7C6D4" />
+    </linearGradient>
+    <linearGradient id="cmRoseGrad" x1="15%" y1="15%" x2="85%" y2="85%">
+      <stop offset="0%" stop-color="#E8618C" />
+      <stop offset="100%" stop-color="#B8336A" />
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="92" height="92" rx="26" fill="url(#cmBgGrad)" stroke="#F7C6D4" stroke-width="1.5" />
+  <path d="M74 30 C62 14 34 14 23 32 C12 50 22 76 50 86 C68 80 79 68 81 56" fill="none" stroke="url(#cmRoseGrad)" stroke-width="10.5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M35 62 L35 42 Q35 34 42 40 L50 49 L58 40 Q65 34 65 42 L65 62" fill="none" stroke="#B8336A" stroke-width="7.5" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M77 15.5 Q79.5 22.5 86.5 25 Q79.5 27.5 77 34.5 Q74.5 27.5 67.5 25 Q74.5 22.5 77 15.5 Z" fill="#E8618C" />
+</svg>

@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Omnichannel.Domain.Entities
 {
     [Table("ThemeConfigs")]
-    public class ThemeConfig
+    public partial class ThemeConfig
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -15,54 +15,54 @@ namespace Omnichannel.Domain.Entities
 
         [Required]
         [MaxLength(100)]
-        public string BrandName { get; set; } = "OMNI BEAUTY";
+        public string BrandName { get; set; } = "CANMAKE BEAUTY";
 
         [MaxLength(255)]
-        public string? Slogan { get; set; } = "Hệ Thống Bán Lẻ Mỹ Phẩm Cao Cấp Tiên Phong Công Nghệ FEFO";
+        public string? Slogan { get; set; } = "Canmake Beauty – Hệ Thống Mỹ Phẩm Đa Kênh Chính Hãng";
 
         [Required]
         [MaxLength(20)]
         [Column(TypeName = "varchar(20)")]
-        public string PrimaryColor { get; set; } = "#E11D48"; // Mã HEX màu chính (Rose-600)
+        public string PrimaryColor { get; set; } = "#E8618C"; // Mã HEX màu chính (Primary Rose)
 
         [Required]
         [MaxLength(20)]
         [Column(TypeName = "varchar(20)")]
-        public string SecondaryColor { get; set; } = "#BE185D"; // Mã HEX màu phụ (Pink-700)
+        public string SecondaryColor { get; set; } = "#B8336A"; // Mã HEX màu phụ (Deep Berry WCAG AA)
 
         [Required]
         [MaxLength(20)]
         [Column(TypeName = "varchar(20)")]
-        public string AccentColor { get; set; } = "#F59E0B"; // Mã HEX điểm nhấn (Amber-500)
+        public string AccentColor { get; set; } = "#F7C6D4"; // Mã HEX điểm nhấn (Blush)
 
         [Required]
         [MaxLength(100)]
         [Column(TypeName = "varchar(100)")]
-        public string FontFamily { get; set; } = "'Inter', sans-serif";
+        public string FontFamily { get; set; } = "'Quicksand', 'Plus Jakarta Sans', sans-serif";
 
         public int? LogoMediaId { get; set; }
         public int? FaviconMediaId { get; set; }
 
         [MaxLength(500)]
-        public string? AnnouncementBarText { get; set; } = "✨ Chào mừng bạn đến với OMNI BEAUTY - Miễn phí vận chuyển cho đơn hàng từ 300K ✨";
+        public string? AnnouncementBarText { get; set; } = "✨ Chào mừng bạn đến với CANMAKE BEAUTY - Miễn phí vận chuyển cho đơn hàng từ 300K ✨";
 
         public bool AnnouncementBarActive { get; set; } = true;
 
         [MaxLength(20)]
         [Column(TypeName = "varchar(20)")]
-        public string AnnouncementBarBgColor { get; set; } = "#881337"; // Rose-900
+        public string AnnouncementBarBgColor { get; set; } = "#B8336A"; // Deep Berry
 
         [MaxLength(50)]
         public string? Hotline { get; set; } = "1900 8888";
 
         [MaxLength(100)]
-        public string? ContactEmail { get; set; } = "hotro@omnibeauty.vn";
+        public string? ContactEmail { get; set; } = "hotro@canmakebeauty.vn";
 
         [MaxLength(255)]
         public string? Address { get; set; } = "68 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh";
 
         [MaxLength(500)]
-        public string? FooterCopyright { get; set; } = "© 2026 OMNI BEAUTY. Tất cả quyền được bảo lưu.";
+        public string? FooterCopyright { get; set; } = "© 2026 CANMAKE BEAUTY. Tất cả quyền được bảo lưu.";
 
         public string? CustomCss { get; set; } // Mã CSS tùy biến lưu trong Database
 

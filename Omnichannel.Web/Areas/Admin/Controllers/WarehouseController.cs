@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -13,6 +13,7 @@ using Omnichannel.Domain.Entities;
 using Omnichannel.Infrastructure.Data;
 using Omnichannel.Infrastructure.Security;
 using Omnichannel.Web.Extensions;
+using Omnichannel.Application.Interfaces.Notifications;
 
 namespace Omnichannel.Web.Areas.Admin.Controllers
 {
@@ -23,15 +24,18 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IInventoryAllocationEngine _allocationEngine;
         private readonly IStockTransferService _stockTransferService;
+        private readonly IInventoryNotificationService? _inventoryNotificationService;
 
         public WarehouseController(
             ApplicationDbContext context, 
             IInventoryAllocationEngine allocationEngine,
-            IStockTransferService stockTransferService)
+            IStockTransferService stockTransferService,
+            IInventoryNotificationService? inventoryNotificationService = null)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _allocationEngine = allocationEngine ?? throw new ArgumentNullException(nameof(allocationEngine));
             _stockTransferService = stockTransferService ?? throw new ArgumentNullException(nameof(stockTransferService));
+            _inventoryNotificationService = inventoryNotificationService;
         }
 
         [HttpGet]
@@ -60,7 +64,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             var today = DateTime.UtcNow.Date;
 
             // Products list for import modal
-            var products = await _context.Products.AsNoTracking().Where(p => p.IsActive).OrderBy(p => p.Name).ToListAsync();
+            var products = await _context.Products.AsNoTracking().Where(p => p.IsActive).OrderBy(p => p.Name).Select(p => new { p.Id, p.Sku, p.Name, p.SellingPrice }).ToListAsync();
             ViewBag.ProductList = products.Select(p => new SelectListItem
             {
                 Value = p.Id.ToString(),
@@ -68,7 +72,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             }).ToList();
 
             // Suppliers list for import modal
-            var suppliers = await _context.Suppliers.AsNoTracking().Where(s => s.IsActive).OrderBy(s => s.Name).ToListAsync();
+            var suppliers = await _context.Suppliers.AsNoTracking().Where(s => s.IsActive).OrderBy(s => s.Name).Select(s => new { s.Id, s.Code, s.Name }).ToListAsync();
             ViewBag.SupplierList = suppliers.Select(s => new SelectListItem
             {
                 Value = s.Id.ToString(),
@@ -124,6 +128,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
             // FEFO Sorting: ExpDate ascending (lô cận date xếp đầu)
             var inventories = await query
                 .OrderBy(si => si.ProductBatch.ExpDate)
+                .Take(200)
                 .ToListAsync();
 
             // Calculate KPIs for current store
@@ -465,6 +470,16 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 };
                 _context.InventoryLogs.Add(log);
                 await _context.SaveChangesAsync();
+
+                // Kích hoạt thông báo Có hàng lại nếu có khách hàng đang theo dõi (GAP-05)
+                if (_inventoryNotificationService != null)
+                {
+                    try
+                    {
+                        await _inventoryNotificationService.TriggerBackInStockAlertsAsync(product.Id, model.Quantity);
+                    }
+                    catch { }
+                }
 
                 TempData["SuccessMessage"] = $"Đã nhập kho thành công {model.Quantity} sản phẩm theo Lô {batch.BatchNumber}!";
             }

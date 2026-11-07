@@ -17,6 +17,23 @@ namespace Omnichannel.Infrastructure.Services
         private readonly ApplicationDbContext _context;
         private readonly ILogger<LoyaltyService> _logger;
 
+        /// <summary>
+        /// Mốc điểm thưởng điểm danh 7 ngày liên tiếp: 10 - 10 - 20 - 20 - 30 - 30 - 100
+        /// </summary>
+        public static readonly int[] DailyCheckInPoints = { 10, 10, 20, 20, 30, 30, 100 };
+
+        public static DateTime GetVietnamDate(DateTime? utcNow = null)
+        {
+            var utc = utcNow ?? DateTime.UtcNow;
+            if (utc.Kind == DateTimeKind.Local)
+            {
+                utc = utc.ToUniversalTime();
+            }
+            return utc.AddHours(7).Date;
+        }
+
+        public static string BuildDefaultReferralCode(int userId) => $"CANMAKE-REF-{userId:D4}";
+
         public LoyaltyService(ApplicationDbContext context, ILogger<LoyaltyService> logger)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
@@ -72,6 +89,8 @@ namespace Omnichannel.Infrastructure.Services
                     TotalSpend12Months = 0,
                     MemberSince = DateTime.UtcNow,
                     QrCodeData = $"BEAUTY-MEM-{userId:D6}",
+                    ReferralCode = BuildDefaultReferralCode(userId),
+                    CurrentStreak = 0,
                     CreatedAt = DateTime.UtcNow
                 };
 
@@ -80,6 +99,11 @@ namespace Omnichannel.Infrastructure.Services
 
                 wallet.CurrentTier = defaultTier;
                 wallet.User = user;
+            }
+            else if (string.IsNullOrWhiteSpace(wallet.ReferralCode))
+            {
+                wallet.ReferralCode = BuildDefaultReferralCode(userId);
+                await _context.SaveChangesAsync(cancellationToken);
             }
 
             return await MapToWalletDtoAsync(wallet, cancellationToken);
@@ -189,6 +213,16 @@ namespace Omnichannel.Infrastructure.Services
                 _logger.LogError(ex, "Lỗi tự động đánh giá hạng thành viên cho User {UserId}", userId);
             }
 
+            // Tự động kích hoạt thưởng Giới thiệu bạn bè nếu đây là đơn hàng hoàn tất đầu tiên của người được giới thiệu
+            try
+            {
+                await ProcessReferralFirstOrderCompletedAsync(userId, orderId, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Lỗi xử lý thưởng giới thiệu đơn đầu tiên cho User {UserId}", userId);
+            }
+
             return new EarnPointsDto
             {
                 UserId = userId,
@@ -255,14 +289,33 @@ namespace Omnichannel.Infrastructure.Services
                 DiscountValue = discountAmount,
                 MinOrderValue = discountAmount,
                 MaxDiscountAmount = discountAmount,
-                ValidFrom = DateTime.UtcNow,
+                ValidFrom = DateTime.UtcNow.AddMinutes(-5),
                 ValidTo = DateTime.UtcNow.AddMonths(1),
                 IsUsed = false,
                 CreatedAt = DateTime.UtcNow
             };
 
+            // Đồng bộ sang bảng Coupons để áp dụng ngay lập tức tại trang Checkout & POS
+            var syncedCoupon = new Coupon
+            {
+                CouponCode = voucherCode,
+                Description = desc,
+                DiscountType = "FIXED_AMOUNT",
+                DiscountValue = discountAmount,
+                MinOrderValue = discountAmount,
+                MaxDiscountAmount = discountAmount,
+                UsageLimit = 1,
+                UsageCount = 0,
+                UsageLimitPerUser = 1,
+                ValidFrom = DateTime.UtcNow.AddMinutes(-5),
+                ValidTo = DateTime.UtcNow.AddMonths(1),
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            };
+
             await _context.PointTransactions.AddAsync(pointTx, cancellationToken);
             await _context.Vouchers.AddAsync(voucher, cancellationToken);
+            await _context.Coupons.AddAsync(syncedCoupon, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 
             _logger.LogInformation("User {UserId} đã đổi {Points} điểm thành Voucher {VoucherCode} trị giá {Amount} VNĐ",
@@ -462,6 +515,9 @@ namespace Omnichannel.Infrastructure.Services
                 NextTierName = nextTier?.TierName,
                 SpendNeededForNextTier = spendNeeded,
                 QrCodeData = wallet.QrCodeData ?? $"BEAUTY-MEM-{wallet.UserId:D6}",
+                ReferralCode = wallet.ReferralCode ?? BuildDefaultReferralCode(wallet.UserId),
+                CurrentStreak = wallet.CurrentStreak,
+                LastCheckInDate = wallet.LastCheckInDate,
                 RecentTransactions = recentTx
             };
         }
@@ -662,6 +718,658 @@ namespace Omnichannel.Infrastructure.Services
                 GoldCount = wallets.Count(w => w.CurrentTier != null && w.CurrentTier.TierName.Equals("Gold", StringComparison.OrdinalIgnoreCase)),
                 DiamondCount = wallets.Count(w => w.CurrentTier != null && w.CurrentTier.TierName.Equals("Diamond", StringComparison.OrdinalIgnoreCase)),
                 TotalSpendOverall = wallets.Sum(w => w.TotalSpend12Months)
+            };
+        }
+
+        // =========================================================================
+        // GAMIFICATION LOYALTY IMPLEMENTATION (GAP-08 - PHIÊN C7)
+        // =========================================================================
+
+        public async Task<DailyCheckInStatusDto> GetDailyCheckInStatusAsync(
+            int userId,
+            DateTime? utcNowOverride = null,
+            CancellationToken cancellationToken = default)
+        {
+            await GetOrCreateWalletAsync(userId, cancellationToken);
+            var wallet = await _context.LoyaltyWallets
+                .AsNoTracking()
+                .FirstAsync(w => w.UserId == userId, cancellationToken);
+
+            DateTime vnToday = GetVietnamDate(utcNowOverride);
+
+            bool checkedInToday = (wallet.LastCheckInDate.HasValue && wallet.LastCheckInDate.Value.Date == vnToday)
+                || await _context.LoyaltyCheckIns
+                    .AsNoTracking()
+                    .AnyAsync(c => c.UserId == userId && c.CheckInDate == vnToday, cancellationToken);
+
+            int effectiveStreak;
+            if (checkedInToday)
+            {
+                effectiveStreak = Math.Clamp(wallet.CurrentStreak, 1, 7);
+            }
+            else if (wallet.LastCheckInDate.HasValue && wallet.LastCheckInDate.Value.Date == vnToday.AddDays(-1))
+            {
+                // Chuỗi 7 ngày đã hoàn thành hôm qua -> hôm nay bắt đầu lại chu kỳ mới từ ngày 1
+                effectiveStreak = wallet.CurrentStreak >= 7 ? 0 : Math.Max(0, wallet.CurrentStreak);
+            }
+            else
+            {
+                // Bỏ lỡ ít nhất 1 ngày hoặc chưa từng điểm danh -> reset về 0
+                effectiveStreak = 0;
+            }
+
+            int nextDayIndex = checkedInToday
+                ? (effectiveStreak >= 7 ? 1 : effectiveStreak + 1)
+                : (effectiveStreak + 1);
+            int nextPoints = DailyCheckInPoints[Math.Clamp(nextDayIndex - 1, 0, 6)];
+
+            var slots = new List<DailyCheckInSlotDto>();
+            for (int day = 1; day <= 7; day++)
+            {
+                slots.Add(new DailyCheckInSlotDto
+                {
+                    DayNumber = day,
+                    Points = DailyCheckInPoints[day - 1],
+                    IsCheckedIn = day <= effectiveStreak,
+                    IsTodaySlot = !checkedInToday && day == effectiveStreak + 1
+                });
+            }
+
+            return new DailyCheckInStatusDto
+            {
+                CurrentStreak = checkedInToday ? effectiveStreak : (wallet.LastCheckInDate.HasValue && wallet.LastCheckInDate.Value.Date == vnToday.AddDays(-1) ? wallet.CurrentStreak : 0),
+                CheckedInToday = checkedInToday,
+                TodayVietnamDate = vnToday.ToString("dd/MM/yyyy"),
+                NextPoints = nextPoints,
+                Slots = slots
+            };
+        }
+
+        public async Task<DailyCheckInResultDto> CheckInDailyAsync(
+            int userId,
+            DateTime? utcNowOverride = null,
+            CancellationToken cancellationToken = default)
+        {
+            await GetOrCreateWalletAsync(userId, cancellationToken);
+            var wallet = await _context.LoyaltyWallets
+                .FirstAsync(w => w.UserId == userId, cancellationToken);
+
+            DateTime nowUtc = utcNowOverride ?? DateTime.UtcNow;
+            DateTime vnToday = GetVietnamDate(nowUtc);
+
+            bool alreadyCheckedIn = (wallet.LastCheckInDate.HasValue && wallet.LastCheckInDate.Value.Date == vnToday)
+                || await _context.LoyaltyCheckIns
+                    .AnyAsync(c => c.UserId == userId && c.CheckInDate == vnToday, cancellationToken);
+
+            if (alreadyCheckedIn)
+            {
+                return new DailyCheckInResultDto
+                {
+                    Success = false,
+                    Message = $"Bạn đã điểm danh ngày {vnToday:dd/MM/yyyy} rồi! Hãy quay lại sau 00:00 (giờ VN) để nhận điểm tiếp theo.",
+                    PointsAwarded = 0,
+                    CurrentStreak = wallet.CurrentStreak,
+                    NewBalance = wallet.CurrentBalance,
+                    CheckedInToday = true
+                };
+            }
+
+            int newStreak;
+            if (wallet.LastCheckInDate.HasValue && wallet.LastCheckInDate.Value.Date == vnToday.AddDays(-1))
+            {
+                newStreak = (wallet.CurrentStreak % 7) + 1;
+            }
+            else
+            {
+                newStreak = 1;
+            }
+
+            int pointsAwarded = DailyCheckInPoints[newStreak - 1];
+            int balanceBefore = wallet.CurrentBalance;
+            int balanceAfter = balanceBefore + pointsAwarded;
+
+            wallet.CurrentBalance = balanceAfter;
+            wallet.TotalPointsEarned += pointsAwarded;
+            wallet.CurrentStreak = newStreak;
+            wallet.LastCheckInDate = vnToday;
+            wallet.UpdatedAt = nowUtc;
+            if (string.IsNullOrWhiteSpace(wallet.ReferralCode))
+            {
+                wallet.ReferralCode = BuildDefaultReferralCode(userId);
+            }
+
+            var pointTx = new PointTransaction
+            {
+                WalletId = wallet.Id,
+                TransactionType = "CHECKIN",
+                Points = pointsAwarded,
+                BalanceBefore = balanceBefore,
+                BalanceAfter = balanceAfter,
+                Description = $"Điểm danh hằng ngày (Ngày {newStreak}/7 - {vnToday:dd/MM/yyyy}) nhận +{pointsAwarded} điểm",
+                ExpiresAt = nowUtc.AddMonths(12),
+                CreatedAt = nowUtc
+            };
+
+            await _context.PointTransactions.AddAsync(pointTx, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            var checkIn = new LoyaltyCheckIn
+            {
+                UserId = userId,
+                WalletId = wallet.Id,
+                CheckInDate = vnToday,
+                StreakDay = newStreak,
+                PointsAwarded = pointsAwarded,
+                PointTransactionId = pointTx.Id,
+                CreatedAt = nowUtc
+            };
+
+            await _context.LoyaltyCheckIns.AddAsync(checkIn, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("User {UserId} điểm danh ngày {VnDate}: Chuỗi {Streak}/7, +{Points} điểm (Dư: {Balance})",
+                userId, vnToday.ToString("yyyy-MM-dd"), newStreak, pointsAwarded, balanceAfter);
+
+            return new DailyCheckInResultDto
+            {
+                Success = true,
+                Message = newStreak == 7
+                    ? $"🎉 Tuyệt vời! Bạn đã cán mốc Chuỗi 7 Ngày Điểm Danh và nhận Jackpot +{pointsAwarded} điểm!"
+                    : $"🎉 Điểm danh Ngày {newStreak}/7 thành công! Bạn nhận được +{pointsAwarded} điểm Canmake Xu.",
+                PointsAwarded = pointsAwarded,
+                CurrentStreak = newStreak,
+                NewBalance = balanceAfter,
+                CheckedInToday = true
+            };
+        }
+
+        public async Task<ReferralDashboardDto> GetReferralDashboardAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            var walletDto = await GetOrCreateWalletAsync(userId, cancellationToken);
+            string myCode = walletDto.ReferralCode ?? BuildDefaultReferralCode(userId);
+
+            var myReferrals = await _context.LoyaltyReferrals
+                .AsNoTracking()
+                .Include(r => r.ReferredUser)
+                .Where(r => r.ReferrerUserId == userId)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync(cancellationToken);
+
+            var referredByRecord = await _context.LoyaltyReferrals
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.ReferredUserId == userId, cancellationToken);
+
+            return new ReferralDashboardDto
+            {
+                MyReferralCode = myCode,
+                TotalReferredCount = myReferrals.Count,
+                RewardedReferredCount = myReferrals.Count(r => r.Status == "REWARDED"),
+                TotalPointsEarnedFromReferrals = myReferrals.Where(r => r.Status == "REWARDED").Sum(r => r.ReferrerPointsAwarded),
+                CanApplyReferralCode = referredByRecord == null,
+                AppliedReferralCode = referredByRecord?.ReferralCode,
+                ReferredByStatus = referredByRecord?.Status,
+                Referrals = myReferrals.Select(r => new ReferralItemDto
+                {
+                    Id = r.Id,
+                    ReferredUserId = r.ReferredUserId,
+                    ReferredUserName = r.ReferredUser?.FullName ?? r.ReferredUser?.Username ?? $"Thành viên #{r.ReferredUserId}",
+                    Status = r.Status,
+                    PointsAwarded = r.ReferrerPointsAwarded,
+                    RewardVoucherCode = r.RewardVoucherCode,
+                    CreatedAt = r.CreatedAt,
+                    RewardedAt = r.RewardedAt
+                }).ToList()
+            };
+        }
+
+        public async Task<ApplyReferralResultDto> ApplyReferralCodeAsync(
+            int referredUserId,
+            string referralCode,
+            CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(referralCode))
+            {
+                return new ApplyReferralResultDto
+                {
+                    Success = false,
+                    Message = "Vui lòng nhập mã giới thiệu."
+                };
+            }
+
+            string cleanCode = referralCode.Trim().ToUpperInvariant();
+            await GetOrCreateWalletAsync(referredUserId, cancellationToken);
+
+            // 1. Tìm người giới thiệu theo ReferralCode trên ví hoặc theo quy ước CANMAKE-REF-{id} (hỗ trợ tương thích ngược OMNI-REF-{id})
+            var referrerWallet = await _context.LoyaltyWallets
+                .AsNoTracking()
+                .FirstOrDefaultAsync(w => w.ReferralCode != null && w.ReferralCode.ToUpper() == cleanCode, cancellationToken);
+
+            int referrerUserId = referrerWallet?.UserId ?? 0;
+            if (referrerUserId <= 0 && (cleanCode.StartsWith("CANMAKE-REF-", StringComparison.OrdinalIgnoreCase) || cleanCode.StartsWith("OMNI-REF-", StringComparison.OrdinalIgnoreCase)))
+            {
+                var prefixLen = cleanCode.StartsWith("CANMAKE-REF-", StringComparison.OrdinalIgnoreCase) ? "CANMAKE-REF-".Length : "OMNI-REF-".Length;
+                var suffix = cleanCode.Substring(prefixLen);
+                if (int.TryParse(suffix, out int parsedId) && parsedId > 0)
+                {
+                    var referrerUserExists = await _context.Users.AnyAsync(u => u.Id == parsedId, cancellationToken);
+                    if (referrerUserExists)
+                    {
+                        await GetOrCreateWalletAsync(parsedId, cancellationToken);
+                        referrerUserId = parsedId;
+                    }
+                }
+            }
+
+            if (referrerUserId <= 0)
+            {
+                return new ApplyReferralResultDto
+                {
+                    Success = false,
+                    Message = $"Mã giới thiệu '{cleanCode}' không tồn tại trên hệ thống."
+                };
+            }
+
+            // 2. Chặn tự giới thiệu chính mình
+            if (referrerUserId == referredUserId)
+            {
+                return new ApplyReferralResultDto
+                {
+                    Success = false,
+                    Message = "Bạn không thể tự sử dụng mã giới thiệu của chính mình."
+                };
+            }
+
+            // 3. Chặn nhập mã nhiều lần
+            bool alreadyReferred = await _context.LoyaltyReferrals
+                .AnyAsync(r => r.ReferredUserId == referredUserId, cancellationToken);
+
+            if (alreadyReferred)
+            {
+                return new ApplyReferralResultDto
+                {
+                    Success = false,
+                    Message = "Tài khoản của bạn đã áp dụng mã giới thiệu trước đó."
+                };
+            }
+
+            // 4. Chặn giới thiệu vòng lặp (A đã giới thiệu B -> B không được giới thiệu ngược lại A)
+            bool isCircularReferral = await _context.LoyaltyReferrals
+                .AnyAsync(r => r.ReferrerUserId == referredUserId && r.ReferredUserId == referrerUserId, cancellationToken);
+
+            if (isCircularReferral)
+            {
+                return new ApplyReferralResultDto
+                {
+                    Success = false,
+                    Message = "Không thể giới thiệu vòng lặp hai chiều giữa hai tài khoản đã giới thiệu nhau."
+                };
+            }
+
+            var referral = new LoyaltyReferral
+            {
+                ReferrerUserId = referrerUserId,
+                ReferredUserId = referredUserId,
+                ReferralCode = cleanCode,
+                Status = "PENDING",
+                ReferrerPointsAwarded = 0,
+                ReferredPointsAwarded = 0,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _context.LoyaltyReferrals.AddAsync(referral, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            // Kiểm tra nếu tài khoản này đã có đơn hàng hoàn tất/thanh toán thì trao thưởng luôn
+            var completedOrder = await _context.Orders
+                .AsNoTracking()
+                .Where(o => o.UserId == referredUserId && (o.OrderStatus == "COMPLETED" || o.OrderStatus == "DELIVERED" || o.PaymentStatus == "PAID"))
+                .OrderBy(o => o.CreatedAt)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (completedOrder != null)
+            {
+                return await ProcessReferralFirstOrderCompletedAsync(referredUserId, completedOrder.Id, cancellationToken);
+            }
+
+            var currentWallet = await _context.LoyaltyWallets
+                .AsNoTracking()
+                .FirstAsync(w => w.UserId == referredUserId, cancellationToken);
+
+            return new ApplyReferralResultDto
+            {
+                Success = true,
+                ReferralCode = cleanCode,
+                PointsAwarded = 0,
+                NewBalance = currentWallet.CurrentBalance,
+                Message = $"Đã liên kết mã giới thiệu {cleanCode} thành công! Ngay khi bạn hoàn tất đơn hàng đầu tiên, bạn sẽ nhận +50 điểm & Voucher 50.000₫, người giới thiệu nhận +100 điểm."
+            };
+        }
+
+        public async Task<ApplyReferralResultDto> ProcessReferralFirstOrderCompletedAsync(
+            int referredUserId,
+            int? orderId = null,
+            CancellationToken cancellationToken = default)
+        {
+            var referral = await _context.LoyaltyReferrals
+                .FirstOrDefaultAsync(r => r.ReferredUserId == referredUserId, cancellationToken);
+
+            if (referral == null)
+            {
+                return new ApplyReferralResultDto
+                {
+                    Success = false,
+                    Message = "Tài khoản chưa liên kết mã giới thiệu."
+                };
+            }
+
+            if (referral.Status == "REWARDED")
+            {
+                var w = await _context.LoyaltyWallets.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == referredUserId, cancellationToken);
+                return new ApplyReferralResultDto
+                {
+                    Success = false,
+                    ReferralCode = referral.ReferralCode,
+                    Message = "Phần thưởng giới thiệu bạn bè đã được trao trước đó.",
+                    NewBalance = w?.CurrentBalance ?? 0
+                };
+            }
+
+            await GetOrCreateWalletAsync(referral.ReferrerUserId, cancellationToken);
+            await GetOrCreateWalletAsync(referral.ReferredUserId, cancellationToken);
+
+            var referrerWallet = await _context.LoyaltyWallets.FirstAsync(w => w.UserId == referral.ReferrerUserId, cancellationToken);
+            var referredWallet = await _context.LoyaltyWallets.FirstAsync(w => w.UserId == referral.ReferredUserId, cancellationToken);
+
+            const int referrerPoints = 100; // 100 điểm = 100.000đ
+            const int referredPoints = 50;  // 50 điểm = 50.000đ
+            var now = DateTime.UtcNow;
+
+            // 1. Cộng điểm vào sổ cái Người giới thiệu
+            int refBefore = referrerWallet.CurrentBalance;
+            int refAfter = refBefore + referrerPoints;
+            referrerWallet.CurrentBalance = refAfter;
+            referrerWallet.TotalPointsEarned += referrerPoints;
+            referrerWallet.UpdatedAt = now;
+
+            await _context.PointTransactions.AddAsync(new PointTransaction
+            {
+                WalletId = referrerWallet.Id,
+                OrderId = orderId,
+                TransactionType = "REFERRAL_BONUS",
+                Points = referrerPoints,
+                BalanceBefore = refBefore,
+                BalanceAfter = refAfter,
+                Description = $"Thưởng giới thiệu bạn mới (User #{referral.ReferredUserId}) hoàn tất đơn đầu tiên (+{referrerPoints} điểm)",
+                ExpiresAt = now.AddMonths(12),
+                CreatedAt = now
+            }, cancellationToken);
+
+            // 2. Cộng điểm vào sổ cái Người được giới thiệu
+            int newBefore = referredWallet.CurrentBalance;
+            int newAfter = newBefore + referredPoints;
+            referredWallet.CurrentBalance = newAfter;
+            referredWallet.TotalPointsEarned += referredPoints;
+            referredWallet.UpdatedAt = now;
+
+            await _context.PointTransactions.AddAsync(new PointTransaction
+            {
+                WalletId = referredWallet.Id,
+                OrderId = orderId,
+                TransactionType = "REFERRAL_BONUS",
+                Points = referredPoints,
+                BalanceBefore = newBefore,
+                BalanceAfter = newAfter,
+                Description = $"Thưởng chào bạn mới từ mã giới thiệu {referral.ReferralCode} (+{referredPoints} điểm)",
+                ExpiresAt = now.AddMonths(12),
+                CreatedAt = now
+            }, cancellationToken);
+
+            // 3. Tặng Voucher 50.000đ cho cả hai bên
+            string voucherCode = $"REF50K-{referral.ReferredUserId:D3}-{Random.Shared.Next(100, 999)}";
+            string voucherDesc = $"Voucher 50.000₫ quà tặng Giới thiệu bạn bè ({referral.ReferralCode})";
+
+            await _context.Vouchers.AddRangeAsync(new[]
+            {
+                new Voucher
+                {
+                    UserId = referral.ReferredUserId,
+                    VoucherCode = voucherCode,
+                    Description = voucherDesc,
+                    DiscountType = "FIXED_AMOUNT",
+                    DiscountValue = 50000m,
+                    MinOrderValue = 150000m,
+                    MaxDiscountAmount = 50000m,
+                    ValidFrom = now.AddMinutes(-5),
+                    ValidTo = now.AddMonths(2),
+                    IsUsed = false,
+                    CreatedAt = now
+                },
+                new Voucher
+                {
+                    UserId = referral.ReferrerUserId,
+                    VoucherCode = $"REF50K-{referral.ReferrerUserId:D3}-{Random.Shared.Next(100, 999)}",
+                    Description = voucherDesc,
+                    DiscountType = "FIXED_AMOUNT",
+                    DiscountValue = 50000m,
+                    MinOrderValue = 150000m,
+                    MaxDiscountAmount = 50000m,
+                    ValidFrom = now.AddMinutes(-5),
+                    ValidTo = now.AddMonths(2),
+                    IsUsed = false,
+                    CreatedAt = now
+                }
+            }, cancellationToken);
+
+            await _context.Coupons.AddAsync(new Coupon
+            {
+                CouponCode = voucherCode,
+                Description = voucherDesc,
+                DiscountType = "FIXED_AMOUNT",
+                DiscountValue = 50000m,
+                MinOrderValue = 150000m,
+                MaxDiscountAmount = 50000m,
+                UsageLimit = 2,
+                UsageLimitPerUser = 1,
+                ValidFrom = now.AddMinutes(-5),
+                ValidTo = now.AddMonths(2),
+                IsActive = true,
+                CreatedAt = now
+            }, cancellationToken);
+
+            referral.Status = "REWARDED";
+            referral.ReferrerPointsAwarded = referrerPoints;
+            referral.ReferredPointsAwarded = referredPoints;
+            referral.RewardVoucherCode = voucherCode;
+            referral.CompletedOrderId = orderId;
+            referral.RewardedAt = now;
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return new ApplyReferralResultDto
+            {
+                Success = true,
+                ReferralCode = referral.ReferralCode,
+                PointsAwarded = referredPoints,
+                VoucherCode = voucherCode,
+                NewBalance = referredWallet.CurrentBalance,
+                Message = $"🎉 Chúc mừng! Bạn nhận được +{referredPoints} điểm & Voucher {voucherCode} (-50.000₫), người giới thiệu nhận +{referrerPoints} điểm!"
+            };
+        }
+
+        public async Task<List<BeautyMissionDto>> GetBeautyMissionsAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            await GetOrCreateWalletAsync(userId, cancellationToken);
+            var wallet = await _context.LoyaltyWallets
+                .AsNoTracking()
+                .FirstAsync(w => w.UserId == userId, cancellationToken);
+
+            var claimedTxs = await _context.PointTransactions
+                .AsNoTracking()
+                .Where(t => t.WalletId == wallet.Id && t.TransactionType == "MISSION")
+                .Select(t => t.Description)
+                .ToListAsync(cancellationToken);
+
+            bool IsMissionClaimed(string code) => claimedTxs.Any(d => d != null && d.Contains($"[{code}]", StringComparison.OrdinalIgnoreCase));
+
+            // Kiểm tra điều kiện thực tế trên hệ thống
+            bool hasSkinProfile = await _context.CustomerProfiles
+                .AsNoTracking()
+                .AnyAsync(cp => cp.UserId == userId && !string.IsNullOrEmpty(cp.CurrentSkinType), cancellationToken);
+
+            bool hasPhotoReview = await _context.ProductReviews
+                .AsNoTracking()
+                .AnyAsync(r => r.UserId == userId && r.ImagesJson != null && r.ImagesJson != "" && r.ImagesJson != "[]", cancellationToken);
+
+            bool hasFirstOrder = await _context.Orders
+                .AsNoTracking()
+                .AnyAsync(o => o.UserId == userId && (o.OrderStatus == "COMPLETED" || o.OrderStatus == "DELIVERED" || o.PaymentStatus == "PAID"), cancellationToken);
+
+            return new List<BeautyMissionDto>
+            {
+                new()
+                {
+                    MissionCode = "MISSION_SKIN_QUIZ",
+                    Title = "Hoàn thành Trắc nghiệm Làn da AI (Skin Quiz)",
+                    Description = "Khám phá loại da & phác đồ hoạt chất cá nhân hóa cùng Chuyên gia AI.",
+                    IconClass = "fa-solid fa-wand-magic-sparkles",
+                    PointsReward = 30,
+                    IsConditionMet = hasSkinProfile,
+                    IsClaimed = IsMissionClaimed("MISSION_SKIN_QUIZ"),
+                    ActionUrl = "/SkinQuiz",
+                    ActionText = "Làm Skin Quiz (+30đ)"
+                },
+                new()
+                {
+                    MissionCode = "MISSION_PHOTO_REVIEW",
+                    Title = "Viết đánh giá sản phẩm có hình ảnh thật",
+                    Description = "Chia sẻ cảm nhận & ảnh chụp sản phẩm thực tế giúp cộng đồng làm đẹp.",
+                    IconClass = "fa-solid fa-camera-retro",
+                    PointsReward = 50,
+                    IsConditionMet = hasPhotoReview,
+                    IsClaimed = IsMissionClaimed("MISSION_PHOTO_REVIEW"),
+                    ActionUrl = "/Shop",
+                    ActionText = "Đánh giá SP (+50đ)"
+                },
+                new()
+                {
+                    MissionCode = "MISSION_FIRST_ORDER",
+                    Title = "Mua & hoàn tất đơn hàng đầu tiên",
+                    Description = "Trải nghiệm mua sắm mỹ phẩm chính hãng lô date FEFO mới nhất tại Canmake Beauty.",
+                    IconClass = "fa-solid fa-bag-shopping",
+                    PointsReward = 100,
+                    IsConditionMet = hasFirstOrder,
+                    IsClaimed = IsMissionClaimed("MISSION_FIRST_ORDER"),
+                    ActionUrl = "/Shop",
+                    ActionText = "Mua sắm ngay (+100đ)"
+                }
+            };
+        }
+
+        public async Task<ClaimMissionResultDto> ClaimMissionRewardAsync(
+            int userId,
+            string missionCode,
+            CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(missionCode))
+            {
+                return new ClaimMissionResultDto { Success = false, Message = "Mã nhiệm vụ không hợp lệ." };
+            }
+
+            string cleanCode = missionCode.Trim().ToUpperInvariant();
+            var missions = await GetBeautyMissionsAsync(userId, cancellationToken);
+            var mission = missions.FirstOrDefault(m => m.MissionCode.Equals(cleanCode, StringComparison.OrdinalIgnoreCase));
+
+            if (mission == null)
+            {
+                return new ClaimMissionResultDto { Success = false, Message = "Không tìm thấy nhiệm vụ này." };
+            }
+
+            if (mission.IsClaimed)
+            {
+                var w = await _context.LoyaltyWallets.AsNoTracking().FirstAsync(x => x.UserId == userId, cancellationToken);
+                return new ClaimMissionResultDto
+                {
+                    Success = false,
+                    MissionCode = cleanCode,
+                    PointsAwarded = 0,
+                    NewBalance = w.CurrentBalance,
+                    Message = "Bạn đã nhận thưởng nhiệm vụ này trước đó rồi."
+                };
+            }
+
+            var wallet = await _context.LoyaltyWallets.FirstAsync(w => w.UserId == userId, cancellationToken);
+            int balanceBefore = wallet.CurrentBalance;
+            int balanceAfter = balanceBefore + mission.PointsReward;
+
+            wallet.CurrentBalance = balanceAfter;
+            wallet.TotalPointsEarned += mission.PointsReward;
+            wallet.UpdatedAt = DateTime.UtcNow;
+
+            var pointTx = new PointTransaction
+            {
+                WalletId = wallet.Id,
+                TransactionType = "MISSION",
+                Points = mission.PointsReward,
+                BalanceBefore = balanceBefore,
+                BalanceAfter = balanceAfter,
+                Description = $"[{cleanCode}] Thưởng hoàn thành nhiệm vụ: {mission.Title} (+{mission.PointsReward} điểm)",
+                ExpiresAt = DateTime.UtcNow.AddMonths(12),
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _context.PointTransactions.AddAsync(pointTx, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return new ClaimMissionResultDto
+            {
+                Success = true,
+                MissionCode = cleanCode,
+                PointsAwarded = mission.PointsReward,
+                NewBalance = balanceAfter,
+                Message = $"🎉 Chúc mừng! Bạn đã nhận +{mission.PointsReward} điểm từ nhiệm vụ '{mission.Title}'!"
+            };
+        }
+
+        public async Task<List<RewardCatalogItemDto>> GetRewardsCatalogAsync(int userId, CancellationToken cancellationToken = default)
+        {
+            var walletDto = await GetOrCreateWalletAsync(userId, cancellationToken);
+            int balance = walletDto.CurrentBalance;
+
+            return new List<RewardCatalogItemDto>
+            {
+                new()
+                {
+                    RewardCode = "BAZAAR_50K",
+                    Title = "Voucher Giảm 50.000₫",
+                    Description = "Áp dụng cho mọi đơn hàng từ 50.000₫ tại Website & Showroom POS.",
+                    BadgeText = "Phổ biến nhất",
+                    PointsCost = 50,
+                    DiscountValueVnd = 50000m,
+                    MinOrderValueVnd = 50000m,
+                    CanAfford = balance >= 50
+                },
+                new()
+                {
+                    RewardCode = "BAZAAR_100K",
+                    Title = "Voucher Giảm 100.000₫",
+                    Description = "Ưu đãi đặc quyền quy đổi điểm thưởng cho đơn hàng từ 100.000₫.",
+                    BadgeText = "Tiết kiệm",
+                    PointsCost = 100,
+                    DiscountValueVnd = 100000m,
+                    MinOrderValueVnd = 100000m,
+                    CanAfford = balance >= 100
+                },
+                new()
+                {
+                    RewardCode = "BAZAAR_200K",
+                    Title = "Voucher VIP Giảm 200.000₫",
+                    Description = "Siêu voucher Rewards Bazaar cho tín đồ Skincare & Nước hoa đơn từ 200.000₫.",
+                    BadgeText = "Hạng VIP",
+                    PointsCost = 200,
+                    DiscountValueVnd = 200000m,
+                    MinOrderValueVnd = 200000m,
+                    CanAfford = balance >= 200
+                }
             };
         }
     }

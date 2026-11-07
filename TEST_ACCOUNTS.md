@@ -1,29 +1,33 @@
 # DANH SÁCH TÀI KHOẢN VÀ MẬT KHẨU KIỂM THỬ HỆ THỐNG
-## Omnichannel Beauty Solution - Hệ Thống Bán Lẻ Mỹ Phẩm Đa Kênh
+## CANMAKE BEAUTY (`OmnichannelBeautySolution`) - Hệ Thống Bán Lẻ Mỹ Phẩm Đa Kênh Chính Hãng
 
-Tài liệu này tổng hợp toàn bộ danh sách tài khoản, mật khẩu, vai trò và phạm vi chi nhánh được khởi tạo sẵn (Seeded Data) trong hệ thống để phục vụ công tác kiểm thử (Manual Test, UAT, Integration Test).
+Tài liệu này tổng hợp toàn bộ danh sách tài khoản, mật khẩu, email (`@canmakebeauty.vn`), vai trò và phạm vi chi nhánh được khởi tạo sẵn (Seeded Data) trong hệ thống để phục vụ công tác kiểm thử (Manual Test, UAT, Integration Test).
 
 ---
 
 ## 1. Bảng Tra Cứu Nhanh Tài Khoản (Quick Reference)
 
-> **Mật khẩu mặc định toàn hệ thống:** `Admin@123`  
-> *(Riêng tài khoản `admin` có thể sử dụng cả `Admin@123456` và có nút **Điền nhanh** tại trang đăng nhập).*
+> [!TIP]
+> **THUYẾT TRÌNH 1-CLICK VỚI DEMO PRESENTER HUD (`Alt + D`):**  
+> Khi `DemoMode:Enabled == true`, bạn có thể bấm tổ hợp phím **`Alt + D`** (hoặc nút tròn góc trái dưới) trên bất kỳ màn hình nào để chuyển vai tức thì giữa **Khách VIP (Lê Ngọc Linh)**, **Thu ngân Showroom 1 (cashier01)**, và **SuperAdmin** trong **< 50ms** mà không cần gõ tài khoản hay mật khẩu!
 
-| STT | Username | Mật khẩu | Vai trò (Role) | Chi nhánh phân bổ | Họ và tên | Loại TK |
-|:---:|:---|:---|:---|:---|:---|:---:|
-| **1** | `superadmin` | `Admin@123` | **SuperAdmin** | Toàn hệ thống (Global) | Nguyễn Quản Trị | Quản trị |
-| **2** | `admin` | `Admin@123456` / `Admin@123` | **SuperAdmin** | Toàn hệ thống (Global) | Quản Trị Viên Kế Thừa | Quản trị |
-| **3** | `manager_hq` | `Admin@123` | **StoreManager** | `HQ-001` (Kho Tổng TP.HCM) | Trần Quản Lý HQ | Nhân viên |
-| **4** | `manager_cg` | `Admin@123` | **StoreManager** | `SH-CG` (Showroom Cầu Giấy) | Lê Quản Lý CG | Nhân viên |
-| **5** | `cashier01` | `Admin@123` | **Cashier** | `HQ-001` (Kho Tổng TP.HCM) | Phạm Thu Ngân 01 | Nhân viên |
-| **6** | `cashier02` | `Admin@123` | **Cashier** | `SH-CG` (Showroom Cầu Giấy) | Hoàng Thu Ngân 02 | Nhân viên |
-| **7** | `warehouse01` | `Admin@123` | **WarehouseStaff** | `HQ-001` (Kho Tổng TP.HCM) | Đặng Thủ Kho 01 | Nhân viên |
-| **8** | `warehouse02` | `Admin@123` | **WarehouseStaff** | `SH-CG` (Showroom Cầu Giấy) | Vũ Thủ Kho 02 | Nhân viên |
-| **9** | `editor01` | `Admin@123` | **ContentEditor** | Toàn hệ thống (CMS) | Bùi Biên Tập | Nhân viên |
-| **10** | `customer01` | `Admin@123` | **Customer** | Khách hàng cá nhân | Ngọc Khách Hàng 01 | Khách hàng |
-| **11** | `customer02` | `Admin@123` | **Customer** | Khách hàng cá nhân | Mai Khách Hàng 02 | Khách hàng |
-| **12** | `customer_vip` | `Admin@123` | **Customer** | Khách hàng cá nhân | Linh VIP Diamond | Khách hàng |
+> **Mật khẩu mặc định toàn hệ thống:** `Admin@123`  
+> *(Riêng tài khoản `admin` có thể sử dụng cả `Admin@123456` và có nút **Điền nhanh** tại trang đăng nhập. Toàn bộ tài khoản nhân sự sử dụng tên miền email chính thức `@canmakebeauty.vn` và hỗ trợ tương thích ngược khi đăng nhập bằng đuôi cũ `@omnichannelbeauty.vn`).*
+
+| STT | Username | Email | Mật khẩu | Vai trò (Role) | Chi nhánh phân bổ | Họ và tên | Loại TK |
+|:---:|:---|:---|:---|:---|:---|:---|:---:|
+| **1** | `superadmin` | `superadmin@canmakebeauty.vn` | `Admin@123` | **SuperAdmin** | Toàn hệ thống (Global) | Nguyễn Quản Trị | Quản trị |
+| **2** | `admin` | `admin@canmakebeauty.vn` | `Admin@123456` / `Admin@123` | **SuperAdmin** | Toàn hệ thống (Global) | Quản Trị Viên Kế Thừa | Quản trị |
+| **3** | `manager_hq` | `manager.hq@canmakebeauty.vn` | `Admin@123` | **StoreManager** | `HQ-001` (Flagship Quận 1) | Trần Quản Lý HQ | Nhân viên |
+| **4** | `manager_cg` | `manager.cg@canmakebeauty.vn` | `Admin@123` | **StoreManager** | `SH-CG` (Showroom Cầu Giấy) | Lê Quản Lý CG | Nhân viên |
+| **5** | `cashier01` | `cashier01@canmakebeauty.vn` | `Admin@123` | **Cashier** | `HQ-001` (Flagship Quận 1) | Phạm Thu Ngân 01 | Nhân viên |
+| **6** | `cashier02` | `cashier02@canmakebeauty.vn` | `Admin@123` | **Cashier** | `SH-CG` (Showroom Cầu Giấy) | Hoàng Thu Ngân 02 | Nhân viên |
+| **7** | `warehouse01` | `warehouse01@canmakebeauty.vn` | `Admin@123` | **WarehouseStaff** | `HQ-001` (Flagship Quận 1) | Đặng Thủ Kho 01 | Nhân viên |
+| **8** | `warehouse02` | `warehouse02@canmakebeauty.vn` | `Admin@123` | **WarehouseStaff** | `SH-CG` (Showroom Cầu Giấy) | Vũ Thủ Kho 02 | Nhân viên |
+| **9** | `editor01` | `editor01@canmakebeauty.vn` | `Admin@123` | **ContentEditor** | Toàn hệ thống (CMS) | Bùi Biên Tập | Nhân viên |
+| **10** | `customer01` | `customer01@gmail.com` | `Admin@123` | **Customer** | Khách hàng cá nhân | Ngọc Khách Hàng 01 | Khách hàng |
+| **11** | `customer02` | `customer02@gmail.com` | `Admin@123` | **Customer** | Khách hàng cá nhân | Mai Khách Hàng 02 | Khách hàng |
+| **12** | `customer_vip` | `customer_vip@gmail.com` | `Admin@123` | **Customer** | Khách hàng cá nhân | Lê Ngọc Linh (VIP Diamond) | Khách hàng |
 
 ---
 
@@ -32,7 +36,7 @@ Tài liệu này tổng hợp toàn bộ danh sách tài khoản, mật khẩu, 
 ### 2.1. Quản Trị Viên Hệ Thống (SuperAdmin)
 * **Tài khoản chính:** `superadmin` / `Admin@123`
 * **Tài khoản thay thế:** `admin` / `Admin@123456` hoặc `Admin@123`
-* **Email:** `superadmin@omnichannelbeauty.vn`
+* **Email:** `superadmin@canmakebeauty.vn` (hỗ trợ đăng nhập cả `superadmin@omnichannelbeauty.vn`)
 * **Phạm vi (Scope):** Toàn quyền (God Mode Bypass). Xem và quản trị tất cả các chi nhánh mà không bị giới hạn `StoreId`.
 * **Kịch bản kiểm thử khuyến nghị:**
   - Truy cập Dashboard tổng quan toàn chuỗi (`/Admin/Dashboard`).
@@ -84,7 +88,7 @@ Tài liệu này tổng hợp toàn bộ danh sách tài khoản, mật khẩu, 
 
 ### 2.5. Biên Tập Viên Nội Dung (Content Editor - CMS)
 * **Tài khoản:** `editor01` / `Admin@123`
-* **Email:** `editor01@omnichannelbeauty.vn`
+* **Email:** `editor01@canmakebeauty.vn` (hỗ trợ đăng nhập cả `editor01@omnichannelbeauty.vn`)
 * **Phạm vi (Scope):** Giao diện CMS & Marketing.
 * **Kịch bản kiểm thử khuyến nghị:**
   - Đăng bài viết chia sẻ bí quyết làm đẹp, cẩm nang chăm sóc da (`/Admin/Post`).
@@ -94,14 +98,53 @@ Tài liệu này tổng hợp toàn bộ danh sách tài khoản, mật khẩu, 
 
 ---
 
-### 2.6. Khách Hàng Mua Sắm (Customer)
-Hệ thống tích hợp sẵn 3 khách hàng với 3 hạng thành viên khác nhau để kiểm thử tích điểm và khuyến mãi:
+### 2.6. Khách Hàng Mua Sắm & Demo Thuyết Trình (Customer)
+Hệ thống tích hợp sẵn hơn 30 khách hàng với đầy đủ hồ sơ da (Skin Profile), lịch sử tích điểm và các hạng thành viên từ Bronze đến Diamond:
 
-| Username | Mật khẩu | Hạng thành viên | Điểm tích lũy hiện có | Chi tiêu 12 tháng qua | Mã QR Loyalty |
-|:---|:---|:---:|:---:|:---:|:---|
-| `customer01` | `Admin@123` | **Silver** (Bạc) | 50 điểm | 500,000 đ | `LOYALTY-X-SILVER` |
-| `customer02` | `Admin@123` | **Gold** (Vàng) | 400 điểm | 5,000,000 đ | `LOYALTY-X-GOLD` |
-| `customer_vip` | `Admin@123` | **Diamond** (Kim Cương VIP) | 1,800 điểm | 15,000,000 đ | `LOYALTY-X-DIAMOND` |
+| Username | Mật khẩu | Họ và tên | Sinh nhật | Loại da & Tình trạng | Hạng & Điểm | Chi tiêu 12T |
+|:---|:---|:---|:---:|:---|:---:|:---:|
+| `customer01` | `Admin@123` | Ngọc Khách Hàng 01 | 15/06 | Da hỗn hợp thiên dầu | **Silver** (50 pts) | 500,000 đ |
+| `customer02` | `Admin@123` | Mai Khách Hàng 02 | 20/09 | Da dầu mụn | **Gold** (400 pts) | 5,000,000 đ |
+| `customer_vip` | `Admin@123` | Linh VIP Diamond | 10/04 | Da lão hóa | **Diamond** (1,800 pts) | 15,000,000 đ |
+| `customer03` | `Admin@123` | Lê Thị Mai Anh | **05/11 (Tháng này)** | Da dầu mụn, bít tắc | **Gold** (680 pts) | 6,800,000 đ |
+| `customer04` | `Admin@123` | Nguyễn Thu Hà | **12/11 (Tháng này)** | Da nhạy cảm đỏ rát | **Silver** (340 pts) | 3,400,000 đ |
+| `customer05` | `Admin@123` | Phạm Hoàng Yến | **18/11 (Tháng này)** | Da khô bong tróc | **Platinum** (1,250 pts) | 12,500,000 đ |
+| `customer06` | `Admin@123` | Vũ Mỹ Linh | **22/11 (Tháng này)** | Da hỗn hợp thiên dầu | **Diamond** (2,400 pts) | 24,000,000 đ |
+| `customer07` | `Admin@123` | Đỗ Hương Giang | **08/11 (Tháng này)** | Da dầu mụn viêm | **Gold** (590 pts) | 5,900,000 đ |
+| `customer08` | `Admin@123` | Hoàng Kim Ngân | **15/11 (Tháng này)** | Da thường, làm sáng | **Bronze** (120 pts) | 1,200,000 đ |
+| `customer09` | `Admin@123` | Bùi Bích Phương | **27/11 (Tháng này)** | Da khô thiếu ẩm | **Silver** (280 pts) | 2,800,000 đ |
+| `customer10` | `Admin@123` | Đặng Thùy Dung | **03/11 (Tháng này)** | Da nhạy cảm dễ nổi mụn | **Bronze** (95 pts) | 950,000 đ |
+| `customer25` | `Admin@123` | Trịnh Kim Chi | **01/11 (Tháng này)** | Da dầu mụn dai dẳng | **Diamond** (2,650 pts) | 26,500,000 đ |
+| `customer26` | `Admin@123` | Chu Thúy Nga | **30/11 (Tháng này)** | Da khô nứt nẻ | **Silver** (380 pts) | 3,800,000 đ |
+| *(và customer11 -> customer24)* | `Admin@123` | Đa dạng khách hàng | Rải rác các tháng | Đa dạng loại da | Bronze/Silver/Gold | 500k - 15.8M |
+
+> **Ghi chú đặc biệt cho Demo:** Có sẵn **10 khách hàng có ngày sinh nhật rơi vào tháng hiện tại (Tháng 11)** để trình diễn tính năng *Chiến dịch sinh nhật (Birthday Campaign)* và *Tặng điểm nhân đôi/Voucher sinh nhật*.
+
+---
+
+### 2.7. Mã Giảm Giá Khuyến Mãi Demo (Active Demo Coupons)
+
+Hệ thống có sẵn các mã giảm giá không hết hạn để thực hiện demo đặt hàng nhanh:
+
+| Mã Coupon | Loại giảm giá | Giá trị ưu đãi | Điều kiện áp dụng | Mô tả kịch bản demo |
+|:---|:---|:---:|:---|:---|
+| `DEMO10` | Phần trăm (%) | **10%** (Tối đa 100k) | Đơn bất kỳ (MinOrder = 0đ) | Mã demo phổ thông cho khách mới |
+| `FREESHIP` | Số tiền cố định | **30,000 đ** | Miễn phí tiền ship toàn quốc | Test luồng miễn phí vận chuyển O2O |
+| `COMBO15` | Phần trăm (%) | **15%** (Tối đa 250k) | Combo Routine 4 bước chăm sóc da | Test mua trọn bộ Skincare Routine |
+
+---
+
+### 2.8. Cơ Chế Khôi Phục Dữ Liệu Demo Chuẩn (Reset State)
+
+Sau mỗi lần diễn tập thuyết trình hoặc thử nghiệm luồng mua sắm/bán hàng POS:
+1. Đăng nhập tài khoản `superadmin` / `Admin@123`.
+2. Truy cập: `/Admin/Settings`.
+3. Nhấp nút **"Khôi Phục Dữ Liệu Demo"** (hoặc thẻ *Demo Ready* ở cuối trang).
+4. Hệ thống hiển thị hộp thoại xác nhận SweetAlert2. Khi xác nhận:
+   - Tự động xóa sạch toàn bộ các đơn hàng diễn tập tạo mới (`!ORD-SEED-*`).
+   - Hoàn nguyên tồn kho vật lý của các lô hàng FEFO về mức chuẩn.
+   - Dọn sạch giỏ hàng tạm vãng lai.
+   - Bảo toàn nguyên vẹn 150+ đơn hàng chuẩn, biểu đồ doanh thu 90 ngày và 210 đánh giá sản phẩm.
 
 * **Kịch bản kiểm thử khuyến nghị:**
   - Đăng nhập Storefront mua sắm tại trang chủ (`/`).
@@ -114,11 +157,11 @@ Hệ thống tích hợp sẵn 3 khách hàng với 3 hạng thành viên khác 
 
 ## 3. Danh Mục Chi Nhánh & Kho Hàng (Store Locations)
 
-| Mã chi nhánh | Tên chi nhánh | Địa chỉ | Vai trò |
-|:---:|:---|:---|:---:|
-| `HQ-001` | **Kho Tổng & Showroom Chính** | 123 Nguyễn Huệ, P. Bến Nghé, Quận 1, TP. Hồ Chí Minh | Trụ sở chính / Kho trung tâm |
-| `SH-CG` | **Showroom Cầu Giấy** | 45 Xuân Thủy, P. Dịch Vọng Hậu, Q. Cầu Giấy, Hà Nội | Showroom bán lẻ & Kho vệ tinh |
-| `SH-TD` | **Showroom Thủ Đức** | 78 Võ Văn Ngân, P. Bình Thọ, TP. Thủ Đức, TP. Hồ Chí Minh | Showroom bán lẻ |
+| Mã chi nhánh | Tên chi nhánh | Địa chỉ | Email liên hệ | Vai trò |
+|:---:|:---|:---|:---|:---:|
+| `HQ-001` | **CANMAKE BEAUTY Flagship Quận 1 (Kho Tổng)** | 123 Nguyễn Huệ, P. Bến Nghé, Quận 1, TP. Hồ Chí Minh | `hq.q1@canmakebeauty.vn` | Trụ sở chính / Kho trung tâm |
+| `SH-CG` | **CANMAKE BEAUTY Cầu Giấy** | 45 Xuân Thủy, P. Dịch Vọng Hậu, Q. Cầu Giấy, Hà Nội | `caugiay.hn@canmakebeauty.vn` | Showroom bán lẻ & Kho vệ tinh |
+| `SH-TD` | **CANMAKE BEAUTY Thủ Đức** | 78 Võ Văn Ngân, P. Bình Thọ, TP. Thủ Đức, TP. Hồ Chí Minh | `thuduc.hcm@canmakebeauty.vn` | Showroom bán lẻ |
 
 ---
 

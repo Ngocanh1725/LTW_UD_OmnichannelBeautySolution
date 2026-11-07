@@ -20,7 +20,7 @@ namespace Omnichannel.Web.Controllers
         private readonly ICartService? _cartService;
         private readonly ILogger<WishlistController> _logger;
 
-        private const string CartCookieKey = "OmnichannelBeauty_CartId";
+        private const string CartCookieKey = "CanmakeBeauty_CartId";
 
         public WishlistController(
             ApplicationDbContext dbContext,
@@ -317,7 +317,7 @@ namespace Omnichannel.Web.Controllers
                 return Json(new StockAlertResponse
                 {
                     Success = true,
-                    Message = "Bạn đã đăng ký nhận thông báo cho sản phẩm này rồi! Omni Beauty sẽ gửi tin nhắn đến bạn ngay khi kho vừa nhập hàng mới."
+                    Message = "Bạn đã đăng ký nhận thông báo cho sản phẩm này rồi! Canmake Beauty sẽ gửi tin nhắn đến bạn ngay khi kho vừa nhập hàng mới."
                 });
             }
 
@@ -343,7 +343,7 @@ namespace Omnichannel.Web.Controllers
             return Json(new StockAlertResponse
             {
                 Success = true,
-                Message = $"🎉 Đăng ký thành công! Omni Beauty sẽ tự động thông báo qua {(string.IsNullOrEmpty(email) ? "SMS" : "Email")} ngay khi \"{product.Name}\" có hàng trở lại."
+                Message = $"🎉 Đăng ký thành công! Canmake Beauty sẽ tự động thông báo qua {(string.IsNullOrEmpty(email) ? "SMS" : "Email")} ngay khi \"{product.Name}\" có hàng trở lại."
             });
         }
 
@@ -368,12 +368,12 @@ namespace Omnichannel.Web.Controllers
                 ProductName = p.Name,
                 Slug = p.Slug,
                 Sku = p.Sku,
-                ThumbnailUrl = !string.IsNullOrEmpty(p.ThumbnailUrl) ? p.ThumbnailUrl : "/images/branding/default-product.png",
+                ThumbnailUrl = ProductImageSourceRegistry.ResolveProductImageUrl(p.ThumbnailUrl, p.Sku, p.Slug, p.Name),
                 Price = price,
                 OriginalPrice = originalPrice,
                 DiscountPercent = discountPercent,
                 CategoryName = p.Category?.Name ?? "Mỹ phẩm cao cấp",
-                BrandName = p.Brand?.Name ?? "Omni Beauty",
+                BrandName = p.Brand?.Name ?? "Canmake Beauty",
                 IsInStock = inStock,
                 StockQuantity = totalStock,
                 Rating = 4.9,
@@ -418,7 +418,7 @@ namespace Omnichannel.Web.Controllers
                     ProductName = "Nước hoa Maison Margiela Replica Jazz Club EDT 100ml",
                     Slug = "maison-margiela-replica-jazz-club",
                     Sku = "MM-REPLICA-JAZZ-100",
-                    ThumbnailUrl = "/images/products/perfume-jazz-club.jpg",
+                    ThumbnailUrl = "/images/products/perfume/nuoc-hoa-unisex-maison-margiela-replica-jazz-club-100ml.jpg",
                     Price = 3450000m,
                     OriginalPrice = 3850000m,
                     DiscountPercent = 10,
@@ -437,7 +437,7 @@ namespace Omnichannel.Web.Controllers
                     ProductName = "Kem Dưỡng Ẩm Chuyên Sâu Clinique Moisture Surge 100H Auto-Replenishing 50ml",
                     Slug = "clinique-moisture-surge-100h",
                     Sku = "CLINIQUE-MS-50ML",
-                    ThumbnailUrl = "/images/products/clinique-moisture.jpg",
+                    ThumbnailUrl = "/images/products/skincare/gel-duong-am-clinique-moisture-surge-100h-50ml.jpg",
                     Price = 1035000m,
                     OriginalPrice = 1150000m,
                     DiscountPercent = 10,
@@ -456,7 +456,7 @@ namespace Omnichannel.Web.Controllers
                     ProductName = "Serum Phục Hồi & Cấp Nước Chuyên Sâu SkinCeuticals Hydrating B5 Gel 30ml",
                     Slug = "skinceuticals-hydrating-b5-gel",
                     Sku = "SKIN-B5-30ML",
-                    ThumbnailUrl = "/images/products/skinceuticals-b5.jpg",
+                    ThumbnailUrl = "/images/products/skincare/serum-phuc-hoi-la-roche-posay-hyalu-b5-pure-30ml.jpg",
                     Price = 2150000m,
                     OriginalPrice = 2400000m,
                     DiscountPercent = 10,
@@ -475,7 +475,7 @@ namespace Omnichannel.Web.Controllers
                     ProductName = "Son Thỏi Lì Cao Cấp MAC Matte Lipstick - Tone 707 Chili 3g",
                     Slug = "mac-matte-lipstick-chili",
                     Sku = "MAC-LIP-CHILI-3G",
-                    ThumbnailUrl = "/images/products/mac-chili.jpg",
+                    ThumbnailUrl = "/images/products/makeup/son-thoi-li-mac-macximal-silky-matte-lipstick-ruby-woo-35g.jpg",
                     Price = 650000m,
                     OriginalPrice = null,
                     DiscountPercent = 0,

@@ -1,7 +1,18 @@
+@using Microsoft.AspNetCore.Authentication
+@using Omnichannel.Application.Common
 @model Omnichannel.Web.Models.HomeSectionsViewModel
+@{
+    var adminAuthResult = Context.RequestServices?.GetService(typeof(IAuthenticationService)) != null
+        ? await Context.AuthenticateAsync(AuthConstants.AdminCookieScheme)
+        : null;
+    bool isAdminOrStaff = (adminAuthResult?.Succeeded == true && adminAuthResult.Principal?.Identity?.IsAuthenticated == true) ||
+        (User?.Identity?.IsAuthenticated == true &&
+         (User.IsInRole("SuperAdmin") || User.IsInRole("SUPER_ADMIN") || User.HasClaim("IsStaff", "true")));
+}
 
 @if (Model != null && Model.Sections.Any())
 {
+    <div id="dynamic-sections-container">
     @foreach (var item in Model.Sections)
     {
         var code = item.Section.SectionCode.ToUpperInvariant();
@@ -9,31 +20,48 @@
         @if (code == "HERO_SLIDER" && item.Banners.Any())
         {
             <!-- 1. HERO SLIDER SECTION (Dynamic from DB) -->
-            <section class="relative bg-charcoal text-white overflow-hidden" 
-                     x-data="{
-                         activeSlide: 0,
-                         timer: null,
-                         totalSlides: @item.Banners.Count,
-                         init() {
-                             if (this.totalSlides > 1) {
-                                 this.timer = setInterval(() => { this.next() }, 6000);
-                             }
-                         },
-                         next() {
-                             this.activeSlide = (this.activeSlide + 1) % this.totalSlides;
-                         },
-                         prev() {
-                             this.activeSlide = (this.activeSlide - 1 + this.totalSlides) % this.totalSlides;
-                         },
-                         goTo(idx) {
-                             this.activeSlide = idx;
-                         }
-                     }">
+            <section id="section-@item.Section.Id" data-section-id="@item.Section.Id" data-section-key="hero_banner" data-section-code="@code" class="relative bg-charcoal text-white overflow-hidden" 
+                     x-data="heroSliderComponent(@item.Banners.Count)">
                 <div class="relative min-h-[460px] sm:min-h-[540px] lg:min-h-[620px] flex items-center">
                     @for (int i = 0; i < item.Banners.Count; i++)
                     {
                         var b = item.Banners[i];
-                        var bannerImg = b.DesktopMediaId.HasValue ? $"/media/{b.DesktopMediaId}" : (!string.IsNullOrEmpty(b.DesktopImageUrl) ? b.DesktopImageUrl : (!string.IsNullOrEmpty(b.ImageUrl) ? b.ImageUrl : "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&q=80"));
+                        var bannerImg = !string.IsNullOrEmpty(b.DesktopImageUrl)
+                            ? b.DesktopImageUrl
+                            : (b.DesktopMediaId.HasValue
+                                ? $"/media/{b.DesktopMediaId}"
+                                : (!string.IsNullOrEmpty(b.ImageUrl) ? b.ImageUrl : "/images/banners/hero-banner-summer-beauty.jpg"));
+                        var mobileBannerImg = !string.IsNullOrEmpty(b.MobileImageUrl)
+                            ? b.MobileImageUrl
+                            : (b.MobileMediaId.HasValue ? $"/media/{b.MobileMediaId}" : null);
+                        var bannerWebp = (bannerImg.StartsWith("/images/banners/", StringComparison.OrdinalIgnoreCase) && !bannerImg.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
+                            ? System.IO.Path.ChangeExtension(bannerImg, ".webp")
+                            : null;
+                        bool canEditBanner = isAdminOrStaff;
+
+                        var style = (item.BannerStyles != null && item.BannerStyles.TryGetValue(b.Id, out var customStyle) && customStyle != null)
+                            ? customStyle
+                            : new Omnichannel.Application.DTOs.Cms.BannerStyleConfigDto();
+
+                        string imgFitInline = style.ImageObjectFit switch
+                        {
+                            "contain" => "object-fit: contain;",
+                            "fill" => "object-fit: fill;",
+                            _ => "object-fit: cover;"
+                        };
+
+                        string imgPosInline = style.ImagePosition switch
+                        {
+                            "top" => "object-position: center top;",
+                            "bottom" => "object-position: center bottom;",
+                            "left" => "object-position: left center;",
+                            "right" => "object-position: right center;",
+                            _ => "object-position: center center;"
+                        };
+
+                        string imgScaleInline = (style.ImageScale > 100 && style.ImageScale <= 150)
+                            ? $"transform: scale({(style.ImageScale / 100.0).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)});"
+                            : "";
 
                         <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out"
                              x-show="activeSlide === @i"
@@ -45,36 +73,178 @@
                              x-transition:leave-end="opacity-0 scale-95"
                              style="@(i == 0 ? "" : "display: none;")">
                             
-                            <!-- Background Image with Gradient Overlay -->
-                            <img src="@bannerImg" alt="@b.Title" class="w-full h-full object-cover object-center" onerror="this.src='https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&q=80'" />
-                            <div class="absolute inset-0 bg-gradient-to-r from-charcoal/90 via-charcoal/60 to-transparent"></div>
+                            <!-- Background Image with Gradient Overlay & LCP Optimization -->
+                            <picture class="block w-full h-full overflow-hidden">
+                                @if (!string.IsNullOrEmpty(mobileBannerImg))
+                                {
+                                    <source media="(max-width: 767px)" srcset="@mobileBannerImg" />
+                                }
+                                @if (!string.IsNullOrEmpty(bannerWebp))
+                                {
+                                    <source srcset="@bannerWebp" type="image/webp" />
+                                }
+                                @if (i == 0)
+                                {
+                                    <img src="@bannerImg" alt="@b.Title" width="1600" height="620" fetchpriority="high" decoding="async" class="w-full h-full transition-transform duration-500" style="@imgFitInline @imgPosInline @imgScaleInline" onerror="this.onerror=null;this.src='/images/banners/hero-banner-summer-beauty.jpg';" />
+                                }
+                                else
+                                {
+                                    <img src="@bannerImg" alt="@b.Title" width="1600" height="620" decoding="async" class="w-full h-full transition-transform duration-500" style="@imgFitInline @imgPosInline @imgScaleInline" onerror="this.onerror=null;this.src='/images/banners/hero-banner-summer-beauty.jpg';" />
+                                }
+                            </picture>
+                            @{
+
+                                string posFlexClass = style.BoxPosition switch
+                                {
+                                    "center" => "justify-center text-center items-center mx-auto",
+                                    "right" => "justify-end text-right items-end ml-auto",
+                                    _ => "justify-start text-left items-start"
+                                };
+
+                                string widthClass = style.BoxWidth switch
+                                {
+                                    "sm" => "max-w-md",
+                                    "lg" => "max-w-2xl",
+                                    "xl" => "max-w-4xl",
+                                    _ => "max-w-xl"
+                                };
+
+                                string radiusClass = style.BoxRadius switch
+                                {
+                                    "none" => "rounded-none",
+                                    "md" => "rounded-xl",
+                                    "xl" => "rounded-2xl",
+                                    _ => "rounded-3xl"
+                                };
+
+                                string frameStyleClass = style.BoxStyle switch
+                                {
+                                    "glass-dark" => $"bg-charcoal/60 backdrop-blur-md border border-white/25 p-6 sm:p-8 shadow-2xl {radiusClass}",
+                                    "glass-light" => $"bg-white/80 backdrop-blur-md border border-white/80 p-6 sm:p-8 shadow-2xl {radiusClass}",
+                                    "rose-luxury" => $"bg-gradient-to-br from-[#B8336A]/80 via-[#2B1B24]/80 to-[#E8618C]/70 backdrop-blur-md border border-[#F7C6D4]/60 p-6 sm:p-8 shadow-2xl {radiusClass}",
+                                    "solid-dark" => $"bg-[#2B1B24]/95 border border-[#E8618C]/50 p-6 sm:p-8 shadow-2xl {radiusClass}",
+                                    "double-border" => $"bg-charcoal/50 backdrop-blur-sm border-4 border-double border-[#F7C6D4]/90 p-6 sm:p-8 shadow-2xl {radiusClass}",
+                                    _ => "bg-transparent p-0"
+                                };
+
+                                string fontStyleInline = style.TitleFont switch
+                                {
+                                    "sans" => "font-family: 'Quicksand', 'Inter', sans-serif;",
+                                    "editorial" => "font-family: Georgia, 'Playfair Display', serif; font-style: italic;",
+                                    "mono" => "font-family: 'JetBrains Mono', monospace; letter-spacing: -0.02em;",
+                                    _ => "font-family: 'Playfair Display', Georgia, serif;"
+                                };
+
+                                string titleSizeClass = style.TitleSize switch
+                                {
+                                    "sm" => "text-2xl sm:text-4xl font-bold leading-tight",
+                                    "md" => "text-3xl sm:text-5xl font-bold leading-tight",
+                                    "xl" => "text-4xl sm:text-6xl lg:text-7xl font-extrabold leading-none",
+                                    _ => "text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight"
+                                };
+
+                                bool isDarkText = style.TextColorTheme == "dark" || (style.BoxStyle == "glass-light" && style.TextColorTheme == "white");
+                                string titleColorInline = style.TextColorTheme switch
+                                {
+                                    "cream" => "color: #FFF4F7;",
+                                    "gold" => "color: #FDE68A;",
+                                    "dark" => "color: #2B1B24;",
+                                    _ => isDarkText ? "color: #2B1B24;" : "color: #FFFFFF;"
+                                };
+
+                                string subtitleColorInline = style.TextColorTheme switch
+                                {
+                                    "cream" => "color: #F7C6D4;",
+                                    "gold" => "color: #FEF3C7;",
+                                    "dark" => "color: #4A3040;",
+                                    _ => isDarkText ? "color: #4A3040;" : "color: #E2E8F0;"
+                                };
+
+                                string btnPrimaryClass = style.ButtonStyle switch
+                                {
+                                    "white-solid" => "bg-white hover:bg-rose-50 text-charcoal shadow-xl",
+                                    "dark-luxury" => "bg-[#2B1B24] hover:bg-black text-white border border-[#F7C6D4]/50 shadow-xl",
+                                    "glass-outline" => "bg-white/15 hover:bg-white/30 text-white border-2 border-white backdrop-blur-md shadow-lg",
+                                    _ => "bg-gradient-to-r from-magenta-accent to-pink-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-xl shadow-magenta-accent/30"
+                                };
+                            }
+
+                            @if (style.ShowOverlayGradient && style.OverlayOpacity > 0)
+                            {
+                                <div class="absolute inset-0 bg-gradient-to-r from-charcoal via-charcoal/70 to-transparent pointer-events-none"
+                                     style="opacity: @((style.OverlayOpacity / 100.0).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));"></div>
+                            }
+
+                            @if (canEditBanner)
+                            {
+                                <div class="absolute top-4 right-4 z-30 flex items-center gap-2">
+                                    @if (b.Id > 0)
+                                    {
+                                        <a href="/Admin/Banner/Edit/@b.Id" class="px-3.5 py-2 rounded-full bg-white/95 hover:bg-white text-charcoal font-bold text-xs shadow-lg flex items-center gap-1.5 transition hover:scale-105">
+                                            <i class="fa-solid fa-wand-magic-sparkles text-magenta-accent"></i>
+                                            <span>Tùy Chỉnh Ảnh & Khung Chữ</span>
+                                        </a>
+                                    }
+                                    <a href="/Admin/Banner" class="px-3.5 py-2 rounded-full bg-charcoal/80 hover:bg-charcoal text-white border border-white/20 font-semibold text-xs shadow-lg flex items-center gap-1.5 backdrop-blur-md transition">
+                                        <i class="fa-solid fa-sliders"></i>
+                                        <span>Quản Lý Tất Cả Banner</span>
+                                    </a>
+                                </div>
+                            }
 
                             <!-- Content Floating Overlay -->
-                            <div class="absolute inset-0 flex items-center">
-                                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-                                    <div class="max-w-xl space-y-4">
-                                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-magenta-accent/20 border border-magenta-accent/40 text-rose-300 text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
-                                            <i class="fa-solid fa-sparkles text-amber-400"></i>
-                                            <span>Bộ Sưu Tập Mới 2026</span>
-                                        </div>
-                                        <h1 class="font-serif text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight text-white drop-shadow-md">
-                                            @b.Title
-                                        </h1>
-                                        <p class="text-sm sm:text-base text-slate-200 font-sans leading-relaxed line-clamp-3">
-                                            @(b.Subtitle ?? "Khám phá chu trình chăm sóc sắc đẹp đa tầng khoa học chuẩn spa và các dòng mỹ phẩm cao cấp.")
-                                        </p>
-                                        <div class="pt-2 flex items-center gap-4">
-                                            <a href="@(b.LinkUrl ?? "/category/all")" class="px-7 py-3.5 rounded-full bg-gradient-to-r from-magenta-accent to-pink-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold text-sm shadow-xl shadow-magenta-accent/30 hover:scale-105 transition-all duration-300 flex items-center gap-2">
-                                                <span>@(b.ButtonText ?? "Khám Phá Ngay")</span>
-                                                <i class="fa-solid fa-arrow-right text-xs"></i>
-                                            </a>
-                                            <a href="/clearance-fefo" class="px-5 py-3.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-sm backdrop-blur-md transition">
-                                                Deal FEFO -50%
-                                            </a>
+                            @if (style.ShowContentBox)
+                            {
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex @(style.BoxPosition == "center" ? "justify-center" : (style.BoxPosition == "right" ? "justify-end" : "justify-start"))">
+                                        <div class="@widthClass w-full space-y-4 @frameStyleClass @(style.BoxPosition == "center" ? "text-center" : (style.BoxPosition == "right" ? "text-right" : "text-left"))">
+                                            @if (style.ShowBadge && !string.IsNullOrWhiteSpace(style.BadgeText))
+                                            {
+                                                <div>
+                                                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full @(isDarkText ? "bg-magenta-accent/15 border border-magenta-accent/40 text-magenta-accent" : "bg-magenta-accent/25 border border-magenta-accent/50 text-rose-200") text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
+                                                        <i class="fa-solid fa-sparkles text-amber-400"></i>
+                                                        <span>@style.BadgeText</span>
+                                                    </div>
+                                                </div>
+                                            }
+                                            @if (style.ShowTitle && !string.IsNullOrWhiteSpace(b.Title))
+                                            {
+                                                <h1 class="@titleSizeClass drop-shadow-md" style="@fontStyleInline @titleColorInline">
+                                                    @b.Title
+                                                </h1>
+                                            }
+                                            @if (style.ShowSubtitle && !string.IsNullOrWhiteSpace(b.Subtitle))
+                                            {
+                                                <p class="text-sm sm:text-base font-sans leading-relaxed line-clamp-3" style="@subtitleColorInline">
+                                                    @b.Subtitle
+                                                </p>
+                                            }
+                                            @if (style.ShowPrimaryButton || style.ShowSecondaryButton)
+                                            {
+                                                <div class="pt-2 flex flex-wrap items-center gap-3.5 @(style.BoxPosition == "center" ? "justify-center" : (style.BoxPosition == "right" ? "justify-end" : "justify-start"))">
+                                                    @if (style.ShowPrimaryButton)
+                                                    {
+                                                        <a href="@(string.IsNullOrWhiteSpace(b.LinkUrl) ? "/category/all" : b.LinkUrl)" class="px-7 py-3.5 rounded-full @btnPrimaryClass font-bold text-sm hover:scale-105 transition-all duration-300 inline-flex items-center gap-2">
+                                                            <span>@(string.IsNullOrWhiteSpace(b.ButtonText) ? "Khám Phá Ngay" : b.ButtonText)</span>
+                                                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                                                        </a>
+                                                    }
+                                                    @if (style.ShowSecondaryButton && !string.IsNullOrWhiteSpace(style.SecondaryButtonText))
+                                                    {
+                                                        <a href="@(string.IsNullOrWhiteSpace(style.SecondaryButtonUrl) ? "/clearance-fefo" : style.SecondaryButtonUrl)" class="px-5 py-3.5 rounded-full @(isDarkText ? "bg-charcoal/10 hover:bg-charcoal/20 border border-charcoal/25 text-charcoal" : "bg-white/15 hover:bg-white/25 border border-white/30 text-white") font-semibold text-sm backdrop-blur-md transition inline-flex items-center">
+                                                            @style.SecondaryButtonText
+                                                        </a>
+                                                    }
+                                                </div>
+                                            }
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            }
+                            else if (!string.IsNullOrWhiteSpace(b.LinkUrl))
+                            {
+                                <a href="@b.LinkUrl" class="absolute inset-0 z-10" aria-label="@b.Title"></a>
+                            }
                         </div>
                     }
 
@@ -105,7 +275,7 @@
         else if (code == "FEATURED_CATEGORIES" && item.Categories.Any())
         {
             <!-- 2. FEATURED CATEGORIES SECTION (Dynamic from DB) -->
-            <section class="py-14 sm:py-20 bg-gradient-to-b from-[#fffdfd] to-pastel-rose/30">
+            <section id="section-@item.Section.Id" data-section-id="@item.Section.Id" data-section-key="featured_categories" data-section-code="@code" class="section-deferred py-14 sm:py-20 bg-gradient-to-b from-[#fffdfd] to-pastel-rose/30">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
                         <div>
@@ -113,12 +283,12 @@
                                 <i class="fa-solid fa-gem text-rose-gold"></i>
                                 <span>Phân Loại Khoa Học</span>
                             </span>
-                            <h2 class="font-serif text-2xl sm:text-4xl font-bold text-charcoal">
+                            <h2 data-cms-title class="font-serif text-2xl sm:text-4xl font-bold text-charcoal">
                                 @item.Section.Title
                             </h2>
                             @if (!string.IsNullOrEmpty(item.Section.Subtitle))
                             {
-                                <p class="text-xs sm:text-sm text-slate-500 mt-1 font-sans">
+                                <p data-cms-subtitle class="text-xs sm:text-sm text-slate-500 mt-1 font-sans">
                                     @item.Section.Subtitle
                                 </p>
                             }
@@ -133,11 +303,15 @@
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
                         @foreach (var cat in item.Categories)
                         {
-                            var catImg = cat.MediaAssetId.HasValue ? $"/media/{cat.MediaAssetId}" : (!string.IsNullOrEmpty(cat.ImageUrl) ? cat.ImageUrl : "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=300&h=300&fit=crop");
+                            var catImg = ProductImageResolver.GetCategoryImageUrl(cat.Slug, cat.ImageUrl);
+                            var catWebp = ProductImageResolver.GetWebpImageUrl(catImg);
 
                             <a href="/tim-kiem?categorySlug=@cat.Slug" class="group flex flex-col items-center text-center p-4 rounded-3xl bg-white border border-rose-100/80 shadow-xs hover:shadow-xl hover:border-pink-300 transition-all duration-300 hover:-translate-y-1">
-                                <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden mb-3 bg-pastel-rose/50 p-2 flex items-center justify-center">
-                                    <img src="@catImg" alt="@cat.Name" class="w-full h-full object-cover rounded-xl group-hover:scale-110 transition duration-300" onerror="this.src='/images/product-placeholder.svg'" />
+                                <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden mb-3 bg-pastel-rose/50 p-2 flex items-center justify-center" style="aspect-ratio: 1/1;">
+                                    <picture class="block w-full h-full">
+                                        <source srcset="@catWebp" type="image/webp" />
+                                        <img src="@catImg" alt="@cat.Name" width="96" height="96" decoding="async" class="w-full h-full object-cover rounded-xl group-hover:scale-110 transition duration-300 will-change-transform" onerror="this.onerror=null;if(this.parentElement&&this.parentElement.tagName==='PICTURE'){this.parentElement.querySelectorAll('source').forEach(function(s){s.remove();});}this.src='@ProductImageResolver.PlaceholderUrl';" />
+                                    </picture>
                                 </div>
                                 <h3 class="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-magenta-accent transition line-clamp-1">
                                     @cat.Name
@@ -149,86 +323,15 @@
                 </div>
             </section>
         }
-        else if (code == "FLASH_SALE" && item.FlashSaleProducts.Any())
+        else if (code == "FLASH_SALE" && ((item.FlashSaleCampaign?.Products.Any() ?? false) || item.FlashSaleProducts.Any()))
         {
-            <!-- 3. FLASH SALE SECTION (Dynamic from DB) -->
-            <section class="py-14 sm:py-20 bg-gradient-to-r from-rose-900 via-charcoal to-slate-900 text-white relative overflow-hidden">
-                <div class="absolute -right-24 -bottom-24 w-96 h-96 rounded-full bg-magenta-accent/10 blur-3xl pointer-events-none"></div>
-
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
-                        <div>
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-bold uppercase tracking-wider mb-2">
-                                <i class="fa-solid fa-bolt text-amber-400 animate-bounce"></i>
-                                <span>Giờ Vàng Giá Sốc • FEFO Minh Bạch</span>
-                            </div>
-                            <h2 class="font-serif text-2xl sm:text-4xl font-bold text-white">
-                                @item.Section.Title
-                            </h2>
-                            @if (!string.IsNullOrEmpty(item.Section.Subtitle))
-                            {
-                                <p class="text-xs sm:text-sm text-slate-300 mt-1 font-sans">
-                                    @item.Section.Subtitle
-                                </p>
-                            }
-                        </div>
-                        <a href="/clearance-fefo" class="text-xs font-bold text-amber-300 hover:text-white flex items-center gap-1.5 group shrink-0">
-                            <span>Xem toàn bộ Deal FEFO</span>
-                            <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
-                        </a>
-                    </div>
-
-                    <!-- Products Grid -->
-                    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-                        @foreach (var prod in item.FlashSaleProducts)
-                        {
-                            var prodImg = prod.ThumbnailMediaId.HasValue ? $"/media/{prod.ThumbnailMediaId}" : (!string.IsNullOrEmpty(prod.ThumbnailUrl) ? prod.ThumbnailUrl : "/images/product-placeholder.svg");
-                            var price = prod.SellingPrice;
-                            var discountPrice = prod.DiscountPrice ?? (price * 0.7m);
-                            var discountPercent = price > 0 ? (int)Math.Round((1 - (discountPrice / price)) * 100) : 30;
-
-                            <div class="group rounded-3xl bg-white/95 backdrop-blur-md text-charcoal border border-white/20 p-4 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between">
-                                <div>
-                                    <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-slate-50 mb-3 flex items-center justify-center p-3">
-                                        <img src="@prodImg" alt="@prod.Name" class="w-full h-full object-contain group-hover:scale-105 transition duration-300" onerror="this.src='/images/product-placeholder.svg'" />
-                                        
-                                        <!-- Sale Badge -->
-                                        <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-bold tracking-wider shadow-sm">
-                                            -@discountPercent%
-                                        </span>
-                                    </div>
-
-                                    <div class="text-[10px] font-bold text-rose-gold uppercase tracking-wider mb-1">
-                                        @(prod.Supplier?.Name ?? "Omni Beauty")
-                                    </div>
-                                    <a href="/san-pham/@prod.Slug" class="block font-bold text-xs sm:text-sm text-slate-800 group-hover:text-magenta-accent transition line-clamp-2">
-                                        @prod.Name
-                                    </a>
-                                </div>
-
-                                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                                    <div>
-                                        <div class="text-xs sm:text-base font-bold text-rose-600 font-mono">
-                                            @discountPrice.ToString("N0") ₫
-                                        </div>
-                                        <div class="text-[10px] text-slate-400 line-through font-mono">
-                                            @price.ToString("N0") ₫
-                                        </div>
-                                    </div>
-                                    <a href="/san-pham/@prod.Slug" class="h-9 w-9 rounded-xl bg-pastel-rose text-magenta-accent hover:bg-magenta-accent hover:text-white flex items-center justify-center transition shadow-xs" title="Xem chi tiết">
-                                        <i class="fa-solid fa-cart-plus text-xs"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                </div>
-            </section>
+            <!-- 3. FLASH SALE SECTION (Real-Time Countdown & Dynamic Progress Bar) -->
+            <partial name="Components/DynamicSection/_FlashSale" model="item" />
         }
         else if (code == "BEST_SELLERS" && item.BestSellers.Any())
         {
             <!-- 4. BEST SELLERS SECTION (Dynamic from DB) -->
-            <section class="py-14 sm:py-20 bg-[#fffdfd]">
+            <section class="section-deferred py-14 sm:py-20 bg-[#fffdfd]">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
                         <div>
@@ -256,46 +359,7 @@
                     <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                         @foreach (var prod in item.BestSellers)
                         {
-                            var prodImg = prod.ThumbnailMediaId.HasValue ? $"/media/{prod.ThumbnailMediaId}" : (!string.IsNullOrEmpty(prod.ThumbnailUrl) ? prod.ThumbnailUrl : "/images/product-placeholder.svg");
-
-                            <div class="group rounded-3xl bg-white border border-rose-100/80 p-4 shadow-xs hover:shadow-xl hover:border-pink-200 transition-all duration-300 flex flex-col justify-between">
-                                <div>
-                                    <div class="relative w-full aspect-square rounded-2xl overflow-hidden bg-slate-50 mb-3 flex items-center justify-center p-3">
-                                        <img src="@prodImg" alt="@prod.Name" class="w-full h-full object-contain group-hover:scale-105 transition duration-300" onerror="this.src='/images/product-placeholder.svg'" />
-                                        
-                                        @if (prod.IsFeatured)
-                                        {
-                                            <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-bold tracking-wider shadow-sm flex items-center gap-1">
-                                                <i class="fa-solid fa-star text-[8px]"></i> HOT
-                                            </span>
-                                        }
-                                    </div>
-
-                                    <div class="text-[10px] font-bold text-rose-gold uppercase tracking-wider mb-1">
-                                        @(prod.Supplier?.Name ?? "Omni Beauty")
-                                    </div>
-                                    <a href="/san-pham/@prod.Slug" class="block font-bold text-xs sm:text-sm text-slate-800 group-hover:text-magenta-accent transition line-clamp-2">
-                                        @prod.Name
-                                    </a>
-                                </div>
-
-                                <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-                                    <div>
-                                        <div class="text-xs sm:text-base font-bold text-charcoal font-mono">
-                                            @((prod.DiscountPrice ?? prod.SellingPrice).ToString("N0")) ₫
-                                        </div>
-                                        @if (prod.DiscountPrice.HasValue && prod.DiscountPrice.Value < prod.SellingPrice)
-                                        {
-                                            <div class="text-[10px] text-slate-400 line-through font-mono">
-                                                @prod.SellingPrice.ToString("N0") ₫
-                                            </div>
-                                        }
-                                    </div>
-                                    <a href="/san-pham/@prod.Slug" class="h-9 w-9 rounded-xl bg-pastel-rose text-magenta-accent hover:bg-magenta-accent hover:text-white flex items-center justify-center transition shadow-xs" title="Xem chi tiết">
-                                        <i class="fa-solid fa-arrow-right text-xs"></i>
-                                    </a>
-                                </div>
-                            </div>
+                            <partial name="_ProductCard" model="prod" />
                         }
                     </div>
                 </div>
@@ -305,35 +369,225 @@
         @if (code == "MID_BANNER")
         {
             var banner = item.MidBanners.FirstOrDefault();
-            var bgImg = banner != null && !string.IsNullOrEmpty(banner.DesktopImageUrl) ? banner.DesktopImageUrl : "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&q=80";
+            var bgImg = banner != null
+                ? (!string.IsNullOrEmpty(banner.DesktopImageUrl)
+                    ? banner.DesktopImageUrl
+                    : (banner.DesktopMediaId.HasValue
+                        ? $"/media/{banner.DesktopMediaId}"
+                        : (!string.IsNullOrEmpty(banner.ImageUrl) ? banner.ImageUrl : "/images/banners/banner-routine-kbeauty.jpg")))
+                : "/images/banners/banner-routine-kbeauty.jpg";
+            var mobileMidImg = banner != null
+                ? (!string.IsNullOrEmpty(banner.MobileImageUrl)
+                    ? banner.MobileImageUrl
+                    : (banner.MobileMediaId.HasValue ? $"/media/{banner.MobileMediaId}" : null))
+                : null;
+            var bgWebp = (bgImg.StartsWith("/images/banners/", StringComparison.OrdinalIgnoreCase) && !bgImg.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
+                ? System.IO.Path.ChangeExtension(bgImg, ".webp")
+                : null;
             var title = banner?.Title ?? item.Section.Title;
             var sub = banner?.Subtitle ?? item.Section.Subtitle ?? "Khám phá phong cách trang điểm chuẩn chuyên gia và các sản phẩm thuần chay";
             var link = banner?.LinkUrl ?? "/category/all";
+            var btnText = !string.IsNullOrWhiteSpace(banner?.ButtonText) ? banner.ButtonText : "Khám Phá Ngay";
+
+            var midStyle = (banner != null && item.BannerStyles != null && item.BannerStyles.TryGetValue(banner.Id, out var customMidStyle) && customMidStyle != null)
+                ? customMidStyle
+                : new Omnichannel.Application.DTOs.Cms.BannerStyleConfigDto
+                {
+                    BadgeText = "Bộ Sưu Tập Độc Quyền",
+                    ShowSecondaryButton = false
+                };
+
+            string midHeightClass = midStyle.BannerHeight switch
+            {
+                "sm" => "min-h-[260px] sm:min-h-[300px]",
+                "lg" => "min-h-[420px] sm:min-h-[500px]",
+                "xl" => "min-h-[500px] sm:min-h-[600px]",
+                _ => "min-h-[320px] sm:min-h-[380px]"
+            };
+
+            string midContainerRadiusClass = midStyle.ContainerRadius switch
+            {
+                "none" => "rounded-none",
+                "xl" => "rounded-2xl",
+                _ => "rounded-3xl"
+            };
+
+            string midImgFitInline = midStyle.ImageObjectFit switch
+            {
+                "contain" => "object-fit: contain;",
+                "fill" => "object-fit: fill;",
+                _ => "object-fit: cover;"
+            };
+
+            string midImgPosInline = midStyle.ImagePosition switch
+            {
+                "top" => "object-position: center top;",
+                "bottom" => "object-position: center bottom;",
+                "left" => "object-position: left center;",
+                "right" => "object-position: right center;",
+                _ => "object-position: center center;"
+            };
+
+            string midImgScaleInline = (midStyle.ImageScale > 100 && midStyle.ImageScale <= 150)
+                ? $"transform: scale({(midStyle.ImageScale / 100.0).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)});"
+                : "";
+
+            string midWidthClass = midStyle.BoxWidth switch
+            {
+                "sm" => "max-w-md",
+                "lg" => "max-w-2xl",
+                "xl" => "max-w-4xl",
+                _ => "max-w-xl"
+            };
+
+            string midBoxRadiusClass = midStyle.BoxRadius switch
+            {
+                "none" => "rounded-none",
+                "md" => "rounded-xl",
+                "xl" => "rounded-2xl",
+                _ => "rounded-3xl"
+            };
+
+            string midFrameStyleClass = midStyle.BoxStyle switch
+            {
+                "glass-dark" => $"bg-charcoal/60 backdrop-blur-md border border-white/25 p-6 sm:p-10 shadow-2xl {midBoxRadiusClass}",
+                "glass-light" => $"bg-white/80 backdrop-blur-md border border-white/80 p-6 sm:p-10 shadow-2xl {midBoxRadiusClass}",
+                "rose-luxury" => $"bg-gradient-to-br from-[#B8336A]/80 via-[#2B1B24]/80 to-[#E8618C]/70 backdrop-blur-md border border-[#F7C6D4]/60 p-6 sm:p-10 shadow-2xl {midBoxRadiusClass}",
+                "solid-dark" => $"bg-[#2B1B24]/95 border border-[#E8618C]/50 p-6 sm:p-10 shadow-2xl {midBoxRadiusClass}",
+                "double-border" => $"bg-charcoal/50 backdrop-blur-sm border-4 border-double border-[#F7C6D4]/90 p-6 sm:p-10 shadow-2xl {midBoxRadiusClass}",
+                _ => "bg-transparent p-8 sm:p-12"
+            };
+
+            string midFontStyleInline = midStyle.TitleFont switch
+            {
+                "sans" => "font-family: 'Quicksand', 'Inter', sans-serif;",
+                "editorial" => "font-family: Georgia, 'Playfair Display', serif; font-style: italic;",
+                "mono" => "font-family: 'JetBrains Mono', monospace; letter-spacing: -0.02em;",
+                _ => "font-family: 'Playfair Display', Georgia, serif;"
+            };
+
+            string midTitleSizeClass = midStyle.TitleSize switch
+            {
+                "sm" => "text-xl sm:text-3xl font-bold leading-tight",
+                "md" => "text-2xl sm:text-4xl font-bold leading-tight",
+                "xl" => "text-3xl sm:text-5xl lg:text-6xl font-extrabold leading-none",
+                _ => "text-2xl sm:text-4xl lg:text-5xl font-bold leading-tight"
+            };
+
+            bool isMidDarkText = midStyle.TextColorTheme == "dark" || (midStyle.BoxStyle == "glass-light" && midStyle.TextColorTheme == "white");
+            string midTitleColorInline = midStyle.TextColorTheme switch
+            {
+                "cream" => "color: #FFF4F7;",
+                "gold" => "color: #FDE68A;",
+                "dark" => "color: #2B1B24;",
+                _ => isMidDarkText ? "color: #2B1B24;" : "color: #FFFFFF;"
+            };
+
+            string midSubColorInline = midStyle.TextColorTheme switch
+            {
+                "cream" => "color: #F7C6D4;",
+                "gold" => "color: #FEF3C7;",
+                "dark" => "color: #4A3040;",
+                _ => isMidDarkText ? "color: #4A3040;" : "color: #E2E8F0;"
+            };
+
+            string midBtnPrimaryClass = midStyle.ButtonStyle switch
+            {
+                "white-solid" => "bg-white hover:bg-rose-50 text-charcoal shadow-xl",
+                "dark-luxury" => "bg-[#2B1B24] hover:bg-black text-white border border-[#F7C6D4]/50 shadow-xl",
+                "glass-outline" => "bg-white/15 hover:bg-white/30 text-white border-2 border-white backdrop-blur-md shadow-lg",
+                _ => "bg-gradient-to-r from-magenta-accent to-pink-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-lg shadow-magenta-accent/30"
+            };
 
             <!-- 5. MID BANNER SECTION (Dynamic from DB) -->
-            <section class="py-10 bg-slate-50">
+            <section class="section-deferred py-10 bg-slate-50">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="relative rounded-3xl overflow-hidden min-h-[320px] sm:min-h-[380px] flex items-center shadow-2xl">
-                        <img src="@bgImg" alt="@title" class="absolute inset-0 w-full h-full object-cover object-center" />
-                        <div class="absolute inset-0 bg-gradient-to-r from-charcoal/90 via-charcoal/60 to-transparent"></div>
-                        <div class="relative max-w-xl p-8 sm:p-12 space-y-4 text-white">
-                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-magenta-accent/30 border border-magenta-accent/40 text-pink-300 text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
-                                <i class="fa-solid fa-sparkles text-amber-400"></i>
-                                <span>Bộ Sưu Tập Độc Quyền</span>
-                            </span>
-                            <h2 class="font-serif text-2xl sm:text-4xl font-bold leading-tight">
-                                @title
-                            </h2>
-                            <p class="text-xs sm:text-sm text-slate-200 leading-relaxed">
-                                @sub
-                            </p>
-                            <div class="pt-2">
-                                <a href="@link" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gradient-to-r from-magenta-accent to-pink-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-magenta-accent/30 hover:scale-105 transition-all">
-                                    <span>Khám Phá Ngay</span>
-                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    <div class="relative @midContainerRadiusClass overflow-hidden @midHeightClass flex items-center shadow-2xl bg-charcoal">
+                        <picture class="absolute inset-0 block w-full h-full overflow-hidden">
+                            @if (!string.IsNullOrEmpty(mobileMidImg))
+                            {
+                                <source media="(max-width: 767px)" srcset="@mobileMidImg" />
+                            }
+                            @if (!string.IsNullOrEmpty(bgWebp))
+                            {
+                                <source srcset="@bgWebp" type="image/webp" />
+                            }
+                            <img src="@bgImg" alt="@title" width="1200" height="380" decoding="async" class="w-full h-full transition-transform duration-500" style="@midImgFitInline @midImgPosInline @midImgScaleInline" onerror="this.onerror=null;this.src='/images/banners/banner-routine-kbeauty.jpg';" />
+                        </picture>
+
+                        @if (midStyle.ShowOverlayGradient && midStyle.OverlayOpacity > 0)
+                        {
+                            <div class="absolute inset-0 bg-gradient-to-r from-charcoal via-charcoal/70 to-transparent pointer-events-none"
+                                 style="opacity: @((midStyle.OverlayOpacity / 100.0).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));"></div>
+                        }
+
+                        @if (isAdminOrStaff)
+                        {
+                            <div class="absolute top-4 right-4 z-30 flex items-center gap-2">
+                                @if (banner != null && banner.Id > 0)
+                                {
+                                    <a href="/Admin/Banner/Edit/@banner.Id" class="px-3.5 py-2 rounded-full bg-white/95 hover:bg-white text-charcoal font-bold text-xs shadow-lg flex items-center gap-1.5 transition hover:scale-105">
+                                        <i class="fa-solid fa-wand-magic-sparkles text-magenta-accent"></i>
+                                        <span>Tùy Chỉnh Banner Này</span>
+                                    </a>
+                                }
+                                <a href="/Admin/Banner" class="px-3.5 py-2 rounded-full bg-charcoal/80 hover:bg-charcoal text-white border border-white/20 font-semibold text-xs shadow-lg flex items-center gap-1.5 backdrop-blur-md transition">
+                                    <i class="fa-solid fa-sliders"></i>
+                                    <span>Quản Lý Banner</span>
                                 </a>
                             </div>
-                        </div>
+                        }
+
+                        @if (midStyle.ShowContentBox)
+                        {
+                            <div class="relative z-10 w-full flex @(midStyle.BoxPosition == "center" ? "justify-center" : (midStyle.BoxPosition == "right" ? "justify-end" : "justify-start")) @(midStyle.BoxStyle == "transparent" ? "" : "p-6 sm:p-10")">
+                                <div class="@midWidthClass w-full space-y-4 @midFrameStyleClass @(midStyle.BoxPosition == "center" ? "text-center" : (midStyle.BoxPosition == "right" ? "text-right" : "text-left"))">
+                                    @if (midStyle.ShowBadge && !string.IsNullOrWhiteSpace(midStyle.BadgeText))
+                                    {
+                                        <div>
+                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full @(isMidDarkText ? "bg-magenta-accent/15 border border-magenta-accent/40 text-magenta-accent" : "bg-magenta-accent/30 border border-magenta-accent/40 text-pink-200") text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
+                                                <i class="fa-solid fa-sparkles text-amber-400"></i>
+                                                <span>@midStyle.BadgeText</span>
+                                            </span>
+                                        </div>
+                                    }
+                                    @if (midStyle.ShowTitle && !string.IsNullOrWhiteSpace(title))
+                                    {
+                                        <h2 class="@midTitleSizeClass drop-shadow-sm" style="@midFontStyleInline @midTitleColorInline">
+                                            @title
+                                        </h2>
+                                    }
+                                    @if (midStyle.ShowSubtitle && !string.IsNullOrWhiteSpace(sub))
+                                    {
+                                        <p class="text-xs sm:text-sm leading-relaxed" style="@midSubColorInline">
+                                            @sub
+                                        </p>
+                                    }
+                                    @if (midStyle.ShowPrimaryButton || midStyle.ShowSecondaryButton)
+                                    {
+                                        <div class="pt-2 flex flex-wrap items-center gap-3 @(midStyle.BoxPosition == "center" ? "justify-center" : (midStyle.BoxPosition == "right" ? "justify-end" : "justify-start"))">
+                                            @if (midStyle.ShowPrimaryButton)
+                                            {
+                                                <a href="@link" class="inline-flex items-center gap-2 px-6 py-3 rounded-full @midBtnPrimaryClass font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all">
+                                                    <span>@btnText</span>
+                                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                                </a>
+                                            }
+                                            @if (midStyle.ShowSecondaryButton && !string.IsNullOrWhiteSpace(midStyle.SecondaryButtonText))
+                                            {
+                                                <a href="@(string.IsNullOrWhiteSpace(midStyle.SecondaryButtonUrl) ? "/clearance-fefo" : midStyle.SecondaryButtonUrl)" class="inline-flex items-center px-5 py-3 rounded-full @(isMidDarkText ? "bg-charcoal/10 hover:bg-charcoal/20 border border-charcoal/25 text-charcoal" : "bg-white/15 hover:bg-white/25 border border-white/30 text-white") font-semibold text-xs uppercase tracking-wider backdrop-blur-md transition">
+                                                    @midStyle.SecondaryButtonText
+                                                </a>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else if (!string.IsNullOrWhiteSpace(link))
+                        {
+                            <a href="@link" class="absolute inset-0 z-10" aria-label="@title"></a>
+                        }
                     </div>
                 </div>
             </section>
@@ -342,7 +596,7 @@
         @if (code == "BEAUTY_BLOG" && item.BlogPosts.Any())
         {
             <!-- 6. BEAUTY BLOG SECTION (Dynamic from DB) -->
-            <section class="py-16 bg-white border-t border-rose-100/50">
+            <section class="section-deferred py-16 bg-white border-t border-rose-100/50">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
                         <div>
@@ -373,8 +627,8 @@
 
                             <article class="group rounded-3xl bg-slate-50/50 border border-slate-200/80 overflow-hidden hover:shadow-xl hover:border-pink-200 transition-all duration-300 flex flex-col justify-between">
                                 <div>
-                                    <div class="relative w-full aspect-[16/10] overflow-hidden bg-slate-100">
-                                        <img src="@postImg" alt="@post.Title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    <div class="relative w-full aspect-[16/10] overflow-hidden bg-slate-100" style="aspect-ratio: 16/10;">
+                                        <img src="@postImg" alt="@post.Title" width="600" height="375" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 will-change-transform" />
                                         @if (post.PostCategory != null)
                                         {
                                             <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-slate-800 text-[10px] font-bold shadow-xs">
@@ -413,4 +667,5 @@
             </section>
         }
     }
+    </div>
 }

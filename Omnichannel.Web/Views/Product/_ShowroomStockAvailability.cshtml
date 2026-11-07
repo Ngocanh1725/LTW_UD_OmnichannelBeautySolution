@@ -1,0 +1,142 @@
+@model Omnichannel.Application.DTOs.Inventory.ShowroomAvailabilityViewModel
+
+@{
+    if (Model == null || !Model.Stores.Any())
+    {
+        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-500 flex items-center gap-2">
+            <i class="fa-solid fa-circle-info text-rose-gold"></i>
+            <span>Hiện chưa có dữ liệu tồn kho showroom cho sản phẩm này. Quý khách vui lòng đặt hàng trực tuyến hoặc liên hệ hotline 1900 8888.</span>
+        </div>
+        return;
+    }
+
+    var totalAvailable = Model.Stores.Sum(s => s.StockQuantity);
+}
+
+<!-- KHỐI TRA CỨU TỒN KHO SHOWROOM THỜI GIAN THỰC (O2O) -->
+<div class="p-4 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3" 
+     id="showroom-stock-container"
+     x-data="{ 
+         selectedCity: '@(Model.SelectedCity ?? "Tất cả")', 
+         showAllStores: false,
+         filterStore(storeCity) {
+             if (this.selectedCity === 'Tất cả' || this.selectedCity === 'All') return true;
+             return storeCity.toLowerCase() === this.selectedCity.toLowerCase();
+         }
+     }">
+
+    <!-- Header & Bộ lọc Tỉnh/Thành phố -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+        <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-lg bg-pink-100 text-magenta-accent flex items-center justify-center text-xs">
+                <i class="fa-solid fa-store"></i>
+            </div>
+            <div>
+                <span class="text-xs font-bold text-charcoal uppercase tracking-wider block">
+                    Có Sẵn Tại Showroom Gần Bạn
+                </span>
+                <span class="text-[11px] text-slate-400">
+                    Tổng cộng: <strong class="text-charcoal font-semibold">@totalAvailable</strong> sản phẩm trên toàn quốc
+                </span>
+            </div>
+        </div>
+
+        <!-- Dropdown Chọn Thành Phố -->
+        <div class="flex items-center gap-2">
+            <label for="city-filter-select" class="sr-only">Chọn thành phố</label>
+            <div class="relative min-w-[140px]">
+                <select id="city-filter-select" 
+                        x-model="selectedCity" 
+                        class="w-full text-xs font-semibold bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 pr-7 text-charcoal focus:ring-2 focus:ring-magenta-accent/20 focus:border-magenta-accent transition cursor-pointer">
+                    <option value="Tất cả">Tất Cả Khu Vực</option>
+                    @foreach (var city in Model.AvailableCities)
+                    {
+                        <option value="@city">@city</option>
+                    }
+                </select>
+                <i class="fa-solid fa-chevron-down absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 pointer-events-none"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách Showroom -->
+    <div class="space-y-2 text-xs pt-1">
+        @for (int i = 0; i < Model.Stores.Count; i++)
+        {
+            var st = Model.Stores[i];
+            var isOutOfStock = st.StockQuantity <= 0;
+
+            <div class="p-3 rounded-xl bg-white border border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs hover:border-pink-300 transition-colors"
+                 x-show="filterStore('@st.City') && (@(i < 2 ? "true" : "showAllStores") || selectedCity !== 'Tất cả')"
+                 x-transition>
+                
+                <div class="space-y-1 flex-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <strong class="font-bold text-charcoal text-xs">@st.StoreName</strong>
+                        <span class="px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 text-[10px] font-mono">@st.StoreCode</span>
+                        @if (st.HasTester)
+                        {
+                            <span class="px-1.5 py-0.5 rounded-full bg-pink-50 text-pink-700 text-[10px] font-semibold flex items-center gap-1 border border-pink-200/60">
+                                <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i> Có mẫu thử
+                            </span>
+                        }
+                    </div>
+                    <p class="text-[11px] text-slate-500 leading-snug">
+                        <i class="fa-solid fa-location-dot text-rose-400 mr-1"></i>@st.Address
+                    </p>
+                    <div class="flex flex-wrap items-center gap-3 text-[10px] text-slate-400 pt-0.5">
+                        <span class="inline-flex items-center gap-1">
+                            <i class="fa-solid fa-phone text-[9px]"></i> @st.PhoneNumber
+                        </span>
+                        <span class="inline-flex items-center gap-1 text-magenta-accent font-medium">
+                            <i class="fa-solid fa-clock text-[9px]"></i> @st.DeliveryBadge
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Tình trạng tồn kho Showroom -->
+                <div class="sm:text-right shrink-0 flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-1.5 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
+                    @if (isOutOfStock)
+                    {
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1.5 bg-rose-50 text-rose-700 border border-rose-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                            Tạm hết hàng
+                        </span>
+                        <span class="text-[10px] text-slate-400">Đang luân chuyển hàng</span>
+                    }
+                    else if (st.StockQuantity <= 5)
+                    {
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 border border-amber-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                            Chỉ còn @st.StockQuantity sản phẩm
+                        </span>
+                        <span class="text-[10px] text-amber-600 font-medium">Nhanh tay giữ hàng</span>
+                    }
+                    else
+                    {
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            Còn hàng (@st.StockQuantity)
+                        </span>
+                        <span class="text-[10px] text-emerald-600 font-medium">Sẵn sàng lấy ngay</span>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Toggle mở rộng / thu gọn danh sách showroom -->
+    @if (Model.Stores.Count > 2)
+    {
+        <div class="pt-1 flex items-center justify-between text-xs" x-show="selectedCity === 'Tất cả'">
+            <span class="text-[11px] text-slate-400">Hiển thị @Math.Min(2, Model.Stores.Count)/@Model.Stores.Count chi nhánh</span>
+            <button type="button" 
+                    @@click="showAllStores = !showAllStores" 
+                    class="text-xs font-semibold text-magenta-accent hover:underline flex items-center gap-1 cursor-pointer">
+                <span x-text="showAllStores ? 'Thu gọn danh sách' : 'Xem toàn bộ @Model.Stores.Count showroom'"></span>
+                <i class="fa-solid" :class="showAllStores ? 'fa-angle-up' : 'fa-angle-down'"></i>
+            </button>
+        </div>
+    }
+</div>
+

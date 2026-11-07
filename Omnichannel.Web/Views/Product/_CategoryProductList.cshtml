@@ -69,22 +69,62 @@ else
         <div class="space-y-5">
             @foreach (var p in products)
             {
-                var meta = Model.FefoMeta.ContainsKey(p.Id) ? Model.FefoMeta[p.Id] : new Omnichannel.Web.Models.ProductFefoMeta { ExpDate = DateTime.UtcNow.AddMonths(18), DaysLeft = 540, StatusKey = "fresh", BadgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200", BadgeText = "HSD: 18 tháng • Chuẩn FEFO" };
+                var bestBatch = p.Batches?.Where(b => b.CurrentQuantity > 0).OrderBy(b => b.ExpDate).FirstOrDefault()
+                    ?? p.Batches?.OrderBy(b => b.ExpDate).FirstOrDefault();
+                var daysLeft = bestBatch != null ? Math.Max(0, (bestBatch.ExpDate - DateTime.UtcNow).Days) : 720;
+                var firstVariant = p.Variants?.FirstOrDefault();
+
+                var originalPrice = p.SellingPrice;
+                var hasDiscount = p.DiscountPrice.HasValue && p.DiscountPrice.Value < originalPrice;
+                var salePrice = hasDiscount && p.DiscountPrice.HasValue ? p.DiscountPrice.Value : originalPrice;
+
+                // Tự động tính giá xả kho cận date FEFO nếu lô có chiết khấu hoặc <180 ngày
+                if (bestBatch != null)
+                {
+                    if (bestBatch.ClearanceDiscountPercent.HasValue && bestBatch.ClearanceDiscountPercent.Value > 0)
+                    {
+                        var clDisc = bestBatch.ClearanceDiscountPercent.Value;
+                        var clPrice = Math.Round(originalPrice * (1m - (clDisc / 100m)));
+                        if (clPrice < salePrice)
+                        {
+                            salePrice = clPrice;
+                            hasDiscount = true;
+                        }
+                    }
+                    else if (daysLeft < 180 && !hasDiscount && originalPrice > 0)
+                    {
+                        salePrice = Math.Round(originalPrice * 0.6m);
+                        hasDiscount = true;
+                    }
+                }
+
+                int discPercent = hasDiscount && originalPrice > 0 
+                    ? (int)Math.Round((1 - (salePrice / originalPrice)) * 100) 
+                    : 0;
+
+                var meta = Model.FefoMeta.ContainsKey(p.Id) ? Model.FefoMeta[p.Id] : new Omnichannel.Web.Models.ProductFefoMeta { ExpDate = bestBatch?.ExpDate ?? DateTime.UtcNow.AddMonths(18), DaysLeft = daysLeft, StatusKey = "fresh", BadgeClass = "bg-emerald-500/15 border-emerald-500/40 text-emerald-700", BadgeText = $"Chuẩn date • HSD {(bestBatch?.ExpDate ?? DateTime.UtcNow.AddMonths(18)):MM/yyyy}" };
                 var rating = Model.Ratings.ContainsKey(p.Id) ? Model.Ratings[p.Id] : 4.9;
                 var ingredients = Model.ActiveIngredients.ContainsKey(p.Id) ? Model.ActiveIngredients[p.Id] : new List<string> { "Hyaluronic Acid", "Niacinamide" };
-                var pImg = !string.IsNullOrEmpty(p.ThumbnailUrl) ? p.ThumbnailUrl : "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=500&h=500&fit=crop";
-                var salePrice = p.DiscountPrice.HasValue && p.DiscountPrice.Value > 0 ? p.DiscountPrice.Value : p.SellingPrice;
-                var hasDiscount = p.DiscountPrice.HasValue && p.DiscountPrice.Value < p.SellingPrice;
-                int discPercent = (hasDiscount && p.DiscountPrice.HasValue) ? (int)Math.Round((p.SellingPrice - p.DiscountPrice.Value) / p.SellingPrice * 100m) : (int)meta.DiscountPercent;
+                
+                var pImg = ProductImageResolver.GetPrimaryImageUrl(p.ThumbnailUrl, p.Sku, p.Slug, p.Name);
+                var pWebp = ProductImageResolver.GetWebpImageUrl(pImg, p.Sku, p.Slug, p.Name);
+                var pAlt = ProductImageResolver.GetAltText(p.Name, p.Brand?.Name, p.Category?.Name, p.Sku, p.Slug);
 
-                <div class="bg-white rounded-3xl border border-soft-border/90 p-5 hover:border-magenta-accent/60 hover:shadow-xl transition-all duration-300 group flex flex-col md:flex-row gap-6 relative overflow-hidden">
+                var productUrl = !string.IsNullOrEmpty(p.Slug) ? $"/san-pham/{p.Slug}" : $"/Product/Detail/{p.Id}";
+
+                <div class="product-card-luxury bg-white rounded-3xl border border-soft-border/90 p-5 hover:border-magenta-accent/60 hover:shadow-xl transition-all duration-300 group flex flex-col md:flex-row gap-6 relative overflow-hidden cursor-pointer" data-product-url="@productUrl">
                     
                     <!-- Left: Large Image Container -->
-                    <div class="relative w-full md:w-56 shrink-0 aspect-square rounded-2xl overflow-hidden bg-slate-50 cursor-pointer" onclick="openQuickView(@p.Id)">
-                        <img src="@pImg" alt="@p.Name" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-106" loading="lazy" />
+                    <div class="relative w-full md:w-56 shrink-0 aspect-square rounded-2xl overflow-hidden bg-slate-50 group/thumb">
+                        <a href="@productUrl" class="block w-full h-full relative" title="@pAlt">
+                            <picture class="block w-full h-full">
+                                <source srcset="@pWebp" type="image/webp" />
+                                <img src="@pImg" alt="@pAlt" width="224" height="224" decoding="async" loading="lazy" onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-106 will-change-transform" />
+                            </picture>
+                        </a>
 
                         <!-- Origin Badge -->
-                        <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-white/95 backdrop-blur-xs text-[9px] font-bold text-charcoal shadow-2xs border border-slate-100 flex items-center gap-1">
+                        <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-white/95 backdrop-blur-xs text-[9px] font-bold text-charcoal shadow-2xs border border-slate-100 flex items-center gap-1 pointer-events-none">
                             <i class="fa-solid fa-location-dot text-rose-gold text-[8px]"></i>
                             <span>@(string.IsNullOrEmpty(p.CountryOfOrigin) ? "Chính Hãng" : p.CountryOfOrigin)</span>
                         </span>
@@ -92,11 +132,21 @@ else
                         <!-- Discount Tag -->
                         @if (discPercent > 0)
                         {
-                            <span class="absolute top-2.5 right-2.5 bg-gradient-to-r from-red-600 to-rose-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center gap-0.5">
+                            <span class="absolute top-2.5 right-2.5 bg-gradient-to-r from-red-600 to-rose-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center gap-0.5 pointer-events-none">
                                 <i class="fa-solid fa-bolt text-amber-300 text-[9px]"></i>
                                 <span>-@discPercent%</span>
                             </span>
                         }
+
+                        <!-- Dedicated Quick View Eye Button -->
+                        <button type="button" 
+                                data-action="quick-view"
+                                data-product-id="@p.Id"
+                                onclick="event.stopPropagation(); event.preventDefault(); openQuickView(@p.Id)" 
+                                class="absolute bottom-2.5 right-2.5 h-8 w-8 rounded-full bg-white/95 hover:bg-magenta-accent text-charcoal hover:text-white shadow-md flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 cursor-pointer z-20"
+                                title="Xem nhanh thông tin">
+                            <i class="fa-regular fa-eye text-xs"></i>
+                        </button>
                     </div>
 
                     <!-- Middle: Details, Description, and Active Ingredients -->
@@ -117,7 +167,7 @@ else
 
                             <!-- Product Name -->
                             <h3 class="font-serif text-lg font-bold text-charcoal leading-snug group-hover:text-magenta-accent transition-colors mb-2">
-                                <a href="/san-pham/@p.Slug">@p.Name</a>
+                                <a href="@productUrl">@p.Name</a>
                             </h3>
 
                             <!-- Short Description -->
@@ -171,14 +221,21 @@ else
                         <div class="space-y-2 mt-4">
                             <!-- Nút Thêm Vào Giỏ -->
                             <button type="button" 
-                                    onclick="addToCart(@p.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Name))', @salePrice, '@pImg')"
+                                    data-action="add-to-cart"
+                                    data-product-id="@p.Id"
+                                    data-variant-id="@(firstVariant?.Id)"
+                                    data-batch-id="@(bestBatch?.Id)"
+                                    data-title="@p.Name"
+                                    data-price="@salePrice"
+                                    data-image="@pImg"
+                                    onclick="event.stopPropagation(); event.preventDefault(); addToCart(@p.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Name))', @salePrice, '@pImg', 1, @(bestBatch?.Id ?? 0), @(firstVariant?.Id ?? 0))"
                                     class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-magenta-accent to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-extrabold text-xs uppercase tracking-wider transition shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95">
                                 <i class="fa-solid fa-cart-plus text-xs"></i>
                                 <span>Thêm Vào Giỏ</span>
                             </button>
 
                             <!-- Nút Xem Chi Tiết -->
-                            <a href="/san-pham/@p.Slug" 
+                            <a href="@productUrl" 
                                class="w-full py-2 px-4 rounded-xl bg-pastel-rose hover:bg-white text-charcoal hover:text-magenta-accent border border-pink-200 text-center font-bold text-xs transition flex items-center justify-center gap-1.5">
                                 <span>Xem Chi Tiết</span>
                                 <i class="fa-solid fa-arrow-right text-[10px]"></i>
@@ -195,88 +252,7 @@ else
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             @foreach (var p in products)
             {
-                var meta = Model.FefoMeta.ContainsKey(p.Id) ? Model.FefoMeta[p.Id] : new Omnichannel.Web.Models.ProductFefoMeta { ExpDate = DateTime.UtcNow.AddMonths(18), DaysLeft = 540, StatusKey = "fresh", BadgeClass = "bg-emerald-50 text-emerald-700 border-emerald-200", BadgeText = "HSD: 18 tháng • Chuẩn FEFO" };
-                var rating = Model.Ratings.ContainsKey(p.Id) ? Model.Ratings[p.Id] : 4.9;
-                var pImg = !string.IsNullOrEmpty(p.ThumbnailUrl) ? p.ThumbnailUrl : "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=500&h=500&fit=crop";
-                var salePrice = p.DiscountPrice.HasValue && p.DiscountPrice.Value > 0 ? p.DiscountPrice.Value : p.SellingPrice;
-                var hasDiscount = p.DiscountPrice.HasValue && p.DiscountPrice.Value < p.SellingPrice;
-                int discPercent = (hasDiscount && p.DiscountPrice.HasValue) ? (int)Math.Round((p.SellingPrice - p.DiscountPrice.Value) / p.SellingPrice * 100m) : (int)meta.DiscountPercent;
-
-                <div class="bg-white rounded-3xl border border-soft-border/90 p-4.5 flex flex-col justify-between hover:border-magenta-accent/60 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden shadow-xs">
-                    <div>
-                        <!-- Thumbnail & Badges -->
-                        <div class="relative aspect-square rounded-2xl overflow-hidden bg-slate-50 mb-3.5 cursor-pointer" onclick="openQuickView(@p.Id)">
-                            <img src="@pImg" alt="@p.Name" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-106" loading="lazy" />
-
-                            <!-- Origin Badge -->
-                            <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/90 backdrop-blur-xs text-[9px] font-bold text-charcoal shadow-2xs border border-slate-100 flex items-center gap-1">
-                                <i class="fa-solid fa-location-dot text-rose-gold text-[8px]"></i>
-                                <span>@(string.IsNullOrEmpty(p.CountryOfOrigin) ? "Chính Hãng" : p.CountryOfOrigin)</span>
-                            </span>
-
-                            <!-- Discount Tag -->
-                            @if (discPercent > 0)
-                            {
-                                <span class="absolute top-2 right-2 bg-gradient-to-r from-red-600 to-rose-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center gap-0.5">
-                                    <i class="fa-solid fa-bolt text-amber-300 text-[9px]"></i>
-                                    <span>-@discPercent%</span>
-                                </span>
-                            }
-
-                            <!-- Quick View Overlay -->
-                            <div class="absolute inset-0 bg-charcoal/30 opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-center backdrop-blur-2xs">
-                                <button type="button" class="px-4 py-2 rounded-full bg-white text-charcoal text-[11px] font-bold shadow-lg hover:bg-magenta-accent hover:text-white transition transform translate-y-2 group-hover:translate-y-0">
-                                    <i class="fa-regular fa-eye mr-1"></i> Xem Nhanh
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Brand & Rating -->
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-gold truncate">
-                                @(string.IsNullOrEmpty(p.ManufacturerName) ? (p.Category?.Name ?? "Dược Mỹ Phẩm") : p.ManufacturerName)
-                            </span>
-                            <div class="flex items-center gap-1 text-amber-400 text-[11px]">
-                                <i class="fa-solid fa-star"></i>
-                                <span class="text-charcoal font-bold text-[10.5px]">@rating.ToString("F1")</span>
-                            </div>
-                        </div>
-
-                        <!-- Product Title -->
-                        <h4 class="text-xs font-bold text-charcoal line-clamp-2 leading-snug group-hover:text-magenta-accent transition-colors h-8 mb-2" title="@p.Name">
-                            <a href="/san-pham/@p.Slug">@p.Name</a>
-                        </h4>
-
-                        <!-- FEFO Expiry Badge -->
-                        <div class="mb-3">
-                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[10.5px] font-bold @meta.BadgeClass border w-full justify-between">
-                                <span class="truncate"><i class="fa-solid fa-clock-rotate-left mr-1"></i>@meta.BadgeText</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Pricing & Cart Button -->
-                    <div class="pt-3 border-t border-slate-100">
-                        <div class="flex items-baseline justify-between mb-2.5">
-                            <span class="text-lg font-black text-rose-600 font-mono-numeric tracking-tight">
-                                @salePrice.ToString("N0") ₫
-                            </span>
-                            @if (hasDiscount)
-                            {
-                                <span class="text-[11px] text-slate-400 line-through font-mono-numeric">
-                                    @p.SellingPrice.ToString("N0") ₫
-                                </span>
-                            }
-                        </div>
-
-                        <button type="button" 
-                                onclick="addToCart(@p.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Name))', @salePrice, '@pImg')"
-                                class="w-full py-2.5 px-3 rounded-xl bg-pastel-rose hover:bg-magenta-accent text-charcoal hover:text-white font-bold text-xs uppercase tracking-wider transition shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer active:scale-95">
-                            <i class="fa-solid fa-bag-shopping text-xs"></i>
-                            <span>Thêm Vào Giỏ</span>
-                        </button>
-                    </div>
-                </div>
+                <partial name="_ProductCard" model="p" />
             }
         </div>
     }

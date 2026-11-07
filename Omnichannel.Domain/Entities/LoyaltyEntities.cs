@@ -81,6 +81,15 @@ namespace Omnichannel.Domain.Entities
         [Column(TypeName = "varchar(200)")]
         public string? QrCodeData { get; set; } // Mã QR định danh thành viên
 
+        [MaxLength(30)]
+        [Column(TypeName = "varchar(30)")]
+        public string? ReferralCode { get; set; } // Mã giới thiệu bạn bè (VD: CANMAKE-REF-0101)
+
+        public int CurrentStreak { get; set; } = 0; // Chuỗi ngày điểm danh liên tiếp (0..7)
+
+        [Column(TypeName = "datetime2(7)")]
+        public DateTime? LastCheckInDate { get; set; } // Ngày điểm danh gần nhất (theo ngày giờ VN UTC+7)
+
         [Column(TypeName = "datetime2(7)")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -91,6 +100,7 @@ namespace Omnichannel.Domain.Entities
         public virtual User User { get; set; } = null!;
         public virtual MemberTier CurrentTier { get; set; } = null!;
         public virtual ICollection<PointTransaction> Transactions { get; set; } = new List<PointTransaction>();
+        public virtual ICollection<LoyaltyCheckIn> CheckIns { get; set; } = new List<LoyaltyCheckIn>();
     }
 
     /// <summary>
@@ -187,5 +197,101 @@ namespace Omnichannel.Domain.Entities
         // Navigations
         public virtual User? User { get; set; }
         public virtual Order? UsedOrder { get; set; }
+    }
+
+    /// <summary>
+    /// Lịch sử điểm danh hằng ngày 7 ngày (Gamification - GAP-08)
+    /// </summary>
+    [Table("LoyaltyCheckIns")]
+    public class LoyaltyCheckIn
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+
+        public int UserId { get; set; }
+
+        public int WalletId { get; set; }
+
+        /// <summary>
+        /// Ngày điểm danh theo múi giờ Việt Nam (UTC+7), lưu phần Date (00:00:00)
+        /// </summary>
+        [Column(TypeName = "datetime2(7)")]
+        public DateTime CheckInDate { get; set; }
+
+        /// <summary>
+        /// Ngày thứ mấy trong chuỗi 7 ngày (1..7)
+        /// </summary>
+        public int StreakDay { get; set; }
+
+        /// <summary>
+        /// Số điểm nhận được (10, 10, 20, 20, 30, 30, 100)
+        /// </summary>
+        public int PointsAwarded { get; set; }
+
+        public int? PointTransactionId { get; set; }
+
+        [Column(TypeName = "datetime2(7)")]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        // Navigations
+        public virtual User User { get; set; } = null!;
+        public virtual LoyaltyWallet Wallet { get; set; } = null!;
+        public virtual PointTransaction? PointTransaction { get; set; }
+    }
+
+    /// <summary>
+    /// Chương trình giới thiệu bạn bè (Referral Program - GAP-08)
+    /// </summary>
+    [Table("LoyaltyReferrals")]
+    public class LoyaltyReferral
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+
+        /// <summary>
+        /// Người giới thiệu
+        /// </summary>
+        public int ReferrerUserId { get; set; }
+
+        /// <summary>
+        /// Người được giới thiệu (mỗi người chỉ được giới thiệu 1 lần)
+        /// </summary>
+        public int ReferredUserId { get; set; }
+
+        [Required]
+        [MaxLength(30)]
+        [Column(TypeName = "varchar(30)")]
+        public string ReferralCode { get; set; } = string.Empty;
+
+        /// <summary>
+        /// PENDING (Đã nhập mã, chờ hoàn tất đơn đầu tiên), REWARDED (Đã cộng điểm & tặng voucher cho cả 2)
+        /// </summary>
+        [Required]
+        [MaxLength(30)]
+        [Column(TypeName = "varchar(30)")]
+        public string Status { get; set; } = "PENDING";
+
+        public int ReferrerPointsAwarded { get; set; } = 0;
+
+        public int ReferredPointsAwarded { get; set; } = 0;
+
+        [MaxLength(50)]
+        [Column(TypeName = "varchar(50)")]
+        public string? RewardVoucherCode { get; set; }
+
+        public int? CompletedOrderId { get; set; }
+
+        [Column(TypeName = "datetime2(7)")]
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        [Column(TypeName = "datetime2(7)")]
+        public DateTime? RewardedAt { get; set; }
+
+        // Navigations
+        public virtual User ReferrerUser { get; set; } = null!;
+        public virtual User ReferredUser { get; set; } = null!;
+        public virtual Order? CompletedOrder { get; set; }
     }
 }

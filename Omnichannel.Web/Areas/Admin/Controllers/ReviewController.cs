@@ -51,11 +51,23 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
 
             var reviews = await _reviewService.GetAllReviewsAsync(filter);
 
-            // Thống kê đếm số lượng theo trạng thái
-            ViewBag.TotalCount = await _context.ProductReviews.CountAsync();
-            ViewBag.PendingCount = await _context.ProductReviews.CountAsync(r => !r.IsApproved && !r.IsHidden);
-            ViewBag.ApprovedCount = await _context.ProductReviews.CountAsync(r => r.IsApproved && !r.IsHidden);
-            ViewBag.HiddenCount = await _context.ProductReviews.CountAsync(r => r.IsHidden);
+            // Thống kê đếm số lượng theo trạng thái tối ưu 1 truy vấn duy nhất với AsNoTracking
+            var reviewStats = await _context.ProductReviews
+                .AsNoTracking()
+                .GroupBy(r => 1)
+                .Select(g => new
+                {
+                    Total = g.Count(),
+                    Pending = g.Count(r => !r.IsApproved && !r.IsHidden),
+                    Approved = g.Count(r => r.IsApproved && !r.IsHidden),
+                    Hidden = g.Count(r => r.IsHidden)
+                })
+                .FirstOrDefaultAsync();
+
+            ViewBag.TotalCount = reviewStats?.Total ?? 0;
+            ViewBag.PendingCount = reviewStats?.Pending ?? 0;
+            ViewBag.ApprovedCount = reviewStats?.Approved ?? 0;
+            ViewBag.HiddenCount = reviewStats?.Hidden ?? 0;
 
             ViewBag.Filter = filter;
             ViewBag.CurrentTab = tab ?? "all";

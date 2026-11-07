@@ -12,12 +12,15 @@ using Omnichannel.Infrastructure.Security;
 namespace Omnichannel.Web.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Route("Admin/[controller]")]
+    [Route("Admin/MenuManagement")]
+    [Route("Admin/MenuManagement/Index")]
     [Authorize]
     public class MenuController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IMenuEngineService _menuService;
-
+//Hiển thị trang quản trị cây menu
         public MenuController(ApplicationDbContext context, IMenuEngineService menuService)
         {
             _context = context;
@@ -25,6 +28,8 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
+        [Route("")]
+        [Route("Index")]
         [HasPermission("CMS_MENU_MANAGE")]
         public async Task<IActionResult> Index(int? menuId = null)
         {
@@ -155,7 +160,8 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        [HasPermission("CMS_MENU_MANAGE")]
+        [Route("GetTargetsByType")]
+
         public async Task<IActionResult> GetTargetsByType(int targetType)
         {
             return targetType switch

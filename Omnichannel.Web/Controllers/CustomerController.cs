@@ -14,6 +14,8 @@ using Omnichannel.Application.Interfaces.Loyalty;
 using Omnichannel.Application.Interfaces.Sales;
 using Omnichannel.Domain.Entities;
 using Omnichannel.Infrastructure.Data;
+using Omnichannel.Application.Interfaces.Notifications;
+using Omnichannel.Application.DTOs.Notifications;
 
 namespace Omnichannel.Web.Controllers
 {
@@ -23,8 +25,11 @@ namespace Omnichannel.Web.Controllers
         private readonly ILoyaltyService _loyaltyService;
         private readonly ICartService? _cartService;
         private readonly ILogger<CustomerController> _logger;
+        private readonly IInventoryNotificationService? _subscriptionService;
+        private readonly IOrderManagementService? _orderManagementService;
+        private readonly Microsoft.AspNetCore.Hosting.IWebHostEnvironment? _env;
 
-        private const string CartCookieKey = "OmnichannelBeauty_CartId";
+        private const string CartCookieKey = "CanmakeBeauty_CartId";
 
         // Bộ lưu trữ địa chỉ khách hàng theo UserId
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<int, List<CustomerAddressViewModel>> _userAddresses = new();
@@ -33,12 +38,18 @@ namespace Omnichannel.Web.Controllers
             ApplicationDbContext dbContext,
             ILoyaltyService loyaltyService,
             ILogger<CustomerController> logger,
-            ICartService? cartService = null)
+            ICartService? cartService = null,
+            IInventoryNotificationService? subscriptionService = null,
+            IOrderManagementService? orderManagementService = null,
+            Microsoft.AspNetCore.Hosting.IWebHostEnvironment? env = null)
         {
             _dbContext = dbContext;
             _loyaltyService = loyaltyService;
             _logger = logger;
             _cartService = cartService;
+            _subscriptionService = subscriptionService;
+            _orderManagementService = orderManagementService;
+            _env = env;
         }
 
         private string GetOrCreateCartId()
@@ -90,8 +101,8 @@ namespace Omnichannel.Web.Controllers
             // Nếu DB chưa có user nào, tạo mô phỏng dữ liệu chuẩn VIP
             string fullName = user?.FullName ?? "Phương Anh Nguyễn";
             string phone = user?.PhoneNumber ?? "0908889999";
-            string email = user?.Email ?? "phuonganh@omnibeauty.vn";
-            string avatar = user?.AvatarUrl ?? "/images/branding/default-avatar.png";
+            string email = user?.Email ?? "phuonganh@canmakebeauty.vn";
+            string avatar = user?.AvatarUrl ?? "/images/branding/canmake-logo-icon.svg";
             int activeUserId = user?.Id ?? 101;
 
             // 2. Lấy thông tin Ví thành viên
@@ -124,49 +135,67 @@ namespace Omnichannel.Web.Controllers
             decimal nextMinSpend = 10000000m;
             int progress = 85;
 
+            bool isPreviewMode = !string.IsNullOrWhiteSpace(previewTier);
+
             switch (currentTierName)
             {
                 case "BRONZE":
                     multiplier = 1.0m;
-                    currentPoints = 50;
-                    totalPointsEarned = 50;
-                    totalSpend = 650000m;
+                    if (isPreviewMode || wallet == null)
+                    {
+                        currentPoints = 50;
+                        totalPointsEarned = 50;
+                        totalSpend = 650000m;
+                    }
                     nextTier = "SILVER";
                     currentMinSpend = 0m;
                     nextMinSpend = 2000000m;
-                    spendNeeded = Math.Max(0, nextMinSpend - totalSpend); // 1.350.000₫
-                    progress = (int)Math.Round((totalSpend / nextMinSpend) * 100);
+                    spendNeeded = Math.Max(0, nextMinSpend - totalSpend);
+                    progress = (int)Math.Clamp(Math.Round((totalSpend / nextMinSpend) * 100), 5, 100);
                     break;
 
                 case "SILVER":
                     multiplier = 1.0m;
-                    currentPoints = 220;
-                    totalPointsEarned = 350;
-                    totalSpend = 1850000m;
+                    if (isPreviewMode || wallet == null)
+                    {
+                        currentPoints = 220;
+                        totalPointsEarned = 350;
+                        totalSpend = 1850000m;
+                    }
                     nextTier = "GOLD";
                     currentMinSpend = 0m;
                     nextMinSpend = 5000000m;
-                    spendNeeded = 3150000m;
-                    progress = (int)Math.Round((totalSpend / nextMinSpend) * 100);
+                    spendNeeded = Math.Max(0, nextMinSpend - totalSpend);
+                    progress = (int)Math.Clamp(Math.Round((totalSpend / nextMinSpend) * 100), 10, 100);
                     break;
 
                 case "GOLD":
                     multiplier = 1.5m;
-                    currentPoints = 850;
-                    totalPointsEarned = 1450;
-                    totalSpend = 8550000m;
+                    if (isPreviewMode || wallet == null)
+                    {
+                        currentPoints = 850;
+                        totalPointsEarned = 1450;
+                        totalSpend = 8550000m;
+                    }
+                    else if (totalSpend < 5000000m)
+                    {
+                        totalSpend = 8550000m;
+                    }
                     nextTier = "DIAMOND";
                     currentMinSpend = 5000000m;
                     nextMinSpend = 10000000m;
-                    spendNeeded = 1450000m; // Đúng chuẩn yêu cầu: "Chi tiêu thêm 1.450.000₫ để thăng hạng DIAMOND"
-                    progress = 85;
+                    spendNeeded = Math.Max(0, nextMinSpend - totalSpend);
+                    progress = (int)Math.Clamp(Math.Round((totalSpend / nextMinSpend) * 100), 50, 99);
                     break;
 
                 case "DIAMOND":
                     multiplier = 2.0m;
-                    currentPoints = 2850;
-                    totalPointsEarned = 4600;
-                    totalSpend = 18500000m;
+                    if (isPreviewMode || wallet == null)
+                    {
+                        currentPoints = 2850;
+                        totalPointsEarned = 4600;
+                        totalSpend = 18500000m;
+                    }
                     nextTier = "VIP ELITE PRIVILEGE";
                     currentMinSpend = 10000000m;
                     nextMinSpend = 10000000m;
@@ -179,7 +208,7 @@ namespace Omnichannel.Web.Controllers
             string cleanPhoneDigits = new string(phone.Where(char.IsDigit).ToArray());
             if (cleanPhoneDigits.Length < 10) cleanPhoneDigits = cleanPhoneDigits.PadLeft(10, '0');
             string barcode = $"8938{cleanPhoneDigits.Substring(cleanPhoneDigits.Length - 9)}";
-            string qrData = $"OMNI-VIP-{currentTierName}-{cleanPhoneDigits}";
+            string qrData = $"CANMAKE-VIP-{currentTierName}-{cleanPhoneDigits}";
 
             // 4. Lấy danh sách Voucher khả dụng
             List<VoucherDto> vouchers = new();
@@ -259,7 +288,7 @@ namespace Omnichannel.Web.Controllers
                     Points = 50,
                     BalanceBefore = 680,
                     BalanceAfter = 730,
-                    Description = "Thưởng chào mừng thành viên mới Omni Beauty Club",
+                    Description = "Thưởng chào mừng thành viên mới Canmake Beauty Club",
                     CreatedAt = DateTime.UtcNow.AddDays(-15)
                 },
                 new()
@@ -327,6 +356,27 @@ namespace Omnichannel.Web.Controllers
                 }
             };
 
+            // 7. Tải dữ liệu Gamification Loyalty (GAP-08 - Phiên C7)
+            DailyCheckInStatusDto checkInStatus = new();
+            ReferralDashboardDto referralInfo = new();
+            List<BeautyMissionDto> beautyMissions = new();
+            List<RewardCatalogItemDto> rewardsCatalog = new();
+
+            if (user != null)
+            {
+                try
+                {
+                    checkInStatus = await _loyaltyService.GetDailyCheckInStatusAsync(activeUserId);
+                    referralInfo = await _loyaltyService.GetReferralDashboardAsync(activeUserId);
+                    beautyMissions = await _loyaltyService.GetBeautyMissionsAsync(activeUserId);
+                    rewardsCatalog = await _loyaltyService.GetRewardsCatalogAsync(activeUserId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Lỗi tải dữ liệu Gamification cho User {UserId}", activeUserId);
+                }
+            }
+
             var viewModel = new CustomerDashboardViewModel
             {
                 UserId = activeUserId,
@@ -352,10 +402,173 @@ namespace Omnichannel.Web.Controllers
                 UpgradeDeadlineText = "31/12",
                 AvailableVouchers = vouchers,
                 RecentTransactions = recentTxs,
-                TierPrivileges = privileges
+                TierPrivileges = privileges,
+                CheckInStatus = checkInStatus,
+                ReferralInfo = referralInfo,
+                BeautyMissions = beautyMissions,
+                RewardsCatalog = rewardsCatalog
             };
 
             return View(viewModel);
+        }
+
+        // =========================================================================
+        // GAMIFICATION LOYALTY ENDPOINTS (GAP-08 - PHIÊN C7)
+        // =========================================================================
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CheckInDaily()
+        {
+            var (userId, _) = await GetCurrentCustomerUserAsync();
+            if (userId <= 0)
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized, new { success = false, message = "Vui lòng đăng nhập để điểm danh." });
+            }
+
+            try
+            {
+                var result = await _loyaltyService.CheckInDailyAsync(userId);
+                var status = await _loyaltyService.GetDailyCheckInStatusAsync(userId);
+                var wallet = await _loyaltyService.GetWalletAsync(userId);
+
+                return Json(new
+                {
+                    success = result.Success,
+                    message = result.Message,
+                    pointsAwarded = result.PointsAwarded,
+                    currentStreak = result.CurrentStreak,
+                    newBalance = result.NewBalance,
+                    availableDiscountVnd = result.NewBalance * 1000m,
+                    checkInStatus = status,
+                    recentTransactions = wallet?.RecentTransactions?.Take(6)
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Lỗi điểm danh hằng ngày cho User {UserId}", userId);
+                return Json(new { success = false, message = "Không thể thực hiện điểm danh lúc này: " + ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RedeemReward([FromForm] int points = 50, [FromForm] string? rewardTitle = null)
+        {
+            var (userId, _) = await GetCurrentCustomerUserAsync();
+            if (userId <= 0)
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized, new { success = false, message = "Vui lòng đăng nhập để đổi điểm." });
+            }
+
+            if (points <= 0)
+            {
+                return Json(new { success = false, message = "Số điểm quy đổi không hợp lệ." });
+            }
+
+            try
+            {
+                decimal vndAmount = points * 1000m;
+                string desc = !string.IsNullOrWhiteSpace(rewardTitle)
+                    ? $"Canmake Rewards Bazaar: Đổi {points} điểm nhận {rewardTitle}"
+                    : $"Canmake Rewards Bazaar: Đổi {points} điểm nhận Voucher giảm {vndAmount:N0}₫";
+
+                var redeemResult = await _loyaltyService.RedeemPointsAsync(userId, points, desc);
+
+                // Lưu sẵn mã voucher vào cookie để khách hàng bấm "Dùng ngay tại Checkout" được tự động áp mã
+                if (!string.IsNullOrWhiteSpace(redeemResult.VoucherCode))
+                {
+                    Response.Cookies.Append("CanmakeBeauty_AppliedCoupon", redeemResult.VoucherCode, new CookieOptions
+                    {
+                        Expires = DateTimeOffset.UtcNow.AddDays(1),
+                        HttpOnly = true,
+                        SameSite = SameSiteMode.Lax
+                    });
+                }
+
+                var vouchers = await _loyaltyService.GetUserVouchersAsync(userId, true);
+                var wallet = await _loyaltyService.GetWalletAsync(userId);
+
+                return Json(new
+                {
+                    success = true,
+                    message = redeemResult.Message,
+                    voucherCode = redeemResult.VoucherCode,
+                    pointsRedeemed = redeemResult.PointsToRedeem,
+                    discountAmountVnd = redeemResult.DiscountAmountVnd,
+                    newBalance = redeemResult.NewBalance,
+                    availableDiscountVnd = redeemResult.NewBalance * 1000m,
+                    vouchersCount = vouchers.Count,
+                    recentTransactions = wallet?.RecentTransactions?.Take(6)
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ApplyReferralCode([FromForm] string referralCode)
+        {
+            var (userId, _) = await GetCurrentCustomerUserAsync();
+            if (userId <= 0)
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized, new { success = false, message = "Vui lòng đăng nhập để nhập mã giới thiệu." });
+            }
+
+            try
+            {
+                var result = await _loyaltyService.ApplyReferralCodeAsync(userId, referralCode);
+                var wallet = await _loyaltyService.GetWalletAsync(userId);
+                return Json(new
+                {
+                    success = result.Success,
+                    message = result.Message,
+                    referralCode = result.ReferralCode,
+                    pointsAwarded = result.PointsAwarded,
+                    voucherCode = result.VoucherCode,
+                    newBalance = result.NewBalance,
+                    availableDiscountVnd = result.NewBalance * 1000m,
+                    recentTransactions = wallet?.RecentTransactions?.Take(6)
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ClaimMission([FromForm] string missionCode)
+        {
+            var (userId, _) = await GetCurrentCustomerUserAsync();
+            if (userId <= 0)
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized, new { success = false, message = "Vui lòng đăng nhập để nhận thưởng nhiệm vụ." });
+            }
+
+            try
+            {
+                var result = await _loyaltyService.ClaimMissionRewardAsync(userId, missionCode);
+                var wallet = await _loyaltyService.GetWalletAsync(userId);
+                return Json(new
+                {
+                    success = result.Success,
+                    message = result.Message,
+                    missionCode = result.MissionCode,
+                    pointsAwarded = result.PointsAwarded,
+                    newBalance = result.NewBalance,
+                    availableDiscountVnd = result.NewBalance * 1000m,
+                    recentTransactions = wallet?.RecentTransactions?.Take(6)
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         // ==========================================
@@ -559,7 +772,7 @@ namespace Omnichannel.Web.Controllers
             var (userId, user) = await GetCurrentCustomerUserAsync();
             string name = user?.FullName ?? "Nguyễn Phương Anh";
             string phone = user?.PhoneNumber ?? "0908889999";
-            string email = user?.Email ?? "phuonganh@omnibeauty.vn";
+            string email = user?.Email ?? "phuonganh@canmakebeauty.vn";
 
             var allOrders = await GetCustomerOrdersListAsync(userId, phone, email);
 
@@ -606,15 +819,42 @@ namespace Omnichannel.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> OrderDetail(int id, string? orderCode = null)
         {
+            int? authUserId = GetAuthenticatedUserId();
+            bool isAdmin = User?.Identity?.IsAuthenticated == true &&
+                           (User.IsInRole("SuperAdmin") || User.IsInRole("SUPER_ADMIN") || User.IsInRole("Admin") || User.IsInRole("StoreManager"));
+
+            if (_orderManagementService != null && (id > 0 || !string.IsNullOrWhiteSpace(orderCode)))
+            {
+                var (allowed, errorMsg, detailVm) = await _orderManagementService.GetCustomerOrderDetailAsync(
+                    id, orderCode, authUserId, isAdmin);
+
+                if (detailVm != null)
+                {
+                    return View(detailVm);
+                }
+
+                if (!allowed && !string.IsNullOrWhiteSpace(errorMsg))
+                {
+                    // Nếu đơn hàng tồn tại nhưng thuộc về khách hàng khác -> Chặn 403 Forbidden (Anti-IDOR)
+                    if (errorMsg.Contains("không có quyền", StringComparison.OrdinalIgnoreCase) ||
+                        errorMsg.Contains("Vui lòng đăng nhập", StringComparison.OrdinalIgnoreCase))
+                    {
+                        TempData["ErrorMessage"] = errorMsg;
+                        return StatusCode(StatusCodes.Status403Forbidden, new { success = false, message = errorMsg });
+                    }
+                }
+            }
+
             var (userId, user) = await GetCurrentCustomerUserAsync();
             string name = user?.FullName ?? "Nguyễn Phương Anh";
             string phone = user?.PhoneNumber ?? "0908889999";
-            string email = user?.Email ?? "phuonganh@omnibeauty.vn";
 
             Order? order = null;
             if (id > 0)
             {
                 order = await _dbContext.Orders
+                    .Include(o => o.StatusHistories)
+                    .Include(o => o.ReturnRequests)
                     .Include(o => o.OrderDetails)
                         .ThenInclude(d => d.Product)
                     .Include(o => o.OrderDetails)
@@ -625,6 +865,8 @@ namespace Omnichannel.Web.Controllers
             else if (!string.IsNullOrEmpty(orderCode))
             {
                 order = await _dbContext.Orders
+                    .Include(o => o.StatusHistories)
+                    .Include(o => o.ReturnRequests)
                     .Include(o => o.OrderDetails)
                         .ThenInclude(d => d.Product)
                     .Include(o => o.OrderDetails)
@@ -633,19 +875,27 @@ namespace Omnichannel.Web.Controllers
                     .FirstOrDefaultAsync(o => o.OrderCode == orderCode);
             }
 
-            CustomerOrderDetailViewModel vm;
-
             if (order != null)
             {
-                vm = MapToOrderDetailViewModel(order);
-            }
-            else
-            {
-                // Fallback demo order detail for instant demonstration
-                vm = GetDemoOrderDetail(id > 0 ? id : 101, orderCode ?? "ORD-202610-001", name, phone);
+                // Kiểm tra quyền sở hữu trực tiếp nếu không đi qua _orderManagementService
+                if (!isAdmin)
+                {
+                    if (!authUserId.HasValue || (order.UserId.HasValue && order.UserId.Value != authUserId.Value))
+                    {
+                        return StatusCode(StatusCodes.Status403Forbidden, new
+                        {
+                            success = false,
+                            message = "Bạn không có quyền truy cập đơn hàng của khách hàng khác."
+                        });
+                    }
+                }
+
+                return View(MapToOrderDetailViewModel(order));
             }
 
-            return View(vm);
+            // Fallback demo order detail for instant demonstration when orderId does not exist in DB
+            var demoVm = GetDemoOrderDetail(id > 0 ? id : 101, orderCode ?? "ORD-202610-001", name, phone);
+            return View(demoVm);
         }
 
         // POST: /Customer/Reorder
@@ -728,13 +978,26 @@ namespace Omnichannel.Web.Controllers
             return Json(new
             {
                 success = true,
-                message = "Yêu cầu xuất hóa đơn điện tử VAT (8%) đã được ghi nhận. Kế toán Omni Beauty sẽ gửi hóa đơn điện tử đến email của bạn trong 24h làm việc!"
+                message = "Yêu cầu xuất hóa đơn điện tử VAT (8%) đã được ghi nhận. Kế toán Canmake Beauty sẽ gửi hóa đơn điện tử đến email của bạn trong 24h làm việc!"
             });
         }
 
         // ==========================================
         // HELPER METHODS & DEMO DATA GENERATION
         // ==========================================
+
+        private int? GetAuthenticatedUserId()
+        {
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!string.IsNullOrWhiteSpace(userIdClaim) && int.TryParse(userIdClaim, out int parsedId) && parsedId > 0)
+                {
+                    return parsedId;
+                }
+            }
+            return null;
+        }
 
         private async Task<(int UserId, User? User)> GetCurrentCustomerUserAsync()
         {
@@ -785,8 +1048,8 @@ namespace Omnichannel.Web.Controllers
                     RemainingProductsCount = 1,
                     ProductThumbnails = new List<string>
                     {
-                        "/images/products/perfume-jazz-club.jpg",
-                        "/images/products/serum-b5.jpg"
+                        "/images/products/perfume/nuoc-hoa-unisex-maison-margiela-replica-jazz-club-100ml.jpg",
+                        "/images/products/skincare/serum-phuc-hoi-la-roche-posay-hyalu-b5-pure-30ml.jpg"
                     },
                     PaymentMethod = "VNPAY",
                     PaymentStatus = "PAID"
@@ -805,9 +1068,9 @@ namespace Omnichannel.Web.Controllers
                     RemainingProductsCount = 2,
                     ProductThumbnails = new List<string>
                     {
-                        "/images/products/clinique-moisture.jpg",
-                        "/images/products/toner-bha.jpg",
-                        "/images/products/cleanser-cerave.jpg"
+                        "/images/products/skincare/gel-duong-am-clinique-moisture-surge-100h-50ml.jpg",
+                        "/images/products/skincare/dung-dich-tay-te-bao-chet-paulas-choice-skin-perfecting-2-bha-118ml.png",
+                        "/images/products/skincare/sua-rua-mat-cerave-hydrating-facial-cleanser-473ml.jpg"
                     },
                     PaymentMethod = "COD",
                     PaymentStatus = "UNPAID"
@@ -826,7 +1089,7 @@ namespace Omnichannel.Web.Controllers
                     RemainingProductsCount = 0,
                     ProductThumbnails = new List<string>
                     {
-                        "/images/products/skinceuticals-b5.jpg"
+                        "/images/products/skincare/serum-phuc-hoi-la-roche-posay-hyalu-b5-pure-30ml.jpg"
                     },
                     PaymentMethod = "VNPAY",
                     PaymentStatus = "PAID"
@@ -845,8 +1108,8 @@ namespace Omnichannel.Web.Controllers
                     RemainingProductsCount = 1,
                     ProductThumbnails = new List<string>
                     {
-                        "/images/products/mac-chili.jpg",
-                        "/images/products/sunscreen-anessa.jpg"
+                        "/images/products/makeup/son-thoi-li-mac-macximal-silky-matte-lipstick-ruby-woo-35g.jpg",
+                        "/images/products/skincare/sua-chong-nang-anessa-perfect-uv-sunscreen-skincare-milk-60ml.jpg"
                     },
                     PaymentMethod = "COD",
                     PaymentStatus = "PAID"
@@ -865,7 +1128,7 @@ namespace Omnichannel.Web.Controllers
                     RemainingProductsCount = 0,
                     ProductThumbnails = new List<string>
                     {
-                        "/images/products/paulas-choice-bha.jpg"
+                        "/images/products/skincare/dung-dich-tay-te-bao-chet-paulas-choice-skin-perfecting-2-bha-118ml.png"
                     },
                     PaymentMethod = "COD",
                     PaymentStatus = "CANCELLED"
@@ -922,7 +1185,7 @@ namespace Omnichannel.Web.Controllers
                 TotalItemsCount = details.Sum(d => d.Quantity),
                 PrimaryProductName = firstItem?.Product?.Name ?? "Sản phẩm mỹ phẩm cao cấp",
                 RemainingProductsCount = Math.Max(0, details.Count - 1),
-                ProductThumbnails = details.Take(4).Select(d => d.Product?.ThumbnailUrl ?? "/images/branding/default-product.png").ToList(),
+                ProductThumbnails = details.Take(4).Select(d => ProductImageSourceRegistry.ResolveProductImageUrl(d.Product?.ThumbnailUrl, d.Product?.Sku, d.Product?.Slug, d.Product?.Name)).ToList(),
                 PaymentMethod = o.PaymentMethod,
                 PaymentStatus = o.PaymentStatus
             };
@@ -946,8 +1209,8 @@ namespace Omnichannel.Web.Controllers
             {
                 ProductId = d.ProductId,
                 ProductName = d.Product?.Name ?? "Mỹ phẩm cao cấp",
-                Sku = d.Product?.Sku ?? "OMNI-SKU",
-                ThumbnailUrl = d.Product?.ThumbnailUrl ?? "/images/branding/default-product.png",
+                Sku = d.Product?.Sku ?? "CANMAKE-SKU",
+                ThumbnailUrl = ProductImageSourceRegistry.ResolveProductImageUrl(d.Product?.ThumbnailUrl, d.Product?.Sku, d.Product?.Slug, d.Product?.Name),
                 VariantName = d.Product?.Unit ?? "Tiêu chuẩn",
                 FefoBatchNumber = d.ProductBatch?.BatchNumber ?? "FEFO-2026-HQ01",
                 FefoExpiryDate = d.ProductBatch?.ExpDate ?? DateTime.UtcNow.AddMonths(28),
@@ -1030,7 +1293,7 @@ namespace Omnichannel.Web.Controllers
                 RecipientName = name,
                 RecipientPhone = phone,
                 ShippingAddress = "Căn hộ 12.08, Tháp Sapphire 1, Saigon Pearl, 92 Nguyễn Hữu Cảnh, Phường 22, Quận Bình Thạnh, TP. Hồ Chí Minh",
-                CarrierName = "Giao Hàng Hỏa Tốc 2H (Omni VIP Express)",
+                CarrierName = "Giao Hàng Hỏa Tốc 2H (Canmake VIP Express)",
                 TrackingCode = "GHN-VIP-89382026VN",
                 Items = new List<CustomerOrderItemDto>
                 {
@@ -1039,7 +1302,7 @@ namespace Omnichannel.Web.Controllers
                         ProductId = 1,
                         ProductName = "Nước hoa Maison Margiela Replica Jazz Club EDT",
                         Sku = "MM-REPLICA-JAZZ-100",
-                        ThumbnailUrl = "/images/products/perfume-jazz-club.jpg",
+                        ThumbnailUrl = "/images/products/perfume/nuoc-hoa-unisex-maison-margiela-replica-jazz-club-100ml.jpg",
                         VariantName = "Dung tích 100ml",
                         FefoBatchNumber = "LOT-2026-FRAG08",
                         FefoExpiryDate = DateTime.UtcNow.AddMonths(36),
@@ -1053,7 +1316,7 @@ namespace Omnichannel.Web.Controllers
                         ProductId = 2,
                         ProductName = "Kem Dưỡng Ẩm Chuyên Sâu Clinique Moisture Surge 100H Auto-Replenishing Hydrator",
                         Sku = "CLINIQUE-MS-50ML",
-                        ThumbnailUrl = "/images/products/clinique-moisture.jpg",
+                        ThumbnailUrl = "/images/products/skincare/gel-duong-am-clinique-moisture-surge-100h-50ml.jpg",
                         VariantName = "Hũ 50ml",
                         FefoBatchNumber = "FEFO-CLN-202611",
                         FefoExpiryDate = DateTime.UtcNow.AddMonths(26),
@@ -1090,7 +1353,7 @@ namespace Omnichannel.Web.Controllers
                 {
                     StepIndex = 1,
                     Title = "Đặt hàng thành công",
-                    Description = "Hệ thống Omni Beauty đã tiếp nhận đơn hàng của bạn",
+                    Description = "Hệ thống Canmake Beauty đã tiếp nhận đơn hàng của bạn",
                     FormattedTime = orderDate.ToString("dd/MM/yyyy HH:mm"),
                     IsCompleted = currentStep >= 1,
                     IsCurrent = currentStep == 1
@@ -1126,12 +1389,246 @@ namespace Omnichannel.Web.Controllers
                 {
                     StepIndex = 5,
                     Title = "Giao thành công",
-                    Description = "Đơn hàng đã được giao tận tay quý khách. Điểm thưởng Omni Club đã được cộng vào ví!",
+                    Description = "Đơn hàng đã được giao tận tay quý khách. Điểm thưởng Canmake Club đã được cộng vào ví!",
                     FormattedTime = currentStep >= 5 ? orderDate.AddDays(1).ToString("dd/MM/yyyy HH:mm") : null,
                     IsCompleted = currentStep >= 5,
                     IsCurrent = currentStep == 5
                 }
             };
+        }
+
+        // =========================================================================
+        // 7. SẢN PHẨM ĐANG THEO DÕI (BACK-IN-STOCK & PRICE DROP ALERTS) - GAP-05
+        // =========================================================================
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Subscriptions()
+        {
+            var (userId, user) = await GetCurrentCustomerUserAsync();
+            if (userId <= 0)
+            {
+                return RedirectToAction("Login", "Account", new { returnUrl = "/Customer/Subscriptions" });
+            }
+
+            var subscriptions = _subscriptionService != null
+                ? await _subscriptionService.GetCustomerSubscriptionsAsync(userId)
+                : new List<CustomerSubscriptionDto>();
+
+            ViewBag.CustomerName = user?.FullName ?? "Quý Khách";
+            return View(subscriptions);
+        }
+
+        // =========================================================================
+        // 8. MINH BẠCH HẬU MUA HÀNG: TRA CỨU ĐƠN VÃNG LAI, HỦY ĐƠN & ĐỔI TRẢ (GAP-07)
+        // =========================================================================
+
+        [AllowAnonymous]
+        [HttpGet("/tra-cuu-don-hang")]
+        [HttpGet("/Customer/TrackOrder")]
+        public async Task<IActionResult> TrackOrder([FromQuery] string? orderCode = null, [FromQuery] string? phone = null)
+        {
+            if (!string.IsNullOrWhiteSpace(orderCode) && !string.IsNullOrWhiteSpace(phone) && _orderManagementService != null)
+            {
+                var lookupResult = await _orderManagementService.LookupGuestOrderAsync(orderCode, phone);
+                return View("TrackOrder", lookupResult);
+            }
+
+            return View("TrackOrder", new GuestOrderLookupViewModel
+            {
+                OrderCode = orderCode?.Trim() ?? string.Empty,
+                PhoneNumber = phone?.Trim() ?? string.Empty,
+                HasSearched = false
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost("/tra-cuu-don-hang")]
+        [HttpPost("/Customer/TrackOrder")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> TrackOrderPost([FromForm] string orderCode, [FromForm] string phoneNumber)
+        {
+            if (_orderManagementService == null)
+            {
+                return View("TrackOrder", new GuestOrderLookupViewModel
+                {
+                    OrderCode = orderCode ?? string.Empty,
+                    PhoneNumber = phoneNumber ?? string.Empty,
+                    HasSearched = true,
+                    ErrorMessage = "Dịch vụ tra cứu đơn hàng đang tạm bảo trì."
+                });
+            }
+
+            var lookupResult = await _orderManagementService.LookupGuestOrderAsync(orderCode, phoneNumber);
+            return View("TrackOrder", lookupResult);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CancelOrder([FromBody] CancelOrderByCustomerRequest request)
+        {
+            if (request == null || request.OrderId <= 0)
+            {
+                return BadRequest(new { success = false, message = "Thông tin yêu cầu hủy đơn không hợp lệ." });
+            }
+
+            int? currentUserId = GetAuthenticatedUserId();
+            if (!currentUserId.HasValue)
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized, new { success = false, message = "Vui lòng đăng nhập để hủy đơn hàng." });
+            }
+
+            if (_orderManagementService == null)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, new { success = false, message = "Dịch vụ đơn hàng không khả dụng." });
+            }
+
+            var (success, message) = await _orderManagementService.CancelOrderByCustomerAsync(
+                request.OrderId, currentUserId.Value, request.Reason, request.Note);
+
+            if (!success && message.Contains("không có quyền", StringComparison.OrdinalIgnoreCase))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { success = false, message });
+            }
+
+            return Json(new { success, message });
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubmitReturnRequest(
+            [FromForm] int orderId,
+            [FromForm] string reason,
+            [FromForm] string? description,
+            [FromForm] List<IFormFile>? photos)
+        {
+            int? currentUserId = GetAuthenticatedUserId();
+            if (!currentUserId.HasValue)
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized, new { success = false, message = "Vui lòng đăng nhập để gửi yêu cầu đổi/trả." });
+            }
+
+            if (_orderManagementService == null)
+            {
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, new { success = false, message = "Dịch vụ đổi/trả không khả dụng." });
+            }
+
+            var savedUrls = new List<string>();
+            if (photos != null && photos.Any())
+            {
+                if (photos.Count > 3)
+                {
+                    return Json(new { success = false, message = "Chỉ được tải lên tối đa 3 ảnh minh chứng." });
+                }
+
+                string webRoot = _env?.WebRootPath ?? System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot");
+                string uploadDir = System.IO.Path.Combine(webRoot, "uploads", "returns");
+                System.IO.Directory.CreateDirectory(uploadDir);
+
+                var allowedExts = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".webp" };
+
+                foreach (var file in photos)
+                {
+                    if (file.Length <= 0) continue;
+                    if (file.Length > 2 * 1024 * 1024)
+                    {
+                        return Json(new { success = false, message = $"Ảnh '{file.FileName}' vượt quá dung lượng tối đa 2MB." });
+                    }
+
+                    string ext = System.IO.Path.GetExtension(file.FileName);
+                    if (string.IsNullOrWhiteSpace(ext) || !allowedExts.Contains(ext))
+                    {
+                        return Json(new { success = false, message = "Chỉ chấp nhận định dạng ảnh .jpg, .png hoặc .webp." });
+                    }
+
+                    using var stream = file.OpenReadStream();
+                    byte[] header = new byte[12];
+                    int readBytes = await stream.ReadAsync(header.AsMemory(0, Math.Min(12, (int)file.Length)));
+                    if (!IsValidImageMagicBytes(header, readBytes))
+                    {
+                        return Json(new { success = false, message = $"Tệp '{file.FileName}' không phải là ảnh hợp lệ." });
+                    }
+
+                    stream.Position = 0;
+                    string safeFileName = $"ret_{orderId}_{Guid.NewGuid():N}{ext.ToLowerInvariant()}";
+                    string fullPath = System.IO.Path.Combine(uploadDir, safeFileName);
+                    using (var fs = new System.IO.FileStream(fullPath, System.IO.FileMode.Create))
+                    {
+                        await stream.CopyToAsync(fs);
+                    }
+
+                    savedUrls.Add($"/uploads/returns/{safeFileName}");
+                }
+            }
+
+            var (success, message, returnReq) = await _orderManagementService.SubmitReturnRequestAsync(
+                orderId, currentUserId.Value, reason, description, savedUrls);
+
+            if (!success && message.Contains("không có quyền", StringComparison.OrdinalIgnoreCase))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { success = false, message });
+            }
+
+            return Json(new { success, message, returnRequest = returnReq });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetOrderStatusJson(int id)
+        {
+            if (_orderManagementService == null || id <= 0)
+            {
+                return NotFound(new { success = false });
+            }
+
+            int? currentUserId = GetAuthenticatedUserId();
+            bool isAdmin = User?.Identity?.IsAuthenticated == true &&
+                           (User.IsInRole("SuperAdmin") || User.IsInRole("SUPER_ADMIN") || User.IsInRole("Admin") || User.IsInRole("StoreManager"));
+
+            var (allowed, errorMsg, detail) = await _orderManagementService.GetCustomerOrderDetailAsync(
+                id, null, currentUserId, isAdmin);
+
+            if (!allowed || detail == null)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { success = false, message = errorMsg });
+            }
+
+            return Json(new
+            {
+                success = true,
+                orderId = detail.Id,
+                orderCode = detail.OrderCode,
+                orderStatus = detail.OrderStatus,
+                orderStatusDisplayName = detail.OrderStatusDisplayName,
+                orderStatusBadgeClass = detail.OrderStatusBadgeClass,
+                paymentStatus = detail.PaymentStatus,
+                timelineStep = detail.TimelineStep,
+                trackingCode = detail.TrackingCode,
+                carrierName = detail.CarrierName,
+                canCancel = detail.CanCancel,
+                canRequestReturn = detail.CanRequestReturn,
+                returnDaysRemaining = detail.ReturnDaysRemaining,
+                timelineEvents = detail.TimelineEvents,
+                statusHistories = detail.StatusHistories,
+                activeReturnRequest = detail.ActiveReturnRequest
+            });
+        }
+
+        private static bool IsValidImageMagicBytes(byte[] header, int length)
+        {
+            if (length < 4) return false;
+            // JPEG: FF D8 FF
+            if (header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF) return true;
+            // PNG: 89 50 4E 47
+            if (header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47) return true;
+            // WEBP: RIFF....WEBP
+            if (length >= 12 &&
+                header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46 &&
+                header[8] == 0x57 && header[9] == 0x45 && header[10] == 0x42 && header[11] == 0x50)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

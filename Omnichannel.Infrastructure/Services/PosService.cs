@@ -90,7 +90,7 @@ namespace Omnichannel.Infrastructure.Services
                     SellingPrice = p.SellingPrice,
                     DiscountPrice = p.DiscountPrice ?? 0m,
                     FinalPrice = (p.DiscountPrice.HasValue && p.DiscountPrice.Value > 0) ? p.DiscountPrice.Value : p.SellingPrice,
-                    ImageUrl = p.ThumbnailUrl,
+                    ImageUrl = Data.ProductImageSourceRegistry.ResolveProductImageUrl(p.ThumbnailUrl, p.Sku, p.Slug, p.Name),
                     CategoryName = p.Category?.Name ?? "Mỹ phẩm",
                     AvailableQuantity = availableStock
                 });

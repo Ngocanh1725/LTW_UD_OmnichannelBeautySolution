@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Omnichannel.Domain.Common;
-
+//Lưu thông tin sản phẩm, hạn sử dụng của từng lô hàng, và số lượng tồn kho của từng chi nhánh.
 namespace Omnichannel.Domain.Entities
 {
     [Table("Categories")]
@@ -231,6 +231,16 @@ namespace Omnichannel.Domain.Entities
         [MaxLength(200)]
         public string? ImporterName { get; set; } // Đơn vị nhập khẩu
 
+        [MaxLength(50)]
+        [Column(TypeName = "varchar(50)")]
+        public string? RoutineStep { get; set; } // 1_Cleanser, 2_Toner, 3_Serum, 4_Moisturizer
+
+        public bool IsAlcoholFree { get; set; } = false; // Không cồn khô
+        public bool IsFragranceFree { get; set; } = false; // Không hương liệu tổng hợp
+        public bool IsPregnancySafe { get; set; } = false; // An toàn cho phụ nữ mang thai
+
+        public string? FullIngredients { get; set; } // Toàn bộ chuỗi thành phần INCI
+
         [Column(TypeName = "datetime2(7)")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
@@ -250,6 +260,8 @@ namespace Omnichannel.Domain.Entities
         public virtual ICollection<ProductSkinType> ProductSkinTypes { get; set; } = new List<ProductSkinType>();
         public virtual ICollection<ProductConcern> ProductConcerns { get; set; } = new List<ProductConcern>();
         public virtual ICollection<ProductReview> Reviews { get; set; } = new List<ProductReview>();
+        public virtual ICollection<ProductQuestion> Questions { get; set; } = new List<ProductQuestion>();
+        public virtual ICollection<ProductSubscription> Subscriptions { get; set; } = new List<ProductSubscription>();
     }
 
     [Table("ProductBatches")]

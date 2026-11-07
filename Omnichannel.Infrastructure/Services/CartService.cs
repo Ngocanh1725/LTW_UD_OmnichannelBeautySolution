@@ -243,12 +243,31 @@ namespace Omnichannel.Infrastructure.Services
 
             if (parsedUserId.HasValue)
             {
-                return await query.FirstOrDefaultAsync(c => c.UserId == parsedUserId.Value, cancellationToken);
+                var userCart = await query.FirstOrDefaultAsync(c => c.UserId == parsedUserId.Value, cancellationToken);
+                if (userCart != null && userCart.CartItems.Any())
+                {
+                    return userCart;
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(sessionId))
             {
-                return await query.FirstOrDefaultAsync(c => c.CartSessionId == sessionId, cancellationToken);
+                var sessionCart = await query.FirstOrDefaultAsync(c => c.CartSessionId == sessionId, cancellationToken);
+                if (sessionCart != null)
+                {
+                    // Nếu user đã đăng nhập mà sessionCart chưa gắn UserId, tự động gắn UserId cho sessionCart
+                    if (parsedUserId.HasValue && !sessionCart.UserId.HasValue)
+                    {
+                        sessionCart.UserId = parsedUserId.Value;
+                        await _context.SaveChangesAsync(cancellationToken);
+                    }
+                    return sessionCart;
+                }
+            }
+
+            if (parsedUserId.HasValue)
+            {
+                return await query.FirstOrDefaultAsync(c => c.UserId == parsedUserId.Value, cancellationToken);
             }
 
             return null;
@@ -263,7 +282,7 @@ namespace Omnichannel.Infrastructure.Services
                 ProductId = ci.ProductId,
                 ProductName = ci.Product?.Name ?? "Sản phẩm",
                 ProductSku = ci.Product?.Sku,
-                ProductImageUrl = ci.Product?.ThumbnailUrl,
+                ProductImageUrl = ProductImageSourceRegistry.ResolveProductImageUrl(ci.Product?.ThumbnailUrl, ci.Product?.Sku, ci.Product?.Slug, ci.Product?.Name),
                 ProductBatchId = null,
                 BatchNumber = null,
                 ExpDate = null,

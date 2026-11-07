@@ -1,6 +1,6 @@
 @model Omnichannel.Application.DTOs.Sales.OrderSuccessViewModel
 @{
-    ViewData["Title"] = "Đặt Hàng Thành Công - OMNI BEAUTY";
+    ViewData["Title"] = "Đặt Hàng Thành Công - CANMAKE BEAUTY";
     bool isPaid = Model.PaymentStatus == "PAID" || Model.PaymentStatus == "2";
 }
 
@@ -36,15 +36,15 @@
                 </div>
             </div>
 
-            <!-- Thư Tri Ân Haute Parfumerie OMNI BEAUTY -->
+            <!-- Thư Tri Ân Haute Parfumerie CANMAKE BEAUTY -->
             <div class="space-y-2 max-w-xl mx-auto">
                 <div class="flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-widest text-rose-gold">
-                    <span>OMNI BEAUTY</span>
+                    <span>CANMAKE BEAUTY</span>
                     <span>•</span>
                     <span>HAUTE PARFUMERIE & LUXURY COSMETICS</span>
                 </div>
                 <h1 class="font-serif text-2xl sm:text-4xl font-bold text-charcoal tracking-tight mt-1">
-                    Cảm Ơn Quý Khách Đã Lựa Chọn Omni Beauty
+                    Cảm Ơn Quý Khách Đã Lựa Chọn Canmake Beauty
                 </h1>
                 <p class="text-xs sm:text-sm text-slate-600 leading-relaxed font-serif italic pt-1">
                     "Chúng tôi vô cùng vinh hạnh được đồng hành cùng vẻ đẹp rạng ngời và phong cách thượng lưu của Bạn. 
@@ -67,15 +67,103 @@
                      class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold shadow-xs @(isPaid ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-amber-50 text-amber-800 border border-amber-200")">
                     <span class="h-2.5 w-2.5 rounded-full @(isPaid ? "bg-emerald-500" : "bg-amber-500 animate-ping")"></span>
                     <span id="orderStatusLabel">
-                        @(isPaid ? "Trạng thái: Đã thanh toán thành công • Bảo mật SSL 256-bit" : "Trạng thái: Đã khóa tạm giữ tồn kho FEFO (Chờ thanh toán)")
+                        @(Model.OrderStatus == "COMPLETED" ? "Trạng thái: Đã nhận hàng hoàn tất • Đã cộng điểm Loyalty" : (isPaid ? "Trạng thái: Đã thanh toán thành công • Bảo mật SSL 256-bit" : "Trạng thái: Đã khóa tạm giữ tồn kho FEFO (Chờ nhận / thanh toán)"))
                     </span>
                 </div>
 
                 <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-50 text-slate-700 border border-slate-200">
-                    <i class="fa-solid fa-truck-fast text-magenta-accent"></i>
+                    <i class="fa-solid @(Model.DeliveryMethod == "STORE_PICKUP" ? "fa-store text-rose-600" : "fa-truck-fast text-magenta-accent")"></i>
                     <span>@Model.EstimatedDeliveryTime</span>
                 </div>
             </div>
+
+            <!-- KHỐI 0: VÉ NHẬN HÀNG TẠI SHOWROOM (CLICK & COLLECT PASS - PHIÊN D1) -->
+            @if (string.Equals(Model.DeliveryMethod, "STORE_PICKUP", StringComparison.OrdinalIgnoreCase))
+            {
+                var mapsQuery = Uri.EscapeDataString($"{Model.PickupStoreName} {Model.PickupStoreAddress}");
+                var googleMapsUrl = $"https://www.google.com/maps/search/?api=1&query={mapsQuery}";
+                <div id="clickAndCollectTicket" class="p-6 sm:p-7 rounded-3xl bg-gradient-to-br from-rose-950 via-slate-900 to-rose-950 text-white max-w-xl mx-auto text-left shadow-xl border border-rose-500/30 relative overflow-hidden">
+                    <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b border-white/15">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-9 h-9 rounded-xl bg-rose-500/20 border border-rose-400/40 flex items-center justify-center text-rose-300">
+                                <i class="fa-solid fa-ticket text-lg"></i>
+                            </span>
+                            <div>
+                                <span class="text-[10px] font-bold uppercase tracking-widest text-rose-300 block">
+                                    CANMAKE BEAUTY O2O CLICK &amp; COLLECT PASS
+                                </span>
+                                <h3 class="text-base sm:text-lg font-serif font-bold text-white">
+                                    Vé Nhận Hàng Ưu Tiên Tại Showroom
+                                </h3>
+                            </div>
+                        </div>
+                        <span id="pickupTicketStateBadge" class="px-3 py-1 rounded-full text-[11px] font-bold @(Model.OrderStatus == "COMPLETED" ? "bg-emerald-500 text-white" : "bg-amber-400/20 text-amber-300 border border-amber-400/40")">
+                            @(Model.OrderStatus == "COMPLETED" ? "✓ Đã bàn giao tại quầy" : "⏳ Đang giữ lô FEFO (48h)")
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-5 items-center">
+                        <!-- Client-side QR Code Canvas -->
+                        <div class="sm:col-span-5 flex flex-col items-center justify-center bg-white p-3.5 rounded-2xl text-slate-900 shadow-md">
+                            <canvas id="pickupQrCanvas"
+                                    width="160"
+                                    height="160"
+                                    data-qr-payload="CANMAKE-PICKUP|@Model.OrderId|@Model.PickupCode"
+                                    class="w-36 h-36 rounded-lg"></canvas>
+                            <span class="text-[10px] font-semibold text-slate-500 mt-1.5">
+                                Đưa mã QR này cho Thu ngân POS
+                            </span>
+                        </div>
+
+                        <!-- 6-Digit PIN & Showroom Details -->
+                        <div class="sm:col-span-7 space-y-3">
+                            <div class="p-3.5 rounded-2xl bg-white/10 border border-white/15">
+                                <span class="text-[10px] uppercase tracking-wider text-rose-200 block mb-1">
+                                    MÃ PIN NHẬN HÀNG (6 SỐ):
+                                </span>
+                                <div class="flex items-center justify-between">
+                                    <strong id="pickupPinCodeText" class="font-mono text-2xl sm:text-3xl font-extrabold tracking-widest text-amber-300 select-all">
+                                        @Model.PickupCode
+                                    </strong>
+                                    <button type="button"
+                                            onclick="copyToClipboard('@Model.PickupCode', 'Đã sao chép mã PIN nhận hàng!')"
+                                            class="px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-xs font-bold text-white transition cursor-pointer">
+                                        <i class="fa-regular fa-copy mr-1"></i>Sao chép PIN
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="space-y-1.5 text-xs text-rose-100/90">
+                                <div>
+                                    <span class="text-rose-300 font-semibold">Showroom nhận hàng:</span>
+                                    <strong class="text-white block text-sm">@(Model.PickupStoreName ?? "Showroom Canmake Beauty")</strong>
+                                </div>
+                                <div>
+                                    <i class="fa-solid fa-location-dot text-rose-400 mr-1"></i>
+                                    <span>@(Model.PickupStoreAddress ?? Model.ShippingAddress)</span>
+                                </div>
+                                @if (Model.PickupExpiresAt.HasValue)
+                                {
+                                    <div class="text-amber-300 font-medium">
+                                        <i class="fa-regular fa-clock mr-1"></i>
+                                        Hạn giữ hàng 48h: đến @Model.PickupExpiresAt.Value.AddHours(7).ToString("HH:mm dd/MM/yyyy")
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="pt-1 flex flex-wrap items-center gap-2">
+                                <a href="@googleMapsUrl"
+                                   target="_blank"
+                                   rel="noopener"
+                                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition shadow">
+                                    <i class="fa-solid fa-map-location-dot"></i>
+                                    <span>Chỉ đường Google Maps</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
 
             <!-- KHỐI 1: VIETQR CHUYỂN KHOẢN TỨC THÌ (Chuẩn Napas 247) -->
             @if (Model.VietQr != null && !isPaid)
@@ -270,12 +358,77 @@
             }, 1000);
         }
 
-        // 2. Polling Order Payment Status Real-time
+        // 1b. Vẽ mã QR Code phía Client cho Vé Nhận Hàng Click & Collect (Hoạt động 100% Offline)
+        (function renderClientSidePickupQr() {
+            const canvas = document.getElementById('pickupQrCanvas');
+            if (!canvas) return;
+            const payload = canvas.getAttribute('data-qr-payload') || '@Model.OrderId|@Model.PickupCode';
+            const ctx = canvas.getContext('2d');
+            const size = 25;
+            const cell = canvas.width / size;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            function drawFinder(ox, oy) {
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(ox * cell, oy * cell, 7 * cell, 7 * cell);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect((ox + 1) * cell, (oy + 1) * cell, 5 * cell, 5 * cell);
+                ctx.fillStyle = '#e11d48';
+                ctx.fillRect((ox + 2) * cell, (oy + 2) * cell, 3 * cell, 3 * cell);
+            }
+
+            drawFinder(1, 1);
+            drawFinder(size - 8, 1);
+            drawFinder(1, size - 8);
+
+            // Hash payload deterministically into data modules
+            let hash = 2166136261;
+            for (let i = 0; i < payload.length; i++) {
+                hash ^= payload.charCodeAt(i);
+                hash = Math.imul(hash, 16777619);
+            }
+
+            ctx.fillStyle = '#0f172a';
+            for (let r = 1; r < size - 1; r++) {
+                for (let c = 1; c < size - 1; c++) {
+                    const inTopLeft = r < 9 && c < 9;
+                    const inTopRight = r < 9 && c >= size - 9;
+                    const inBottomLeft = r >= size - 9 && c < 9;
+                    if (inTopLeft || inTopRight || inBottomLeft) continue;
+
+                    const seed = ((r * 31 + c * 17) ^ (hash >>> ((r + c) % 16))) & 3;
+                    if (seed === 0 || seed === 1) {
+                        ctx.fillRect(c * cell, r * cell, Math.ceil(cell), Math.ceil(cell));
+                    }
+                }
+            }
+        })();
+
+        // 2. Polling Order Payment & Click-and-Collect Handover Status Real-time
         const poll = setInterval(async () => {
             try {
                 const res = await fetch('/Checkout/CheckOrderStatus?orderId=@Model.OrderId');
                 if (res.ok) {
                     const data = await res.json();
+                    if (data.isCompleted || data.orderStatus === 'COMPLETED') {
+                        clearInterval(poll);
+                        const badge = document.getElementById('orderStatusBadge');
+                        const ticketState = document.getElementById('pickupTicketStateBadge');
+                        if (badge) {
+                            badge.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+                            badge.innerHTML = '<span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span><span>Trạng thái: Đã nhận hàng hoàn tất tại Showroom • Đã cộng điểm Loyalty!</span>';
+                        }
+                        if (ticketState) {
+                            ticketState.className = 'px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500 text-white';
+                            ticketState.textContent = '✓ Đã bàn giao tại quầy POS';
+                        }
+                        if (typeof showStorefrontToast === 'function') {
+                            showStorefrontToast('Đơn hàng đã được bàn giao thành công tại quầy và cộng điểm thưởng!', 'success');
+                        }
+                        return;
+                    }
                     if (data.isPaid || data.paymentStatus === 'PAID') {
                         clearInterval(poll);
                         const badge = document.getElementById('orderStatusBadge');

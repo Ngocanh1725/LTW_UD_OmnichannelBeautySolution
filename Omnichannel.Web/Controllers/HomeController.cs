@@ -27,149 +27,23 @@ namespace Omnichannel.Web.Controllers
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index([FromQuery] string? mode = null)
         {
-            // Truy vấn Banner quảng cáo trang chủ với chuỗi định danh chuẩn
-            var heroBanners = await _context.Banners
-                .AsNoTracking()
-                .Where(b => b.IsActive && (b.Position == "HERO_HOME" || b.Position == "1"))
-                .OrderBy(b => b.SortOrder)
-                .ToListAsync();
-
-            if (!heroBanners.Any())
+            if (string.Equals(mode, "draft", StringComparison.OrdinalIgnoreCase))
             {
-                heroBanners = new List<Banner>
-                {
-                    new Banner
-                    {
-                        Title = "Bừng Sáng Nhan Sắc Mùa Hè",
-                        Subtitle = "Ưu đãi độc quyền đến 40% cho bộ sưu tập làm đẹp cao cấp",
-                        ImageUrl = "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&q=80",
-                        DesktopImageUrl = "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=1600&q=80",
-                        LinkUrl = "/category/cham-soc-da",
-                        ButtonText = "Khám Phá Ngay",
-                        Position = "HERO_HOME"
-                    },
-                    new Banner
-                    {
-                        Title = "Chu Trình K-Beauty Chuẩn Spa",
-                        Subtitle = "Nuôi dưỡng làn da căng mọng ngậm nước với tinh chất quý giá",
-                        ImageUrl = "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=1600&q=80",
-                        DesktopImageUrl = "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=1600&q=80",
-                        LinkUrl = "/category/trang-diem",
-                        ButtonText = "Mua Ngay",
-                        Position = "HERO_HOME"
-                    },
-                    new Banner
-                    {
-                        Title = "Haute Parfumerie & Skincare",
-                        Subtitle = "Hương thơm quý phái và đẳng cấp từ những nhà chế tác hàng đầu",
-                        ImageUrl = "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=1600&q=80",
-                        DesktopImageUrl = "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=1600&q=80",
-                        LinkUrl = "/category/nuoc-hoa",
-                        ButtonText = "Xem Bộ Sưu Tập",
-                        Position = "HERO_HOME"
-                    }
-                };
+                ViewBag.IsPreviewMode = true;
+                ViewBag.PreviewMode = "draft";
             }
-
-            ViewBag.HeroBanners = heroBanners;
-
-            // Truy vấn Danh mục gốc cho thanh điều hướng và avatar tròn (Đảm bảo ít nhất 8 danh mục)
-            var rootCategories = await _context.Categories
-                .AsNoTracking()
-                .Where(c => c.IsActive && c.ParentId == null)
-                .OrderBy(c => c.SortOrder)
-                .ToListAsync();
-
-            if (rootCategories.Count < 8)
-            {
-                var subCategories = await _context.Categories
-                    .AsNoTracking()
-                    .Where(c => c.IsActive && c.ParentId != null && !rootCategories.Select(r => r.Id).Contains(c.Id))
-                    .OrderBy(c => c.SortOrder)
-                    .ToListAsync();
-
-                rootCategories.AddRange(subCategories);
-            }
-
-            if (rootCategories.Count < 8)
-            {
-                var defaultBeautyCategories = new List<Category>
-                {
-                    new() { Name = "Chăm Sóc Da", Slug = "cham-soc-da", ImageUrl = "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=300&h=300&fit=crop" },
-                    new() { Name = "Trang Điểm", Slug = "trang-diem", ImageUrl = "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=300&h=300&fit=crop" },
-                    new() { Name = "Kem Chống Nắng", Slug = "kem-chong-nang", ImageUrl = "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=300&h=300&fit=crop" },
-                    new() { Name = "Chăm Sóc Tóc", Slug = "cham-soc-toc", ImageUrl = "https://images.unsplash.com/photo-1527799820374-dcf8d9d4a388?w=300&h=300&fit=crop" },
-                    new() { Name = "Chăm Sóc Cơ Thể", Slug = "cham-soc-co-the", ImageUrl = "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=300&h=300&fit=crop" },
-                    new() { Name = "Nước Hoa", Slug = "nuoc-hoa", ImageUrl = "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=300&h=300&fit=crop" },
-                    new() { Name = "Dụng Cụ Làm Đẹp", Slug = "dung-cu-lam-dep", ImageUrl = "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&h=300&fit=crop" },
-                    new() { Name = "Set Quà Tặng", Slug = "set-qua-tang", ImageUrl = "https://images.unsplash.com/photo-1512290900672-1f02e6a0d33e?w=300&h=300&fit=crop" }
-                };
-
-                foreach (var defCat in defaultBeautyCategories)
-                {
-                    if (!rootCategories.Any(c => c.Slug == defCat.Slug) && rootCategories.Count < 8)
-                    {
-                        rootCategories.Add(defCat);
-                    }
-                }
-            }
-
-            ViewBag.Categories = rootCategories.Take(8).ToList();
-
-            // Truy vấn Top 8 sản phẩm nổi bật
-            var featuredProducts = await _context.Products
-                .AsNoTracking()
-                .Include(p => p.Category)
-                .Include(p => p.Batches)
-                .Where(p => p.IsActive && p.IsFeatured)
-                .Take(8)
-                .ToListAsync();
-
-            if (!featuredProducts.Any())
-            {
-                featuredProducts = await _context.Products
-                    .AsNoTracking()
-                    .Include(p => p.Category)
-                    .Include(p => p.Batches)
-                    .Where(p => p.IsActive)
-                    .Take(8)
-                    .ToListAsync();
-            }
-
-            ViewBag.FeaturedProducts = featuredProducts;
-
-            // Truy vấn danh sách các lô hàng cận date FEFO phục vụ Flash Sale
-            var now = DateTime.UtcNow;
-            var fefoThresholdDate = now.AddDays(270);
-
-            var fefoBatches = await _context.ProductBatches
-                .AsNoTracking()
-                .Include(pb => pb.Product)
-                    .ThenInclude(p => p.Category)
-                .Where(pb => pb.CurrentQuantity > 0 && pb.Product != null && (pb.Status == "NEAR_EXPIRATION" || pb.ExpDate <= fefoThresholdDate))
-                .OrderBy(pb => pb.ExpDate)
-                .Take(12)
-                .ToListAsync();
-
-            if (fefoBatches.Count < 12)
-            {
-                var extraBatches = await _context.ProductBatches
-                    .AsNoTracking()
-                    .Include(pb => pb.Product)
-                        .ThenInclude(p => p.Category)
-                    .Where(pb => pb.CurrentQuantity > 0 && pb.Product != null && !fefoBatches.Select(b => b.Id).Contains(pb.Id))
-                    .OrderBy(pb => pb.ExpDate)
-                    .Take(12 - fefoBatches.Count)
-                    .ToListAsync();
-
-                fefoBatches.AddRange(extraBatches);
-            }
-
-            ViewBag.FefoBatches = fefoBatches;
-
+            // Giao diện trang chủ được điều phối và tối ưu hóa 100% qua HomeSectionsViewComponent (đã tích hợp L1 MemoryCache)
             return View();
+        }
+
+        [HttpGet("preview")]
+        public IActionResult Preview([FromQuery] string mode = "draft")
+        {
+            ViewBag.IsPreviewMode = true;
+            ViewBag.PreviewMode = mode;
+            return View("Index");
         }
 
         [HttpGet("clearance-fefo")]
@@ -194,6 +68,7 @@ namespace Omnichannel.Web.Controllers
         {
             var query = _context.Products
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Include(p => p.Category)
                 .Include(p => p.Batches)
                 .Where(p => p.IsActive);
@@ -215,23 +90,32 @@ namespace Omnichannel.Web.Controllers
                                       || p.Name.Contains("B5") 
                                       || p.Name.Contains("Centella") 
                                       || p.Name.Contains("Ceramide") 
-                                      || p.Name.Contains("Sensitive"));
+                                      || p.Name.Contains("Sensitive"))
+                             .OrderByDescending(p => p.Id);
             }
             else if (cat == "skincare")
             {
-                query = query.Where(p => (p.Category != null && (p.Category.Name.Contains("Da") || p.Category.Name.Contains("Rửa Mặt") || p.Category.Name.Contains("Tẩy") || p.Category.Name.Contains("Chống Nắng") || p.Category.Name.Contains("Serum") || p.Category.Slug.Contains("cham-soc-da"))) || p.Name.Contains("Serum") || p.Name.Contains("Kem") || p.Name.Contains("Toner"));
+                query = query.Where(p => (p.Category != null && (p.Category.Name.Contains("Da") || p.Category.Name.Contains("Rửa Mặt") || p.Category.Name.Contains("Tẩy") || p.Category.Name.Contains("Chống Nắng") || p.Category.Name.Contains("Serum") || p.Category.Slug.Contains("cham-soc-da"))) || p.Name.Contains("Serum") || p.Name.Contains("Kem") || p.Name.Contains("Toner"))
+                             .OrderByDescending(p => p.Id);
             }
             else if (cat == "makeup")
             {
-                query = query.Where(p => (p.Category != null && (p.Category.Name.Contains("Trang Điểm") || p.Category.Name.Contains("Son") || p.Category.Name.Contains("Cushion") || p.Category.Slug.Contains("trang-diem"))) || p.Name.Contains("Son") || p.Name.Contains("Phấn") || p.Name.Contains("Cushion"));
+                query = query.Where(p => (p.Category != null && (p.Category.Name.Contains("Trang Điểm") || p.Category.Name.Contains("Son") || p.Category.Name.Contains("Cushion") || p.Category.Slug.Contains("trang-diem"))) || p.Name.Contains("Son") || p.Name.Contains("Phấn") || p.Name.Contains("Cushion"))
+                             .OrderByDescending(p => p.Id);
             }
             else if (cat == "fragrance")
             {
-                query = query.Where(p => (p.Category != null && (p.Category.Name.Contains("Nước Hoa") || p.Category.Slug.Contains("nuoc-hoa"))) || p.Name.Contains("Nước Hoa") || p.Name.Contains("Parfum"));
+                query = query.Where(p => (p.Category != null && (p.Category.Name.Contains("Nước Hoa") || p.Category.Slug.Contains("nuoc-hoa"))) || p.Name.Contains("Nước Hoa") || p.Name.Contains("Parfum"))
+                             .OrderByDescending(p => p.Id);
             }
             else if (cat == "haircare")
             {
-                query = query.Where(p => (p.Category != null && (p.Category.Name.Contains("Tóc") || p.Category.Slug.Contains("toc"))) || p.Name.Contains("Dầu Gội") || p.Name.Contains("Dưỡng Tóc"));
+                query = query.Where(p => (p.Category != null && (p.Category.Name.Contains("Tóc") || p.Category.Slug.Contains("toc"))) || p.Name.Contains("Dầu Gội") || p.Name.Contains("Dưỡng Tóc"))
+                             .OrderByDescending(p => p.Id);
+            }
+            else
+            {
+                query = query.OrderByDescending(p => p.IsFeatured).ThenByDescending(p => p.Id);
             }
 
             var products = await query.Take(8).ToListAsync();
@@ -240,9 +124,11 @@ namespace Omnichannel.Web.Controllers
             {
                 products = await _context.Products
                     .AsNoTracking()
+                    .AsSplitQuery()
                     .Include(p => p.Category)
                     .Include(p => p.Batches)
                     .Where(p => p.IsActive)
+                    .OrderByDescending(p => p.Id)
                     .Take(8)
                     .ToListAsync();
             }
@@ -255,6 +141,7 @@ namespace Omnichannel.Web.Controllers
         {
             var product = await _context.Products
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Include(p => p.Category)
                 .Include(p => p.Brand)
                 .Include(p => p.Batches)
@@ -346,6 +233,12 @@ namespace Omnichannel.Web.Controllers
             {
                 ("/", "1.0", "daily"),
                 ("/category", "0.9", "daily"),
+                ("/san-pham", "0.9", "daily"),
+                ("/clearance-fefo", "0.9", "daily"),
+                ("/tu-van-da", "0.9", "daily"),
+                ("/phan-tich-da", "0.8", "weekly"),
+                ("/so-sanh", "0.8", "weekly"),
+                ("/tra-cuu-don-hang", "0.8", "weekly"),
                 ("/Blog", "0.8", "daily"),
                 ("/Product/SmartFilter", "0.8", "weekly")
             };
@@ -440,7 +333,7 @@ namespace Omnichannel.Web.Controllers
             var sb = new StringBuilder();
 
             sb.AppendLine("# ==============================================================");
-            sb.AppendLine("# OMNI BEAUTY - Senior Technical SEO Robots.txt Directives");
+            sb.AppendLine("# CANMAKE BEAUTY - Senior Technical SEO Robots.txt Directives");
             sb.AppendLine("# ==============================================================");
             sb.AppendLine("User-agent: *");
             sb.AppendLine("Allow: /");

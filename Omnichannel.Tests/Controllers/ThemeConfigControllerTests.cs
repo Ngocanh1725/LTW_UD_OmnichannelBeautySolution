@@ -50,8 +50,8 @@ namespace Omnichannel.Tests.Controllers
             // Arrange
             var theme = new ThemeConfigDto
             {
-                BrandName = "OMNI BEAUTY",
-                PrimaryColor = "#E11D48"
+                BrandName = "CANMAKE BEAUTY",
+                PrimaryColor = "#E8618C"
             };
             _themeServiceMock.Setup(s => s.GetCurrentThemeAsync()).ReturnsAsync(theme);
 
@@ -70,7 +70,7 @@ namespace Omnichannel.Tests.Controllers
             var model = new ThemeConfigDto
             {
                 Id = 1,
-                BrandName = "OMNI BEAUTY",
+                BrandName = "CANMAKE BEAUTY",
                 PrimaryColor = "#0D9488" // Teal
             };
             _themeServiceMock.Setup(s => s.UpdateThemeAsync(model)).ReturnsAsync(true);

@@ -1,4 +1,5 @@
 @model Omnichannel.Application.DTOs.Settings.SettingsGroupViewModel
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @{
     Layout = "_AdminLayout";
     ViewData["Title"] = "Cài Đặt Hệ Thống & Cấu Hình Động";
@@ -11,6 +12,9 @@
         "SHIPPING" => Model.ShippingSettings,
         _ => Model.GeneralSettings
     };
+
+    var isDemoMode = string.Equals(Configuration["DemoMode:Enabled"], "true", StringComparison.OrdinalIgnoreCase);
+    var isSuperAdmin = User.IsInRole("SuperAdmin") || User.IsInRole("SUPER_ADMIN");
 }
 
 <div class="space-y-6">
@@ -24,6 +28,12 @@
             <p class="text-xs text-slate-500 mt-1">Quản lý linh hoạt cấu hình đa kênh, máy chủ SMTP, cổng thanh toán và giao vận thời gian thực</p>
         </div>
         <div class="flex items-center gap-3">
+            @if (isDemoMode && isSuperAdmin)
+            {
+                <button type="button" onclick="confirmResetDemoData()" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition shadow-sm" title="Khôi phục trạng thái chuẩn trước giờ demo">
+                    <i class="fa-solid fa-rotate-left text-rose-600"></i> Khôi Phục Dữ Liệu Demo
+                </button>
+            }
             <form asp-action="ClearCache" method="post" class="inline">
                 <input type="hidden" name="group" value="@activeGroup" />
                 <button type="submit" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold transition">
@@ -163,6 +173,52 @@
             </div>
         </form>
     </div>
+
+    @if (isDemoMode && isSuperAdmin)
+    {
+        <!-- Demo State Restoration Card -->
+        <div class="bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-indigo-500/10 border-2 border-rose-300/80 rounded-2xl p-6 shadow-sm">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div class="space-y-2">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-rose-600 text-white shadow-sm">
+                            <i class="fa-solid fa-bolt-lightning mr-1"></i> Demo Ready
+                        </span>
+                        <h2 class="text-lg font-black text-slate-800">Cơ Chế Khôi Phục Dữ Liệu Demo (Reset State)</h2>
+                    </div>
+                    <p class="text-xs text-slate-600 max-w-3xl leading-relaxed">
+                        Chế độ diễn tập đang được kích hoạt (<code class="text-indigo-600 font-mono font-bold">DemoMode:Enabled = true</code>). Tính năng này cho phép dọn sạch toàn bộ dữ liệu tạm sinh ra trong lúc diễn tập thử nghiệm (đơn hàng test, tồn kho bị trừ, giỏ hàng dở dang) và đưa hệ thống về đúng <span class="font-bold text-slate-800">Trạng Thái Chuẩn Hoàn Hảo</span> trước khi bước lên thuyết trình đồ án trước Hội đồng.
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-2 text-xs text-slate-700">
+                        <div class="flex items-center gap-2 bg-white/80 backdrop-blur px-3 py-2 rounded-xl border border-rose-100">
+                            <i class="fa-solid fa-shield-halved text-emerald-600 text-sm"></i>
+                            <span>Bảo toàn 150+ đơn chuẩn & charts</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white/80 backdrop-blur px-3 py-2 rounded-xl border border-rose-100">
+                            <i class="fa-solid fa-trash-can text-rose-600 text-sm"></i>
+                            <span>Xóa đơn diễn tập (!ORD-SEED)</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white/80 backdrop-blur px-3 py-2 rounded-xl border border-rose-100">
+                            <i class="fa-solid fa-boxes-stacked text-indigo-600 text-sm"></i>
+                            <span>Phục hồi tồn kho lô FEFO thật</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white/80 backdrop-blur px-3 py-2 rounded-xl border border-rose-100">
+                            <i class="fa-solid fa-ticket text-amber-600 text-sm"></i>
+                            <span>Làm mới coupon DEMO10, COMBO15</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-shrink-0">
+                    <form id="formResetDemoData" asp-action="ResetDemoData" method="post" class="inline">
+                        @Html.AntiForgeryToken()
+                        <button type="button" onclick="confirmResetDemoData()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-700 hover:to-amber-700 text-white text-xs font-black shadow-lg shadow-rose-600/30 transition transform hover:-translate-y-0.5">
+                            <i class="fa-solid fa-rotate-left text-sm"></i> Khôi Phục Về Chuẩn Demo (1-Click)
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 <!-- Modal Thêm Cấu Hình Mới -->
@@ -244,6 +300,38 @@
             input.type = 'password';
             icon.classList.remove('fa-eye-slash');
             icon.classList.add('fa-eye');
+        }
+    }
+
+    function confirmResetDemoData() {
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Khôi phục dữ liệu Demo?',
+                html: `Hệ thống sẽ <b>xóa các đơn hàng thử nghiệm</b> tạo trong lúc diễn tập, <b>hoàn trả tồn kho vật lý</b> và <b>làm mới giỏ hàng</b> về trạng thái chuẩn trước giờ demo.<br/><br/><span class="text-rose-600 font-bold">Dữ liệu chuẩn (150+ đơn seed, 200+ review, báo cáo doanh thu) được bảo toàn tuyệt đối.</span>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: '<i class="fa-solid fa-rotate-left mr-1"></i> Xác nhận khôi phục ngay',
+                cancelButtonText: 'Hủy bỏ',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Đang khôi phục...',
+                        text: 'Hệ thống đang chuẩn hóa lại dữ liệu demo, vui lòng đợi trong giây lát.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                            document.getElementById('formResetDemoData').submit();
+                        }
+                    });
+                }
+            });
+        } else {
+            if (confirm('Bạn có chắc chắn muốn khôi phục dữ liệu về trạng thái chuẩn trước giờ demo? Các đơn thử nghiệm sẽ bị xóa và tồn kho được hoàn trả.')) {
+                document.getElementById('formResetDemoData').submit();
+            }
         }
     }
 </script>

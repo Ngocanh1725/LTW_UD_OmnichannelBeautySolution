@@ -8,26 +8,27 @@ using Omnichannel.Application.DTOs.Inventory;
 using Omnichannel.Application.Interfaces.Catalog;
 using Omnichannel.Domain.Entities;
 using Omnichannel.Infrastructure.Data;
+using Omnichannel.Application.Interfaces.Notifications;
 
 namespace Omnichannel.Infrastructure.Services.Catalog
 {
     public class ProductService : IProductService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IInventoryNotificationService? _inventoryNotificationService;
 
-        public ProductService(ApplicationDbContext context)
+        public ProductService(
+            ApplicationDbContext context,
+            IInventoryNotificationService? inventoryNotificationService = null)
         {
             _context = context;
+            _inventoryNotificationService = inventoryNotificationService;
         }
 
         public async Task<List<ProductItemViewModel>> GetProductsAsync(string? keyword = null, int? categoryId = null)
         {
             var query = _context.Products
                 .AsNoTracking()
-                .Include(p => p.Category)
-                .Include(p => p.Supplier)
-                .Include(p => p.Batches)
-                .Include(p => p.Variants)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(keyword))
@@ -77,15 +78,17 @@ namespace Omnichannel.Infrastructure.Services.Catalog
 
             var baseQuery = _context.Products
                 .AsNoTracking()
-                .Include(p => p.Category)
-                .Include(p => p.Supplier)
-                .Include(p => p.Batches)
-                .Include(p => p.Variants)
                 .AsQueryable();
 
             // Overall stats before keyword/stock filtering (for top KPI pills)
-            int totalActive = await _context.Products.CountAsync(p => p.IsActive, cancellationToken);
-            int totalInactive = await _context.Products.CountAsync(p => !p.IsActive, cancellationToken);
+            var statusCounts = await _context.Products
+                .AsNoTracking()
+                .GroupBy(p => p.IsActive)
+                .Select(g => new { IsActive = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.IsActive, x => x.Count, cancellationToken);
+
+            int totalActive = statusCounts.TryGetValue(true, out int act) ? act : 0;
+            int totalInactive = statusCounts.TryGetValue(false, out int inact) ? inact : 0;
             int totalOutOfStock = await _context.Products.CountAsync(p => !p.Batches.Any() || p.Batches.Sum(b => b.CurrentQuantity) <= 0, cancellationToken);
             int totalInStock = await _context.Products.CountAsync(p => p.Batches.Sum(b => b.CurrentQuantity) > 0, cancellationToken);
 
@@ -262,6 +265,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
         {
             var product = await _context.Products
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Include(p => p.ProductSkinTypes)
                 .Include(p => p.ProductIngredients)
                 .Include(p => p.Variants)
@@ -285,7 +289,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
                 CostPrice = product.CostPrice,
                 SellingPrice = product.SellingPrice,
                 DiscountPrice = product.DiscountPrice,
-                ThumbnailUrl = product.ThumbnailUrl,
+                ThumbnailUrl = Data.ProductImageSourceRegistry.ResolveProductImageUrl(product.ThumbnailUrl, product.Sku, product.Slug, product.Name),
                 ThumbnailMediaId = product.ThumbnailMediaId,
                 Unit = product.Unit,
                 IsActive = product.IsActive,
@@ -305,6 +309,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
         public async Task<bool> UpdateProductAsync(ProductFormViewModel model, CancellationToken cancellationToken = default)
         {
             var product = await _context.Products
+                .AsSplitQuery()
                 .Include(p => p.ProductSkinTypes)
                 .Include(p => p.ProductIngredients)
                 .FirstOrDefaultAsync(p => p.Id == model.Id, cancellationToken);
@@ -319,6 +324,10 @@ namespace Omnichannel.Infrastructure.Services.Catalog
             product.SupplierId = model.SupplierId;
             product.ShortDescription = model.ShortDescription?.Trim();
             product.Description = model.Description?.Trim();
+            decimal oldEffectivePrice = (product.DiscountPrice.HasValue && product.DiscountPrice.Value > 0)
+                ? product.DiscountPrice.Value
+                : product.SellingPrice;
+
             product.CostPrice = model.CostPrice;
             product.SellingPrice = model.SellingPrice;
             product.DiscountPrice = model.DiscountPrice;
@@ -326,10 +335,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
             {
                 product.ThumbnailUrl = model.ThumbnailUrl.Trim();
             }
-            if (model.ThumbnailMediaId.HasValue)
-            {
-                product.ThumbnailMediaId = model.ThumbnailMediaId.Value;
-            }
+            product.ThumbnailMediaId = model.ThumbnailMediaId;
             product.Unit = string.IsNullOrWhiteSpace(model.Unit) ? "Chai" : model.Unit.Trim();
             product.IsActive = model.IsActive;
             product.IsFeatured = model.IsFeatured;
@@ -369,6 +375,21 @@ namespace Omnichannel.Infrastructure.Services.Catalog
             }
 
             await _context.SaveChangesAsync(cancellationToken);
+
+            // Kích hoạt thông báo giảm giá nếu giá mới thấp hơn giá cũ (GAP-05)
+            decimal newEffectivePrice = (product.DiscountPrice.HasValue && product.DiscountPrice.Value > 0)
+                ? product.DiscountPrice.Value
+                : product.SellingPrice;
+
+            if (_inventoryNotificationService != null && newEffectivePrice < oldEffectivePrice)
+            {
+                try
+                {
+                    await _inventoryNotificationService.TriggerPriceDropAlertsAsync(product.Id, newEffectivePrice, oldEffectivePrice, cancellationToken);
+                }
+                catch { }
+            }
+
             return true;
         }
 
@@ -458,7 +479,7 @@ namespace Omnichannel.Infrastructure.Services.Catalog
                 CostPrice = product.CostPrice,
                 SellingPrice = product.SellingPrice,
                 DiscountPrice = product.DiscountPrice,
-                ThumbnailUrl = product.ThumbnailUrl,
+                ThumbnailUrl = Data.ProductImageSourceRegistry.ResolveProductImageUrl(product.ThumbnailUrl, product.Sku, product.Slug, product.Name),
                 ImagesJson = product.ImagesJson,
                 Unit = product.Unit,
                 IsActive = product.IsActive,

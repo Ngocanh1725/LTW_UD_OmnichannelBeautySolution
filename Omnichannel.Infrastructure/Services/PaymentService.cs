@@ -39,7 +39,7 @@ namespace Omnichannel.Infrastructure.Services
         {
             string bankId = _config["VietQrConfig:BankId"] ?? "MB";
             string accountNo = _config["VietQrConfig:AccountNo"] ?? "0909999888";
-            string accountName = _config["VietQrConfig:AccountName"] ?? "CONG TY TNHH OMNICHANNEL BEAUTY";
+            string accountName = _config["VietQrConfig:AccountName"] ?? "CONG TY TNHH CANMAKE BEAUTY";
             string bankName = _config["VietQrConfig:BankName"] ?? "MBBank (Ngân Hàng Quân Đội)";
 
             // Nội dung chuyển khoản duy nhất theo chuẩn ORDER_{OrderCode}
@@ -138,7 +138,7 @@ namespace Omnichannel.Infrastructure.Services
                 { "vnp_CurrCode", "VND" },
                 { "vnp_IpAddr", string.IsNullOrWhiteSpace(ipAddress) ? "127.0.0.1" : ipAddress },
                 { "vnp_Locale", "vn" },
-                { "vnp_OrderInfo", $"Thanh toan don hang {order.OrderCode} tai Omni Beauty" },
+                { "vnp_OrderInfo", $"Thanh toan don hang {order.OrderCode} tai Canmake Beauty" },
                 { "vnp_OrderType", "other" },
                 { "vnp_ReturnUrl", configReturnUrl },
                 { "vnp_TxnRef", order.OrderCode }
@@ -248,7 +248,7 @@ namespace Omnichannel.Infrastructure.Services
             string requestId = Guid.NewGuid().ToString("N");
             string orderId = order.OrderCode;
             long amount = (long)Math.Round(order.TotalAmount);
-            string orderInfo = $"Thanh toan don hang {order.OrderCode} tai Omni Beauty";
+            string orderInfo = $"Thanh toan don hang {order.OrderCode} tai Canmake Beauty";
             string requestType = "captureWallet";
             string extraData = "";
 
@@ -259,8 +259,8 @@ namespace Omnichannel.Infrastructure.Services
             var requestBody = new
             {
                 partnerCode,
-                partnerName = "OMNI BEAUTY",
-                storeId = "OmniBeautyMainStore",
+                partnerName = "CANMAKE BEAUTY",
+                storeId = "CanmakeBeautyMainStore",
                 requestId,
                 amount,
                 orderId,

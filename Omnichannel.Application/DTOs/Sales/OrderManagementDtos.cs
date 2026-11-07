@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Omnichannel.Application.DTOs.Customer;
 
 namespace Omnichannel.Application.DTOs.Sales
 {
@@ -37,6 +38,7 @@ namespace Omnichannel.Application.DTOs.Sales
         public string StoreName { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        public bool HasPendingReturnRequest { get; set; }
     }
 
     public class AdminOrderPagedListViewModel
@@ -86,6 +88,9 @@ namespace Omnichannel.Application.DTOs.Sales
         public string? ShippingAddress { get; set; }
         public string? Note { get; set; }
 
+        public string? TrackingCode { get; set; }
+        public string? CarrierName { get; set; }
+
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
 
@@ -103,6 +108,8 @@ namespace Omnichannel.Application.DTOs.Sales
 
         public List<AdminOrderDetailItemViewModel> Items { get; set; } = new();
         public List<AdminOrderStatusHistoryDto> Timeline { get; set; } = new();
+        public List<OrderStatusHistoryItemDto> StatusHistories { get; set; } = new();
+        public List<OrderReturnRequestViewModel> ReturnRequests { get; set; } = new();
     }
 
     public class AdminOrderDetailItemViewModel
@@ -155,4 +162,3 @@ namespace Omnichannel.Application.DTOs.Sales
         public string? Note { get; set; }
     }
 }
-

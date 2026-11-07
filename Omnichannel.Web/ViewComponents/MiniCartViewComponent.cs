@@ -8,7 +8,7 @@ namespace Omnichannel.Web.ViewComponents
     public class MiniCartViewComponent : ViewComponent
     {
         private readonly ICartService _cartService;
-        private const string CartCookieKey = "OmnichannelBeauty_CartId";
+        private const string CartCookieKey = "CanmakeBeauty_CartId";
 
         public MiniCartViewComponent(ICartService cartService)
         {

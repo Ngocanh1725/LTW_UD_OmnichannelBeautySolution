@@ -2,6 +2,10 @@
 @{
     ViewData["Title"] = "Quản lý Banners & Quảng cáo";
     Layout = "_AdminLayout";
+    var currentStatus = (ViewBag.CurrentStatus as string) ?? "all";
+    int totalCount = ViewBag.TotalCount ?? 0;
+    int activeCount = ViewBag.ActiveCount ?? 0;
+    int hiddenCount = ViewBag.HiddenCount ?? 0;
 }
 
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
@@ -9,7 +13,7 @@
         <h4 class="fw-bold text-dark mb-1">Chiến dịch Banner & Quảng Cáo</h4>
         <p class="text-muted small mb-0">Quản lý slider đầu trang chủ, popup khuyến mại và banner danh mục sản phẩm</p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="d-flex flex-wrap gap-2">
         <a href="/" target="_blank" class="btn btn-outline-secondary px-3">
             <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Xem Hero Slider
         </a>
@@ -21,13 +25,45 @@
 
 @if (TempData["SuccessMessage"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show rounded-3 small mb-4" role="alert">
+    <div class="alert alert-success alert-dismissible fade show rounded-3 small mb-4 shadow-xs" role="alert">
         <i class="fa-solid fa-circle-check me-2"></i>@TempData["SuccessMessage"]
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
 
-<div class="beauty-card overflow-hidden">
+@if (hiddenCount > 0)
+{
+    <div class="alert alert-warning border-amber-300 bg-amber-50 text-amber-900 rounded-3 p-3 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3 shadow-xs">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-eye-slash fs-5 text-amber-600"></i>
+            <div>
+                <strong>Có @hiddenCount Banner đang được tạm ẩn</strong>
+                <div class="small text-amber-800">Các banner này không xuất hiện ngoài trang chủ/storefront nhưng vẫn được lưu đầy đủ cấu hình.</div>
+            </div>
+        </div>
+        <form asp-action="RestoreAllHidden" method="post" class="d-inline m-0">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-sm btn-success text-white px-3 py-1.5 rounded-2 shadow-xs fw-semibold">
+                <i class="fa-solid fa-eye me-1"></i>Hiện Lại Tất Cả (@hiddenCount Banner)
+            </button>
+        </form>
+    </div>
+}
+
+<!-- Navigation Filter Tabs -->
+<div class="d-flex align-items-center gap-2 mb-3 border-bottom pb-2">
+    <a href="/Admin/Banner?status=all" class="btn btn-sm @(currentStatus == "all" ? "btn-dark fw-bold" : "btn-outline-secondary") rounded-pill px-3">
+        <i class="fa-solid fa-list me-1"></i>Tất cả <span class="badge @(currentStatus == "all" ? "bg-light text-dark" : "bg-secondary text-white") ms-1">@totalCount</span>
+    </a>
+    <a href="/Admin/Banner?status=active" class="btn btn-sm @(currentStatus == "active" ? "btn-success fw-bold text-white" : "btn-outline-secondary") rounded-pill px-3">
+        <i class="fa-solid fa-circle-check me-1"></i>Đang hiển thị <span class="badge @(currentStatus == "active" ? "bg-white text-success" : "bg-success-subtle text-success") ms-1">@activeCount</span>
+    </a>
+    <a href="/Admin/Banner?status=hidden" class="btn btn-sm @(currentStatus == "hidden" ? "btn-warning fw-bold text-dark" : "btn-outline-secondary") rounded-pill px-3">
+        <i class="fa-solid fa-eye-slash me-1"></i>Đã tạm ẩn <span class="badge @(currentStatus == "hidden" ? "bg-dark text-white" : "bg-warning text-dark") ms-1">@hiddenCount</span>
+    </a>
+</div>
+
+<div class="beauty-card overflow-hidden border shadow-sm rounded-3">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
             <thead class="bg-light">
@@ -47,7 +83,18 @@
                     <tr>
                         <td colspan="7" class="text-center py-5 text-muted">
                             <i class="fa-regular fa-images fs-1 text-muted opacity-50 mb-2"></i>
-                            <div>Chưa có banner nào. Nhấn <strong>"Tạo Mới Banner"</strong> để thêm banner cho trang chủ!</div>
+                            @if (currentStatus == "hidden")
+                            {
+                                <div>Không có banner nào đang bị tạm ẩn.</div>
+                            }
+                            else if (currentStatus == "active")
+                            {
+                                <div>Không có banner nào đang hiển thị. Hãy bấm <a href="/Admin/Banner?status=hidden" class="text-primary fw-bold">Hiện lại banner đã ẩn</a> hoặc tạo mới.</div>
+                            }
+                            else
+                            {
+                                <div>Chưa có banner nào. Nhấn <strong>"Tạo Mới Banner"</strong> để thêm banner cho trang chủ!</div>
+                            }
                         </td>
                     </tr>
                 }
@@ -55,10 +102,10 @@
                 {
                     @foreach (var b in Model)
                     {
-                        <tr>
+                        <tr class="@(!b.IsActive ? "bg-warning-subtle" : "")" style="@(!b.IsActive ? "background-color: #fffbeb !important;" : "")">
                             <td class="px-4">
                                 <div class="position-relative d-inline-block">
-                                    <img src="@b.DesktopImageUrl" alt="@b.Title" class="rounded-3 shadow-sm border" style="width: 120px; height: 55px; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=240&fit=crop'" />
+                                    <img src="@b.DesktopImageUrl" alt="@b.Title" class="rounded-3 shadow-sm border" style="width: 120px; height: 55px; object-fit: cover;" onerror="this.src='/images/banners/hero-banner-summer-beauty.jpg'" />
                                     @if (!string.IsNullOrEmpty(b.MobileImageUrl))
                                     {
                                         <span class="position-absolute bottom-0 end-0 badge bg-dark text-white p-1" style="font-size: 8px;" title="Có ảnh Mobile riêng">
@@ -68,7 +115,17 @@
                                 </div>
                             </td>
                             <td>
-                                <div class="fw-bold text-dark">@b.Title</div>
+                                <div class="fw-bold text-dark d-flex align-items-center gap-1.5">
+                                    <span>@b.Title</span>
+                                    @if (!b.IsActive)
+                                    {
+                                        <span class="badge bg-warning text-dark border" style="font-size: 10px;">ĐANG ẨN</span>
+                                    }
+                                </div>
+                                @if (!string.IsNullOrEmpty(b.Subtitle))
+                                {
+                                    <div class="text-muted small text-truncate" style="max-width: 340px;">@b.Subtitle</div>
+                                }
                                 <span class="badge" style="background: var(--primary-purple-light); color: var(--primary-purple); font-size: 11px;">@b.PositionName</span>
                                 @if (!string.IsNullOrEmpty(b.LinkUrl))
                                 {
@@ -88,33 +145,53 @@
                             <td class="text-center">
                                 @if (!b.IsActive)
                                 {
-                                    <span class="badge bg-secondary-subtle text-secondary px-2.5 py-1.5 rounded-pill border">Đã ẩn</span>
+                                    <span class="badge bg-secondary text-white px-2.5 py-1.5 rounded-pill shadow-xs">
+                                        <i class="fa-solid fa-eye-slash me-1"></i>Đã tạm ẩn
+                                    </span>
                                 }
                                 else if (b.IsExpired)
                                 {
-                                    <span class="badge bg-danger-subtle text-danger px-2.5 py-1.5 rounded-pill border border-danger-subtle">Hết hạn</span>
+                                    <span class="badge bg-danger-subtle text-danger px-2.5 py-1.5 rounded-pill border border-danger-subtle">
+                                        <i class="fa-solid fa-clock-rotate-left me-1"></i>Hết hạn
+                                    </span>
                                 }
                                 else if (b.IsUpcoming)
                                 {
-                                    <span class="badge bg-warning-subtle text-warning px-2.5 py-1.5 rounded-pill border border-warning-subtle">Sắp chạy</span>
+                                    <span class="badge bg-warning-subtle text-warning px-2.5 py-1.5 rounded-pill border border-warning-subtle">
+                                        <i class="fa-solid fa-calendar-day me-1"></i>Sắp chạy
+                                    </span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-success-subtle text-success px-2.5 py-1.5 rounded-pill border border-success-subtle">Đang hiển thị</span>
+                                    <span class="badge bg-success-subtle text-success px-2.5 py-1.5 rounded-pill border border-success-subtle">
+                                        <i class="fa-solid fa-circle-check me-1"></i>Đang hiển thị
+                                    </span>
                                 }
                             </td>
                             <td class="px-4 text-end">
-                                <div class="d-inline-flex gap-1.5">
+                                <div class="d-inline-flex gap-1.5 align-items-center">
+                                    @if (!b.IsActive)
+                                    {
+                                        <form asp-action="ToggleStatus" asp-route-id="@b.BannerId" method="post" class="d-inline m-0">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-success text-white rounded-3 px-2.5 py-1 shadow-xs fw-semibold" title="Bật hiển thị lại banner này">
+                                                <i class="fa-solid fa-eye me-1"></i>Hiện lại
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="ToggleStatus" asp-route-id="@b.BannerId" method="post" class="d-inline m-0">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary rounded-3" title="Tạm ẩn banner này">
+                                                <i class="fa-solid fa-eye-slash me-1"></i>Tạm ẩn
+                                            </button>
+                                        </form>
+                                    }
                                     <a href="/Admin/Banner/Edit/@b.BannerId" class="btn btn-sm btn-outline-primary rounded-3" title="Chỉnh sửa Banner">
                                         <i class="fa-solid fa-pen-to-square"></i>
                                     </a>
-                                    <form asp-action="ToggleStatus" asp-route-id="@b.BannerId" method="post" class="d-inline">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-sm btn-outline-secondary rounded-3" title="@(b.IsActive ? "Tạm ẩn Banner" : "Bật hiển thị Banner")">
-                                            <i class="fa-solid @(b.IsActive ? "fa-eye-slash" : "fa-eye")"></i>
-                                        </button>
-                                    </form>
-                                    <form asp-action="Delete" asp-route-id="@b.BannerId" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa banner này?');">
+                                    <form asp-action="Delete" asp-route-id="@b.BannerId" method="post" class="d-inline m-0" onsubmit="return confirm('Bạn có chắc muốn xóa vĩnh viễn banner này?');">
                                         @Html.AntiForgeryToken()
                                         <button type="submit" class="btn btn-sm btn-outline-danger rounded-3" title="Xóa banner">
                                             <i class="fa-solid fa-trash-can"></i>

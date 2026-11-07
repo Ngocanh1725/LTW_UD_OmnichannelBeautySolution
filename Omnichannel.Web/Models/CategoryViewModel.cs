@@ -19,6 +19,11 @@ namespace Omnichannel.Web.Models
         public string SkinType { get; set; } = "all"; // all, oily, dry, sensitive, combination
         public int? MinRating { get; set; } // null, 4, 5
 
+        // Clean Beauty Filters
+        public bool IsAlcoholFree { get; set; } = false;
+        public bool IsFragranceFree { get; set; } = false;
+        public bool IsPregnancySafe { get; set; } = false;
+
         // Sorting & View Mode
         public string Sort { get; set; } = "newest"; // newest, bestseller, price-asc, price-desc, fefo-longest, discount-desc
         public string ViewMode { get; set; } = "grid"; // grid, list

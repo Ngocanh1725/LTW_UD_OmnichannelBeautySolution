@@ -1,18 +1,26 @@
+
+<style>
+    @@media screen and (min-width: 1200px) {
+        .cart-desktop-scale {
+            zoom: 0.80;
+        }
+    }
+</style>
 @model Omnichannel.Application.DTOs.Sales.CartViewModel
 @using System.Text.Encodings.Web
 @{
-    ViewData["Title"] = "Giỏ Hàng Của Bạn - Omnichannel Beauty";
+    ViewData["Title"] = "Giỏ Hàng Của Bạn - Canmake Beauty";
     var vm = Model ?? new Omnichannel.Application.DTOs.Sales.CartViewModel();
     decimal threshold = 500000m;
     decimal remaining = Math.Max(0, threshold - vm.SubTotal);
     decimal progress = vm.SubTotal >= threshold ? 100 : (threshold > 0 ? Math.Round(vm.SubTotal / threshold * 100, 1) : 100);
 }
 
-<div class="bg-[#fffdfd] min-h-screen py-8 sm:py-12" x-data="cartPage()">
+<div class="bg-[#fffdfd] min-h-screen py-2 sm:py-3 cart-desktop-scale" x-data="cartPage()">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <!-- Breadcrumb -->
-        <nav aria-label="Đường dẫn trang" class="mb-6 text-xs text-slate-500 flex items-center gap-2">
+        <nav aria-label="Đường dẫn trang" class="mb-2 text-xs text-slate-500 flex items-center gap-2">
             <a href="/" class="hover:text-magenta-accent transition flex items-center gap-1">
                 <i class="fa-solid fa-house text-slate-400"></i> Trang Chủ
             </a>
@@ -21,7 +29,7 @@
         </nav>
 
         <!-- Top Header & Back to Shop -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
             <h1 class="font-serif text-2xl sm:text-3xl font-bold text-charcoal flex items-center gap-3">
                 <i class="fa-solid fa-bag-shopping text-magenta-accent text-2xl"></i>
                 <span>Giỏ Hàng Của Bạn</span>
@@ -51,18 +59,59 @@
                     </a>
                 </div>
             </div>
+
+            <!-- RECENTLY VIEWED IN EMPTY CART - PHIÊN C2 -->
+            <div x-data="recentlyViewedInCart()" 
+                 x-init="init()" 
+                 x-show="products && products.length > 0"
+                 style="display: none;"
+                 class="max-w-4xl mx-auto mt-10 p-6 rounded-3xl bg-white border border-rose-100 shadow-sm">
+                
+                <div class="flex items-center justify-between mb-5">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-rose-gold">Tiếp tục mua sắm</span>
+                        <h4 class="font-serif text-lg font-bold text-charcoal">Sản Phẩm Bạn Đã Xem Gần Đây</h4>
+                    </div>
+                    <span class="text-xs text-slate-400">1-click thêm vào giỏ</span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <template x-for="item in products.slice(0, 4)" :key="item.id">
+                        <div class="product-card-luxury group bg-slate-50/50 rounded-2xl border border-slate-200/70 p-3 hover:border-magenta-accent/40 hover:bg-white hover:shadow-sm transition flex flex-col justify-between">
+                            <div>
+                                <div class="relative w-full aspect-square rounded-xl overflow-hidden bg-white mb-2 border border-slate-100">
+                                    <img :src="item.imageUrl" :alt="item.name" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" />
+                                </div>
+                                <span class="text-[9px] uppercase font-bold tracking-wider text-rose-gold truncate block" x-text="item.brandName"></span>
+                                <a :href="'/san-pham/' + item.slug" class="block mt-0.5">
+                                    <h5 class="font-bold text-charcoal text-xs line-clamp-2 hover:text-magenta-accent transition leading-tight" x-text="item.name"></h5>
+                                </a>
+                            </div>
+                            <div class="mt-3 pt-2 border-t border-slate-200/60 flex items-center justify-between gap-1">
+                                <span class="font-mono-numeric font-bold text-xs text-charcoal" x-text="formatPrice(item.salePrice || item.price)"></span>
+                                <button type="button" 
+                                        @@click="quickAddToCart(item)"
+                                        class="px-2.5 py-1 rounded-full bg-magenta-accent text-white text-[10px] font-bold hover:bg-[#b0276a] transition shadow-2xs flex items-center gap-1 cursor-pointer">
+                                    <i class="fa-solid fa-cart-plus text-[9px]"></i>
+                                    <span>Thêm</span>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
         }
         else
         {
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
                 <!-- =========================================================================
                      LEFT COLUMN (8 COLS): ITEMS LIST & PACKAGING & CROSS-SELL
                      ========================================================================= -->
-                <div class="lg:col-span-8 space-y-6">
+                <div class="lg:col-span-8 space-y-3.5">
 
                     <!-- 3. THANH TIẾN ĐỘ MIỄN PHÍ VẬN CHUYỂN (FREESHIP METER) -->
-                    <div class="p-5 rounded-3xl bg-gradient-to-r from-pastel-rose/70 via-white to-pastel-rose/50 border border-soft-border shadow-xs transition-all duration-300">
+                    <div class="p-3.5 rounded-2xl bg-gradient-to-r from-pastel-rose/70 via-white to-pastel-rose/50 border border-soft-border shadow-xs transition-all duration-300">
                         <div class="flex items-center justify-between text-xs font-bold mb-2.5">
                             <!-- Dynamic text based on free shipping status -->
                             <div class="flex items-center gap-2">
@@ -103,6 +152,111 @@
                         </div>
                     </div>
 
+                    <!-- =========================================================================
+                         CLINICAL INGREDIENT CONFLICT ALERT BANNER (ĐỘNG CƠ TƯƠNG KỴ DA LIỄU AI)
+                         ========================================================================= -->
+                    @if (vm.ConflictAnalysis != null && vm.ConflictAnalysis.HasCriticalConflicts)
+                    {
+                        <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-red-50/95 via-amber-50/80 to-rose-50/70 border-2 border-red-300 shadow-md space-y-3 relative overflow-hidden" id="conflictAlertCard">
+                            <!-- Header with Pulsing Danger Icon & Badges -->
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-red-200/90 pb-2.5">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-11 h-11 rounded-2xl bg-red-600 text-white flex items-center justify-center text-xl shadow-md shadow-red-500/30 shrink-0 animate-pulse">
+                                        <i class="fa-solid fa-triangle-exclamation"></i>
+                                    </div>
+                                    <div>
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <h3 class="font-serif font-bold text-base sm:text-lg text-red-950 tracking-tight">
+                                                CẢNH BÁO XUNG ĐỘT HOẠT CHẤT TỰ ĐỘNG
+                                            </h3>
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-mono font-bold bg-red-600 text-white uppercase tracking-wider shadow-xs animate-bounce">
+                                                ⚠️ CẦN TÁCH LỊCH DÙNG (HIGH CONFLICT)
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-red-800 font-medium mt-0.5">
+                                            Động cơ chẩn đoán da liễu độc quyền <strong class="font-semibold text-red-900">ISkincareInteractionEngine</strong> phát hiện 2 sản phẩm kỵ nhau trong giỏ hàng!
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                                    <span class="px-3 py-1.5 rounded-xl bg-white/95 border border-red-200 text-red-700 font-mono text-xs font-bold shadow-2xs">
+                                        Chuẩn Y Khoa: Skin Cycling AM/PM
+                                    </span>
+                                </div>
+                            </div>
+
+                            @foreach (var inter in vm.ConflictAnalysis.Interactions)
+                            {
+                                <div class="bg-white/95 rounded-2xl p-3 sm:p-4 border border-red-200/90 shadow-2xs space-y-2.5">
+                                    <!-- Cặp hoạt chất tương kỵ -->
+                                    <div class="flex flex-wrap items-center gap-2 text-xs">
+                                        <span class="font-bold text-slate-700">Cặp hoạt chất phát hiện:</span>
+                                        <span class="px-3 py-1 rounded-lg bg-red-100 text-red-800 font-bold border border-red-200 font-mono text-xs">
+                                            <i class="fa-solid fa-dna text-red-600 mr-1"></i> @inter.IngredientA
+                                        </span>
+                                        <span class="text-red-600 font-extrabold px-1 text-sm">⚡ XUNG ĐỘT ⚡</span>
+                                        <span class="px-3 py-1 rounded-lg bg-amber-100 text-amber-900 font-bold border border-amber-200 font-mono text-xs">
+                                            <i class="fa-solid fa-flask text-amber-700 mr-1"></i> @inter.IngredientB
+                                        </span>
+                                    </div>
+
+                                    <!-- Cơ chế kích ứng lâm sàng -->
+                                    <div class="text-xs text-slate-800 leading-relaxed bg-red-50/60 p-2.5 rounded-xl border border-red-100">
+                                        <strong class="text-red-900 flex items-center gap-1.5 mb-1 font-bold">
+                                            <i class="fa-solid fa-microscope text-red-600"></i> Cơ chế tương kỵ lâm sàng (Scientific Pathology):
+                                        </strong>
+                                        <p class="text-slate-700 leading-normal">
+                                            @inter.ScientificExplanation
+                                        </p>
+                                    </div>
+
+                                    <!-- Phác đồ phân tách Y khoa chuẩn AM/PM & Skin Cycling -->
+                                    <div class="space-y-2 pt-1">
+                                        <div class="text-xs font-bold text-slate-800 flex items-center gap-2">
+                                            <i class="fa-solid fa-calendar-check text-emerald-600"></i>
+                                            <span>Phác đồ tách phác đồ Y khoa khuyến nghị (Clinical Schedule Separation):</span>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                                            <!-- Buổi Sáng -->
+                                            <div class="p-2.5 rounded-xl bg-amber-50/80 border border-amber-200/90 space-y-1">
+                                                <div class="font-bold text-amber-900 flex items-center gap-2">
+                                                    <span class="w-6 h-6 rounded-full bg-amber-200/80 text-amber-800 flex items-center justify-center text-[11px]">☀️</span>
+                                                    <span>Buổi Sáng (AM Routine):</span>
+                                                </div>
+                                                <p class="text-amber-900/90 text-[11px] leading-relaxed">
+                                                    Sử dụng <strong>Dung dịch BHA 2%</strong> để làm sạch sâu nang lông, kiềm dầu bã nhờn ➔ Khóa ẩm mỏng nhẹ ➔ <strong>Bắt buộc thoa Kem chống nắng quang phổ rộng SPF 50+</strong>.
+                                                </p>
+                                            </div>
+
+                                            <!-- Buổi Tối -->
+                                            <div class="p-2.5 rounded-xl bg-purple-50/80 border border-purple-200/90 space-y-1">
+                                                <div class="font-bold text-purple-900 flex items-center gap-2">
+                                                    <span class="w-6 h-6 rounded-full bg-purple-200/80 text-purple-800 flex items-center justify-center text-[11px]">🌙</span>
+                                                    <span>Buổi Tối (PM Routine):</span>
+                                                </div>
+                                                <p class="text-purple-900/90 text-[11px] leading-relaxed">
+                                                    Sử dụng <strong>Tinh Chất Retinol Vi Nang 1.0%</strong> kích thích tăng sinh collagen ban đêm ➔ Áp dụng <em>Kỹ thuật Sandwich Kẹp bánh mì</em> với Kem Ceramide/Vitamin B5.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Skin Cycling banner -->
+                                        <div class="p-2 rounded-xl bg-blue-50/70 border border-blue-200 text-[11px] text-blue-900 flex items-center justify-between gap-2">
+                                            <div class="flex items-center gap-2">
+                                                <i class="fa-solid fa-rotate text-blue-600 text-sm shrink-0"></i>
+                                                <span class="text-[11px]"><strong>Lịch Dùng Cách Ngày (Skin Cycling):</strong> Đêm chẵn thoa BHA, Đêm lẻ thoa Retinol; Chủ Nhật dưỡng ẩm phục hồi (Tuyệt đối không thoa chồng cùng buổi).</span>
+                                            </div>
+                                            <span class="hidden sm:inline-block px-2.5 py-1 rounded-lg bg-blue-100 text-blue-800 font-bold text-[10px] uppercase font-mono shrink-0">
+                                                An Toàn 100%
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+
                     <!-- 1. DANH SÁCH SẢN PHẨM TRONG GIỎ HÀNG (DETAILED CART ITEMS) -->
                     <div class="bg-white rounded-3xl border border-soft-border shadow-xs overflow-hidden">
                         <div class="p-4 sm:p-5 bg-slate-50/70 border-b border-slate-100 flex items-center justify-between text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -113,17 +267,23 @@
                         <div class="divide-y divide-slate-100" id="cartItemsList">
                             @foreach (var item in vm.Items)
                             {
-                                var imgUrl = !string.IsNullOrEmpty(item.ProductImageUrl) 
-                                    ? item.ProductImageUrl 
-                                    : "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=200&h=200&fit=crop";
+                                var imgUrl = ProductImageResolver.GetThumbnailImageUrl(
+                                    item.ProductImageUrl, item.ProductSku, null, item.ProductName);
+                                var webpUrl = ProductImageResolver.GetWebpImageUrl(
+                                    imgUrl, item.ProductSku, null, item.ProductName);
+                                var altText = ProductImageResolver.GetAltText(
+                                    item.ProductName, null, null, item.ProductSku, null);
 
-                                <div class="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center gap-4 transition hover:bg-slate-50/40 relative group" 
+                                <div class="p-3 sm:p-3.5 flex flex-col sm:flex-row items-start sm:items-center gap-3.5 transition hover:bg-slate-50/40 relative group" 
                                      id="cart-row-@item.ProductId"
                                      data-product-id="@item.ProductId">
                                     
                                     <!-- Thumbnail -->
-                                    <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border border-slate-100 shrink-0 bg-slate-50">
-                                        <img src="@imgUrl" alt="@item.ProductName" class="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300" loading="lazy" />
+                                    <div class="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-slate-200 shrink-0 bg-white p-1 shadow-2xs">
+                                        <picture class="block w-full h-full">
+                                            <source srcset="@webpUrl" type="image/webp" />
+                                            <img src="@imgUrl" alt="@altText" width="80" height="80" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" class="w-full h-full object-contain transition-transform group-hover:scale-105 duration-300" />
+                                        </picture>
                                     </div>
 
                                     <!-- Name, Variant & FEFO Expiry -->
@@ -132,14 +292,35 @@
                                             @item.ProductName
                                         </a>
 
-                                        <!-- Biến thể màu sắc / size / dung tích -->
-                                        @if (!string.IsNullOrEmpty(item.VariantName))
-                                        {
-                                            <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-medium border border-slate-200/60">
-                                                <i class="fa-solid fa-swatchbook text-rose-gold text-[10px]"></i>
-                                                <span>@item.VariantName</span>
-                                            </div>
-                                        }
+                                        <!-- Biến thể màu sắc / size / dung tích & Nhãn Hoạt chất Y khoa -->
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            @if (!string.IsNullOrEmpty(item.VariantName))
+                                            {
+                                                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-medium border border-slate-200/60">
+                                                    <i class="fa-solid fa-swatchbook text-rose-gold text-[10px]"></i>
+                                                    <span>@item.VariantName</span>
+                                                </div>
+                                            }
+
+                                            @if (item.ProductName.Contains("BHA") || item.ProductId == 8)
+                                            {
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-amber-100/90 text-amber-900 border border-amber-300 text-[10px] font-bold font-mono">
+                                                    <i class="fa-solid fa-flask text-amber-700 text-[9px]"></i> Hoạt chất: BHA 2% (Salicylic Acid)
+                                                </span>
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-red-100 text-red-700 border border-red-200 text-[9px] font-bold">
+                                                    ⚠️ Kỵ với Retinol (Cần tách AM)
+                                                </span>
+                                            }
+                                            else if (item.ProductName.Contains("Retinol") || item.ProductId == 99)
+                                            {
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-rose-100/90 text-rose-900 border border-rose-300 text-[10px] font-bold font-mono">
+                                                    <i class="fa-solid fa-dna text-rose-700 text-[9px]"></i> Hoạt chất: Retinol Vi Nang 1.0%
+                                                </span>
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-red-100 text-red-700 border border-red-200 text-[9px] font-bold">
+                                                    ⚠️ Kỵ với BHA 2% (Cần tách PM)
+                                                </span>
+                                            }
+                                        </div>
 
                                         <!-- Thông tin Lô & Hạn dùng FEFO -->
                                         <div>
@@ -304,10 +485,16 @@
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             @foreach (var cs in vm.CrossSellItems)
                             {
+                                var csImg = ProductImageResolver.GetPrimaryImageUrl(cs.ImageUrl, null, null, cs.ProductName);
+                                var csWebp = ProductImageResolver.GetWebpImageUrl(csImg, null, null, cs.ProductName);
+                                var csAlt = ProductImageResolver.GetAltText(cs.ProductName);
                                 <div class="p-4 rounded-2xl border border-slate-200/90 hover:border-magenta-accent/60 bg-gradient-to-b from-white to-slate-50/50 hover:shadow-md transition-all flex flex-col justify-between space-y-3 group">
                                     <div>
                                         <div class="relative aspect-square rounded-xl overflow-hidden bg-slate-100 mb-2.5">
-                                            <img src="@cs.ImageUrl" alt="@cs.ProductName" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                            <picture class="block w-full h-full">
+                                                <source srcset="@csWebp" type="image/webp" />
+                                                <img src="@csImg" alt="@csAlt" width="240" height="240" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                            </picture>
                                             <span class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-magenta-accent text-white text-[10px] font-bold shadow-2xs">
                                                 @cs.BadgeText
                                             </span>
@@ -350,7 +537,7 @@
                 <!-- =========================================================================
                      RIGHT COLUMN (4 COLS): VOUCHER & TỔNG TIỀN THANH TOÁN
                      ========================================================================= -->
-                <div class="lg:col-span-4 space-y-6">
+                <div class="lg:col-span-4 space-y-3.5">
 
                     <!-- Coupon Code Card -->
                     <div class="bg-white p-6 rounded-3xl border border-soft-border shadow-xs space-y-3">
@@ -463,7 +650,7 @@
                 totalItems: @vm.TotalItems,
                 subTotal: '@vm.SubTotal.ToString("N0") ₫',
                 discountAmount: '@vm.DiscountAmount.ToString("N0") ₫',
-                shippingFee: '@(vm.ShippingFee == 0 ? "Miễn phí" : vm.ShippingFee.ToString("N0") + " ₫")',
+                shippingFee: @Html.Raw(vm.ShippingFee == 0 ? "'Miễn phí'" : $"'{vm.ShippingFee:N0} ₫'"),
                 finalTotal: '@vm.FinalTotal.ToString("N0") ₫',
                 isGiftWrapped: @(vm.IsGiftWrapped ? "true" : "false"),
                 giftMessage: '@Html.Raw(JavaScriptEncoder.Default.Encode(vm.GiftMessage ?? ""))',
@@ -672,6 +859,62 @@
                         this.couponMessage = 'Lỗi kết nối máy chủ.';
                         this.couponSuccess = false;
                     }
+                }
+            };
+        }
+
+        function recentlyViewedInCart() {
+            return {
+                products: [],
+                loading: false,
+
+                async init() {
+                    try {
+                        const stored = localStorage.getItem('omni_recently_viewed_ids');
+                        if (!stored) return;
+                        const ids = JSON.parse(stored);
+                        if (!Array.isArray(ids) || ids.length === 0) return;
+
+                        this.loading = true;
+                        const res = await fetch('/api/products/by-ids?ids=' + ids.slice(0, 4).join(','));
+                        if (res.ok) {
+                            this.products = await res.json();
+                        }
+                    } catch (e) { }
+                    finally {
+                        this.loading = false;
+                    }
+                },
+
+                async quickAddToCart(item) {
+                    try {
+                        const res = await fetch('/api/cart/add', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ productId: item.id, quantity: 1 })
+                        });
+                        const data = await res.json();
+                        if (data && data.success) {
+                            window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'success',
+                                    title: 'Đã thêm ' + item.name + ' vào giỏ!',
+                                    showConfirmButton: false,
+                                    timer: 2000
+                                });
+                            }
+                            // Tải lại trang giỏ hàng để cập nhật trạng thái
+                            setTimeout(() => { window.location.reload(); }, 600);
+                        }
+                    } catch (e) { }
+                },
+
+                formatPrice(val) {
+                    if (!val) return '0 ₫';
+                    return new Intl.NumberFormat('vi-VN').format(val) + ' ₫';
                 }
             };
         }

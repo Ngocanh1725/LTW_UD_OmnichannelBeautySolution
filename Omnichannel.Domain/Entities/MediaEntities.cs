@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Omnichannel.Domain.Entities
 {
     [Table("MediaAssets")]
-    public class MediaAsset
+    public partial class MediaAsset
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

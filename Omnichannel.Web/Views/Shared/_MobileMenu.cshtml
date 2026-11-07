@@ -1,8 +1,22 @@
+@using Microsoft.AspNetCore.Authentication
+@using System.Security.Claims
+@using Omnichannel.Application.Common
 @inject Omnichannel.Application.Interfaces.Cms.IThemeService ThemeService
 @{
     var theme = await ThemeService.GetCurrentThemeAsync();
+    var adminAuthResult = Context.RequestServices?.GetService(typeof(IAuthenticationService)) != null
+        ? await Context.AuthenticateAsync(AuthConstants.AdminCookieScheme)
+        : null;
+    var adminPrincipal = (adminAuthResult?.Succeeded == true && adminAuthResult.Principal?.Identity?.IsAuthenticated == true)
+        ? adminAuthResult.Principal
+        : null;
+
+    bool isStaffLogged = adminPrincipal != null ||
+        (User?.Identity?.IsAuthenticated == true &&
+         (User.HasClaim("IsStaff", "true") || User.IsInRole("SuperAdmin") || User.IsInRole("SUPER_ADMIN") || User.IsInRole("StoreManager") || User.IsInRole("STORE_MANAGER") || User.IsInRole("Cashier") || User.IsInRole("WarehouseStaff") || User.IsInRole("ContentEditor")));
+    bool isCustomerLogged = !isStaffLogged && User?.Identity?.IsAuthenticated == true;
 }
-@* Omnichannel Beauty Suite - Storefront Mobile Menu Off-Canvas Drawer *@
+@* Canmake Beauty - Storefront Mobile Menu Off-Canvas Drawer *@
 <div x-show="mobileMenuOpen" 
      style="display: none;" 
      class="relative z-50 lg:hidden" 
@@ -36,13 +50,8 @@
                     <!-- Drawer Header -->
                     <div class="p-5 border-b border-soft-border flex items-center justify-between bg-pastel-rose">
                         <a href="/" class="brand-logo-wrapper flex items-center gap-3 leading-none" @@click="mobileMenuOpen = false">
-                            <div class="brand-logo-badge relative shrink-0">
-                                <img src="@theme.LogoUrl" alt="@theme.BrandName Logo" class="brand-logo-img h-10 w-10 object-cover rounded-full" />
-                            </div>
-                            <div class="flex flex-col items-start leading-none">
-                                <span class="brand-logo-text text-lg font-serif font-bold text-charcoal tracking-[0.16em]">@theme.BrandName</span>
-                                <span class="text-[8.5px] font-bold tracking-[0.3em] text-magenta-accent uppercase mt-0.5">@(theme.Slogan ?? "LUXURY COSMETICS")</span>
-                            </div>
+                            <img src="@Brand.LogoUrl" alt="@theme.BrandName Logo" class="h-10 w-auto object-contain" />
+                            <span class="sr-only">@theme.BrandName</span>
                         </a>
                         <button type="button" 
                                 @@click="mobileMenuOpen = false" 
@@ -54,7 +63,7 @@
 
                     <!-- Mobile Live Search -->
                     <div class="p-4 border-b border-slate-100 bg-white">
-                        <form action="/Product/Search" method="get" class="relative">
+                        <form action="/tim-kiem" method="get" class="relative">
                             <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                             <input type="text" name="q" placeholder="Tìm kiếm mỹ phẩm..." class="w-full pl-9 pr-4 py-2.5 rounded-full border border-slate-200 text-xs focus:outline-none focus:border-magenta-accent focus:ring-1 focus:ring-magenta-accent bg-slate-50" />
                         </form>
@@ -126,22 +135,49 @@
                             </nav>
                         </div>
 
-                        <!-- Customer Account & Admin -->
+                        <!-- Customer Account -->
                         <div class="pt-4 border-t border-slate-100">
                             <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 px-2">Tài Khoản</div>
                             <div class="space-y-1 text-xs">
-                                <a href="/Account/Login" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent transition" @@click="mobileMenuOpen = false">
-                                    <i class="fa-solid fa-arrow-right-to-bracket text-slate-400 w-4"></i> Đăng Nhập
-                                </a>
-                                <a href="/Account/Register" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-magenta-accent font-bold hover:bg-pastel-rose transition" @@click="mobileMenuOpen = false">
-                                    <i class="fa-solid fa-gift text-warning w-4"></i> Đăng Ký (+50 Điểm)
-                                </a>
-                                <a href="/Customer/Dashboard" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-amber-800 font-bold hover:bg-amber-50 transition" @@click="mobileMenuOpen = false">
-                                    <i class="fa-solid fa-crown text-amber-500 w-4"></i> Thẻ VIP & Điểm Thưởng
-                                </a>
-                                <a href="/Admin/Dashboard" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-magenta-accent font-bold hover:bg-pastel-rose transition" @@click="mobileMenuOpen = false">
-                                    <i class="fa-solid fa-shield-halved text-magenta-accent w-4"></i> Quản Trị Hệ Thống
-                                </a>
+                                @if (isStaffLogged)
+                                {
+                                    <a href="/Admin/Dashboard" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-magenta-accent font-bold hover:bg-pastel-rose transition" @@click="mobileMenuOpen = false">
+                                        <i class="fa-solid fa-gauge-high text-magenta-accent w-4"></i> Bảng Điều Khiển Quản Trị
+                                    </a>
+                                    <a href="/Admin/Pos" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent transition" @@click="mobileMenuOpen = false">
+                                        <i class="fa-solid fa-cash-register text-emerald-600 w-4"></i> Quầy Thu Ngân POS
+                                    </a>
+                                    <a href="/Admin/Warehouse" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent transition" @@click="mobileMenuOpen = false">
+                                        <i class="fa-solid fa-boxes-stacked text-amber-500 w-4"></i> Quản Trị Kho & FEFO
+                                    </a>
+                                    <a href="/Account/Logout" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-rose-600 font-semibold hover:bg-rose-50 transition" @@click="mobileMenuOpen = false">
+                                        <i class="fa-solid fa-right-from-bracket w-4"></i> Đăng Xuất
+                                    </a>
+                                }
+                                else if (isCustomerLogged)
+                                {
+                                    <a href="/Customer/Dashboard" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-amber-800 font-bold hover:bg-amber-50 transition" @@click="mobileMenuOpen = false">
+                                        <i class="fa-solid fa-crown text-amber-500 w-4"></i> Thẻ VIP & Điểm Thưởng
+                                    </a>
+                                    <a href="/Customer/Orders" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent transition" @@click="mobileMenuOpen = false">
+                                        <i class="fa-solid fa-bag-shopping text-blue-500 w-4"></i> Đơn Hàng Của Tôi
+                                    </a>
+                                    <a href="/Account/Logout" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-rose-600 font-semibold hover:bg-rose-50 transition" @@click="mobileMenuOpen = false">
+                                        <i class="fa-solid fa-right-from-bracket w-4"></i> Đăng Xuất
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="/Account/Login" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent transition" @@click="mobileMenuOpen = false">
+                                        <i class="fa-solid fa-arrow-right-to-bracket text-slate-400 w-4"></i> Đăng Nhập
+                                    </a>
+                                    <a href="/Account/Register" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-magenta-accent font-bold hover:bg-pastel-rose transition" @@click="mobileMenuOpen = false">
+                                        <i class="fa-solid fa-gift text-warning w-4"></i> Đăng Ký (+50 Điểm)
+                                    </a>
+                                    <a href="/Customer/Dashboard" class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-amber-800 font-bold hover:bg-amber-50 transition" @@click="mobileMenuOpen = false">
+                                        <i class="fa-solid fa-crown text-amber-500 w-4"></i> Thẻ VIP & Điểm Thưởng
+                                    </a>
+                                }
                             </div>
                         </div>
                     </div>

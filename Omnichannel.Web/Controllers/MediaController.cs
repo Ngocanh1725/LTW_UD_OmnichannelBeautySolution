@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using Omnichannel.Application.Interfaces.Media;
+using Omnichannel.Infrastructure.Data;
 
 namespace Omnichannel.Web.Controllers
 {
@@ -18,35 +19,54 @@ namespace Omnichannel.Web.Controllers
         }
 
         [HttpGet("{id:int}")]
+        [HttpGet("GetImage/{id:int}")]
         [ResponseCache(Duration = 31536000, Location = ResponseCacheLocation.Any)] // Cache 1 năm
         public async Task<IActionResult> GetMedia(int id)
         {
-            var media = await _mediaService.GetMediaStreamAsync(id);
-            if (media == null || media.Data.Length == 0)
+            try
             {
-                return Redirect("~/images/product-placeholder.svg");
+                var media = await _mediaService.GetMediaStreamAsync(id);
+                if (media == null || media.Data == null || media.Data.Length == 0)
+                {
+                    return Redirect(ProductImageSourceRegistry.PlaceholderUrl);
+                }
+
+                var hash = !string.IsNullOrWhiteSpace(media.ChecksumHash)
+                    ? media.ChecksumHash
+                    : Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(media.Data)).ToLowerInvariant();
+
+                // Kiểm tra HTTP Header If-None-Match gửi lên từ Browser
+                if (Request.Headers.TryGetValue(HeaderNames.IfNoneMatch, out var clientEtag) &&
+                    clientEtag.ToString().Contains(hash))
+                {
+                    return StatusCode(304); // Not Modified: Client dùng cache sẵn có, tiết kiệm 100% băng thông
+                }
+
+                var etag = new EntityTagHeaderValue($"\"{hash}\"");
+                Response.Headers[HeaderNames.ETag] = etag.ToString();
+                Response.Headers[HeaderNames.CacheControl] = "public, max-age=31536000, immutable";
+
+                var lastModifiedUtc = media.LastModified.Kind == DateTimeKind.Utc
+                    ? media.LastModified
+                    : DateTime.SpecifyKind(media.LastModified, DateTimeKind.Utc);
+                Response.Headers[HeaderNames.LastModified] = lastModifiedUtc.ToString("R");
+
+                var contentType = !string.IsNullOrWhiteSpace(media.ContentType)
+                    ? media.ContentType
+                    : "image/jpeg";
+
+                return File(media.Data, contentType, enableRangeProcessing: true);
             }
-
-            var etag = new EntityTagHeaderValue($"\"{media.ChecksumHash}\"");
-
-            // Kiểm tra HTTP Header If-None-Match gửi lên từ Browser
-            if (Request.Headers.TryGetValue(HeaderNames.IfNoneMatch, out var clientEtag) &&
-                clientEtag.ToString().Contains(media.ChecksumHash))
+            catch
             {
-                return StatusCode(304); // Not Modified: Client dùng cache sẵn có, tiết kiệm 100% băng thông
+                return Redirect(ProductImageSourceRegistry.PlaceholderUrl);
             }
-
-            Response.Headers[HeaderNames.ETag] = etag.ToString();
-            Response.Headers[HeaderNames.CacheControl] = "public, max-age=31536000, immutable";
-            Response.Headers[HeaderNames.LastModified] = media.LastModified.ToString("R");
-
-            return File(media.Data, media.ContentType, enableRangeProcessing: true);
         }
 
         [HttpGet("view/{id:int}")]
         public Task<IActionResult> ViewMedia(int id) => GetMedia(id);
 
         [HttpGet("placeholder")]
-        public IActionResult GetPlaceholder() => Redirect("~/images/product-placeholder.svg");
+        public IActionResult GetPlaceholder() => Redirect(ProductImageSourceRegistry.PlaceholderUrl);
     }
 }

@@ -1,0 +1,364 @@
+@model Omnichannel.Application.DTOs.Catalog.ProductComparisonMatrixDto
+
+@{
+    if (Model == null || !Model.Products.Any())
+    {
+        <div class="py-12 text-center text-slate-400">
+            <i class="fa-solid fa-scale-balanced text-4xl mb-3 text-slate-300"></i>
+            <p class="text-sm font-semibold text-slate-600">Chưa có sản phẩm nào trong khay so sánh.</p>
+            <p class="text-xs text-slate-400 mt-1">Vui lòng chọn từ 2 đến 3 sản phẩm để bắt đầu đối chiếu.</p>
+        </div>
+        return;
+    }
+
+    // Tính toán trước các hàng có khác biệt không
+    var diffPrice = Model.Products.Select(p => p.FinalPrice).Distinct().Count() > 1;
+    var diffVolume = Model.Products.Select(p => p.VolumeDisplay).Distinct().Count() > 1;
+    var diffRatio = Model.Products.Select(p => p.UnitPriceRatio).Distinct().Count() > 1;
+    var diffEwg = Model.Products.Select(p => p.AverageEwgScore).Distinct().Count() > 1;
+    var diffClean = Model.Products.Select(p => $"{p.IsAlcoholFree}_{p.IsFragranceFree}_{p.IsPregnancySafe}").Distinct().Count() > 1;
+    var diffActives = Model.Products.Select(p => string.Join(',', p.ParsedKeyActiveNames)).Distinct().Count() > 1;
+    var diffSkin = Model.Products.Select(p => string.Join(',', p.SuitableSkinTypes)).Distinct().Count() > 1;
+    var diffFefo = Model.Products.Select(p => p.DaysUntilExpiry).Distinct().Count() > 1;
+    var diffStock = Model.Products.Select(p => p.IsInStock).Distinct().Count() > 1;
+    var diffRating = Model.Products.Select(p => p.AverageRating).Distinct().Count() > 1;
+}
+
+<div x-data="{ onlyDifferences: false }" class="space-y-5">
+
+    <!-- Thanh công cụ: Chế độ "Chỉ hiển thị điểm khác biệt" & Cảnh báo danh mục -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
+        <!-- Toggle Switch "Chỉ hiển thị điểm khác biệt" -->
+        <label class="relative inline-flex items-center gap-2.5 cursor-pointer select-none">
+            <input type="checkbox" x-model="onlyDifferences" class="sr-only peer" />
+            <div class="w-9 h-5 bg-slate-300 peer-focus:outline-hidden rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-magenta-accent"></div>
+            <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <i class="fa-solid fa-code-compare text-magenta-accent text-[11px]"></i>
+                <span>Chỉ hiển thị điểm khác biệt</span>
+            </span>
+        </label>
+
+        <!-- Thống kê sản phẩm -->
+        <div class="text-xs text-slate-500 font-medium flex items-center gap-2">
+            <span>Đang đối chiếu: <strong class="text-charcoal font-bold">@Model.TotalProducts / 3 sản phẩm</strong></span>
+        </div>
+    </div>
+
+    <!-- Cảnh báo nếu khác nhóm danh mục -->
+    @if (Model.HasCategoryMismatch)
+    {
+        <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
+            <i class="fa-solid fa-triangle-exclamation text-amber-500 text-sm mt-0.5 shrink-0"></i>
+            <div>
+                <strong>Lưu ý về danh mục:</strong> Bạn đang so sánh các sản phẩm thuộc các nhóm khác nhau:
+                <em>(@string.Join(", ", Model.DistinctCategories))</em>.
+                Việc so sánh giữa các sản phẩm cùng nhóm công dụng sẽ mang lại kết quả đối chiếu chuẩn xác nhất.
+            </div>
+        </div>
+    }
+
+    <!-- Cảnh báo tương kỵ da liễu / Hiệp đồng (nếu có) -->
+    @if (Model.Interactions != null && Model.Interactions.Any())
+    {
+        <div class="space-y-2.5">
+            @foreach (var finding in Model.Interactions)
+            {
+                var isDanger = finding.SeverityBadge == "DANGER" || finding.SeverityBadge == "WARNING";
+                <div class="p-3.5 rounded-2xl border flex items-start gap-3 @(isDanger ? "bg-rose-50/80 border-rose-200 text-rose-900" : "bg-emerald-50/80 border-emerald-200 text-emerald-900")">
+                    <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 @(isDanger ? "bg-rose-500 text-white" : "bg-emerald-500 text-white")">
+                        <i class="fa-solid @(isDanger ? "fa-triangle-exclamation" : "fa-wand-magic-sparkles") text-[11px]"></i>
+                    </div>
+                    <div class="text-xs flex-1">
+                        <div class="flex items-center gap-2 mb-0.5">
+                            <span class="font-bold uppercase tracking-wider text-[9px] px-2 py-0.5 rounded-full @(isDanger ? "bg-rose-200 text-rose-800" : "bg-emerald-200 text-emerald-800")">
+                                @finding.InteractionType
+                            </span>
+                            <span class="font-bold">@finding.IngredientA × @finding.IngredientB</span>
+                        </div>
+                        <p class="text-slate-700 leading-tight">@finding.ScientificExplanation</p>
+                        <p class="mt-1 font-semibold @(isDanger ? "text-rose-700" : "text-emerald-700")">💡 Phác đồ: @finding.RecommendedResolution</p>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Bảng so sánh Ma trận Side-by-Side Responsive (Cột tiêu chí cố định) -->
+    <div class="overflow-x-auto border border-slate-200 rounded-3xl bg-white shadow-xs">
+        <table class="w-full border-collapse text-left text-xs min-w-[650px]">
+            <tbody>
+                
+                <!-- HÀNG 1: THẺ SẢN PHẨM & ẢNH -->
+                <tr class="border-b border-slate-100 bg-slate-50/50">
+                    <td class="p-3.5 sm:p-4 font-bold text-slate-400 uppercase text-[10px] tracking-wider w-36 sm:w-44 sticky left-0 bg-slate-50/95 backdrop-blur-xs z-10">
+                        Sản Phẩm
+                    </td>
+                    @foreach (var prod in Model.Products)
+                    {
+                        <td class="p-3.5 sm:p-4 align-top w-56 sm:w-64">
+                            <div class="flex flex-col items-center text-center">
+                                <div class="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-slate-50 p-2 border border-slate-100 mb-2">
+                                    <img src="@prod.ThumbnailUrl" alt="@prod.Name" class="w-full h-full object-contain" />
+                                    @if (prod.IsBestValuePriceRatio)
+                                    {
+                                        <span class="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-emerald-600 text-white font-extrabold text-[9px] shadow-sm flex items-center gap-1 animate-bounce" title="Đơn giá trên từng ml tiết kiệm nhất">
+                                            <i class="fa-solid fa-crown text-[8px] text-amber-300"></i> Kinh Tế Nhất
+                                        </span>
+                                    }
+                                    @if (prod.IsLongestFefo && !prod.IsBestValuePriceRatio)
+                                    {
+                                        <span class="absolute -top-2 -right-2 px-2 py-0.5 rounded-full bg-blue-600 text-white font-extrabold text-[9px] shadow-sm flex items-center gap-1" title="Hạn sử dụng lô FEFO xa nhất">
+                                            <i class="fa-solid fa-calendar-check text-[8px]"></i> Date Mới Nhất
+                                        </span>
+                                    }
+                                </div>
+                                <span class="text-[10px] font-bold text-rose-gold uppercase tracking-wider">@prod.BrandName</span>
+                                <h4 class="font-bold text-xs text-charcoal line-clamp-2 mt-0.5 leading-snug">
+                                    <a href="/san-pham/@prod.Slug" target="_blank" class="hover:text-magenta-accent transition">
+                                        @prod.Name
+                                    </a>
+                                </h4>
+                                <!-- Nút Thêm Vào Giỏ -->
+                                <button type="button" 
+                                        onclick="addToCart(@prod.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(prod.Name))', @prod.FinalPrice, '@prod.ThumbnailUrl', 1)"
+                                        class="mt-2.5 w-full py-1.5 px-3 rounded-xl bg-magenta-accent hover:bg-rose-700 text-white font-bold text-[11px] shadow-xs active:scale-95 transition flex items-center justify-center gap-1.5 cursor-pointer">
+                                    <i class="fa-solid fa-cart-plus text-[10px]"></i>
+                                    <span>Thêm Giỏ Hàng</span>
+                                </button>
+                            </div>
+                        </td>
+                    }
+                </tr>
+
+                <!-- HÀNG 2: GIÁ BÁN & GIẢM GIÁ -->
+                <tr data-diff="@(diffPrice ? "true" : "false")"
+                    x-show="!onlyDifferences || '@diffPrice' === 'True'"
+                    class="border-b border-slate-100 hover:bg-pink-50/20 transition-colors">
+                    <td class="p-3.5 sm:p-4 font-bold text-slate-500 text-xs sticky left-0 bg-white/95 backdrop-blur-xs z-10">
+                        Giá Bán & Giảm Giá
+                    </td>
+                    @foreach (var prod in Model.Products)
+                    {
+                        <td class="p-3.5 sm:p-4 text-center">
+                            <span class="text-sm sm:text-base font-bold font-mono text-charcoal">
+                                @prod.FinalPrice.ToString("N0") ₫
+                            </span>
+                            @if (prod.HasDiscount)
+                            {
+                                <div class="text-[10px] text-slate-400 line-through font-mono">
+                                    @prod.OriginalPrice.ToString("N0") ₫ (-@prod.DiscountPercent%)
+                                </div>
+                            }
+                        </td>
+                    }
+                </tr>
+
+                <!-- HÀNG 3: DUNG TÍCH (QUY ĐỔI) -->
+                <tr data-diff="@(diffVolume ? "true" : "false")"
+                    x-show="!onlyDifferences || '@diffVolume' === 'True'"
+                    class="border-b border-slate-100 hover:bg-pink-50/20 transition-colors">
+                    <td class="p-3.5 sm:p-4 font-bold text-slate-500 text-xs sticky left-0 bg-white/95 backdrop-blur-xs z-10">
+                        Dung Tích
+                    </td>
+                    @foreach (var prod in Model.Products)
+                    {
+                        <td class="p-3.5 sm:p-4 text-center">
+                            <span class="text-xs font-bold text-slate-700 font-mono">
+                                @prod.VolumeDisplay
+                            </span>
+                        </td>
+                    }
+                </tr>
+
+                <!-- HÀNG 4: ĐƠN GIÁ TRÊN THỂ TÍCH (VNĐ/ml hoặc VNĐ/g) - BADGE "KINH TẾ NHẤT" -->
+                <tr data-diff="@(diffRatio ? "true" : "false")"
+                    x-show="!onlyDifferences || '@diffRatio' === 'True'"
+                    class="border-b border-slate-100 bg-pink-50/30 hover:bg-pink-50/50 transition-colors">
+                    <td class="p-3.5 sm:p-4 font-bold text-magenta-accent text-xs sticky left-0 bg-pink-50/95 backdrop-blur-xs z-10">
+                        <div class="flex items-center gap-1.5">
+                            <i class="fa-solid fa-flask-vial text-rose-500"></i>
+                            <span>Giá / 1 ml (hoặc 1g)</span>
+                        </div>
+                    </td>
+                    @foreach (var prod in Model.Products)
+                    {
+                        <td class="p-3.5 sm:p-4 text-center">
+                            @if (prod.UnitPriceRatio.HasValue)
+                            {
+                                <div class="font-mono font-bold text-xs sm:text-sm text-magenta-accent">
+                                    @prod.UnitPriceRatioFormatted
+                                </div>
+                                @if (prod.IsBestValuePriceRatio)
+                                {
+                                    <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black border border-emerald-300">
+                                        <i class="fa-solid fa-crown text-[8px] text-amber-500"></i> Kinh Tế Nhất
+                                    </span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-slate-400 text-xs font-mono">——</span>
+                            }
+                        </td>
+                    }
+                </tr>
+
+                <!-- HÀNG 5: ĐỘ AN TOÀN EWG & TIÊU CHUẨN CLEAN BEAUTY -->
+                <tr data-diff="@(diffEwg || diffClean ? "true" : "false")"
+                    x-show="!onlyDifferences || '@(diffEwg || diffClean)' === 'True'"
+                    class="border-b border-slate-100 hover:bg-pink-50/20 transition-colors">
+                    <td class="p-3.5 sm:p-4 font-bold text-slate-500 text-xs sticky left-0 bg-white/95 backdrop-blur-xs z-10">
+                        Độ An Toàn & Clean Beauty
+                    </td>
+                    @foreach (var prod in Model.Products)
+                    {
+                        <td class="p-3.5 sm:p-4 text-center">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border @prod.EwgBadgeColor">
+                                <i class="fa-solid fa-shield-halved text-[10px]"></i>
+                                <span>@prod.EwgRatingText</span>
+                            </span>
+                            <div class="flex items-center justify-center gap-1 mt-2 flex-wrap text-[10px]">
+                                @if (prod.IsAlcoholFree)
+                                {
+                                    <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Không cồn</span>
+                                }
+                                @if (prod.IsFragranceFree)
+                                {
+                                    <span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Không hương liệu</span>
+                                }
+                                @if (prod.IsPregnancySafe)
+                                {
+                                    <span class="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">An toàn thai kỳ</span>
+                                }
+                            </div>
+                        </td>
+                    }
+                </tr>
+
+                <!-- HÀNG 6: HOẠT CHẤT CHÍNH (KEY ACTIVES) -->
+                <tr data-diff="@(diffActives ? "true" : "false")"
+                    x-show="!onlyDifferences || '@diffActives' === 'True'"
+                    class="border-b border-slate-100 hover:bg-pink-50/20 transition-colors">
+                    <td class="p-3.5 sm:p-4 font-bold text-slate-500 text-xs sticky left-0 bg-white/95 backdrop-blur-xs z-10">
+                        Hoạt Chất Chủ Đạo
+                    </td>
+                    @foreach (var prod in Model.Products)
+                    {
+                        <td class="p-3.5 sm:p-4 align-top">
+                            <div class="flex flex-col gap-1.5">
+                                @foreach (var active in prod.KeyActives.Take(4))
+                                {
+                                    <div class="p-2 rounded-xl bg-slate-50 border border-slate-100 text-left">
+                                        <div class="flex items-center justify-between font-bold text-[11px] text-charcoal">
+                                            <span>@active.Name</span>
+                                            <span class="text-magenta-accent font-mono">@active.Concentration</span>
+                                        </div>
+                                        <p class="text-[10px] text-slate-500 mt-0.5 line-clamp-1">@active.Function</p>
+                                    </div>
+                                }
+                            </div>
+                        </td>
+                    }
+                </tr>
+
+                <!-- HÀNG 7: LOẠI DA PHÙ HỢP -->
+                <tr data-diff="@(diffSkin ? "true" : "false")"
+                    x-show="!onlyDifferences || '@diffSkin' === 'True'"
+                    class="border-b border-slate-100 hover:bg-pink-50/20 transition-colors">
+                    <td class="p-3.5 sm:p-4 font-bold text-slate-500 text-xs sticky left-0 bg-white/95 backdrop-blur-xs z-10">
+                        Loại Da Phù Hợp
+                    </td>
+                    @foreach (var prod in Model.Products)
+                    {
+                        <td class="p-3.5 sm:p-4 text-center">
+                            <div class="flex items-center justify-center gap-1 flex-wrap">
+                                @foreach (var skin in prod.SuitableSkinTypes)
+                                {
+                                    <span class="px-2 py-0.5 rounded-lg bg-pink-50 text-slate-700 border border-pink-100 text-[10px] font-medium">
+                                        @skin
+                                    </span>
+                                }
+                            </div>
+                        </td>
+                    }
+                </tr>
+
+                <!-- HÀNG 8: HẠN DÙNG LÔ FEFO XA NHẤT - BADGE "DATE MỚI NHẤT" -->
+                <tr data-diff="@(diffFefo ? "true" : "false")"
+                    x-show="!onlyDifferences || '@diffFefo' === 'True'"
+                    class="border-b border-slate-100 hover:bg-pink-50/20 transition-colors">
+                    <td class="p-3.5 sm:p-4 font-bold text-slate-500 text-xs sticky left-0 bg-white/95 backdrop-blur-xs z-10">
+                        Hạn Dùng Lô FEFO
+                    </td>
+                    @foreach (var prod in Model.Products)
+                    {
+                        <td class="p-3.5 sm:p-4 text-center">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold border @prod.FefoBadgeClass">
+                                <i class="fa-solid fa-clock text-[9px]"></i>
+                                <span>@prod.FefoStatusText</span>
+                            </span>
+                            @if (prod.IsLongestFefo)
+                            {
+                                <div class="mt-1">
+                                    <span class="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[9px] font-bold border border-blue-200">
+                                        ✨ Date Mới Nhất
+                                    </span>
+                                </div>
+                            }
+                            <div class="text-[10px] text-slate-500 mt-1">
+                                PAO: @prod.PaoMonthsText
+                            </div>
+                        </td>
+                    }
+                </tr>
+
+                <!-- HÀNG 9: TỒN KHO -->
+                <tr data-diff="@(diffStock ? "true" : "false")"
+                    x-show="!onlyDifferences || '@diffStock' === 'True'"
+                    class="border-b border-slate-100 hover:bg-pink-50/20 transition-colors">
+                    <td class="p-3.5 sm:p-4 font-bold text-slate-500 text-xs sticky left-0 bg-white/95 backdrop-blur-xs z-10">
+                        Tình Trạng Kho
+                    </td>
+                    @foreach (var prod in Model.Products)
+                    {
+                        <td class="p-3.5 sm:p-4 text-center">
+                            @if (prod.IsInStock)
+                            {
+                                <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold flex items-center justify-center gap-1 w-max mx-auto">
+                                    <i class="fa-solid fa-circle-check text-[9px]"></i> Còn Hàng (@prod.TotalStockQuantity)
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 border border-slate-200 text-[10px] font-bold">
+                                    Hết Hàng Tạm Thời
+                                </span>
+                            }
+                        </td>
+                    }
+                </tr>
+
+                <!-- HÀNG 10: ĐÁNH GIÁ & REVIEW -->
+                <tr data-diff="@(diffRating ? "true" : "false")"
+                    x-show="!onlyDifferences || '@diffRating' === 'True'"
+                    class="hover:bg-pink-50/20 transition-colors">
+                    <td class="p-3.5 sm:p-4 font-bold text-slate-500 text-xs sticky left-0 bg-white/95 backdrop-blur-xs z-10">
+                        Điểm Đánh Giá
+                    </td>
+                    @foreach (var prod in Model.Products)
+                    {
+                        <td class="p-3.5 sm:p-4 text-center">
+                            <div class="flex items-center justify-center gap-1 text-amber-400 text-xs">
+                                <i class="fa-solid fa-star"></i>
+                                <span class="font-bold font-mono text-slate-800 text-xs">@prod.AverageRating.ToString("F1")</span>
+                                <span class="text-[10px] text-slate-400">(@prod.ReviewCount review)</span>
+                            </div>
+                        </td>
+                    }
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+</div>
