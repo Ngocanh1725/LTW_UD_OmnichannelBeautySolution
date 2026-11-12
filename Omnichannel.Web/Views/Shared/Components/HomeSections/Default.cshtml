@@ -1,6 +1,47 @@
 @using Microsoft.AspNetCore.Authentication
 @using Omnichannel.Application.Common
 @model Omnichannel.Web.Models.HomeSectionsViewModel
+@functions {
+    public static Microsoft.AspNetCore.Html.HtmlString FormatHeroTitle(string? rawTitle)
+    {
+        if (string.IsNullOrWhiteSpace(rawTitle))
+            return new Microsoft.AspNetCore.Html.HtmlString("Bừng Sáng <em class=\"font-serif italic font-normal text-[var(--rl-rose)]\">Nhan Sắc</em> Mùa Hè");
+
+        if (rawTitle.Contains('*'))
+        {
+            var replaced = System.Text.RegularExpressions.Regex.Replace(
+                rawTitle,
+                @"\*(.*?)\*",
+                "<em class=\"font-serif italic font-normal text-[var(--rl-rose)]\">$1</em>"
+            );
+            return new Microsoft.AspNetCore.Html.HtmlString(replaced);
+        }
+
+        var keywords = new[] { "Nhan Sắc", "Beauty", "Thượng Lưu", "Rạng Ngời", "Xuất Sắc", "Mỹ Phẩm", "Dưỡng Da", "Trẻ Hoá", "Summer", "Vibes", "Danh Mục", "Bán Chạy", "Date Mới", "Routine", "Thực Tế", "Làm Đẹp", "Khoa Học", "Tuyển Chọn", "Mới Về" };
+        foreach (var kw in keywords)
+        {
+            if (rawTitle.Contains(kw, StringComparison.OrdinalIgnoreCase))
+            {
+                var replaced = System.Text.RegularExpressions.Regex.Replace(
+                    rawTitle,
+                    System.Text.RegularExpressions.Regex.Escape(kw),
+                    $"<em class=\"font-serif italic font-normal text-[var(--rl-rose)]\">{kw}</em>",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase
+                );
+                return new Microsoft.AspNetCore.Html.HtmlString(replaced);
+            }
+        }
+
+        var parts = rawTitle.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 3)
+        {
+            parts[1] = $"<em class=\"font-serif italic font-normal text-[var(--rl-rose)]\">{parts[1]}</em>";
+            return new Microsoft.AspNetCore.Html.HtmlString(string.Join(" ", parts));
+        }
+
+        return new Microsoft.AspNetCore.Html.HtmlString(rawTitle);
+    }
+}
 @{
     var adminAuthResult = Context.RequestServices?.GetService(typeof(IAuthenticationService)) != null
         ? await Context.AuthenticateAsync(AuthConstants.AdminCookieScheme)
@@ -19,305 +60,709 @@
 
         @if (code == "HERO_SLIDER" && item.Banners.Any())
         {
-            <!-- 1. HERO SLIDER SECTION (Dynamic from DB) -->
-            <section id="section-@item.Section.Id" data-section-id="@item.Section.Id" data-section-key="hero_banner" data-section-code="@code" class="relative bg-charcoal text-white overflow-hidden" 
-                     x-data="heroSliderComponent(@item.Banners.Count)">
-                <div class="relative min-h-[460px] sm:min-h-[540px] lg:min-h-[620px] flex items-center">
-                    @for (int i = 0; i < item.Banners.Count; i++)
-                    {
-                        var b = item.Banners[i];
-                        var bannerImg = !string.IsNullOrEmpty(b.DesktopImageUrl)
-                            ? b.DesktopImageUrl
-                            : (b.DesktopMediaId.HasValue
-                                ? $"/media/{b.DesktopMediaId}"
-                                : (!string.IsNullOrEmpty(b.ImageUrl) ? b.ImageUrl : "/images/banners/hero-banner-summer-beauty.jpg"));
-                        var mobileBannerImg = !string.IsNullOrEmpty(b.MobileImageUrl)
-                            ? b.MobileImageUrl
-                            : (b.MobileMediaId.HasValue ? $"/media/{b.MobileMediaId}" : null);
-                        var bannerWebp = (bannerImg.StartsWith("/images/banners/", StringComparison.OrdinalIgnoreCase) && !bannerImg.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
-                            ? System.IO.Path.ChangeExtension(bannerImg, ".webp")
-                            : null;
-                        bool canEditBanner = isAdminOrStaff;
+            <!-- =========================================================================
+                 1. HERO SECTION "ROSÉ LUXE" (Bloom Room & Nepalora Inspiration)
+                 - Khung bo góc 40px trên nền gradient Rosé Glow (#FBE8EE -> #F6D2DF -> #FFFDFB)
+                 - Chiều sâu 3 lớp: Nền -> Wordmark khổng lồ -> Sản phẩm chủ đạo đè lên chữ -> Hoạ tiết nổi
+                 - Headline trộn Sans đậm + Serif nghiêng
+                 - Autoplay 6500ms có thanh tiến trình + nút prev/next tròn (>= 44x44px)
+                 - Khối tìm kiếm nhanh dạng pill glass ĐỘC LẬP HOÀN TOÀN (cảm hứng алё,тур)
+                 - Dải Trust Strip 4 tiêu chí vàng với icon Champagne
+                 - Đường phân cách dạng sóng (SVG wave divider) chuyển mượt sang section sau
+                 ========================================================================= -->
+            <section id="section-@item.Section.Id"
+                     data-section-id="@item.Section.Id"
+                     data-section-key="hero_banner"
+                     data-section-code="@code"
+                     class="relative pt-2 pb-0 bg-[var(--rl-ivory)] overflow-hidden isolate"
+                     x-data="heroSliderComponent(@item.Banners.Count)"
+                     x-init="init()"
+                     @@keydown.left.prevent="prev()"
+                     @@keydown.right.prevent="next()">
 
-                        var style = (item.BannerStyles != null && item.BannerStyles.TryGetValue(b.Id, out var customStyle) && customStyle != null)
-                            ? customStyle
-                            : new Omnichannel.Application.DTOs.Cms.BannerStyleConfigDto();
+                <!-- Ambient Radial Glows -->
+                <div class="pointer-events-none absolute -top-20 -left-20 w-[420px] h-[420px] rounded-full bg-[var(--rl-rose-100)]/80 blur-3xl" aria-hidden="true"></div>
+                <div class="pointer-events-none absolute top-1/3 -right-20 w-[480px] h-[480px] rounded-full bg-[var(--rl-rose-200)]/60 blur-3xl" aria-hidden="true"></div>
 
-                        string imgFitInline = style.ImageObjectFit switch
-                        {
-                            "contain" => "object-fit: contain;",
-                            "fill" => "object-fit: fill;",
-                            _ => "object-fit: cover;"
-                        };
+                <div class="max-w-[1360px] mx-auto px-3 sm:px-6 lg:px-8 relative z-10">
 
-                        string imgPosInline = style.ImagePosition switch
-                        {
-                            "top" => "object-position: center top;",
-                            "bottom" => "object-position: center bottom;",
-                            "left" => "object-position: left center;",
-                            "right" => "object-position: right center;",
-                            _ => "object-position: center center;"
-                        };
+                    <!-- KHUNG HERO BO GÓC 40PX NỀN ROSÉ GLOW SANG TRỌNG & ÁNH KIM CHAMPAGNE -->
+                    <div id="heroInnerFrame"
+                         style="background: radial-gradient(circle at 82% 20%, rgba(201,169,110,0.18) 0%, transparent 45%), radial-gradient(circle at 12% 85%, rgba(184,51,106,0.12) 0%, transparent 42%), linear-gradient(135deg, #FFF6F9 0%, #FAEDF2 28%, #F7D7E3 65%, #FFFBF8 100%);"
+                         class="relative rounded-[28px] sm:rounded-[36px] lg:rounded-[40px] border border-[#E7D6C8] ring-1 ring-[#C9A96E]/25 shadow-[0_25px_65px_-15px_rgba(43,27,36,0.12)] overflow-hidden min-h-[520px] sm:min-h-[560px] lg:min-h-[600px] flex flex-col justify-between p-5 sm:p-8 lg:p-10 xl:p-12 isolate select-none"
+                         @@mouseleave="onMouseLeaveHero()"
+                         @@mousemove="onMouseMove($event)"
+                         @@touchstart.passive="onTouchStart($event)"
+                         @@touchmove.passive="onTouchMove($event)"
+                         @@touchend="onTouchEnd()">
 
-                        string imgScaleInline = (style.ImageScale > 100 && style.ImageScale <= 150)
-                            ? $"transform: scale({(style.ImageScale / 100.0).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)});"
-                            : "";
+                        <!-- LAYER 2: WORDMARK KHỔNG LỒ NẰM CHÌM PHÍA SAU (Tạo chiều sâu 3D Bloom Room) -->
+                        <div class="pointer-events-none select-none absolute right-0 top-10 font-serif font-black uppercase leading-none tracking-tighter whitespace-nowrap transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                             style="color: rgba(184, 51, 106, 0.035); font-size: clamp(3rem, 11vw, 140px); z-index: 1; transform: translate3d(calc(var(--parallaxX, 0) * -0.6px), calc(var(--parallaxY, 0) * -0.4px), 0);"
+                             :style="`transform: translate3d(${parallaxX * -0.6}px, ${parallaxY * -0.4}px, 0)`"
+                             aria-hidden="true">
+                            CANMAKE BEAUTY
+                        </div>
 
-                        <div class="absolute inset-0 transition-opacity duration-1000 ease-in-out"
-                             x-show="activeSlide === @i"
-                             x-transition:enter="transition ease-out duration-700"
-                             x-transition:enter-start="opacity-0 scale-105"
-                             x-transition:enter-end="opacity-100 scale-100"
-                             x-transition:leave="transition ease-in duration-500"
-                             x-transition:leave-start="opacity-100 scale-100"
-                             x-transition:leave-end="opacity-0 scale-95"
-                             style="@(i == 0 ? "" : "display: none;")">
-                            
-                            <!-- Background Image with Gradient Overlay & LCP Optimization -->
-                            <picture class="block w-full h-full overflow-hidden">
-                                @if (!string.IsNullOrEmpty(mobileBannerImg))
+                        <!-- LAYER 4: HOẠ TIẾT NỔI BAY LƠ LỬNG (4-6 Cánh hoa / Giọt serum / Hạt lấp lánh Champagne) -->
+                        <!-- 1. Hạt lấp lánh Champagne góc trên trái -->
+                        <span class="pointer-events-none select-none absolute top-7 left-10 text-[var(--rl-champagne)] text-2xl lg:text-3xl font-black leading-none animate-floating-sparkle z-30"
+                              :style="`transform: translate3d(${parallaxX * 0.9}px, ${parallaxY * 0.9}px, 0)`"
+                              aria-hidden="true">✦</span>
+
+                        <!-- 2. Cánh hoa anh đào trôi (SVG) góc trên phải -->
+                        <div class="pointer-events-none select-none absolute top-12 right-[42%] lg:right-[38%] text-[var(--rl-rose)]/40 animate-floating-petal z-30 hidden sm:block"
+                             :style="`transform: translate3d(${parallaxX * 0.7}px, ${parallaxY * 0.7}px, 0)`"
+                             aria-hidden="true">
+                            <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24">
+                                <path d="M12 2C13.5 6 18 8 18 12C18 16 14 20 12 22C10 20 6 16 6 12C6 8 10.5 6 12 2Z"/>
+                            </svg>
+                        </div>
+
+                        <!-- 3. Giọt Serum tinh chất trôi (SVG) góc dưới trái -->
+                        <div class="pointer-events-none select-none absolute bottom-24 left-1/3 text-[var(--rl-rose)]/30 animate-floating-petal-slow z-30 hidden lg:block"
+                             :style="`transform: translate3d(${parallaxX * 0.5}px, ${parallaxY * 0.5}px, 0)`"
+                             aria-hidden="true">
+                            <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24">
+                                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                            </svg>
+                        </div>
+
+                        <!-- 4. Hạt Champagne góc dưới phải -->
+                        <span class="pointer-events-none select-none absolute bottom-14 right-10 text-[var(--rl-champagne)] text-xl lg:text-2xl font-black leading-none animate-floating-sparkle z-30 delay-300"
+                              :style="`transform: translate3d(${parallaxX * 0.8}px, ${parallaxY * 0.8}px, 0)`"
+                              aria-hidden="true">✦</span>
+
+                        <!-- 5. Lưới điểm nhấn champagne nhẹ -->
+                        <div class="pointer-events-none select-none absolute bottom-8 left-10 hidden sm:grid grid-cols-3 gap-1.5 opacity-30 z-20" aria-hidden="true">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[var(--rl-rose)]"></span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-[var(--rl-champagne)]"></span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-[var(--rl-rose)]"></span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-[var(--rl-champagne)]"></span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-[var(--rl-rose)]"></span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-[var(--rl-champagne)]"></span>
+                        </div>
+
+                        <!-- BỐ CỤC CHÍNH HERO: 12 CỘT (DESKTOP) / XẾP CHỒNG (MOBILE) -->
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 xl:gap-10 items-center flex-1 z-20">
+
+                            <!-- CỘT TRÁI (5 Cột Desktop / Order 2 Mobile): Eyebrow, Headline Line-Mask, Subtitle, 2 CTAs -->
+                            <div class="lg:col-span-5 order-2 lg:order-1 relative grid grid-cols-1 items-center">
+                                @for (int i = 0; i < item.Banners.Count; i++)
                                 {
-                                    <source media="(max-width: 767px)" srcset="@mobileBannerImg" />
-                                }
-                                @if (!string.IsNullOrEmpty(bannerWebp))
-                                {
-                                    <source srcset="@bannerWebp" type="image/webp" />
-                                }
-                                @if (i == 0)
-                                {
-                                    <img src="@bannerImg" alt="@b.Title" width="1600" height="620" fetchpriority="high" decoding="async" class="w-full h-full transition-transform duration-500" style="@imgFitInline @imgPosInline @imgScaleInline" onerror="this.onerror=null;this.src='/images/banners/hero-banner-summer-beauty.jpg';" />
-                                }
-                                else
-                                {
-                                    <img src="@bannerImg" alt="@b.Title" width="1600" height="620" decoding="async" class="w-full h-full transition-transform duration-500" style="@imgFitInline @imgPosInline @imgScaleInline" onerror="this.onerror=null;this.src='/images/banners/hero-banner-summer-beauty.jpg';" />
-                                }
-                            </picture>
-                            @{
+                                    var b = item.Banners[i];
+                                    var style = (item.BannerStyles != null && item.BannerStyles.TryGetValue(b.Id, out var customStyle) && customStyle != null)
+                                        ? customStyle
+                                        : new Omnichannel.Application.DTOs.Cms.BannerStyleConfigDto();
 
-                                string posFlexClass = style.BoxPosition switch
-                                {
-                                    "center" => "justify-center text-center items-center mx-auto",
-                                    "right" => "justify-end text-right items-end ml-auto",
-                                    _ => "justify-start text-left items-start"
-                                };
+                                    var eyebrowText = (style.ShowBadge && !string.IsNullOrWhiteSpace(style.BadgeText))
+                                        ? style.BadgeText
+                                        : "BỘ SƯU TẬP MỚI 2026 • DATE TƯƠI MỚI";
 
-                                string widthClass = style.BoxWidth switch
-                                {
-                                    "sm" => "max-w-md",
-                                    "lg" => "max-w-2xl",
-                                    "xl" => "max-w-4xl",
-                                    _ => "max-w-xl"
-                                };
+                                    var titleText = !string.IsNullOrWhiteSpace(b.Title)
+                                        ? b.Title
+                                        : "SUMMER BEAUTY VIBES";
 
-                                string radiusClass = style.BoxRadius switch
-                                {
-                                    "none" => "rounded-none",
-                                    "md" => "rounded-xl",
-                                    "xl" => "rounded-2xl",
-                                    _ => "rounded-3xl"
-                                };
+                                    var subtitleText = !string.IsNullOrWhiteSpace(b.Subtitle)
+                                        ? b.Subtitle
+                                        : "Bừng Sáng Nhan Sắc Mùa Hè - Ưu Đãi Đến 40% cho các dòng tinh chất & chống nắng chuẩn hạn dùng minh bạch.";
 
-                                string frameStyleClass = style.BoxStyle switch
-                                {
-                                    "glass-dark" => $"bg-charcoal/60 backdrop-blur-md border border-white/25 p-6 sm:p-8 shadow-2xl {radiusClass}",
-                                    "glass-light" => $"bg-white/80 backdrop-blur-md border border-white/80 p-6 sm:p-8 shadow-2xl {radiusClass}",
-                                    "rose-luxury" => $"bg-gradient-to-br from-[#B8336A]/80 via-[#2B1B24]/80 to-[#E8618C]/70 backdrop-blur-md border border-[#F7C6D4]/60 p-6 sm:p-8 shadow-2xl {radiusClass}",
-                                    "solid-dark" => $"bg-[#2B1B24]/95 border border-[#E8618C]/50 p-6 sm:p-8 shadow-2xl {radiusClass}",
-                                    "double-border" => $"bg-charcoal/50 backdrop-blur-sm border-4 border-double border-[#F7C6D4]/90 p-6 sm:p-8 shadow-2xl {radiusClass}",
-                                    _ => "bg-transparent p-0"
-                                };
-
-                                string fontStyleInline = style.TitleFont switch
-                                {
-                                    "sans" => "font-family: 'Quicksand', 'Inter', sans-serif;",
-                                    "editorial" => "font-family: Georgia, 'Playfair Display', serif; font-style: italic;",
-                                    "mono" => "font-family: 'JetBrains Mono', monospace; letter-spacing: -0.02em;",
-                                    _ => "font-family: 'Playfair Display', Georgia, serif;"
-                                };
-
-                                string titleSizeClass = style.TitleSize switch
-                                {
-                                    "sm" => "text-2xl sm:text-4xl font-bold leading-tight",
-                                    "md" => "text-3xl sm:text-5xl font-bold leading-tight",
-                                    "xl" => "text-4xl sm:text-6xl lg:text-7xl font-extrabold leading-none",
-                                    _ => "text-3xl sm:text-5xl lg:text-6xl font-bold leading-tight"
-                                };
-
-                                bool isDarkText = style.TextColorTheme == "dark" || (style.BoxStyle == "glass-light" && style.TextColorTheme == "white");
-                                string titleColorInline = style.TextColorTheme switch
-                                {
-                                    "cream" => "color: #FFF4F7;",
-                                    "gold" => "color: #FDE68A;",
-                                    "dark" => "color: #2B1B24;",
-                                    _ => isDarkText ? "color: #2B1B24;" : "color: #FFFFFF;"
-                                };
-
-                                string subtitleColorInline = style.TextColorTheme switch
-                                {
-                                    "cream" => "color: #F7C6D4;",
-                                    "gold" => "color: #FEF3C7;",
-                                    "dark" => "color: #4A3040;",
-                                    _ => isDarkText ? "color: #4A3040;" : "color: #E2E8F0;"
-                                };
-
-                                string btnPrimaryClass = style.ButtonStyle switch
-                                {
-                                    "white-solid" => "bg-white hover:bg-rose-50 text-charcoal shadow-xl",
-                                    "dark-luxury" => "bg-[#2B1B24] hover:bg-black text-white border border-[#F7C6D4]/50 shadow-xl",
-                                    "glass-outline" => "bg-white/15 hover:bg-white/30 text-white border-2 border-white backdrop-blur-md shadow-lg",
-                                    _ => "bg-gradient-to-r from-magenta-accent to-pink-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-xl shadow-magenta-accent/30"
-                                };
-                            }
-
-                            @if (style.ShowOverlayGradient && style.OverlayOpacity > 0)
-                            {
-                                <div class="absolute inset-0 bg-gradient-to-r from-charcoal via-charcoal/70 to-transparent pointer-events-none"
-                                     style="opacity: @((style.OverlayOpacity / 100.0).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));"></div>
-                            }
-
-                            @if (canEditBanner)
-                            {
-                                <div class="absolute top-4 right-4 z-30 flex items-center gap-2">
-                                    @if (b.Id > 0)
+                                    var primaryUrl = string.IsNullOrWhiteSpace(b.LinkUrl) ? "/tim-kiem" : b.LinkUrl;
+                                    var primaryBtnText = string.IsNullOrWhiteSpace(b.ButtonText) ? "Khám Phá Ngay" : b.ButtonText;
+                                    var secondaryUrl = string.IsNullOrWhiteSpace(style.SecondaryButtonUrl) ? "/clearance-fefo" : style.SecondaryButtonUrl;
+                                    if (secondaryUrl.Contains("?") || secondaryUrl.Contains("C?n") || secondaryUrl.Contains("Cận Date"))
                                     {
-                                        <a href="/Admin/Banner/Edit/@b.Id" class="px-3.5 py-2 rounded-full bg-white/95 hover:bg-white text-charcoal font-bold text-xs shadow-lg flex items-center gap-1.5 transition hover:scale-105">
-                                            <i class="fa-solid fa-wand-magic-sparkles text-magenta-accent"></i>
-                                            <span>Tùy Chỉnh Ảnh & Khung Chữ</span>
-                                        </a>
+                                        secondaryUrl = "/clearance-fefo";
                                     }
-                                    <a href="/Admin/Banner" class="px-3.5 py-2 rounded-full bg-charcoal/80 hover:bg-charcoal text-white border border-white/20 font-semibold text-xs shadow-lg flex items-center gap-1.5 backdrop-blur-md transition">
-                                        <i class="fa-solid fa-sliders"></i>
-                                        <span>Quản Lý Tất Cả Banner</span>
-                                    </a>
-                                </div>
-                            }
+                                    var secondaryBtnText = string.IsNullOrWhiteSpace(style.SecondaryButtonText) ? "Săn Deal Cận Date -50%" : style.SecondaryButtonText;
+                                    if (!string.IsNullOrWhiteSpace(secondaryBtnText))
+                                    {
+                                        secondaryBtnText = secondaryBtnText.Replace("FEFO", "Cận Date", StringComparison.OrdinalIgnoreCase)
+                                                                           .Replace("San Deal C?n Date", "Săn Deal Cận Date")
+                                                                           .Replace("C?n Date", "Cận Date");
+                                    }
+                                    if (!string.IsNullOrWhiteSpace(eyebrowText))
+                                    {
+                                        eyebrowText = eyebrowText.Replace("FEFO", "Date Mới", StringComparison.OrdinalIgnoreCase);
+                                    }
 
-                            <!-- Content Floating Overlay -->
-                            @if (style.ShowContentBox)
-                            {
-                                <div class="absolute inset-0 flex items-center">
-                                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex @(style.BoxPosition == "center" ? "justify-center" : (style.BoxPosition == "right" ? "justify-end" : "justify-start"))">
-                                        <div class="@widthClass w-full space-y-4 @frameStyleClass @(style.BoxPosition == "center" ? "text-center" : (style.BoxPosition == "right" ? "text-right" : "text-left"))">
-                                            @if (style.ShowBadge && !string.IsNullOrWhiteSpace(style.BadgeText))
+                                    <div x-show="activeSlide === @i"
+                                         x-transition:enter="transition ease-[cubic-bezier(0.22,1,0.36,1)] duration-500"
+                                         x-transition:enter-start="opacity-0 translate-y-3"
+                                         x-transition:enter-end="opacity-100 translate-y-0"
+                                         x-transition:leave="transition ease-in duration-200 pointer-events-none absolute"
+                                         x-transition:leave-start="opacity-100 translate-y-0"
+                                         x-transition:leave-end="opacity-0 -translate-y-2"
+                                         style="@(i == 0 ? "" : "display: none;")"
+                                         class="col-start-1 row-start-1 space-y-4 sm:space-y-5">
+
+                                        <!-- Eyebrow Pill Badge -->
+                                        <div>
+                                            <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-[#C9A96E]/40 text-[#8E1F4F] text-[11px] font-extrabold uppercase tracking-[0.16em] shadow-[var(--rl-shadow-2xs)]">
+                                                <i class="fa-solid fa-sparkles text-[#C9A96E] text-xs" aria-hidden="true"></i>
+                                                <span>@eyebrowText</span>
+                                            </span>
+                                        </div>
+
+                                        <!-- Fluid Headline Line-Mask Reveal (Trộn Sans Đậm + Serif Nghiêng) -->
+                                        <div class="hero-line-mask">
+                                            <h1 class="hero-line-reveal font-sans font-black text-[clamp(2.1rem,1.4rem+2.6vw,3.6rem)] text-[var(--rl-ink)] tracking-tight leading-[1.08] max-w-xl">
+                                                @FormatHeroTitle(titleText)
+                                            </h1>
+                                        </div>
+
+                                        <!-- Subtitle -->
+                                        <p class="text-sm sm:text-base text-[var(--rl-mauve)] leading-relaxed max-w-lg line-clamp-3 sm:line-clamp-2">
+                                            @subtitleText
+                                        </p>
+
+                                        <!-- 2 CTAs (Full width trên mobile, inline-flex trên tablet/desktop) -->
+                                        <div class="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                            @if (style.ShowPrimaryButton)
                                             {
-                                                <div>
-                                                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full @(isDarkText ? "bg-magenta-accent/15 border border-magenta-accent/40 text-magenta-accent" : "bg-magenta-accent/25 border border-magenta-accent/50 text-rose-200") text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
-                                                        <i class="fa-solid fa-sparkles text-amber-400"></i>
-                                                        <span>@style.BadgeText</span>
-                                                    </div>
-                                                </div>
+                                                <a href="@primaryUrl" class="btn-pill-arrow w-full sm:w-auto justify-between sm:justify-start shadow-[0_10px_25px_rgba(184,51,106,0.30)] hover:shadow-[0_14px_30px_rgba(184,51,106,0.40)]">
+                                                    <span>@primaryBtnText</span>
+                                                    <span class="arrow-circle" aria-hidden="true">
+                                                        <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                                                    </span>
+                                                </a>
                                             }
-                                            @if (style.ShowTitle && !string.IsNullOrWhiteSpace(b.Title))
+                                            @if (style.ShowSecondaryButton || string.IsNullOrWhiteSpace(style.SecondaryButtonText))
                                             {
-                                                <h1 class="@titleSizeClass drop-shadow-md" style="@fontStyleInline @titleColorInline">
-                                                    @b.Title
-                                                </h1>
-                                            }
-                                            @if (style.ShowSubtitle && !string.IsNullOrWhiteSpace(b.Subtitle))
-                                            {
-                                                <p class="text-sm sm:text-base font-sans leading-relaxed line-clamp-3" style="@subtitleColorInline">
-                                                    @b.Subtitle
-                                                </p>
-                                            }
-                                            @if (style.ShowPrimaryButton || style.ShowSecondaryButton)
-                                            {
-                                                <div class="pt-2 flex flex-wrap items-center gap-3.5 @(style.BoxPosition == "center" ? "justify-center" : (style.BoxPosition == "right" ? "justify-end" : "justify-start"))">
-                                                    @if (style.ShowPrimaryButton)
-                                                    {
-                                                        <a href="@(string.IsNullOrWhiteSpace(b.LinkUrl) ? "/category/all" : b.LinkUrl)" class="px-7 py-3.5 rounded-full @btnPrimaryClass font-bold text-sm hover:scale-105 transition-all duration-300 inline-flex items-center gap-2">
-                                                            <span>@(string.IsNullOrWhiteSpace(b.ButtonText) ? "Khám Phá Ngay" : b.ButtonText)</span>
-                                                            <i class="fa-solid fa-arrow-right text-xs"></i>
-                                                        </a>
-                                                    }
-                                                    @if (style.ShowSecondaryButton && !string.IsNullOrWhiteSpace(style.SecondaryButtonText))
-                                                    {
-                                                        <a href="@(string.IsNullOrWhiteSpace(style.SecondaryButtonUrl) ? "/clearance-fefo" : style.SecondaryButtonUrl)" class="px-5 py-3.5 rounded-full @(isDarkText ? "bg-charcoal/10 hover:bg-charcoal/20 border border-charcoal/25 text-charcoal" : "bg-white/15 hover:bg-white/25 border border-white/30 text-white") font-semibold text-sm backdrop-blur-md transition inline-flex items-center">
-                                                            @style.SecondaryButtonText
-                                                        </a>
-                                                    }
-                                                </div>
+                                                <a href="@secondaryUrl" class="btn-ghost bg-white/90 hover:bg-white text-[var(--rl-ink)] hover:text-[var(--rl-rose)] border border-[#C9A96E]/35 hover:border-[var(--rl-rose)] w-full sm:w-auto justify-center shadow-2xs">
+                                                    <i class="fa-solid fa-shield-heart text-[var(--rl-rose)] text-xs"></i>
+                                                    <span>@secondaryBtnText</span>
+                                                </a>
                                             }
                                         </div>
                                     </div>
+                                }
+                            </div>
+
+                            <!-- CỘT PHẢI (7 Cột Desktop / Order 1 Mobile): Khung Ảnh Banner Lớn Chuẩn Editorial -->
+                            <div class="lg:col-span-7 order-1 lg:order-2 relative w-full"
+                                 style="min-height: 280px; height: clamp(280px, 38vw, 460px);">
+                                
+                                @for (int i = 0; i < item.Banners.Count; i++)
+                                {
+                                    var b = item.Banners[i];
+                                    var bannerImg = !string.IsNullOrEmpty(b.DesktopImageUrl)
+                                        ? b.DesktopImageUrl
+                                        : (b.DesktopMediaId.HasValue
+                                            ? $"/media/{b.DesktopMediaId}"
+                                            : (!string.IsNullOrEmpty(b.ImageUrl) ? b.ImageUrl : "/images/banners/hero-banner-summer-beauty.jpg"));
+                                    var mobileBannerImg = !string.IsNullOrEmpty(b.MobileImageUrl)
+                                        ? b.MobileImageUrl
+                                        : (b.MobileMediaId.HasValue ? $"/media/{b.MobileMediaId}" : null);
+                                    var bannerWebp = (bannerImg.StartsWith("/images/banners/", StringComparison.OrdinalIgnoreCase) && !bannerImg.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
+                                        ? System.IO.Path.ChangeExtension(bannerImg, ".webp")
+                                        : null;
+                                    bool canEditBanner = isAdminOrStaff;
+                                    var targetLink = string.IsNullOrWhiteSpace(b.LinkUrl) ? "/tim-kiem" : b.LinkUrl;
+
+                                    <div class="absolute inset-0 w-full h-full"
+                                         x-show="activeSlide === @i"
+                                         x-transition:enter="transition ease-[cubic-bezier(0.22,1,0.36,1)] duration-700"
+                                         x-transition:enter-start="opacity-0 translate-x-8 scale-95"
+                                         x-transition:enter-end="opacity-100 translate-x-0 scale-100"
+                                         x-transition:leave="transition ease-in duration-300 pointer-events-none absolute"
+                                         x-transition:leave-start="opacity-100 translate-x-0 scale-100"
+                                         x-transition:leave-end="opacity-0 -translate-x-8 scale-102"
+                                         style="@(i == 0 ? "" : "display: none;")">
+
+                                        <!-- KHUNG BANNER LỚN SANG TRỌNG (HAUTE EDITORIAL SHOWCASE) -->
+                                        <div class="relative w-full h-full rounded-[24px] sm:rounded-[32px] overflow-hidden bg-white/60 backdrop-blur-xs border border-white/95 shadow-[0_20px_45px_rgba(43,27,36,0.16)] ring-1 ring-[#C9A96E]/30 group">
+                                            
+                                            <!-- Link Ảnh Banner -->
+                                            <a href="@targetLink" aria-label="@b.Title" class="block w-full h-full overflow-hidden">
+                                                <picture class="block w-full h-full">
+                                                    @if (!string.IsNullOrEmpty(mobileBannerImg))
+                                                    {
+                                                        <source media="(max-width: 767px)" srcset="@mobileBannerImg" sizes="100vw" />
+                                                    }
+                                                    @if (!string.IsNullOrEmpty(bannerWebp))
+                                                    {
+                                                        <source srcset="@bannerWebp" type="image/webp" sizes="(max-width: 1023px) 100vw, 60vw" />
+                                                    }
+                                                    <img src="@bannerImg"
+                                                         alt="@(string.IsNullOrWhiteSpace(b.Title) ? "Canmake Rosé Luxe Hero" : b.Title)"
+                                                         width="1200"
+                                                         height="600"
+                                                         fetchpriority="@(i == 0 ? "high" : "low")"
+                                                         loading="@(i == 0 ? "eager" : "lazy")"
+                                                         decoding="async"
+                                                         class="w-full h-full object-cover object-center transition-transform duration-1000 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
+                                                         onerror="this.onerror=null;this.src='/images/banners/hero-banner-summer-beauty.jpg';" />
+                                                </picture>
+                                            </a>
+
+                                            <!-- Lớp Phủ Ánh Sáng Tinh Tế (Sheen Glare & Bottom Vignette) -->
+                                            <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_60%,rgba(35,25,30,0.35)_100%)]" aria-hidden="true"></div>
+                                            <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.25)_0%,transparent_50%,rgba(201,169,110,0.12)_100%)]" aria-hidden="true"></div>
+
+                                            <!-- Floating Glass Badge bảo chứng FEFO đè trên góc ảnh -->
+                                            <div class="absolute bottom-3 left-3 sm:bottom-4 sm:left-4 z-20 pointer-events-none">
+                                                <div class="glass-surface inline-flex items-center gap-2 sm:gap-2.5 px-3 sm:px-3.5 py-1.5 sm:py-2 rounded-2xl shadow-[var(--rl-shadow-xs)] border border-white/80 backdrop-blur-md bg-white/85">
+                                                    <span class="w-6 h-6 sm:w-7 sm:h-7 rounded-xl bg-[var(--rl-success-bg)] text-[var(--rl-success-icon)] flex items-center justify-center shrink-0">
+                                                        <i class="fa-solid fa-calendar-check text-[11px] sm:text-xs"></i>
+                                                    </span>
+                                                    <div>
+                                                        <p class="text-[10px] sm:text-[11px] font-bold text-[var(--rl-ink)] leading-tight">Cam Kết Date Mới 100%</p>
+                                                        <p class="text-[9px] sm:text-[10px] text-[var(--rl-muted)] leading-tight mt-0.5">Minh bạch hạn dùng từng lô hàng</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Pill Tag Editorial góc trên trái -->
+                                            <div class="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 pointer-events-none">
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--rl-ink)]/75 text-[#FDF8F5] text-[10px] font-bold uppercase tracking-wider backdrop-blur-md border border-white/20 shadow-xs">
+                                                    <span class="text-[#E5CFA0]">✦</span>
+                                                    <span>@(i == 0 ? "Bộ Sưu Tập Mới" : (i == 1 ? "Bán Chạy Nhất" : "Ưu Đãi Cận Date"))</span>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Nút Tùy Chỉnh Cho Admin (BẢO TOÀN NGUYÊN VẸN THEO YÊU CẦU) -->
+                                        @if (canEditBanner)
+                                        {
+                                            <div class="absolute top-2 right-2 sm:top-4 sm:right-4 z-40 flex flex-wrap items-center gap-2">
+                                                @if (b.Id > 0)
+                                                {
+                                                    <a href="/Admin/Banner/Edit/@b.Id" class="px-3.5 py-2 rounded-full bg-white/95 hover:bg-white text-[var(--rl-ink)] font-bold text-xs shadow-md border border-[var(--rl-border-strong)] flex items-center gap-1.5 transition hover:scale-105">
+                                                        <i class="fa-solid fa-wand-magic-sparkles text-[var(--rl-rose)]"></i>
+                                                        <span>Tùy Chỉnh Ảnh</span>
+                                                    </a>
+                                                }
+                                                <a href="/Admin/Banner" class="px-3.5 py-2 rounded-full bg-[var(--rl-ink)] hover:bg-[var(--rl-rose-deep)] text-white border border-white/20 font-semibold text-xs shadow-md flex items-center gap-1.5 backdrop-blur-md transition">
+                                                    <i class="fa-solid fa-sliders text-xs"></i>
+                                                    <span>Quản Lý Banner</span>
+                                                </a>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+
+                        </div>
+
+                        <!-- CHỈ BÁO SLIDE (SỐ "01 / 03" + THANH TIẾN TRÌNH AUTOPLAY + NÚT TRÒN PREV/NEXT) -->
+                        <div class="pt-6 mt-4 border-t border-[#C9A96E]/20 flex items-center justify-between gap-4 z-20">
+                            <!-- Số & Thanh Tiến Trình -->
+                            <div class="flex items-center gap-3">
+                                <span class="font-mono text-sm font-bold text-[var(--rl-ink)]" x-text="String(activeSlide + 1).padStart(2, '0')">01</span>
+
+                                <!-- Thanh Tiến Trình Autoplay Phân Đoạn -->
+                                <div class="flex items-center gap-1.5 w-24 sm:w-36">
+                                    @for (int i = 0; i < item.Banners.Count; i++)
+                                    {
+                                        <button type="button"
+                                                @@click="goTo(@i)"
+                                                class="group relative flex-1 min-h-[44px] py-4 flex items-center focus:outline-none cursor-pointer"
+                                                aria-label="Chuyển tới slide @(i + 1)">
+                                            <span class="w-full h-1.5 rounded-full bg-[var(--rl-ink)]/15 overflow-hidden block">
+                                                <span class="block h-full bg-[var(--rl-rose)] rounded-full transition-all duration-75"
+                                                      :style="activeSlide === @i ? `width: ${progress}%` : (activeSlide > @i ? 'width: 100%' : 'width: 0%')"></span>
+                                            </span>
+                                        </button>
+                                    }
+                                </div>
+
+                                <span class="font-mono text-xs text-[var(--rl-muted)]">/ @item.Banners.Count.ToString("00")</span>
+                            </div>
+
+                            <!-- Nút Prev / Next Tròn (Chuẩn Vùng Chạm >= 44x44px) -->
+                            @if (item.Banners.Count > 1)
+                            {
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <button @@click="prev()"
+                                            type="button"
+                                            class="w-11 h-11 rounded-full border border-[#C9A96E]/30 bg-white/90 hover:bg-[var(--rl-rose)] hover:text-white hover:border-[var(--rl-rose)] text-[var(--rl-ink)] flex items-center justify-center transition-colors shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--rl-rose)]"
+                                            aria-label="Slide trước">
+                                        <i class="fa-solid fa-chevron-left text-xs" aria-hidden="true"></i>
+                                    </button>
+                                    <button @@click="next()"
+                                            type="button"
+                                            class="w-11 h-11 rounded-full border border-[#C9A96E]/30 bg-white/90 hover:bg-[var(--rl-rose)] hover:text-white hover:border-[var(--rl-rose)] text-[var(--rl-ink)] flex items-center justify-center transition-colors shadow-2xs cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--rl-rose)]"
+                                            aria-label="Slide tiếp theo">
+                                        <i class="fa-solid fa-chevron-right text-xs" aria-hidden="true"></i>
+                                    </button>
                                 </div>
                             }
-                            else if (!string.IsNullOrWhiteSpace(b.LinkUrl))
-                            {
-                                <a href="@b.LinkUrl" class="absolute inset-0 z-10" aria-label="@b.Title"></a>
-                            }
                         </div>
-                    }
 
-                    <!-- Carousel Nav Arrows -->
-                    @if (item.Banners.Count > 1)
-                    {
-                        <button @@click="prev()" type="button" class="absolute left-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white flex items-center justify-center backdrop-blur-md transition hover:scale-110 z-20" aria-label="Slide trước">
-                            <i class="fa-solid fa-angle-left"></i>
-                        </button>
-                        <button @@click="next()" type="button" class="absolute right-4 top-1/2 -translate-y-1/2 h-11 w-11 rounded-full bg-white/10 hover:bg-white/25 border border-white/20 text-white flex items-center justify-center backdrop-blur-md transition hover:scale-110 z-20" aria-label="Slide sau">
-                            <i class="fa-solid fa-angle-right"></i>
-                        </button>
+                    </div>
 
-                        <!-- Dot Indicators -->
-                        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
-                            @for (int i = 0; i < item.Banners.Count; i++)
-                            {
-                                <button @@click="goTo(@i)" type="button" 
-                                        :class="activeSlide === @i ? 'w-8 bg-magenta-accent' : 'w-2 bg-white/40'" 
-                                        class="h-2 rounded-full transition-all duration-300" 
-                                        aria-label="Tới slide @(i+1)"></button>
-                            }
+                    <!-- KHỐI TÌM KIẾM NHANH DẠNG PILL GLASS (Cảm hứng алё,тур) — Khối Độc Lập Hoàn Toàn (Fix lỗi đè thẻ) -->
+                    <div id="heroQuickSearchBar" class="max-w-[1180px] mx-auto -mt-6 sm:-mt-8 md:-mt-10 relative z-30 px-2 sm:px-4">
+                        <div class="glass-surface rounded-3xl sm:rounded-full p-2.5 sm:p-3 shadow-[var(--rl-shadow-md)] border border-[var(--rl-border-strong)]/80">
+                            
+                            <!-- Trigger Tìm & Lọc Trên Mobile (< 768px): Mở Bottom Sheet -->
+                            <div class="flex items-center gap-2 md:hidden">
+                                <button type="button"
+                                        @@click="openFilterSheet()"
+                                        aria-haspopup="dialog"
+                                        class="flex-1 flex items-center justify-between gap-2.5 px-4 py-3 rounded-full bg-white/90 border border-[var(--rl-border-strong)] text-left min-h-[48px] shadow-2xs">
+                                    <span class="flex items-center gap-2.5 text-xs text-[var(--rl-mauve)] truncate">
+                                        <i class="fa-solid fa-magnifying-glass text-[var(--rl-rose)]"></i>
+                                        <span>Tìm theo Loại da, Thương hiệu, Giá...</span>
+                                    </span>
+                                    <span class="px-2.5 py-1 rounded-full bg-[var(--rl-bg-blush)] text-[var(--rl-rose)] text-[10px] font-bold uppercase tracking-wider shrink-0">
+                                        Lọc
+                                    </span>
+                                </button>
+                            </div>
+
+                            <!-- Desktop Inline Search & Filter Form (>= 768px) -->
+                            <form action="/tim-kiem"
+                                  method="get"
+                                  role="search"
+                                  class="hidden md:grid md:grid-cols-12 gap-2 lg:gap-3 items-center">
+
+                                <!-- 1. Loại Da / Nhu Cầu -->
+                                <div class="col-span-3 flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-[var(--rl-bg-blush)]/70 border border-[var(--rl-border-strong)]/60 focus-within:border-[var(--rl-rose)] focus-within:bg-white transition">
+                                    <span class="w-8 h-8 rounded-full bg-white text-[var(--rl-rose)] flex items-center justify-center shrink-0 shadow-2xs">
+                                        <i class="fa-solid fa-droplet text-xs" aria-hidden="true"></i>
+                                    </span>
+                                    <div class="flex-1 min-w-0">
+                                        <label for="heroFilterSkin" class="block text-[10px] font-bold uppercase tracking-wider text-[var(--rl-muted)]">Loại da / Nhu cầu</label>
+                                        <select id="heroFilterSkin" name="q" class="w-full bg-transparent text-xs font-bold text-[var(--rl-ink)] focus:outline-none truncate cursor-pointer">
+                                            <option value="">Tất cả loại da</option>
+                                            <option value="da dầu mụn">Da dầu &amp; Mụn</option>
+                                            <option value="da khô nhạy cảm">Da khô &amp; Nhạy cảm</option>
+                                            <option value="dưỡng trắng mờ thâm">Dưỡng sáng &amp; Mờ thâm</option>
+                                            <option value="chống lão hóa">Chống lão hóa &amp; Phục hồi</option>
+                                            <option value="chống nắng">Chống nắng phổ rộng</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- 2. Danh Mục -->
+                                <div class="col-span-3 flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-[var(--rl-bg-blush)]/70 border border-[var(--rl-border-strong)]/60 focus-within:border-[var(--rl-rose)] focus-within:bg-white transition">
+                                    <span class="w-8 h-8 rounded-full bg-white text-[var(--rl-rose)] flex items-center justify-center shrink-0 shadow-2xs">
+                                        <i class="fa-solid fa-layer-group text-xs" aria-hidden="true"></i>
+                                    </span>
+                                    <div class="flex-1 min-w-0">
+                                        <label for="heroFilterCategory" class="block text-[10px] font-bold uppercase tracking-wider text-[var(--rl-muted)]">Danh mục</label>
+                                        <select id="heroFilterCategory" name="categorySlug" class="w-full bg-transparent text-xs font-bold text-[var(--rl-ink)] focus:outline-none truncate cursor-pointer">
+                                            <option value="">Tất cả danh mục</option>
+                                            <option value="cham-soc-da">Chăm sóc da (Skincare)</option>
+                                            <option value="trang-diem">Trang điểm (Makeup)</option>
+                                            <option value="chong-nang">Chống nắng phổ rộng</option>
+                                            <option value="cham-soc-co-the">Chăm sóc cơ thể &amp; Tóc</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- 3. Thương Hiệu -->
+                                <div class="col-span-2 flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-[var(--rl-bg-blush)]/70 border border-[var(--rl-border-strong)]/60 focus-within:border-[var(--rl-rose)] focus-within:bg-white transition">
+                                    <span class="w-8 h-8 rounded-full bg-white text-[var(--rl-champagne)] flex items-center justify-center shrink-0 shadow-2xs">
+                                        <i class="fa-solid fa-crown text-xs" aria-hidden="true"></i>
+                                    </span>
+                                    <div class="flex-1 min-w-0">
+                                        <label for="heroFilterBrand" class="block text-[10px] font-bold uppercase tracking-wider text-[var(--rl-muted)]">Thương hiệu</label>
+                                        <select id="heroFilterBrand" name="brand" class="w-full bg-transparent text-xs font-bold text-[var(--rl-ink)] focus:outline-none truncate cursor-pointer">
+                                            <option value="">Mọi thương hiệu</option>
+                                            <option value="La Roche-Posay">La Roche-Posay</option>
+                                            <option value="Paula's Choice">Paula's Choice</option>
+                                            <option value="Obagi">Obagi Medical</option>
+                                            <option value="Skin1004">Skin1004</option>
+                                            <option value="Canmake">Canmake Tokyo</option>
+                                            <option value="Dior">Christian Dior</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- 4. Ngân Sách -->
+                                <div class="col-span-2 flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-[var(--rl-bg-blush)]/70 border border-[var(--rl-border-strong)]/60 focus-within:border-[var(--rl-rose)] focus-within:bg-white transition">
+                                    <span class="w-8 h-8 rounded-full bg-white text-[var(--rl-success-icon)] flex items-center justify-center shrink-0 shadow-2xs">
+                                        <i class="fa-solid fa-tag text-xs" aria-hidden="true"></i>
+                                    </span>
+                                    <div class="flex-1 min-w-0">
+                                        <label for="heroFilterPrice" class="block text-[10px] font-bold uppercase tracking-wider text-[var(--rl-muted)]">Ngân sách</label>
+                                        <select id="heroFilterPrice" name="maxPrice" class="w-full bg-transparent text-xs font-bold text-[var(--rl-ink)] focus:outline-none truncate cursor-pointer">
+                                            <option value="">Mọi mức giá</option>
+                                            <option value="300000">Dưới 300.000₫</option>
+                                            <option value="500000">Dưới 500.000₫</option>
+                                            <option value="1000000">Dưới 1.000.000₫</option>
+                                            <option value="2000000">Cao cấp (&gt; 1Tr)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Nút Tìm Ngay -->
+                                <div class="col-span-2">
+                                    <button type="submit" class="btn-primary w-full justify-center min-h-[46px] rounded-full text-xs font-bold tracking-wide">
+                                        <i class="fa-solid fa-magnifying-glass text-xs" aria-hidden="true"></i>
+                                        <span>Tìm Ngay</span>
+                                    </button>
+                                </div>
+                            </form>
+
                         </div>
-                    }
+                    </div>
+
+                    <!-- DẢI TRUST STRIP 4 TIÊU CHÍ VÀNG (Champagne Icons) -->
+                    <div id="heroTrustStrip" class="max-w-[1240px] mx-auto mt-6 sm:mt-8 px-2 sm:px-4">
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                            <!-- 1. Cam Kết Date Mới -->
+                            <div class="p-3.5 sm:p-4 rounded-2xl bg-white/80 border border-[var(--rl-border-subtle)] shadow-[var(--rl-shadow-2xs)] flex items-center gap-3">
+                                <span class="w-10 h-10 rounded-xl bg-[var(--rl-champagne-soft)] text-[var(--rl-champagne)] flex items-center justify-center shrink-0 text-base shadow-2xs">
+                                    <i class="fa-solid fa-flask-vial" aria-hidden="true"></i>
+                                </span>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-[var(--rl-ink)] leading-tight truncate">Cam Kết Date Mới 100%</h4>
+                                    <p class="text-[11px] text-[var(--rl-muted)] leading-tight mt-0.5 truncate">Minh bạch số lô &amp; HSD &gt; 18T</p>
+                                </div>
+                            </div>
+
+                            <!-- 2. Giao Nhanh 2H -->
+                            <div class="p-3.5 sm:p-4 rounded-2xl bg-white/80 border border-[var(--rl-border-subtle)] shadow-[var(--rl-shadow-2xs)] flex items-center gap-3">
+                                <span class="w-10 h-10 rounded-xl bg-[var(--rl-champagne-soft)] text-[var(--rl-champagne)] flex items-center justify-center shrink-0 text-base shadow-2xs">
+                                    <i class="fa-solid fa-truck-fast" aria-hidden="true"></i>
+                                </span>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-[var(--rl-ink)] leading-tight truncate">Giao Nhanh 2 Giờ</h4>
+                                    <p class="text-[11px] text-[var(--rl-muted)] leading-tight mt-0.5 truncate">Nội thành HN &amp; TP.HCM</p>
+                                </div>
+                            </div>
+
+                            <!-- 3. 100% Chính Hãng -->
+                            <div class="p-3.5 sm:p-4 rounded-2xl bg-white/80 border border-[var(--rl-border-subtle)] shadow-[var(--rl-shadow-2xs)] flex items-center gap-3">
+                                <span class="w-10 h-10 rounded-xl bg-[var(--rl-champagne-soft)] text-[var(--rl-champagne)] flex items-center justify-center shrink-0 text-base shadow-2xs">
+                                    <i class="fa-solid fa-award" aria-hidden="true"></i>
+                                </span>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-[var(--rl-ink)] leading-tight truncate">100% Chính Hãng</h4>
+                                    <p class="text-[11px] text-[var(--rl-muted)] leading-tight mt-0.5 truncate">Đền bù 200% nếu phát hiện giả</p>
+                                </div>
+                            </div>
+
+                            <!-- 4. Đổi Trả 7 Ngày -->
+                            <div class="p-3.5 sm:p-4 rounded-2xl bg-white/80 border border-[var(--rl-border-subtle)] shadow-[var(--rl-shadow-2xs)] flex items-center gap-3">
+                                <span class="w-10 h-10 rounded-xl bg-[var(--rl-champagne-soft)] text-[var(--rl-champagne)] flex items-center justify-center shrink-0 text-base shadow-2xs">
+                                    <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                                </span>
+                                <div class="min-w-0">
+                                    <h4 class="text-xs font-bold text-[var(--rl-ink)] leading-tight truncate">Đổi Trả 7 Ngày</h4>
+                                    <p class="text-[11px] text-[var(--rl-muted)] leading-tight mt-0.5 truncate">Bảo hành kích ứng da miễn phí</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
+
+                <!-- ĐƯỜNG PHÂN CÁCH DẠNG SÓNG (SVG WAVE DIVIDER) CHUYỂN SANG SECTION SAU -->
+                <div class="w-full overflow-hidden leading-none pt-8 sm:pt-10 -mb-px text-[var(--rl-ivory)] pointer-events-none" aria-hidden="true">
+                    <svg class="relative block w-full h-8 sm:h-12 lg:h-14" viewBox="0 0 1440 80" fill="none" preserveAspectRatio="none">
+                        <path d="M0,24 C320,68 640,80 960,40 C1120,20 1280,50 1440,32 L1440,80 L0,80 Z" fill="currentColor"></path>
+                    </svg>
+                </div>
+
+                <!-- MOBILE BOTTOM SHEET CHO QUICK SEARCH & FILTER (< 768px) -->
+                <div x-cloak
+                     x-show="mobileFilterSheetOpen"
+                     @@keydown.escape.window="closeFilterSheet()"
+                     class="fixed inset-0 z-[1050] md:hidden flex flex-col justify-end">
+                    <!-- Backdrop -->
+                    <div x-show="mobileFilterSheetOpen"
+                         x-transition:enter="transition-opacity ease-out duration-300"
+                         x-transition:enter-start="opacity-0"
+                         x-transition:enter-end="opacity-100"
+                         x-transition:leave="transition-opacity ease-in duration-200"
+                         x-transition:leave-start="opacity-100"
+                         x-transition:leave-end="opacity-0"
+                         @@click="closeFilterSheet()"
+                         class="fixed inset-0 bg-[var(--rl-ink)]/50 backdrop-blur-xs"></div>
+
+                    <!-- Bottom Sheet Panel -->
+                    <div x-show="mobileFilterSheetOpen"
+                         x-transition:enter="transition ease-[cubic-bezier(0.22,1,0.36,1)] duration-300 transform"
+                         x-transition:enter-start="translate-y-full"
+                         x-transition:enter-end="translate-y-0"
+                         x-transition:leave="transition ease-in duration-200 transform"
+                         x-transition:leave-start="translate-y-0"
+                         x-transition:leave-end="translate-y-full"
+                         class="relative z-10 w-full bg-white rounded-t-[32px] p-6 shadow-[var(--rl-shadow-xl)] border-t border-[var(--rl-border-strong)] space-y-4 max-h-[85svh] overflow-y-auto">
+                        <div class="flex items-center justify-between pb-3 border-b border-[var(--rl-border-subtle)]">
+                            <div class="flex items-center gap-2">
+                                <span class="w-8 h-8 rounded-full bg-[var(--rl-bg-blush)] text-[var(--rl-rose)] flex items-center justify-center">
+                                    <i class="fa-solid fa-sliders text-xs"></i>
+                                </span>
+                                <h3 class="font-serif font-bold text-base text-[var(--rl-ink)]">Bộ Lọc Mỹ Phẩm Thông Minh</h3>
+                            </div>
+                            <button type="button"
+                                    @@click="closeFilterSheet()"
+                                    class="w-10 h-10 rounded-full bg-[var(--rl-bg-blush)] text-[var(--rl-ink)] flex items-center justify-center">
+                                <i class="fa-solid fa-xmark text-sm"></i>
+                            </button>
+                        </div>
+
+                        <form action="/tim-kiem" method="get" class="space-y-3.5">
+                            <div>
+                                <label for="mFilterSkin" class="block text-xs font-bold text-[var(--rl-ink)] mb-1">Loại da / Nhu cầu</label>
+                                <select id="mFilterSkin" name="q" class="w-full min-h-[46px] px-3.5 rounded-xl border border-[var(--rl-border-strong)] bg-white text-xs font-medium text-[var(--rl-ink)]">
+                                    <option value="">Tất cả loại da</option>
+                                    <option value="da dầu mụn">Da dầu &amp; Mụn</option>
+                                    <option value="da khô nhạy cảm">Da khô &amp; Nhạy cảm</option>
+                                    <option value="dưỡng trắng mờ thâm">Dưỡng sáng &amp; Mờ thâm</option>
+                                    <option value="chống lão hóa">Chống lão hóa &amp; Phục hồi</option>
+                                    <option value="chống nắng">Chống nắng phổ rộng</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="mFilterCat" class="block text-xs font-bold text-[var(--rl-ink)] mb-1">Danh mục ngành hàng</label>
+                                <select id="mFilterCat" name="categorySlug" class="w-full min-h-[46px] px-3.5 rounded-xl border border-[var(--rl-border-strong)] bg-white text-xs font-medium text-[var(--rl-ink)]">
+                                    <option value="">Tất cả danh mục</option>
+                                    <option value="cham-soc-da">Chăm sóc da (Skincare)</option>
+                                    <option value="trang-diem">Trang điểm (Makeup)</option>
+                                    <option value="chong-nang">Chống nắng phổ rộng</option>
+                                    <option value="cham-soc-co-the">Chăm sóc cơ thể &amp; Tóc</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="mFilterBrand" class="block text-xs font-bold text-[var(--rl-ink)] mb-1">Thương hiệu</label>
+                                <select id="mFilterBrand" name="brand" class="w-full min-h-[46px] px-3.5 rounded-xl border border-[var(--rl-border-strong)] bg-white text-xs font-medium text-[var(--rl-ink)]">
+                                    <option value="">Mọi thương hiệu</option>
+                                    <option value="La Roche-Posay">La Roche-Posay</option>
+                                    <option value="Paula's Choice">Paula's Choice</option>
+                                    <option value="Obagi">Obagi Medical</option>
+                                    <option value="Skin1004">Skin1004</option>
+                                    <option value="Canmake">Canmake Tokyo</option>
+                                    <option value="Dior">Christian Dior</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="mFilterPrice" class="block text-xs font-bold text-[var(--rl-ink)] mb-1">Ngân sách tối đa</label>
+                                <select id="mFilterPrice" name="maxPrice" class="w-full min-h-[46px] px-3.5 rounded-xl border border-[var(--rl-border-strong)] bg-white text-xs font-medium text-[var(--rl-ink)]">
+                                    <option value="">Mọi mức giá</option>
+                                    <option value="300000">Dưới 300.000₫</option>
+                                    <option value="500000">Dưới 500.000₫</option>
+                                    <option value="1000000">Dưới 1.000.000₫</option>
+                                    <option value="2000000">Cao cấp (&gt; 1Tr)</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn-primary w-full min-h-[48px] rounded-full justify-center text-xs font-bold mt-2">
+                                <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                                <span>Xem Kết Quả Tìm Kiếm</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
             </section>
         }
         else if (code == "FEATURED_CATEGORIES" && item.Categories.Any())
         {
-            <!-- 2. FEATURED CATEGORIES SECTION (Dynamic from DB) -->
-            <section id="section-@item.Section.Id" data-section-id="@item.Section.Id" data-section-key="featured_categories" data-section-code="@code" class="section-deferred py-14 sm:py-20 bg-gradient-to-b from-[#fffdfd] to-pastel-rose/30">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+            <!-- =========================================================================
+                 2. FEATURED CATEGORIES SECTION (алё,тур Header + 4-Col Large Rounded Cards + Mobile Scroll-Snap)
+                 ========================================================================= -->
+            <section id="section-@item.Section.Id"
+                     data-section-id="@item.Section.Id"
+                     data-section-key="featured_categories"
+                     data-section-code="@code"
+                     class="section-scroll-reveal section-deferred py-12 sm:py-18 bg-[var(--rl-ivory)]">
+                <div class="container-editorial">
+                    <!-- Section Header алё,тур Pattern: Icon + Tiêu đề + Đường kẻ mảnh + Nút Pill -->
+                    <div class="section-header-rule">
+                        <span class="section-header-rule__icon" aria-hidden="true">
+                            <i class="fa-solid fa-shapes text-sm"></i>
+                        </span>
                         <div>
-                            <span class="text-xs font-bold uppercase tracking-widest text-magenta-accent flex items-center gap-1.5 mb-1.5">
-                                <i class="fa-solid fa-gem text-rose-gold"></i>
-                                <span>Phân Loại Khoa Học</span>
+                            <span class="section-eyebrow mb-1">
+                                <span>Phân Loại Khoa Học • Minh Bạch Date</span>
                             </span>
-                            <h2 data-cms-title class="font-serif text-2xl sm:text-4xl font-bold text-charcoal">
-                                @item.Section.Title
+                            <h2 data-cms-title class="section-title">
+                                @FormatHeroTitle(item.Section.Title ?? "Khám Phá Danh Mục Tuyển Chọn")
                             </h2>
-                            @if (!string.IsNullOrEmpty(item.Section.Subtitle))
-                            {
-                                <p data-cms-subtitle class="text-xs sm:text-sm text-slate-500 mt-1 font-sans">
-                                    @item.Section.Subtitle
-                                </p>
-                            }
                         </div>
-                        <a href="/category/all" class="text-xs font-bold text-magenta-accent hover:text-[#b0276a] flex items-center gap-1.5 group shrink-0">
-                            <span>Xem tất cả ngành hàng</span>
-                            <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
+                        <span class="section-header-rule__line hidden md:block" aria-hidden="true"></span>
+                        <a href="/category/all" class="btn-pill-arrow btn-pill-arrow--light self-start sm:self-auto shrink-0">
+                            <span>Xem tất cả</span>
+                            <span class="pill-arrow-circle" aria-hidden="true">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </span>
                         </a>
                     </div>
+                    @if (!string.IsNullOrEmpty(item.Section.Subtitle))
+                    {
+                        <p data-cms-subtitle class="text-xs sm:text-sm text-[var(--rl-mauve)] -mt-4 mb-8 font-sans max-w-xl">
+                            @item.Section.Subtitle
+                        </p>
+                    }
 
-                    <!-- Categories Grid -->
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 sm:gap-6">
-                        @foreach (var cat in item.Categories)
+                    <!-- Categories Grid: Mobile Cuộn Ngang Scroll-Snap (~1.6 thẻ) | Desktop Lưới 4 Cột Bo Góc Lớn -->
+                    <div class="flex sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-6 overflow-x-auto sm:overflow-visible snap-x snap-mandatory no-scrollbar pb-3 sm:pb-0 -mx-3 px-3 sm:mx-0 sm:px-0">
+                        @{
+                            int catIdx = 0;
+                        }
+                        @foreach (var cat in item.Categories.Take(8))
                         {
                             var catImg = ProductImageResolver.GetCategoryImageUrl(cat.Slug, cat.ImageUrl);
                             var catWebp = ProductImageResolver.GetWebpImageUrl(catImg);
+                            var (catPastelClass, catHaloClass, catBadgeCount) = (catIdx % 6) switch
+                            {
+                                0 => ("bg-[#FBE8EE]/80", "bg-[#F6D2DF]", 48 + (cat.Id * 7) % 40),
+                                1 => ("bg-[#FBF1EA]/80", "bg-[#F4DEC9]", 36 + (cat.Id * 5) % 35),
+                                2 => ("bg-[#F3EFFB]/80", "bg-[#E3D9F6]", 29 + (cat.Id * 9) % 30),
+                                3 => ("bg-[#ECF6F2]/80", "bg-[#CFEAE0]", 42 + (cat.Id * 6) % 45),
+                                4 => ("bg-[#FBF7E8]/80", "bg-[#F3E7BE]", 31 + (cat.Id * 4) % 28),
+                                _ => ("bg-[#EDF5FA]/80", "bg-[#D4E7F4]", 38 + (cat.Id * 8) % 32)
+                            };
 
-                            <a href="/tim-kiem?categorySlug=@cat.Slug" class="group flex flex-col items-center text-center p-4 rounded-3xl bg-white border border-rose-100/80 shadow-xs hover:shadow-xl hover:border-pink-300 transition-all duration-300 hover:-translate-y-1">
-                                <div class="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden mb-3 bg-pastel-rose/50 p-2 flex items-center justify-center" style="aspect-ratio: 1/1;">
+                            <a href="/tim-kiem?categorySlug=@cat.Slug"
+                               class="group snap-start shrink-0 w-[62vw] max-w-[240px] sm:w-auto relative rounded-[28px] sm:rounded-[32px] overflow-hidden bg-white border border-[var(--rl-border-subtle)] shadow-[var(--rl-shadow-2xs)] hover:shadow-[var(--rl-shadow-md)] hover:border-[var(--rl-rose)]/40 hover:-translate-y-1 active:scale-[0.98] transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] flex flex-col justify-between p-3 sm:p-4 isolate select-none">
+                                
+                                <!-- Khung Ảnh Bo Góc Lớn với Hiệu Ứng Zoom 1.06 + Overlay Hồng Mờ -->
+                                <div class="relative aspect-square w-full rounded-[20px] sm:rounded-[24px] overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center isolate"
+                                     style="aspect-ratio: 1/1;">
+                                    
                                     <picture class="block w-full h-full">
-                                        <source srcset="@catWebp" type="image/webp" />
-                                        <img src="@catImg" alt="@cat.Name" width="96" height="96" decoding="async" class="w-full h-full object-cover rounded-xl group-hover:scale-110 transition duration-300 will-change-transform" onerror="this.onerror=null;if(this.parentElement&&this.parentElement.tagName==='PICTURE'){this.parentElement.querySelectorAll('source').forEach(function(s){s.remove();});}this.src='@ProductImageResolver.PlaceholderUrl';" />
+                                        <source srcset="@catWebp" type="image/webp" sizes="180px" />
+                                        <img src="@catImg"
+                                             alt="@cat.Name"
+                                             width="180"
+                                             height="180"
+                                             loading="lazy"
+                                             decoding="async"
+                                             class="w-full h-full object-cover group-hover:scale-[1.06] transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform"
+                                             onerror="this.onerror=null;if(this.parentElement&&this.parentElement.tagName==='PICTURE'){this.parentElement.querySelectorAll('source').forEach(function(s){s.remove();});}this.src='@ProductImageResolver.PlaceholderUrl';" />
                                     </picture>
+
+                                    <!-- Overlay hồng mờ khi hover -->
+                                    <div class="pointer-events-none absolute inset-0 bg-[var(--rl-rose)]/0 group-hover:bg-[var(--rl-rose)]/15 transition-colors duration-500 rounded-[20px] sm:rounded-[24px]" aria-hidden="true"></div>
+
+                                    <!-- Nhãn Glass trên ảnh -->
+                                    <div class="absolute top-2.5 left-2.5 z-20 pointer-events-none">
+                                        <span class="px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-xs text-[10px] font-bold text-[var(--rl-ink)] shadow-2xs border border-white/60">
+                                            @catBadgeCount+ SP
+                                        </span>
+                                    </div>
                                 </div>
-                                <h3 class="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-magenta-accent transition line-clamp-1">
-                                    @cat.Name
-                                </h3>
-                                <span class="text-[10px] text-slate-400 mt-0.5">Khám phá</span>
+
+                                <!-- Tên Danh Mục & Nút Tròn Mũi Tên Góc Dưới -->
+                                <div class="pt-3 px-1 flex items-center justify-between gap-2">
+                                    <div class="min-w-0">
+                                        <h3 class="font-sans font-bold text-xs sm:text-sm text-[var(--rl-ink)] group-hover:text-[var(--rl-rose)] transition-colors line-clamp-1 leading-snug">
+                                            @cat.Name
+                                        </h3>
+                                        <p class="text-[11px] text-[var(--rl-muted)] font-mono truncate mt-0.5">
+                                            Cam Kết Date Mới
+                                        </p>
+                                    </div>
+
+                                    <!-- Nút tròn mũi tên góc dưới -->
+                                    <span class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[var(--rl-blush)] text-[var(--rl-ink)] group-hover:bg-[var(--rl-rose)] group-hover:text-white flex items-center justify-center shadow-2xs transition-all duration-300 group-hover:scale-105 shrink-0"
+                                          aria-hidden="true">
+                                        <i class="fa-solid fa-arrow-right text-[11px] group-hover:translate-x-0.5 transition-transform"></i>
+                                    </span>
+                                </div>
                             </a>
+                            catIdx++;
                         }
                     </div>
                 </div>
@@ -325,42 +770,112 @@
         }
         else if (code == "FLASH_SALE" && ((item.FlashSaleCampaign?.Products.Any() ?? false) || item.FlashSaleProducts.Any()))
         {
-            <!-- 3. FLASH SALE SECTION (Real-Time Countdown & Dynamic Progress Bar) -->
-            <partial name="Components/DynamicSection/_FlashSale" model="item" />
+            <!-- =========================================================================
+                 3. FLASH SALE SECTION (⛔ VÙNG ĐÓNG BĂNG - BẢO TOÀN NGUYÊN VẸN 100%)
+                 ========================================================================= -->
+            <div class="section-scroll-reveal">
+                <partial name="Components/DynamicSection/_FlashSale" model="item" />
+            </div>
         }
         else if (code == "BEST_SELLERS" && item.BestSellers.Any())
         {
-            <!-- 4. BEST SELLERS SECTION (Dynamic from DB) -->
-            <section class="section-deferred py-14 sm:py-20 bg-[#fffdfd]">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+            <!-- =========================================================================
+                 4. BEST SELLERS / MỚI VỀ: 3D COVERFLOW CAROUSEL (Nepalora Inspiration)
+                 ========================================================================= -->
+            <section id="section-@item.Section.Id"
+                     data-section-id="@item.Section.Id"
+                     data-section-key="best_sellers"
+                     data-section-code="@code"
+                     class="section-scroll-reveal section-deferred py-12 sm:py-18 bg-[var(--rl-ivory)] border-t border-[var(--rl-border-subtle)]">
+                <div class="container-editorial">
+                    <!-- Section Header алё,тур Pattern: Icon + Tiêu đề + Đường kẻ mảnh + Nút Pill -->
+                    <div class="section-header-rule">
+                        <span class="section-header-rule__icon" aria-hidden="true">
+                            <i class="fa-solid fa-crown text-[var(--rl-champagne)] text-sm"></i>
+                        </span>
                         <div>
-                            <span class="text-xs font-bold uppercase tracking-widest text-magenta-accent flex items-center gap-1.5 mb-1.5">
-                                <i class="fa-solid fa-crown text-amber-500"></i>
-                                <span>Top Bán Chạy Nhất</span>
+                            <span class="section-eyebrow mb-1">
+                                <span>Tuyển Tập Được Yêu Thích Nhất</span>
                             </span>
-                            <h2 class="font-serif text-2xl sm:text-4xl font-bold text-charcoal">
-                                @item.Section.Title
+                            <h2 data-cms-title class="section-title">
+                                @FormatHeroTitle(item.Section.Title ?? "Sản Phẩm Bán Chạy & Mới Về")
                             </h2>
-                            @if (!string.IsNullOrEmpty(item.Section.Subtitle))
-                            {
-                                <p class="text-xs sm:text-sm text-slate-500 mt-1 font-sans">
-                                    @item.Section.Subtitle
-                                </p>
-                            }
                         </div>
-                        <a href="/tim-kiem?sort=best_seller" class="text-xs font-bold text-magenta-accent hover:text-[#b0276a] flex items-center gap-1.5 group shrink-0">
+                        <span class="section-header-rule__line hidden md:block" aria-hidden="true"></span>
+                        <a href="/tim-kiem?sort=best_seller" class="btn-pill-arrow btn-pill-arrow--light self-start sm:self-auto shrink-0">
                             <span>Xem tất cả</span>
-                            <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
+                            <span class="pill-arrow-circle" aria-hidden="true">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </span>
                         </a>
                     </div>
+                    @if (!string.IsNullOrEmpty(item.Section.Subtitle))
+                    {
+                        <p data-cms-subtitle class="text-xs sm:text-sm text-[var(--rl-mauve)] -mt-4 mb-8 font-sans max-w-xl">
+                            @item.Section.Subtitle
+                        </p>
+                    }
 
-                    <!-- Products Grid -->
-                    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-                        @foreach (var prod in item.BestSellers)
-                        {
-                            <partial name="_ProductCard" model="prod" />
-                        }
+                    <!-- Carousel 3D Coverflow Container (Alpine.js coverflowCarousel) -->
+                    <div x-data="coverflowCarousel(@item.BestSellers.Count)"
+                         x-init="init()"
+                         @@keydown.left.prevent="prev()"
+                         @@keydown.right.prevent="next()"
+                         tabindex="0"
+                         aria-label="Băng chuyền 3D sản phẩm bán chạy"
+                         class="relative focus:outline-none isolate">
+                        
+                        <!-- Desktop & Tablet: 3D Coverflow Stage (Nepalora Inspiration) -->
+                        <div class="hidden md:block coverflow-stage overflow-hidden py-6 px-4"
+                             @@touchstart.passive="onTouchStart($event)"
+                             @@touchend.passive="onTouchEnd($event)">
+                            <div class="coverflow-track">
+                                @{
+                                    int bIdx = 0;
+                                }
+                                @foreach (var prod in item.BestSellers)
+                                {
+                                    <div class="coverflow-card"
+                                         :data-pos="getPos(@bIdx)"
+                                         @@click="goTo(@bIdx)">
+                                        <partial name="_ProductCard" model="prod" />
+                                    </div>
+                                    bIdx++;
+                                }
+                            </div>
+
+                            <!-- Coverflow Controls Bar (Prev Button + Pill Link + Next Button) -->
+                            <div class="flex items-center justify-center gap-6 mt-6 z-30 relative">
+                                <button type="button"
+                                        @@click="prev()"
+                                        class="w-11 h-11 rounded-full bg-white hover:bg-[var(--rl-rose)] text-[var(--rl-ink)] hover:text-white border border-[var(--rl-border-strong)] flex items-center justify-center shadow-2xs hover:shadow-sm transition-all active:scale-95 cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--rl-rose)]"
+                                        aria-label="Sản phẩm trước">
+                                    <i class="fa-solid fa-chevron-left text-xs"></i>
+                                </button>
+
+                                <a href="/tim-kiem?sort=best_seller" class="text-xs font-bold text-[var(--rl-ink)] hover:text-[var(--rl-rose)] uppercase tracking-wider inline-flex items-center gap-2 transition">
+                                    <span>Khám Phá Toàn Bộ Bán Chạy</span>
+                                    <span class="text-xs text-[var(--rl-champagne)]">✦</span>
+                                </a>
+
+                                <button type="button"
+                                        @@click="next()"
+                                        class="w-11 h-11 rounded-full bg-white hover:bg-[var(--rl-rose)] text-[var(--rl-ink)] hover:text-white border border-[var(--rl-border-strong)] flex items-center justify-center shadow-2xs hover:shadow-sm transition-all active:scale-95 cursor-pointer focus-visible:outline-2 focus-visible:outline-[var(--rl-rose)]"
+                                        aria-label="Sản phẩm tiếp theo">
+                                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Mobile: Carousel Phẳng Scroll-Snap (< 768px) -->
+                        <div class="md:hidden flex gap-3.5 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-4 -mx-3 px-3">
+                            @foreach (var prod in item.BestSellers)
+                            {
+                                <div class="snap-center shrink-0 w-[72vw] max-w-[280px]">
+                                    <partial name="_ProductCard" model="prod" />
+                                </div>
+                            }
+                        </div>
                     </div>
                 </div>
             </section>
@@ -384,210 +899,517 @@
             var bgWebp = (bgImg.StartsWith("/images/banners/", StringComparison.OrdinalIgnoreCase) && !bgImg.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
                 ? System.IO.Path.ChangeExtension(bgImg, ".webp")
                 : null;
-            var title = banner?.Title ?? item.Section.Title;
-            var sub = banner?.Subtitle ?? item.Section.Subtitle ?? "Khám phá phong cách trang điểm chuẩn chuyên gia và các sản phẩm thuần chay";
-            var link = banner?.LinkUrl ?? "/category/all";
-            var btnText = !string.IsNullOrWhiteSpace(banner?.ButtonText) ? banner.ButtonText : "Khám Phá Ngay";
+            var title = !string.IsNullOrWhiteSpace(banner?.Title) ? banner.Title : (!string.IsNullOrWhiteSpace(item.Section.Title) ? item.Section.Title : "Made for Everyday Radiance");
+            var sub = !string.IsNullOrWhiteSpace(banner?.Subtitle) ? banner.Subtitle : (!string.IsNullOrWhiteSpace(item.Section.Subtitle) ? item.Section.Subtitle : "Chắt lọc những công thức dưỡng da thuần khiết, kết cấu mỏng nhẹ và hạn sử dụng luôn tươi mới — dành cho nghi thức chăm sóc bản thân mỗi ngày của bạn.");
+            var link = !string.IsNullOrWhiteSpace(banner?.LinkUrl) ? banner.LinkUrl : "/category/all";
+            var btnText = !string.IsNullOrWhiteSpace(banner?.ButtonText) ? banner.ButtonText : "Khám Phá Lookbook";
 
             var midStyle = (banner != null && item.BannerStyles != null && item.BannerStyles.TryGetValue(banner.Id, out var customMidStyle) && customMidStyle != null)
                 ? customMidStyle
                 : new Omnichannel.Application.DTOs.Cms.BannerStyleConfigDto
                 {
-                    BadgeText = "Bộ Sưu Tập Độc Quyền",
-                    ShowSecondaryButton = false
+                    BadgeText = "Nghi Thức Làm Đẹp Mỗi Ngày",
+                    ShowSecondaryButton = true,
+                    SecondaryButtonText = "Trắc Nghiệm Làn Da",
+                    SecondaryButtonUrl = "/tu-van-da"
                 };
 
-            string midHeightClass = midStyle.BannerHeight switch
-            {
-                "sm" => "min-h-[260px] sm:min-h-[300px]",
-                "lg" => "min-h-[420px] sm:min-h-[500px]",
-                "xl" => "min-h-[500px] sm:min-h-[600px]",
-                _ => "min-h-[320px] sm:min-h-[380px]"
-            };
+            <!-- =========================================================================
+                 5A. CÂU CHUYỆN THƯƠNG HIỆU / FEFO DẠNG BENTO (Nepalora Inspiration)
+                 - Thẻ tối Ink giới thiệu FEFO
+                 - Thẻ ảnh lớn có nhãn glass
+                 - Thẻ thống kê có thanh tiến trình chấm (Bento Dot Meter)
+                 ========================================================================= -->
+            <section x-data="fefoTrustBentoStats()"
+                     x-init="initObserver($el)"
+                     class="section-scroll-reveal section-deferred py-12 sm:py-18 bg-[var(--rl-ivory)] border-t border-[var(--rl-border-subtle)]">
+                <div class="container-editorial">
+                    <!-- Section Header алё,тур Pattern -->
+                    <div class="section-header-rule">
+                        <span class="section-header-rule__icon" aria-hidden="true">
+                            <i class="fa-solid fa-flask-vial text-sm"></i>
+                        </span>
+                        <div>
+                            <span class="section-eyebrow mb-1">
+                                <span>Bảo Chứng Chất Lượng &amp; Hạn Dùng</span>
+                            </span>
+                            <h2 class="section-title">
+                                Cam Kết Độ Tươi Mới <em class="font-serif italic font-normal text-[var(--rl-rose)]">&amp; Hạn Dùng Minh Bạch</em>
+                            </h2>
+                        </div>
+                        <span class="section-header-rule__line hidden md:block" aria-hidden="true"></span>
+                        <button type="button" 
+                                onclick="window.dispatchEvent(new CustomEvent('open-fefo-modal'))"
+                                class="btn-pill-arrow btn-pill-arrow--light self-start sm:self-auto shrink-0 cursor-pointer"
+                                title="Bấm để xem cam kết chất lượng hạn dùng và quyền lợi người mua">
+                            <span>Tìm hiểu Cam Kết Hạn Dùng</span>
+                            <span class="pill-arrow-circle" aria-hidden="true">
+                                <i class="fa-solid fa-question text-[11px]"></i>
+                            </span>
+                        </button>
+                    </div>
+                    <p class="text-xs sm:text-sm text-[var(--rl-mauve)] -mt-4 mb-8 font-sans max-w-2xl">
+                        Canmake Beauty cam kết 100% xuất lô sản xuất mới nhất (&gt;18 tháng) và công khai hạn sử dụng thực tế của từng sản phẩm.
+                    </p>
 
-            string midContainerRadiusClass = midStyle.ContainerRadius switch
-            {
-                "none" => "rounded-none",
-                "xl" => "rounded-2xl",
-                _ => "rounded-3xl"
-            };
-
-            string midImgFitInline = midStyle.ImageObjectFit switch
-            {
-                "contain" => "object-fit: contain;",
-                "fill" => "object-fit: fill;",
-                _ => "object-fit: cover;"
-            };
-
-            string midImgPosInline = midStyle.ImagePosition switch
-            {
-                "top" => "object-position: center top;",
-                "bottom" => "object-position: center bottom;",
-                "left" => "object-position: left center;",
-                "right" => "object-position: right center;",
-                _ => "object-position: center center;"
-            };
-
-            string midImgScaleInline = (midStyle.ImageScale > 100 && midStyle.ImageScale <= 150)
-                ? $"transform: scale({(midStyle.ImageScale / 100.0).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)});"
-                : "";
-
-            string midWidthClass = midStyle.BoxWidth switch
-            {
-                "sm" => "max-w-md",
-                "lg" => "max-w-2xl",
-                "xl" => "max-w-4xl",
-                _ => "max-w-xl"
-            };
-
-            string midBoxRadiusClass = midStyle.BoxRadius switch
-            {
-                "none" => "rounded-none",
-                "md" => "rounded-xl",
-                "xl" => "rounded-2xl",
-                _ => "rounded-3xl"
-            };
-
-            string midFrameStyleClass = midStyle.BoxStyle switch
-            {
-                "glass-dark" => $"bg-charcoal/60 backdrop-blur-md border border-white/25 p-6 sm:p-10 shadow-2xl {midBoxRadiusClass}",
-                "glass-light" => $"bg-white/80 backdrop-blur-md border border-white/80 p-6 sm:p-10 shadow-2xl {midBoxRadiusClass}",
-                "rose-luxury" => $"bg-gradient-to-br from-[#B8336A]/80 via-[#2B1B24]/80 to-[#E8618C]/70 backdrop-blur-md border border-[#F7C6D4]/60 p-6 sm:p-10 shadow-2xl {midBoxRadiusClass}",
-                "solid-dark" => $"bg-[#2B1B24]/95 border border-[#E8618C]/50 p-6 sm:p-10 shadow-2xl {midBoxRadiusClass}",
-                "double-border" => $"bg-charcoal/50 backdrop-blur-sm border-4 border-double border-[#F7C6D4]/90 p-6 sm:p-10 shadow-2xl {midBoxRadiusClass}",
-                _ => "bg-transparent p-8 sm:p-12"
-            };
-
-            string midFontStyleInline = midStyle.TitleFont switch
-            {
-                "sans" => "font-family: 'Quicksand', 'Inter', sans-serif;",
-                "editorial" => "font-family: Georgia, 'Playfair Display', serif; font-style: italic;",
-                "mono" => "font-family: 'JetBrains Mono', monospace; letter-spacing: -0.02em;",
-                _ => "font-family: 'Playfair Display', Georgia, serif;"
-            };
-
-            string midTitleSizeClass = midStyle.TitleSize switch
-            {
-                "sm" => "text-xl sm:text-3xl font-bold leading-tight",
-                "md" => "text-2xl sm:text-4xl font-bold leading-tight",
-                "xl" => "text-3xl sm:text-5xl lg:text-6xl font-extrabold leading-none",
-                _ => "text-2xl sm:text-4xl lg:text-5xl font-bold leading-tight"
-            };
-
-            bool isMidDarkText = midStyle.TextColorTheme == "dark" || (midStyle.BoxStyle == "glass-light" && midStyle.TextColorTheme == "white");
-            string midTitleColorInline = midStyle.TextColorTheme switch
-            {
-                "cream" => "color: #FFF4F7;",
-                "gold" => "color: #FDE68A;",
-                "dark" => "color: #2B1B24;",
-                _ => isMidDarkText ? "color: #2B1B24;" : "color: #FFFFFF;"
-            };
-
-            string midSubColorInline = midStyle.TextColorTheme switch
-            {
-                "cream" => "color: #F7C6D4;",
-                "gold" => "color: #FEF3C7;",
-                "dark" => "color: #4A3040;",
-                _ => isMidDarkText ? "color: #4A3040;" : "color: #E2E8F0;"
-            };
-
-            string midBtnPrimaryClass = midStyle.ButtonStyle switch
-            {
-                "white-solid" => "bg-white hover:bg-rose-50 text-charcoal shadow-xl",
-                "dark-luxury" => "bg-[#2B1B24] hover:bg-black text-white border border-[#F7C6D4]/50 shadow-xl",
-                "glass-outline" => "bg-white/15 hover:bg-white/30 text-white border-2 border-white backdrop-blur-md shadow-lg",
-                _ => "bg-gradient-to-r from-magenta-accent to-pink-600 hover:from-pink-600 hover:to-rose-700 text-white shadow-lg shadow-magenta-accent/30"
-            };
-
-            <!-- 5. MID BANNER SECTION (Dynamic from DB) -->
-            <section class="section-deferred py-10 bg-slate-50">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="relative @midContainerRadiusClass overflow-hidden @midHeightClass flex items-center shadow-2xl bg-charcoal">
-                        <picture class="absolute inset-0 block w-full h-full overflow-hidden">
-                            @if (!string.IsNullOrEmpty(mobileMidImg))
-                            {
-                                <source media="(max-width: 767px)" srcset="@mobileMidImg" />
-                            }
-                            @if (!string.IsNullOrEmpty(bgWebp))
-                            {
-                                <source srcset="@bgWebp" type="image/webp" />
-                            }
-                            <img src="@bgImg" alt="@title" width="1200" height="380" decoding="async" class="w-full h-full transition-transform duration-500" style="@midImgFitInline @midImgPosInline @midImgScaleInline" onerror="this.onerror=null;this.src='/images/banners/banner-routine-kbeauty.jpg';" />
-                        </picture>
-
-                        @if (midStyle.ShowOverlayGradient && midStyle.OverlayOpacity > 0)
-                        {
-                            <div class="absolute inset-0 bg-gradient-to-r from-charcoal via-charcoal/70 to-transparent pointer-events-none"
-                                 style="opacity: @((midStyle.OverlayOpacity / 100.0).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture));"></div>
-                        }
-
-                        @if (isAdminOrStaff)
-                        {
-                            <div class="absolute top-4 right-4 z-30 flex items-center gap-2">
-                                @if (banner != null && banner.Id > 0)
-                                {
-                                    <a href="/Admin/Banner/Edit/@banner.Id" class="px-3.5 py-2 rounded-full bg-white/95 hover:bg-white text-charcoal font-bold text-xs shadow-lg flex items-center gap-1.5 transition hover:scale-105">
-                                        <i class="fa-solid fa-wand-magic-sparkles text-magenta-accent"></i>
-                                        <span>Tùy Chỉnh Banner Này</span>
-                                    </a>
-                                }
-                                <a href="/Admin/Banner" class="px-3.5 py-2 rounded-full bg-charcoal/80 hover:bg-charcoal text-white border border-white/20 font-semibold text-xs shadow-lg flex items-center gap-1.5 backdrop-blur-md transition">
-                                    <i class="fa-solid fa-sliders"></i>
-                                    <span>Quản Lý Banner</span>
-                                </a>
+                    <!-- Bento 3 Thẻ Bất Đối Xứng (Nepalora Inspiration) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-stretch">
+                        
+                        <!-- Thẻ 1 (4 Cột Desktop): Thẻ Tối Ink Sang Trọng Giới Thiệu FEFO -->
+                        <div class="lg:col-span-4 rounded-[28px] sm:rounded-[36px] bg-[linear-gradient(145deg,#23191E_0%,#3B222F_100%)] text-white p-6 sm:p-7 flex flex-col justify-between min-h-[360px] shadow-[var(--rl-shadow-md)] relative overflow-hidden group">
+                            <div class="pointer-events-none absolute -right-12 -top-12 w-48 h-48 rounded-full bg-[var(--rl-rose)]/25 blur-3xl" aria-hidden="true"></div>
+                            
+                            <div class="relative z-10 flex items-center justify-between">
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/12 backdrop-blur-md text-[var(--rl-champagne-light)] text-[10px] font-bold tracking-widest uppercase border border-white/20">
+                                    <i class="fa-solid fa-shield-halved text-[var(--rl-champagne)]"></i>
+                                    <span>Cam Kết Minh Bạch Hạn Dùng</span>
+                                </span>
+                                <span class="w-9 h-9 rounded-full bg-white/10 text-white flex items-center justify-center">
+                                    <i class="fa-solid fa-calendar-check text-xs"></i>
+                                </span>
                             </div>
-                        }
 
-                        @if (midStyle.ShowContentBox)
-                        {
-                            <div class="relative z-10 w-full flex @(midStyle.BoxPosition == "center" ? "justify-center" : (midStyle.BoxPosition == "right" ? "justify-end" : "justify-start")) @(midStyle.BoxStyle == "transparent" ? "" : "p-6 sm:p-10")">
-                                <div class="@midWidthClass w-full space-y-4 @midFrameStyleClass @(midStyle.BoxPosition == "center" ? "text-center" : (midStyle.BoxPosition == "right" ? "text-right" : "text-left"))">
-                                    @if (midStyle.ShowBadge && !string.IsNullOrWhiteSpace(midStyle.BadgeText))
-                                    {
-                                        <div>
-                                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full @(isMidDarkText ? "bg-magenta-accent/15 border border-magenta-accent/40 text-magenta-accent" : "bg-magenta-accent/30 border border-magenta-accent/40 text-pink-200") text-xs font-bold uppercase tracking-wider backdrop-blur-sm">
-                                                <i class="fa-solid fa-sparkles text-amber-400"></i>
-                                                <span>@midStyle.BadgeText</span>
-                                            </span>
+                            <div class="relative z-10 my-6">
+                                <div class="font-serif font-black text-2xl sm:text-3xl text-white tracking-tight leading-tight">
+                                    Hạn Dùng Minh Bạch, <br/><em class="italic text-[var(--rl-champagne)]">Lô Luôn Mới Nhất</em>
+                                </div>
+                                <div class="text-[11px] text-[var(--rl-champagne-light)] mt-1.5 font-semibold">
+                                    100% Date Mới • Xuất Kho Chuẩn Y Khoa
+                                </div>
+                                <p class="text-xs text-white/80 mt-2.5 leading-relaxed">
+                                    Khác với mỹ phẩm trôi nổi không rõ date, Canmake Beauty quản trị kho số hóa: Đơn hàng luôn tự động xuất lô mới nhất (&gt;18 tháng), kho mát 22°C - 25°C và hiển thị số tháng sử dụng còn lại trước khi bạn bấm mua.
+                                </p>
+                            </div>
+
+                            <div class="relative z-10 pt-4 border-t border-white/12 flex items-center justify-between">
+                                <button type="button"
+                                        onclick="window.dispatchEvent(new CustomEvent('open-fefo-modal'))"
+                                        class="btn-pill-arrow bg-[var(--rl-rose)] hover:bg-[var(--rl-rose-deep)] text-white text-xs cursor-pointer">
+                                    <span>Xem Cam Kết Hạn Dùng</span>
+                                    <span class="pill-arrow-circle" aria-hidden="true">
+                                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                    </span>
+                                </button>
+                                <span class="text-xs text-[var(--rl-champagne)]">✦</span>
+                            </div>
+                        </div>
+
+                        <!-- Thẻ 2 (4 Cột Desktop): Thẻ Ảnh Lớn Editorial Có Nhãn Glass -->
+                        <div class="lg:col-span-4 rounded-[28px] sm:rounded-[36px] overflow-hidden bg-[var(--rl-bg-blush)] border border-[var(--rl-border-subtle)] shadow-[var(--rl-shadow-xs)] relative min-h-[360px] group">
+                            <picture class="block w-full h-full">
+                                @if (!string.IsNullOrEmpty(mobileMidImg))
+                                {
+                                    <source media="(max-width: 767px)" srcset="@mobileMidImg" />
+                                }
+                                @if (!string.IsNullOrEmpty(bgWebp))
+                                {
+                                    <source srcset="@bgWebp" type="image/webp" />
+                                }
+                                <img src="@bgImg"
+                                     alt="@title"
+                                     width="600"
+                                     height="800"
+                                     loading="lazy"
+                                     decoding="async"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                                     onerror="this.onerror=null;this.src='/images/banners/banner-routine-kbeauty.jpg';" />
+                            </picture>
+
+                            <!-- Nhãn Glass nổi (Made for You) -->
+                            <div class="absolute top-4 left-4 z-20 pointer-events-none">
+                                <span class="glass-surface inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-[11px] font-bold text-[var(--rl-ink)] shadow-2xs border border-white/80">
+                                    <span class="w-2 h-2 rounded-full bg-[var(--rl-rose)]"></span>
+                                    <span>Made for You • Nghi Thức Mỗi Ngày</span>
+                                </span>
+                            </div>
+
+                            <!-- Bottom Overlay Title -->
+                            <div class="absolute inset-x-0 bottom-0 p-5 bg-gradient-to-t from-[var(--rl-ink)]/75 via-[var(--rl-ink)]/30 to-transparent text-white">
+                                <p class="text-xs text-white/80 font-mono">Editorial Lookbook 2026</p>
+                                <h3 class="font-serif font-bold text-base sm:text-lg text-white leading-snug">
+                                    Vẻ đẹp rạng rỡ từ những công thức thuần khiết
+                                </h3>
+                            </div>
+
+                            @if (isAdminOrStaff && banner != null && banner.Id > 0)
+                            {
+                                <div class="absolute top-3.5 right-3.5 z-30">
+                                    <a href="/Admin/Banner/Edit/@banner.Id" class="px-3 py-1.5 rounded-full bg-white/95 text-[var(--rl-ink)] font-bold text-[11px] shadow-sm flex items-center gap-1.5">
+                                        <i class="fa-solid fa-wand-magic-sparkles text-[var(--rl-rose)]"></i>
+                                        <span>Tùy Chỉnh</span>
+                                    </a>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Thẻ 3 (4 Cột Desktop): Thẻ Thống Kê Với Thanh Chấm (Nepalora Dot Meter) -->
+                        <div class="lg:col-span-4 rounded-[28px] sm:rounded-[36px] bg-white border border-[var(--rl-border-subtle)] p-6 sm:p-7 flex flex-col justify-between min-h-[360px] shadow-[var(--rl-shadow-xs)]">
+                            <div>
+                                <span class="text-[11px] font-bold uppercase tracking-wider text-[var(--rl-muted)] block">Chỉ Số Tin Cậy Lâm Sàng</span>
+                                <div class="font-serif font-black text-3xl sm:text-4xl text-[var(--rl-ink)] tracking-tight mt-1">
+                                    50+ <span class="text-sm font-sans font-normal text-[var(--rl-mauve)]">Quy chuẩn độc quyền</span>
+                                </div>
+                                <p class="text-xs text-[var(--rl-muted)] mt-1">Khảo sát &amp; đánh giá theo chuẩn y khoa da liễu</p>
+                            </div>
+
+                            <!-- Thanh Tiến Trình Chấm (Nepalora Dot Meters) -->
+                            <div class="space-y-3.5 my-4 pt-4 border-t border-[var(--rl-border-subtle)]">
+                                <!-- Tiêu chí 1: Độ tươi mới FEFO -->
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="font-semibold text-[var(--rl-ink)]">Lô mới xuất kho (HSD &gt; 18 tháng)</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="bento-dot-meter" aria-hidden="true">
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
                                         </div>
-                                    }
-                                    @if (midStyle.ShowTitle && !string.IsNullOrWhiteSpace(title))
-                                    {
-                                        <h2 class="@midTitleSizeClass drop-shadow-sm" style="@midFontStyleInline @midTitleColorInline">
-                                            @title
-                                        </h2>
-                                    }
-                                    @if (midStyle.ShowSubtitle && !string.IsNullOrWhiteSpace(sub))
-                                    {
-                                        <p class="text-xs sm:text-sm leading-relaxed" style="@midSubColorInline">
-                                            @sub
-                                        </p>
-                                    }
-                                    @if (midStyle.ShowPrimaryButton || midStyle.ShowSecondaryButton)
-                                    {
-                                        <div class="pt-2 flex flex-wrap items-center gap-3 @(midStyle.BoxPosition == "center" ? "justify-center" : (midStyle.BoxPosition == "right" ? "justify-end" : "justify-start"))">
-                                            @if (midStyle.ShowPrimaryButton)
-                                            {
-                                                <a href="@link" class="inline-flex items-center gap-2 px-6 py-3 rounded-full @midBtnPrimaryClass font-bold text-xs uppercase tracking-wider hover:scale-105 transition-all">
-                                                    <span>@btnText</span>
-                                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                                                </a>
-                                            }
-                                            @if (midStyle.ShowSecondaryButton && !string.IsNullOrWhiteSpace(midStyle.SecondaryButtonText))
-                                            {
-                                                <a href="@(string.IsNullOrWhiteSpace(midStyle.SecondaryButtonUrl) ? "/clearance-fefo" : midStyle.SecondaryButtonUrl)" class="inline-flex items-center px-5 py-3 rounded-full @(isMidDarkText ? "bg-charcoal/10 hover:bg-charcoal/20 border border-charcoal/25 text-charcoal" : "bg-white/15 hover:bg-white/25 border border-white/30 text-white") font-semibold text-xs uppercase tracking-wider backdrop-blur-md transition">
-                                                    @midStyle.SecondaryButtonText
-                                                </a>
-                                            }
+                                        <span class="font-mono font-bold text-[var(--rl-rose)] text-[11px]">100%</span>
+                                    </div>
+                                </div>
+
+                                <!-- Tiêu chí 2: Chính ngạch VAT -->
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="font-semibold text-[var(--rl-ink)]">Chính ngạch có tem phụ</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="bento-dot-meter" aria-hidden="true">
+                                            <span class="dot active-gold"></span>
+                                            <span class="dot active-gold"></span>
+                                            <span class="dot active-gold"></span>
+                                            <span class="dot active-gold"></span>
+                                            <span class="dot active-gold"></span>
+                                            <span class="dot active-gold"></span>
+                                            <span class="dot active-gold"></span>
+                                            <span class="dot active-gold"></span>
+                                            <span class="dot active-gold"></span>
+                                            <span class="dot active-gold"></span>
                                         </div>
-                                    }
+                                        <span class="font-mono font-bold text-[var(--rl-champagne)] text-[11px]">100%</span>
+                                    </div>
+                                </div>
+
+                                <!-- Tiêu chí 3: Hài lòng da liễu -->
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="font-semibold text-[var(--rl-ink)]">Hài lòng da nhạy cảm</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="bento-dot-meter" aria-hidden="true">
+                                            <span class="dot active-teal"></span>
+                                            <span class="dot active-teal"></span>
+                                            <span class="dot active-teal"></span>
+                                            <span class="dot active-teal"></span>
+                                            <span class="dot active-teal"></span>
+                                            <span class="dot active-teal"></span>
+                                            <span class="dot active-teal"></span>
+                                            <span class="dot active-teal"></span>
+                                            <span class="dot active-teal"></span>
+                                            <span class="dot"></span>
+                                        </div>
+                                        <span class="font-mono font-bold text-[var(--rl-success-icon)] text-[11px]">96%</span>
+                                    </div>
+                                </div>
+
+                                <!-- Tiêu chí 4: Bảo hành đổi trả -->
+                                <div class="flex items-center justify-between text-xs">
+                                    <span class="font-semibold text-[var(--rl-ink)]">Bảo hành kích ứng</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="bento-dot-meter" aria-hidden="true">
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
+                                            <span class="dot active"></span>
+                                        </div>
+                                        <span class="font-mono font-bold text-[var(--rl-rose)] text-[11px]">7 Ngày</span>
+                                    </div>
                                 </div>
                             </div>
-                        }
-                        else if (!string.IsNullOrWhiteSpace(link))
+
+                            <blockquote class="text-[11px] text-[var(--rl-mauve)] italic leading-relaxed pt-3 border-t border-[var(--rl-border-subtle)]">
+                                “Từng lọ mỹ phẩm đều thể hiện rõ ràng số lô và hạn dùng xa hơn 20 tháng. Rất yên tâm cho làn da nhạy cảm.”
+                            </blockquote>
+                        </div>
+
+                    </div>
+                </div>
+            </section>
+
+            <!-- =========================================================================
+                 5B. DẢI SỐ LIỆU LỚN COUNT-UP (Nepalora Inspiration)
+                 ========================================================================= -->
+            <section aria-label="Số liệu thống kê thương hiệu Canmake"
+                     x-data="fefoTrustBentoStats()"
+                     x-init="initObserver($el)"
+                     class="py-10 sm:py-14 bg-white border-y border-[var(--rl-border-subtle)]">
+                <div class="container-editorial">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 text-center">
+                        <!-- Số 1: Khách hàng -->
+                        <div class="space-y-1">
+                            <div class="font-serif font-black text-3xl sm:text-5xl text-[var(--rl-ink)] tracking-tight">
+                                <span x-text="customersStat">50</span>.000+
+                            </div>
+                            <p class="text-xs sm:text-sm font-bold text-[var(--rl-rose)]">Khách Hàng Tin Chọn</p>
+                            <p class="text-[11px] text-[var(--rl-muted)]">Đồng hành cùng sắc đẹp phụ nữ Việt</p>
+                        </div>
+
+                        <!-- Số 2: Thương hiệu -->
+                        <div class="space-y-1">
+                            <div class="font-serif font-black text-3xl sm:text-5xl text-[var(--rl-ink)] tracking-tight">
+                                <span x-text="brandsStat">300</span>+
+                            </div>
+                            <p class="text-xs sm:text-sm font-bold text-[var(--rl-rose)]">Thương Hiệu Hàng Đầu</p>
+                            <p class="text-[11px] text-[var(--rl-muted)]">Nhập khẩu chính ngạch 100%</p>
+                        </div>
+
+                        <!-- Số 3: Minh Bạch Hạn Dùng -->
+                        <div class="space-y-1">
+                            <div class="font-serif font-black text-3xl sm:text-5xl text-[var(--rl-ink)] tracking-tight">
+                                <span x-text="authenticStat">100</span>%
+                            </div>
+                            <p class="text-xs sm:text-sm font-bold text-[var(--rl-rose)]">Minh Bạch Hạn Dùng</p>
+                            <p class="text-[11px] text-[var(--rl-muted)]">Kiểm soát xuất kho date mới tự động</p>
+                        </div>
+
+                        <!-- Số 4: Giao nhanh 2H -->
+                        <div class="space-y-1">
+                            <div class="font-serif font-black text-3xl sm:text-5xl text-[var(--rl-ink)] tracking-tight">
+                                <span x-text="deliveryStat">2</span>H
+                            </div>
+                            <p class="text-xs sm:text-sm font-bold text-[var(--rl-rose)]">Giao Nhanh Hỏa Tốc</p>
+                            <p class="text-[11px] text-[var(--rl-muted)]">Nội thành Hà Nội &amp; TP.HCM</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =========================================================================
+                 5C. QUIZ ROUTINE BANNER (Tương tác trắc nghiệm da cá nhân hóa)
+                 ========================================================================= -->
+            <section class="section-scroll-reveal section-deferred py-12 sm:py-16 bg-[var(--rl-ivory)]">
+                <div class="container-editorial">
+                    <div class="rounded-[32px] sm:rounded-[40px] bg-[linear-gradient(135deg,#FBE8EE_0%,#F6D2DF_48%,#FFFDFB_100%)] border border-[var(--rl-border-subtle)] p-6 sm:p-10 lg:p-12 shadow-[var(--rl-shadow-md)] relative overflow-hidden isolate">
+                        <!-- Ambient Sparkles -->
+                        <div class="pointer-events-none absolute top-4 right-10 text-[var(--rl-champagne)] text-3xl font-black animate-floating-sparkle" aria-hidden="true">✦</div>
+                        <div class="pointer-events-none absolute bottom-6 right-1/3 text-[var(--rl-rose)]/25 text-2xl font-black animate-floating-petal" aria-hidden="true">✦</div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+                            <!-- Nội dung Text & CTA -->
+                            <div class="lg:col-span-8 space-y-4">
+                                <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/85 text-[var(--rl-rose-deep)] text-[11px] font-extrabold uppercase tracking-widest shadow-2xs border border-white">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-[var(--rl-champagne)] text-xs"></i>
+                                    <span>Bác Sĩ Da Liễu Ảo • AI Routine Quiz</span>
+                                </span>
+
+                                <h2 class="font-sans font-black text-2xl sm:text-4xl text-[var(--rl-ink)] leading-tight tracking-tight">
+                                    Tìm <em class="font-serif italic font-normal text-[var(--rl-rose)]">Routine Chăm Sóc Da</em> Dành Riêng Cho Bạn Trong 2 Phút
+                                </h2>
+
+                                <p class="text-xs sm:text-sm text-[var(--rl-mauve)] leading-relaxed max-w-2xl font-sans">
+                                    Dựa trên nghiên cứu da liễu và thuật toán gợi ý thông minh, trắc nghiệm nhanh 5 câu hỏi để xác định phác đồ dưỡng da chuẩn xác với hạn dùng tươi mới nhất.
+                                </p>
+
+                                <div class="pt-3 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
+                                    <a href="/tu-van-da" class="btn-pill-arrow justify-center sm:justify-start">
+                                        <span>Bắt Đầu Trắc Nghiệm Ngay</span>
+                                        <span class="pill-arrow-circle" aria-hidden="true">
+                                            <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                                        </span>
+                                    </a>
+                                    <a href="/category/cham-soc-da" class="btn-ghost bg-white/70 hover:bg-white text-[var(--rl-ink)] border border-[var(--rl-border-strong)] justify-center">
+                                        <i class="fa-solid fa-sparkles text-[var(--rl-champagne)] text-xs"></i>
+                                        <span>Xem Phác Đồ Mẫu</span>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Minh họa Visual -->
+                            <div class="lg:col-span-4 flex items-center justify-center">
+                                <div class="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-white/80 border border-white shadow-[var(--rl-shadow-md)] flex items-center justify-center p-6 text-center">
+                                    <div class="space-y-2">
+                                        <div class="w-14 h-14 mx-auto rounded-2xl bg-[var(--rl-blush)] text-[var(--rl-rose)] flex items-center justify-center text-2xl shadow-2xs">
+                                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                        </div>
+                                        <div class="font-serif font-black text-lg text-[var(--rl-ink)]">5 Bước Da Sáng</div>
+                                        <p class="text-[11px] text-[var(--rl-muted)]">Cá nhân hóa theo độ tuổi &amp; loại da</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =========================================================================
+                 5D. MARQUEE LOGO THƯƠNG HIỆU CHẠY VÔ HẠN (Hover: Grayscale -> Color)
+                 ========================================================================= -->
+            <section aria-label="Đối tác thương hiệu mỹ phẩm chính hãng"
+                     class="py-8 sm:py-10 bg-white border-y border-[var(--rl-border-subtle)] overflow-hidden">
+                <div class="container-editorial mb-4 text-center">
+                    <span class="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--rl-muted)]">
+                        Đối Tác Phân Phối Chính Hãng • Cam Kết Minh Bạch Hạn Dùng
+                    </span>
+                </div>
+
+                @{
+                    var luxuryBrands = new (string Name, string Origin, string AccentHex, string BgHex, string Icon)[]
+                    {
+                        ("CANMAKE TOKYO", "Japan • Makeup", "#B8336A", "#FBE8EE", "fa-wand-magic-sparkles"),
+                        ("LA ROCHE-POSAY", "France • Dermocosmetics", "#1E5E8A", "#EDF5FA", "fa-shield-halved"),
+                        ("PAULA'S CHOICE", "USA • Clinical Skincare", "#6B4C9A", "#F3EFFB", "fa-flask"),
+                        ("OBAGI MEDICAL", "USA • Prescription Grade", "#9A5B13", "#FBF1EA", "fa-microscope"),
+                        ("SKIN1004", "Korea • Centella Pure", "#1F6E50", "#ECF6F2", "fa-leaf"),
+                        ("SHISEIDO GINZA", "Japan • Haute Beauty", "#B42336", "#FBE8EE", "fa-gem"),
+                        ("SULWHASOO", "Korea • Holistic Ginseng", "#8A6116", "#FBF7E8", "fa-spa"),
+                        ("VICHY LABORATOIRES", "France • Volcanic Mineral", "#1E5E8A", "#EDF5FA", "fa-droplet")
+                    };
+                }
+
+                <div class="brand-marquee-container relative w-full overflow-hidden">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 w-12 sm:w-24 bg-gradient-to-r from-white to-transparent z-10"></div>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 w-12 sm:w-24 bg-gradient-to-l from-white to-transparent z-10"></div>
+
+                    <div class="brand-marquee-track items-center gap-3.5 sm:gap-5 px-2">
+                        @for (int loop = 0; loop < 2; loop++)
                         {
-                            <a href="@link" class="absolute inset-0 z-10" aria-label="@title"></a>
+                            @foreach (var br in luxuryBrands)
+                            {
+                                <a href="/tim-kiem?brand=@Uri.EscapeDataString(br.Name)"
+                                   aria-hidden="@(loop == 1 ? "true" : "false")"
+                                   tabindex="@(loop == 1 ? -1 : 0)"
+                                   class="group inline-flex items-center gap-3 px-5 py-3 rounded-full bg-[var(--rl-ivory)] border border-[var(--rl-border-subtle)] shadow-2xs grayscale opacity-65 hover:grayscale-0 hover:opacity-100 hover:border-[var(--rl-rose)]/40 hover:shadow-md transition-all duration-300 shrink-0">
+                                    <span class="w-9 h-9 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+                                          style="background-color: @br.BgHex; color: @br.AccentHex;">
+                                        <i class="fa-solid @br.Icon text-xs"></i>
+                                    </span>
+                                    <div class="text-left">
+                                        <div class="font-sans font-bold text-xs sm:text-sm tracking-wide text-[var(--rl-ink)] group-hover:text-[var(--rl-rose)] transition-colors">
+                                            @br.Name
+                                        </div>
+                                        <div class="text-[10px] font-sans text-[var(--rl-muted)] leading-none mt-0.5">
+                                            @br.Origin
+                                        </div>
+                                    </div>
+                                </a>
+                            }
                         }
+                    </div>
+                </div>
+            </section>
+
+            <!-- =========================================================================
+                 5E. ĐÁNH GIÁ KHÁCH HÀNG / UGC (User Generated Content)
+                 ========================================================================= -->
+            <section class="section-scroll-reveal section-deferred py-12 sm:py-18 bg-[var(--rl-ivory)]">
+                <div class="container-editorial">
+                    <!-- Section Header алё,тур Pattern -->
+                    <div class="section-header-rule">
+                        <span class="section-header-rule__icon" aria-hidden="true">
+                            <i class="fa-solid fa-heart text-[var(--rl-rose)] text-sm"></i>
+                        </span>
+                        <div>
+                            <span class="section-eyebrow mb-1">
+                                <span>Cộng Đồng Yêu Mỹ Phẩm Chính Hãng</span>
+                            </span>
+                            <h2 class="section-title">
+                                Trải Nghiệm <em class="font-serif italic font-normal text-[var(--rl-rose)]">Thực Tế</em> Từ Khách Hàng
+                            </h2>
+                        </div>
+                        <span class="section-header-rule__line hidden md:block" aria-hidden="true"></span>
+                        <div class="hidden sm:flex items-center gap-1.5 text-xs font-bold text-[var(--rl-mauve)]">
+                            <span class="text-[var(--rl-champagne)]">★★★★★</span>
+                            <span>4.9 / 5.0 (2.400+ đánh giá)</span>
+                        </div>
+                    </div>
+
+                    <!-- Lưới 3 Thẻ Đánh Giá UGC -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+                        <!-- Review 1 -->
+                        <div class="rounded-[28px] bg-white p-5 sm:p-6 border border-[var(--rl-border-subtle)] shadow-[var(--rl-shadow-2xs)] flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between gap-2 mb-3">
+                                    <div class="flex text-[var(--rl-champagne)] text-xs gap-0.5">
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                    </div>
+                                    <span class="badge-fefo badge-fefo--fresh text-[10px]">Đã mua date mới</span>
+                                </div>
+                                <p class="text-xs sm:text-sm text-[var(--rl-ink)] leading-relaxed italic">
+                                    “Mình đặt kem chống nắng La Roche-Posay, nhận hàng kiểm tra số lô và date tận cuối 2027. Giao hàng 2H đúng chuẩn, đóng gói kèm túi xốp chống sốc rất tỉ mỉ.”
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-3 pt-3 border-t border-[var(--rl-border-subtle)]">
+                                <span class="w-10 h-10 rounded-full bg-[var(--rl-blush)] text-[var(--rl-rose)] font-bold text-xs flex items-center justify-center">TL</span>
+                                <div>
+                                    <h4 class="text-xs font-bold text-[var(--rl-ink)]">Thùy Linh</h4>
+                                    <p class="text-[10px] text-[var(--rl-muted)]">Hà Nội • Khách hàng thân thiết</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Review 2 -->
+                        <div class="rounded-[28px] bg-white p-5 sm:p-6 border border-[var(--rl-border-subtle)] shadow-[var(--rl-shadow-2xs)] flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between gap-2 mb-3">
+                                    <div class="flex text-[var(--rl-champagne)] text-xs gap-0.5">
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                    </div>
+                                    <span class="badge-fefo badge-fefo--fresh text-[10px]">Đã mua date mới</span>
+                                </div>
+                                <p class="text-xs sm:text-sm text-[var(--rl-ink)] leading-relaxed italic">
+                                    “Lần đầu tiên thấy website mỹ phẩm hiển thị rõ còn bao nhiêu tháng hạn dùng trên từng sản phẩm. Không lo mua phải hàng tồn kho cận date như các sàn khác.”
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-3 pt-3 border-t border-[var(--rl-border-subtle)]">
+                                <span class="w-10 h-10 rounded-full bg-[#FBF1EA] text-[#9A5B13] font-bold text-xs flex items-center justify-center">MA</span>
+                                <div>
+                                    <h4 class="text-xs font-bold text-[var(--rl-ink)]">Minh Anh</h4>
+                                    <p class="text-[10px] text-[var(--rl-muted)]">TP.HCM • Thành viên Gold</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Review 3 -->
+                        <div class="rounded-[28px] bg-white p-5 sm:p-6 border border-[var(--rl-border-subtle)] shadow-[var(--rl-shadow-2xs)] flex flex-col justify-between space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between gap-2 mb-3">
+                                    <div class="flex text-[var(--rl-champagne)] text-xs gap-0.5">
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                        <i class="fa-solid fa-star"></i>
+                                    </div>
+                                    <span class="badge-fefo badge-fefo--fresh text-[10px]">Đã mua date mới</span>
+                                </div>
+                                <p class="text-xs sm:text-sm text-[var(--rl-ink)] leading-relaxed italic">
+                                    “Dịch vụ tư vấn da liễu và Quiz routine gợi ý đúng loại serum phục hồi B5 mình cần. Da mình đỡ kích ứng hẳn sau 2 tuần sử dụng. Chắc chắn sẽ ủng hộ lâu dài!”
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-3 pt-3 border-t border-[var(--rl-border-subtle)]">
+                                <span class="w-10 h-10 rounded-full bg-[#ECF6F2] text-[#1F6E50] font-bold text-xs flex items-center justify-center">HN</span>
+                                <div>
+                                    <h4 class="text-xs font-bold text-[var(--rl-ink)]">Hồng Nhung</h4>
+                                    <p class="text-[10px] text-[var(--rl-muted)]">Đà Nẵng • Khách hàng mới</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -595,67 +1417,194 @@
 
         @if (code == "BEAUTY_BLOG" && item.BlogPosts.Any())
         {
-            <!-- 6. BEAUTY BLOG SECTION (Dynamic from DB) -->
-            <section class="section-deferred py-16 bg-white border-t border-rose-100/50">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+            var postsList = item.BlogPosts.Take(3).ToList();
+            var featuredPost = postsList.FirstOrDefault();
+            var sidePosts = postsList.Skip(1).ToList();
+
+            <!-- =========================================================================
+                 6. BEAUTY BLOG SECTION (алё,тур Header + Editorial Asymmetric Cards)
+                 ========================================================================= -->
+            <section id="section-@item.Section.Id"
+                     data-section-id="@item.Section.Id"
+                     data-section-key="beauty_blog"
+                     data-section-code="@code"
+                     class="section-scroll-reveal section-deferred py-12 sm:py-18 bg-[var(--rl-ivory)] border-t border-[var(--rl-border-subtle)]">
+                <div class="container-editorial">
+                    <!-- Section Header алё,тур Pattern -->
+                    <div class="section-header-rule">
+                        <span class="section-header-rule__icon" aria-hidden="true">
+                            <i class="fa-solid fa-feather-pointed text-sm"></i>
+                        </span>
                         <div>
-                            <div class="flex items-center gap-2 text-magenta-accent text-xs font-bold uppercase tracking-widest mb-1.5">
-                                <i class="fa-solid fa-book-open"></i>
-                                <span>Cẩm Nang Chăm Sóc Sắc Đẹp</span>
-                            </div>
-                            <h2 class="font-serif text-2xl sm:text-3xl font-bold text-charcoal">
-                                @item.Section.Title
+                            <span class="section-eyebrow mb-1">
+                                <span>Tạp Chí Khoa Học Làn Da &amp; Sắc Đẹp</span>
+                            </span>
+                            <h2 data-cms-title class="section-title">
+                                @FormatHeroTitle(item.Section.Title ?? "Kiến Thức Làm Đẹp & Xu Hướng 2026")
                             </h2>
-                            @if (!string.IsNullOrEmpty(item.Section.Subtitle))
-                            {
-                                <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-xl">
-                                    @item.Section.Subtitle
-                                </p>
-                            }
                         </div>
-                        <a href="/blog" class="inline-flex items-center gap-2 text-xs font-bold text-magenta-accent hover:text-rose-700 group transition">
+                        <span class="section-header-rule__line hidden md:block" aria-hidden="true"></span>
+                        <a href="/blog" class="btn-pill-arrow btn-pill-arrow--light self-start sm:self-auto shrink-0">
                             <span>Xem tất cả bài viết</span>
-                            <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform"></i>
+                            <span class="pill-arrow-circle" aria-hidden="true">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </span>
                         </a>
                     </div>
+                    @if (!string.IsNullOrEmpty(item.Section.Subtitle))
+                    {
+                        <p data-cms-subtitle class="text-xs sm:text-sm text-[var(--rl-mauve)] -mt-4 mb-8 font-sans max-w-xl">
+                            @item.Section.Subtitle
+                        </p>
+                    }
 
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        @foreach (var post in item.BlogPosts)
+                    <!-- Desktop Editorial Asymmetric Layout (1 Large + 2 Small) -->
+                    <div class="hidden lg:grid lg:grid-cols-12 gap-6 items-stretch">
+                        @if (featuredPost != null)
                         {
-                            var postImg = !string.IsNullOrEmpty(post.ThumbnailUrl) ? post.ThumbnailUrl : "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&h=400&fit=crop";
+                            var featImg = !string.IsNullOrEmpty(featuredPost.ThumbnailUrl) ? featuredPost.ThumbnailUrl : "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&h=550&fit=crop";
+                            var featCategory = featuredPost.PostCategory?.Name ?? "Khoa Học Dưỡng Da";
+                            var featReadMins = Math.Max(3, ((featuredPost.Summary?.Length ?? 180) / 45));
 
-                            <article class="group rounded-3xl bg-slate-50/50 border border-slate-200/80 overflow-hidden hover:shadow-xl hover:border-pink-200 transition-all duration-300 flex flex-col justify-between">
+                            <!-- Bài Nổi Bật Lớn (7 Cols) -->
+                            <article class="lg:col-span-7 group rounded-[32px] bg-white border border-[var(--rl-border-subtle)] p-4 sm:p-5 flex flex-col justify-between shadow-[var(--rl-shadow-2xs)] hover:shadow-[var(--rl-shadow-md)] hover:border-[var(--rl-rose)]/40 hover:-translate-y-1 transition-all duration-300">
                                 <div>
-                                    <div class="relative w-full aspect-[16/10] overflow-hidden bg-slate-100" style="aspect-ratio: 16/10;">
-                                        <img src="@postImg" alt="@post.Title" width="600" height="375" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 will-change-transform" />
-                                        @if (post.PostCategory != null)
-                                        {
-                                            <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-slate-800 text-[10px] font-bold shadow-xs">
-                                                @post.PostCategory.Name
+                                    <a href="/blog/@featuredPost.Slug" class="block relative w-full aspect-[16/10] rounded-[24px] overflow-hidden bg-[var(--rl-bg-blush)] mb-5">
+                                        <img src="@featImg"
+                                             alt="@featuredPost.Title"
+                                             width="760"
+                                             height="475"
+                                             loading="lazy"
+                                             decoding="async"
+                                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-[cubic-bezier(0.22,1,0.36,1)]" />
+                                        <div class="absolute top-3.5 left-3.5 flex items-center gap-2">
+                                            <span class="px-3 py-1 rounded-full bg-white/95 backdrop-blur-md text-[var(--rl-rose-deep)] text-[11px] font-bold shadow-xs">
+                                                @featCategory
                                             </span>
+                                            <span class="px-3 py-1 rounded-full bg-[var(--rl-ink)]/85 backdrop-blur-md text-white text-[11px] font-mono">
+                                                <i class="fa-regular fa-clock mr-1 text-[var(--rl-champagne)]"></i>@featReadMins phút đọc
+                                            </span>
+                                        </div>
+                                    </a>
+
+                                    <div class="px-2 space-y-2.5">
+                                        <div class="text-xs text-[var(--rl-muted)] font-mono flex items-center gap-2">
+                                            <i class="fa-regular fa-calendar text-[var(--rl-rose)]"></i>
+                                            <span>@((featuredPost.PublishedAt ?? featuredPost.CreatedAt).ToString("dd/MM/yyyy"))</span>
+                                            <span>•</span>
+                                            <span>Ban Biên Tập Khoa Học CANMAKE</span>
+                                        </div>
+                                        <h3 class="font-serif font-bold text-xl sm:text-2xl text-[var(--rl-ink)] group-hover:text-[var(--rl-rose)] transition-colors leading-snug line-clamp-2">
+                                            <a href="/blog/@featuredPost.Slug">@featuredPost.Title</a>
+                                        </h3>
+                                        @if (!string.IsNullOrEmpty(featuredPost.Summary))
+                                        {
+                                            <p class="text-sm text-[var(--rl-mauve)] line-clamp-2 leading-relaxed font-sans">
+                                                @featuredPost.Summary
+                                            </p>
                                         }
                                     </div>
-                                    <div class="p-5 space-y-2">
-                                        <div class="text-[11px] text-slate-400 flex items-center gap-2">
-                                            <i class="fa-regular fa-calendar"></i>
-                                            <span>@((post.PublishedAt ?? post.CreatedAt).ToString("dd/MM/yyyy"))</span>
+                                </div>
+
+                                <div class="px-2 pt-4 mt-4 border-t border-[var(--rl-border-subtle)] flex items-center justify-between">
+                                    <a href="/blog/@featuredPost.Slug" class="inline-flex items-center gap-2 text-xs font-bold text-[var(--rl-rose)] group-hover:translate-x-1 transition-transform">
+                                        <span>Đọc trọn bài phân tích</span>
+                                        <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                                    </a>
+                                    <span class="text-sm text-[var(--rl-champagne)]" aria-hidden="true">✦</span>
+                                </div>
+                            </article>
+                        }
+
+                        <!-- 2 Bài Nhỏ Bên Phải (5 Cols) -->
+                        <div class="lg:col-span-5 flex flex-col gap-5 justify-between">
+                            @{
+                                int sPostIdx = 0;
+                            }
+                            @foreach (var post in sidePosts)
+                            {
+                                var postImg = !string.IsNullOrEmpty(post.ThumbnailUrl) ? post.ThumbnailUrl : "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&h=400&fit=crop";
+                                var postCat = post.PostCategory?.Name ?? "Bí Quyết Làm Đẹp";
+                                var readMins = Math.Max(3, ((post.Summary?.Length ?? 150) / 40));
+
+                                <article class="group flex-1 rounded-[28px] bg-white border border-[var(--rl-border-subtle)] p-4 flex items-center gap-4 shadow-[var(--rl-shadow-2xs)] hover:shadow-[var(--rl-shadow-md)] hover:border-[var(--rl-rose)]/40 hover:-translate-y-1 transition-all duration-300">
+                                    <a href="/blog/@post.Slug" class="w-32 h-32 sm:w-36 sm:h-36 rounded-2xl overflow-hidden bg-[var(--rl-bg-blush)] shrink-0 relative block">
+                                        <img src="@postImg"
+                                             alt="@post.Title"
+                                             width="160"
+                                             height="160"
+                                             loading="lazy"
+                                             decoding="async"
+                                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                    </a>
+                                    <div class="flex-1 min-w-0 flex flex-col justify-between h-full py-0.5">
+                                        <div class="space-y-1.5">
+                                            <div class="flex items-center gap-2 flex-wrap">
+                                                <span class="px-2.5 py-0.5 rounded-full bg-[var(--rl-blush)] text-[var(--rl-rose-deep)] text-[10px] font-bold">
+                                                    @postCat
+                                                </span>
+                                                <span class="text-[11px] font-mono text-[var(--rl-muted)]">
+                                                    <i class="fa-regular fa-clock mr-1"></i>@readMins phút
+                                                </span>
+                                            </div>
+                                            <h3 class="font-serif font-bold text-sm sm:text-base text-[var(--rl-ink)] group-hover:text-[var(--rl-rose)] transition-colors line-clamp-2 leading-snug">
+                                                <a href="/blog/@post.Slug">@post.Title</a>
+                                            </h3>
+                                            @if (!string.IsNullOrEmpty(post.Summary))
+                                            {
+                                                <p class="text-xs text-[var(--rl-mauve)] line-clamp-2 leading-relaxed font-sans">
+                                                    @post.Summary
+                                                </p>
+                                            }
                                         </div>
-                                        <h3 class="font-serif text-base font-bold text-charcoal group-hover:text-magenta-accent transition line-clamp-2">
-                                            <a href="/blog/@post.Slug">
-                                                @post.Title
+                                        <div class="pt-2 flex items-center justify-between text-[11px]">
+                                            <span class="font-mono text-[var(--rl-muted)]">@((post.PublishedAt ?? post.CreatedAt).ToString("dd/MM/yyyy"))</span>
+                                            <a href="/blog/@post.Slug" class="font-bold text-[var(--rl-rose)] inline-flex items-center gap-1">
+                                                <span>Đọc tiếp</span>
+                                                <i class="fa-solid fa-arrow-right text-[9px]"></i>
                                             </a>
+                                        </div>
+                                    </div>
+                                </article>
+                                sPostIdx++;
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Mobile & Tablet Scroll-Snap Carousel (< 1024px) -->
+                    <div class="lg:hidden grid grid-flow-col auto-cols-[82%] sm:auto-cols-[46%] gap-4 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-2 -mx-3 px-3">
+                        @foreach (var post in postsList)
+                        {
+                            var postImg = !string.IsNullOrEmpty(post.ThumbnailUrl) ? post.ThumbnailUrl : "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&h=400&fit=crop";
+                            var postCat = post.PostCategory?.Name ?? "Khoa Học Làn Da";
+                            var readMins = Math.Max(3, ((post.Summary?.Length ?? 150) / 40));
+
+                            <article class="snap-start rounded-[28px] bg-white border border-[var(--rl-border-subtle)] p-3.5 flex flex-col justify-between shadow-[var(--rl-shadow-2xs)]">
+                                <div>
+                                    <a href="/blog/@post.Slug" class="relative block w-full aspect-[16/10] rounded-2xl overflow-hidden bg-[var(--rl-bg-blush)] mb-3.5">
+                                        <img src="@postImg" alt="@post.Title" width="500" height="312" loading="lazy" decoding="async" class="w-full h-full object-cover" />
+                                        <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-white/95 text-[var(--rl-rose-deep)] text-[10px] font-bold shadow-2xs">
+                                            @postCat
+                                        </span>
+                                    </a>
+                                    <div class="px-1 space-y-1.5">
+                                        <div class="flex items-center justify-between text-[11px] font-mono text-[var(--rl-muted)]">
+                                            <span><i class="fa-regular fa-calendar mr-1"></i>@((post.PublishedAt ?? post.CreatedAt).ToString("dd/MM/yyyy"))</span>
+                                            <span><i class="fa-regular fa-clock mr-1 text-[var(--rl-rose)]"></i>@readMins phút đọc</span>
+                                        </div>
+                                        <h3 class="font-serif font-bold text-sm sm:text-base text-[var(--rl-ink)] line-clamp-2 leading-snug">
+                                            <a href="/blog/@post.Slug">@post.Title</a>
                                         </h3>
                                         @if (!string.IsNullOrEmpty(post.Summary))
                                         {
-                                            <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                                            <p class="text-xs text-[var(--rl-mauve)] line-clamp-2 leading-relaxed">
                                                 @post.Summary
                                             </p>
                                         }
                                     </div>
                                 </div>
-                                <div class="p-5 pt-0">
-                                    <a href="/blog/@post.Slug" class="text-xs font-bold text-magenta-accent hover:text-rose-700 flex items-center gap-1.5 transition">
+                                <div class="px-1 pt-3 mt-3 border-t border-[var(--rl-border-subtle)]">
+                                    <a href="/blog/@post.Slug" class="text-xs font-bold text-[var(--rl-rose)] flex items-center gap-1.5">
                                         <span>Đọc chi tiết</span>
                                         <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                     </a>
@@ -668,4 +1617,78 @@
         }
     }
     </div>
+
+    <!-- Script Count-Up & IntersectionObserver Stagger Reveal Fallback (Modern Web Guidance) -->
+    <script>
+        function fefoTrustBentoStats() {
+            return {
+                monthsStat: 0,
+                customersStat: 0,
+                brandsStat: 0,
+                authenticStat: 0,
+                deliveryStat: 0,
+                hasAnimated: false,
+                initObserver(sectionEl) {
+                    const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+                        this.monthsStat = 18;
+                        this.customersStat = 50;
+                        this.brandsStat = 300;
+                        this.authenticStat = 100;
+                        this.deliveryStat = 2;
+                        return;
+                    }
+
+                    const obs = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting && !this.hasAnimated) {
+                                this.hasAnimated = true;
+                                this.animateCount('customersStat', 50, 1200);
+                                this.animateCount('brandsStat', 300, 1300);
+                                this.animateCount('authenticStat', 100, 1100);
+                                this.animateCount('deliveryStat', 2, 800);
+                                obs.unobserve(sectionEl);
+                            }
+                        });
+                    }, { threshold: 0.2 });
+
+                    obs.observe(sectionEl);
+                },
+                animateCount(prop, target, duration) {
+                    const start = performance.now();
+                    const step = (now) => {
+                        const progress = Math.min(1, (now - start) / duration);
+                        const eased = 1 - Math.pow(1 - progress, 4);
+                        this[prop] = Math.round(target * eased);
+                        if (progress < 1) {
+                            requestAnimationFrame(step);
+                        } else {
+                            this[prop] = target;
+                        }
+                    };
+                    requestAnimationFrame(step);
+                }
+            };
+        }
+
+        // Section Stagger Reveal Fallback (cho trình duyệt chưa hỗ trợ CSS Scroll-Driven Animations)
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.CSS && CSS.supports && CSS.supports('(animation-timeline: view()) and (animation-range: entry)')) {
+                return;
+            }
+            const sections = document.querySelectorAll('.section-scroll-reveal');
+            if (!sections.length || !('IntersectionObserver' in window)) return;
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('section-revealed');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.12 });
+
+            sections.forEach(s => observer.observe(s));
+        });
+    </script>
 }

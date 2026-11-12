@@ -7,35 +7,35 @@
 }
 
 <!-- Synchronize count badge and header total in Header via HTMX OOB Swapping -->
-<span id="miniCartCountBadge" hx-swap-oob="true" class="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-magenta-accent text-white text-[10px] font-bold flex items-center justify-center border-2 border-white shadow-sm">@vm.TotalItems</span>
+<span id="miniCartCountBadge" hx-swap-oob="true" data-cart-count class="min-w-[24px] h-[24px] px-1.5 rounded-full bg-[var(--rl-rose)] group-hover:bg-white group-hover:text-[var(--rl-rose)] text-white text-xs font-extrabold font-mono-numeric flex items-center justify-center transition-colors">@vm.TotalItems</span>
 <span id="miniCartHeaderTotal" hx-swap-oob="true" class="text-xs font-bold font-mono-numeric tracking-wide">@vm.SubTotal.ToString("N0") ₫</span>
 
-<!-- 1. THANH TIẾN ĐỘ FREESHIP THÔNG MINH -->
-<div class="p-4 bg-gradient-to-r from-pastel-rose/90 via-pink-50/80 to-white border-b border-soft-border shrink-0">
+<!-- 1. THANH TIẾN ĐỘ FREESHIP THÔNG MINH (Rosé Luxe Gradient) -->
+<div class="p-4 bg-gradient-to-r from-[var(--rl-bg-blush)] via-white to-[var(--rl-bg-petal)]/40 border-b border-[var(--rl-border-subtle)] shrink-0">
     <div class="space-y-1.5">
-        <div class="flex items-center justify-between text-xs font-semibold text-slate-700">
+        <div class="flex items-center justify-between text-xs font-semibold">
             @if (remaining > 0)
             {
-                <span class="flex items-center gap-1.5 text-charcoal">
-                    <i class="fa-solid fa-truck-fast text-magenta-accent"></i>
-                    <span>Mua thêm <strong class="text-magenta-accent font-mono-numeric font-bold">@remaining.ToString("N0") ₫</strong> để được <strong class="text-charcoal uppercase">MIỄN PHÍ VẬN CHUYỂN TOÀN QUỐC!</strong></span>
+                <span class="flex items-center gap-1.5 text-[var(--rl-ink)]">
+                    <i class="fa-solid fa-truck-fast text-[var(--rl-rose)]" aria-hidden="true"></i>
+                    <span>Còn <strong class="text-[var(--rl-rose)] font-mono-numeric font-bold">@remaining.ToString("N0") ₫</strong> để được <strong class="text-[var(--rl-ink)] uppercase">FREESHIP TOÀN QUỐC! ✦</strong></span>
                 </span>
             }
             else
             {
-                <span class="text-emerald-700 font-bold flex items-center gap-1.5">
-                    <i class="fa-solid fa-shield-heart text-emerald-600 text-sm"></i>
-                    <span>Chúc mừng! Bạn đã đạt mức <strong class="uppercase text-emerald-800">FREESHIP TOÀN QUỐC!</strong></span>
+                <span class="text-[var(--rl-success)] font-bold flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-heart text-sm" aria-hidden="true"></i>
+                    <span>Chúc mừng! Bạn đã đạt mức <strong class="uppercase text-[var(--rl-success)]">FREESHIP TOÀN QUỐC! ✦</strong></span>
                 </span>
             }
-            <span class="font-mono font-bold text-[11px] @(remaining == 0 ? "text-emerald-600" : "text-slate-400")">
+            <span class="font-mono-numeric font-bold text-[11px] @(remaining == 0 ? "text-[var(--rl-success)]" : "text-[var(--rl-mauve)]")">
                 @progress.ToString("0")%
             </span>
         </div>
         
         <!-- Progress Bar Track -->
-        <div class="h-2 rounded-full overflow-hidden bg-pink-100/70 p-0.5 shadow-inner">
-            <div class="h-full rounded-full transition-all duration-500 @(remaining == 0 ? "bg-emerald-500 shadow-sm shadow-emerald-500/30" : "bg-gradient-to-r from-amber-400 via-rose-400 to-magenta-accent shadow-sm")" 
+        <div class="h-2 rounded-full overflow-hidden bg-[var(--rl-bg-petal)]/50 p-0.5 shadow-inner">
+            <div class="h-full rounded-full transition-all duration-500 @(remaining == 0 ? "bg-[var(--rl-success)] shadow-sm" : "bg-gradient-to-r from-[var(--rl-rose)] via-[#D35B89] to-[var(--rl-champagne)] shadow-sm")" 
                  style="width: @progress.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)%;">
             </div>
         </div>
@@ -47,15 +47,15 @@
     @if (vm.Items == null || !vm.Items.Any())
     {
         <!-- Empty Cart State -->
-        <div class="text-center py-16 text-slate-400 flex flex-col items-center justify-center space-y-3">
-            <div class="w-16 h-16 rounded-full bg-pastel-rose flex items-center justify-center text-rose-gold text-2xl shadow-inner">
-                <i class="fa-solid fa-bag-shopping"></i>
+        <div class="text-center py-16 text-[var(--rl-mauve)] flex flex-col items-center justify-center space-y-3">
+            <div class="w-16 h-16 rounded-full bg-[var(--rl-bg-blush)] flex items-center justify-center text-[var(--rl-rose)] text-2xl shadow-inner">
+                <i class="fa-solid fa-bag-shopping" aria-hidden="true"></i>
             </div>
-            <h4 class="text-sm font-bold text-slate-800">Giỏ hàng của bạn đang trống</h4>
-            <p class="text-xs text-slate-400 max-w-xs leading-relaxed">Khám phá các sản phẩm mỹ phẩm chính hãng chuẩn hạn dùng FEFO ngay!</p>
+            <h4 class="font-serif text-sm font-bold text-[var(--rl-ink)]">Giỏ hàng của bạn đang trống</h4>
+            <p class="text-xs text-[var(--rl-mauve)] max-w-xs leading-relaxed">Khám phá các sản phẩm mỹ phẩm chính hãng cam kết date mới ngay!</p>
             <button type="button" 
                     @@click="cartOpen = false" 
-                    class="mt-2 px-6 py-2.5 rounded-full bg-charcoal text-white font-bold text-xs hover:bg-magenta-accent shadow-md transition-all">
+                    class="btn-primary mt-2 min-h-[44px] px-6 py-2.5 rounded-full text-white font-bold text-xs uppercase tracking-wider shadow-md transition-all cursor-pointer">
                 Tiếp Tục Mua Sắm
             </button>
         </div>
@@ -68,7 +68,7 @@
             var itemWebp = ProductImageResolver.GetWebpImageUrl(itemImg, item.ProductSku, null, item.ProductName);
             var itemAlt = ProductImageResolver.GetAltText(item.ProductName, null, null, item.ProductSku, null);
             
-            <div class="flex gap-3 items-center p-3 rounded-2xl bg-white border border-slate-100 shadow-xs relative group hover:border-pink-200 transition-all">
+            <div class="flex gap-3 items-center p-3 rounded-2xl bg-white border border-[var(--rl-border-subtle)] shadow-[var(--rl-shadow-xs)] relative group hover:border-[var(--rl-rose)]/40 transition-all">
                 <!-- Thumbnail -->
                 <picture class="shrink-0">
                     <source srcset="@itemWebp" type="image/webp" />
@@ -79,29 +79,29 @@
                          decoding="async"
                          loading="lazy"
                          onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';"
-                         class="rounded-xl w-16 h-16 object-cover border border-slate-100 shrink-0 shadow-2xs" />
+                         class="rounded-xl w-16 h-16 object-cover border border-[var(--rl-border-subtle)] shrink-0 shadow-2xs" />
                 </picture>
                 
                 <!-- Information -->
                 <div class="flex-1 min-w-0 pr-1">
-                    <h5 class="font-bold text-charcoal text-xs truncate leading-snug hover:text-magenta-accent transition" title="@item.ProductName">
+                    <h5 class="font-serif font-bold text-[var(--rl-ink)] text-xs truncate leading-snug hover:text-[var(--rl-rose)] transition" title="@item.ProductName">
                         <a href="/Product/Detail/@item.ProductId">@item.ProductName</a>
                     </h5>
                     
                     @if (!string.IsNullOrEmpty(item.NearestExpDateStr))
                     {
                         <div class="mt-0.5">
-                            <span class="inline-flex items-center rounded-md bg-amber-50 px-1.5 py-0.5 text-[9px] font-semibold text-amber-800 border border-amber-200">
-                                <i class="fa-solid fa-clock mr-1 text-[8px] text-amber-600"></i> HSD: @item.NearestExpDateStr
+                            <span class="inline-flex items-center rounded-md bg-[var(--rl-bg-blush)] px-1.5 py-0.5 text-[9px] font-semibold text-[var(--rl-rose)] border border-[var(--rl-border-subtle)]">
+                                <i class="fa-solid fa-clock mr-1 text-[8px] text-[var(--rl-champagne-deep)]" aria-hidden="true"></i> HSD: @item.NearestExpDateStr
                             </span>
                         </div>
                     }
 
                     <div class="flex items-baseline gap-2 mt-1">
-                        <span class="font-bold text-magenta-accent text-xs font-mono-numeric">@item.UnitPrice.ToString("N0") ₫</span>
+                        <span class="font-bold text-[var(--rl-rose)] text-xs font-mono-numeric">@item.UnitPrice.ToString("N0") ₫</span>
                         @if (item.Quantity > 1)
                         {
-                            <span class="text-[10px] text-slate-400 font-mono">(= @item.LineTotal.ToString("N0") ₫)</span>
+                            <span class="text-[10px] text-[var(--rl-mauve)] font-mono-numeric">(= @item.LineTotal.ToString("N0") ₫)</span>
                         }
                     </div>
                 </div>
@@ -115,37 +115,38 @@
                             hx-vals='{"productId": "@item.ProductId"}'
                             hx-trigger="click"
                             hx-on::after-request="if(event.detail.successful) htmx.trigger('body', 'reloadMiniCart')"
-                            class="text-slate-300 hover:text-rose-600 transition p-1"
-                            title="Xóa khỏi giỏ hàng">
-                        <i class="fa-regular fa-trash-can text-xs"></i>
+                            class="min-w-[32px] min-h-[32px] flex items-center justify-center text-[var(--rl-mauve)] hover:text-rose-600 transition p-1 cursor-pointer"
+                            title="Xóa khỏi giỏ hàng"
+                            aria-label="Xóa khỏi giỏ hàng">
+                        <i class="fa-regular fa-trash-can text-xs" aria-hidden="true"></i>
                     </button>
                     
                     <!-- Stepper Tăng/Giảm Số Lượng (+ / -) Cập Nhật Tức Thì Qua AJAX -->
-                    <div class="flex items-center gap-1 bg-slate-50 rounded-lg p-0.5 border border-slate-200 mt-2">
+                    <div class="flex items-center gap-1 bg-[var(--rl-bg-blush)]/70 rounded-full p-0.5 border border-[var(--rl-border-subtle)] mt-2">
                         <!-- Decrement Button -->
                         <button type="button" 
-                                class="w-5 h-5 flex items-center justify-center text-slate-500 hover:text-magenta-accent hover:bg-white rounded transition"
+                                class="w-6 h-6 flex items-center justify-center text-[var(--rl-ink)] hover:text-[var(--rl-rose)] hover:bg-white rounded-full transition cursor-pointer"
                                 hx-post="/Cart/UpdateQuantity" 
                                 hx-ext="json-enc" 
                                 hx-vals='{"productId": "@item.ProductId", "delta": -1}' 
                                 hx-trigger="click" 
                                 hx-on::after-request="if(event.detail.successful) htmx.trigger('body', 'reloadMiniCart')"
                                 aria-label="Giảm số lượng">
-                            <i class="fa-solid fa-minus text-[8px]"></i>
+                            <i class="fa-solid fa-minus text-[8px]" aria-hidden="true"></i>
                         </button>
                         
-                        <span class="text-xs font-bold text-slate-800 w-5 text-center font-mono-numeric">@item.Quantity</span>
+                        <span class="text-xs font-bold text-[var(--rl-ink)] w-5 text-center font-mono-numeric">@item.Quantity</span>
                         
                         <!-- Increment Button -->
                         <button type="button" 
-                                class="w-5 h-5 flex items-center justify-center text-slate-500 hover:text-magenta-accent hover:bg-white rounded transition"
+                                class="w-6 h-6 flex items-center justify-center text-[var(--rl-ink)] hover:text-[var(--rl-rose)] hover:bg-white rounded-full transition cursor-pointer"
                                 hx-post="/Cart/UpdateQuantity" 
                                 hx-ext="json-enc" 
                                 hx-vals='{"productId": "@item.ProductId", "delta": 1}' 
                                 hx-trigger="click" 
                                 hx-on::after-request="if(event.detail.successful) htmx.trigger('body', 'reloadMiniCart')"
                                 aria-label="Tăng số lượng">
-                            <i class="fa-solid fa-plus text-[8px]"></i>
+                            <i class="fa-solid fa-plus text-[8px]" aria-hidden="true"></i>
                         </button>
                     </div>
                 </div>
@@ -157,7 +158,7 @@
 <!-- 3. VOUCHER GIẢM GIÁ GỢI Ý & TỔNG TIỀN TẠM TÍNH & 2 NÚT HÀNH ĐỘNG -->
 @if (vm.Items != null && vm.Items.Any())
 {
-    <div class="p-4 border-t border-slate-200/80 bg-slate-50/90 space-y-3.5 shrink-0" x-data="{
+    <div class="p-4 border-t border-[var(--rl-border-subtle)] bg-[var(--rl-surface)] space-y-3.5 shrink-0" x-data="{
         couponInput: '',
         couponMsg: '',
         isApplying: false,
@@ -197,10 +198,10 @@
         <!-- Voucher Giảm Giá Gợi Ý (Quick Coupon Box) -->
         <div class="space-y-2">
             <div class="flex items-center justify-between text-[11px]">
-                <span class="font-bold text-charcoal flex items-center gap-1.5">
-                    <i class="fa-solid fa-ticket text-rose-gold"></i> Voucher Gợi Ý Dành Riêng Cho Bạn:
+                <span class="font-bold text-[var(--rl-ink)] flex items-center gap-1.5">
+                    <i class="fa-solid fa-ticket text-[var(--rl-champagne-deep)]" aria-hidden="true"></i> Voucher Gợi Ý Cho Bạn:
                 </span>
-                <span class="text-magenta-accent font-semibold cursor-pointer hover:underline" @@click="applyVoucher('BEAUTY50K')">
+                <span class="text-[var(--rl-rose)] font-semibold cursor-pointer hover:underline" @@click="applyVoucher('BEAUTY50K')">
                     Dùng mã 50K
                 </span>
             </div>
@@ -209,13 +210,13 @@
             <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
                 <button type="button" 
                         @@click="applyVoucher('BEAUTY50K')"
-                        class="px-2.5 py-1 rounded-lg border border-dashed border-magenta-accent/60 bg-magenta-accent/5 text-magenta-accent text-[10px] font-bold flex items-center gap-1 hover:bg-magenta-accent/10 transition shrink-0">
-                    <i class="fa-solid fa-tag text-[9px]"></i> BEAUTY50K (-50.000₫)
+                        class="px-2.5 py-1 rounded-full border border-dashed border-[var(--rl-rose)]/60 bg-[var(--rl-bg-blush)] text-[var(--rl-rose)] text-[10px] font-bold flex items-center gap-1 hover:bg-[var(--rl-bg-petal)] transition shrink-0 cursor-pointer">
+                    <i class="fa-solid fa-tag text-[9px]" aria-hidden="true"></i> BEAUTY50K (-50.000₫)
                 </button>
                 <button type="button" 
                         @@click="applyVoucher('FREESHIP')"
-                        class="px-2.5 py-1 rounded-lg border border-dashed border-emerald-500/60 bg-emerald-50 text-emerald-700 text-[10px] font-bold flex items-center gap-1 hover:bg-emerald-100 transition shrink-0">
-                    <i class="fa-solid fa-truck-fast text-[9px]"></i> FREESHIP (-30.000₫)
+                        class="px-2.5 py-1 rounded-full border border-dashed border-[var(--rl-success)]/60 bg-emerald-50 text-[var(--rl-success)] text-[10px] font-bold flex items-center gap-1 hover:bg-emerald-100 transition shrink-0 cursor-pointer">
+                    <i class="fa-solid fa-truck-fast text-[9px]" aria-hidden="true"></i> FREESHIP (-30.000₫)
                 </button>
             </div>
 
@@ -224,43 +225,44 @@
                 <input type="text" 
                        x-model="couponInput" 
                        placeholder="Nhập mã ưu đãi..." 
-                       class="flex-1 px-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-magenta-accent uppercase font-mono font-bold" />
+                       aria-label="Nhập mã ưu đãi"
+                       class="flex-1 px-3 py-2 rounded-xl border border-[var(--rl-border-subtle)] text-xs focus:outline-none focus:border-[var(--rl-rose)] uppercase font-mono font-bold bg-white" />
                 <button type="button" 
                         @@click="submitCoupon()"
                         :disabled="isApplying"
-                        class="px-3.5 py-1.5 rounded-xl bg-charcoal hover:bg-magenta-accent text-white font-bold text-xs transition shrink-0">
+                        class="min-h-[38px] px-3.5 py-1.5 rounded-xl bg-[var(--rl-ink)] hover:bg-[var(--rl-rose)] text-white font-bold text-xs transition shrink-0 cursor-pointer disabled:opacity-50">
                     <span x-show="!isApplying">Áp Dụng</span>
-                    <span x-show="isApplying"><i class="fa-solid fa-spinner fa-spin"></i></span>
+                    <span x-show="isApplying"><i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i></span>
                 </button>
             </div>
             <div x-show="couponMsg" x-text="couponMsg" class="text-[10px] text-rose-600 font-medium"></div>
         </div>
 
         <!-- Tóm Tắt Chi Phí -->
-        <div class="space-y-1.5 pt-2 border-t border-slate-200 text-xs">
-            <div class="flex items-center justify-between text-slate-500">
+        <div class="space-y-1.5 pt-2 border-t border-[var(--rl-border-subtle)] text-xs">
+            <div class="flex items-center justify-between text-[var(--rl-mauve)]">
                 <span>Tạm tính (@vm.TotalItems sản phẩm):</span>
-                <span class="font-bold text-charcoal font-mono-numeric">@vm.SubTotal.ToString("N0") ₫</span>
+                <span class="font-bold text-[var(--rl-ink)] font-mono-numeric">@vm.SubTotal.ToString("N0") ₫</span>
             </div>
 
             @if (vm.DiscountAmount > 0)
             {
-                <div class="flex items-center justify-between text-emerald-600">
-                    <span class="flex items-center gap-1"><i class="fa-solid fa-ticket"></i> Voucher giảm giá:</span>
+                <div class="flex items-center justify-between text-[var(--rl-success)]">
+                    <span class="flex items-center gap-1"><i class="fa-solid fa-ticket" aria-hidden="true"></i> Voucher giảm giá:</span>
                     <span class="font-bold font-mono-numeric">-@vm.DiscountAmount.ToString("N0") ₫</span>
                 </div>
             }
 
-            <div class="flex items-center justify-between text-slate-500">
+            <div class="flex items-center justify-between text-[var(--rl-mauve)]">
                 <span>Phí vận chuyển:</span>
-                <span class="font-bold @(remaining == 0 ? "text-emerald-600" : "text-charcoal") font-mono-numeric">
+                <span class="font-bold @(remaining == 0 ? "text-[var(--rl-success)]" : "text-[var(--rl-ink)]") font-mono-numeric">
                     @(remaining == 0 ? "Miễn phí" : "30.000 ₫")
                 </span>
             </div>
 
-            <div class="flex items-center justify-between text-sm pt-1 border-t border-dashed border-slate-200">
-                <span class="font-bold text-charcoal">Tổng thanh toán:</span>
-                <span class="font-bold text-magenta-accent font-mono-numeric text-base">@vm.FinalTotal.ToString("N0") ₫</span>
+            <div class="flex items-center justify-between text-sm pt-1 border-t border-dashed border-[var(--rl-border-subtle)]">
+                <span class="font-bold text-[var(--rl-ink)] font-serif">Tổng thanh toán:</span>
+                <span class="font-extrabold text-[var(--rl-rose)] font-mono-numeric text-base sm:text-lg">@vm.FinalTotal.ToString("N0") ₫</span>
             </div>
         </div>
 
@@ -268,15 +270,15 @@
         <div class="grid grid-cols-2 gap-2.5 pt-1">
             <!-- Nút 1: Xem Chi Tiết Giỏ Hàng -->
             <a href="/Cart" 
-               class="py-3 px-3 rounded-full border border-slate-300 hover:border-charcoal hover:bg-white text-charcoal font-bold text-xs uppercase tracking-wider text-center transition flex items-center justify-center gap-1.5 shadow-2xs">
-                <i class="fa-solid fa-bag-shopping text-rose-gold text-xs"></i>
+               class="btn-ghost min-h-[44px] py-2.5 px-3 rounded-full text-[var(--rl-ink)] font-bold text-xs uppercase tracking-wider text-center transition flex items-center justify-center gap-1.5 border border-[var(--rl-border-subtle)]">
+                <i class="fa-solid fa-bag-shopping text-[var(--rl-champagne-deep)] text-xs" aria-hidden="true"></i>
                 <span>Xem Giỏ Hàng</span>
             </a>
 
             <!-- Nút 2: Thanh Toán Nhanh -->
             <a href="/Checkout" 
-               class="py-3 px-3 rounded-full bg-magenta-accent hover:bg-[#b0276a] text-white font-bold text-xs uppercase tracking-wider text-center transition flex items-center justify-center gap-1.5 shadow-lg shadow-magenta-accent/25">
-                <i class="fa-solid fa-bolt text-xs"></i>
+               class="btn-primary min-h-[44px] py-2.5 px-3 rounded-full text-white font-bold text-xs uppercase tracking-wider text-center transition flex items-center justify-center gap-1.5 shadow-md">
+                <i class="fa-solid fa-bolt text-xs" aria-hidden="true"></i>
                 <span>Thanh Toán</span>
             </a>
         </div>

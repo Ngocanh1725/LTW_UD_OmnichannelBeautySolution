@@ -661,7 +661,7 @@ namespace Omnichannel.Infrastructure.Services
                     break;
             }
 
-            sb.AppendLine("\n👇 **Top sản phẩm chứa " + displayName + " chính hãng chuẩn hạn dùng FEFO từ CSDL:**");
+            sb.AppendLine("\n👇 **Top sản phẩm chứa " + displayName + " chính hãng cam kết date mới từ CSDL:**");
 
             return new ChatBotResponseDto
             {

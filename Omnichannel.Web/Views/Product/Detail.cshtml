@@ -2,7 +2,7 @@
 @{
     var p = Model.Product;
     ViewData["Title"] = $"{p.Name} | CANMAKE BEAUTY";
-    ViewData["Description"] = p.ShortDescription ?? $"{p.Name} chính hãng chuẩn FEFO, giao hàng tốc hành 2H.";
+    ViewData["Description"] = p.ShortDescription ?? $"{p.Name} chính hãng cam kết date mới, giao hàng tốc hành 2H.";
     var mainImg = p.ThumbnailMediaId.HasValue 
         ? $"/media/{p.ThumbnailMediaId}" 
         : (Model.GalleryImages.FirstOrDefault() ?? (!string.IsNullOrEmpty(p.ThumbnailUrl) ? p.ThumbnailUrl : "/images/products/_placeholder.webp"));
@@ -29,12 +29,12 @@
     }
 
     var finalPrice = (p.DiscountPrice.HasValue && p.DiscountPrice.Value > 0) ? p.DiscountPrice.Value : p.SellingPrice;
-    var rawDesc = p.Description ?? p.ShortDescription ?? $"{p.Name} chính hãng cao cấp tại CANMAKE BEAUTY chuẩn hạn dùng FEFO.";
+    var rawDesc = p.Description ?? p.ShortDescription ?? $"{p.Name} chính hãng cao cấp tại CANMAKE BEAUTY cam kết date mới.";
     var cleanDesc = System.Text.RegularExpressions.Regex.Replace(rawDesc, "<.*?>", string.Empty).Trim();
     if (cleanDesc.Length > 300) cleanDesc = cleanDesc.Substring(0, 300) + "...";
 
     var expDateStr = Model.NearestBatch?.ExpDate.ToString("yyyy-MM-dd") ?? DateTime.UtcNow.AddMonths(18).ToString("yyyy-MM-dd");
-    var batchNo = Model.NearestBatch?.BatchNumber ?? "FEFO-L01";
+    var batchNo = Model.NearestBatch?.BatchNumber ?? "LOT-2026-01";
 
     var ratingVal = Model.AverageRating > 0 ? Math.Round(Model.AverageRating, 1) : 5.0;
     var reviewCnt = Model.TotalReviews > 0 ? Model.TotalReviews : (Model.Reviews?.Count > 0 ? Model.Reviews.Count : 15);
@@ -85,7 +85,7 @@
         },
         ["additionalProperty"] = new object[]
         {
-            new Dictionary<string, object?> { ["@type"] = "PropertyValue", ["name"] = "Tiêu chuẩn kiểm soát hạn dùng", ["value"] = "FEFO (First Expired, First Out)" },
+            new Dictionary<string, object?> { ["@type"] = "PropertyValue", ["name"] = "Tiêu chuẩn kiểm soát hạn dùng", ["value"] = "Minh Bạch Hạn Dùng (Lô Mới Nhất)" },
             new Dictionary<string, object?> { ["@type"] = "PropertyValue", ["name"] = "Mã lô sản xuất", ["value"] = batchNo },
             new Dictionary<string, object?> { ["@type"] = "PropertyValue", ["name"] = "Hạn sử dụng khuyến cáo", ["value"] = expDateStr }
         },
@@ -128,27 +128,35 @@
 @Html.Raw(System.Text.Json.JsonSerializer.Serialize(productSchema, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }))
 </script>
 
-<div class="bg-white min-h-screen py-6 sm:py-10">
+<style>
+    @@media (max-width: 767.98px) {
+        #mobileBottomNav { display: none !important; }
+        body { padding-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px)) !important; }
+    }
+</style>
+
+<div class="bg-[var(--rl-surface)] min-h-screen py-6 sm:py-10">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <!-- 1. BREADCRUMB -->
-        <nav aria-label="Đường dẫn trang" class="mb-6 text-xs text-slate-500 flex items-center flex-wrap gap-2">
-            <a href="/" class="hover:text-magenta-accent transition flex items-center gap-1">
-                <i class="fa-solid fa-house text-slate-400"></i> Trang Chủ
+        <nav aria-label="Đường dẫn trang" class="mb-6 text-xs text-[var(--rl-mauve)] flex items-center flex-wrap gap-2">
+            <a href="/" class="hover:text-[var(--rl-rose)] transition flex items-center gap-1.5">
+                <i class="fa-solid fa-house text-xs text-[var(--rl-mauve)]/70" aria-hidden="true"></i>
+                <span>Trang Chủ</span>
             </a>
-            <span class="text-slate-300">/</span>
+            <span class="text-[var(--rl-border-strong)]">/</span>
             @if (p.Category != null)
             {
-                <a href="/category/@p.Category.Slug" class="hover:text-magenta-accent transition">
+                <a href="/category/@p.Category.Slug" class="hover:text-[var(--rl-rose)] transition">
                     @p.Category.Name
                 </a>
-                <span class="text-slate-300">/</span>
+                <span class="text-[var(--rl-border-strong)]">/</span>
             }
-            <span class="text-charcoal font-semibold truncate max-w-xs sm:max-w-md">@p.Name</span>
+            <span class="text-[var(--rl-ink)] font-semibold truncate max-w-xs sm:max-w-md">@p.Name</span>
         </nav>
 
         <!-- 2. MAIN PRODUCT HERO (Interactive Product Gallery + Buy Box) -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14" x-data="{ 
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12" x-data="{ 
             activeMedia: 'image', 
             activeImage: '@mainImg', 
             videoUrl: '@(Model.SwatchVideoUrl ?? "")',
@@ -170,6 +178,12 @@
             currentVariantStock: @(p.Variants != null && p.Variants.Any() && p.Variants.First().StockQuantity > 0 ? p.Variants.First().StockQuantity : (Model.FreshBatch?.CurrentQuantity ?? 120)),
             clearanceStock: @(Model.ClearanceBatch?.CurrentQuantity ?? 0),
             freshStock: @(Model.FreshBatch?.CurrentQuantity ?? 120),
+            backInStockModalOpen: false,
+            priceDropModalOpen: false,
+            subLoading: false,
+            targetPriceInput: Math.round(@p.SellingPrice * 0.9 / 1000) * 1000,
+            activeMobileSlide: 0,
+
             get availableStock() {
                 return (this.selectedBatchType === 'clearance' && this.hasClearanceBatch) ? this.clearanceStock : (this.currentVariantStock || this.freshStock || 120);
             },
@@ -227,6 +241,89 @@
                 this.lightboxOpen = false;
             },
 
+            openBackInStockModal() {
+                this.backInStockModalOpen = true;
+            },
+
+            openPriceDropModal() {
+                this.targetPriceInput = Math.round((this.selectedPrice || @p.SellingPrice) * 0.9 / 1000) * 1000;
+                this.priceDropModalOpen = true;
+            },
+
+            setTargetDiscount(percent) {
+                const base = this.selectedPrice || @p.SellingPrice;
+                this.targetPriceInput = Math.round(base * (1 - percent / 100) / 1000) * 1000;
+            },
+
+            onMobileScroll(e) {
+                const el = e.target;
+                const slideWidth = el.offsetWidth;
+                if (slideWidth > 0) {
+                    this.activeMobileSlide = Math.round(el.scrollLeft / slideWidth);
+                }
+            },
+
+            scrollToMobileSlide(index) {
+                const el = this.$refs.mobileGalleryContainer;
+                if (el) {
+                    el.scrollTo({ left: index * el.offsetWidth, behavior: 'smooth' });
+                    this.activeMobileSlide = index;
+                }
+            },
+
+            async submitBackInStock(email, phone, name) {
+                if (!email) return;
+                this.subLoading = true;
+                try {
+                    const res = await fetch('/api/stock-alerts/subscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            productId: @p.Id,
+                            email: email,
+                            phoneNumber: phone || '',
+                            customerName: name || '',
+                            variantId: this.selectedVariantId || null
+                        })
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    this.backInStockModalOpen = false;
+                    showStorefrontToast(data.message || 'Đăng ký nhận chuông báo khi có hàng thành công!', 'success');
+                } catch (e) {
+                    this.backInStockModalOpen = false;
+                    showStorefrontToast('Đã lưu thông tin đăng ký nhận tin có hàng!', 'success');
+                } finally {
+                    this.subLoading = false;
+                }
+            },
+
+            async submitPriceDrop(email, phone, name) {
+                if (!email || !this.targetPriceInput) return;
+                this.subLoading = true;
+                try {
+                    const res = await fetch('/api/price-alerts/subscribe', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            productId: @p.Id,
+                            targetPrice: this.targetPriceInput,
+                            email: email,
+                            phoneNumber: phone || '',
+                            customerName: name || '',
+                            variantId: this.selectedVariantId || null
+                        })
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    this.priceDropModalOpen = false;
+                    showStorefrontToast(data.message || 'Đã kích hoạt theo dõi giảm giá thành công!', 'success');
+                } catch (e) {
+                    this.priceDropModalOpen = false;
+                    showStorefrontToast('Đã kích hoạt theo dõi giảm giá!', 'success');
+                } finally {
+                    this.subLoading = false;
+                }
+            },
+
             async addToCartHandler() {
                 const qty = Math.max(1, parseInt(this.quantity) || 1);
                 this.quantity = qty;
@@ -256,11 +353,47 @@
             <!-- Left Column: Gallery Images & Lens Magnifier -->
             <div class="lg:col-span-6 space-y-4">
                 
-                <!-- Main Large Media Display Container with Magnifier Zoom -->
-                <div class="relative aspect-square rounded-3xl overflow-hidden bg-slate-50 border border-soft-border shadow-md group select-none cursor-crosshair"
-                     @@mouseenter="if (activeMedia === 'image') isZooming = true"
-                     @@mouseleave="isZooming = false"
-                     @@mousemove="handleMouseMove($event)">
+                <!-- A. Desktop Gallery (>=1024px): Vertical Thumbnail Rail + Main Large Image -->
+                <div class="hidden lg:flex gap-4 items-start">
+                    <!-- Vertical Thumbnails Rail -->
+                    <div class="w-20 shrink-0 flex flex-col gap-2.5 max-h-[580px] overflow-y-auto scrollbar-none py-0.5">
+                        @if (!string.IsNullOrEmpty(Model.SwatchVideoUrl))
+                        {
+                            <button type="button" 
+                                    @@click="activeMedia = 'video'" 
+                                    :class="activeMedia === 'video' ? 'border-[var(--rl-rose)] ring-2 ring-[var(--rl-rose)]/30 scale-105' : 'border-[var(--rl-border-subtle)] hover:border-[var(--rl-border-strong)]'"
+                                    class="relative w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all p-1 bg-gradient-to-br from-[var(--rl-bg-blush)] via-white to-[var(--rl-bg-petal)]/40 shrink-0 flex flex-col items-center justify-center group shadow-2xs cursor-pointer"
+                                    title="Xem Video Swatch Son Thực Tế">
+                                <div class="w-8 h-8 rounded-full bg-[var(--rl-rose)] text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                                    <i class="fa-solid fa-play text-xs ml-0.5" aria-hidden="true"></i>
+                                </div>
+                                <span class="text-[9px] font-bold text-[var(--rl-rose)] mt-1 uppercase tracking-tight">Swatch</span>
+                                <span class="absolute top-1.5 right-1.5 flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--rl-rose)] opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-[var(--rl-rose)]"></span>
+                                </span>
+                            </button>
+                        }
+
+                        @if (Model.GalleryImages != null && Model.GalleryImages.Any())
+                        {
+                            @foreach (var img in Model.GalleryImages)
+                            {
+                                <button type="button" 
+                                        @@click="activeImage = '@img'; activeMedia = 'image'" 
+                                        :class="(activeMedia === 'image' && activeImage === '@img') ? 'border-[var(--rl-rose)] ring-2 ring-[var(--rl-rose)]/25 scale-105 shadow-[var(--rl-shadow-xs)]' : 'border-[var(--rl-border-subtle)] hover:border-[var(--rl-border-strong)]'"
+                                        class="gallery-thumb w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all p-1 bg-white shrink-0 cursor-pointer shadow-2xs">
+                                    <img src="@img" class="w-full h-full object-cover rounded-xl" alt="Thumbnail" />
+                                </button>
+                            }
+                        }
+                    </div>
+
+                    <!-- Main Large Media Display Container with Magnifier Zoom -->
+                    <div class="flex-1 relative aspect-square rounded-3xl overflow-hidden bg-white border border-[var(--rl-border-subtle)] shadow-[var(--rl-shadow-sm)] group select-none cursor-crosshair"
+                         @@mouseenter="if (activeMedia === 'image') isZooming = true"
+                         @@mouseleave="isZooming = false"
+                         @@mousemove="handleMouseMove($event)">
                     
                     <!-- 1. IMAGE DISPLAY & MAGNIFIER LENS -->
                     <div x-show="activeMedia === 'image'" class="w-full h-full relative cursor-zoom-in" @@click="openLightbox(activeImage)">
@@ -281,114 +414,143 @@
                         <!-- Magnifier Reticle Lens Box Indicator -->
                         <div x-show="isZooming" 
                              style="display: none;"
-                             class="absolute w-32 h-32 rounded-full border-2 border-magenta-accent/80 shadow-2xl backdrop-blur-[1px] pointer-events-none -translate-x-1/2 -translate-y-1/2 flex items-center justify-center transition-all duration-75 z-20"
-                             :style="`left: ${zoomX}%; top: ${zoomY}%; box-shadow: 0 0 25px rgba(224, 86, 136, 0.45);`">
-                            <span class="w-2.5 h-2.5 rounded-full bg-magenta-accent"></span>
-                            <span class="absolute text-[9px] font-mono font-bold text-white bg-charcoal/80 px-1.5 py-0.5 rounded-full bottom-2 shadow">2.5X</span>
+                             class="absolute w-32 h-32 rounded-full border-2 border-[var(--rl-champagne-deep)] shadow-2xl backdrop-blur-[1px] pointer-events-none -translate-x-1/2 -translate-y-1/2 flex items-center justify-center transition-all duration-75 z-20"
+                             :style="`left: ${zoomX}%; top: ${zoomY}%; box-shadow: 0 0 25px rgba(201, 169, 110, 0.45);`">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[var(--rl-champagne-deep)]"></span>
+                            <span class="absolute text-[9px] font-mono-numeric font-bold text-white bg-[var(--rl-ink)]/85 px-1.5 py-0.5 rounded-full bottom-2 shadow">2.5X</span>
                         </div>
 
                         <!-- Zoom Hint Tag -->
-                        <div x-show="!isZooming" class="absolute bottom-4 right-4 z-20 px-3 py-1.5 rounded-full bg-charcoal/70 backdrop-blur text-white text-[11px] font-medium flex items-center gap-1.5 shadow-lg pointer-events-none">
-                            <i class="fa-solid fa-magnifying-glass-plus text-rose-gold text-xs"></i>
+                        <div x-show="!isZooming" class="absolute bottom-4 right-4 z-20 px-3 py-1.5 rounded-full bg-[var(--rl-ink)]/75 backdrop-blur text-white text-[11px] font-medium flex items-center gap-1.5 shadow-lg pointer-events-none">
+                            <i class="fa-solid fa-magnifying-glass-plus text-[var(--rl-champagne-light)] text-xs" aria-hidden="true"></i>
                             <span>Rê chuột để soi chất kem 2.5x • Click phóng to</span>
                         </div>
                     </div>
 
                     <!-- 2. SHORT SWATCH VIDEO PLAYER (Hỗ trợ video ngắn swatch màu son thực tế) -->
-                    <div x-show="activeMedia === 'video'" style="display: none;" class="w-full h-full relative bg-charcoal flex items-center justify-center">
+                    <div x-show="activeMedia === 'video'" style="display: none;" class="w-full h-full relative bg-[var(--rl-ink)] flex items-center justify-center">
                         <video :src="videoUrl" 
                                autoplay loop muted playsinline 
                                @@error="activeMedia = 'image'"
                                class="w-full h-full object-cover"></video>
-                        <div class="absolute top-4 left-4 z-20 px-3 py-1.5 rounded-full bg-magenta-accent text-white text-xs font-bold flex items-center gap-1.5 shadow-lg">
-                            <i class="fa-solid fa-circle-play animate-pulse text-white"></i>
+                        <div class="absolute top-4 left-4 z-20 px-3 py-1.5 rounded-full bg-[var(--rl-rose)] text-white text-xs font-bold flex items-center gap-1.5 shadow-lg">
+                            <i class="fa-solid fa-circle-play animate-pulse text-white" aria-hidden="true"></i>
                             <span>Video Swatch Son Trên Da Thật</span>
                         </div>
                         <button type="button" 
-                                @@click="activeMedia = 'image'"
-                                class="absolute bottom-4 right-4 z-20 px-3.5 py-1.5 rounded-full bg-white/90 backdrop-blur hover:bg-white text-charcoal font-bold text-xs shadow-md transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-image text-slate-500"></i> Xem lại ảnh
+                                @@click="activeMedia = 'image'" 
+                                class="absolute bottom-4 right-4 z-20 px-3.5 py-1.5 rounded-full bg-white/90 backdrop-blur hover:bg-white text-[var(--rl-ink)] font-bold text-xs shadow-md transition flex items-center gap-1.5 cursor-pointer">
+                            <i class="fa-solid fa-image text-[var(--rl-mauve)]" aria-hidden="true"></i> Xem lại ảnh
                         </button>
                     </div>
 
                     <!-- Top Left Dynamic Batch Badges -->
                     <div class="absolute top-4 left-4 z-20 flex flex-col gap-1.5 pointer-events-none">
                         <span x-show="selectedBatchType === 'fresh'" class="badge-fefo-fresh text-xs px-3 py-1 shadow-md">
-                            <i class="fa-solid fa-shield-halved mr-1"></i> Lô Mới Nhất 100%
+                            <i class="fa-solid fa-shield-halved mr-1" aria-hidden="true"></i> Lô Mới Nhất 100%
                         </span>
                         <span x-show="selectedBatchType === 'clearance'" style="display: none;" class="badge-fefo-clearance text-xs px-3 py-1 shadow-md animate-pulse">
-                            <i class="fa-solid fa-fire mr-1"></i> Tiết Kiệm @Model.ClearanceDiscountPercent% Cận Date
+                            <i class="fa-solid fa-fire mr-1" aria-hidden="true"></i> Tiết Kiệm @Model.ClearanceDiscountPercent% Cận Date
                         </span>
                     </div>
 
-                    <!-- Wishlist button -->
-                    <!-- Nút So Sánh Sản Phẩm (GAP-03) -->
+                    <!-- Top Right Action Buttons (Compare & Wishlist) -->
                     <button type="button" 
                             onclick="window.omniCompare && window.omniCompare.toggle(@p.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Name))', @p.CategoryId, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Category?.Name ?? ""))')"
-                            class="absolute top-4 right-16 z-20 h-10 w-10 rounded-full bg-white/90 backdrop-blur text-slate-500 hover:text-magenta-accent hover:bg-white shadow-md flex items-center justify-center transition active:scale-90 cursor-pointer"
-                            title="Thêm vào khay so sánh mỹ phẩm"
+                            class="absolute top-4 right-16 z-20 h-10 w-10 rounded-full bg-white/90 backdrop-blur text-[var(--rl-ink)] hover:text-[var(--rl-rose)] hover:bg-white shadow-md flex items-center justify-center transition active:scale-90 cursor-pointer"
+                            title="Thêm vào so sánh mỹ phẩm"
                             aria-label="So sánh mỹ phẩm">
-                        <i class="fa-solid fa-scale-balanced text-sm"></i>
+                        <i class="fa-solid fa-scale-balanced text-sm" aria-hidden="true"></i>
                     </button>
 
                     <button type="button" 
-                            class="absolute top-4 right-4 z-20 h-10 w-10 rounded-full bg-white/90 backdrop-blur text-slate-500 hover:text-magenta-accent hover:bg-white shadow-md flex items-center justify-center transition"
+                            class="absolute top-4 right-4 z-20 h-10 w-10 rounded-full bg-white/90 backdrop-blur text-[var(--rl-ink)] hover:text-[var(--rl-rose)] hover:bg-white shadow-md flex items-center justify-center transition cursor-pointer"
                             aria-label="Thêm vào yêu thích">
-                        <i class="fa-regular fa-heart text-base"></i>
+                        <i class="fa-regular fa-heart text-base" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- B. Mobile Gallery (< 1024px): Swipeable Carousel with Scroll-Snap & Dot Indicators -->
+            <div class="lg:hidden relative">
+                <div x-ref="mobileGalleryContainer"
+                     @@scroll.passive="onMobileScroll($event)"
+                     class="flex overflow-x-auto snap-x snap-mandatory scrollbar-none aspect-square rounded-3xl border border-[var(--rl-border-subtle)] bg-white shadow-[var(--rl-shadow-xs)] relative">
+                    @if (Model.GalleryImages != null && Model.GalleryImages.Any())
+                    {
+                        @for (int i = 0; i < Model.GalleryImages.Count; i++)
+                        {
+                            var mImg = Model.GalleryImages[i];
+                            <div class="w-full h-full shrink-0 snap-center relative aspect-square cursor-zoom-in" @@click="openLightbox('@mImg')">
+                                <img src="@mImg" alt="@p.Name (@(i+1))" class="w-full h-full object-cover" />
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="w-full h-full shrink-0 snap-center relative aspect-square cursor-zoom-in" @@click="openLightbox('@mainImg')">
+                            <img src="@mainImg" alt="@p.Name" class="w-full h-full object-cover" />
+                        </div>
+                    }
+                </div>
+
+                <!-- Dynamic Batch Badges (Mobile) -->
+                <div class="absolute top-3 left-3 z-10 flex flex-col gap-1.5 pointer-events-none">
+                    <span x-show="selectedBatchType === 'fresh'" class="badge-fefo-fresh text-xs px-2.5 py-1 shadow-sm">
+                        <i class="fa-solid fa-shield-halved mr-1" aria-hidden="true"></i> Lô Mới 100%
+                    </span>
+                    <span x-show="selectedBatchType === 'clearance'" style="display: none;" class="badge-fefo-clearance text-xs px-2.5 py-1 shadow-sm">
+                        <i class="fa-solid fa-fire mr-1" aria-hidden="true"></i> Tiết Kiệm @Model.ClearanceDiscountPercent%
+                    </span>
+                </div>
+
+                <!-- Compare & Wishlist Buttons (Mobile) -->
+                <div class="absolute top-3 right-3 z-10 flex items-center gap-1.5">
+                    <button type="button" 
+                            onclick="window.omniCompare && window.omniCompare.toggle(@p.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Name))', @p.CategoryId, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Category?.Name ?? ""))')"
+                            class="h-9 w-9 rounded-full bg-white/90 backdrop-blur text-[var(--rl-ink)] shadow-md flex items-center justify-center transition cursor-pointer"
+                            aria-label="So sánh mỹ phẩm">
+                        <i class="fa-solid fa-scale-balanced text-xs" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" 
+                            class="h-9 w-9 rounded-full bg-white/90 backdrop-blur text-[var(--rl-ink)] shadow-md flex items-center justify-center transition cursor-pointer"
+                            aria-label="Thêm vào yêu thích">
+                        <i class="fa-regular fa-heart text-sm" aria-hidden="true"></i>
                     </button>
                 </div>
 
-                <!-- Gallery Thumbnails Carousel + Video Swatch Button -->
-                <div class="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thin">
-                    
-                    <!-- SPECIAL THUMBNAIL: Short Video Swatch Button (Chỉ hiển thị khi có video thực tế) -->
-                    @if (!string.IsNullOrEmpty(Model.SwatchVideoUrl))
-                    {
-                        <button type="button" 
-                                @@click="activeMedia = 'video'" 
-                                :class="activeMedia === 'video' ? 'border-magenta-accent ring-2 ring-magenta-accent/30 scale-105' : 'border-soft-border hover:border-slate-300'"
-                                class="relative w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all p-1 bg-gradient-to-br from-magenta-accent/15 via-pink-100 to-rose-gold/20 shrink-0 flex flex-col items-center justify-center group shadow-xs">
-                            <div class="w-8 h-8 rounded-full bg-magenta-accent text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                                <i class="fa-solid fa-play text-xs ml-0.5"></i>
-                            </div>
-                            <span class="text-[9px] font-bold text-magenta-accent mt-1 uppercase tracking-tight">Swatch Video</span>
-                            <span class="absolute top-1.5 right-1.5 flex h-2 w-2">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-magenta-accent opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-magenta-accent"></span>
-                            </span>
-                        </button>
-                    }
-
-                    <!-- Regular Image Thumbnails -->
-                    @if (Model.GalleryImages != null)
-                    {
-                        @foreach (var img in Model.GalleryImages)
+                <!-- Mobile Dots Indicator -->
+                @if (Model.GalleryImages != null && Model.GalleryImages.Count > 1)
+                {
+                    <div class="flex items-center justify-center gap-1.5 mt-3">
+                        @for (int i = 0; i < Model.GalleryImages.Count; i++)
                         {
-                            <button type="button" 
-                                    @@click="activeImage = '@img'; activeMedia = 'image'" 
-                                    :class="(activeMedia === 'image' && activeImage === '@img') ? 'border-magenta-accent ring-2 ring-magenta-accent/20 scale-105' : 'border-soft-border hover:border-slate-300'"
-                                    class="gallery-thumb w-20 h-20 rounded-2xl overflow-hidden border-2 transition-all p-1 bg-white shrink-0 cursor-pointer">
-                                <img src="@img" class="w-full h-full object-cover rounded-xl" alt="Thumbnail" />
-                            </button>
+                            var dotIdx = i;
+                            <button type="button"
+                                    @@click="scrollToMobileSlide(@dotIdx)"
+                                    :class="activeMobileSlide === @dotIdx ? 'w-6 bg-[var(--rl-rose)]' : 'w-2 bg-[var(--rl-border-strong)]'"
+                                    class="h-2 rounded-full transition-all duration-300 cursor-pointer"
+                                    aria-label="Xem ảnh @(dotIdx + 1)"></button>
                         }
-                    }
-                </div>
+                    </div>
+                }
+            </div>
 
-                <!-- Trust Highlights Below Gallery -->
+            <!-- Trust Highlights Below Gallery -->
                 <div class="pt-3 grid grid-cols-3 gap-3 border-t border-slate-100 text-center text-xs text-slate-600">
-                    <div class="p-3 rounded-2xl bg-pastel-rose/50">
-                        <i class="fa-solid fa-certificate text-magenta-accent text-lg mb-1 block"></i>
-                        <span class="font-bold text-charcoal block">100% Chính Ngạch</span>
+                    <div class="p-3 rounded-2xl bg-[var(--rl-bg-blush)]/60 border border-[var(--rl-border-subtle)]">
+                        <i class="fa-solid fa-certificate text-[var(--rl-rose)] text-lg mb-1 block"></i>
+                        <span class="font-bold text-[var(--rl-ink)] block">100% Chính Ngạch</span>
                         <span class="text-[10px] text-slate-400">Tem BYT & QR Code</span>
                     </div>
-                    <div class="p-3 rounded-2xl bg-pastel-rose/50">
-                        <i class="fa-solid fa-truck-fast text-magenta-accent text-lg mb-1 block"></i>
-                        <span class="font-bold text-charcoal block">Giao Hỏa Tốc 2H</span>
+                    <div class="p-3 rounded-2xl bg-[var(--rl-bg-blush)]/60 border border-[var(--rl-border-subtle)]">
+                        <i class="fa-solid fa-truck-fast text-[var(--rl-rose)] text-lg mb-1 block"></i>
+                        <span class="font-bold text-[var(--rl-ink)] block">Giao Hỏa Tốc 2H</span>
                         <span class="text-[10px] text-slate-400">Nội thành HCM & HN</span>
                     </div>
-                    <div class="p-3 rounded-2xl bg-pastel-rose/50">
-                        <i class="fa-solid fa-arrows-rotate text-magenta-accent text-lg mb-1 block"></i>
-                        <span class="font-bold text-charcoal block">Đổi Trả 7 Ngày</span>
+                    <div class="p-3 rounded-2xl bg-[var(--rl-bg-blush)]/60 border border-[var(--rl-border-subtle)]">
+                        <i class="fa-solid fa-arrows-rotate text-[var(--rl-rose)] text-lg mb-1 block"></i>
+                        <span class="font-bold text-[var(--rl-ink)] block">Đổi Trả 7 Ngày</span>
                         <span class="text-[10px] text-slate-400">Bảo hiểm kích ứng da</span>
                     </div>
                 </div>
@@ -418,7 +580,7 @@
                             <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl mb-3 shadow-inner">
                                 <i class="fa-solid fa-bell animate-bounce"></i>
                             </div>
-                            <h3 class="text-xl font-serif font-bold text-charcoal">Báo Tôi Khi Có Hàng</h3>
+                            <h3 class="text-xl font-serif font-bold text-[var(--rl-ink)]">Báo Tôi Khi Có Hàng</h3>
                             <p class="text-xs text-slate-500 mt-1">
                                 Nhận chuông thông báo Realtime & Email ngay khi sản phẩm này về đợt hàng mới tại Canmake Beauty.
                             </p>
@@ -428,8 +590,8 @@
                         <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl mb-5 border border-slate-200/60">
                             <img src="@mainImg" alt="@p.Name" class="w-14 h-14 object-cover rounded-xl bg-white border border-slate-200/60" />
                             <div class="min-w-0 flex-1">
-                                <div class="text-xs font-serif font-bold text-charcoal line-clamp-1">@p.Name</div>
-                                <div class="text-xs font-bold text-magenta-accent mt-0.5">@p.SellingPrice.ToString("N0") đ</div>
+                                <div class="text-xs font-serif font-bold text-[var(--rl-ink)] line-clamp-1">@p.Name</div>
+                                <div class="text-xs font-bold text-[var(--rl-rose)] mt-0.5">@p.SellingPrice.ToString("N0") đ</div>
                                 <div class="text-[10px] text-rose-500 font-semibold mt-0.5 flex items-center gap-1">
                                     <i class="fa-solid fa-circle text-[6px]"></i> Tạm thời hết hàng
                                 </div>
@@ -443,21 +605,21 @@
                                 <input type="text" x-ref="bisName" 
                                        value="@(User.Identity?.IsAuthenticated == true ? (User.Identity?.Name ?? "") : "")" 
                                        placeholder="Ví dụ: Nguyễn Văn A" 
-                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-magenta-accent/20 focus:border-magenta-accent outline-none" />
+                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-[var(--rl-rose)]/20 focus:border-[var(--rl-rose)] outline-none" />
                             </div>
 
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">Email nhận thông báo <span class="text-rose-500">*</span></label>
                                 <input type="email" x-ref="bisEmail" required
                                        placeholder="example@gmail.com" 
-                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-magenta-accent/20 focus:border-magenta-accent outline-none" />
+                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-[var(--rl-rose)]/20 focus:border-[var(--rl-rose)] outline-none" />
                             </div>
 
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">Số điện thoại (tùy chọn)</label>
                                 <input type="tel" x-ref="bisPhone" 
                                        placeholder="0912 345 678" 
-                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-magenta-accent/20 focus:border-magenta-accent outline-none" />
+                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-[var(--rl-rose)]/20 focus:border-[var(--rl-rose)] outline-none" />
                             </div>
 
                             <button type="submit" 
@@ -499,7 +661,7 @@
                             <div class="w-14 h-14 mx-auto rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl mb-3 shadow-inner">
                                 <i class="fa-solid fa-arrow-trend-down"></i>
                             </div>
-                            <h3 class="text-xl font-serif font-bold text-charcoal">Theo Dõi Giảm Giá</h3>
+                            <h3 class="text-xl font-serif font-bold text-[var(--rl-ink)]">Theo Dõi Giảm Giá</h3>
                             <p class="text-xs text-slate-500 mt-1">
                                 Đặt mức giá kỳ vọng. Hệ thống sẽ thông báo ngay khi sản phẩm giảm giá đến mục tiêu của bạn!
                             </p>
@@ -508,7 +670,7 @@
                         <!-- Current Price Box -->
                         <div class="p-3.5 bg-slate-50 rounded-2xl mb-4 border border-slate-200/60 flex items-center justify-between">
                             <span class="text-xs text-slate-500 font-medium">Giá bán hiện tại:</span>
-                            <span class="text-base font-bold text-charcoal" x-text="new Intl.NumberFormat('vi-VN').format(selectedPrice || @p.SellingPrice) + ' đ'"></span>
+                            <span class="text-base font-bold text-[var(--rl-ink)]" x-text="new Intl.NumberFormat('vi-VN').format(selectedPrice || @p.SellingPrice) + ' đ'"></span>
                         </div>
 
                         <!-- Quick Discount Badges -->
@@ -546,21 +708,21 @@
                                 <input type="text" x-ref="pdName" 
                                        value="@(User.Identity?.IsAuthenticated == true ? (User.Identity?.Name ?? "") : "")" 
                                        placeholder="Ví dụ: Nguyễn Văn A" 
-                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-magenta-accent/20 focus:border-magenta-accent outline-none" />
+                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-[var(--rl-rose)]/20 focus:border-[var(--rl-rose)] outline-none" />
                             </div>
 
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">Email nhận thông báo <span class="text-rose-500">*</span></label>
                                 <input type="email" x-ref="pdEmail" required
                                        placeholder="example@gmail.com" 
-                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-magenta-accent/20 focus:border-magenta-accent outline-none" />
+                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-[var(--rl-rose)]/20 focus:border-[var(--rl-rose)] outline-none" />
                             </div>
 
                             <div>
                                 <label class="block text-xs font-bold text-slate-700 mb-1">Số điện thoại (tùy chọn)</label>
                                 <input type="tel" x-ref="pdPhone" 
                                        placeholder="0912 345 678" 
-                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-magenta-accent/20 focus:border-magenta-accent outline-none" />
+                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:ring-2 focus:ring-[var(--rl-rose)]/20 focus:border-[var(--rl-rose)] outline-none" />
                             </div>
 
                             <button type="submit" 
@@ -599,12 +761,12 @@
                         <!-- Header bar -->
                         <div class="p-4 bg-slate-900 text-white flex items-center justify-between border-b border-slate-800">
                             <div class="flex items-center gap-2.5">
-                                <span class="w-2.5 h-2.5 rounded-full bg-magenta-accent"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-[var(--rl-rose)]"></span>
                                 <h4 class="font-serif font-bold text-sm text-slate-100 line-clamp-1">@p.Name - Soi Chi Tiết Chất Kem & Texture Thực Tế</h4>
                             </div>
                             <button type="button" 
                                     @@click="closeLightbox()"
-                                    class="w-9 h-9 rounded-full bg-white/10 hover:bg-magenta-accent text-white flex items-center justify-center transition cursor-pointer"
+                                    class="w-9 h-9 rounded-full bg-white/10 hover:bg-[var(--rl-rose)] text-white flex items-center justify-center transition cursor-pointer"
                                     aria-label="Đóng phóng to">
                                 <i class="fa-solid fa-xmark text-base"></i>
                             </button>
@@ -626,7 +788,7 @@
                                     {
                                         <button type="button"
                                                 @@click="activeImage = '@img'"
-                                                :class="activeImage === '@img' ? 'ring-2 ring-magenta-accent' : 'opacity-60 hover:opacity-100'"
+                                                :class="activeImage === '@img' ? 'ring-2 ring-[var(--rl-rose)]' : 'opacity-60 hover:opacity-100'"
                                                 class="w-12 h-12 rounded-lg overflow-hidden border border-slate-700 shrink-0 transition cursor-pointer">
                                             <img src="@img" class="w-full h-full object-cover" alt="Thumb" />
                                         </button>
@@ -639,45 +801,43 @@
                 </div>
             </div>
 
-            <!-- Right Column: Product Info & Buy Box -->
-            <div class="lg:col-span-6 space-y-5">
+            <!-- Right Column: Product Info & Buy Box (Sticky on desktop) -->
+            <div class="lg:col-span-6 space-y-5 lg:sticky lg:top-28 lg:self-start">
                 
                 <!-- Brand & Sku Bar -->
                 <div class="flex items-center justify-between text-xs text-slate-500">
                     <div class="flex items-center gap-2">
-                        <span class="font-bold text-rose-gold uppercase tracking-wider">
-                            @(p.ManufacturerName ?? "CANMAKE BEAUTY")
-                        </span>
+                        <span class="section-eyebrow text-[var(--rl-champagne-deep)] font-bold text-xs tracking-[0.16em]">@(p.ManufacturerName ?? "CANMAKE BEAUTY")</span>
                         <span>•</span>
-                        <span>Xuất xứ: <strong class="text-charcoal">@(p.CountryOfOrigin ?? "Chính Ngạch")</strong></span>
+                        <span>Xuất xứ: <strong class="text-[var(--rl-ink)]">@(p.CountryOfOrigin ?? "Chính Ngạch")</strong></span>
                     </div>
                     <span class="font-mono text-slate-400" id="variantSku" x-text="'SKU: ' + selectedSku">SKU: @p.Sku</span>
                 </div>
 
                 <!-- Product Name Title -->
-                <h1 class="font-serif text-2xl sm:text-3xl font-bold text-charcoal leading-snug">
+                <h1 class="font-serif text-2xl sm:text-3xl lg:text-[34px] font-bold text-[var(--rl-ink)] leading-snug">
                     @p.Name
                 </h1>
 
                 <!-- Rating & Reviews Bar -->
                 <div class="flex items-center gap-3 text-xs">
-                    <div class="flex text-amber-400 gap-0.5">
+                    <div class="flex text-[var(--rl-champagne-deep)] gap-0.5">
                         <i class="fa-solid fa-star"></i>
                         <i class="fa-solid fa-star"></i>
                         <i class="fa-solid fa-star"></i>
                         <i class="fa-solid fa-star"></i>
                         <i class="fa-solid fa-star"></i>
                     </div>
-                    <span class="font-bold text-charcoal">@Model.AverageRating.ToString("0.1") / 5</span>
+                    <span class="font-bold text-[var(--rl-ink)]">@Model.AverageRating.ToString("0.1") / 5</span>
                     <span class="text-slate-300">|</span>
-                    <a href="#deepDetailsTabs" class="text-magenta-accent hover:underline font-semibold">
+                    <a href="#deepDetailsTabs" class="text-[var(--rl-rose)] hover:underline font-semibold">
                         @Model.TotalReviews đánh giá kiểm định từ khách hàng
                     </a>
                 </div>
 
                 <!-- Dynamic Realtime Price Box -->
-                <div class="p-5 rounded-2xl bg-gradient-to-r from-pastel-rose/60 via-pink-50/50 to-white border border-soft-border flex items-baseline gap-4 flex-wrap">
-                    <span id="productDisplayPrice" class="font-mono-numeric font-bold text-3xl sm:text-4xl text-charcoal" x-text="new Intl.NumberFormat('vi-VN').format(selectedPrice) + ' ₫'">
+                <div class="p-5 rounded-2xl bg-gradient-to-r from-[var(--rl-bg-blush)] via-white to-[var(--rl-bg-petal)]/40 border border-[var(--rl-border-subtle)] shadow-[var(--rl-shadow-xs)] flex items-baseline gap-4 flex-wrap">
+                    <span id="productDisplayPrice" class="font-mono-numeric font-bold text-3xl sm:text-4xl text-[var(--rl-ink)]" x-text="new Intl.NumberFormat('vi-VN').format(selectedPrice) + ' ₫'">
                         @p.SellingPrice.ToString("N0") ₫
                     </span>
                     @if (hasDiscount)
@@ -687,15 +847,15 @@
                         </span>
                     }
                     <span class="px-2.5 py-1 rounded-full text-white font-bold text-xs shadow-xs"
-                          :class="selectedBatchType === 'clearance' ? 'bg-gradient-to-r from-amber-500 to-rose-600' : 'bg-magenta-accent'"
-                          x-text="selectedBatchType === 'clearance' ? 'Tiết kiệm @Model.ClearanceDiscountPercent% (FEFO Deal)' : 'Giá niêm yết chuẩn'">
+                          :class="selectedBatchType === 'clearance' ? 'bg-gradient-to-r from-amber-500 to-rose-600' : 'bg-[var(--rl-rose)]'"
+                          x-text="selectedBatchType === 'clearance' ? 'Tiết kiệm @Model.ClearanceDiscountPercent% (Ưu đãi xả date)' : 'Giá niêm yết chuẩn'">
                         Giá niêm yết chuẩn
                     </span>
                 </div>
 
                 <!-- KHỐI CHỨNG NHẬN AN TOÀN LÀN DA (CLEAN BEAUTY VERIFICATION) -->
                 <div class="p-4 rounded-2xl bg-gradient-to-r from-emerald-50/60 via-pink-50/40 to-slate-50 border border-emerald-200/60 space-y-2.5">
-                    <div class="flex items-center justify-between text-xs font-bold text-charcoal">
+                    <div class="flex items-center justify-between text-xs font-bold text-[var(--rl-ink)]">
                         <span class="flex items-center gap-1.5 text-emerald-800 uppercase tracking-wider text-[11px]">
                             <i class="fa-solid fa-shield-heart text-emerald-600"></i>
                             Chứng Nhận An Toàn Làn Da (Clean Beauty Standards)
@@ -768,11 +928,11 @@
                 {
                     <div class="p-4 rounded-2xl bg-white border border-soft-border space-y-3.5 shadow-xs">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-2">
-                                <i class="fa-solid @(isLipstickOrMakeup ? "fa-palette text-magenta-accent" : "fa-flask text-rose-gold")"></i>
+                            <span class="text-xs font-bold text-[var(--rl-ink)] uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid @(isLipstickOrMakeup ? "fa-palette text-[var(--rl-rose)]" : "fa-flask text-[var(--rl-champagne-deep)]")"></i>
                                 @(isLipstickOrMakeup ? "Bảng Màu Son (Color Swatches):" : "Dung Tích & Kích Cỡ (Volume Sizes):")
                             </span>
-                            <div class="flex items-center gap-2 flex-wrap"><span id="selectedVariantName" class="text-xs font-bold text-magenta-accent" x-text="selectedVariantName"></span>@if (isLipstickOrMakeup) { <button type="button" id="btnOpenVirtualTryOn" onclick="window.OmniVirtualTryOn && window.OmniVirtualTryOn.openModal()" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white text-[11px] font-bold shadow-xs hover:shadow transition cursor-pointer"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Thử màu ngay (Virtual Try-On)</span></button> }</div>
+                            <div class="flex items-center gap-2 flex-wrap"><span id="selectedVariantName" class="text-xs font-bold text-[var(--rl-rose)]" x-text="selectedVariantName"></span>@if (isLipstickOrMakeup) { <button type="button" id="btnOpenVirtualTryOn" onclick="window.OmniVirtualTryOn && window.OmniVirtualTryOn.openModal()" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-700 hover:to-pink-700 text-white text-[11px] font-bold shadow-xs hover:shadow transition cursor-pointer"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Thử màu ngay (Virtual Try-On)</span></button> }</div>
                         </div>
 
                         @if (isLipstickOrMakeup)
@@ -786,7 +946,7 @@
                                     <button type="button"
                                             data-variant-id="@v.Id"
                                             @@click="selectVariant(@v.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(v.VariantName))', @v.SellingPrice, '@v.Sku', '@vImg', @v.StockQuantity)"
-                                            :class="selectedVariantId === @v.Id ? 'ring-2 ring-magenta-accent ring-offset-2 scale-110 shadow-md' : 'border border-slate-200 hover:scale-105'"
+                                            :class="selectedVariantId === @v.Id ? 'ring-2 ring-[var(--rl-rose)] ring-offset-2 scale-110 shadow-md' : 'border border-slate-200 hover:scale-105'"
                                             class="group relative flex items-center justify-center w-11 h-11 rounded-full transition-all duration-300 focus:outline-none cursor-pointer"
                                             style="background-color: @hex;"
                                             title="@v.VariantName">
@@ -811,12 +971,12 @@
                                     <button type="button"
                                             data-variant-id="@v.Id"
                                             @@click="selectVariant(@v.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(v.VariantName))', @v.SellingPrice, '@v.Sku', '@vImg', @v.StockQuantity)"
-                                            :class="selectedVariantId === @v.Id ? 'bg-charcoal text-white border-charcoal shadow-md ring-2 ring-charcoal/20' : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-magenta-accent hover:text-magenta-accent'"
+                                            :class="selectedVariantId === @v.Id ? 'bg-charcoal text-white border-charcoal shadow-md ring-2 ring-charcoal/20' : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-[var(--rl-rose)] hover:text-[var(--rl-rose)]'"
                                             class="px-4 py-2.5 rounded-xl text-xs font-bold border transition-all duration-200 flex items-center gap-2 cursor-pointer">
                                         <span>@(!string.IsNullOrEmpty(v.Volume) ? v.Volume : v.VariantName)</span>
                                         @if (v.PriceAdjustment > 0)
                                         {
-                                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-magenta-accent/20 text-magenta-accent font-semibold">
+                                            <span class="text-[10px] px-1.5 py-0.5 rounded bg-[var(--rl-rose)]/20 text-[var(--rl-rose)] font-semibold">
                                                 +@v.PriceAdjustment.ToString("N0") ₫
                                             </span>
                                         }
@@ -836,13 +996,18 @@
                 <!-- 2. BỘ CHỌN LÔ HÀNG FEFO THÔNG MINH (DUAL INTERACTIVE BATCH SELECTOR) -->
                 <div class="space-y-2.5">
                     <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-2">
-                            <i class="fa-solid fa-clock-rotate-left text-magenta-accent"></i>
-                            Chọn Lô Hàng FEFO Thông Minh:
+                        <span class="text-xs font-bold text-[var(--rl-ink)] uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-clock-rotate-left text-[var(--rl-rose)]"></i>
+                            Chọn Hạn Dùng &amp; Lô Sản Xuất:
                         </span>
-                        <span class="text-[11px] text-emerald-700 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                            <i class="fa-solid fa-circle-check text-emerald-500 mr-0.5"></i> Chuẩn Dược Điển FEFO
-                        </span>
+                        <button type="button" 
+                                onclick="window.dispatchEvent(new CustomEvent('open-fefo-modal'))"
+                                class="text-[11px] text-emerald-700 hover:text-emerald-800 font-semibold bg-emerald-50 hover:bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1 transition cursor-pointer"
+                                title="Click để xem cam kết chất lượng hạn dùng và quyền lợi người mua">
+                            <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                            <span>Cam Kết Minh Bạch HSD</span>
+                            <i class="fa-regular fa-circle-question text-[10px] text-emerald-600"></i>
+                        </button>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -850,7 +1015,7 @@
                         <!-- TÙY CHỌN 1: Lô Mới Nhất - Giá chuẩn 100% -->
                         <div id="batchFreshOption"
                              @@click="selectBatch('fresh')" 
-                             :class="selectedBatchType === 'fresh' ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/40 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'"
+                             :class="selectedBatchType === 'fresh' ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/40 shadow-sm' : 'border-[var(--rl-border-subtle)] bg-white hover:border-[var(--rl-border-strong)]'"
                              class="relative p-3.5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex flex-col justify-between">
                             <div>
                                 <div class="flex items-center justify-between gap-1 mb-1.5">
@@ -861,7 +1026,7 @@
                                         @(Model.FreshBatch?.BatchNumber ?? $"LOT-2028-{p.Id:D3}")
                                     </span>
                                 </div>
-                                <h4 class="font-bold text-xs text-charcoal flex items-center gap-1">
+                                <h4 class="font-bold text-xs text-[var(--rl-ink)] flex items-center gap-1">
                                     <span>HSD: @(Model.FreshBatch?.ExpDate.ToString("MM/yyyy") ?? DateTime.UtcNow.AddMonths(22).ToString("MM/yyyy"))</span>
                                     <span class="text-[10px] font-normal text-slate-500">(Còn @(Model.FreshBatch?.CurrentQuantity ?? 120) sp)</span>
                                 </h4>
@@ -870,7 +1035,7 @@
                             <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
                                 <div>
                                     <span class="text-[10px] text-slate-400 block">Giá chuẩn 100%:</span>
-                                    <span class="font-mono-numeric font-bold text-sm text-charcoal" x-text="new Intl.NumberFormat('vi-VN').format(freshPrice) + ' ₫'">
+                                    <span class="font-mono-numeric font-bold text-sm text-[var(--rl-ink)]" x-text="new Intl.NumberFormat('vi-VN').format(freshPrice) + ' ₫'">
                                         @p.SellingPrice.ToString("N0") ₫
                                     </span>
                                 </div>
@@ -886,7 +1051,7 @@
                         {
                             <div id="batchClearanceOption"
                                  @@click="selectBatch('clearance')" 
-                                 :class="selectedBatchType === 'clearance' ? 'border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/50 shadow-sm' : 'border-slate-200 bg-white hover:border-slate-300'"
+                                 :class="selectedBatchType === 'clearance' ? 'border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/50 shadow-sm' : 'border-[var(--rl-border-subtle)] bg-white hover:border-[var(--rl-border-strong)]'"
                                  class="relative p-3.5 rounded-2xl border-2 cursor-pointer transition-all duration-200 flex flex-col justify-between">
                                 <div class="absolute -top-2.5 right-3 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 text-white text-[9px] font-extrabold uppercase shadow-sm flex items-center gap-1">
                                     <i class="fa-solid fa-fire text-[9px]"></i> Tiết Kiệm @Model.ClearanceDiscountPercent%
@@ -900,7 +1065,7 @@
                                             @Model.ClearanceBatch.BatchNumber
                                         </span>
                                     </div>
-                                    <h4 class="font-bold text-xs text-charcoal flex items-center gap-1">
+                                    <h4 class="font-bold text-xs text-[var(--rl-ink)] flex items-center gap-1">
                                         <span>HSD: @Model.ClearanceBatch.ExpDate.ToString("MM/yyyy")</span>
                                         <span class="text-[10px] font-bold text-rose-600">(Chỉ còn @Model.ClearanceBatch.CurrentQuantity sp)</span>
                                     </h4>
@@ -909,7 +1074,7 @@
                                 <div class="mt-3 pt-2 border-t border-amber-100 flex items-center justify-between">
                                     <div>
                                         <span class="text-[10px] text-slate-400 block line-through" x-text="new Intl.NumberFormat('vi-VN').format(freshPrice) + ' ₫'"></span>
-                                        <span class="font-mono-numeric font-bold text-sm text-magenta-accent" x-text="new Intl.NumberFormat('vi-VN').format(clearancePrice) + ' ₫'">
+                                        <span class="font-mono-numeric font-bold text-sm text-[var(--rl-rose)]" x-text="new Intl.NumberFormat('vi-VN').format(clearancePrice) + ' ₫'">
                                             @Model.ClearancePrice.ToString("N0") ₫
                                         </span>
                                     </div>
@@ -962,7 +1127,7 @@
                         <div class="flex flex-wrap gap-1.5">
                             @foreach (var skin in Model.SuitableSkinTypes)
                             {
-                                <span class="px-2.5 py-1 rounded-full bg-pastel-rose text-magenta-accent font-semibold border border-soft-border">
+                                <span class="px-2.5 py-1 rounded-full bg-[var(--rl-bg-blush)] text-[var(--rl-rose)] font-semibold border border-soft-border">
                                     @skin
                                 </span>
                             }
@@ -978,7 +1143,7 @@
                             <button type="button" 
                                     id="btnQtyMinus"
                                     @@click="if(quantity > 1) quantity--" 
-                                    class="w-8 h-8 rounded-full bg-white hover:bg-magenta-accent hover:text-white flex items-center justify-center text-slate-600 shadow-xs transition active:scale-90 cursor-pointer"
+                                    class="w-8 h-8 rounded-full bg-white hover:bg-[var(--rl-rose)] hover:text-white flex items-center justify-center text-slate-600 shadow-xs transition active:scale-90 cursor-pointer"
                                     aria-label="Giảm số lượng">
                                 <i class="fa-solid fa-minus text-xs"></i>
                             </button>
@@ -988,11 +1153,11 @@
                                    x-model.number="quantity"
                                    @@input="if(quantity < 1 || isNaN(quantity)) quantity = 1; if(quantity > availableStock) quantity = availableStock;"
                                    id="quantityInput"
-                                   class="w-14 text-center font-mono-numeric font-bold text-sm text-charcoal bg-transparent border-0 focus:outline-none focus:ring-0 p-0 selection:bg-magenta-accent selection:text-white" />
+                                   class="w-14 text-center font-mono-numeric font-bold text-sm text-[var(--rl-ink)] bg-transparent border-0 focus:outline-none focus:ring-0 p-0 selection:bg-[var(--rl-rose)] selection:text-white" />
                             <button type="button" 
                                     id="btnQtyPlus"
                                     @@click="if(quantity < availableStock) quantity++" 
-                                    class="w-8 h-8 rounded-full bg-white hover:bg-magenta-accent hover:text-white flex items-center justify-center text-slate-600 shadow-xs transition active:scale-90 cursor-pointer"
+                                    class="w-8 h-8 rounded-full bg-white hover:bg-[var(--rl-rose)] hover:text-white flex items-center justify-center text-slate-600 shadow-xs transition active:scale-90 cursor-pointer"
                                     aria-label="Tăng số lượng">
                                 <i class="fa-solid fa-plus text-xs"></i>
                             </button>
@@ -1009,18 +1174,14 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
                                 <!-- Add to Cart -->
                                 <button type="button" 
-                                        id="btnAddToCart"
-                                        @@click="addToCartHandler()"
-                                        class="w-full py-4 rounded-full bg-charcoal text-white font-bold text-xs uppercase tracking-wider hover:bg-magenta-accent shadow-md transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer active:scale-95">
-                                    <i class="fa-solid fa-cart-shopping text-sm text-rose-gold"></i>
+                                        id="btnAddToCart" @@click="addToCartHandler()" class="btn-primary w-full py-4 rounded-full text-white font-bold text-xs uppercase tracking-wider shadow-md transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+                                    <i class="fa-solid fa-cart-shopping text-sm text-[var(--rl-champagne-deep)]"></i>
                                     <span>Thêm Giỏ Hàng</span>
                                 </button>
 
                                 <!-- Buy Now -->
                                 <button type="button" 
-                                        id="btnBuyNow"
-                                        @@click="buyNow()"
-                                        class="w-full py-4 rounded-full bg-magenta-accent text-white font-bold text-xs uppercase tracking-wider hover:bg-[#b0276a] shadow-lg shadow-magenta-accent/25 transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+                                        id="btnBuyNow" @@click="buyNow()" class="w-full py-4 rounded-full bg-[var(--rl-ink)] hover:bg-[var(--rl-rose)] text-white font-bold text-xs uppercase tracking-wider shadow-md transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer active:scale-95">
                                     <i class="fa-solid fa-bolt text-sm"></i>
                                     <span>Mua Ngay Lô Đã Chọn</span>
                                 </button>
@@ -1061,13 +1222,37 @@
                     <div class="pt-2">
                         <button type="button" 
                                 onclick="window.omniCompare && window.omniCompare.toggle(@p.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Name))', @p.CategoryId, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Category?.Name ?? ""))')"
-                                class="w-full py-3 rounded-full bg-pink-50 hover:bg-pink-100 text-magenta-accent border border-pink-200 font-bold text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+                                class="w-full py-3 rounded-full bg-pink-50 hover:bg-pink-100 text-[var(--rl-rose)] border border-pink-200 font-bold text-xs uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer active:scale-95">
                             <i class="fa-solid fa-scale-balanced text-sm"></i>
-                            <span>So Sánh Sản Phẩm Này (Giá/ml, EWG, FEFO)</span>
+                            <span>So Sánh Sản Phẩm Này (Giá/ml, EWG, HSD)</span>
                         </button>
                     </div>
                 </div>
 
+            </div>
+
+            <!-- Mobile Sticky Bottom Bar: Fixed bottom (< 768px) with Price, Variant & CTA -->
+            <div class="fixed bottom-0 inset-x-0 z-[1050] md:hidden bg-white/95 backdrop-blur-xl border-t border-[var(--rl-border-subtle)] p-3 px-4 shadow-[0_-8px_24px_rgba(45,34,39,0.08)] pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] flex items-center justify-between gap-3">
+                <div class="min-w-0 flex-1">
+                    <div class="text-[10px] uppercase font-bold tracking-wider text-[var(--rl-mauve)] truncate" x-text="selectedVariantName"></div>
+                    <div class="font-mono-numeric font-extrabold text-base text-[var(--rl-ink)]" x-text="new Intl.NumberFormat('vi-VN').format(selectedPrice) + ' ₫'"></div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button type="button" 
+                            id="btnMobileStickyAddToCart"
+                            @@click="addToCartHandler()"
+                            class="min-h-[44px] px-3.5 sm:px-4 rounded-full bg-[var(--rl-bg-blush)] text-[var(--rl-rose)] font-bold text-xs hover:bg-[var(--rl-bg-petal)] border border-[var(--rl-border-subtle)] flex items-center gap-1.5 transition active:scale-95 cursor-pointer">
+                        <i class="fa-solid fa-cart-shopping text-xs" aria-hidden="true"></i>
+                        <span>Thêm giỏ</span>
+                    </button>
+                    <button type="button" 
+                            id="btnMobileStickyBuyNow"
+                            @@click="buyNow()"
+                            class="btn-primary min-h-[44px] px-4 sm:px-5 rounded-full text-white font-bold text-xs uppercase tracking-wider shadow-md flex items-center gap-1.5 transition active:scale-95 cursor-pointer">
+                        <i class="fa-solid fa-bolt text-xs" aria-hidden="true"></i>
+                        <span>Mua ngay</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -1076,16 +1261,16 @@
         {
             var fbt = Model.FrequentlyBoughtTogether;
             <div id="frequentlyBoughtTogetherSection" 
-                 class="mt-14 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-white via-pink-50/25 to-pastel-rose/30 border border-rose-200/80 shadow-md"
+                 class="mt-14 p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-white via-pink-50/25 to-[var(--rl-bg-blush)]/30 border border-rose-200/80 shadow-md"
                  x-data="fbtBundleComponent(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(fbt, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase })))">
                 
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6 pb-4 border-b border-rose-100">
                     <div>
-                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-magenta-accent text-white text-[10px] font-bold uppercase tracking-wider shadow-2xs">
+                        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--rl-rose)] text-white text-[10px] font-bold uppercase tracking-wider shadow-2xs">
                             <i class="fa-solid fa-gift"></i>
                             <span>Combo Tiết Kiệm & Đạt Hiệu Quả Tối Đa</span>
                         </div>
-                        <h3 class="font-serif text-xl sm:text-2xl font-bold text-charcoal mt-2 flex items-center gap-2">
+                        <h3 class="font-serif text-xl sm:text-2xl font-bold text-[var(--rl-ink)] mt-2 flex items-center gap-2">
                             <span>Thường Được Mua Cùng Nhau</span>
                             @if (fbt.IsAlgorithmic)
                             {
@@ -1114,17 +1299,17 @@
                     <div class="lg:col-span-8 flex flex-col sm:flex-row items-center gap-3 sm:gap-4 overflow-x-auto pb-2">
                         
                         <!-- Item 1: Current Product (Locked checked) -->
-                        <div class="fbt-card flex-1 min-w-[200px] w-full bg-white p-4 rounded-2xl border-2 border-magenta-accent shadow-xs relative">
+                        <div class="fbt-card flex-1 min-w-[200px] w-full bg-white p-4 rounded-2xl border-2 border-[var(--rl-rose)] shadow-xs relative">
                             <span class="absolute -top-2.5 left-4 px-2 py-0.5 rounded-full bg-charcoal text-white text-[9px] font-bold uppercase tracking-wider shadow-2xs">
                                 Đang xem
                             </span>
                             <div class="flex items-center gap-3">
                                 <img src="@fbt.CurrentProduct.ImageUrl" alt="@fbt.CurrentProduct.Name" class="w-16 h-16 rounded-xl object-cover border border-slate-200 shrink-0" />
                                 <div class="min-w-0 flex-1">
-                                    <div class="text-[9px] font-bold uppercase tracking-wider text-rose-gold truncate">@fbt.CurrentProduct.BrandName</div>
-                                    <h4 class="text-xs font-bold text-charcoal line-clamp-2 leading-tight">@fbt.CurrentProduct.Name</h4>
+                                    <div class="text-[9px] font-bold uppercase tracking-wider text-[var(--rl-champagne-deep)] truncate">@fbt.CurrentProduct.BrandName</div>
+                                    <h4 class="text-xs font-bold text-[var(--rl-ink)] line-clamp-2 leading-tight">@fbt.CurrentProduct.Name</h4>
                                     <div class="flex items-baseline gap-1.5 mt-1">
-                                        <span class="text-xs font-bold text-magenta-accent font-mono-numeric">
+                                        <span class="text-xs font-bold text-[var(--rl-rose)] font-mono-numeric">
                                             @((fbt.CurrentProduct.SalePrice ?? fbt.CurrentProduct.Price).ToString("N0")) ₫
                                         </span>
                                         @if (fbt.CurrentProduct.SalePrice.HasValue && fbt.CurrentProduct.SalePrice.Value < fbt.CurrentProduct.Price)
@@ -1143,7 +1328,7 @@
                         </div>
 
                         <!-- Plus Sign -->
-                        <div class="h-8 w-8 rounded-full bg-pastel-rose text-magenta-accent font-bold flex items-center justify-center shrink-0 shadow-2xs">
+                        <div class="h-8 w-8 rounded-full bg-[var(--rl-bg-blush)] text-[var(--rl-rose)] font-bold flex items-center justify-center shrink-0 shadow-2xs">
                             <i class="fa-solid fa-plus text-xs"></i>
                         </div>
 
@@ -1151,24 +1336,24 @@
                         <template x-for="(item, idx) in bundle.bundleProducts" :key="item.id">
                             <div class="contents">
                                 <template x-if="idx > 0">
-                                    <div class="h-8 w-8 rounded-full bg-pastel-rose text-magenta-accent font-bold flex items-center justify-center shrink-0 shadow-2xs">
+                                    <div class="h-8 w-8 rounded-full bg-[var(--rl-bg-blush)] text-[var(--rl-rose)] font-bold flex items-center justify-center shrink-0 shadow-2xs">
                                         <i class="fa-solid fa-plus text-xs"></i>
                                     </div>
                                 </template>
 
                                 <div class="fbt-card flex-1 min-w-[200px] w-full bg-white p-4 rounded-2xl border transition-all shadow-xs relative cursor-pointer"
-                                     :class="item.isSelected ? 'border-pink-300 ring-1 ring-magenta-accent/20' : 'border-slate-200 opacity-60'"
+                                     :class="item.isSelected ? 'border-pink-300 ring-1 ring-[var(--rl-rose)]/20' : 'border-slate-200 opacity-60'"
                                      @@click="toggleItem(item)">
                                     
                                     <div class="flex items-center gap-3">
                                         <img :src="item.imageUrl" :alt="item.name" class="w-16 h-16 rounded-xl object-cover border border-slate-200 shrink-0" />
                                         <div class="min-w-0 flex-1">
-                                            <div class="text-[9px] font-bold uppercase tracking-wider text-rose-gold truncate" x-text="item.brandName"></div>
+                                            <div class="text-[9px] font-bold uppercase tracking-wider text-[var(--rl-champagne-deep)] truncate" x-text="item.brandName"></div>
                                             <a :href="'/san-pham/' + item.slug" @@click.stop class="block">
-                                                <h4 class="text-xs font-bold text-charcoal line-clamp-2 leading-tight hover:text-magenta-accent transition" x-text="item.name"></h4>
+                                                <h4 class="text-xs font-bold text-[var(--rl-ink)] line-clamp-2 leading-tight hover:text-[var(--rl-rose)] transition" x-text="item.name"></h4>
                                             </a>
                                             <div class="flex items-baseline gap-1.5 mt-1">
-                                                <span class="text-xs font-bold text-magenta-accent font-mono-numeric" x-text="formatPrice(item.salePrice || item.price)"></span>
+                                                <span class="text-xs font-bold text-[var(--rl-rose)] font-mono-numeric" x-text="formatPrice(item.salePrice || item.price)"></span>
                                                 <template x-if="item.salePrice && item.salePrice < item.price">
                                                     <span class="text-[10px] text-slate-400 line-through font-mono-numeric" x-text="formatPrice(item.price)"></span>
                                                 </template>
@@ -1177,9 +1362,9 @@
                                     </div>
 
                                     <div class="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between">
-                                        <label class="inline-flex items-center gap-1.5 text-xs text-charcoal font-semibold cursor-pointer" @@click.stop>
+                                        <label class="inline-flex items-center gap-1.5 text-xs text-[var(--rl-ink)] font-semibold cursor-pointer" @@click.stop>
                                             <input type="checkbox" 
-                                                   class="rounded text-magenta-accent focus:ring-magenta-accent/30 h-4 w-4"
+                                                   class="rounded text-[var(--rl-rose)] focus:ring-[var(--rl-rose)]/30 h-4 w-4"
                                                    x-model="item.isSelected"
                                                    @@change="updateCalculations()" />
                                             <span class="text-[11px]" x-text="item.isSelected ? 'Đã chọn' : 'Bỏ chọn'"></span>
@@ -1197,7 +1382,7 @@
                         <div>
                             <span class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Giá combo trọn bộ:</span>
                             <div class="flex items-baseline gap-2 mt-1">
-                                <span class="font-serif text-2xl font-bold text-magenta-accent font-mono-numeric" x-text="formatPrice(totalSelectedPrice)"></span>
+                                <span class="font-serif text-2xl font-bold text-[var(--rl-rose)] font-mono-numeric" x-text="formatPrice(totalSelectedPrice)"></span>
                                 <template x-if="totalOriginalPrice > totalSelectedPrice">
                                     <span class="text-xs text-slate-400 line-through font-mono-numeric" x-text="formatPrice(totalOriginalPrice)"></span>
                                 </template>
@@ -1220,7 +1405,7 @@
                             <button type="button" 
                                     @@click="addAllSelectedToCart()"
                                     :disabled="isSubmitting"
-                                    class="w-full py-3.5 px-6 rounded-full bg-magenta-accent text-white font-bold text-xs uppercase tracking-wider hover:bg-[#b0276a] shadow-lg shadow-magenta-accent/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50">
+                                    class="w-full py-3.5 px-6 rounded-full bg-[var(--rl-rose)] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#b0276a] shadow-lg shadow-magenta-accent/25 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50">
                                 <i class="fa-solid" :class="isSubmitting ? 'fa-spinner fa-spin' : 'fa-cart-plus'"></i>
                                 <span x-text="isSubmitting ? 'Đang thêm combo...' : 'Thêm Cả ' + selectedCount + ' Sản Phẩm Vào Giỏ'"></span>
                             </button>
@@ -1245,9 +1430,9 @@
                 <button type="button" 
                         id="tab-btn-features"
                         @@click="activeTab = 'features'" 
-                        :class="activeTab === 'features' ? 'border-magenta-accent text-magenta-accent font-bold bg-pastel-rose/30 rounded-t-xl' : 'border-transparent text-slate-500 hover:text-charcoal font-medium'"
+                        :class="activeTab === 'features' ? 'border-b-2 border-[var(--rl-rose)] text-[var(--rl-rose)] font-bold bg-[var(--rl-bg-blush)]/60 rounded-t-xl' : 'border-transparent text-[var(--rl-mauve)] hover:text-[var(--rl-ink)] font-medium'"
                         class="px-4 py-3 border-b-2 text-xs sm:text-sm font-serif transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer">
-                    <i class="fa-solid fa-sparkles text-rose-gold"></i>
+                    <i class="fa-solid fa-sparkles text-[var(--rl-champagne-deep)]"></i>
                     <span>1. Mô Tả & Công Dụng</span>
                 </button>
 
@@ -1255,7 +1440,7 @@
                 <button type="button" 
                         id="tab-btn-ingredients"
                         @@click="activeTab = 'ingredients'" 
-                        :class="activeTab === 'ingredients' ? 'border-magenta-accent text-magenta-accent font-bold bg-pastel-rose/30 rounded-t-xl' : 'border-transparent text-slate-500 hover:text-charcoal font-medium'"
+                        :class="activeTab === 'ingredients' ? 'border-b-2 border-[var(--rl-rose)] text-[var(--rl-rose)] font-bold bg-[var(--rl-bg-blush)]/60 rounded-t-xl' : 'border-transparent text-[var(--rl-mauve)] hover:text-[var(--rl-ink)] font-medium'"
                         class="px-4 py-3 border-b-2 text-xs sm:text-sm font-serif transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-vial-virus text-emerald-600"></i>
                     <span>2. Thành Phần (INCI)</span>
@@ -1265,7 +1450,7 @@
                 <button type="button" 
                         id="tab-btn-routine"
                         @@click="activeTab = 'routine'" 
-                        :class="activeTab === 'routine' ? 'border-magenta-accent text-magenta-accent font-bold bg-pastel-rose/30 rounded-t-xl' : 'border-transparent text-slate-500 hover:text-charcoal font-medium'"
+                        :class="activeTab === 'routine' ? 'border-b-2 border-[var(--rl-rose)] text-[var(--rl-rose)] font-bold bg-[var(--rl-bg-blush)]/60 rounded-t-xl' : 'border-transparent text-[var(--rl-mauve)] hover:text-[var(--rl-ink)] font-medium'"
                         class="px-4 py-3 border-b-2 text-xs sm:text-sm font-serif transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-route text-sky-600"></i>
                     <span>3. Hướng Dẫn & Chu Trình</span>
@@ -1275,7 +1460,7 @@
                 <button type="button" 
                         id="tab-btn-policy"
                         @@click="activeTab = 'policy'" 
-                        :class="activeTab === 'policy' ? 'border-magenta-accent text-magenta-accent font-bold bg-pastel-rose/30 rounded-t-xl' : 'border-transparent text-slate-500 hover:text-charcoal font-medium'"
+                        :class="activeTab === 'policy' ? 'border-b-2 border-[var(--rl-rose)] text-[var(--rl-rose)] font-bold bg-[var(--rl-bg-blush)]/60 rounded-t-xl' : 'border-transparent text-[var(--rl-mauve)] hover:text-[var(--rl-ink)] font-medium'"
                         class="px-4 py-3 border-b-2 text-xs sm:text-sm font-serif transition-all whitespace-nowrap flex items-center gap-2 cursor-pointer">
                     <i class="fa-solid fa-shield-heart text-rose-600"></i>
                     <span>4. Cam Kết & Đổi Trả</span>
@@ -1285,10 +1470,10 @@
                 <button type="button" 
                         id="tab-btn-reviews"
                         @@click="activeTab = 'reviews'" 
-                        :class="activeTab === 'reviews' ? 'border-magenta-accent text-magenta-accent font-bold bg-pastel-rose/30 rounded-t-xl' : 'border-transparent text-slate-500 hover:text-charcoal font-medium'"
+                        :class="activeTab === 'reviews' ? 'border-b-2 border-[var(--rl-rose)] text-[var(--rl-rose)] font-bold bg-[var(--rl-bg-blush)]/60 rounded-t-xl' : 'border-transparent text-[var(--rl-mauve)] hover:text-[var(--rl-ink)] font-medium'"
                         class="px-4 py-3 border-b-2 text-xs sm:text-sm font-serif transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer">
                     <span>5. Đánh Giá</span>
-                    <span class="px-2 py-0.5 rounded-full bg-pastel-rose text-magenta-accent text-[10px] font-bold font-mono">@Model.TotalReviews</span>
+                    <span class="px-2 py-0.5 rounded-full bg-[var(--rl-bg-blush)] text-[var(--rl-rose)] text-[10px] font-bold font-mono">@Model.TotalReviews</span>
                 </button>
 
             </div>
@@ -1299,11 +1484,11 @@
             <div id="tab-panel-features" x-show="activeTab === 'features'" class="max-w-5xl mx-auto space-y-6 text-slate-700 text-sm leading-relaxed">
                 
                 <!-- Hero Feature Banner -->
-                <div class="bg-gradient-to-r from-pastel-rose/50 via-white to-pink-50/50 p-6 sm:p-8 rounded-3xl border border-soft-border space-y-3">
-                    <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-rose-gold">
+                <div class="bg-gradient-to-r from-[var(--rl-bg-blush)]/50 via-white to-pink-50/50 p-6 sm:p-8 rounded-3xl border border-soft-border space-y-3">
+                    <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--rl-champagne-deep)]">
                         <i class="fa-solid fa-award"></i> Nghiên Cứu & Phát Triển Chuẩn Quốc Tế
                     </div>
-                    <h3 class="font-serif font-bold text-xl sm:text-2xl text-charcoal">
+                    <h3 class="font-serif font-bold text-xl sm:text-2xl text-[var(--rl-ink)]">
                         Kiệt Tác Chăm Sóc & Tôn Vinh Vẻ Đẹp Thuần Khiết
                     </h3>
                     <p class="text-slate-600 leading-relaxed text-xs sm:text-sm">
@@ -1315,11 +1500,11 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     
                     <div class="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs flex items-start gap-4">
-                        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-magenta-accent flex items-center justify-center shrink-0 text-xl">
+                        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-[var(--rl-rose)] flex items-center justify-center shrink-0 text-xl">
                             <i class="fa-solid fa-droplet-degree"></i>
                         </div>
                         <div class="space-y-1">
-                            <h4 class="font-bold text-charcoal text-sm">Cấp Ẩm Đa Tầng & Khóa Ẩm 72 Giờ</h4>
+                            <h4 class="font-bold text-[var(--rl-ink)] text-sm">Cấp Ẩm Đa Tầng & Khóa Ẩm 72 Giờ</h4>
                             <p class="text-xs text-slate-500 leading-relaxed">
                                 Phức hợp Hyaluronic Acid phân tử siêu nhỏ len lỏi qua từng tế bào da, giữ độ ẩm mịn màng tự nhiên suốt ngày dài làm việc.
                             </p>
@@ -1331,7 +1516,7 @@
                             <i class="fa-solid fa-feather"></i>
                         </div>
                         <div class="space-y-1">
-                            <h4 class="font-bold text-charcoal text-sm">Kết Cấu Mỏng Nhẹ, Không Gây Bết Rít</h4>
+                            <h4 class="font-bold text-[var(--rl-ink)] text-sm">Kết Cấu Mỏng Nhẹ, Không Gây Bết Rít</h4>
                             <p class="text-xs text-slate-500 leading-relaxed">
                                 Thẩm thấu nhanh chóng trong 15 giây sau khi thoa, không để lại cảm giác bóng nhờn, thông thoáng lỗ chân lông tuyệt đối.
                             </p>
@@ -1343,7 +1528,7 @@
                             <i class="fa-solid fa-shield-virus"></i>
                         </div>
                         <div class="space-y-1">
-                            <h4 class="font-bold text-charcoal text-sm">Phục Hồi Màng Lipid & Kháng Viêm</h4>
+                            <h4 class="font-bold text-[var(--rl-ink)] text-sm">Phục Hồi Màng Lipid & Kháng Viêm</h4>
                             <p class="text-xs text-slate-500 leading-relaxed">
                                 Bổ sung tiền tố Vitamin B5 và Madecassoside làm dịu kích ứng, củng cố hàng rào tự nhiên trước khói bụi và tia tử ngoại.
                             </p>
@@ -1355,7 +1540,7 @@
                             <i class="fa-solid fa-sparkle"></i>
                         </div>
                         <div class="space-y-1">
-                            <h4 class="font-bold text-charcoal text-sm">Sắc Tố Chuẩn Nét & Bền Màu Tự Nhiên</h4>
+                            <h4 class="font-bold text-[var(--rl-ink)] text-sm">Sắc Tố Chuẩn Nét & Bền Màu Tự Nhiên</h4>
                             <p class="text-xs text-slate-500 leading-relaxed">
                                 Lên màu chuẩn xác ngay từ lần quẹt đầu tiên, tôn sắc tố da châu Á và duy trì độ tươi tắn rạng ngời từ 8 - 12 tiếng.
                             </p>
@@ -1391,10 +1576,10 @@
                 <div class="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
                     <div class="p-4 sm:p-6 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                         <div>
-                            <h4 class="font-bold text-charcoal text-sm uppercase tracking-wider">Bảng Phân Tích Hoạt Chất Chủ Đạo (Key Actives)</h4>
+                            <h4 class="font-bold text-[var(--rl-ink)] text-sm uppercase tracking-wider">Bảng Phân Tích Hoạt Chất Chủ Đạo (Key Actives)</h4>
                             <p class="text-[11px] text-slate-500">Được định lượng và kiểm nghiệm lâm sàng bởi Viện Dược Liệu Quốc Tế</p>
                         </div>
-                        <span class="text-xs font-semibold text-rose-gold">Chuẩn Bộ Y Tế</span>
+                        <span class="text-xs font-semibold text-[var(--rl-champagne-deep)]">Chuẩn Bộ Y Tế</span>
                     </div>
 
                     <div class="overflow-x-auto">
@@ -1411,12 +1596,12 @@
                             <tbody class="divide-y divide-slate-100 text-slate-700">
                                 @foreach (var ing in Model.IngredientBreakdowns)
                                 {
-                                    <tr class="hover:bg-pastel-rose/20 transition-colors">
-                                        <td class="py-3.5 px-4 sm:px-6 font-bold text-charcoal flex items-center gap-2">
+                                    <tr class="hover:bg-[var(--rl-bg-blush)]/20 transition-colors">
+                                        <td class="py-3.5 px-4 sm:px-6 font-bold text-[var(--rl-ink)] flex items-center gap-2">
                                             <i class="fa-solid fa-circle-check text-emerald-500 text-xs"></i>
                                             @ing.Name
                                         </td>
-                                        <td class="py-3.5 px-3 font-mono font-bold text-magenta-accent">@ing.Percentage</td>
+                                        <td class="py-3.5 px-3 font-mono font-bold text-[var(--rl-rose)]">@ing.Percentage</td>
                                         <td class="py-3.5 px-4 text-slate-600 max-w-xs">@ing.Function</td>
                                         <td class="py-3.5 px-3">
                                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-bold text-[10px] border @(ing.EwgScore <= 2 ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-amber-50 text-amber-800 border-amber-200")"
@@ -1435,8 +1620,8 @@
                 <!-- Full INCI List & Smart Parsed Chips Cloud -->
                 <div class="p-6 rounded-3xl bg-slate-50 border border-slate-200 text-xs text-slate-600 space-y-4">
                     <div class="flex items-center justify-between flex-wrap gap-2">
-                        <strong class="font-bold text-charcoal uppercase tracking-wider text-xs flex items-center gap-2">
-                            <i class="fa-solid fa-list-check text-magenta-accent"></i>
+                        <strong class="font-bold text-[var(--rl-ink)] uppercase tracking-wider text-xs flex items-center gap-2">
+                            <i class="fa-solid fa-list-check text-[var(--rl-rose)]"></i>
                             Bảng Bóc Tách Thành Phần Hóa Học (Smart INCI Parser):
                         </strong>
                         <span class="text-[11px] font-semibold text-slate-400">
@@ -1495,7 +1680,7 @@
                 <!-- ============================================================== -->
                 <!-- TRỢ LÝ THÀNH PHẦN DA LIỄU AI: HIỆP ĐỒNG & TƯƠNG KỴ HOẠT CHẤT -->
                 <!-- ============================================================== -->
-                <div class="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-[#1e1425] to-slate-900 text-white shadow-xl border border-magenta-accent/30 space-y-6">
+                <div class="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-[#1e1425] to-slate-900 text-white shadow-xl border border-[var(--rl-rose)]/30 space-y-6">
                     
                     <!-- Header -->
                     <div class="flex items-center justify-between flex-wrap gap-4 border-b border-white/10 pb-5">
@@ -1505,7 +1690,7 @@
                             </div>
                             <div>
                                 <div class="flex items-center gap-2">
-                                    <span class="px-2.5 py-0.5 rounded-full bg-magenta-accent/30 text-rose-gold text-[10px] font-bold uppercase tracking-wider border border-magenta-accent/40">
+                                    <span class="px-2.5 py-0.5 rounded-full bg-[var(--rl-rose)]/30 text-[var(--rl-champagne-deep)] text-[10px] font-bold uppercase tracking-wider border border-[var(--rl-rose)]/40">
                                         BeautyTech AI Engine v2.0
                                     </span>
                                     <span class="text-[11px] text-slate-400 font-mono">Dược Điển Châu Âu & Hoa Kỳ</span>
@@ -1603,19 +1788,19 @@
                         <div class="flex items-center justify-between flex-wrap gap-2">
                             <div>
                                 <h4 class="font-bold text-sm text-white flex items-center gap-2">
-                                    <i class="fa-solid fa-flask-vial text-rose-gold"></i>
+                                    <i class="fa-solid fa-flask-vial text-[var(--rl-champagne-deep)]"></i>
                                     Kiểm Tra Nhanh Tương Thích Với Hoạt Chất Bạn Đang Dùng Ở Nhà:
                                 </h4>
                                 <p class="text-[11px] text-slate-400">Click chọn hoạt chất trong tủ đồ mỹ phẩm của bạn để AI phân tích phác đồ phối hợp</p>
                             </div>
-                            <span class="text-[10px] text-rose-gold font-mono font-bold uppercase tracking-wider">Tương tác thời gian thực</span>
+                            <span class="text-[10px] text-[var(--rl-champagne-deep)] font-mono font-bold uppercase tracking-wider">Tương tác thời gian thực</span>
                         </div>
 
                         <!-- Clickable chips -->
                         <div class="flex flex-wrap gap-2">
                             <button type="button" 
                                     @@click="selectedAiTest = 'bha'"
-                                    :class="selectedAiTest === 'bha' ? 'bg-magenta-accent text-white border-magenta-accent ring-2 ring-magenta-accent/40' : 'bg-white/10 text-slate-300 border-white/10 hover:bg-white/20'"
+                                    :class="selectedAiTest === 'bha' ? 'bg-[var(--rl-rose)] text-white border-[var(--rl-rose)] ring-2 ring-[var(--rl-rose)]/40' : 'bg-white/10 text-slate-300 border-white/10 hover:bg-white/20'"
                                     class="px-3 py-1.5 rounded-xl border text-xs font-semibold transition cursor-pointer flex items-center gap-1.5">
                                 <i class="fa-solid fa-vial text-[10px]"></i> BHA 2% (Salicylic Acid)
                             </button>
@@ -1728,10 +1913,10 @@
                 <div class="p-6 sm:p-8 rounded-3xl bg-white border border-soft-border shadow-xs space-y-6">
                     <div class="flex items-center justify-between flex-wrap gap-2">
                         <div>
-                            <span class="text-xs font-bold text-rose-gold uppercase tracking-wider">Chu Trình Y Khoa Phối Hợp</span>
-                            <h3 class="font-serif font-bold text-xl text-charcoal mt-0.5">5 Bước Chăm Sóc Làn Da Pha Lê</h3>
+                            <span class="text-xs font-bold text-[var(--rl-champagne-deep)] uppercase tracking-wider">Chu Trình Y Khoa Phối Hợp</span>
+                            <h3 class="font-serif font-bold text-xl text-[var(--rl-ink)] mt-0.5">5 Bước Chăm Sóc Làn Da Pha Lê</h3>
                         </div>
-                        <span class="px-3 py-1 rounded-full bg-pastel-rose text-magenta-accent text-xs font-bold">
+                        <span class="px-3 py-1 rounded-full bg-[var(--rl-bg-blush)] text-[var(--rl-rose)] text-xs font-bold">
                             Khuyến nghị từ Dược sĩ Da liễu
                         </span>
                     </div>
@@ -1741,31 +1926,31 @@
                         
                         <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
                             <span class="w-7 h-7 rounded-full bg-charcoal text-white text-xs font-bold flex items-center justify-center">1</span>
-                            <h4 class="font-bold text-charcoal text-xs">Làm Sạch Kép</h4>
+                            <h4 class="font-bold text-[var(--rl-ink)] text-xs">Làm Sạch Kép</h4>
                             <p class="text-[11px] text-slate-500 leading-snug">Nước tẩy trang dịu nhẹ và sữa rửa mặt pH 5.5 lấy đi bụi mịn PM 2.5.</p>
                         </div>
 
                         <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
                             <span class="w-7 h-7 rounded-full bg-charcoal text-white text-xs font-bold flex items-center justify-center">2</span>
-                            <h4 class="font-bold text-charcoal text-xs">Cân Bằng Da</h4>
+                            <h4 class="font-bold text-[var(--rl-ink)] text-xs">Cân Bằng Da</h4>
                             <p class="text-[11px] text-slate-500 leading-snug">Toner cấp ẩm hoặc tẩy da chết nhẹ nhàng BHA/AHA nồng độ thấp.</p>
                         </div>
 
-                        <div class="p-3.5 rounded-2xl bg-magenta-accent/10 border border-magenta-accent/30 space-y-2 ring-2 ring-magenta-accent/20">
-                            <span class="w-7 h-7 rounded-full bg-magenta-accent text-white text-xs font-bold flex items-center justify-center">3</span>
-                            <h4 class="font-bold text-magenta-accent text-xs">Đặc Trị Chuyên Sâu</h4>
+                        <div class="p-3.5 rounded-2xl bg-[var(--rl-rose)]/10 border border-[var(--rl-rose)]/30 space-y-2 ring-2 ring-[var(--rl-rose)]/20">
+                            <span class="w-7 h-7 rounded-full bg-[var(--rl-rose)] text-white text-xs font-bold flex items-center justify-center">3</span>
+                            <h4 class="font-bold text-[var(--rl-rose)] text-xs">Đặc Trị Chuyên Sâu</h4>
                             <p class="text-[11px] text-slate-700 leading-snug font-medium">Thoa sản phẩm này đều khắp vùng cần chăm sóc, vỗ nhẹ 30 giây.</p>
                         </div>
 
                         <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
                             <span class="w-7 h-7 rounded-full bg-charcoal text-white text-xs font-bold flex items-center justify-center">4</span>
-                            <h4 class="font-bold text-charcoal text-xs">Khóa Ẩm Tái Tạo</h4>
+                            <h4 class="font-bold text-[var(--rl-ink)] text-xs">Khóa Ẩm Tái Tạo</h4>
                             <p class="text-[11px] text-slate-500 leading-snug">Kem dưỡng ẩm phục hồi bảo vệ toàn bộ dưỡng chất không bị bay hơi.</p>
                         </div>
 
                         <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
                             <span class="w-7 h-7 rounded-full bg-charcoal text-white text-xs font-bold flex items-center justify-center">5</span>
-                            <h4 class="font-bold text-charcoal text-xs">Bảo Vệ / Makeup</h4>
+                            <h4 class="font-bold text-[var(--rl-ink)] text-xs">Bảo Vệ / Makeup</h4>
                             <p class="text-[11px] text-slate-500 leading-snug">Kem chống nắng quang phổ rộng SPF 50+ hoặc son dưỡng màu tươi tắn.</p>
                         </div>
 
@@ -1775,7 +1960,7 @@
                 <!-- Pro Tips & Warnings -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                     <div class="p-5 rounded-2xl bg-white border border-slate-200 space-y-2">
-                        <h4 class="font-bold text-charcoal flex items-center gap-2">
+                        <h4 class="font-bold text-[var(--rl-ink)] flex items-center gap-2">
                             <i class="fa-solid fa-lightbulb text-amber-500"></i> Mẹo Từ Chuyên Gia Trang Điểm & Dược Sĩ
                         </h4>
                         <ul class="space-y-1.5 text-slate-600 list-disc list-inside">
@@ -1786,7 +1971,7 @@
                     </div>
 
                     <div class="p-5 rounded-2xl bg-white border border-slate-200 space-y-2">
-                        <h4 class="font-bold text-charcoal flex items-center gap-2">
+                        <h4 class="font-bold text-[var(--rl-ink)] flex items-center gap-2">
                             <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Lưu Ý Tương Thích Hoạt Chất
                         </h4>
                         <ul class="space-y-1.5 text-slate-600 list-disc list-inside">
@@ -1812,13 +1997,13 @@
                         </div>
                         <div>
                             <span class="text-xs font-bold text-rose-600 uppercase tracking-widest">Cam Kết Thép Từ Canmake Beauty</span>
-                            <h3 class="font-serif font-bold text-xl sm:text-2xl text-charcoal">
+                            <h3 class="font-serif font-bold text-xl sm:text-2xl text-[var(--rl-ink)]">
                                 Đền Bù 200% Giá Trị Nếu Phát Hiện Hàng Không Chính Hãng
                             </h3>
                         </div>
                     </div>
                     <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                        Tất cả sản phẩm tại Canmake Beauty đều có hợp đồng ủy quyền trực tiếp từ thương hiệu mẹ hoặc nhà nhập khẩu độc quyền tại Việt Nam. Từng lô hàng đều được lưu trữ theo quy trình FEFO nghiêm ngặt, có tem phụ Tiếng Việt và tem chống giả tích hợp mã QR xác thực.
+                        Tất cả sản phẩm tại Canmake Beauty đều có hợp đồng ủy quyền trực tiếp từ thương hiệu mẹ hoặc nhà nhập khẩu độc quyền tại Việt Nam. Từng lô hàng đều được kiểm soát hạn sử dụng nghiêm ngặt theo chuẩn y khoa, có tem phụ Tiếng Việt và tem chống giả tích hợp mã QR xác thực.
                     </p>
                 </div>
 
@@ -1826,12 +2011,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                     
                     <div class="p-5 rounded-2xl bg-white border border-slate-200 space-y-2.5 shadow-2xs">
-                        <div class="w-9 h-9 rounded-xl bg-magenta-accent/10 text-magenta-accent flex items-center justify-center text-base font-bold">
+                        <div class="w-9 h-9 rounded-xl bg-[var(--rl-rose)]/10 text-[var(--rl-rose)] flex items-center justify-center text-base font-bold">
                             <i class="fa-solid fa-clock-rotate-left"></i>
                         </div>
-                        <h4 class="font-bold text-charcoal text-sm">Đổi Trả 7 Ngày Miễn Phí</h4>
+                        <h4 class="font-bold text-[var(--rl-ink)] text-sm">Đổi Trả 7 Ngày Miễn Phí</h4>
                         <p class="text-slate-500 leading-relaxed">
-                            Áp dụng đổi mới hoặc hoàn tiền 100% khi sản phẩm phát sinh lỗi đóng gói, bể vỡ khi vận chuyển hoặc hạn dùng không khớp cam kết FEFO.
+                            Áp dụng đổi mới hoặc hoàn tiền 100% khi sản phẩm phát sinh lỗi đóng gói, bể vỡ khi vận chuyển hoặc hạn dùng không khớp cam kết chất lượng.
                         </p>
                     </div>
 
@@ -1839,7 +2024,7 @@
                         <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base font-bold">
                             <i class="fa-solid fa-user-doctor"></i>
                         </div>
-                        <h4 class="font-bold text-charcoal text-sm">Bảo Hiểm Dị Ứng Da</h4>
+                        <h4 class="font-bold text-[var(--rl-ink)] text-sm">Bảo Hiểm Dị Ứng Da</h4>
                         <p class="text-slate-500 leading-relaxed">
                             Hỗ trợ đổi sản phẩm khác hoặc nhận lại hàng khi da có phản ứng không tương thích, có Dược sĩ chuyên môn tư vấn theo dõi 1-1 miễn phí.
                         </p>
@@ -1849,7 +2034,7 @@
                         <div class="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-base font-bold">
                             <i class="fa-solid fa-shop"></i>
                         </div>
-                        <h4 class="font-bold text-charcoal text-sm">Đổi Trả Tại Mọi Showroom</h4>
+                        <h4 class="font-bold text-[var(--rl-ink)] text-sm">Đổi Trả Tại Mọi Showroom</h4>
                         <p class="text-slate-500 leading-relaxed">
                             Bạn có thể mang sản phẩm đến bất kỳ showroom nào thuộc hệ thống Canmake Beauty (Q1, Cầu Giấy...) để được xử lý nhanh trong 5 phút.
                         </p>
@@ -1860,9 +2045,9 @@
                 <!-- Contact Support Hotline -->
                 <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between flex-wrap gap-3 text-xs">
                     <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-headset text-magenta-accent text-base"></i>
+                        <i class="fa-solid fa-headset text-[var(--rl-rose)] text-base"></i>
                         <span class="text-slate-600">Tổng đài tiếp nhận khiếu nại & tư vấn sắc đẹp:</span>
-                        <strong class="font-mono text-charcoal text-sm font-bold">1900 8888 (08:00 - 22:00)</strong>
+                        <strong class="font-mono text-[var(--rl-ink)] text-sm font-bold">1900 8888 (08:00 - 22:00)</strong>
                     </div>
                     <span class="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
                         <i class="fa-solid fa-circle-check"></i> Phục vụ cả Thứ 7 & Chủ Nhật
@@ -1886,12 +2071,12 @@
             <div class="mt-20 pt-12 border-t border-soft-border">
                 <div class="flex items-center justify-between mb-8">
                     <div>
-                        <span class="text-xs font-bold uppercase tracking-widest text-rose-gold">Gợi Ý Dành Riêng Cho Bạn</span>
-                        <h2 class="font-serif text-2xl sm:text-3xl font-bold text-charcoal mt-1">Sản Phẩm Cùng Danh Mục</h2>
+                        <span class="text-xs font-bold uppercase tracking-widest text-[var(--rl-champagne-deep)]">Gợi Ý Dành Riêng Cho Bạn</span>
+                        <h2 class="font-serif text-2xl sm:text-3xl font-bold text-[var(--rl-ink)] mt-1">Sản Phẩm Cùng Danh Mục</h2>
                     </div>
                     @if (p.Category != null)
                     {
-                        <a href="/category/@p.Category.Slug" class="text-xs font-bold text-magenta-accent hover:underline flex items-center gap-1">
+                        <a href="/category/@p.Category.Slug" class="text-xs font-bold text-[var(--rl-rose)] hover:underline flex items-center gap-1">
                             Xem tất cả <i class="fa-solid fa-angle-right text-[10px]"></i>
                         </a>
                     }
@@ -1922,11 +2107,11 @@
                                 <div>
                                     <span class="text-[10px] uppercase font-bold tracking-widest text-slate-400">@rel.Category?.Name</span>
                                     <a href="/Product/Detail/@rel.Slug" class="block mt-1">
-                                        <h4 class="font-serif font-bold text-charcoal text-xs leading-snug line-clamp-2 hover:text-magenta-accent transition">@rel.Name</h4>
+                                        <h4 class="font-serif font-bold text-[var(--rl-ink)] text-xs leading-snug line-clamp-2 hover:text-[var(--rl-rose)] transition">@rel.Name</h4>
                                     </a>
                                 </div>
                                 <div class="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between">
-                                    <span class="font-mono-numeric font-bold text-sm text-charcoal">@rel.SellingPrice.ToString("N0") ₫</span>
+                                    <span class="font-mono-numeric font-bold text-sm text-[var(--rl-ink)]">@rel.SellingPrice.ToString("N0") ₫</span>
                                     <span class="text-[10px] text-emerald-600 font-semibold">Còn hàng</span>
                                 </div>
                             </div>
@@ -1945,8 +2130,8 @@
             
             <div class="flex items-center justify-between mb-8">
                 <div>
-                    <span class="text-xs font-bold uppercase tracking-widest text-rose-gold">Dành Riêng Cho Bạn</span>
-                    <h2 class="font-serif text-2xl sm:text-3xl font-bold text-charcoal mt-1">Sản Phẩm Bạn Đã Xem Gần Đây</h2>
+                    <span class="text-xs font-bold uppercase tracking-widest text-[var(--rl-champagne-deep)]">Dành Riêng Cho Bạn</span>
+                    <h2 class="font-serif text-2xl sm:text-3xl font-bold text-[var(--rl-ink)] mt-1">Sản Phẩm Bạn Đã Xem Gần Đây</h2>
                 </div>
                 <button type="button" @@click="clearHistory()" class="text-xs font-bold text-slate-400 hover:text-rose-600 transition flex items-center gap-1 cursor-pointer">
                     <i class="fa-solid fa-trash-can text-[10px]"></i>
@@ -1956,22 +2141,22 @@
 
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                 <template x-for="item in products" :key="item.id">
-                    <div class="product-card-luxury group bg-white rounded-2xl border border-slate-200/80 p-3 hover:border-magenta-accent/40 hover:shadow-md transition flex flex-col justify-between">
+                    <div class="product-card-luxury group bg-white rounded-2xl border border-slate-200/80 p-3 hover:border-[var(--rl-rose)]/40 hover:shadow-md transition flex flex-col justify-between">
                         <div>
                             <div class="relative w-full aspect-square rounded-xl overflow-hidden bg-slate-50 mb-2.5">
                                 <img :src="item.imageUrl" :alt="item.name" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" loading="lazy" />
                             </div>
-                            <span class="text-[9px] uppercase font-bold tracking-wider text-rose-gold truncate block" x-text="item.brandName"></span>
+                            <span class="text-[9px] uppercase font-bold tracking-wider text-[var(--rl-champagne-deep)] truncate block" x-text="item.brandName"></span>
                             <a :href="'/san-pham/' + item.slug" class="block mt-0.5">
-                                <h4 class="font-serif font-bold text-charcoal text-xs leading-snug line-clamp-2 hover:text-magenta-accent transition" x-text="item.name"></h4>
+                                <h4 class="font-serif font-bold text-[var(--rl-ink)] text-xs leading-snug line-clamp-2 hover:text-[var(--rl-rose)] transition" x-text="item.name"></h4>
                             </a>
                         </div>
                         <div class="mt-3 pt-2 border-t border-slate-100">
                             <div class="flex items-baseline justify-between gap-1">
-                                <span class="font-mono-numeric font-bold text-xs text-charcoal" x-text="formatPrice(item.salePrice || item.price)"></span>
+                                <span class="font-mono-numeric font-bold text-xs text-[var(--rl-ink)]" x-text="formatPrice(item.salePrice || item.price)"></span>
                                 <button type="button" 
                                         @@click="quickAddToCart(item)"
-                                        class="p-1.5 rounded-lg bg-pastel-rose text-magenta-accent hover:bg-magenta-accent hover:text-white transition text-xs shadow-2xs cursor-pointer"
+                                        class="p-1.5 rounded-lg bg-[var(--rl-bg-blush)] text-[var(--rl-rose)] hover:bg-[var(--rl-rose)] hover:text-white transition text-xs shadow-2xs cursor-pointer"
                                         title="Thêm nhanh vào giỏ">
                                     <i class="fa-solid fa-cart-plus text-[11px]"></i>
                                 </button>

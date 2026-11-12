@@ -1,132 +1,302 @@
-@inject Omnichannel.Application.Interfaces.Cms.IThemeService ThemeService
-@{
-    var theme = await ThemeService.GetCurrentThemeAsync();
-}
-@* Canmake Beauty - Storefront Footer Partial *@
-<footer class="section-deferred bg-[#1F1219] text-slate-300 pt-16 pb-12 border-t border-pink-950/60 relative z-10" role="contentinfo">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <!-- Membership Newsletter Banner -->
-        <div class="rounded-3xl bg-[#2B1B24] border border-pink-900/40 p-8 sm:p-12 mb-16 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl relative overflow-hidden">
-            <div class="absolute -right-12 -top-12 w-64 h-64 rounded-full bg-magenta-accent/15 blur-3xl pointer-events-none"></div>
-            <div class="max-w-md relative z-10">
-                <span class="text-xs font-bold uppercase tracking-widest text-rose-gold flex items-center gap-2">
-                    <i class="fa-solid fa-crown text-amber-400"></i> Đặc Quyền Thành Viên VIP
+@*
+    Canmake Beauty Suite - Rosé Luxe Luxury Footer (_Footer.cshtml)
+    Phiên 2:
+    - Nền Ink (#23191E) pha chuyển sắc Rose Deep (#8E1F4F) sang trọng
+    - Wordmark "CANMAKE" cỡ lớn mờ làm nền (Editorial Watermark)
+    - 4 cột link trên Desktop, tự động chuyển thành Accordion mượt mà trên Mobile (< 768px)
+    - Form đăng ký nhận tin chuẩn modern-web-guidance (autocomplete="email", min-height >= 48px)
+    - Icon mạng xã hội >= 44x44px, khoảng cách >= 8px
+    - Chứng nhận chính hãng / Chuẩn hạn dùng minh bạch FEFO
+    - Khoảng đệm pb-28 md:pb-12 để Mobile Bottom Navigation không bao giờ che nội dung cuối trang
+*@
+<footer id="siteFooter"
+        class="relative overflow-hidden bg-[linear-gradient(180deg,#23191E_0%,#1B1217_62%,#351324_100%)] text-[#FBE8EE]/85 pt-14 pb-28 md:pb-12 mt-20 border-t border-[#C9A96E]/25">
+
+    <!-- Ánh sáng Rosé Glow trang trí tinh tế -->
+    <div aria-hidden="true" class="pointer-events-none absolute -top-32 left-1/4 w-[480px] h-[240px] rounded-full bg-[#B8336A]/18 blur-[120px]"></div>
+    <div aria-hidden="true" class="pointer-events-none absolute bottom-12 right-10 w-[420px] h-[220px] rounded-full bg-[#C9A96E]/10 blur-[110px]"></div>
+
+    <!-- WORDMARK "CANMAKE" CỠ LỚN MỜ LÀM NỀN (WATERMARK BACKGROUND) -->
+    <div aria-hidden="true"
+         class="pointer-events-none select-none absolute inset-x-0 bottom-6 sm:bottom-2 flex justify-center overflow-hidden z-0">
+        <span class="font-serif font-bold uppercase tracking-[0.14em] text-[clamp(4.25rem,17vw,15.5rem)] leading-none text-white/[0.04] whitespace-nowrap">
+            CANMAKE
+        </span>
+    </div>
+
+    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- 1. DẢI CHỨNG NHẬN CHÍNH HÃNG & CAM KẾT DATE MỚI (4 TRUST PILLARS) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pb-10 mb-10 border-b border-white/10">
+            <div class="flex items-center gap-3.5 p-4 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-xs">
+                <span class="w-11 h-11 rounded-full bg-[#B8336A]/25 border border-[#F6D2DF]/30 text-[#F6D2DF] flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-shield-heart text-base" aria-hidden="true"></i>
                 </span>
-                <h3 class="font-serif text-3xl sm:text-4xl font-bold text-white mt-2">Đăng ký nhận ưu đãi 10%</h3>
-                <p class="text-sm text-slate-300 mt-3 font-sans leading-relaxed">
-                    Cập nhật xu hướng làm đẹp mới nhất, mã giảm giá độc quyền và danh sách sản phẩm phiên bản giới hạn mỗi tuần.
-                </p>
+                <div>
+                    <div class="text-xs font-bold text-white uppercase tracking-wider">Cam Kết Date Mới 100%</div>
+                    <div class="text-[11px] text-[#FBE8EE]/65 mt-0.5">Minh bạch số lô &amp; HSD &gt; 18 tháng</div>
+                </div>
             </div>
-            <form class="w-full md:w-auto flex-1 max-w-md flex flex-col sm:flex-row gap-3 relative z-10" onsubmit="event.preventDefault(); showStorefrontToast('Cảm ơn bạn đã đăng ký nhận mã ưu đãi VIP 10%!', 'success'); this.reset();">
-                <input type="email" required placeholder="Nhập địa chỉ email của bạn..." class="w-full px-5 py-3.5 rounded-full bg-white/5 border border-pink-900/50 text-white placeholder-slate-400 text-sm focus:outline-none focus:border-rose-gold focus:ring-1 focus:ring-rose-gold transition-all" />
-                <button type="submit" class="px-8 py-3.5 rounded-full bg-[#E8618C] text-white font-bold text-sm hover:bg-[#B8336A] shadow-lg shadow-pink-500/25 transition-all flex-shrink-0 flex items-center justify-center gap-2">
-                    <span>Đăng Ký</span>
-                    <i class="fa-solid fa-paper-plane text-xs"></i>
-                </button>
-            </form>
+
+            <div class="flex items-center gap-3.5 p-4 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-xs">
+                <span class="w-11 h-11 rounded-full bg-[#C9A96E]/20 border border-[#C9A96E]/40 text-[#E5CFA0] flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-award text-base" aria-hidden="true"></i>
+                </span>
+                <div>
+                    <div class="text-xs font-bold text-white uppercase tracking-wider">100% Chính Hãng</div>
+                    <div class="text-[11px] text-[#FBE8EE]/65 mt-0.5">Đền bù 200% nếu phát hiện hàng giả</div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3.5 p-4 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-xs">
+                <span class="w-11 h-11 rounded-full bg-[#B8336A]/25 border border-[#F6D2DF]/30 text-[#F6D2DF] flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-bolt text-base" aria-hidden="true"></i>
+                </span>
+                <div>
+                    <div class="text-xs font-bold text-white uppercase tracking-wider">Giao Nhanh 2 Giờ</div>
+                    <div class="text-[11px] text-[#FBE8EE]/65 mt-0.5">Hỗ trợ nội thành HN &amp; TP.HCM</div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3.5 p-4 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-xs">
+                <span class="w-11 h-11 rounded-full bg-[#C9A96E]/20 border border-[#C9A96E]/40 text-[#E5CFA0] flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-rotate-left text-base" aria-hidden="true"></i>
+                </span>
+                <div>
+                    <div class="text-xs font-bold text-white uppercase tracking-wider">Đổi Trả 30 Ngày</div>
+                    <div class="text-[11px] text-[#FBE8EE]/65 mt-0.5">Bảo hành kích ứng da miễn phí</div>
+                </div>
+            </div>
         </div>
 
-        <!-- Footer Columns -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-pink-950/60 text-xs">
-            <!-- Col 1: About & Mission -->
-            <div class="space-y-4">
-                <div class="flex items-center leading-none">
-                    <img src="@Brand.LogoWhiteUrl" alt="@theme.BrandName Logo" class="h-12 w-auto object-contain brand-logo-img" onerror="this.onerror=null; this.src='/images/branding/canmake-logo-white.svg'" />
-                    <span class="sr-only">@theme.BrandName</span>
-                </div>
-                <p class="text-[#F7C6D4] text-xs italic font-serif">
-                    "@(theme.Slogan ?? Brand.Slogan)"
-                </p>
-                <p class="text-slate-300 leading-relaxed">
-                    Hệ thống phân phối mỹ phẩm cao cấp đa kênh tiên phong áp dụng công nghệ kiểm soát hạn sử dụng FEFO. Chúng tôi cam kết 100% minh bạch xuất xứ và độ tươi mới của từng sản phẩm.
-                </p>
-                <div class="flex items-center gap-3 pt-2">
-                    <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="h-9 w-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#E8618C] hover:text-white text-slate-200 transition" aria-label="Facebook">
-                        <i class="fa-brands fa-facebook-f text-sm"></i>
+        <!-- 2. KHỐI BENTO ĐĂNG KÝ NHẬN BẢN TIN & THƯƠNG HIỆU -->
+        <div class="rounded-[28px] p-6 sm:p-8 lg:p-10 mb-12 bg-[linear-gradient(135deg,rgba(184,51,106,0.20)_0%,rgba(255,253,251,0.04)_55%,rgba(201,169,110,0.12)_100%)] border border-white/12 shadow-2xl">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <!-- Cột trái: Tuyên ngôn thương hiệu + Mạng xã hội (>= 44x44px, gap >= 8px) -->
+                <div class="lg:col-span-6 space-y-4">
+                    <a href="/" class="inline-block mb-1" title="@Brand.DisplayName - @Brand.Slogan">
+                        <img src="@Brand.LogoWhiteUrl"
+                             alt="@Brand.Name Logo"
+                             class="h-8 sm:h-9 w-auto object-contain transition-transform duration-300 hover:scale-[1.02]"
+                             onerror="this.onerror=null; this.src='/images/branding/canmake-logo-white.svg';" />
+                        <span class="sr-only">@Brand.Name</span>
                     </a>
-                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="h-9 w-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#E8618C] hover:text-white text-slate-200 transition" aria-label="Instagram">
-                        <i class="fa-brands fa-instagram text-sm"></i>
-                    </a>
-                    <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" class="h-9 w-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#E8618C] hover:text-white text-slate-200 transition" aria-label="TikTok">
-                        <i class="fa-brands fa-tiktok text-sm"></i>
-                    </a>
-                    <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="h-9 w-9 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#E8618C] hover:text-white text-slate-200 transition" aria-label="YouTube">
-                        <i class="fa-brands fa-youtube text-sm"></i>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Col 2: Showroom Flagship -->
-            <div class="space-y-3">
-                <h4 class="font-serif text-sm font-bold uppercase tracking-wider text-[#F7C6D4]">Hệ Thống Showroom</h4>
-                <ul class="space-y-3 text-slate-300">
-                    <li class="flex items-start gap-2.5">
-                        <i class="fa-solid fa-location-dot text-[#E8618C] mt-1 text-sm"></i>
-                        <div>
-                            <strong class="text-white block">Địa chỉ trụ sở chính:</strong>
-                            <span>@(theme.Address ?? Brand.Address)</span>
-                            <div class="text-[10px] text-slate-400 mt-0.5">Giờ làm việc: 08:30 - 22:00 (Tất cả các ngày)</div>
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-[#C9A96E]/35 text-[10px] font-bold uppercase tracking-[0.2em] text-[#E5CFA0]">
+                            <span>✦ ROSÉ LUXE BEAUTY CLUB</span>
                         </div>
-                    </li>
-                    <li class="flex items-center gap-2 pt-1 text-slate-300">
-                        <i class="fa-solid fa-phone text-amber-400"></i>
-                        <span>Hotline hỗ trợ: <strong class="text-white">@(theme.Hotline ?? Brand.Hotline)</strong> (Miễn phí)</span>
-                    </li>
-                    <li class="flex items-center gap-2 pt-1 text-slate-300">
-                        <i class="fa-solid fa-envelope text-[#F7C6D4]"></i>
-                        <span>Email CSKH: <strong class="text-white">@(theme.ContactEmail ?? Brand.Email)</strong></span>
-                    </li>
-                </ul>
-            </div>
+                    </div>
+                    <h2 class="font-serif text-2xl sm:text-3xl font-bold text-white leading-tight">
+                        Gia Nhập Đặc Quyền <em class="italic font-normal text-[#F6D2DF]">Nhan Sắc</em> Thượng Lưu
+                    </h2>
+                    <p class="text-xs sm:text-sm text-[#FBE8EE]/75 leading-relaxed max-w-xl">
+                        Nhận ngay voucher <strong class="text-white">50.000₫</strong> cho đơn hàng đầu tiên, lịch mở bán giới hạn Dior &amp; Lancôme cùng cẩm nang chăm sóc da chuẩn khoa học.
+                    </p>
 
-            <!-- Col 3: Customer Care -->
-            <div class="space-y-3">
-                <h4 class="font-serif text-sm font-bold uppercase tracking-wider text-[#F7C6D4]">Chăm Sóc Khách Hàng</h4>
-                <ul class="space-y-2.5 text-slate-300">
-                    <li><a href="/page/chinh-sach-giao-hang" class="hover:text-[#F7C6D4] transition flex items-center gap-1.5"><i class="fa-solid fa-angle-right text-[10px] text-[#E8618C]"></i> Chính sách giao hàng hỏa tốc 2H</a></li>
-                    <li><a href="/page/chinh-sach-doi-tra" class="hover:text-[#F7C6D4] transition flex items-center gap-1.5"><i class="fa-solid fa-angle-right text-[10px] text-[#E8618C]"></i> Chính sách đổi trả & hoàn tiền 100%</a></li>
-                    <li><a href="/clearance-fefo" class="hover:text-[#F7C6D4] transition flex items-center gap-1.5"><i class="fa-solid fa-angle-right text-[10px] text-[#E8618C]"></i> Quy chuẩn hạn sử dụng minh bạch FEFO</a></li>
-                    <li><a href="/page/chinh-sach-bao-mat" class="hover:text-[#F7C6D4] transition flex items-center gap-1.5"><i class="fa-solid fa-angle-right text-[10px] text-[#E8618C]"></i> Chính sách bảo mật dữ liệu khách hàng</a></li>
-                    <li><a href="/orders/tracking" class="hover:text-[#F7C6D4] transition flex items-center gap-1.5"><i class="fa-solid fa-angle-right text-[10px] text-[#E8618C]"></i> Hướng dẫn tra cứu hành trình đơn hàng</a></li>
-                </ul>
-            </div>
-
-            <!-- Col 4: Trust & Certifications -->
-            <div class="space-y-3">
-                <h4 class="font-serif text-sm font-bold uppercase tracking-wider text-[#F7C6D4]">Chứng Nhận & Thanh Toán</h4>
-                <p class="text-slate-300 leading-relaxed">
-                    Website thương mại điện tử đã thông báo và đăng ký chính thức với Bộ Công Thương Việt Nam.
-                </p>
-                <div class="pt-2">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[11px] font-semibold text-emerald-400">
-                        <i class="fa-solid fa-circle-check"></i> Đã thông báo Bộ Công Thương
-                    </span>
+                    <!-- Cụm Icon Mạng Xã Hội (44x44px, gap 10px >= 8px) -->
+                    <div class="pt-1 flex items-center gap-2.5">
+                        <span class="text-[11px] font-semibold uppercase tracking-wider text-[#FBE8EE]/60 mr-1">Kết nối:</span>
+                        <a href="https://facebook.com"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           aria-label="Canmake Beauty trên Facebook"
+                           class="w-11 h-11 rounded-full bg-white/8 hover:bg-[#B8336A] border border-white/15 hover:border-[#F6D2DF] flex items-center justify-center text-white transition-all duration-200">
+                            <i class="fa-brands fa-facebook-f text-sm" aria-hidden="true"></i>
+                        </a>
+                        <a href="https://instagram.com"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           aria-label="Canmake Beauty trên Instagram"
+                           class="w-11 h-11 rounded-full bg-white/8 hover:bg-[#B8336A] border border-white/15 hover:border-[#F6D2DF] flex items-center justify-center text-white transition-all duration-200">
+                            <i class="fa-brands fa-instagram text-sm" aria-hidden="true"></i>
+                        </a>
+                        <a href="https://tiktok.com"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           aria-label="Canmake Beauty trên TikTok"
+                           class="w-11 h-11 rounded-full bg-white/8 hover:bg-[#B8336A] border border-white/15 hover:border-[#F6D2DF] flex items-center justify-center text-white transition-all duration-200">
+                            <i class="fa-brands fa-tiktok text-sm" aria-hidden="true"></i>
+                        </a>
+                        <a href="https://youtube.com"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           aria-label="Canmake Beauty trên YouTube"
+                           class="w-11 h-11 rounded-full bg-white/8 hover:bg-[#B8336A] border border-white/15 hover:border-[#F6D2DF] flex items-center justify-center text-white transition-all duration-200">
+                            <i class="fa-brands fa-youtube text-sm" aria-hidden="true"></i>
+                        </a>
+                    </div>
                 </div>
-                <div class="pt-3">
-                    <div class="text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-2">Phương Thức Thanh Toán</div>
-                    <div class="flex flex-wrap gap-2">
-                        <span class="px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 font-mono-numeric font-bold text-[10px] text-emerald-400">VietQR Pro</span>
-                        <span class="px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 font-mono-numeric font-bold text-[10px] text-blue-400">VNPAY-QR</span>
-                        <span class="px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 font-mono-numeric font-bold text-[10px] text-pink-400">MoMo</span>
-                        <span class="px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10 font-mono-numeric font-bold text-[10px] text-amber-400">COD Tiền mặt</span>
+
+                <!-- Cột phải: Form Đăng Ký Nhận Tin (Chuẩn modern-web-guidance forms) -->
+                <div class="lg:col-span-6" x-data="{ email: '', subscribed: false }">
+                    <form action="/Subscription/Subscribe"
+                          method="post"
+                          x-on:submit.prevent="if (email.trim()) { subscribed = true; if (window.showStorefrontToast) showStorefrontToast('Đăng ký nhận bản tin Rosé Luxe thành công!', 'success'); }"
+                          class="space-y-3">
+                        <label for="footerNewsletterEmail" class="block text-xs font-bold uppercase tracking-wider text-[#F6D2DF]">
+                            Đăng ký email nhận ưu đãi độc quyền
+                        </label>
+                        <div class="flex flex-col sm:flex-row gap-2.5">
+                            <input type="email"
+                                   id="footerNewsletterEmail"
+                                   name="email"
+                                   x-model="email"
+                                   required
+                                   autocomplete="email"
+                                   autocorrect="off"
+                                   autocapitalize="off"
+                                   spellcheck="false"
+                                   enterkeyhint="send"
+                                   placeholder="Nhập địa chỉ email của bạn..."
+                                   class="flex-1 min-h-[48px] px-5 py-3 rounded-full bg-white/10 focus:bg-white/15 border border-white/20 focus:border-[#F6D2DF] text-base text-white placeholder:text-white/45 focus:outline-none transition" />
+                            <button type="submit"
+                                    class="min-h-[48px] px-7 py-3 rounded-full bg-[#B8336A] hover:bg-[#8E1F4F] text-white text-xs font-extrabold uppercase tracking-wider shadow-lg transition inline-flex items-center justify-center gap-2 shrink-0">
+                                <span>Đăng Ký Ngay</span>
+                                <i class="fa-solid fa-paper-plane text-xs" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <p x-cloak x-show="subscribed" role="status" aria-live="polite" class="text-xs font-semibold text-emerald-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check" aria-hidden="true"></i>
+                            <span>Cảm ơn bạn! Mã ưu đãi ROSELUXE50 đã được gửi tới hộp thư của bạn.</span>
+                        </p>
+                        <p x-show="!subscribed" class="text-[11px] text-[#FBE8EE]/55">
+                            Bằng việc đăng ký, bạn đồng ý với Chính sách bảo mật của Canmake Beauty. Hủy đăng ký bất cứ lúc nào.
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. LƯỚI 4 CỘT LINK (DESKTOP: 4 CỘT | MOBILE < 768PX: ACCORDION) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8 mb-12"
+             x-data="{ openCol: 'col1' }">
+
+            <!-- Cột 1: Danh Mục Nổi Bật -->
+            <div class="border-b border-white/10 md:border-none pb-2 md:pb-0">
+                <button type="button"
+                        @@click="openCol = (openCol === 'col1' ? null : 'col1')"
+                        :aria-expanded="(openCol === 'col1').toString()"
+                        class="w-full min-h-[48px] md:min-h-0 flex items-center justify-between text-left py-2 md:py-0 md:mb-4 md:cursor-default">
+                    <span class="font-serif text-base font-bold text-white tracking-wide">Danh Mục Nổi Bật</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-[#F6D2DF] md:hidden transition-transform duration-300"
+                       :class="openCol === 'col1' ? 'rotate-180' : ''"
+                       aria-hidden="true"></i>
+                </button>
+                <ul class="space-y-2.5 text-xs text-[#FBE8EE]/75 pb-3 md:pb-0"
+                    :class="openCol === 'col1' ? 'block' : 'hidden md:block'">
+                    <li><a href="/tim-kiem?categorySlug=cham-soc-da" class="inline-flex items-center min-h-[44px] md:min-h-0 py-1 hover:text-[#F6D2DF] transition">Chăm Sóc Da Chuyên Sâu</a></li>
+                    <li><a href="/tim-kiem?categorySlug=trang-diem" class="inline-flex items-center min-h-[44px] md:min-h-0 py-1 hover:text-[#F6D2DF] transition">Trang Điểm Cao Cấp Rosé</a></li>
+                    <li><a href="/tim-kiem?categorySlug=serum-tinh-chat" class="inline-flex items-center min-h-[44px] md:min-h-0 py-1 hover:text-[#F6D2DF] transition">Serum B5 &amp; Tinh Chất Đặc Trị</a></li>
+                    <li><a href="/tim-kiem?categorySlug=kem-chong-nang" class="inline-flex items-center min-h-[44px] md:min-h-0 py-1 hover:text-[#F6D2DF] transition">Kem Chống Nắng Phổ Rộng</a></li>
+                    <li><a href="/tim-kiem?fefo=clearance" class="inline-flex items-center gap-1.5 min-h-[44px] md:min-h-0 py-1 text-emerald-300 hover:text-emerald-200 font-semibold transition"><i class="fa-solid fa-shield-heart text-[10px]" aria-hidden="true"></i> Ưu Đãi Xả Kho Cận Date (-50%)</a></li>
+                </ul>
+            </div>
+
+            <!-- Cột 2: Dịch Vụ Độc Quyền -->
+            <div class="border-b border-white/10 md:border-none pb-2 md:pb-0">
+                <button type="button"
+                        @@click="openCol = (openCol === 'col2' ? null : 'col2')"
+                        :aria-expanded="(openCol === 'col2').toString()"
+                        class="w-full min-h-[48px] md:min-h-0 flex items-center justify-between text-left py-2 md:py-0 md:mb-4 md:cursor-default">
+                    <span class="font-serif text-base font-bold text-white tracking-wide">Trải Nghiệm Số Hoá</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-[#F6D2DF] md:hidden transition-transform duration-300"
+                       :class="openCol === 'col2' ? 'rotate-180' : ''"
+                       aria-hidden="true"></i>
+                </button>
+                <ul class="space-y-2.5 text-xs text-[#FBE8EE]/75 pb-3 md:pb-0"
+                    :class="openCol === 'col2' ? 'block' : 'hidden md:block'">
+                    <li><a href="/tu-van-da" class="inline-flex items-center min-h-[44px] md:min-h-0 py-1 hover:text-[#F6D2DF] transition">Trắc Nghiệm Da 4 Bước (Routine Quiz)</a></li>
+                    <li><a href="/Product/SmartFilter" class="inline-flex items-center min-h-[44px] md:min-h-0 py-1 hover:text-[#F6D2DF] transition">AI Beauty Advisor &amp; Smart Filter</a></li>
+                    <li><a href="/so-sanh" class="inline-flex items-center min-h-[44px] md:min-h-0 py-1 hover:text-[#F6D2DF] transition">So Sánh Thành Phần &amp; Hoạt Chất</a></li>
+                    <li><a href="/Blog" class="inline-flex items-center min-h-[44px] md:min-h-0 py-1 hover:text-[#F6D2DF] transition">Tạp Chí Làm Đẹp &amp; Da Liễu</a></li>
+                    <li><a href="/wishlist" class="inline-flex items-center min-h-[44px] md:min-h-0 py-1 hover:text-[#F6D2DF] transition">Tủ Đồ Mỹ Phẩm Yêu Thích</a></li>
+                </ul>
+            </div>
+
+            <!-- Cột 3: Hỗ Trợ Khách Hàng -->
+            <div class="border-b border-white/10 md:border-none pb-2 md:pb-0">
+                <button type="button"
+                        @@click="openCol = (openCol === 'col3' ? null : 'col3')"
+                        :aria-expanded="(openCol === 'col3').toString()"
+                        class="w-full min-h-[48px] md:min-h-0 flex items-center justify-between text-left py-2 md:py-0 md:mb-4 md:cursor-default">
+                    <span class="font-serif text-base font-bold text-white tracking-wide">Chính Sách &amp; Hỗ Trợ</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-[#F6D2DF] md:hidden transition-transform duration-300"
+                       :class="openCol === 'col3' ? 'rotate-180' : ''"
+                       aria-hidden="true"></i>
+                </button>
+                <ul class="space-y-2.5 text-xs text-[#FBE8EE]/75 pb-3 md:pb-0"
+                    :class="openCol === 'col3' ? 'block' : 'hidden md:block'">
+                    <li><a href="/Order/Lookup" class="inline-flex items-center min-h-[44px] md:min-h-0 py-1 hover:text-[#F6D2DF] transition">Tra Cứu Hành Trình Đơn Hàng</a></li>
+                    <li><a href="/Home/Privacy" class="inline-flex items-center min-h-[44px] md:min-h-0 py-1 hover:text-[#F6D2DF] transition">Cam Kết Hạn Dùng &amp; Độ Tươi Mới</a></li>
+                    <li><a href="/Home/Privacy" class="inline-flex items-center min-h-[44px] md:min-h-0 py-1 hover:text-[#F6D2DF] transition">Chính Sách Đổi Trả 30 Ngày</a></li>
+                    <li><a href="/Home/Privacy" class="inline-flex items-center min-h-[44px] md:min-h-0 py-1 hover:text-[#F6D2DF] transition">Bảo Mật Thông Tin Khách Hàng</a></li>
+                    <li><a href="/Account/Login" class="inline-flex items-center min-h-[44px] md:min-h-0 py-1 hover:text-[#F6D2DF] transition">Tài Khoản &amp; Hạng Thẻ VIP</a></li>
+                </ul>
+            </div>
+
+            <!-- Cột 4: Hệ Thống Showroom & Liên Hệ -->
+            <div class="border-b border-white/10 md:border-none pb-2 md:pb-0">
+                <button type="button"
+                        @@click="openCol = (openCol === 'col4' ? null : 'col4')"
+                        :aria-expanded="(openCol === 'col4').toString()"
+                        class="w-full min-h-[48px] md:min-h-0 flex items-center justify-between text-left py-2 md:py-0 md:mb-4 md:cursor-default">
+                    <span class="font-serif text-base font-bold text-white tracking-wide">Showroom &amp; Liên Hệ</span>
+                    <i class="fa-solid fa-chevron-down text-xs text-[#F6D2DF] md:hidden transition-transform duration-300"
+                       :class="openCol === 'col4' ? 'rotate-180' : ''"
+                       aria-hidden="true"></i>
+                </button>
+                <div class="space-y-3 text-xs text-[#FBE8EE]/75 pb-3 md:pb-0"
+                     :class="openCol === 'col4' ? 'block' : 'hidden md:block'">
+                    <p class="flex items-start gap-2.5 leading-relaxed">
+                        <i class="fa-solid fa-location-dot text-[#F6D2DF] mt-1 shrink-0" aria-hidden="true"></i>
+                        <span>Flagship: Tòa nhà Lotte Center, 54 Liễu Giai, Quận Ba Đình, Hà Nội</span>
+                    </p>
+                    <p class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-phone-volume text-[#F6D2DF] shrink-0" aria-hidden="true"></i>
+                        <span>Hotline VIP: <a href="tel:1900888999" class="text-white font-bold font-mono-numeric hover:underline">1900 888 999</a></span>
+                    </p>
+                    <p class="flex items-center gap-2.5">
+                        <i class="fa-solid fa-envelope text-[#F6D2DF] shrink-0" aria-hidden="true"></i>
+                        <a href="mailto:cskh@canmakebeauty.vn" class="hover:text-white transition">cskh@canmakebeauty.vn</a>
+                    </p>
+
+                    <!-- Chứng nhận Bộ Công Thương & FEFO -->
+                    <div class="pt-2 flex flex-wrap items-center gap-2">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/8 border border-white/15">
+                            <i class="fa-solid fa-circle-check text-emerald-400 text-sm" aria-hidden="true"></i>
+                            <div class="leading-tight">
+                                <div class="text-[9px] font-bold uppercase tracking-wider text-white">Đã Thông Báo</div>
+                                <div class="text-[8px] text-[#FBE8EE]/65">Bộ Công Thương</div>
+                            </div>
+                        </div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/8 border border-[#C9A96E]/35">
+                            <i class="fa-solid fa-flask-vial text-[#E5CFA0] text-sm" aria-hidden="true"></i>
+                            <div class="leading-tight">
+                                <div class="text-[9px] font-bold uppercase tracking-wider text-[#E5CFA0]">Date Certified</div>
+                                <div class="text-[8px] text-[#FBE8EE]/65">ISO 22716 GMP</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Bottom Copyright Bar -->
-        <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-400 text-[11px]">
-            <div>@(theme.FooterCopyright ?? Brand.CopyrightText)</div>
-            <div class="flex items-center gap-4">
-                <span class="inline-flex items-center gap-1"><span class="h-2 w-2 rounded-full bg-emerald-500"></span> Phiên bản: 2.6-RELEASE</span>
-                <span>•</span>
-                <span>Tốc độ phản hồi: &lt; 25ms</span>
-                <span>•</span>
-                <a href="/page/dieu-khoan" class="hover:text-slate-200 transition">Điều khoản sử dụng</a>
+        <!-- 4. DẢI CUỐI TRANG: BẢN QUYỀN & PHƯƠNG THỨC THANH TOÁN -->
+        <div class="pt-6 border-t border-white/10 flex flex-col lg:flex-row items-center justify-between gap-4 text-xs text-[#FBE8EE]/60">
+            <div class="text-center lg:text-left space-y-1">
+                <p>&copy; 2026 <strong class="text-white">CANMAKE BEAUTY SOLUTION</strong>. Hệ thống Thương mại Điện tử Mỹ phẩm Đa kênh Tiên phong Minh bạch Hạn Dùng.</p>
+                <p class="text-[11px] text-[#F6D2DF]/80">
+                    <i class="fa-solid fa-graduation-cap mr-1" aria-hidden="true"></i>
+                    Đồ án Tốt nghiệp Đại học — Phiên bản nâng cấp giao diện <strong>Rosé Luxe Design System</strong>.
+                </p>
             </div>
-        </div>
-        <div class="mt-3 text-[10px] text-slate-500 text-center sm:text-left leading-relaxed">
-            Lưu ý học thuật: CANMAKE BEAUTY trong hệ thống này là thương hiệu giả định phục vụ mục đích nghiên cứu &amp; trình diễn Khóa luận Tốt nghiệp, độc lập và không liên kết thương mại với nhãn hiệu CANMAKE TOKYO (IDA Laboratories Co., Ltd., Nhật Bản).
+
+            <div class="flex flex-wrap items-center justify-center gap-2">
+                <span class="px-3 py-1 rounded-full bg-white/8 border border-white/12 text-[10px] font-bold text-white">VNPay QR</span>
+                <span class="px-3 py-1 rounded-full bg-white/8 border border-white/12 text-[10px] font-bold text-white">MoMo</span>
+                <span class="px-3 py-1 rounded-full bg-white/8 border border-white/12 text-[10px] font-bold text-white">Visa / Master</span>
+                <span class="px-3 py-1 rounded-full bg-white/8 border border-white/12 text-[10px] font-bold text-white">COD Kiểm Hàng</span>
+            </div>
         </div>
     </div>
 </footer>

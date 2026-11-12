@@ -5,8 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Omnichannel.Domain.Entities;
 using Omnichannel.Infrastructure.Data;
 using Omnichannel.Web.Models;
@@ -20,11 +23,60 @@ namespace Omnichannel.Web.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment? _env;
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
+        public HomeController(
+            ILogger<HomeController> logger,
+            ApplicationDbContext context,
+            IWebHostEnvironment? env = null)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _env = env;
+        }
+
+        /// <summary>
+        /// Trang Living Styleguide trình bày toàn bộ Design System "Rosé Luxe" (Chỉ mở trên môi trường Development)
+        /// </summary>
+        [HttpGet("styleguide")]
+        public async Task<IActionResult> Styleguide()
+        {
+            var env = _env ?? HttpContext?.RequestServices?.GetService<IWebHostEnvironment>();
+            if (env == null || !env.IsDevelopment())
+            {
+                return NotFound();
+            }
+
+            List<Product> sampleProducts = new();
+            List<Category> sampleCategories = new();
+            try
+            {
+                sampleProducts = await _context.Products
+                    .AsNoTracking()
+                    .Include(p => p.Brand)
+                    .Include(p => p.Category)
+                    .Include(p => p.Batches)
+                    .Where(p => p.IsActive)
+                    .OrderByDescending(p => p.IsFeatured)
+                    .ThenBy(p => p.Id)
+                    .Take(4)
+                    .ToListAsync();
+
+                sampleCategories = await _context.Categories
+                    .AsNoTracking()
+                    .Where(c => c.IsActive)
+                    .OrderBy(c => c.Id)
+                    .Take(4)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Không tải được dữ liệu mẫu cho trang /styleguide, sử dụng dữ liệu tĩnh.");
+            }
+
+            ViewBag.SampleProducts = sampleProducts;
+            ViewBag.SampleCategories = sampleCategories;
+            return View();
         }
 
         public IActionResult Index([FromQuery] string? mode = null)

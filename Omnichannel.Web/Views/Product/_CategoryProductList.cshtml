@@ -4,14 +4,15 @@
     var products = Model.Products ?? new List<Omnichannel.Domain.Entities.Product>();
     int startItem = Model.TotalProducts > 0 ? ((Model.CurrentPage - 1) * Model.PageSize) + 1 : 0;
     int endItem = Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalProducts);
+    int progressPercent = Model.TotalProducts > 0 ? (int)Math.Round((double)endItem / Model.TotalProducts * 100) : 0;
 }
 
-<!-- Results Count & Active View State Meta -->
-<div class="flex items-center justify-between text-xs text-slate-500 mb-6 pb-3 border-b border-slate-100">
+<!-- Results Count & Removable Active Filter Chips -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-[#8A7580] mb-6 pb-4 border-b border-[#F1DCE4]">
     <div>
         @if (Model.TotalProducts > 0)
         {
-            <span>Hiển thị <strong class="text-charcoal font-bold">@startItem - @endItem</strong> trong tổng số <strong class="text-magenta-accent font-bold">@Model.TotalProducts</strong> sản phẩm chính ngạch</span>
+            <span>Hiển thị <strong class="text-[#23191E] font-bold font-mono">@startItem - @endItem</strong> trong tổng số <strong class="text-[#B8336A] font-extrabold font-mono">@Model.TotalProducts</strong> sản phẩm chính ngạch</span>
         }
         else
         {
@@ -19,24 +20,41 @@
         }
     </div>
 
-    <!-- Active Tag Badges -->
-    <div class="hidden sm:flex items-center gap-1.5 flex-wrap">
+    <!-- Active Filter Badges -->
+    <div class="flex items-center gap-1.5 flex-wrap">
         @if (Model.FefoOption != "all")
         {
-            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                FEFO: @(Model.FefoOption == "fresh" ? ">18 tháng" : (Model.FefoOption == "good" ? "6-12 tháng" : "<6 tháng xả kho"))
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#FBF5E8] text-[#7A5413] border border-[#EBD6A7]">
+                <i class="fa-solid fa-clock-rotate-left text-[10px]"></i>
+                <span>Date: @(Model.FefoOption == "fresh" ? ">18 tháng" : (Model.FefoOption == "good" ? "6-12 tháng" : "<6th xả kho"))</span>
             </span>
         }
         @if (Model.SelectedBrands.Any())
         {
-            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-pink-50 text-magenta-accent border border-pink-200">
-                Hãng: @string.Join(", ", Model.SelectedBrands)
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#FDF0F4] text-[#B8336A] border border-[#F5C2D1]">
+                <i class="fa-solid fa-tag text-[10px]"></i>
+                <span>Hãng: @string.Join(", ", Model.SelectedBrands)</span>
             </span>
         }
         @if (Model.SkinType != "all")
         {
-            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-800 border border-sky-200">
-                Da: @Model.SkinType
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#FFF7FA] text-[#8E1F4F] border border-[#F6D2DF]">
+                <i class="fa-solid fa-face-smile text-[10px]"></i>
+                <span>Da: @Model.SkinType</span>
+            </span>
+        }
+        @if (Model.SkinConcern != "all")
+        {
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#EDF8F4] text-[#135D43] border border-[#B6E4D4]">
+                <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
+                <span>Nhu cầu: @Model.SkinConcern</span>
+            </span>
+        }
+        @if (Model.Ingredient != "all")
+        {
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#F6F1F8] text-[#513066] border border-[#DFCEE8]">
+                <i class="fa-solid fa-flask-vial text-[10px]"></i>
+                <span>Chất: @Model.Ingredient</span>
             </span>
         }
     </div>
@@ -44,19 +62,22 @@
 
 @if (!products.Any())
 {
-    <!-- Empty State -->
-    <div class="py-16 text-center bg-white rounded-3xl border border-soft-border/80 p-8 shadow-xs">
-        <div class="w-16 h-16 rounded-full bg-pastel-rose text-magenta-accent flex items-center justify-center text-2xl mx-auto mb-4">
+    <!-- LUXURY EMPTY STATE -->
+    <div class="py-16 sm:py-20 text-center bg-white rounded-[28px] border border-[#F1DCE4] p-8 sm:p-12 shadow-xs">
+        <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-[#FFF7FA] to-[#FBE8EE] text-[#B8336A] flex items-center justify-center text-3xl mx-auto mb-5 border border-[#F6D2DF] shadow-xs">
             <i class="fa-solid fa-filter-circle-xmark"></i>
         </div>
-        <h3 class="font-serif text-xl font-bold text-charcoal mb-2">Không tìm thấy sản phẩm phù hợp</h3>
-        <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto mb-6">
-            Rất tiếc, không có sản phẩm nào thỏa mãn tất cả các tiêu chí lọc bạn đã chọn. Vui lòng thử nới lỏng khoảng giá, bỏ chọn một vài thương hiệu hoặc đặt lại bộ lọc.
+        <h3 class="font-serif text-2xl sm:text-3xl font-extrabold text-[#23191E] mb-3">
+            Không tìm thấy sản phẩm phù hợp
+        </h3>
+        <p class="text-xs sm:text-sm text-[#57454E] max-w-md mx-auto mb-6 leading-relaxed">
+            Các tiêu chí lọc của bạn hiện tại quá hẹp. Hãy thử mở rộng khoảng giá, bỏ chọn một vài thương hiệu hoặc đặt lại bộ lọc để khám phá toàn bộ bộ sưu tập.
         </p>
         <button type="button" 
                 onclick="resetFacetedFilter()" 
-                class="px-6 py-2.5 rounded-full bg-magenta-accent text-white font-bold text-xs uppercase tracking-wider hover:bg-[#b0276a] transition shadow-md">
-            <i class="fa-solid fa-arrows-rotate mr-1.5"></i> Đặt Lại Tất Cả Bộ Lọc
+                class="inline-flex items-center gap-2 px-7 py-3.5 rounded-full bg-gradient-to-r from-[#B8336A] to-[#8E1F4F] text-white font-extrabold text-xs uppercase tracking-widest shadow-md hover:shadow-lg transition cursor-pointer active:scale-95">
+            <i class="fa-solid fa-arrows-rotate text-xs"></i>
+            <span>Đặt Lại Tất Cả Bộ Lọc</span>
         </button>
     </div>
 }
@@ -67,8 +88,9 @@ else
     {
         <!-- =================== LIST VIEW (CHI TIẾT THÀNH PHẦN) =================== -->
         <div class="space-y-5">
-            @foreach (var p in products)
+            @for (int idx = 0; idx < products.Count; idx++)
             {
+                var p = products[idx];
                 var bestBatch = p.Batches?.Where(b => b.CurrentQuantity > 0).OrderBy(b => b.ExpDate).FirstOrDefault()
                     ?? p.Batches?.OrderBy(b => b.ExpDate).FirstOrDefault();
                 var daysLeft = bestBatch != null ? Math.Max(0, (bestBatch.ExpDate - DateTime.UtcNow).Days) : 720;
@@ -78,7 +100,6 @@ else
                 var hasDiscount = p.DiscountPrice.HasValue && p.DiscountPrice.Value < originalPrice;
                 var salePrice = hasDiscount && p.DiscountPrice.HasValue ? p.DiscountPrice.Value : originalPrice;
 
-                // Tự động tính giá xả kho cận date FEFO nếu lô có chiết khấu hoặc <180 ngày
                 if (bestBatch != null)
                 {
                     if (bestBatch.ClearanceDiscountPercent.HasValue && bestBatch.ClearanceDiscountPercent.Value > 0)
@@ -102,124 +123,90 @@ else
                     ? (int)Math.Round((1 - (salePrice / originalPrice)) * 100) 
                     : 0;
 
-                var meta = Model.FefoMeta.ContainsKey(p.Id) ? Model.FefoMeta[p.Id] : new Omnichannel.Web.Models.ProductFefoMeta { ExpDate = bestBatch?.ExpDate ?? DateTime.UtcNow.AddMonths(18), DaysLeft = daysLeft, StatusKey = "fresh", BadgeClass = "bg-emerald-500/15 border-emerald-500/40 text-emerald-700", BadgeText = $"Chuẩn date • HSD {(bestBatch?.ExpDate ?? DateTime.UtcNow.AddMonths(18)):MM/yyyy}" };
+                var meta = Model.FefoMeta.ContainsKey(p.Id) ? Model.FefoMeta[p.Id] : new Omnichannel.Web.Models.ProductFefoMeta { ExpDate = bestBatch?.ExpDate ?? DateTime.UtcNow.AddMonths(18), DaysLeft = daysLeft, StatusKey = "fresh", BadgeClass = "bg-[#EDF8F4] border-[#B6E4D4] text-[#135D43]", BadgeText = $"Chuẩn date • HSD {(bestBatch?.ExpDate ?? DateTime.UtcNow.AddMonths(18)):MM/yyyy}" };
                 var rating = Model.Ratings.ContainsKey(p.Id) ? Model.Ratings[p.Id] : 4.9;
                 var ingredients = Model.ActiveIngredients.ContainsKey(p.Id) ? Model.ActiveIngredients[p.Id] : new List<string> { "Hyaluronic Acid", "Niacinamide" };
                 
                 var pImg = ProductImageResolver.GetPrimaryImageUrl(p.ThumbnailUrl, p.Sku, p.Slug, p.Name);
                 var pWebp = ProductImageResolver.GetWebpImageUrl(pImg, p.Sku, p.Slug, p.Name);
                 var pAlt = ProductImageResolver.GetAltText(p.Name, p.Brand?.Name, p.Category?.Name, p.Sku, p.Slug);
-
                 var productUrl = !string.IsNullOrEmpty(p.Slug) ? $"/san-pham/{p.Slug}" : $"/Product/Detail/{p.Id}";
 
-                <div class="product-card-luxury bg-white rounded-3xl border border-soft-border/90 p-5 hover:border-magenta-accent/60 hover:shadow-xl transition-all duration-300 group flex flex-col md:flex-row gap-6 relative overflow-hidden cursor-pointer" data-product-url="@productUrl">
+                <div class="product-card-luxury bg-white rounded-[24px] border border-[#F1DCE4] p-5 hover:border-[#B8336A]/50 hover:shadow-xl transition-all duration-300 group flex flex-col md:flex-row gap-6 relative overflow-hidden cursor-pointer" data-product-url="@productUrl">
                     
-                    <!-- Left: Large Image Container -->
-                    <div class="relative w-full md:w-56 shrink-0 aspect-square rounded-2xl overflow-hidden bg-slate-50 group/thumb">
+                    <!-- Left: Thumbnail Container -->
+                    <div class="relative w-full md:w-52 shrink-0 aspect-square rounded-2xl overflow-hidden bg-[#FFF7FA] group/thumb">
                         <a href="@productUrl" class="block w-full h-full relative" title="@pAlt">
                             <picture class="block w-full h-full">
                                 <source srcset="@pWebp" type="image/webp" />
-                                <img src="@pImg" alt="@pAlt" width="224" height="224" decoding="async" loading="lazy" onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-106 will-change-transform" />
+                                <img src="@pImg" alt="@pAlt" width="208" height="208" decoding="async" loading="lazy" onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-106 will-change-transform" />
                             </picture>
                         </a>
 
-                        <!-- Origin Badge -->
-                        <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-white/95 backdrop-blur-xs text-[9px] font-bold text-charcoal shadow-2xs border border-slate-100 flex items-center gap-1 pointer-events-none">
-                            <i class="fa-solid fa-location-dot text-rose-gold text-[8px]"></i>
-                            <span>@(string.IsNullOrEmpty(p.CountryOfOrigin) ? "Chính Hãng" : p.CountryOfOrigin)</span>
-                        </span>
-
-                        <!-- Discount Tag -->
                         @if (discPercent > 0)
                         {
-                            <span class="absolute top-2.5 right-2.5 bg-gradient-to-r from-red-600 to-rose-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center gap-0.5 pointer-events-none">
-                                <i class="fa-solid fa-bolt text-amber-300 text-[9px]"></i>
+                            <span class="absolute top-2.5 right-2.5 bg-gradient-to-r from-[#B8336A] to-[#8E1F4F] text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-md flex items-center gap-0.5 pointer-events-none">
                                 <span>-@discPercent%</span>
                             </span>
                         }
-
-                        <!-- Dedicated Quick View Eye Button -->
-                        <button type="button" 
-                                data-action="quick-view"
-                                data-product-id="@p.Id"
-                                onclick="event.stopPropagation(); event.preventDefault(); openQuickView(@p.Id)" 
-                                class="absolute bottom-2.5 right-2.5 h-8 w-8 rounded-full bg-white/95 hover:bg-magenta-accent text-charcoal hover:text-white shadow-md flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 cursor-pointer z-20"
-                                title="Xem nhanh thông tin">
-                            <i class="fa-regular fa-eye text-xs"></i>
-                        </button>
                     </div>
 
-                    <!-- Middle: Details, Description, and Active Ingredients -->
+                    <!-- Middle: Content -->
                     <div class="flex-1 flex flex-col justify-between">
                         <div>
-                            <!-- Brand & Rating -->
                             <div class="flex items-center justify-between mb-1.5">
-                                <span class="text-[10.5px] font-extrabold uppercase tracking-wider text-rose-gold">
-                                    @(string.IsNullOrEmpty(p.ManufacturerName) ? (p.Category?.Name ?? "Dược Mỹ Phẩm") : p.ManufacturerName)
+                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-[#B8336A]">
+                                    @(string.IsNullOrEmpty(p.ManufacturerName) ? (p.Category?.Name ?? "CANMAKE TOKYO") : p.ManufacturerName)
                                 </span>
 
                                 <div class="flex items-center gap-1 text-amber-400 text-xs">
                                     <i class="fa-solid fa-star"></i>
-                                    <span class="text-charcoal font-bold text-[11px] ml-0.5">@rating.ToString("F1")</span>
-                                    <span class="text-slate-400 text-[10px] font-normal">(120+ đánh giá)</span>
+                                    <span class="text-[#23191E] font-bold text-[11px]">@rating.ToString("F1")</span>
                                 </div>
                             </div>
 
-                            <!-- Product Name -->
-                            <h3 class="font-serif text-lg font-bold text-charcoal leading-snug group-hover:text-magenta-accent transition-colors mb-2">
+                            <h3 class="font-serif text-lg font-bold text-[#23191E] leading-snug group-hover:text-[#B8336A] transition-colors mb-2">
                                 <a href="@productUrl">@p.Name</a>
                             </h3>
 
-                            <!-- Short Description -->
-                            <p class="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-3">
-                                @(string.IsNullOrEmpty(p.ShortDescription) ? "Sản phẩm dược mỹ phẩm cao cấp phân phối chính ngạch với công nghệ thẩm thấu sâu đa tầng, an toàn lành tính cho mọi làn da." : p.ShortDescription)
+                            <p class="text-xs text-[#57454E] line-clamp-2 leading-relaxed mb-3">
+                                @(string.IsNullOrEmpty(p.ShortDescription) ? "Dược mỹ phẩm chính ngạch Nhật Bản với công thức thẩm thấu sâu, dịu nhẹ và đạt chuẩn date mới minh bạch." : p.ShortDescription)
                             </p>
 
-                            <!-- Key Active Ingredients (Hoạt chất vàng y khoa) -->
-                            <div class="mb-3">
-                                <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                                    <i class="fa-solid fa-flask-vial text-rose-gold text-[10px]"></i> Thành Phần Hoạt Chất Nổi Bật:
-                                </div>
-                                <div class="flex flex-wrap gap-1.5">
-                                    @foreach (var ing in ingredients)
-                                    {
-                                        <span class="px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-900 border border-amber-500/20 text-[10.5px] font-semibold flex items-center gap-1">
-                                            <i class="fa-solid fa-check text-amber-600 text-[8px]"></i>
-                                            @ing
-                                        </span>
-                                    }
-                                </div>
+                            <!-- Ingredients -->
+                            <div class="flex flex-wrap gap-1.5 mb-3">
+                                @foreach (var ing in ingredients.Take(3))
+                                {
+                                    <span class="px-2.5 py-0.5 rounded-full bg-[#FFF7FA] text-[#8E1F4F] border border-[#F6D2DF] text-[10px] font-bold">
+                                        ✦ @ing
+                                    </span>
+                                }
                             </div>
 
-                            <!-- FEFO Transparent Batch Details -->
-                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-xl text-xs font-bold @meta.BadgeClass border shadow-2xs">
+                            <!-- FEFO Badge -->
+                            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-xl text-xs font-bold @meta.BadgeClass border">
                                 <i class="fa-solid fa-clock-rotate-left"></i>
                                 <span>@meta.BadgeText</span>
-                                <span class="opacity-75 font-normal text-[10px]">• Lô: @meta.BatchNumber</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Right: Pricing & CTA Actions -->
-                    <div class="w-full md:w-56 shrink-0 flex flex-col justify-between border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 md:pl-6">
+                    <!-- Right: Pricing & CTA -->
+                    <div class="w-full md:w-48 shrink-0 flex flex-col justify-between border-t md:border-t-0 md:border-l border-[#F1DCE4] pt-4 md:pt-0 md:pl-5">
                         <div class="text-left md:text-right">
-                            <span class="text-[10.5px] text-slate-400 font-medium block">Giá bán chính hãng:</span>
-                            <div class="text-2xl font-black text-rose-600 font-mono-numeric tracking-tight mt-0.5">
+                            <span class="text-[10px] text-[#8A7580] font-medium block">Giá chính hãng:</span>
+                            <div class="text-xl font-extrabold text-[#B8336A] font-mono tracking-tight mt-0.5">
                                 @salePrice.ToString("N0") ₫
                             </div>
                             @if (hasDiscount)
                             {
-                                <div class="text-xs text-slate-400 line-through font-mono-numeric mt-0.5">
+                                <div class="text-xs text-[#8A7580] line-through font-mono">
                                     @p.SellingPrice.ToString("N0") ₫
                                 </div>
                             }
-                            <div class="text-[10.5px] text-emerald-600 font-bold mt-2 flex items-center justify-start md:justify-end gap-1">
-                                <i class="fa-solid fa-truck-fast"></i> Sẵn hàng • Giao 2H
-                            </div>
                         </div>
 
                         <div class="space-y-2 mt-4">
-                            <!-- Nút Thêm Vào Giỏ -->
                             <button type="button" 
                                     data-action="add-to-cart"
                                     data-product-id="@p.Id"
@@ -229,103 +216,177 @@ else
                                     data-price="@salePrice"
                                     data-image="@pImg"
                                     onclick="event.stopPropagation(); event.preventDefault(); addToCart(@p.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(p.Name))', @salePrice, '@pImg', 1, @(bestBatch?.Id ?? 0), @(firstVariant?.Id ?? 0))"
-                                    class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-magenta-accent to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-extrabold text-xs uppercase tracking-wider transition shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95">
+                                    class="w-full py-2.5 px-4 rounded-full bg-gradient-to-r from-[#B8336A] to-[#8E1F4F] text-white font-extrabold text-xs uppercase tracking-wider transition shadow-xs flex items-center justify-center gap-2 cursor-pointer active:scale-95">
                                 <i class="fa-solid fa-cart-plus text-xs"></i>
                                 <span>Thêm Vào Giỏ</span>
                             </button>
-
-                            <!-- Nút Xem Chi Tiết -->
-                            <a href="@productUrl" 
-                               class="w-full py-2 px-4 rounded-xl bg-pastel-rose hover:bg-white text-charcoal hover:text-magenta-accent border border-pink-200 text-center font-bold text-xs transition flex items-center justify-center gap-1.5">
-                                <span>Xem Chi Tiết</span>
-                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                            </a>
                         </div>
                     </div>
                 </div>
+
+                @if ((idx + 1) % 8 == 0 && idx < products.Count - 1)
+                {
+                    <!-- EDITORIAL BANNER (LIST VIEW) -->
+                    <div class="rounded-[24px] bg-gradient-to-r from-[#FFF4F7] via-[#FFFDFB] to-[#FBE8EE] border border-[#F6D2DF] p-6 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xs relative overflow-hidden">
+                        <div class="relative z-10 max-w-lg">
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest text-[#B8336A] block mb-1">
+                                ✦ BẢO CHỨNG MINH BẠCH CANMAKE
+                            </span>
+                            <h4 class="font-serif text-xl sm:text-2xl font-extrabold text-[#23191E] mb-2">
+                                Tươi Mới Đến <em>Giọt Cuối Cùng</em>
+                            </h4>
+                            <p class="text-xs text-[#57454E] leading-relaxed">
+                                Cam kết hạn sử dụng luôn minh bạch đến từng ngày theo chuẩn xuất xưởng Nhật Bản. Hoàn tiền 200% nếu phát hiện cận hạn không thông báo.
+                            </p>
+                        </div>
+                        <a href="/quiz" class="relative z-10 px-6 py-3 rounded-full bg-white text-[#B8336A] border border-[#F6D2DF] font-extrabold text-xs uppercase tracking-wider shadow-xs hover:bg-[#FBE8EE] transition shrink-0">
+                            Cam Kết Date Mới &rarr;
+                        </a>
+                    </div>
+                }
             }
         </div>
     }
     else
     {
-        <!-- =================== GRID VIEW (LƯỚI 3-4 CỘT) =================== -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            @foreach (var p in products)
+        <!-- =================== GRID VIEW (2 COLS MOBILE -> 3 COLS TABLET -> 4 COLS DESKTOP) =================== -->
+        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-5 lg:gap-6">
+            @for (int i = 0; i < products.Count; i++)
             {
+                var p = products[i];
                 <partial name="_ProductCard" model="p" />
+
+                @if ((i + 1) % 8 == 0 && i < products.Count - 1)
+                {
+                    <!-- EDITORIAL BANNER (SPANS 2 COLUMNS IN GRID) -->
+                    <div class="col-span-2 editorial-grid-banner bg-gradient-to-br from-[#FFF4F7] via-[#FFFDFB] to-[#FBE8EE] border border-[#F6D2DF] p-6 sm:p-8 flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xs relative overflow-hidden group hover:shadow-md transition">
+                        <!-- Decorative Watermark Background -->
+                        <div class="absolute -right-6 -bottom-6 text-6xl sm:text-8xl font-serif font-black text-[#B8336A]/5 pointer-events-none select-none uppercase" aria-hidden="true">
+                            DATE MỚI
+                        </div>
+
+                        <!-- Left Text Content -->
+                        <div class="relative z-10 max-w-md">
+                            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 text-[#B8336A] border border-[#F6D2DF] text-[10px] font-extrabold uppercase tracking-widest mb-2 shadow-2xs">
+                                <i class="fa-solid fa-certificate text-[9px] text-[#C9A96E]"></i>
+                                <span>Cam Kết Date Mới 100%</span>
+                            </div>
+
+                            <h4 class="font-serif text-xl sm:text-2xl font-extrabold text-[#23191E] mb-2 leading-snug">
+                                Tươi Mới Đến <em class="italic text-[#B8336A]">Giọt Cuối Cùng</em>
+                            </h4>
+
+                            <p class="text-xs text-[#57454E] leading-relaxed">
+                                100% sản phẩm phân phối chính ngạch được quản lý hạn dùng từng lô xuất xưởng. Tra cứu date trực tiếp trên vỏ hộp & ứng dụng.
+                            </p>
+
+                            <div class="flex items-center gap-4 mt-4 text-[11px] font-bold text-[#23191E]">
+                                <span class="flex items-center gap-1.5">
+                                    <i class="fa-solid fa-circle-check text-[#1E8E68]"></i> Date &gt; 18 tháng
+                                </span>
+                                <span class="flex items-center gap-1.5">
+                                    <i class="fa-solid fa-rotate-left text-[#C9A96E]"></i> Đổi trả 7 ngày
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Right CTA Button -->
+                        <div class="relative z-10 shrink-0 w-full sm:w-auto text-center sm:text-right">
+                            <a href="/quiz" 
+                               class="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3.5 rounded-full bg-gradient-to-r from-[#B8336A] to-[#8E1F4F] text-white font-extrabold text-xs uppercase tracking-widest shadow-md hover:shadow-lg transition active:scale-95">
+                                <span>Làm Quiz Routine</span>
+                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </a>
+                        </div>
+                    </div>
+                }
             }
         </div>
     }
 
-    <!-- =================== LUXURY PAGINATION & LOAD MORE =================== -->
-    <div class="mt-12 pt-8 border-t border-soft-border/80 flex flex-col sm:flex-row items-center justify-between gap-6">
+    <!-- =================== LUXURY PAGINATION & LOAD MORE PROGRESS =================== -->
+    <div class="mt-12 pt-8 border-t border-[#F1DCE4] flex flex-col items-center gap-6">
         
-        <!-- Results counter text -->
-        <div class="text-xs text-slate-500 font-medium order-2 sm:order-1">
-            Hiển thị <strong class="text-charcoal">@startItem - @endItem</strong> trên tổng số <strong class="text-magenta-accent">@Model.TotalProducts</strong> sản phẩm
+        <!-- Progress Bar: "Đã xem X / Y sản phẩm" -->
+        <div class="w-full max-w-sm text-center">
+            <div class="text-xs text-[#57454E] font-medium mb-2">
+                Đã xem <strong class="text-[#23191E] font-mono font-bold">@endItem</strong> trên tổng số <strong class="text-[#B8336A] font-mono font-extrabold">@Model.TotalProducts</strong> sản phẩm
+            </div>
+            
+            <div class="w-full bg-[#FBE8EE] rounded-full h-1.5 overflow-hidden">
+                <div class="bg-gradient-to-r from-[#B8336A] to-[#C9A96E] h-full rounded-full transition-all duration-500 ease-out" 
+                     style="width: @progressPercent%"></div>
+            </div>
         </div>
 
-        <!-- Numbered Pagination -->
+        <!-- Load More Button -->
+        @if (Model.CurrentPage < Model.TotalPages)
+        {
+            <button type="button" 
+                    onclick="loadMoreCategoryProducts(@(Model.CurrentPage + 1))" 
+                    class="btn-pill-arrow inline-flex items-center gap-3 px-8 py-3.5 rounded-full bg-white hover:bg-[#FFF7FA] text-[#23191E] hover:text-[#B8336A] border border-[#F1DCE4] hover:border-[#B8336A] font-extrabold text-xs uppercase tracking-widest shadow-xs hover:shadow-md transition active:scale-98 cursor-pointer">
+                <span>Xem thêm @(Math.Min(Model.PageSize, Model.TotalProducts - endItem)) sản phẩm</span>
+                <span class="w-6 h-6 rounded-full bg-[#FBE8EE] text-[#B8336A] flex items-center justify-center text-[10px]">
+                    <i class="fa-solid fa-arrow-down"></i>
+                </span>
+            </button>
+        }
+
+        <!-- Numbered Pagination for Desktop -->
         @if (Model.TotalPages > 1)
         {
-            <div class="flex items-center gap-2 order-1 sm:order-2">
+            <nav aria-label="Phân trang danh mục" class="flex items-center gap-1.5 flex-wrap justify-center pt-2">
                 <!-- Prev Button -->
                 @if (Model.CurrentPage > 1)
                 {
                     <button type="button" 
                             onclick="goToCategoryPage(@(Model.CurrentPage - 1))" 
-                            class="w-10 h-10 rounded-2xl bg-white border border-soft-border flex items-center justify-center text-charcoal hover:bg-magenta-accent hover:text-white hover:border-magenta-accent transition shadow-xs text-xs font-bold"
+                            class="w-9 h-9 rounded-xl bg-white border border-[#F1DCE4] flex items-center justify-center text-[#23191E] hover:border-[#B8336A] hover:text-[#B8336A] transition shadow-2xs text-xs font-bold cursor-pointer"
                             title="Trang trước">
-                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                        <i class="fa-solid fa-chevron-left text-[11px]"></i>
                     </button>
-                }
-                else
-                {
-                    <span class="w-10 h-10 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-300 text-xs cursor-not-allowed">
-                        <i class="fa-solid fa-chevron-left text-xs"></i>
-                    </span>
                 }
 
                 <!-- Page Numbers -->
                 @{
-                    int startPage = Math.Max(1, Model.CurrentPage - 2);
-                    int endPage = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
+                    int startP = Math.Max(1, Model.CurrentPage - 2);
+                    int endP = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
                 }
 
-                @if (startPage > 1)
+                @if (startP > 1)
                 {
-                    <button type="button" onclick="goToCategoryPage(1)" class="w-10 h-10 rounded-2xl bg-white border border-soft-border flex items-center justify-center text-charcoal hover:border-magenta-accent text-xs font-bold">1</button>
-                    @if (startPage > 2)
+                    <button type="button" onclick="goToCategoryPage(1)" class="w-9 h-9 rounded-xl bg-white border border-[#F1DCE4] flex items-center justify-center text-[#23191E] hover:border-[#B8336A] text-xs font-bold cursor-pointer">1</button>
+                    @if (startP > 2)
                     {
-                        <span class="px-1 text-slate-400">...</span>
+                        <span class="px-1 text-[#8A7580] text-xs">...</span>
                     }
                 }
 
-                @for (int i = startPage; i <= endPage; i++)
+                @for (int pNum = startP; pNum <= endP; pNum++)
                 {
-                    if (i == Model.CurrentPage)
+                    if (pNum == Model.CurrentPage)
                     {
-                        <span class="w-10 h-10 rounded-2xl bg-gradient-to-r from-magenta-accent to-rose-600 text-white font-extrabold flex items-center justify-center text-xs shadow-md ring-2 ring-magenta-accent/20">
-                            @i
+                        <span class="w-9 h-9 rounded-xl bg-gradient-to-r from-[#B8336A] to-[#8E1F4F] text-white font-extrabold flex items-center justify-center text-xs shadow-xs font-mono">
+                            @pNum
                         </span>
                     }
                     else
                     {
                         <button type="button" 
-                                onclick="goToCategoryPage(@i)" 
-                                class="w-10 h-10 rounded-2xl bg-white border border-soft-border text-charcoal font-bold flex items-center justify-center text-xs hover:border-magenta-accent hover:text-magenta-accent transition shadow-xs">
-                            @i
+                                onclick="goToCategoryPage(@pNum)" 
+                                class="w-9 h-9 rounded-xl bg-white border border-[#F1DCE4] text-[#23191E] font-bold flex items-center justify-center text-xs hover:border-[#B8336A] hover:text-[#B8336A] transition shadow-2xs font-mono cursor-pointer">
+                            @pNum
                         </button>
                     }
                 }
 
-                @if (endPage < Model.TotalPages)
+                @if (endP < Model.TotalPages)
                 {
-                    @if (endPage < Model.TotalPages - 1)
+                    @if (endP < Model.TotalPages - 1)
                     {
-                        <span class="px-1 text-slate-400">...</span>
+                        <span class="px-1 text-[#8A7580] text-xs">...</span>
                     }
-                    <button type="button" onclick="goToCategoryPage(@Model.TotalPages)" class="w-10 h-10 rounded-2xl bg-white border border-soft-border flex items-center justify-center text-charcoal hover:border-magenta-accent text-xs font-bold">@Model.TotalPages</button>
+                    <button type="button" onclick="goToCategoryPage(@Model.TotalPages)" class="w-9 h-9 rounded-xl bg-white border border-[#F1DCE4] flex items-center justify-center text-[#23191E] hover:border-[#B8336A] text-xs font-bold cursor-pointer">@Model.TotalPages</button>
                 }
 
                 <!-- Next Button -->
@@ -333,32 +394,12 @@ else
                 {
                     <button type="button" 
                             onclick="goToCategoryPage(@(Model.CurrentPage + 1))" 
-                            class="w-10 h-10 rounded-2xl bg-white border border-soft-border flex items-center justify-center text-charcoal hover:bg-magenta-accent hover:text-white hover:border-magenta-accent transition shadow-xs text-xs font-bold"
-                            title="Trang tiếp theo">
-                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                            class="w-9 h-9 rounded-xl bg-white border border-[#F1DCE4] flex items-center justify-center text-[#23191E] hover:border-[#B8336A] hover:text-[#B8336A] transition shadow-2xs text-xs font-bold cursor-pointer"
+                            title="Trang tiếp">
+                        <i class="fa-solid fa-chevron-right text-[11px]"></i>
                     </button>
                 }
-                else
-                {
-                    <span class="w-10 h-10 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-300 text-xs cursor-not-allowed">
-                        <i class="fa-solid fa-chevron-right text-xs"></i>
-                    </span>
-                }
-            </div>
+            </nav>
         }
     </div>
-
-    <!-- Tự động tải thêm (Load More Button) -->
-    @if (Model.CurrentPage < Model.TotalPages)
-    {
-        <div class="mt-8 text-center">
-            <button type="button" 
-                    onclick="loadMoreCategoryProducts(@(Model.CurrentPage + 1))" 
-                    class="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-white hover:bg-pastel-rose text-charcoal hover:text-magenta-accent border border-soft-border hover:border-magenta-accent font-extrabold text-xs uppercase tracking-widest shadow-sm hover:shadow-md transition-all active:scale-98">
-                <i class="fa-solid fa-sparkles text-rose-gold"></i>
-                <span>Tải Thêm Sản Phẩm (Trang @(Model.CurrentPage + 1)/@Model.TotalPages)</span>
-                <i class="fa-solid fa-chevron-down text-[10px]"></i>
-            </button>
-        </div>
-    }
 }

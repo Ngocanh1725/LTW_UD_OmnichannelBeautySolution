@@ -204,7 +204,7 @@
                             <i class="fa-solid fa-bolt text-emerald-600 text-sm mt-0.5"></i>
                             <div>
                                 <strong class="font-bold">Đặc quyền Click &amp; Collect O2O:</strong>
-                                Miễn phí vận chuyển <strong>0 ₫</strong> • Khóa giữ sẵn lô hàng FEFO mới nhất tại Showroom trong <strong>48 giờ</strong> • Nhận Vé QR &amp; Mã PIN 6 số lấy hàng ngay trong 1 giờ!
+                                Miễn phí vận chuyển <strong>0 ₫</strong> • Khóa giữ sẵn lô hàng mới nhất tại Showroom trong <strong>48 giờ</strong> • Nhận Vé QR &amp; Mã PIN 6 số lấy hàng ngay trong 1 giờ!
                             </div>
                         </div>
 
@@ -248,7 +248,7 @@
                                                     @if (!string.IsNullOrEmpty(st.EarliestFefoBatchCode))
                                                     {
                                                         <span class="text-emerald-700 font-semibold">
-                                                            <i class="fa-solid fa-shield-halved mr-0.5"></i>Lô FEFO: @st.EarliestFefoBatchCode (HSD: @(st.EarliestFefoExpDate?.ToString("dd/MM/yyyy")))
+                                                            <i class="fa-solid fa-shield-halved mr-0.5"></i>Số Lô: @st.EarliestFefoBatchCode (HSD: @(st.EarliestFefoExpDate?.ToString("dd/MM/yyyy")))
                                                         </span>
                                                     }
                                                     <a href="@st.GoogleMapsUrl" target="_blank" rel="noopener" class="text-rose-600 hover:underline font-semibold" onclick="event.stopPropagation();">
@@ -586,7 +586,7 @@
                         <!-- Chiết khấu FEFO cận date -->
                         <div class="flex justify-between items-center text-rose-700 bg-rose-50 px-2.5 py-1.5 rounded-xl border border-rose-200" x-show="fefoDiscount > 0">
                             <span class="flex items-center gap-1 font-semibold">
-                                <i class="fa-solid fa-clock-rotate-left text-rose-500"></i> Ưu đãi cận date FEFO
+                                <i class="fa-solid fa-clock-rotate-left text-rose-500"></i> Ưu đãi cận date
                             </span>
                             <span class="font-mono-numeric font-bold" x-text="'-' + fefoDiscount.toLocaleString('vi-VN') + ' ₫'"></span>
                         </div>

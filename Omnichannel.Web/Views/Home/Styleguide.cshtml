@@ -1,0 +1,779 @@
+@using Omnichannel.Domain.Entities
+@{
+    ViewData["Title"] = "Rosé Luxe Design System — Styleguide (Dev Only)";
+    ViewData["Robots"] = "noindex, nofollow";
+
+    var sampleProducts = ViewBag.SampleProducts as List<Product> ?? new List<Product>();
+    var sampleCategories = ViewBag.SampleCategories as List<Category> ?? new List<Category>();
+
+    var roseScale = new (string Step, string Hex, string Name, bool LightText)[]
+    {
+        ("50",  "#FFF7FA", "Silk Mist", false),
+        ("100", "#FBE8EE", "Blush", false),
+        ("200", "#F6D2DF", "Petal", false),
+        ("300", "#EEB1C8", "Sakura Bloom", false),
+        ("400", "#E485AA", "Peony Satin", false),
+        ("500", "#D45687", "Camellia Rose", true),
+        ("600", "#B8336A", "Couture Rose ★", true),
+        ("700", "#8E1F4F", "Rose Deep", true),
+        ("800", "#6B153B", "Velvet Plum", true),
+        ("900", "#4A0D28", "Noir Berry", true)
+    };
+
+    var coreTokens = new (string Role, string Name, string CssVar, string Hex, string Ratio, bool DarkSurface)[]
+    {
+        ("60% Nền chính", "Ivory", "--rl-ivory", "#FFFDFB", "16.79:1 vs Ink", false),
+        ("60% Bề mặt nổi", "Silk Surface", "--rl-surface", "#FFFFFF", "17.10:1 vs Ink", false),
+        ("30% Hồng sương", "Blush", "--rl-blush", "#FBE8EE", "14.55:1 vs Ink", false),
+        ("30% Cánh hoa", "Petal", "--rl-petal", "#F6D2DF", "12.37:1 vs Ink", false),
+        ("10% Thương hiệu", "Couture Rose", "--rl-rose", "#B8336A", "5.65:1 vs #FFF", true),
+        ("10% Hover / Nhấn", "Rose Deep", "--rl-rose-deep", "#8E1F4F", "8.54:1 vs #FFF", true),
+        ("Điểm xuyết kim loại", "Champagne", "--rl-champagne", "#C9A96E", "7.56:1 vs Ink", false),
+        ("Chữ chính / Nền tối", "Espresso Ink", "--rl-ink", "#23191E", "16.79:1 vs Ivory", true),
+        ("Chữ nội dung phụ", "Mauve", "--rl-mauve", "#57454E", "8.72:1 vs Ivory", true),
+        ("Chữ chú thích AA", "Muted AA", "--rl-muted-aa", "#6E5864", "6.47:1 vs Ivory", true)
+    };
+
+    var wcagPairs = new (string PairName, string FgHex, string BgHex, string Ratio, string Level, string SampleText)[]
+    {
+        ("Ink trên nền Ivory (Tiêu đề & Giá)", "#23191E", "#FFFDFB", "16.79 : 1", "AAA", "Đánh Thức Nhan Sắc Nguyên Bản — 385.000₫"),
+        ("Ink trên nền Blush (Thẻ sản phẩm)", "#23191E", "#FBE8EE", "14.55 : 1", "AAA", "Canmake Mermaid Skin Gel UV SPF50+ PA++++"),
+        ("Mauve trên nền Ivory (Body copy)", "#57454E", "#FFFDFB", "8.72 : 1", "AAA", "100% mỹ phẩm chính ngạch xuất kho tự động theo chuẩn hạn dùng FEFO."),
+        ("Mauve trên nền Blush (Mô tả phụ)", "#57454E", "#FBE8EE", "7.55 : 1", "AAA", "Kiểm soát nhiệt độ tiêu chuẩn 22°C tại toàn hệ thống kho."),
+        ("Chữ Trắng trên nền Rose (CTA Primary)", "#FFFFFF", "#B8336A", "5.65 : 1", "AA", "Khám Phá Bộ Sưu Tập Ngay"),
+        ("Chữ Trắng trên nền Rose Deep (Hover)", "#FFFFFF", "#8E1F4F", "8.54 : 1", "AAA", "Thêm Nhanh Vào Giỏ Hàng"),
+        ("Rose trên nền Ivory (Eyebrow / Italic)", "#B8336A", "#FFFDFB", "5.55 : 1", "AA", "✦ CHUẨN HẠN DÙNG MINH BẠCH FEFO"),
+        ("Rose trên nền Blush (Chip Hover)", "#B8336A", "#FBE8EE", "4.81 : 1", "AA", "Serum Phục Hồi Hàng Rào Ẩm"),
+        ("Success Jade (Badge FEFO > 18 tháng)", "#135D43", "#EDF8F4", "7.42 : 1", "AAA", "● Hạn dùng: còn 24 tháng"),
+        ("Warning Champagne (FEFO 6–18 tháng)", "#7A5413", "#FBF5E8", "6.55 : 1", "AA", "● Hạn dùng: còn 11 tháng"),
+        ("Error Berry (FEFO Cận hạn < 6 tháng)", "#931942", "#FDF0F4", "7.68 : 1", "AAA", "● Xả kho FEFO: còn 5 tháng (-40%)")
+    };
+}
+
+<div class="bg-[var(--rl-ivory)] text-[var(--rl-mauve)] overflow-x-clip">
+
+    <!-- 1. HERO SHOWCASE CỦA STYLEGUIDE (Trình diễn Gradient "Rosé Glow" + Bo góc 40px + Wave Divider) -->
+    <section class="pt-4 sm:pt-7 pb-0">
+        <div class="container-editorial">
+            <div class="bg-rose-glow rounded-[var(--rl-radius-xl)] border border-[var(--rl-border-subtle)] p-6 sm:p-10 lg:p-14 shadow-[var(--rl-shadow-md)] relative overflow-hidden isolate">
+                <!-- Hoạ tiết ánh sáng nhẹ -->
+                <span class="pointer-events-none select-none absolute -top-12 -right-12 w-64 h-64 rounded-full bg-white/55 blur-3xl -z-10" aria-hidden="true"></span>
+                <span class="pointer-events-none select-none absolute top-7 right-8 text-[var(--rl-champagne)] text-2xl" aria-hidden="true">✦</span>
+
+                <div class="max-w-3xl space-y-4">
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <span class="champagne-badge">
+                            <span>✦</span>
+                            <span>Development Only • Phiên 1</span>
+                        </span>
+                        <span class="badge-fefo badge-fefo--fresh">
+                            <span class="badge-fefo__dot"></span>
+                            <span>WCAG 2.1 AA/AAA Verified</span>
+                        </span>
+                    </div>
+
+                    <h1 class="text-display-xl">
+                        Hệ Sinh Thái <em>Rosé Luxe</em> Chuẩn Mỹ Phẩm Cao Cấp
+                    </h1>
+
+                    <p class="text-body-lg max-w-2xl">
+                        Bản mẫu sống (Living Styleguide) kiểm chứng toàn bộ hệ thống Design Tokens, thang chữ tiếng Việt trộn
+                        <strong>Plus Jakarta Sans</strong> cùng <em>Cormorant Garamond Italic</em>, bộ thẻ đồng nhất nền Blush và chuẩn tương phản cho <strong>CANMAKE BEAUTY</strong>.
+                    </p>
+
+                    <!-- Thanh điều hướng nhanh tới từng mục -->
+                    <nav aria-label="Mục lục Styleguide" class="pt-3 flex flex-wrap gap-2">
+                        <a href="#sg-colors" class="chip is-active">01. Bảng màu</a>
+                        <a href="#sg-gradients" class="chip">02. Gradient &amp; Kính</a>
+                        <a href="#sg-typography" class="chip">03. Typography</a>
+                        <a href="#sg-controls" class="chip">04. Nút &amp; Chip</a>
+                        <a href="#sg-cards" class="chip">05. Thẻ chuẩn</a>
+                        <a href="#sg-foundations" class="chip">06. Radius &amp; Shadow</a>
+                        <a href="#sg-wcag" class="chip">07. Tương phản AA</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Đường phân cách sóng lụa SVG (.divider-wave) -->
+        <div class="mt-6 bg-[var(--rl-blush)]/65 pt-4">
+            <div class="divider-wave" style="--wave-fill: var(--rl-ivory);" aria-hidden="true">
+                <svg viewBox="0 0 1440 72" fill="none" preserveAspectRatio="none">
+                    <path d="M0,32 C260,78 520,-6 820,34 C1080,68 1280,18 1440,28 L1440,72 L0,72 Z" fill="currentColor" opacity="0.45"></path>
+                    <path d="M0,46 C320,8 640,80 980,40 C1200,14 1340,36 1440,48 L1440,72 L0,72 Z" fill="currentColor"></path>
+                </svg>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. BẢNG MÀU ROSÉ LUXE (THANG 50->900 + QUY TẮC 60-30-10 + MÀU TRẠNG THÁI) -->
+    <section id="sg-colors" class="py-12 sm:py-16">
+        <div class="container-editorial space-y-10">
+            <div class="section-header-rule">
+                <span class="section-header-rule__icon" aria-hidden="true">
+                    <i class="fa-solid fa-palette text-sm"></i>
+                </span>
+                <div>
+                    <span class="section-eyebrow">01 • Color Architecture</span>
+                    <h2 class="section-title">Bảng Màu <em>Rosé Luxe</em> &amp; Thang Sắc Độ</h2>
+                </div>
+                <span class="section-header-rule__line" aria-hidden="true"></span>
+                <span class="badge-fefo badge-fefo--stable">
+                    <span class="badge-fefo__dot"></span>
+                    <span>Quy tắc 60 - 30 - 10</span>
+                </span>
+            </div>
+
+            <!-- 2.1 Thang Rose 50 -> 900 -->
+            <div class="space-y-3">
+                <h3 class="text-h4">Thang màu Couture Rose (<code>--rl-rose-50</code> → <code>--rl-rose-900</code>)</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-10 gap-2.5">
+                    @foreach (var item in roseScale)
+                    {
+                        <div class="rounded-[var(--rl-radius-md)] border border-[var(--rl-border-subtle)] overflow-hidden bg-[var(--rl-surface)] shadow-[var(--rl-shadow-xs)]">
+                            <div class="h-20 p-3 flex flex-col justify-between"
+                                 style="background-color: @item.Hex; color: @(item.LightText ? "#FFFFFF" : "#23191E");">
+                                <span class="font-mono text-xs font-bold">@item.Step</span>
+                                <span class="font-mono text-[11px] opacity-90">@item.Hex</span>
+                            </div>
+                            <div class="p-2.5">
+                                <p class="text-xs font-bold text-[var(--rl-ink)] truncate">@item.Name</p>
+                                <p class="font-mono text-[10px] text-[var(--rl-muted-aa)] truncate">--rl-rose-@item.Step</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- 2.2 Bảng màu định danh 60-30-10 -->
+            <div class="space-y-3">
+                <h3 class="text-h4">Hệ Token Định Danh (60% Ivory • 30% Blush/Petal • 10% Rose &amp; Champagne)</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+                    @foreach (var tk in coreTokens)
+                    {
+                        <div class="card-bento p-3.5 flex flex-col justify-between gap-3">
+                            <div class="h-20 rounded-[var(--rl-radius-sm)] border border-[var(--rl-border-subtle)] p-3 flex items-end justify-between"
+                                 style="background-color: @tk.Hex; color: @(tk.DarkSurface ? "#FFFFFF" : "#23191E");">
+                                <span class="font-bold text-xs">@tk.Name</span>
+                                <span class="font-mono text-xs font-semibold">@tk.Hex</span>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="flex items-center justify-between gap-1">
+                                    <span class="text-[11px] font-bold text-[var(--rl-rose)]">@tk.Role</span>
+                                    <span class="font-mono text-[10px] text-[var(--rl-muted-aa)]">@tk.Ratio</span>
+                                </div>
+                                <code class="block font-mono text-xs text-[var(--rl-ink)] bg-[var(--rl-blush)]/60 px-2 py-1 rounded-lg">@tk.CssVar</code>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- 2.3 Màu trạng thái hài hòa tông hồng -->
+            <div class="space-y-3">
+                <h3 class="text-h4">Màu Trạng Thái Hài Hoà Với Hồng (Luôn kèm biểu tượng ngoài màu sắc)</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                    <div class="rounded-[var(--rl-radius-md)] p-4 border" style="background: var(--rl-success-bg); border-color: var(--rl-success-border); color: var(--rl-success-text);">
+                        <div class="flex items-center gap-2 font-bold text-sm">
+                            <i class="fa-solid fa-circle-check" style="color: var(--rl-success-icon);" aria-hidden="true"></i>
+                            <span>Success • Xanh Ngọc Dịu</span>
+                        </div>
+                        <p class="text-xs mt-1.5">Lô hàng FEFO mới &gt; 18 tháng • Tương phản 7.42:1 (AAA)</p>
+                    </div>
+                    <div class="rounded-[var(--rl-radius-md)] p-4 border" style="background: var(--rl-warning-bg); border-color: var(--rl-warning-border); color: var(--rl-warning-text);">
+                        <div class="flex items-center gap-2 font-bold text-sm">
+                            <i class="fa-solid fa-clock" style="color: var(--rl-warning-icon);" aria-hidden="true"></i>
+                            <span>Warning • Vàng Champagne</span>
+                        </div>
+                        <p class="text-xs mt-1.5">Lô hàng ổn định 6–18 tháng • Tương phản 6.55:1 (AA)</p>
+                    </div>
+                    <div class="rounded-[var(--rl-radius-md)] p-4 border" style="background: var(--rl-error-bg); border-color: var(--rl-error-border); color: var(--rl-error-text);">
+                        <div class="flex items-center gap-2 font-bold text-sm">
+                            <i class="fa-solid fa-fire-flame-curved" style="color: var(--rl-error-icon);" aria-hidden="true"></i>
+                            <span>Error / Clearance • Đỏ Hồng</span>
+                        </div>
+                        <p class="text-xs mt-1.5">Xả kho cận hạn &lt; 6 tháng / Báo lỗi • Tương phản 7.68:1 (AAA)</p>
+                    </div>
+                    <div class="rounded-[var(--rl-radius-md)] p-4 border" style="background: var(--rl-info-bg); border-color: var(--rl-info-border); color: var(--rl-info-text);">
+                        <div class="flex items-center gap-2 font-bold text-sm">
+                            <i class="fa-solid fa-bolt" style="color: var(--rl-info-icon);" aria-hidden="true"></i>
+                            <span>Info • Mauve Mist</span>
+                        </div>
+                        <p class="text-xs mt-1.5">Giao nhanh nội thành 2H • Tương phản 8.12:1 (AAA)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. GRADIENT CHỮ KÝ & BỀ MẶT KÍNH MỜ -->
+    <section id="sg-gradients" class="py-12 sm:py-16 bg-[var(--rl-blush)]/45 border-y border-[var(--rl-border-subtle)]">
+        <div class="container-editorial space-y-8">
+            <div class="section-header-rule">
+                <span class="section-header-rule__icon" aria-hidden="true">
+                    <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                </span>
+                <div>
+                    <span class="section-eyebrow">02 • Signature Gradients &amp; Glass</span>
+                    <h2 class="section-title">Chuyển Sắc <em>Chữ Ký</em> &amp; Kính Mờ</h2>
+                </div>
+                <span class="section-header-rule__line" aria-hidden="true"></span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="rounded-[var(--rl-radius-lg)] p-6 min-h-[190px] flex flex-col justify-between border border-[var(--rl-border-subtle)] shadow-[var(--rl-shadow-sm)] bg-rose-glow">
+                    <span class="section-eyebrow">Rosé Glow</span>
+                    <div>
+                        <h3 class="text-h3">Nền Sân Khấu Hero</h3>
+                        <p class="text-caption mt-1">Blush (#FBE8EE) → Petal (#F6D2DF) → Ivory (#FFFDFB) nội suy Oklab mượt.</p>
+                    </div>
+                </div>
+
+                <div class="rounded-[var(--rl-radius-lg)] p-6 min-h-[190px] flex flex-col justify-between border border-[var(--rl-border-champagne)] shadow-[var(--rl-shadow-champagne)] bg-champagne-sheen">
+                    <span class="section-eyebrow !text-[var(--rl-ink)]">Champagne Sheen</span>
+                    <div>
+                        <h3 class="text-h3">Ánh Kim Huy Hiệu Cao Cấp</h3>
+                        <p class="text-caption !text-[var(--rl-ink)]/80 mt-1">Dùng cho viền huy hiệu VIP, chứng nhận FEFO và điểm nhấn kim loại mảnh.</p>
+                    </div>
+                </div>
+
+                <div class="rounded-[var(--rl-radius-lg)] p-6 min-h-[190px] flex flex-col justify-between relative overflow-hidden"
+                     style="background: var(--gradient-noir-velvet);">
+                    <div class="glass-surface rounded-[var(--rl-radius-md)] p-4">
+                        <p class="text-xs font-bold text-[var(--rl-ink)]">.glass-surface (Blur 18px)</p>
+                        <p class="text-caption mt-0.5">Kính mờ trắng ngà đặt nổi trên nền tương phản.</p>
+                    </div>
+                    <div class="text-white">
+                        <p class="text-xs font-mono opacity-80">--gradient-noir-velvet</p>
+                        <p class="text-sm font-bold">Nền Thẻ Tối Bento &amp; Luxury Footer</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. TYPOGRAPHY FLUID & KỸ THUẬT TRỘN CHỮ TIẾNG VIỆT -->
+    <section id="sg-typography" class="py-12 sm:py-16">
+        <div class="container-editorial space-y-8">
+            <div class="section-header-rule">
+                <span class="section-header-rule__icon" aria-hidden="true">
+                    <i class="fa-solid fa-font text-sm"></i>
+                </span>
+                <div>
+                    <span class="section-eyebrow">03 • Fluid Vietnamese Typography</span>
+                    <h2 class="section-title">Hệ Chữ <em>Fluid Clamp()</em> &amp; Dấu Tiếng Việt</h2>
+                </div>
+                <span class="section-header-rule__line" aria-hidden="true"></span>
+            </div>
+
+            <div class="card-bento p-5 sm:p-8 space-y-6 divide-y divide-[var(--rl-border-subtle)]">
+                <div class="pt-2 space-y-1.5">
+                    <span class="font-mono text-xs text-[var(--rl-muted-aa)]">--fs-display-xl • clamp(2.5rem, 1.55rem + 4.2vw, 5.25rem)</span>
+                    <p class="text-display-xl">Bừng Sáng <em>Nhan Sắc</em> Mùa Hè</p>
+                </div>
+                <div class="pt-5 space-y-1.5">
+                    <span class="font-mono text-xs text-[var(--rl-muted-aa)]">--fs-display-lg • clamp(2.125rem, 1.45rem + 2.8vw, 3.875rem)</span>
+                    <p class="text-display-lg">Tuyển Tập <em>Dưỡng Ẩm Chuyên Sâu</em> Chuẩn Nhật</p>
+                </div>
+                <div class="pt-5 space-y-1.5">
+                    <span class="font-mono text-xs text-[var(--rl-muted-aa)]">--fs-h1 • clamp(1.875rem, 1.35rem + 2.1vw, 3.125rem)</span>
+                    <p class="text-h1">Phác Đồ <em>Trẻ Hoá Làn Da</em> Minh Bạch Từng Số Lô</p>
+                </div>
+                <div class="pt-5 space-y-1.5">
+                    <span class="font-mono text-xs text-[var(--rl-muted-aa)]">--fs-h2 • clamp(1.5rem, 1.15rem + 1.5vw, 2.375rem)</span>
+                    <p class="text-h2">Kiểm Định <em>Độ Tươi Mới</em> Xuất Kho Tự Động FEFO</p>
+                </div>
+                <div class="pt-5 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <span class="font-mono text-xs text-[var(--rl-muted-aa)]">--fs-h3 &amp; --fs-h4 (Plus Jakarta Sans Bold)</span>
+                        <p class="text-h3">H3 — Tinh Chất Phục Hồi Hàng Rào Bảo Vệ Da</p>
+                        <p class="text-h4">H4 — Kết cấu mỏng nhẹ thấm nhanh không nhờn rít</p>
+                        <span class="section-eyebrow pt-2">Eyebrow Chữ Hoa Giãn Chữ 0.16em</span>
+                    </div>
+                    <div class="space-y-2">
+                        <span class="font-mono text-xs text-[var(--rl-muted-aa)]">Body lg / md / sm &amp; Caption (Kiểm thử đầy đủ dấu tiếng Việt)</span>
+                        <p class="text-body-lg">Body LG: Làn da ẩm mượt, rạng rỡ tự nhiên suốt ngày dài năng động.</p>
+                        <p class="text-body-md">Body MD: Mỗi sản phẩm tại CANMAKE BEAUTY đều hiển thị rõ ngày hết hạn của lô hàng thực tế trước khi bạn bấm đặt mua.</p>
+                        <p class="text-body-sm">Body SM: Hỗ trợ giao nhanh 2 giờ nội thành TP.HCM &amp; Hà Nội, miễn phí vận chuyển đơn từ 499.000₫.</p>
+                        <p class="text-caption">Caption: Kiểm thử dấu phức tiếng Việt — Ấ Ậ Ắ Ặ Ể Ễ Ộ Ợ Ử Ữ Đ/đ — <em class="font-editorial text-base text-[var(--rl-rose)]">Ẩm mượt dịu dàng tựa sương mai</em>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. BUTTONS, CHIPS, BADGES & INTERACTIVE STATES (HOVER / FOCUS-VISIBLE / ACTIVE / DISABLED) -->
+    <section id="sg-controls" class="py-12 sm:py-16 bg-[var(--rl-blush)]/40 border-y border-[var(--rl-border-subtle)]"
+             x-data="{ selectedChip: 'serum' }">
+        <div class="container-editorial space-y-8">
+            <div class="section-header-rule">
+                <span class="section-header-rule__icon" aria-hidden="true">
+                    <i class="fa-solid fa-hand-pointer text-sm"></i>
+                </span>
+                <div>
+                    <span class="section-eyebrow">04 • Interactive Components &amp; States</span>
+                    <h2 class="section-title">Nút Bấm, Chip &amp; <em>Trạng Thái Tương Tác</em></h2>
+                </div>
+                <span class="section-header-rule__line" aria-hidden="true"></span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Buttons Matrix -->
+                <div class="card-bento p-6 space-y-5">
+                    <h3 class="text-h4">Hệ Nút Bấm (Thử phím <code>Tab</code> để kiểm tra vòng <code>:focus-visible</code> hồng 2px)</h3>
+
+                    <div class="flex flex-wrap items-center gap-3">
+                        <button type="button" class="btn-primary">
+                            <span>Mua Ngay</span>
+                        </button>
+                        <button type="button" class="btn-ghost">
+                            <i class="fa-solid fa-shield-heart text-[var(--rl-rose)] text-xs" aria-hidden="true"></i>
+                            <span>Ưu Đãi FEFO</span>
+                        </button>
+                        <button type="button" class="btn-plus-circle" aria-label="Thêm nhanh vào giỏ hàng mẫu">
+                            <i class="fa-solid fa-plus text-xs" aria-hidden="true"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-3">
+                        <a href="#sg-controls" class="btn-pill-arrow">
+                            <span>Khám Phá Bộ Sưu Tập</span>
+                            <span class="pill-arrow-circle" aria-hidden="true">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </span>
+                        </a>
+                        <a href="#sg-controls" class="btn-pill-arrow btn-pill-arrow--light">
+                            <span>Xem tất cả</span>
+                            <span class="pill-arrow-circle" aria-hidden="true">
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </span>
+                        </a>
+                    </div>
+
+                    <div class="pt-3 border-t border-[var(--rl-border-subtle)] space-y-2">
+                        <span class="text-caption block font-semibold">Trạng thái Disabled (Không nhấc lên khi di chuột):</span>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <button type="button" class="btn-primary" disabled>Tạm hết hàng</button>
+                            <button type="button" class="btn-ghost" disabled>Đã khoá</button>
+                            <button type="button" class="btn-pill-arrow" disabled>
+                                <span>Ngừng nhận đơn</span>
+                                <span class="pill-arrow-circle" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chips & FEFO Badges -->
+                <div class="card-bento p-6 space-y-5">
+                    <h3 class="text-h4">Chip Lọc Tương Tác (<code>.chip</code>) &amp; Huy Hiệu Hạn Dùng (<code>.badge-fefo</code>)</h3>
+
+                    <div class="flex flex-wrap gap-2" role="group" aria-label="Ví dụ chọn danh mục con">
+                        <button type="button" class="chip" :class="selectedChip === 'serum' ? 'is-active' : ''" @@click="selectedChip = 'serum'">
+                            <i class="fa-solid fa-droplet text-xs" aria-hidden="true"></i>
+                            <span>Serum &amp; Tinh chất</span>
+                        </button>
+                        <button type="button" class="chip" :class="selectedChip === 'sunscreen' ? 'is-active' : ''" @@click="selectedChip = 'sunscreen'">
+                            <i class="fa-solid fa-sun text-xs" aria-hidden="true"></i>
+                            <span>Chống nắng phổ rộng</span>
+                        </button>
+                        <button type="button" class="chip" :class="selectedChip === 'lip' ? 'is-active' : ''" @@click="selectedChip = 'lip'">
+                            <i class="fa-solid fa-heart text-xs" aria-hidden="true"></i>
+                            <span>Son dưỡng bóng</span>
+                        </button>
+                        <button type="button" class="chip" disabled>Chip vô hiệu hoá</button>
+                    </div>
+
+                    <div class="pt-3 border-t border-[var(--rl-border-subtle)] space-y-2.5">
+                        <span class="text-caption block font-semibold">3 cấp độ minh bạch hạn dùng FEFO &amp; Huy hiệu Champagne:</span>
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <span class="badge-fefo badge-fefo--fresh">
+                                <span class="badge-fefo__dot"></span>
+                                <span>Hạn dùng: còn 24 tháng</span>
+                            </span>
+                            <span class="badge-fefo badge-fefo--stable">
+                                <span class="badge-fefo__dot"></span>
+                                <span>Hạn dùng: còn 12 tháng</span>
+                            </span>
+                            <span class="badge-fefo badge-fefo--clearance">
+                                <span class="badge-fefo__dot"></span>
+                                <span>Cận hạn: còn 5 tháng (-40%)</span>
+                            </span>
+                            <span class="champagne-badge">
+                                <span>✦</span>
+                                <span>100% Chính Ngạch</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. THẺ SẢN PHẨM (.card-product) & THẺ DANH MỤC (.card-category) CHUẨN ROSÉ LUXE -->
+    <section id="sg-cards" class="py-12 sm:py-16">
+        <div class="container-editorial space-y-12">
+            <!-- 6.1 Thẻ Sản Phẩm Nền Blush Đồng Nhất -->
+            <div class="space-y-6">
+                <div class="section-header-rule">
+                    <span class="section-header-rule__icon" aria-hidden="true">
+                        <i class="fa-solid fa-bag-shopping text-sm"></i>
+                    </span>
+                    <div>
+                        <span class="section-eyebrow">05A • Unified Blush Product Card</span>
+                        <h2 class="section-title">Thẻ Sản Phẩm <em>Chuẩn Rosé Luxe</em></h2>
+                    </div>
+                    <span class="section-header-rule__line" aria-hidden="true"></span>
+                    <a href="/category/all" class="btn-pill-arrow btn-pill-arrow--light">
+                        <span>Xem danh mục</span>
+                        <span class="pill-arrow-circle" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></span>
+                    </a>
+                </div>
+
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+                    @if (sampleProducts.Any())
+                    {
+                        @foreach (var prod in sampleProducts)
+                        {
+                            var prodUrl = !string.IsNullOrEmpty(prod.Slug) ? $"/san-pham/{prod.Slug}" : $"/Product/Detail/{prod.Id}";
+                            var imgUrl = ProductImageResolver.GetPrimaryImageUrl(prod.ThumbnailUrl, prod.Sku, prod.Slug, prod.Name);
+                            var brandName = prod.Brand?.Name ?? "CANMAKE BEAUTY";
+                            var salePrice = prod.DiscountPrice.HasValue && prod.DiscountPrice.Value < prod.SellingPrice
+                                ? prod.DiscountPrice.Value
+                                : prod.SellingPrice;
+
+                            <article class="card-product">
+                                <div>
+                                    <div class="card-product__media">
+                                        <span class="absolute top-2.5 left-2.5 z-10 px-2.5 py-0.5 rounded-full bg-[var(--rl-rose)] text-white font-mono text-[11px] font-bold">-15%</span>
+                                        <a href="@prodUrl" class="w-full h-full flex items-center justify-center">
+                                            <img src="@imgUrl"
+                                                 alt="@prod.Name"
+                                                 width="320"
+                                                 height="400"
+                                                 loading="lazy"
+                                                 onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';"
+                                                 class="card-product__img" />
+                                        </a>
+                                    </div>
+                                    <div class="card-product__body">
+                                        <div class="flex items-center justify-between gap-1">
+                                            <span class="card-product__brand truncate">@brandName</span>
+                                            <span class="inline-flex items-center gap-1 text-[11px] font-mono font-bold text-[var(--rl-mauve)] shrink-0">
+                                                <i class="fa-solid fa-star text-[10px] text-[var(--rl-champagne)]" aria-hidden="true"></i>4.9
+                                            </span>
+                                        </div>
+                                        <h3 class="card-product__title">
+                                            <a href="@prodUrl">@prod.Name</a>
+                                        </h3>
+                                        <div>
+                                            <span class="badge-fefo badge-fefo--fresh">
+                                                <span class="badge-fefo__dot"></span>
+                                                <span>HSD: còn 22 tháng</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-product__footer px-2 pb-1">
+                                    <div>
+                                        <div class="text-[11px] text-[var(--rl-muted)] line-through font-mono leading-none mb-0.5">
+                                            @((salePrice * 1.15m).ToString("N0"))₫
+                                        </div>
+                                        <div class="text-sm sm:text-base font-extrabold text-[var(--rl-ink)] font-mono">
+                                            @salePrice.ToString("N0")₫
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn-plus-circle" aria-label="Thêm @prod.Name vào giỏ">
+                                        <i class="fa-solid fa-plus text-xs" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </article>
+                        }
+                    }
+                    else
+                    {
+                        @for (int idx = 1; idx <= 4; idx++)
+                        {
+                            <article class="card-product">
+                                <div class="card-product__media">
+                                    <img src="/images/products/_placeholder.webp" alt="Sản phẩm mẫu @idx" class="card-product__img" />
+                                </div>
+                                <div class="card-product__body">
+                                    <span class="card-product__brand">CANMAKE TOKYO</span>
+                                    <h3 class="card-product__title">Kem Chống Nắng Mermaid Skin Gel UV SPF50+ Mẫu @idx</h3>
+                                    <span class="badge-fefo badge-fefo--fresh"><span class="badge-fefo__dot"></span><span>HSD: còn 24 tháng</span></span>
+                                </div>
+                                <div class="card-product__footer px-2 pb-1">
+                                    <span class="font-mono font-extrabold text-base text-[var(--rl-ink)]">275.000₫</span>
+                                    <button type="button" class="btn-plus-circle" aria-label="Thêm sản phẩm mẫu @idx vào giỏ"><i class="fa-solid fa-plus text-xs" aria-hidden="true"></i></button>
+                                </div>
+                            </article>
+                        }
+                    }
+                </div>
+            </div>
+
+            <!-- 6.2 Thẻ Danh Mục Nổi Bật (.card-category) -->
+            <div class="space-y-6">
+                <div class="section-header-rule">
+                    <span class="section-header-rule__icon" aria-hidden="true">
+                        <i class="fa-solid fa-layer-group text-sm"></i>
+                    </span>
+                    <div>
+                        <span class="section-eyebrow">05B • Editorial Category Cards</span>
+                        <h2 class="section-title">Thẻ Danh Mục <em>Nút Tròn Mũi Tên</em></h2>
+                    </div>
+                    <span class="section-header-rule__line" aria-hidden="true"></span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+                    @{
+                        var fallbackCats = new (string Name, string Slug, string Img, string Count)[]
+                        {
+                            ("Chăm Sóc Da", "cham-soc-da", "/images/banners/hero-banner-summer-beauty.jpg", "48+ sản phẩm"),
+                            ("Trang Điểm", "trang-diem", "/images/banners/banner-routine-kbeauty.jpg", "36+ sản phẩm"),
+                            ("Chống Nắng", "chong-nang", "/images/banners/hero-banner-summer-beauty.jpg", "24+ sản phẩm"),
+                            ("Nước Hoa & Cơ Thể", "nuoc-hoa", "/images/banners/banner-routine-kbeauty.jpg", "30+ sản phẩm")
+                        };
+                    }
+                    @if (sampleCategories.Count >= 4)
+                    {
+                        @foreach (var cat in sampleCategories.Take(4))
+                        {
+                            var cImg = ProductImageResolver.GetCategoryImageUrl(cat.Slug, cat.ImageUrl);
+                            <a href="/danh-muc/@cat.Slug" class="card-category">
+                                <img src="@cImg"
+                                     alt="@cat.Name"
+                                     width="400"
+                                     height="300"
+                                     loading="lazy"
+                                     onerror="this.onerror=null;this.src='/images/banners/hero-banner-summer-beauty.jpg';"
+                                     class="card-category__img" />
+                                <div class="card-category__content">
+                                    <div>
+                                        <h3 class="card-category__title">@cat.Name</h3>
+                                        <span class="card-category__meta">✦ Chuẩn hạn dùng FEFO</span>
+                                    </div>
+                                    <span class="card-category__arrow" aria-hidden="true">
+                                        <i class="fa-solid fa-arrow-right"></i>
+                                    </span>
+                                </div>
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        @foreach (var fc in fallbackCats)
+                        {
+                            <a href="/danh-muc/@fc.Slug" class="card-category">
+                                <img src="@fc.Img" alt="@fc.Name" width="400" height="300" loading="lazy" class="card-category__img" />
+                                <div class="card-category__content">
+                                    <div>
+                                        <h3 class="card-category__title">@fc.Name</h3>
+                                        <span class="card-category__meta">✦ @fc.Count</span>
+                                    </div>
+                                    <span class="card-category__arrow" aria-hidden="true">
+                                        <i class="fa-solid fa-arrow-right"></i>
+                                    </span>
+                                </div>
+                            </a>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. THANG SPACING 4PX, BO GÓC (12/20/28/40/PILL), BÓNG HỒNG NHIỀU LỚP, Z-INDEX & MOTION TOKENS -->
+    <section id="sg-foundations" class="py-12 sm:py-16 bg-[var(--rl-blush)]/40 border-y border-[var(--rl-border-subtle)]"
+             x-data="{ playMotion: false }">
+        <div class="container-editorial space-y-8">
+            <div class="section-header-rule">
+                <span class="section-header-rule__icon" aria-hidden="true">
+                    <i class="fa-solid fa-cube text-sm"></i>
+                </span>
+                <div>
+                    <span class="section-eyebrow">06 • Spatial, Elevation, Z-Index &amp; Motion</span>
+                    <h2 class="section-title">Không Gian 4px, Bóng Hồng Đa Lớp &amp; <em>Nhịp Chuyển Động</em></h2>
+                </div>
+                <span class="section-header-rule__line" aria-hidden="true"></span>
+            </div>
+
+            <!-- 7.1 Bo góc & Bóng hồng đa lớp -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div class="bg-[var(--rl-surface)] p-5 border border-[var(--rl-border-subtle)] text-center space-y-1" style="border-radius: var(--rl-radius-sm); box-shadow: var(--rl-shadow-xs);">
+                    <span class="font-mono text-xs font-bold text-[var(--rl-rose)]">sm • 12px</span>
+                    <p class="text-caption">Shadow XS</p>
+                </div>
+                <div class="bg-[var(--rl-surface)] p-5 border border-[var(--rl-border-subtle)] text-center space-y-1" style="border-radius: var(--rl-radius-md); box-shadow: var(--rl-shadow-sm);">
+                    <span class="font-mono text-xs font-bold text-[var(--rl-rose)]">md • 20px</span>
+                    <p class="text-caption">Shadow SM</p>
+                </div>
+                <div class="bg-[var(--rl-surface)] p-5 border border-[var(--rl-border-subtle)] text-center space-y-1" style="border-radius: var(--rl-radius-lg); box-shadow: var(--rl-shadow-md);">
+                    <span class="font-mono text-xs font-bold text-[var(--rl-rose)]">lg • 28px</span>
+                    <p class="text-caption">Shadow MD</p>
+                </div>
+                <div class="bg-[var(--rl-surface)] p-5 border border-[var(--rl-border-subtle)] text-center space-y-1" style="border-radius: var(--rl-radius-xl); box-shadow: var(--rl-shadow-lg);">
+                    <span class="font-mono text-xs font-bold text-[var(--rl-rose)]">xl • 40px</span>
+                    <p class="text-caption">Shadow LG</p>
+                </div>
+                <div class="col-span-2 sm:col-span-1 bg-[var(--rl-surface)] p-5 border border-[var(--rl-border-subtle)] text-center space-y-1" style="border-radius: var(--rl-radius-pill); box-shadow: var(--rl-shadow-xl);">
+                    <span class="font-mono text-xs font-bold text-[var(--rl-rose)]">pill • 9999px</span>
+                    <p class="text-caption">Shadow XL</p>
+                </div>
+            </div>
+
+            <!-- 7.2 Thang Spacing 4px & Thang phân tầng Z-Index -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card-bento p-6 space-y-4">
+                    <h3 class="text-h4">Thang Khoảng Cách Chuẩn 4px (<code>--space-1</code> → <code>--space-24</code>)</h3>
+                    <div class="space-y-2.5">
+                        @foreach (var sp in new (string Token, string Px)[] {
+                            ("--space-1", "4px"), ("--space-2", "8px"), ("--space-3", "12px"),
+                            ("--space-4", "16px"), ("--space-6", "24px"), ("--space-8", "32px"),
+                            ("--space-12", "48px"), ("--space-16", "64px"), ("--space-24", "96px")
+                        })
+                        {
+                            <div class="flex items-center gap-3">
+                                <code class="font-mono text-[11px] text-[var(--rl-ink)] w-24 shrink-0">@sp.Token</code>
+                                <div class="h-3 rounded-full bg-[var(--rl-rose)]/85 transition-all" style="width: var(@sp.Token);"></div>
+                                <span class="font-mono text-[11px] text-[var(--rl-muted-aa)]">@sp.Px</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="card-bento p-6 space-y-4">
+                    <h3 class="text-h4">Thang Phân Tầng Z-Index (<code>--z-behind</code> → <code>--z-toast</code>)</h3>
+                    <div class="flex flex-wrap gap-2">
+                        @foreach (var zi in new (string Name, string Val)[] {
+                            ("behind", "-1"), ("base", "1"), ("elevated", "10"), ("floating", "20"),
+                            ("sticky", "40"), ("header", "50"), ("dropdown", "100"), ("overlay", "1030"),
+                            ("drawer", "1040"), ("modal", "1050"), ("popover", "1060"), ("toast", "1080")
+                        })
+                        {
+                            <div class="px-3 py-2 rounded-[var(--rl-radius-sm)] bg-[var(--rl-blush)]/75 border border-[var(--rl-border-subtle)] flex items-center gap-2">
+                                <code class="font-mono text-xs font-bold text-[var(--rl-ink)]">--z-@zi.Name</code>
+                                <span class="px-1.5 py-0.5 rounded-full bg-[var(--rl-surface)] font-mono text-[11px] font-bold text-[var(--rl-rose)]">@zi.Val</span>
+                            </div>
+                        }
+                    </div>
+                    <p class="text-caption pt-1">
+                        Phân tách rõ tầng điều hướng nổi (<code>40–100</code>) với tầng ngăn kéo/hộp thoại phủ màn hình (<code>1030–1080</code>), triệt tiêu lỗi chồng chéo <code>z-index</code> tuỳ tiện.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 7.3 Sân khấu chạy thử Motion Curve --ease-luxe -->
+            <div class="card-bento p-6 space-y-5">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                        <h3 class="text-h4">Sân Khấu Chuyển Động "Silk &amp; Serum" (<code>--ease-luxe: cubic-bezier(.22, 1, .36, 1)</code>)</h3>
+                        <p class="text-caption mt-0.5">Bấm nút bên phải để quan sát trực tiếp 3 nhịp thời lượng chuẩn của toàn hệ thống.</p>
+                    </div>
+                    <button type="button" class="btn-pill-arrow" @@click="playMotion = !playMotion">
+                        <span x-text="playMotion ? 'Đưa Về Vị Trí Đầu' : 'Chạy Thử Chuyển Động'">Chạy Thử Chuyển Động</span>
+                        <span class="pill-arrow-circle" aria-hidden="true">
+                            <i class="fa-solid fa-play text-[10px]"></i>
+                        </span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 rounded-[var(--rl-radius-md)] bg-[var(--rl-blush)]/65 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="font-mono text-xs font-bold text-[var(--rl-rose)]">--dur-fast: 180ms</span>
+                            <span class="text-caption font-semibold">Hover / Tap</span>
+                        </div>
+                        <div class="h-9 rounded-full bg-[var(--rl-surface)] border border-[var(--rl-border-subtle)] p-1 flex items-center overflow-hidden">
+                            <span class="w-7 h-7 rounded-full bg-[var(--rl-rose)] text-white flex items-center justify-center text-[10px] font-mono font-bold shadow-[var(--rl-shadow-xs)]"
+                                  :style="playMotion ? 'transform: translateX(140px);' : 'transform: translateX(0);'"
+                                  style="transition: transform var(--dur-fast) var(--ease-luxe);">180</span>
+                        </div>
+                        <p class="text-caption">Phản hồi xúc giác tức thì cho nút, chip và liên kết.</p>
+                    </div>
+
+                    <div class="p-4 rounded-[var(--rl-radius-md)] bg-[var(--rl-blush)]/65 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="font-mono text-xs font-bold text-[var(--rl-rose)]">--dur-base: 320ms</span>
+                            <span class="text-caption font-semibold">Card / Pill / Drawer</span>
+                        </div>
+                        <div class="h-9 rounded-full bg-[var(--rl-surface)] border border-[var(--rl-border-subtle)] p-1 flex items-center overflow-hidden">
+                            <span class="w-7 h-7 rounded-full bg-[var(--rl-rose-deep)] text-white flex items-center justify-center text-[10px] font-mono font-bold shadow-[var(--rl-shadow-xs)]"
+                                  :style="playMotion ? 'transform: translateX(140px);' : 'transform: translateX(0);'"
+                                  style="transition: transform var(--dur-base) var(--ease-luxe);">320</span>
+                        </div>
+                        <p class="text-caption">Mượt như nắp hộp phấn từ tính khép êm.</p>
+                    </div>
+
+                    <div class="p-4 rounded-[var(--rl-radius-md)] bg-[var(--rl-blush)]/65 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="font-mono text-xs font-bold text-[var(--rl-rose)]">--dur-slow: 700ms</span>
+                            <span class="text-caption font-semibold">Reveal / Hero</span>
+                        </div>
+                        <div class="h-9 rounded-full bg-[var(--rl-surface)] border border-[var(--rl-border-subtle)] p-1 flex items-center overflow-hidden">
+                            <span class="w-7 h-7 rounded-full bg-[var(--rl-champagne)] text-[var(--rl-ink)] flex items-center justify-center text-[10px] font-mono font-bold shadow-[var(--rl-shadow-xs)]"
+                                  :style="playMotion ? 'transform: translateX(140px);' : 'transform: translateX(0);'"
+                                  style="transition: transform var(--dur-slow) var(--ease-luxe);">700</span>
+                        </div>
+                        <p class="text-caption">Dùng cho Line-Mask Reveal &amp; phóng ảnh Hero tinh tế.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. BẢNG KIỂM ĐỊNH ĐỘ TƯƠNG PHẢN MÀU WCAG 2.1 AA / AAA -->
+    <section id="sg-wcag" class="py-12 sm:py-20">
+        <div class="container-editorial space-y-6">
+            <div class="section-header-rule">
+                <span class="section-header-rule__icon" aria-hidden="true">
+                    <i class="fa-solid fa-universal-access text-sm"></i>
+                </span>
+                <div>
+                    <span class="section-eyebrow">07 • Accessibility Contrast Audit</span>
+                    <h2 class="section-title">Bảng Tỷ Lệ Tương Phản <em>Chuẩn WCAG 2.1 AA/AAA</em></h2>
+                </div>
+                <span class="section-header-rule__line" aria-hidden="true"></span>
+            </div>
+
+            <div class="card-bento overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <caption class="visually-hidden">Bảng đối chiếu tỷ lệ tương phản màu chữ và màu nền của hệ thống Rosé Luxe</caption>
+                    <thead>
+                        <tr class="bg-[var(--rl-blush)]/70 border-b border-[var(--rl-border-subtle)] text-xs uppercase tracking-wider text-[var(--rl-ink)]">
+                            <th scope="col" class="py-3.5 px-4 font-bold">Cặp màu ứng dụng</th>
+                            <th scope="col" class="py-3.5 px-4 font-bold">Mã HEX (Chữ / Nền)</th>
+                            <th scope="col" class="py-3.5 px-4 font-bold">Tỷ lệ</th>
+                            <th scope="col" class="py-3.5 px-4 font-bold">Chuẩn</th>
+                            <th scope="col" class="py-3.5 px-4 font-bold min-w-[240px]">Mẫu hiển thị trực tiếp</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-[var(--rl-border-subtle)] text-sm">
+                        @foreach (var row in wcagPairs)
+                        {
+                            <tr class="hover:bg-[var(--rl-blush)]/25 transition-colors">
+                                <th scope="row" class="py-3.5 px-4 font-semibold text-[var(--rl-ink)]">@row.PairName</th>
+                                <td class="py-3.5 px-4 font-mono text-xs text-[var(--rl-muted-aa)] whitespace-nowrap">@row.FgHex / @row.BgHex</td>
+                                <td class="py-3.5 px-4 font-mono font-bold text-[var(--rl-ink)] whitespace-nowrap">@row.Ratio</td>
+                                <td class="py-3.5 px-4 whitespace-nowrap">
+                                    <span class="badge-fefo badge-fefo--fresh">
+                                        <span class="badge-fefo__dot"></span>
+                                        <span>WCAG @row.Level</span>
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <span class="inline-block px-3 py-1.5 rounded-xl font-semibold text-xs border border-black/5"
+                                          style="background-color: @row.BgHex; color: @row.FgHex;">
+                                        @row.SampleText
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+</div>
+

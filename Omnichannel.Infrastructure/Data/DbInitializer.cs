@@ -2990,7 +2990,7 @@ namespace Omnichannel.Infrastructure.Data
             var standardSections = new Dictionary<string, (string Title, string Subtitle, int Order, string Layout)>
             {
                 ["HERO_SLIDER"] = ("Banner Slider", "Bộ sưu tập mỹ phẩm dẫn đầu xu hướng làm đẹp 2026", 1, "CAROUSEL"),
-                ["FLASH_SALE"] = ("Deal Chớp Nhoáng (Flash Sale)", "Cơ hội săn mỹ phẩm cao cấp chuẩn hạn dùng FEFO với giá ưu đãi cực lớn", 2, "GRID_4"),
+                ["FLASH_SALE"] = ("Deal Chớp Nhoáng (Flash Sale)", "Cơ hội săn mỹ phẩm cao cấp cam kết date mới với giá ưu đãi cực lớn", 2, "GRID_4"),
                 ["FEATURED_CATEGORIES"] = ("Danh Mục Nổi Bật", "Khám phá vẻ đẹp thuần khiết theo từng phân nhóm da liễu", 3, "GRID_6"),
                 ["BEST_SELLERS"] = ("Sản Phẩm Bán Chạy", "Top mỹ phẩm được các tín đồ làm đẹp tin chọn nhiều nhất", 4, "GRID_4"),
                 ["MID_BANNER"] = ("Banner Giữa Trang", "Chiến dịch ưu đãi nổi bật giữa trang", 5, "BANNER_FULL"),
@@ -5725,7 +5725,7 @@ namespace Omnichannel.Infrastructure.Data
                     {
                         PromotionCode = "PROMO-FLASH20",
                         Name = "Flash Sale Deal Sốc Giờ Vàng - Giảm 20%",
-                        Description = "Cơ hội săn mỹ phẩm cao cấp chuẩn hạn dùng FEFO với giá ưu đãi cực lớn",
+                        Description = "Cơ hội săn mỹ phẩm cao cấp cam kết date mới với giá ưu đãi cực lớn",
                         PromotionType = "FLASH_SALE",
                         DiscountValue = 20m,
                         MinOrderValue = 200000m,

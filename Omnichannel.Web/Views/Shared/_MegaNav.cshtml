@@ -1,220 +1,298 @@
 @*
-    Canmake Beauty Suite - Mega Navigation Bar Partial (_MegaNav.cshtml)
-    Tối ưu hóa GPU-accelerated dropdown, lazy-loading ảnh phụ, không block Main Thread
+    Canmake Beauty Suite - Rosé Luxe Desktop Center Navigation & Mega Menu (_MegaNav.cshtml)
+    Phiên 2: Nằm trong Floating Pill Header (Desktop >= 1024px)
+    - Mở bằng hover có intent delay 120ms (tránh nhấp nháy khi lướt chuột ngang)
+    - Điều hướng hoàn toàn bằng bàn phím (Enter/Space/ArrowDown mở, Escape đóng & trả focus, Tab/focusout tự đóng)
+    - Lưới 3 cột danh mục con + 1 ô ảnh banner/sản phẩm nổi bật chuẩn Rosé Luxe
 *@
-<nav aria-label="Thanh điều hướng chính" class="nav-mega-wrapper hidden lg:block bg-pastel-rose/70 border-b border-soft-border/80 sticky top-20 z-30 backdrop-blur-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        <div class="flex items-center">
-            <!-- All Departments Button with 4-Column Mega Menu -->
-            <div class="relative group mr-4">
-                <a href="/tim-kiem" class="bg-magenta-accent text-white px-6 py-3.5 text-xs font-bold uppercase tracking-wider flex items-center gap-3 rounded-t-2xl hover:bg-[#b0276a] transition-colors shadow-sm">
-                    <i class="fa-solid fa-bars text-sm"></i>
-                    <span>Danh Mục Mỹ Phẩm</span>
-                    <i class="fa-solid fa-angle-down text-[10px] text-white/70 group-hover:rotate-180 transition-transform duration-300"></i>
+<nav aria-label="Điều hướng chính"
+     x-data="megaMenuController()"
+     @@keydown.escape.window="handleEscape()"
+     class="hidden lg:flex items-center gap-1 xl:gap-1.5">
+
+    <!-- 1. NÚT & PANEL MEGA MENU DANH MỤC (HOVER DELAY 120MS + KEYBOARD ACCESSIBLE) -->
+    <div class="relative"
+         @@mouseenter="onMouseEnter()"
+         @@mouseleave="onMouseLeave()"
+         @@focusout="onFocusOut($event)">
+
+        <button type="button"
+                id="megaMenuTriggerBtn"
+                x-ref="megaTrigger"
+                @@click="toggleMega()"
+                @@keydown.arrow-down.prevent="openAndFocusFirst()"
+                :aria-expanded="megaOpen.toString()"
+                aria-haspopup="true"
+                aria-controls="desktopMegaMenuPanel"
+                class="group inline-flex items-center gap-2 min-h-[44px] px-4 py-2 rounded-full text-xs font-bold tracking-wide transition-all duration-200 focus-visible:outline-2 focus-visible:outline-[var(--rl-rose)] focus-visible:outline-offset-2"
+                :class="megaOpen
+                    ? 'bg-[var(--rl-rose)] text-white shadow-[var(--rl-shadow-sm)]'
+                    : 'bg-[var(--rl-bg-blush)]/90 text-[var(--rl-ink)] hover:bg-[var(--rl-bg-petal)] hover:text-[var(--rl-rose)] border border-[var(--rl-border-strong)]/60'">
+            <i class="fa-solid fa-grid-2 text-xs transition-transform duration-200"
+               :class="megaOpen ? 'text-white scale-110' : 'text-[var(--rl-rose)]'"
+               aria-hidden="true"></i>
+            <span>Danh Mục</span>
+            <i class="fa-solid fa-chevron-down text-[10px] transition-transform duration-300"
+               :class="megaOpen ? 'rotate-180 text-white' : 'text-[var(--rl-mauve)]'"
+               aria-hidden="true"></i>
+        </button>
+
+        <!-- PANEL MEGA MENU: 3 CỘT DANH MỤC CON + 1 Ô ẢNH BANNER/SẢN PHẨM NỔI BẬT -->
+        <div id="desktopMegaMenuPanel"
+             x-ref="megaPanel"
+             x-cloak
+             x-show="megaOpen"
+             x-transition:enter="transition ease-[cubic-bezier(0.22,1,0.36,1)] duration-300"
+             x-transition:enter-start="opacity-0 translate-y-2 scale-[0.98]"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="transition ease-in duration-180"
+             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-y-1.5 scale-[0.99]"
+             role="region"
+             aria-label="Danh mục mỹ phẩm chi tiết"
+             class="absolute left-0 top-full mt-3 w-[920px] xl:w-[980px] max-w-[calc(100vw-2rem)] rounded-[28px] bg-[#FFFDFB]/98 backdrop-blur-2xl border border-[var(--rl-border-strong)] shadow-[var(--rl-shadow-xl)] p-7 z-[1060]">
+
+            <!-- Thanh tiêu đề đầu Mega Menu -->
+            <div class="flex items-center justify-between pb-4 mb-5 border-b border-[var(--rl-border-subtle)]">
+                <div class="flex items-center gap-3">
+                    <span class="section-eyebrow !mb-0">CANMAKE CURATED CATALOG</span>
+                    <span class="badge-fefo cursor-pointer" onclick="window.dispatchEvent(new CustomEvent('open-fefo-modal'))" title="Click để tìm hiểu cam kết hạn sử dụng &amp; date mới">
+                        <i class="fa-solid fa-shield-heart" aria-hidden="true"></i>
+                        100% Lô Date Mới (Minh Bạch HSD)
+                    </span>
+                </div>
+                <a href="/tim-kiem"
+                   class="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--rl-rose)] hover:text-[var(--rl-rose-deep)] transition group">
+                    <span>Xem toàn bộ 500+ sản phẩm</span>
+                    <i class="fa-solid fa-arrow-right text-[10px] group-hover:translate-x-1 transition-transform" aria-hidden="true"></i>
                 </a>
+            </div>
 
-                <!-- Mega Menu Dropdown 4 Cột với Backdrop Blur & GPU Transform -->
-                <div class="mega-menu-content absolute top-full left-0 w-[960px] bg-white/95 backdrop-blur-xl shadow-2xl rounded-3xl border border-rose-100/90 p-7 z-50 invisible opacity-0 translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto will-change-transform">
-                    <div class="grid grid-cols-4 gap-6">
-                        <!-- Cột 1: Danh mục nhóm da & makeup -->
+            <div class="grid grid-cols-12 gap-6">
+                <!-- Cột 1 (3 cols): Chăm Sóc Da Chuyên Sâu -->
+                <div class="col-span-3">
+                    <a href="/tim-kiem?categorySlug=cham-soc-da"
+                       class="flex items-center gap-2.5 pb-2.5 mb-3 border-b border-[var(--rl-border-subtle)] group">
+                        <img src="@ProductImageResolver.GetPrimaryImageUrl(sku: "SKU-SKIN-LRP-002")"
+                             alt=""
+                             aria-hidden="true"
+                             width="32"
+                             height="32"
+                             loading="lazy"
+                             decoding="async"
+                             class="w-8 h-8 rounded-full object-cover border border-[var(--rl-border-strong)] shrink-0" />
                         <div>
-                            <h4 class="font-serif font-bold text-charcoal text-sm mb-3.5 pb-2 border-b border-rose-100 flex items-center gap-2">
-                                <i class="fa-solid fa-layer-group text-rose-gold text-xs"></i>
-                                <span>Nhóm Da & Makeup</span>
-                            </h4>
-                            <div class="space-y-4">
-                                <div>
-                                    <div class="text-[10px] font-bold text-rose-gold uppercase tracking-wider mb-1.5">Chăm Sóc & Phục Hồi</div>
-                                    <ul class="space-y-2 text-xs text-slate-600 font-sans">
-                                        <li><a href="/tim-kiem?categorySlug=sua-rua-mat" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Sữa Rửa Mặt Dịu Nhẹ</a></li>
-                                        <li><a href="/tim-kiem?categorySlug=serum-tinh-chat" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Serum B5 & HA Phục Hồi</a></li>
-                                        <li><a href="/tim-kiem?categorySlug=kem-chong-nang" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Kem Chống Nắng Phổ Rộng</a></li>
-                                    </ul>
-                                </div>
-                                <div>
-                                    <div class="text-[10px] font-bold text-rose-gold uppercase tracking-wider mb-1.5">Trang Điểm Cao Cấp</div>
-                                    <ul class="space-y-2 text-xs text-slate-600 font-sans">
-                                        <li><a href="/tim-kiem?categorySlug=son-moi" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Son Lì & Son Bóng Căng Mọng</a></li>
-                                        <li><a href="/tim-kiem?categorySlug=kem-nen-cushion" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Cushion Mỏng Nhẹ Tự Nhiên</a></li>
-                                        <li><a href="/tim-kiem?categorySlug=phan-mat" class="hover:text-magenta-accent hover:translate-x-1 transition-all duration-200 block py-0.5">Phấn Mắt & Má Hồng Lâu Trôi</a></li>
-                                    </ul>
-                                </div>
-                            </div>
+                            <div class="font-serif font-bold text-sm text-[var(--rl-ink)] group-hover:text-[var(--rl-rose)] transition">Chăm Sóc Da</div>
+                            <div class="text-[10px] text-[var(--rl-muted)]">Dược mỹ phẩm &amp; Phục hồi</div>
                         </div>
-
-                        <!-- Cột 2: Thương hiệu đình đám -->
-                        <div>
-                            <h4 class="font-serif font-bold text-charcoal text-sm mb-3.5 pb-2 border-b border-rose-100 flex items-center gap-2">
-                                <i class="fa-solid fa-crown text-amber-500 text-xs"></i>
-                                <span>Thương Hiệu Đình Đám</span>
-                            </h4>
-                            <ul class="space-y-2 text-xs font-medium text-slate-700">
-                                <li>
-                                    <a href="/tim-kiem?brand=Dior" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
-                                        <span class="font-bold">Dior</span>
-                                        <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Haute Parfumerie</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="/tim-kiem?brand=Lancome" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
-                                        <span class="font-bold">Lancôme</span>
-                                        <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Tinh hoa Pháp</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="/tim-kiem?brand=MAC" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
-                                        <span class="font-bold">MAC Cosmetics</span>
-                                        <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Makeup Artist</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="/tim-kiem?brand=Estee Lauder" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
-                                        <span class="font-bold">Estée Lauder</span>
-                                        <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Chống lão hóa</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="/tim-kiem?brand=YSL" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
-                                        <span class="font-bold">YSL Beauty</span>
-                                        <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Quyến rũ</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="/tim-kiem?brand=Chanel" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
-                                        <span class="font-bold">Chanel</span>
-                                        <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Kinh điển</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="/tim-kiem?brand=Kiehls" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
-                                        <span class="font-bold">Kiehl's</span>
-                                        <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Từ năm 1851</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="/tim-kiem?brand=La Roche-Posay" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-pastel-rose hover:text-magenta-accent transition group">
-                                        <span class="font-bold">La Roche-Posay</span>
-                                        <span class="text-[9px] text-slate-400 group-hover:text-magenta-accent">Dược mỹ phẩm</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <!-- Cột 3: Sản phẩm bán chạy có ảnh nhỏ (Best Sellers) -->
-                        <div>
-                            <h4 class="font-serif font-bold text-charcoal text-sm mb-3.5 pb-2 border-b border-rose-100 flex items-center gap-2">
-                                <i class="fa-solid fa-fire text-rose-500 text-xs"></i>
-                                <span>Sản Phẩm Bán Chạy</span>
-                            </h4>
-                            <div class="space-y-3">
-                                <!-- Best Seller 1 -->
-                                <a href="/tim-kiem?q=Serum" class="flex items-center gap-3 p-2 rounded-xl bg-slate-50/70 hover:bg-pastel-rose hover:border-pink-200 border border-transparent transition group">
-                                    <img src="@ProductImageResolver.GetPrimaryImageUrl(sku: "SKU-SKIN-LRP-002")" 
-                                         alt="Serum La Roche-Posay" 
-                                         width="48"
-                                         height="48"
-                                         loading="lazy"
-                                         decoding="async"
-                                         class="w-12 h-12 rounded-lg object-cover border border-slate-200 group-hover:scale-105 transition shrink-0" />
-                                    <div class="flex-1 min-w-0">
-                                        <div class="text-[9px] font-bold text-rose-gold uppercase truncate">La Roche-Posay</div>
-                                        <div class="text-xs font-bold text-slate-800 truncate group-hover:text-magenta-accent">Serum Hyalu B5 30ml</div>
-                                        <div class="flex items-center justify-between mt-0.5">
-                                            <span class="text-xs font-bold text-charcoal font-mono-numeric">980.000₫</span>
-                                            <span class="text-[9px] text-amber-500">★★★★★ 5.0</span>
-                                        </div>
-                                    </div>
-                                </a>
-
-                                <!-- Best Seller 2 -->
-                                <a href="/tim-kiem?q=Dior" class="flex items-center gap-3 p-2 rounded-xl bg-slate-50/70 hover:bg-pastel-rose hover:border-pink-200 border border-transparent transition group">
-                                    <img src="@ProductImageResolver.GetPrimaryImageUrl(sku: "SKU-LIP-DIO-037")" 
-                                         alt="Son Dior Rouge Forever" 
-                                         width="48"
-                                         height="48"
-                                         loading="lazy"
-                                         decoding="async"
-                                         class="w-12 h-12 rounded-lg object-cover border border-slate-200 group-hover:scale-105 transition shrink-0" />
-                                    <div class="flex-1 min-w-0">
-                                        <div class="text-[9px] font-bold text-rose-gold uppercase truncate">Christian Dior</div>
-                                        <div class="text-xs font-bold text-slate-800 truncate group-hover:text-magenta-accent">Rouge Dior 999 Velvet</div>
-                                        <div class="flex items-center justify-between mt-0.5">
-                                            <span class="text-xs font-bold text-charcoal font-mono-numeric">1.150.000₫</span>
-                                            <span class="text-[9px] text-amber-500">★★★★★ 5.0</span>
-                                        </div>
-                                    </div>
-                                </a>
-
-                                <!-- Best Seller 3 -->
-                                <a href="/tim-kiem?q=Anessa" class="flex items-center gap-3 p-2 rounded-xl bg-slate-50/70 hover:bg-pastel-rose hover:border-pink-200 border border-transparent transition group">
-                                    <img src="@ProductImageResolver.GetPrimaryImageUrl(sku: "SKU-SKIN-ANE-001")" 
-                                         alt="Kem Chống Nắng Anessa" 
-                                         width="48"
-                                         height="48"
-                                         loading="lazy"
-                                         decoding="async"
-                                         class="w-12 h-12 rounded-lg object-cover border border-slate-200 group-hover:scale-105 transition shrink-0" />
-                                    <div class="flex-1 min-w-0">
-                                        <div class="text-[9px] font-bold text-rose-gold uppercase truncate">Anessa Shiseido</div>
-                                        <div class="text-xs font-bold text-slate-800 truncate group-hover:text-magenta-accent">Perfect UV Sunscreen 60ml</div>
-                                        <div class="flex items-center justify-between mt-0.5">
-                                            <span class="text-xs font-bold text-charcoal font-mono-numeric">550.000₫</span>
-                                            <span class="text-[9px] text-amber-500">★★★★★ 4.9</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Cột 4: Banner khuyến mãi mini có ảnh đại diện thương hiệu -->
-                        <div class="rounded-2xl overflow-hidden relative bg-gradient-to-br from-rose-50 via-white to-pink-50/80 p-5 border border-rose-200/60 flex flex-col justify-between shadow-xs">
-                            <div>
-                                <div class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-magenta-accent/10 text-magenta-accent text-[9px] font-bold tracking-widest uppercase mb-2">
-                                    ✦ VIP PRIVILEGE 2026 ✦
-                                </div>
-                                <h5 class="font-serif font-bold text-charcoal text-base leading-snug">
-                                    Đặc Quyền Hội Viên & Quà Tặng Dior
-                                </h5>
-                                <div class="my-3 rounded-xl overflow-hidden border border-rose-200/50 shadow-2xs">
-                                    <img src="/images/banners/banner-routine-kbeauty.jpg" 
-                                         alt="Banner Khuyến Mãi Mỹ Phẩm Cao Cấp" 
-                                         width="360"
-                                         height="96"
-                                         loading="lazy"
-                                         decoding="async"
-                                         class="w-full h-24 object-cover hover:scale-105 transition duration-300" />
-                                </div>
-                                <p class="text-[11px] text-slate-600 font-sans leading-relaxed">
-                                    Tặng bộ Travel Kit Full-size Dior & Lancôme cho đơn hàng từ 1.500.000₫. Date cam kết > 18 tháng chuẩn FEFO.
-                                </p>
-                            </div>
-                            <a href="/tim-kiem?brand=Dior" class="inline-flex items-center justify-center gap-2 mt-4 px-4 py-2 rounded-xl bg-magenta-accent text-white text-xs font-bold hover:bg-[#b0276a] transition shadow-xs">
-                                <span>Khám Phá Ngay</span>
-                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                    </a>
+                    <ul class="space-y-1.5 text-xs text-[var(--rl-mauve)]">
+                        <li>
+                            <a href="/tim-kiem?categorySlug=sua-rua-mat"
+                               class="flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-[var(--rl-bg-blush)] hover:text-[var(--rl-rose)] transition">
+                                <span class="font-medium">Sữa Rửa Mặt pH 5.5</span>
+                                <span class="text-[10px] text-[var(--rl-muted)]">42 SP</span>
                             </a>
+                        </li>
+                        <li>
+                            <a href="/tim-kiem?categorySlug=toner-nuoc-hoa-hong"
+                               class="flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-[var(--rl-bg-blush)] hover:text-[var(--rl-rose)] transition">
+                                <span class="font-medium">Toner &amp; Nước Hoa Hồng</span>
+                                <span class="text-[10px] text-[var(--rl-muted)]">35 SP</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/tim-kiem?categorySlug=serum-tinh-chat"
+                               class="flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-[var(--rl-bg-blush)] hover:text-[var(--rl-rose)] transition">
+                                <span class="font-semibold text-[var(--rl-ink)]">Serum B5 &amp; HA Phục Hồi</span>
+                                <span class="px-1.5 py-0.5 rounded-full bg-[var(--rl-bg-petal)] text-[var(--rl-rose)] text-[9px] font-bold">HOT</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/tim-kiem?categorySlug=kem-duong-am"
+                               class="flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-[var(--rl-bg-blush)] hover:text-[var(--rl-rose)] transition">
+                                <span class="font-medium">Kem Dưỡng Khóa Ẩm 72H</span>
+                                <span class="text-[10px] text-[var(--rl-muted)]">38 SP</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/tim-kiem?categorySlug=nuoc-tay-trang"
+                               class="flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-[var(--rl-bg-blush)] hover:text-[var(--rl-rose)] transition">
+                                <span class="font-medium">Tẩy Trang Micellar Dịu Nhẹ</span>
+                                <span class="text-[10px] text-[var(--rl-muted)]">29 SP</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Cột 2 (3 cols): Trang Điểm & Chống Nắng -->
+                <div class="col-span-3">
+                    <a href="/tim-kiem?categorySlug=trang-diem"
+                       class="flex items-center gap-2.5 pb-2.5 mb-3 border-b border-[var(--rl-border-subtle)] group">
+                        <img src="@ProductImageResolver.GetPrimaryImageUrl(sku: "SKU-LIP-DIO-037")"
+                             alt=""
+                             aria-hidden="true"
+                             width="32"
+                             height="32"
+                             loading="lazy"
+                             decoding="async"
+                             class="w-8 h-8 rounded-full object-cover border border-[var(--rl-border-strong)] shrink-0" />
+                        <div>
+                            <div class="font-serif font-bold text-sm text-[var(--rl-ink)] group-hover:text-[var(--rl-rose)] transition">Trang Điểm &amp; UV</div>
+                            <div class="text-[10px] text-[var(--rl-muted)]">Rosé Couture Makeup</div>
                         </div>
+                    </a>
+                    <ul class="space-y-1.5 text-xs text-[var(--rl-mauve)]">
+                        <li>
+                            <a href="/tim-kiem?categorySlug=son-moi"
+                               class="flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-[var(--rl-bg-blush)] hover:text-[var(--rl-rose)] transition">
+                                <span class="font-semibold text-[var(--rl-ink)]">Son Lì &amp; Son Bóng Rosé</span>
+                                <span class="px-1.5 py-0.5 rounded-full bg-[var(--rl-rose)] text-white text-[9px] font-bold">MỚI</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/tim-kiem?categorySlug=kem-nen-cushion"
+                               class="flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-[var(--rl-bg-blush)] hover:text-[var(--rl-rose)] transition">
+                                <span class="font-medium">Cushion &amp; Kem Nền Mỏng Nhẹ</span>
+                                <span class="text-[10px] text-[var(--rl-muted)]">31 SP</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/tim-kiem?categorySlug=phan-mat"
+                               class="flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-[var(--rl-bg-blush)] hover:text-[var(--rl-rose)] transition">
+                                <span class="font-medium">Phấn Mắt &amp; Má Hồng Căng Bóng</span>
+                                <span class="text-[10px] text-[var(--rl-muted)]">27 SP</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/tim-kiem?categorySlug=kem-chong-nang"
+                               class="flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-[var(--rl-bg-blush)] hover:text-[var(--rl-rose)] transition">
+                                <span class="font-medium">Kem Chống Nắng SPF50+</span>
+                                <span class="text-[10px] text-[var(--rl-muted)]">46 SP</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/tim-kiem?categorySlug=nuoc-hoa"
+                               class="flex items-center justify-between px-2.5 py-2 rounded-xl hover:bg-[var(--rl-bg-blush)] hover:text-[var(--rl-rose)] transition">
+                                <span class="font-medium">Nước Hoa Pháp &amp; Quà Tặng</span>
+                                <span class="text-[10px] text-[var(--rl-muted)]">24 SP</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Cột 3 (3 cols): Nhà Mốt Danh Tiếng & Sản Phẩm Hot -->
+                <div class="col-span-3">
+                    <div class="flex items-center gap-2 pb-2.5 mb-3 border-b border-[var(--rl-border-subtle)]">
+                        <span class="w-8 h-8 rounded-full bg-[var(--rl-bg-blush)] border border-[var(--rl-border-strong)] flex items-center justify-center text-[var(--rl-champagne)] shrink-0">
+                            <i class="fa-solid fa-crown text-xs" aria-hidden="true"></i>
+                        </span>
+                        <div>
+                            <div class="font-serif font-bold text-sm text-[var(--rl-ink)]">Thương Hiệu &amp; Top</div>
+                            <div class="text-[10px] text-[var(--rl-muted)]">Phân phối chính hãng</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-1.5 mb-3">
+                        <a href="/tim-kiem?brand=Dior" class="px-2.5 py-1.5 rounded-xl bg-[var(--rl-bg)] border border-[var(--rl-border-subtle)] hover:border-[var(--rl-rose)] text-[11px] font-bold text-[var(--rl-ink)] hover:text-[var(--rl-rose)] transition truncate">Dior Beauty</a>
+                        <a href="/tim-kiem?brand=Lancome" class="px-2.5 py-1.5 rounded-xl bg-[var(--rl-bg)] border border-[var(--rl-border-subtle)] hover:border-[var(--rl-rose)] text-[11px] font-bold text-[var(--rl-ink)] hover:text-[var(--rl-rose)] transition truncate">Lancôme</a>
+                        <a href="/tim-kiem?brand=La Roche-Posay" class="px-2.5 py-1.5 rounded-xl bg-[var(--rl-bg)] border border-[var(--rl-border-subtle)] hover:border-[var(--rl-rose)] text-[11px] font-bold text-[var(--rl-ink)] hover:text-[var(--rl-rose)] transition truncate">La Roche-Posay</a>
+                        <a href="/tim-kiem?brand=Anessa" class="px-2.5 py-1.5 rounded-xl bg-[var(--rl-bg)] border border-[var(--rl-border-subtle)] hover:border-[var(--rl-rose)] text-[11px] font-bold text-[var(--rl-ink)] hover:text-[var(--rl-rose)] transition truncate">Anessa</a>
+                    </div>
+
+                    <div class="space-y-2">
+                        <a href="/tim-kiem?q=Serum"
+                           class="flex items-center gap-2.5 p-2 rounded-2xl bg-[var(--rl-bg)] hover:bg-[var(--rl-bg-blush)] border border-[var(--rl-border-subtle)] transition group">
+                            <img src="@ProductImageResolver.GetPrimaryImageUrl(sku: "SKU-SKIN-LRP-002")"
+                                 alt="Serum Hyalu B5"
+                                 width="44"
+                                 height="44"
+                                 loading="lazy"
+                                 decoding="async"
+                                 class="w-11 h-11 rounded-xl object-cover border border-[var(--rl-border-subtle)] shrink-0" />
+                            <div class="min-w-0 flex-1">
+                                <div class="text-[9px] font-bold text-[var(--rl-rose)] uppercase tracking-wider truncate">La Roche-Posay</div>
+                                <div class="text-xs font-bold text-[var(--rl-ink)] truncate group-hover:text-[var(--rl-rose)]">Serum Hyalu B5 30ml</div>
+                                <div class="text-[11px] font-bold text-[var(--rl-mauve)] font-mono-numeric">980.000₫</div>
+                            </div>
+                        </a>
+
+                        <a href="/tim-kiem?q=Dior"
+                           class="flex items-center gap-2.5 p-2 rounded-2xl bg-[var(--rl-bg)] hover:bg-[var(--rl-bg-blush)] border border-[var(--rl-border-subtle)] transition group">
+                            <img src="@ProductImageResolver.GetPrimaryImageUrl(sku: "SKU-LIP-DIO-037")"
+                                 alt="Son Rouge Dior 999"
+                                 width="44"
+                                 height="44"
+                                 loading="lazy"
+                                 decoding="async"
+                                 class="w-11 h-11 rounded-xl object-cover border border-[var(--rl-border-subtle)] shrink-0" />
+                            <div class="min-w-0 flex-1">
+                                <div class="text-[9px] font-bold text-[var(--rl-rose)] uppercase tracking-wider truncate">Christian Dior</div>
+                                <div class="text-xs font-bold text-[var(--rl-ink)] truncate group-hover:text-[var(--rl-rose)]">Rouge Dior 999 Velvet</div>
+                                <div class="text-[11px] font-bold text-[var(--rl-mauve)] font-mono-numeric">1.150.000₫</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Cột 4 (3 cols): 1 Ô Ảnh Banner / Sản Phẩm Nổi Bật (Editorial Spotlight) -->
+                <div class="col-span-3">
+                    <div class="h-full rounded-[24px] p-5 bg-[linear-gradient(145deg,#FBE8EE_0%,#F6D2DF_52%,#FFFDFB_100%)] border border-[var(--rl-border-strong)] shadow-[var(--rl-shadow-sm)] flex flex-col justify-between relative overflow-hidden">
+                        <div>
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/85 text-[var(--rl-rose)] text-[9px] font-extrabold tracking-widest uppercase border border-[var(--rl-border-strong)]">
+                                ✦ ROSÉ LUXE EDITION
+                            </span>
+                            <h4 class="font-serif font-bold text-[var(--rl-ink)] text-base leading-snug mt-2.5">
+                                Chuẩn Sắc Hồng <em class="italic font-normal text-[var(--rl-rose)]">Thượng Lưu</em> Mùa Hè
+                            </h4>
+                            <div class="my-3 rounded-2xl overflow-hidden border border-white/80 shadow-[var(--rl-shadow-xs)] aspect-[16/10] bg-white">
+                                <img src="/images/banners/banner-routine-kbeauty.jpg"
+                                     alt="Bộ sưu tập mỹ phẩm Rosé Luxe"
+                                     width="320"
+                                     height="200"
+                                     loading="lazy"
+                                     decoding="async"
+                                     class="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                            </div>
+                            <p class="text-[11px] text-[var(--rl-mauve)] leading-relaxed">
+                                Đặc quyền tặng bộ Travel Kit Dior &amp; kiểm tra hạn dùng minh bạch &gt; 18 tháng.
+                            </p>
+                        </div>
+
+                        <a href="/tu-van-da" class="btn-pill-arrow w-full justify-between !py-2 !pl-4 !pr-2 mt-3 text-xs">
+                            <span>Cá Nhân Hoá Routine</span>
+                            <span class="btn-pill-arrow__circle !w-7 !h-7" aria-hidden="true">
+                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </span>
+                        </a>
                     </div>
                 </div>
             </div>
-
-            <!-- Navigation Links with Mega Menu from Database / Fallback -->
-            @await Component.InvokeAsync("DynamicMenu", new { menuCode = "HEADER_MAIN" })
-        </div>
-
-        <!-- Trust rating & AI Beauty Advisor Button -->
-        <div class="flex items-center gap-3">
-            <a href="/tu-van-da" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-magenta-accent text-white text-xs font-bold shadow-xs hover:bg-[#b0276a] hover:scale-105 active:scale-95 transition-all">
-                <i class="fa-solid fa-clipboard-check text-[10px]"></i>
-                <span>Trắc Nghiệm Da 4 Bước</span>
-            </a>
-            <a href="/Product/SmartFilter" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-pink-500 via-rose-500 to-purple-600 text-white text-xs font-bold shadow-xs hover:shadow-pink-500/25 hover:scale-105 active:scale-95 transition-all">
-                <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i>
-                <span>AI Beauty Advisor</span>
-            </a>
-            <div class="hidden xl:flex text-xs font-bold text-slate-500 items-center gap-1.5">
-                <span class="text-amber-500 text-sm">★★★★★</span>
-                <span>4.9/5</span>
-            </div>
         </div>
     </div>
+
+    <!-- 2. CÁC LINK ĐIỀU HƯỚNG TRUNG TÂM TRONG FLOATING PILL -->
+    <a href="/tim-kiem?categorySlug=cham-soc-da"
+       class="min-h-[44px] px-3.5 py-2 rounded-full text-xs font-semibold text-[var(--rl-ink)] hover:text-[var(--rl-rose)] hover:bg-[var(--rl-bg-blush)]/70 transition inline-flex items-center">
+        Chăm Sóc Da
+    </a>
+    <a href="/tim-kiem?categorySlug=trang-diem"
+       class="min-h-[44px] px-3.5 py-2 rounded-full text-xs font-semibold text-[var(--rl-ink)] hover:text-[var(--rl-rose)] hover:bg-[var(--rl-bg-blush)]/70 transition inline-flex items-center">
+        Trang Điểm
+    </a>
+    <a href="/tim-kiem?fefo=clearance"
+       class="min-h-[44px] px-3.5 py-2 rounded-full text-xs font-semibold text-[var(--rl-ink)] hover:text-[var(--rl-rose)] hover:bg-[var(--rl-bg-blush)]/70 transition inline-flex items-center gap-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-[var(--rl-emerald)]" aria-hidden="true"></span>
+        <span>Xả Lô Cận Date (-50%)</span>
+    </a>
+    <a href="/tu-van-da"
+       class="min-h-[44px] px-3.5 py-2 rounded-full text-xs font-bold text-[var(--rl-rose)] bg-[var(--rl-bg-blush)]/80 hover:bg-[var(--rl-bg-petal)] transition inline-flex items-center gap-1.5">
+        <i class="fa-solid fa-wand-magic-sparkles text-[11px]" aria-hidden="true"></i>
+        <span>Quiz Da</span>
+    </a>
+    <a href="/Product/SmartFilter"
+       class="hidden xl:inline-flex min-h-[44px] px-3.5 py-2 rounded-full text-xs font-semibold text-[var(--rl-mauve)] hover:text-[var(--rl-rose)] hover:bg-[var(--rl-bg-blush)]/70 transition items-center gap-1.5">
+        <i class="fa-solid fa-sliders text-[11px] text-[var(--rl-champagne)]" aria-hidden="true"></i>
+        <span>Smart Filter</span>
+    </a>
 </nav>

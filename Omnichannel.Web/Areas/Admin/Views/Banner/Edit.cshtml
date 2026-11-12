@@ -115,7 +115,7 @@
 
                     <div class="col-md-6">
                         <label class="form-label fw-semibold small">Chữ trên nút phụ thứ 2</label>
-                        <input asp-for="StyleConfig.SecondaryButtonText" id="SecondaryBtnTextInput" class="form-control" placeholder="Deal FEFO -50%" oninput="syncLivePreview()" />
+                        <input asp-for="StyleConfig.SecondaryButtonText" id="SecondaryBtnTextInput" class="form-control" placeholder="Săn Deal Cận Date -50%" oninput="syncLivePreview()" />
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-semibold small">Đường dẫn nút phụ thứ 2 (URL)</label>
@@ -418,7 +418,7 @@
                                     <span id="previewPrimaryBtnText">@Model.ButtonText</span> →
                                 </span>
                                 <span id="previewSecondaryBtn" class="px-2.5 py-1.5 rounded-pill fw-semibold d-inline-flex align-items-center" style="font-size: 10.5px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: #fff;">
-                                    Deal FEFO -50%
+                                    Săn Deal Cận Date -50%
                                 </span>
                             </div>
                         </div>
@@ -457,7 +457,7 @@
             const titleText = document.getElementById('TitleInput').value || '';
             const subtitleText = document.getElementById('SubtitleInput').value || '';
             const primaryBtnText = document.getElementById('ButtonTextInput').value || 'Khám Phá Ngay';
-            const secondaryBtnText = document.getElementById('SecondaryBtnTextInput').value || 'Deal FEFO -50%';
+            const secondaryBtnText = document.getElementById('SecondaryBtnTextInput').value || 'Săn Deal Cận Date -50%';
 
             const boxStyle = document.getElementById('BoxStyleSelect').value;
             const boxWidth = document.getElementById('BoxWidthSelect').value;

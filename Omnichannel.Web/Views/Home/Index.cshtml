@@ -1,162 +1,346 @@
 @{
-    ViewData["Title"] = "Trang Chủ - Mỹ Phẩm Cao Cấp Chuẩn Hạn Dùng FEFO";
-    ViewData["Description"] = "Trải nghiệm mua sắm mỹ phẩm cao cấp chính ngạch tiên phong áp dụng tiêu chuẩn hạn dùng FEFO minh bạch. Giao nhanh 2H tại TP.HCM & Hà Nội.";
+    ViewData["Title"] = "Trang Chủ - Mỹ Phẩm Cao Cấp Minh Bạch Hạn Dùng";
+    ViewData["Description"] = "Trải nghiệm mua sắm mỹ phẩm cao cấp chính ngạch tiên phong áp dụng cam kết hạn dùng tươi mới & minh bạch từng lô hàng. Giao nhanh 2H tại TP.HCM & Hà Nội.";
 }
 
 @await Component.InvokeAsync("HomeSections")
 
-<!-- TAB GRID SẢN PHẨM PHÂN THEO DANH MỤC TRÊN TRANG CHỦ (Yêu cầu Phiên 4) -->
-<section id="categoryProductTabs" class="section-deferred py-16 bg-[#fffdfd] border-t border-rose-100/60 relative">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 pb-4 border-b border-blush/60">
+<!-- =========================================================================
+     TAB SẢN PHẨM PHÂN THEO DANH MỤC TRÊN TRANG CHỦ (алё,тур Pattern + Sliding Pill + View Transition)
+     ========================================================================= -->
+<section id="categoryProductTabs"
+         x-data="homeCategoryTabsController()"
+         x-init="initTabs()"
+         class="section-scroll-reveal section-deferred py-12 sm:py-18 bg-[var(--rl-ivory)] border-t border-[var(--rl-border-subtle)] relative">
+    <div class="container-editorial">
+        <!-- Section Header алё,тур Pattern -->
+        <div class="section-header-rule mb-6 sm:mb-8">
+            <span class="section-header-rule__icon" aria-hidden="true">
+                <i class="fa-solid fa-layer-group text-sm"></i>
+            </span>
             <div>
-                <span class="text-xs font-bold uppercase tracking-widest text-magenta-accent flex items-center gap-1.5 mb-1.5">
-                    <i class="fa-solid fa-sparkles text-amber-500"></i>
-                    <span>Tuyển Lựa Khoa Học Chuẩn Hạn Dùng FEFO</span>
+                <span class="section-eyebrow mb-1">
+                    <span>Tuyển Lựa Khoa Học • Cam Kết Date Mới</span>
                 </span>
-                <h2 class="font-serif text-2xl sm:text-4xl font-bold text-charcoal">
-                    Sản Phẩm Theo Danh Mục
+                <h2 class="section-title">
+                    Sản Phẩm <em class="font-serif italic font-normal text-[var(--rl-rose)]">Theo Danh Mục</em> Tuyển Chọn
                 </h2>
-                <p class="text-xs sm:text-sm text-slate-500 mt-1 font-sans">
-                    Khám phá mỹ phẩm chính hãng với tiêu chuẩn hạn dùng minh bạch theo từng ngành hàng
-                </p>
             </div>
+            <span class="section-header-rule__line hidden md:block" aria-hidden="true"></span>
+            <a href="/category/all" class="btn-pill-arrow btn-pill-arrow--light self-start sm:self-auto shrink-0">
+                <span>Xem tất cả</span>
+                <span class="pill-arrow-circle" aria-hidden="true">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </span>
+            </a>
+        </div>
 
-            <!-- Tab Buttons -->
-            <div x-data="{ currentTab: 'all' }" class="flex flex-wrap items-center gap-1.5 p-1.5 rounded-2xl bg-white border border-rose-100 shadow-xs">
-                <button type="button" 
-                        @@click="currentTab = 'all'" 
-                        onclick="switchHomeProductTab('all', this)" 
-                        :class="currentTab === 'all' ? 'bg-magenta-accent text-white shadow-md font-bold' : 'text-slate-600 hover:text-magenta-accent font-semibold'" 
-                        class="tab-nav-btn px-4 sm:px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2 cursor-pointer active:scale-95">
-                    <i class="fa-solid fa-border-all text-[11px]"></i>
-                    <span>Tất Cả</span>
-                </button>
-                <button type="button" 
-                        @@click="currentTab = 'skincare'" 
-                        onclick="switchHomeProductTab('skincare', this)" 
-                        :class="currentTab === 'skincare' ? 'bg-magenta-accent text-white shadow-md font-bold' : 'text-slate-600 hover:text-magenta-accent font-semibold'" 
-                        class="tab-nav-btn px-4 sm:px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2 cursor-pointer active:scale-95">
-                    <i class="fa-solid fa-spa text-[11px]"></i>
-                    <span>Chăm Sóc Da</span>
-                </button>
-                <button type="button" 
-                        @@click="currentTab = 'makeup'" 
-                        onclick="switchHomeProductTab('makeup', this)" 
-                        :class="currentTab === 'makeup' ? 'bg-magenta-accent text-white shadow-md font-bold' : 'text-slate-600 hover:text-magenta-accent font-semibold'" 
-                        class="tab-nav-btn px-4 sm:px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2 cursor-pointer active:scale-95">
-                    <i class="fa-solid fa-wand-magic-sparkles text-[11px]"></i>
-                    <span>Trang Điểm</span>
-                </button>
-                <button type="button" 
-                        @@click="currentTab = 'fragrance'" 
-                        onclick="switchHomeProductTab('fragrance', this)" 
-                        :class="currentTab === 'fragrance' ? 'bg-magenta-accent text-white shadow-md font-bold' : 'text-slate-600 hover:text-magenta-accent font-semibold'" 
-                        class="tab-nav-btn px-4 sm:px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2 cursor-pointer active:scale-95">
-                    <i class="fa-solid fa-spray-can-sparkles text-[11px]"></i>
-                    <span>Nước Hoa</span>
-                </button>
-                <button type="button" 
-                        @@click="currentTab = 'haircare'" 
-                        onclick="switchHomeProductTab('haircare', this)" 
-                        :class="currentTab === 'haircare' ? 'bg-magenta-accent text-white shadow-md font-bold' : 'text-slate-600 hover:text-magenta-accent font-semibold'" 
-                        class="tab-nav-btn px-4 sm:px-5 py-2 rounded-xl text-xs transition-all flex items-center gap-2 cursor-pointer active:scale-95">
-                    <i class="fa-solid fa-scissors text-[11px]"></i>
-                    <span>Chăm Sóc Tóc</span>
-                </button>
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+            <p class="text-xs sm:text-sm text-[var(--rl-mauve)] font-sans max-w-xl">
+                Khám phá mỹ phẩm chính hãng với tiêu chuẩn hạn dùng minh bạch theo từng ngành hàng chuyên biệt.
+            </p>
+
+            <!-- Horizontal Scrollable Pill Tab Bar (Chuẩn WAI-ARIA Tablist + Sliding Indicator) -->
+            <div class="overflow-x-auto no-scrollbar -mx-3 px-3 sm:mx-0 sm:px-0">
+                <div x-ref="tabStrip"
+                     role="tablist"
+                     aria-label="Chọn danh mục sản phẩm"
+                     @@keydown.right.prevent="navigateTabByKey(1)"
+                     @@keydown.left.prevent="navigateTabByKey(-1)"
+                     @@keydown.home.prevent="navigateTabToIndex(0)"
+                     @@keydown.end.prevent="navigateTabToIndex(4)"
+                     class="relative inline-flex flex-nowrap items-center gap-1 p-1.5 rounded-full bg-[var(--rl-bg-blush)]/70 border border-[var(--rl-border-subtle)] shadow-2xs whitespace-nowrap">
+                    
+                    <!-- Sliding Pill Indicator -->
+                    <span class="pointer-events-none absolute top-1.5 bottom-1.5 rounded-full bg-[var(--rl-rose)] shadow-[var(--rl-shadow-xs)] transition-all duration-300 ease-out"
+                          :style="`left: ${pillLeft}px; width: ${pillWidth}px;`"></span>
+
+                    <button type="button"
+                            id="tab-cat-all"
+                            role="tab"
+                            data-tab-key="all"
+                            x-ref="tabAll"
+                            aria-controls="productCardsGrid"
+                            :aria-selected="(currentTab === 'all').toString()"
+                            :tabindex="currentTab === 'all' ? 0 : -1"
+                            @@click="selectTab('all', $el)"
+                            :class="currentTab === 'all' ? 'text-white font-bold' : 'text-[var(--rl-mauve)] hover:text-[var(--rl-ink)] font-semibold'"
+                            class="tab-nav-btn relative z-10 min-h-[40px] px-4 sm:px-5 py-2 rounded-full text-xs transition-colors flex items-center gap-2 cursor-pointer shrink-0">
+                        <i class="fa-solid fa-border-all text-[11px]"></i>
+                        <span>Tất Cả</span>
+                    </button>
+
+                    <button type="button"
+                            id="tab-cat-skincare"
+                            role="tab"
+                            data-tab-key="skincare"
+                            aria-controls="productCardsGrid"
+                            :aria-selected="(currentTab === 'skincare').toString()"
+                            :tabindex="currentTab === 'skincare' ? 0 : -1"
+                            @@click="selectTab('skincare', $el)"
+                            :class="currentTab === 'skincare' ? 'text-white font-bold' : 'text-[var(--rl-mauve)] hover:text-[var(--rl-ink)] font-semibold'"
+                            class="tab-nav-btn relative z-10 min-h-[40px] px-4 sm:px-5 py-2 rounded-full text-xs transition-colors flex items-center gap-2 cursor-pointer shrink-0">
+                        <i class="fa-solid fa-spa text-[11px]"></i>
+                        <span>Chăm Sóc Da</span>
+                    </button>
+
+                    <button type="button"
+                            id="tab-cat-makeup"
+                            role="tab"
+                            data-tab-key="makeup"
+                            aria-controls="productCardsGrid"
+                            :aria-selected="(currentTab === 'makeup').toString()"
+                            :tabindex="currentTab === 'makeup' ? 0 : -1"
+                            @@click="selectTab('makeup', $el)"
+                            :class="currentTab === 'makeup' ? 'text-white font-bold' : 'text-[var(--rl-mauve)] hover:text-[var(--rl-ink)] font-semibold'"
+                            class="tab-nav-btn relative z-10 min-h-[40px] px-4 sm:px-5 py-2 rounded-full text-xs transition-colors flex items-center gap-2 cursor-pointer shrink-0">
+                        <i class="fa-solid fa-wand-magic-sparkles text-[11px]"></i>
+                        <span>Trang Điểm</span>
+                    </button>
+
+                    <button type="button"
+                            id="tab-cat-fragrance"
+                            role="tab"
+                            data-tab-key="fragrance"
+                            aria-controls="productCardsGrid"
+                            :aria-selected="(currentTab === 'fragrance').toString()"
+                            :tabindex="currentTab === 'fragrance' ? 0 : -1"
+                            @@click="selectTab('fragrance', $el)"
+                            :class="currentTab === 'fragrance' ? 'text-white font-bold' : 'text-[var(--rl-mauve)] hover:text-[var(--rl-ink)] font-semibold'"
+                            class="tab-nav-btn relative z-10 min-h-[40px] px-4 sm:px-5 py-2 rounded-full text-xs transition-colors flex items-center gap-2 cursor-pointer shrink-0">
+                        <i class="fa-solid fa-spray-can-sparkles text-[11px]"></i>
+                        <span>Nước Hoa</span>
+                    </button>
+
+                    <button type="button"
+                            id="tab-cat-haircare"
+                            role="tab"
+                            data-tab-key="haircare"
+                            aria-controls="productCardsGrid"
+                            :aria-selected="(currentTab === 'haircare').toString()"
+                            :tabindex="currentTab === 'haircare' ? 0 : -1"
+                            @@click="selectTab('haircare', $el)"
+                            :class="currentTab === 'haircare' ? 'text-white font-bold' : 'text-[var(--rl-mauve)] hover:text-[var(--rl-ink)] font-semibold'"
+                            class="tab-nav-btn relative z-10 min-h-[40px] px-4 sm:px-5 py-2 rounded-full text-xs transition-colors flex items-center gap-2 cursor-pointer shrink-0">
+                        <i class="fa-solid fa-scissors text-[11px]"></i>
+                        <span>Chăm Sóc Tóc</span>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Product Grid Container with Loading State -->
-        <div id="productCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative min-h-[360px] transition-opacity duration-200">
-            <!-- Sẽ được nạp tự động qua AJAX / HomeController.GetProductTab -->
-            <div class="col-span-full py-16 flex items-center justify-center">
-                <div class="flex flex-col items-center gap-3">
-                    <span class="h-10 w-10 border-3 border-magenta-accent border-t-transparent rounded-full animate-spin"></span>
-                    <span class="text-xs font-bold text-slate-500 uppercase tracking-widest animate-pulse">Đang tải sản phẩm theo danh mục...</span>
+        <!-- Product Grid Container: 2 cột (Mobile) -> 3 cột (Tablet) -> 4 cột (Desktop) + Skeleton Loading -->
+        <div id="productCardsGrid"
+             role="tabpanel"
+             :aria-labelledby="'tab-cat-' + currentTab"
+             aria-live="polite"
+             style="view-transition-name: product-tab-grid;"
+             class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 sm:gap-6 relative min-h-[380px] transition-opacity duration-300">
+            <!-- Initial 4-Card Skeleton Loader Rosé Luxe -->
+            @for (int s = 0; s < 4; s++)
+            {
+                <div class="rounded-[1.5rem] sm:rounded-[1.75rem] bg-white p-3 border border-[var(--rl-border-subtle)] shadow-[var(--rl-shadow-2xs)] flex flex-col justify-between">
+                    <div class="aspect-square w-full rounded-[1.2rem] sm:rounded-[1.35rem] shimmer-effect"></div>
+                    <div class="pt-3 pb-1 px-1 space-y-2.5">
+                        <div class="flex justify-between">
+                            <span class="h-3 w-20 rounded-full shimmer-effect"></span>
+                            <span class="h-3 w-8 rounded-full shimmer-effect"></span>
+                        </div>
+                        <div class="h-4 w-full rounded-full shimmer-effect"></div>
+                        <div class="h-4 w-3/4 rounded-full shimmer-effect"></div>
+                        <div class="h-5 w-32 rounded-full shimmer-effect"></div>
+                        <div class="pt-2 border-t border-[var(--rl-border-subtle)] flex items-center justify-between">
+                            <span class="h-5 w-24 rounded-full shimmer-effect"></span>
+                            <span class="h-11 w-11 rounded-full shimmer-effect"></span>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            }
+        </div>
+
+        <!-- Bottom CTA: Nút "Xem tất cả" dạng Pill có vòng tròn mũi tên -->
+        <div class="mt-10 sm:mt-12 flex justify-center">
+            <a href="/category/all" class="btn-pill-arrow">
+                <span>Xem Tất Cả Mỹ Phẩm Tuyển Chọn</span>
+                <span class="pill-arrow-circle" aria-hidden="true">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </span>
+            </a>
         </div>
     </div>
 </section>
 
-<!-- DÀNH RIÊNG CHO BẠN: SẢN PHẨM ĐÃ XEM GẦN ĐÂY (Phiên C2) -->
+<!-- DÀNH RIÊNG CHO BẠN: SẢN PHẨM ĐÃ XEM GẦN ĐÂY (Mobile: Carousel ngang Scroll-Snap | Desktop: 4 cột) -->
 <section id="homeRecentlyViewed" 
          x-data="homeRecentlyViewed()" 
          x-init="init()" 
          x-show="products && products.length > 0"
          style="display: none;"
-         class="py-14 bg-gradient-to-b from-[#fffdfd] to-pink-50/20 border-t border-rose-100/60 relative">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between mb-8 pb-3 border-b border-blush/60">
+         class="section-scroll-reveal section-deferred py-12 sm:py-16 bg-[var(--rl-ivory)] border-t border-[var(--rl-border-subtle)] relative">
+    <div class="container-editorial">
+        <div class="section-header-rule mb-6 sm:mb-8">
+            <span class="section-header-rule__icon" aria-hidden="true">
+                <i class="fa-solid fa-clock-rotate-left text-sm"></i>
+            </span>
             <div>
-                <span class="text-xs font-bold uppercase tracking-widest text-rose-gold block mb-1">Cá Nhân Hóa Dành Riêng Cho Bạn</span>
-                <h2 class="font-serif text-2xl sm:text-3xl font-bold text-charcoal flex items-center gap-2">
-                    <i class="fa-solid fa-clock-rotate-left text-magenta-accent text-xl"></i>
-                    <span>Sản Phẩm Bạn Đã Xem Gần Đây</span>
+                <span class="section-eyebrow mb-1">
+                    <span>Cá Nhân Hóa Dành Riêng Cho Bạn</span>
+                </span>
+                <h2 class="section-title">
+                    Sản Phẩm <em class="font-serif italic font-normal text-[var(--rl-rose)]">Đã Xem Gần Đây</em>
                 </h2>
             </div>
-            <button type="button" @@click="clearHistory()" class="text-xs font-bold text-slate-400 hover:text-rose-600 transition flex items-center gap-1 cursor-pointer">
-                <i class="fa-solid fa-trash-can text-[10px]"></i>
+            <span class="section-header-rule__line hidden md:block" aria-hidden="true"></span>
+            <button type="button" @@click="clearHistory()" class="btn-ghost !min-h-[38px] !py-1.5 !px-3.5 text-xs shrink-0 border border-[var(--rl-border-strong)] text-[var(--rl-mauve)] hover:text-[var(--rl-rose)]">
+                <i class="fa-regular fa-trash-can text-[11px]"></i>
                 <span>Xóa lịch sử</span>
             </button>
         </div>
 
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            <template x-for="item in products" :key="item.id">
-                <div class="product-card-luxury group bg-white rounded-2xl border border-slate-200/80 p-3 hover:border-magenta-accent/40 hover:shadow-md transition flex flex-col justify-between">
+        <!-- Mobile: Carousel ngang Scroll-Snap (~1.6 thẻ) | Desktop: Lưới 4 cột -->
+        <div class="grid grid-flow-col auto-cols-[65%] sm:auto-cols-[45%] lg:grid-flow-row lg:auto-cols-auto lg:grid-cols-4 gap-3.5 sm:gap-5 overflow-x-auto lg:overflow-visible snap-x snap-mandatory no-scrollbar pb-2 -mx-3 px-3 sm:mx-0 sm:px-0">
+            <template x-for="(item, rIdx) in products.slice(0, 4)" :key="item.id">
+                <article class="snap-start product-card-luxury group bg-white rounded-[1.5rem] sm:rounded-[1.75rem] border border-[var(--rl-border-subtle)] p-2.5 sm:p-3 hover:-translate-y-1 hover:border-[var(--rl-rose)]/40 hover:shadow-[var(--rl-shadow-md)] transition-all duration-300 flex flex-col justify-between">
                     <div>
-                        <div class="relative w-full aspect-square rounded-xl overflow-hidden bg-slate-50 mb-2.5">
-                            <img :src="item.imageUrl" :alt="item.name" width="200" height="200" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+                        <div class="relative w-full aspect-square rounded-[1.2rem] sm:rounded-[1.35rem] overflow-hidden bg-slate-50 border border-slate-100/80 mb-3 flex items-center justify-center isolate"
+                             style="aspect-ratio: 1/1;">
+                            <a :href="'/san-pham/' + item.slug" class="block w-full h-full">
+                                <img :src="item.imageUrl" :alt="item.name" width="300" height="300" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='@ProductImageResolver.PlaceholderUrl';" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out" />
+                            </a>
                         </div>
-                        <span class="text-[9px] uppercase font-bold tracking-wider text-rose-gold truncate block" x-text="item.brandName"></span>
-                        <a :href="'/san-pham/' + item.slug" class="block mt-0.5">
-                            <h4 class="font-serif font-bold text-charcoal text-xs leading-snug line-clamp-2 hover:text-magenta-accent transition" x-text="item.name"></h4>
-                        </a>
-                    </div>
-                    <div class="mt-3 pt-2 border-t border-slate-100">
-                        <div class="flex items-baseline justify-between gap-1">
-                            <span class="font-mono-numeric font-bold text-xs text-charcoal" x-text="formatPrice(item.salePrice || item.price)"></span>
-                            <button type="button" 
-                                    @@click="quickAddToCart(item)"
-                                    class="p-1.5 rounded-lg bg-pastel-rose text-magenta-accent hover:bg-magenta-accent hover:text-white transition text-xs shadow-2xs cursor-pointer"
-                                    title="Thêm nhanh vào giỏ">
-                                <i class="fa-solid fa-cart-plus text-[11px]"></i>
-                            </button>
+                        <div class="px-1.5 space-y-1">
+                            <div class="flex items-center justify-between gap-1">
+                                <span class="text-[10px] uppercase font-bold tracking-wider text-[var(--rl-muted)] truncate block" x-text="item.brandName || 'Canmake Beauty'"></span>
+                                <span class="badge-fefo badge-fefo--fresh !py-0 !px-2 !text-[10px]">Date Mới</span>
+                            </div>
+                            <a :href="'/san-pham/' + item.slug" class="block">
+                                <h4 class="font-sans font-bold text-[var(--rl-ink)] text-xs sm:text-sm leading-snug line-clamp-2 min-h-[2.35rem] group-hover:text-[var(--rl-rose)] transition" x-text="item.name"></h4>
+                            </a>
                         </div>
                     </div>
-                </div>
+                    <div class="mt-3 pt-2.5 px-1.5 border-t border-[var(--rl-border-subtle)] flex items-end justify-between gap-2">
+                        <span class="font-mono font-extrabold text-sm sm:text-base text-[var(--rl-ink)]" x-text="formatPrice(item.salePrice || item.price)"></span>
+                        <button type="button" 
+                                @@click="quickAddToCart(item)"
+                                class="btn-modoa-plus w-11 h-11 rounded-full bg-[var(--rl-rose)] hover:bg-[var(--rl-rose-deep)] text-white flex items-center justify-center shadow-xs cursor-pointer shrink-0 active:scale-95 transition-all"
+                                title="Thêm nhanh vào giỏ"
+                                :aria-label="'Thêm ' + item.name + ' vào giỏ hàng'">
+                            <i class="fa-solid fa-plus text-xs"></i>
+                        </button>
+                    </div>
+                </article>
             </template>
+        </div>
+    </div>
+</section>
         </div>
     </div>
 </section>
 
 @section Scripts {
     <script>
+        function getProductTabSkeletonHtml(count = 4) {
+            let cards = '';
+            for (let i = 0; i < count; i++) {
+                cards += `
+                <div class="rounded-[1.5rem] sm:rounded-[1.75rem] bg-[#FFFDFB] p-2 sm:p-2.5 border border-[#23191E]/8 shadow-2xs flex flex-col justify-between">
+                    <div class="aspect-square w-full rounded-[1.15rem] sm:rounded-[1.35rem] shimmer-effect"></div>
+                    <div class="pt-3 pb-1.5 px-1.5 space-y-2.5">
+                        <div class="flex justify-between">
+                            <span class="h-3 w-20 rounded-full shimmer-effect"></span>
+                            <span class="h-3 w-8 rounded-full shimmer-effect"></span>
+                        </div>
+                        <div class="h-4 w-full rounded-full shimmer-effect"></div>
+                        <div class="h-4 w-3/4 rounded-full shimmer-effect"></div>
+                        <div class="h-5 w-32 rounded-full shimmer-effect"></div>
+                        <div class="pt-2 border-t border-[#23191E]/6 flex items-center justify-between">
+                            <span class="h-5 w-24 rounded-full shimmer-effect"></span>
+                            <span class="h-11 w-11 rounded-full shimmer-effect"></span>
+                        </div>
+                    </div>
+                </div>`;
+            }
+            return cards;
+        }
+
+        function homeCategoryTabsController() {
+            const tabKeys = ['all', 'skincare', 'makeup', 'fragrance', 'haircare'];
+            return {
+                currentTab: 'all',
+                pillLeft: 6,
+                pillWidth: 96,
+                initTabs() {
+                    this.$nextTick(() => {
+                        if (this.$refs.tabAll) {
+                            this.updatePillPosition(this.$refs.tabAll);
+                        }
+                    });
+                    window.addEventListener('resize', () => {
+                        const activeBtn = this.$refs.tabStrip?.querySelector('[aria-selected="true"]');
+                        if (activeBtn) this.updatePillPosition(activeBtn);
+                    }, { passive: true });
+                },
+                selectTab(tabKey, btnEl) {
+                    this.currentTab = tabKey;
+                    this.updatePillPosition(btnEl);
+                    if (btnEl && btnEl.scrollIntoView) {
+                        btnEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    }
+                    switchHomeProductTab(tabKey, btnEl);
+                },
+                navigateTabByKey(delta) {
+                    const currentIdx = tabKeys.indexOf(this.currentTab);
+                    const nextIdx = (currentIdx + delta + tabKeys.length) % tabKeys.length;
+                    this.navigateTabToIndex(nextIdx);
+                },
+                navigateTabToIndex(idx) {
+                    const key = tabKeys[idx] || 'all';
+                    const btn = this.$refs.tabStrip?.querySelector(`[data-tab-key="${key}"]`);
+                    if (btn) {
+                        btn.focus();
+                        this.selectTab(key, btn);
+                    }
+                },
+                updatePillPosition(btnEl) {
+                    if (!btnEl) return;
+                    this.pillLeft = btnEl.offsetLeft;
+                    this.pillWidth = btnEl.offsetWidth;
+                }
+            };
+        }
+
         async function switchHomeProductTab(category, btn) {
             const grid = document.getElementById('productCardsGrid');
             if (!grid) return;
 
-            // Visual feedback loading state
-            grid.classList.add('opacity-40');
+            // Hiển thị 4 thẻ Skeleton Loading thay cho Spinner cũ
+            grid.innerHTML = getProductTabSkeletonHtml(4);
             
             try {
                 const response = await fetch(`/Home/GetProductTab?category=${encodeURIComponent(category)}`);
                 if (response.ok) {
                     const html = await response.text();
-                    grid.innerHTML = html;
-                    
-                    // Reparse any HTMX or Alpine bindings if needed
-                    if (window.htmx) {
-                        htmx.process(grid);
+                    const applyGridUpdate = () => {
+                        grid.innerHTML = html;
+                        if (window.htmx) {
+                            htmx.process(grid);
+                        }
+                        if (window.Alpine) {
+                            window.Alpine.initTree(grid);
+                        }
+                    };
+
+                    const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                    if (document.startViewTransition && !prefersReducedMotion) {
+                        document.startViewTransition(applyGridUpdate);
+                    } else {
+                        applyGridUpdate();
                     }
                 } else {
                     console.error('Lỗi nạp sản phẩm tab:', response.status);
                 }
             } catch (err) {
                 console.error('Lỗi kết nối khi nạp tab sản phẩm:', err);
-            } finally {
-                grid.classList.remove('opacity-40');
             }
         }
 
@@ -172,7 +356,7 @@
                         const ids = JSON.parse(stored);
                         if (!Array.isArray(ids) || ids.length === 0) return;
 
-                        const res = await fetch('/api/products/by-ids?ids=' + ids.slice(0, 6).join(','));
+                        const res = await fetch('/api/products/by-ids?ids=' + ids.slice(0, 4).join(','));
                         if (res.ok) {
                             this.products = await res.json();
                         }
@@ -180,6 +364,10 @@
                 },
 
                 async quickAddToCart(item) {
+                    if (typeof window.addToCart === 'function') {
+                        await window.addToCart(item.id, item.name, item.salePrice || item.price, item.imageUrl, 1);
+                        return;
+                    }
                     try {
                         const res = await fetch('/api/cart/add', {
                             method: 'POST',
@@ -189,16 +377,6 @@
                         const data = await res.json();
                         if (data && data.success) {
                             window.dispatchEvent(new CustomEvent('cart-updated', { detail: data }));
-                            if (typeof Swal !== 'undefined') {
-                                Swal.fire({
-                                    toast: true,
-                                    position: 'top-end',
-                                    icon: 'success',
-                                    title: 'Đã thêm ' + item.name + ' vào giỏ hàng!',
-                                    showConfirmButton: false,
-                                    timer: 2500
-                                });
-                            }
                             window.dispatchEvent(new CustomEvent('open-cart-drawer'));
                         }
                     } catch (e) { }

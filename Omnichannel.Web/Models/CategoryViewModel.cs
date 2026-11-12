@@ -17,6 +17,8 @@ namespace Omnichannel.Web.Models
         public decimal MaxPrice { get; set; } = 10000000m;
         public List<string> SelectedBrands { get; set; } = new();
         public string SkinType { get; set; } = "all"; // all, oily, dry, sensitive, combination
+        public string SkinConcern { get; set; } = "all"; // all, acne, anti_aging, hydration, brightening, pore_minimizing
+        public string Ingredient { get; set; } = "all"; // all, niacinamide, ha, b5, bha, retinol, vitc...
         public int? MinRating { get; set; } // null, 4, 5
 
         // Clean Beauty Filters

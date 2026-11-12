@@ -1,4 +1,4 @@
-﻿// ==========================================
+// ==========================================
 // CANMAKE BEAUTY SOLUTION - OPTIMIZED STOREFRONT JS
 // Alpine.js Components, 60 FPS Event Loop & Passive Listeners
 // ==========================================
@@ -29,23 +29,165 @@ function heroSliderComponent(totalSlides) {
     return {
         activeSlide: 0,
         timer: null,
+        progress: 0,
+        paused: false,
+        mobileFilterSheetOpen: false,
+        touchStartX: 0,
+        touchStartY: 0,
+        dragOffsetX: 0,
         totalSlides: totalSlides || 1,
+        slideDurationMs: 3000,
+        tickIntervalMs: 25,
+        parallaxX: 0,
+        parallaxY: 0,
         init() {
-            if (this.totalSlides > 1) {
-                this.timer = setInterval(() => { this.next(); }, 6000);
+            const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (this.totalSlides > 1 && !prefersReducedMotion) {
+                this.startTimer();
+            } else {
+                this.progress = 100;
             }
         },
+        startTimer() {
+            if (this.timer) clearInterval(this.timer);
+            const step = (this.tickIntervalMs / this.slideDurationMs) * 100;
+            this.timer = setInterval(() => {
+                if (this.paused) return;
+                this.progress += step;
+                if (this.progress >= 100) {
+                    this.progress = 0;
+                    this.activeSlide = (this.activeSlide + 1) % this.totalSlides;
+                }
+            }, this.tickIntervalMs);
+        },
+        pause() {
+            this.paused = true;
+        },
+        resume() {
+            this.paused = false;
+        },
         next() {
+            this.progress = 0;
             this.activeSlide = (this.activeSlide + 1) % this.totalSlides;
         },
         prev() {
+            this.progress = 0;
             this.activeSlide = (this.activeSlide - 1 + this.totalSlides) % this.totalSlides;
         },
         goTo(idx) {
+            this.progress = 0;
             this.activeSlide = idx;
+        },
+        onMouseMove(e) {
+            if (window.innerWidth < 1024) return;
+            const prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (prefersReducedMotion) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            const relX = (e.clientX - rect.left) / rect.width - 0.5;
+            const relY = (e.clientY - rect.top) / rect.height - 0.5;
+            this.parallaxX = Math.round(relX * 24);
+            this.parallaxY = Math.round(relY * 20);
+        },
+        onMouseLeaveHero() {
+            this.parallaxX = 0;
+            this.parallaxY = 0;
+            this.resume();
+        },
+        onTouchStart(e) {
+            if (!e.touches || !e.touches.length) return;
+            this.touchStartX = e.touches[0].clientX;
+            this.touchStartY = e.touches[0].clientY;
+            this.paused = true;
+        },
+        onTouchMove(e) {
+            if (!e.touches || !e.touches.length) return;
+            this.dragOffsetX = e.touches[0].clientX - this.touchStartX;
+        },
+        onTouchEnd(e) {
+            this.paused = false;
+            this.dragOffsetX = 0;
+            if (!e.changedTouches || !e.changedTouches.length || this.totalSlides <= 1) return;
+            const dx = e.changedTouches[0].clientX - this.touchStartX;
+            const dy = e.changedTouches[0].clientY - this.touchStartY;
+            if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+                if (dx < 0) {
+                    this.next();
+                } else {
+                    this.prev();
+                }
+            }
+        },
+        openFilterSheet() {
+            this.mobileFilterSheetOpen = true;
+            document.body.style.overflow = 'hidden';
+        },
+        closeFilterSheet() {
+            this.mobileFilterSheetOpen = false;
+            document.body.style.overflow = '';
         }
     };
 }
+
+// =========================================================================
+// PHIÊN 4: 3D COVERFLOW CAROUSEL (NEPALORA INSPIRATION)
+// =========================================================================
+function coverflowCarousel(totalItems) {
+    return {
+        activeIndex: 0,
+        total: totalItems || 8,
+        touchStartX: 0,
+        touchEndX: 0,
+        init() {
+            if (this.total >= 3) {
+                this.activeIndex = Math.min(2, Math.floor(this.total / 2));
+            }
+        },
+        getPos(index) {
+            const diff = index - this.activeIndex;
+            if (diff === 0) return '0';
+            if (diff === -1) return '-1';
+            if (diff === 1) return '1';
+            if (diff === -2) return '-2';
+            if (diff === 2) return '2';
+            return 'hidden';
+        },
+        next() {
+            if (this.activeIndex < this.total - 1) {
+                this.activeIndex++;
+            } else {
+                this.activeIndex = 0;
+            }
+        },
+        prev() {
+            if (this.activeIndex > 0) {
+                this.activeIndex--;
+            } else {
+                this.activeIndex = this.total - 1;
+            }
+        },
+        goTo(index) {
+            if (index >= 0 && index < this.total) {
+                this.activeIndex = index;
+            }
+        },
+        onTouchStart(e) {
+            if (e.touches && e.touches[0]) {
+                this.touchStartX = e.touches[0].clientX;
+            }
+        },
+        onTouchEnd(e) {
+            if (e.changedTouches && e.changedTouches[0]) {
+                this.touchEndX = e.changedTouches[0].clientX;
+                const diff = this.touchStartX - this.touchEndX;
+                if (Math.abs(diff) > 40) {
+                    if (diff > 0) this.next();
+                    else this.prev();
+                }
+            }
+        }
+    };
+}
+
 
 function categoryFilterComponent(config) {
     config = config || {};
@@ -55,6 +197,36 @@ function categoryFilterComponent(config) {
         minPriceVal: config.minPrice || 50000,
         maxPriceVal: config.maxPrice || 10000000,
         currentViewMode: config.viewMode || 'grid',
+        sortVal: config.sort || 'newest',
+        activeFilterCount: 0,
+        init() {
+            this.updateActiveFilterCount();
+            this.$watch('minPriceVal', () => this.updateActiveFilterCount());
+            this.$watch('maxPriceVal', () => this.updateActiveFilterCount());
+        },
+        updateActiveFilterCount() {
+            let count = 0;
+            if (this.minPriceVal > 50000 || this.maxPriceVal < 10000000) count++;
+            const form = document.getElementById('facetedFilterForm');
+            if (form) {
+                const fefo = form.querySelector('input[name="fefo"]:checked');
+                if (fefo && fefo.value !== 'all') count++;
+                const skin = form.querySelector('input[name="skinType"]:checked');
+                if (skin && skin.value !== 'all') count++;
+                const concern = form.querySelector('input[name="skinConcern"]:checked');
+                if (concern && concern.value !== 'all') count++;
+                const ingredient = form.querySelector('input[name="ingredient"]:checked');
+                if (ingredient && ingredient.value !== 'all') count++;
+                const rating = form.querySelector('input[name="minRating"]:checked');
+                if (rating && rating.value !== '') count++;
+                const brands = form.querySelectorAll('input[name="brand"]:checked');
+                if (brands && brands.length > 0) count += brands.length;
+                if (form.querySelector('input[name="isAlcoholFree"]:checked')) count++;
+                if (form.querySelector('input[name="isFragranceFree"]:checked')) count++;
+                if (form.querySelector('input[name="isPregnancySafe"]:checked')) count++;
+            }
+            this.activeFilterCount = count;
+        },
         get minPercent() {
             return Math.min(100, Math.max(0, ((this.minPriceVal - 50000) / (10000000 - 50000)) * 100));
         },
@@ -70,6 +242,7 @@ function categoryFilterComponent(config) {
                 this.minPriceVal = this.maxPriceVal;
                 this.maxPriceVal = temp;
             }
+            this.updateActiveFilterCount();
             if (typeof submitFacetedFilter === 'function') {
                 submitFacetedFilter();
             }
@@ -380,6 +553,96 @@ function closeMiniCart() {
 }
 window.closeMiniCart = closeMiniCart;
 
+// Hiệu ứng Ảnh sản phẩm "bay" vào icon giỏ hàng + Badge giỏ hàng nảy (Phiên 5)
+function triggerFlyToCartAnimation(productId, imageUrl, triggerEl) {
+    try {
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            bounceCartBadges();
+            return;
+        }
+
+        const isMobile = window.innerWidth < 768;
+        const targetBadge = isMobile
+            ? (document.getElementById('mobileBottomCartBadge') || document.getElementById('miniCartCountBadge'))
+            : (document.getElementById('miniCartCountBadge') || document.getElementById('btnOpenMiniCart'));
+
+        if (!targetBadge) return;
+
+        let sourceEl = triggerEl;
+        if (!sourceEl && window.event && window.event.target && window.event.target.closest) {
+            sourceEl = window.event.target.closest('button, article, .product-card-luxury');
+        }
+        if (!sourceEl && productId) {
+            sourceEl = document.querySelector(`article[data-product-id="${productId}"] img, [data-product-id="${productId}"]`);
+        }
+
+        const pdpMainImg = document.getElementById('mainProductImage');
+        const cardEl = sourceEl?.closest ? sourceEl.closest('article, .product-card-luxury, .fefo-flash-card') : null;
+        const imgEl = cardEl?.querySelector('img') || (pdpMainImg && pdpMainImg.offsetParent !== null ? pdpMainImg : sourceEl);
+        if (!imgEl || !imgEl.getBoundingClientRect) {
+            bounceCartBadges();
+            return;
+        }
+
+        const startRect = imgEl.getBoundingClientRect();
+        const endRect = targetBadge.getBoundingClientRect();
+        if (startRect.width === 0 || (endRect.width === 0 && endRect.height === 0)) {
+            bounceCartBadges();
+            return;
+        }
+
+        const flyImg = document.createElement('img');
+        flyImg.src = imageUrl || imgEl.currentSrc || imgEl.src || '/images/products/placeholder-beauty.svg';
+        flyImg.alt = '';
+        flyImg.setAttribute('aria-hidden', 'true');
+        const size = Math.min(72, Math.max(48, startRect.width * 0.35));
+        flyImg.style.cssText = `
+            position: fixed;
+            z-index: 9999;
+            left: ${startRect.left + startRect.width / 2 - size / 2}px;
+            top: ${startRect.top + startRect.height / 2 - size / 2}px;
+            width: ${size}px;
+            height: ${size}px;
+            object-fit: contain;
+            border-radius: 9999px;
+            background: #FFFDFB;
+            padding: 4px;
+            border: 2px solid #B8336A;
+            box-shadow: 0 16px 32px rgba(184, 51, 106, 0.32);
+            pointer-events: none;
+            transition: transform 0.68s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.68s ease-in;
+            will-change: transform, opacity;
+        `;
+        document.body.appendChild(flyImg);
+
+        const deltaX = (endRect.left + endRect.width / 2) - (startRect.left + startRect.width / 2);
+        const deltaY = (endRect.top + endRect.height / 2) - (startRect.top + startRect.height / 2);
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                flyImg.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0) scale(0.22) rotate(14deg)`;
+                flyImg.style.opacity = '0.25';
+            });
+        });
+
+        setTimeout(() => {
+            flyImg.remove();
+            bounceCartBadges();
+        }, 680);
+    } catch (err) {
+        bounceCartBadges();
+    }
+}
+
+function bounceCartBadges() {
+    const badges = document.querySelectorAll('#miniCartCountBadge, #mobileBottomCartBadge, [data-cart-count], .cart-badge-count');
+    badges.forEach(badge => {
+        badge.classList.remove('cart-badge-bounce');
+        void badge.offsetWidth;
+        badge.classList.add('cart-badge-bounce');
+    });
+}
+
 async function addToCart(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
     let productId = null;
     let title = 'Sản phẩm';
@@ -431,6 +694,12 @@ async function addToCart(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
     }
 
     quantity = Math.max(1, parseInt(quantity) || 1);
+    const triggerSource = (window.event && window.event.target && window.event.target.closest)
+        ? window.event.target.closest('button, article, .product-card-luxury')
+        : null;
+
+    // Kích hoạt hiệu ứng ảnh bay vào giỏ hàng ngay khi người dùng bấm
+    triggerFlyToCartAnimation(productId, imageUrl, triggerSource);
 
     try {
         const tokenEl = document.querySelector('input[name="__RequestVerificationToken"]');
@@ -629,7 +898,7 @@ async function openQuickView(productId) {
         <div class="p-8 sm:p-12 flex flex-col items-center justify-center min-h-[460px] space-y-4 text-center">
             <div class="w-12 h-12 rounded-full border-4 border-pink-100 border-t-magenta-accent animate-spin flex items-center justify-center"></div>
             <div class="text-xs font-bold text-charcoal uppercase tracking-widest animate-pulse">Đang tải thông tin sản phẩm...</div>
-            <div class="text-[11px] text-slate-400">Đồng bộ hạn sử dụng FEFO & tồn kho showroom...</div>
+            <div class="text-[11px] text-slate-400">Đồng bộ hạn sử dụng & tồn kho showroom...</div>
         </div>
     `;
 

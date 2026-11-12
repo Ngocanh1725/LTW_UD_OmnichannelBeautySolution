@@ -1,137 +1,293 @@
 @model Omnichannel.Web.Models.CategoryViewModel
 @{
+    var slug = (Model.CategorySlug ?? "all").ToLowerInvariant();
     var catName = Model.CurrentCategory?.Name ?? "Tất Cả Sản Phẩm Mỹ Phẩm";
-    var catDesc = Model.CurrentCategory?.Description ?? "Bộ sưu tập mỹ phẩm và dược mỹ phẩm chính ngạch cao cấp chuẩn tiêu chuẩn hạn dùng FEFO minh bạch hàng đầu Việt Nam.";
-    ViewData["Title"] = $"{catName} - Chuẩn Hạn Dùng FEFO | Canmake Beauty";
+    var catDesc = Model.CurrentCategory?.Description ?? "Bộ sưu tập mỹ phẩm và dược mỹ phẩm chính ngạch cao cấp cam kết date mới minh bạch hàng đầu Việt Nam.";
+    ViewData["Title"] = $"{catName} - Cam Kết Date Mới | Canmake Beauty";
     ViewData["Description"] = catDesc;
+
+    // --- CATEGORY PERSONALITY THEMES (Rosé Luxe System) ---
+    string heroBgGradient = "from-[#FFF4F7] via-[#FFFDFB] to-[#FBE8EE]";
+    string heroBorder = "border-[#F1DCE4]";
+    string heroWordmark = "CANMAKE TOKYO";
+    string heroAccentBadge = "Bộ Sưu Tập Chính Ngạch";
+    string heroBadgeIcon = "fa-gem";
+    string heroBadgeStyle = "text-[#B8336A] bg-white/95 border-[#F6D2DF]";
+    string heroProductImg = "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&h=600&fit=crop&q=80";
+    string heroTagline = "Khoa học dưỡng da đa tầng & cam kết date mới minh bạch";
+
+    if (slug.Contains("cham-soc-da") || slug.Contains("skincare") || slug.Contains("serum") || slug.Contains("toner") || slug.Contains("kem-duong") || slug.Contains("sua-rua-mat") || slug.Contains("nuoc-tay-trang"))
+    {
+        heroBgGradient = "from-[#FFF4F7] via-[#FFFDFB] to-[#FBE8EE]";
+        heroBorder = "border-[#F6D2DF]";
+        heroWordmark = "CANMAKE SKINCARE";
+        heroAccentBadge = "Dưỡng Sâu Đa Tầng";
+        heroBadgeIcon = "fa-droplet";
+        heroBadgeStyle = "text-[#B8336A] bg-white/95 border-[#F6D2DF]";
+        heroProductImg = "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&h=600&fit=crop&q=80";
+        heroTagline = "Khoa học dưỡng ẩm đa tầng, phục hồi hàng rào sinh học & cam kết date mới";
+    }
+    else if (slug.Contains("trang-diem") || slug.Contains("makeup") || slug.Contains("son-moi") || slug.Contains("phan-phu") || slug.Contains("ma-hong") || slug.Contains("kem-nen"))
+    {
+        heroBgGradient = "from-[#FCE7F0] via-[#FFFDFB] to-[#F8DDE8]";
+        heroBorder = "border-[#EEB1C8]";
+        heroWordmark = "CANMAKE MAKEUP";
+        heroAccentBadge = "Sắc Màu Thuần Khiết";
+        heroBadgeIcon = "fa-wand-magic-sparkles";
+        heroBadgeStyle = "text-[#8E1F4F] bg-white/95 border-[#EEB1C8]";
+        heroProductImg = "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600&h=600&fit=crop&q=80";
+        heroTagline = "Lớp nền trong veo mỏng nhẹ & sắc màu ngọt ngào tự nhiên chuẩn Tokyo";
+    }
+    else if (slug.Contains("chong-nang") || slug.Contains("sunscreen") || slug.Contains("kem-chong-nang"))
+    {
+        heroBgGradient = "from-[#FDF6E2] via-[#FFFDFB] to-[#FCEFE3]";
+        heroBorder = "border-[#EBD6A7]";
+        heroWordmark = "CANMAKE SUNCARE";
+        heroAccentBadge = "Quang Phổ Rộng UV";
+        heroBadgeIcon = "fa-sun";
+        heroBadgeStyle = "text-[#7A5413] bg-white/95 border-[#EBD6A7]";
+        heroProductImg = "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=600&h=600&fit=crop&q=80";
+        heroTagline = "Màng lọc quang phổ rộng bảo vệ vô hình suốt 12H, không bết rít";
+    }
+    else if (slug.Contains("nuoc-hoa") || slug.Contains("fragrance") || slug.Contains("perfume"))
+    {
+        heroBgGradient = "from-[#F5EEF8] via-[#FFFDFB] to-[#FCEEF5]";
+        heroBorder = "border-[#DFCEE8]";
+        heroWordmark = "CANMAKE FRAGRANCE";
+        heroAccentBadge = "Hương Thơm Tinh Tế";
+        heroBadgeIcon = "fa-spray-can-sparkles";
+        heroBadgeStyle = "text-[#513066] bg-white/95 border-[#DFCEE8]";
+        heroProductImg = "https://images.unsplash.com/photo-1547887537-6158d64c35b3?w=600&h=600&fit=crop&q=80";
+        heroTagline = "Nốt hương hoa quả tươi mát thanh lịch lưu luyến suốt ngày dài";
+    }
+    else if (slug.Contains("cham-soc-toc") || slug.Contains("hair") || slug.Contains("body"))
+    {
+        heroBgGradient = "from-[#EBF5EE] via-[#FFFDFB] to-[#F3FAF5]";
+        heroBorder = "border-[#B6E4D4]";
+        heroWordmark = "CANMAKE HAIR & BODY";
+        heroAccentBadge = "Thảo Mộc Hữu Cơ";
+        heroBadgeIcon = "fa-leaf";
+        heroBadgeStyle = "text-[#135D43] bg-white/95 border-[#B6E4D4]";
+        heroProductImg = "https://images.unsplash.com/photo-1608248597359-009848520330?w=600&h=600&fit=crop&q=80";
+        heroTagline = "Dưỡng chất thảo mộc nuôi dưỡng nang tóc óng ả bồng bềnh tự nhiên";
+    }
+    else if (slug.Contains("fefo") || slug.Contains("clearance") || slug.Contains("uu-dai"))
+    {
+        heroBgGradient = "from-[#FEF2F2] via-[#FFFDFB] to-[#FFF7ED]";
+        heroBorder = "border-[#F5C2D1]";
+        heroWordmark = "OUTLET CẬN DATE -70%";
+        heroAccentBadge = "Xả Kho Date Vàng";
+        heroBadgeIcon = "fa-bolt";
+        heroBadgeStyle = "text-[#931942] bg-white/95 border-[#F5C2D1]";
+        heroProductImg = "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&h=600&fit=crop&q=80";
+        heroTagline = "Tiết kiệm tới 70% cùng cam kết hạn dùng minh bạch theo ngày";
+    }
+
+    // Determine subcategory chips
+    var subCats = Model.CurrentCategory?.SubCategories?.Where(s => s.IsActive).OrderBy(s => s.SortOrder).ToList() ?? new List<Omnichannel.Domain.Entities.Category>();
 }
 
-<style>
-    /* Dual Range Slider Styling */
-    .dual-slider-track {
-        position: relative;
-        width: 100%;
-        height: 6px;
-        background: #f3e5eb;
-        border-radius: 9999px;
-    }
-    .dual-slider-fill {
-        position: absolute;
-        height: 100%;
-        background: linear-gradient(90deg, #D44476, #E0A96D);
-        border-radius: 9999px;
-    }
-    .dual-range-input {
-        position: absolute;
-        width: 100%;
-        height: 6px;
-        top: 0;
-        left: 0;
-        margin: 0;
-        pointer-events: none;
-        -webkit-appearance: none;
-        appearance: none;
-        background: transparent;
-        z-index: 10;
-    }
-    .dual-range-input::-webkit-slider-thumb {
-        pointer-events: auto;
-        -webkit-appearance: none;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: #ffffff;
-        border: 3px solid #D44476;
-        box-shadow: 0 2px 6px rgba(212, 68, 118, 0.25);
-        cursor: grab;
-        transition: transform 0.15s ease;
-    }
-    .dual-range-input::-webkit-slider-thumb:active {
-        cursor: grabbing;
-        transform: scale(1.2);
-    }
-    .dual-range-input::-moz-range-thumb {
-        pointer-events: auto;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: #ffffff;
-        border: 3px solid #D44476;
-        box-shadow: 0 2px 6px rgba(212, 68, 118, 0.25);
-        cursor: grab;
-    }
-</style>
-
-<div class="bg-[#FFFDFD] min-h-screen py-8 sm:py-12" 
-     x-data="categoryFilterComponent({ minPrice: @Model.MinPrice, maxPrice: @Model.MaxPrice, viewMode: '@Model.ViewMode' })">
+<div class="bg-[#FFFDFB] min-h-screen py-6 sm:py-10 overflow-x-clip" 
+     x-data="categoryFilterComponent({ minPrice: @Model.MinPrice, maxPrice: @Model.MaxPrice, viewMode: '@Model.ViewMode', sort: '@Model.Sort' })">
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <!-- 1. BREADCRUMBS -->
-        <nav aria-label="Đường dẫn trang" class="mb-6 text-xs text-slate-500 flex items-center gap-2 flex-wrap">
-            <a href="/" class="hover:text-magenta-accent transition flex items-center gap-1">
-                <i class="fa-solid fa-house text-slate-400"></i> Trang Chủ
+        <!-- 1. BREADCRUMBS WITH SCHEMA.ORG MICRODATA -->
+        <nav aria-label="Đường dẫn trang" class="mb-5 text-xs text-[#8A7580] flex items-center gap-2 flex-wrap">
+            <a href="/" class="hover:text-[#B8336A] transition-colors flex items-center gap-1 font-medium">
+                <i class="fa-solid fa-house text-[#C9A96E] text-xs"></i> Trang Chủ
             </a>
-            <span class="text-slate-300">/</span>
-            <a href="/category/all" class="hover:text-magenta-accent transition">Danh Mục Sản Phẩm</a>
+            <span class="text-[#E4BFD0]">/</span>
+            <a href="/category/all" class="hover:text-[#B8336A] transition-colors font-medium">
+                Danh Mục Sản Phẩm
+            </a>
             @if (Model.CurrentCategory != null)
             {
-                <span class="text-slate-300">/</span>
-                <span class="text-charcoal font-semibold">@Model.CurrentCategory.Name</span>
+                <span class="text-[#E4BFD0]">/</span>
+                <span class="text-[#23191E] font-bold" aria-current="page">@Model.CurrentCategory.Name</span>
             }
         </nav>
 
-        <!-- 2. LUXURY CATEGORY HERO BANNER -->
-        <div class="mb-10 p-8 sm:p-10 rounded-3xl bg-gradient-to-r from-pastel-rose via-white to-pink-50/70 border border-rose-100/80 shadow-sm relative overflow-hidden">
-            <!-- Decorative Ambient Glows -->
-            <div class="absolute -right-16 -top-16 w-64 h-64 bg-magenta-accent/10 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-champagne-gold/15 rounded-full blur-3xl pointer-events-none"></div>
+        <!-- 2. ROSÉ LUXE CATEGORY HERO BANNER (LAYERED DEPTH) -->
+        <div class="category-hero-container mb-8 p-6 sm:p-10 lg:p-12 rounded-[28px] lg:rounded-[36px] bg-gradient-to-r @heroBgGradient border @heroBorder shadow-xs relative overflow-hidden">
+            <!-- Ambient Glow Spots -->
+            <div class="absolute -right-16 -top-16 w-72 h-72 bg-[#B8336A]/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-16 -bottom-16 w-72 h-72 bg-[#C9A96E]/15 rounded-full blur-3xl pointer-events-none"></div>
 
-            <div class="relative z-10 max-w-3xl">
-                <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/95 text-magenta-accent border border-pink-200 text-xs font-extrabold uppercase tracking-wider mb-3 shadow-2xs">
-                    <i class="fa-solid fa-gem text-rose-gold text-xs"></i>
-                    <span>Bộ Sưu Tập Dược Mỹ Phẩm Chính Ngạch</span>
+            <!-- Massive Translucent Serif Wordmark (Layer 2) -->
+            <div class="category-hero-backdrop-wordmark" aria-hidden="true">
+                @heroWordmark
+            </div>
+
+            <!-- Content Grid (Layer 3 & 4) -->
+            <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-10">
+                
+                <!-- Left: Editorial Text Column -->
+                <div class="w-full lg:max-w-2xl">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full @heroBadgeStyle text-xs font-extrabold uppercase tracking-widest mb-3 shadow-2xs">
+                        <i class="fa-solid @heroBadgeIcon text-xs"></i>
+                        <span>@heroAccentBadge</span>
+                    </div>
+
+                    <h1 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#23191E] tracking-tight leading-tight">
+                        @catName
+                    </h1>
+
+                    <p class="text-xs sm:text-sm text-[#57454E] mt-3 font-sans leading-relaxed max-w-xl">
+                        @heroTagline
+                    </p>
+
+                    <!-- Trust Strip Highlights -->
+                    <div class="flex flex-wrap items-center gap-4 sm:gap-6 mt-6 pt-5 border-t border-[#F1DCE4]/80 text-xs text-[#23191E]">
+                        <div class="flex items-center gap-2 font-bold">
+                            <span class="w-5 h-5 rounded-full bg-[#EDF8F4] text-[#1E8E68] flex items-center justify-center text-[10px]">
+                                <i class="fa-solid fa-shield-check"></i>
+                            </span>
+                            <span>100% Nhập Khẩu Nhật Bản</span>
+                        </div>
+                        <div class="flex items-center gap-2 font-bold">
+                            <span class="w-5 h-5 rounded-full bg-[#FBF5E8] text-[#C9963B] flex items-center justify-center text-[10px]">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            </span>
+                            <span>Minh Bạch Lô Hạn Dùng</span>
+                        </div>
+                        <div class="flex items-center gap-2 font-bold">
+                            <span class="w-5 h-5 rounded-full bg-[#FDF0F4] text-[#B8336A] flex items-center justify-center text-[10px]">
+                                <i class="fa-solid fa-truck-fast"></i>
+                            </span>
+                            <span>Giao Hỏa Tốc 2H</span>
+                        </div>
+                    </div>
                 </div>
-                <h1 class="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-charcoal tracking-tight">
-                    @catName
-                </h1>
-                <p class="text-xs sm:text-sm text-slate-600 mt-3 font-sans leading-relaxed">
-                    @catDesc
-                </p>
 
-                <!-- Trust Highlights -->
-                <div class="flex flex-wrap items-center gap-6 mt-6 pt-5 border-t border-rose-200/60 text-xs">
-                    <div class="flex items-center gap-2 font-bold text-charcoal">
-                        <i class="fa-solid fa-shield-check text-emerald-600 text-sm"></i>
-                        <span>100% Nhập Khẩu Chính Hãng</span>
-                    </div>
-                    <div class="flex items-center gap-2 font-bold text-charcoal">
-                        <i class="fa-solid fa-clock-rotate-left text-amber-500 text-sm"></i>
-                        <span>Tiên Phong Chuẩn Hạn Dùng FEFO</span>
-                    </div>
-                    <div class="flex items-center gap-2 font-bold text-charcoal">
-                        <i class="fa-solid fa-truck-fast text-magenta-accent text-sm"></i>
-                        <span>Giao Nhanh 2H Nội Thành</span>
-                    </div>
+                <!-- Right: Product Cutout with Layered Shadow & Floating Motifs -->
+                <div class="relative w-40 sm:w-56 lg:w-72 aspect-square shrink-0 hidden sm:flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-[#B8336A]/10 to-[#C9A96E]/20 blur-2xl transform scale-90 pointer-events-none"></div>
+                    <img src="@heroProductImg" 
+                         alt="@catName" 
+                         width="288" 
+                         height="288" 
+                         loading="eager"
+                         fetchpriority="high"
+                         decoding="async"
+                         class="category-hero-product-img relative z-10 w-full h-full object-cover rounded-2xl border border-white/60 shadow-lg" />
+                    
+                    <!-- Floating Champagne Sparkle Motif -->
+                    <div class="absolute -top-2 -right-2 text-[#C9A96E] text-lg animate-pulse pointer-events-none">✦</div>
+                    <div class="absolute -bottom-1 -left-2 text-[#B8336A] text-sm animate-pulse pointer-events-none" style="animation-delay: 1s;">🌸</div>
                 </div>
             </div>
         </div>
 
-        <!-- 3. MAIN FACETED FILTER & PRODUCTS LAYOUT -->
+        <!-- 3. HORIZONTAL SUBCATEGORY CHIP CAROUSEL -->
+        <div class="mb-8">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-[#8A7580] uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-layer-group text-[#B8336A] text-xs"></i> Khám Phá Nhóm Sản Phẩm
+                </span>
+                <span class="text-[11px] text-[#8A7580] hidden sm:inline-block">Vuốt ngang để xem thêm</span>
+            </div>
+
+            <div class="chip-scroll-container py-1.5">
+                <!-- "Tất Cả" Chip -->
+                <a href="/category/all" 
+                   class="px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2 shrink-0 border @(slug == "all" ? "bg-gradient-to-r from-[#B8336A] to-[#8E1F4F] text-white border-transparent shadow-xs" : "bg-white text-[#23191E] border-[#F1DCE4] hover:border-[#B8336A]/50 hover:bg-[#FBE8EE]/40")">
+                    <i class="fa-solid fa-sparkles text-[11px] @(slug == "all" ? "text-amber-200" : "text-[#C9A96E]")"></i>
+                    <span>Tất Cả Sản Phẩm</span>
+                </a>
+
+                @if (subCats.Any())
+                {
+                    @foreach (var sc in subCats)
+                    {
+                        var isCurrent = slug == sc.Slug?.ToLowerInvariant();
+                        <a href="/category/@sc.Slug" 
+                           class="px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2 shrink-0 border @(isCurrent ? "bg-gradient-to-r from-[#B8336A] to-[#8E1F4F] text-white border-transparent shadow-xs" : "bg-white text-[#23191E] border-[#F1DCE4] hover:border-[#B8336A]/50 hover:bg-[#FBE8EE]/40")">
+                            <i class="@(string.IsNullOrEmpty(sc.Icon) ? "fa-solid fa-tag" : sc.Icon) text-[11px] @(isCurrent ? "text-amber-200" : "text-[#B8336A]")"></i>
+                            <span>@sc.Name</span>
+                        </a>
+                    }
+                }
+                else
+                {
+                    @foreach (var c in Model.Categories.Take(8))
+                    {
+                        var isCurrent = slug == c.Slug?.ToLowerInvariant();
+                        <a href="/category/@c.Slug" 
+                           class="px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2 shrink-0 border @(isCurrent ? "bg-gradient-to-r from-[#B8336A] to-[#8E1F4F] text-white border-transparent shadow-xs" : "bg-white text-[#23191E] border-[#F1DCE4] hover:border-[#B8336A]/50 hover:bg-[#FBE8EE]/40")">
+                            <i class="fa-solid fa-spa text-[11px] @(isCurrent ? "text-amber-200" : "text-[#B8336A]")"></i>
+                            <span>@c.Name</span>
+                            @if (c.Count > 0)
+                            {
+                                <span class="text-[10px] opacity-75 font-mono">(@c.Count)</span>
+                            }
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- 4. MOBILE STICKY TOOLBAR (Lọc + Sắp Xếp + Số Lượng SP) -->
+        <div class="lg:hidden sticky top-16 z-30 mb-6 bg-white/95 backdrop-blur-md p-2.5 rounded-2xl border border-[#F1DCE4] shadow-sm flex items-center justify-between gap-1.5">
+            <!-- Nút Mở Bottom Sheet Lọc -->
+            <button type="button" 
+                    @@click="mobileFilterOpen = true"
+                    class="flex-1 py-2 px-2.5 rounded-xl bg-gradient-to-r from-[#B8336A] to-[#8E1F4F] text-white font-extrabold text-[11px] flex items-center justify-center gap-1.5 shadow-xs active:scale-95 transition-transform cursor-pointer">
+                <i class="fa-solid fa-sliders text-[11px]"></i>
+                <span>Bộ Lọc</span>
+                <span x-show="activeFilterCount > 0" 
+                      x-text="activeFilterCount" 
+                      class="w-4 h-4 rounded-full bg-white text-[#B8336A] text-[9px] font-black flex items-center justify-center"></span>
+            </button>
+
+            <!-- Nút Sắp Xếp Nhanh Mobile -->
+            <div class="relative shrink-0">
+                <select id="mobileSortSelect" 
+                        onchange="changeCategorySort(this.value)" 
+                        class="py-2 pl-2 pr-6 rounded-xl border border-[#F1DCE4] text-[11px] font-bold text-[#23191E] bg-[#FFF7FA] focus:outline-none focus:border-[#B8336A] cursor-pointer">
+                    <option value="newest" selected="@(Model.Sort == "newest")">Mới nhất</option>
+                    <option value="bestseller" selected="@(Model.Sort == "bestseller")">Bán chạy</option>
+                    <option value="price-asc" selected="@(Model.Sort == "price-asc")">Giá tăng</option>
+                    <option value="price-desc" selected="@(Model.Sort == "price-desc")">Giá giảm</option>
+                    <option value="fefo-longest" selected="@(Model.Sort == "fefo-longest")">Date xa</option>
+                    <option value="discount-desc" selected="@(Model.Sort == "discount-desc")">Giảm sâu</option>
+                </select>
+            </div>
+
+            <!-- View Mode Switch Mobile -->
+            <div class="flex items-center p-0.5 rounded-lg bg-slate-100 border border-slate-200 shrink-0">
+                <button type="button" 
+                        @@click="currentViewMode = 'grid'; document.getElementById('hiddenViewMode').value = 'grid'; submitFacetedFilter();"
+                        :class="currentViewMode === 'grid' ? 'bg-white text-[#B8336A] shadow-2xs' : 'text-slate-400'"
+                        class="w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold transition"
+                        title="Lưới">
+                    <i class="fa-solid fa-table-cells-large"></i>
+                </button>
+                <button type="button" 
+                        @@click="currentViewMode = 'list'; document.getElementById('hiddenViewMode').value = 'list'; submitFacetedFilter();"
+                        :class="currentViewMode === 'list' ? 'bg-white text-[#B8336A] shadow-2xs' : 'text-slate-400'"
+                        class="w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold transition"
+                        title="Danh sách">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 5. MAIN FACETED FILTER & PRODUCTS LAYOUT -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-            <!-- =================== LEFT COLUMN: FACETED SIDEBAR FILTER =================== -->
-            <aside class="hidden lg:block lg:col-span-3 bg-white p-6 rounded-3xl border border-soft-border/90 shadow-xs sticky top-24 select-none">
+            <!-- =================== LEFT COLUMN: DESKTOP STICKY SIDEBAR FILTER =================== -->
+            <aside class="hidden lg:block lg:col-span-3 bg-white p-6 rounded-[28px] border border-[#F1DCE4] shadow-xs sticky top-28 select-none">
                 
                 <!-- Filter Header -->
-                <div class="flex items-center justify-between pb-4 border-b border-soft-border mb-6">
-                    <h3 class="font-serif font-bold text-charcoal text-base flex items-center gap-2">
-                        <i class="fa-solid fa-sliders text-magenta-accent text-sm"></i>
+                <div class="flex items-center justify-between pb-4 border-b border-[#F1DCE4] mb-5">
+                    <h3 class="font-serif font-extrabold text-[#23191E] text-base flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-[#B8336A] text-sm"></i>
                         <span>Bộ Lọc Đa Tiêu Chí</span>
                     </h3>
                     <button type="button" 
                             onclick="resetFacetedFilter()" 
-                            class="text-[11px] text-magenta-accent hover:underline font-semibold flex items-center gap-1 cursor-pointer">
+                            class="text-xs text-[#B8336A] hover:text-[#8E1F4F] font-bold flex items-center gap-1 cursor-pointer transition">
                         <i class="fa-solid fa-arrows-rotate text-[10px]"></i> Đặt lại
                     </button>
                 </div>
@@ -140,7 +296,7 @@
                 <form id="facetedFilterForm" 
                       hx-get="/category/@Model.CategorySlug" 
                       hx-push-url="true"
-                      hx-trigger="change delay:300ms, input delay:300ms" 
+                      hx-trigger="change delay:250ms, input delay:300ms" 
                       hx-target="#categoryProductsContainer" 
                       hx-indicator="#filterSkeletonLoader"
                       class="space-y-6 text-xs">
@@ -149,64 +305,65 @@
                     <input type="hidden" name="viewMode" :value="currentViewMode" id="hiddenViewMode" />
                     <input type="hidden" name="page" value="1" id="hiddenPageInput" />
                     <input type="hidden" name="q" value="@Model.Query" />
+                    <input type="hidden" name="sort" :value="sortVal" id="hiddenSortInput" />
 
-                    <!-- 1. LỌC THEO HẠN DÙNG FEFO (FEFO Faceted Filter) -->
+                    <!-- 1. HẠN DÙNG (Faceted Filter) -->
                     <div class="space-y-3">
-                        <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] flex items-center justify-between">
-                            <span class="flex items-center gap-1.5 text-amber-800">
-                                <i class="fa-solid fa-clock-rotate-left text-amber-500"></i> Hạn Dùng FEFO
-                            </span>
-                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-bold border border-amber-200">Minh Bạch</span>
-                        </h4>
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-[#23191E] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                                <i class="fa-solid fa-clock-rotate-left text-[#C9A96E]"></i> Lọc Theo Hạn Dùng
+                            </h4>
+                            <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 font-bold border border-amber-200">Minh Bạch</span>
+                        </div>
                         
-                        <div class="space-y-2">
+                        <div class="space-y-1.5">
                             <!-- Tất cả -->
-                            <label class="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 cursor-pointer transition group">
+                            <label class="flex items-center justify-between p-2 rounded-xl hover:bg-[#FFF7FA] cursor-pointer transition group">
                                 <div class="flex items-center gap-2.5">
-                                    <input type="radio" name="fefo" value="all" @(Model.FefoOption == "all" ? "checked" : "") class="text-magenta-accent focus:ring-magenta-accent" />
-                                    <span class="text-slate-700 font-medium group-hover:text-charcoal">Tất cả date</span>
+                                    <input type="radio" name="fefo" value="all" @(Model.FefoOption == "all" ? "checked" : "") class="text-[#B8336A] focus:ring-[#B8336A]" />
+                                    <span class="text-[#23191E] font-medium group-hover:text-[#B8336A]">Tất cả hạn dùng</span>
                                 </div>
-                                <span class="text-[10px] text-slate-400 font-mono">100%</span>
+                                <span class="text-[10px] text-[#8A7580] font-mono">100%</span>
                             </label>
 
                             <!-- Date mới >18 tháng -->
-                            <label class="flex items-center justify-between p-2 rounded-xl hover:bg-emerald-50/50 cursor-pointer transition group">
+                            <label class="flex items-center justify-between p-2 rounded-xl hover:bg-[#EDF8F4] cursor-pointer transition group">
                                 <div class="flex items-center gap-2.5">
-                                    <input type="radio" name="fefo" value="fresh" @(Model.FefoOption == "fresh" ? "checked" : "") class="text-emerald-600 focus:ring-emerald-500" />
-                                    <span class="text-slate-700 font-medium group-hover:text-emerald-700">Date mới >18 tháng</span>
+                                    <input type="radio" name="fefo" value="fresh" @(Model.FefoOption == "fresh" ? "checked" : "") class="text-[#1E8E68] focus:ring-[#1E8E68]" />
+                                    <span class="text-[#23191E] font-medium group-hover:text-[#135D43]">Mới xuất xưởng &gt;18th</span>
                                 </div>
-                                <span class="text-[9px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">Xuất xưởng</span>
+                                <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-[#EDF8F4] text-[#135D43] font-bold border border-[#B6E4D4]">Tươi mới</span>
                             </label>
 
-                            <!-- Date 6-12 tháng (Giá tốt) -->
-                            <label class="flex items-center justify-between p-2 rounded-xl hover:bg-amber-50/50 cursor-pointer transition group">
+                            <!-- Date 6-12 tháng -->
+                            <label class="flex items-center justify-between p-2 rounded-xl hover:bg-[#FBF5E8] cursor-pointer transition group">
                                 <div class="flex items-center gap-2.5">
-                                    <input type="radio" name="fefo" value="good" @(Model.FefoOption == "good" ? "checked" : "") class="text-amber-500 focus:ring-amber-400" />
-                                    <span class="text-slate-700 font-medium group-hover:text-amber-800">Date 6-12 tháng</span>
+                                    <input type="radio" name="fefo" value="good" @(Model.FefoOption == "good" ? "checked" : "") class="text-[#C9963B] focus:ring-[#C9963B]" />
+                                    <span class="text-[#23191E] font-medium group-hover:text-[#7A5413]">Date 6–12 tháng</span>
                                 </div>
-                                <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-bold border border-amber-200">Giá tốt -30%</span>
+                                <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-[#FBF5E8] text-[#7A5413] font-bold border border-[#EBD6A7]">-30%</span>
                             </label>
 
                             <!-- Cận date xả kho <6 tháng -->
-                            <label class="flex items-center justify-between p-2 rounded-xl hover:bg-rose-50/50 cursor-pointer transition group">
+                            <label class="flex items-center justify-between p-2 rounded-xl hover:bg-[#FDF0F4] cursor-pointer transition group">
                                 <div class="flex items-center gap-2.5">
-                                    <input type="radio" name="fefo" value="clearance" @(Model.FefoOption == "clearance" ? "checked" : "") class="text-rose-600 focus:ring-rose-500" />
-                                    <span class="text-slate-700 font-medium group-hover:text-rose-700">Cận date xả kho &lt;6 tháng</span>
+                                    <input type="radio" name="fefo" value="clearance" @(Model.FefoOption == "clearance" ? "checked" : "") class="text-[#D4386C] focus:ring-[#D4386C]" />
+                                    <span class="text-[#23191E] font-medium group-hover:text-[#931942]">Xả kho cận date &lt;6th</span>
                                 </div>
-                                <span class="text-[9px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 font-bold border border-rose-200 animate-pulse">Giảm -70%</span>
+                                <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-[#FDF0F4] text-[#931942] font-extrabold border border-[#F5C2D1] animate-pulse">-70%</span>
                             </label>
                         </div>
                     </div>
 
-                    <div class="border-t border-slate-100"></div>
+                    <div class="border-t border-[#F1DCE4]"></div>
 
-                    <!-- 2. LỌC THEO MỨC GIÁ (Price Range Slider Kép: 50.000₫ - 10.000.000₫) -->
-                    <div class="space-y-4">
+                    <!-- 2. KHOẢNG GIÁ (Price Range Slider Kép: 50.000₫ - 10.000.000₫) -->
+                    <div class="space-y-3.5">
                         <div class="flex items-center justify-between">
-                            <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                                <i class="fa-solid fa-coins text-rose-gold"></i> Khoảng Giá
+                            <h4 class="font-bold text-[#23191E] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                                <i class="fa-solid fa-coins text-[#C9A96E]"></i> Khoảng Giá
                             </h4>
-                            <span class="text-[10px] text-magenta-accent font-bold font-mono-numeric" x-text="formatPrice(minPriceVal) + ' - ' + formatPrice(maxPriceVal)"></span>
+                            <span class="text-[10px] text-[#B8336A] font-extrabold font-mono" x-text="formatPrice(minPriceVal) + ' - ' + formatPrice(maxPriceVal)"></span>
                         </div>
 
                         <!-- Dual Range Interactive Track -->
@@ -218,139 +375,199 @@
                             
                             <!-- Left Min Thumb Input -->
                             <input type="range" 
-                                    min="50000" 
-                                    max="10000000" 
-                                    step="50000" 
-                                    x-model.number.debounce.300ms="minPriceVal" 
-                                    name="minPrice" 
-                                    @@input="if (minPriceVal > maxPriceVal) minPriceVal = maxPriceVal"
-                                    @@change="onPriceSliderChange()"
-                                    class="dual-range-input" />
+                                   min="50000" 
+                                   max="10000000" 
+                                   step="50000" 
+                                   aria-label="Giá tối thiểu"
+                                   x-model.number.debounce.250ms="minPriceVal" 
+                                   name="minPrice" 
+                                   @@input="if (minPriceVal > maxPriceVal) minPriceVal = maxPriceVal"
+                                   @@change="onPriceSliderChange()"
+                                   class="dual-range-input" />
 
                             <!-- Right Max Thumb Input -->
                             <input type="range" 
-                                    min="50000" 
-                                    max="10000000" 
-                                    step="50000" 
-                                    x-model.number.debounce.300ms="maxPriceVal" 
-                                    name="maxPrice" 
-                                    @@input="if (maxPriceVal < minPriceVal) maxPriceVal = minPriceVal"
-                                    @@change="onPriceSliderChange()"
-                                    class="dual-range-input" />
+                                   min="50000" 
+                                   max="10000000" 
+                                   step="50000" 
+                                   aria-label="Giá tối đa"
+                                   x-model.number.debounce.250ms="maxPriceVal" 
+                                   name="maxPrice" 
+                                   @@input="if (maxPriceVal < minPriceVal) maxPriceVal = minPriceVal"
+                                   @@change="onPriceSliderChange()"
+                                   class="dual-range-input" />
                         </div>
 
                         <!-- Min & Max Badges Indicator -->
-                        <div class="flex items-center justify-between text-[10.5px] text-slate-500 font-mono-numeric">
-                            <span class="px-2 py-1 bg-slate-50 rounded-lg border border-slate-200" x-text="formatPrice(minPriceVal)">50.000 ₫</span>
-                            <span class="text-slate-300">đến</span>
-                            <span class="px-2 py-1 bg-slate-50 rounded-lg border border-slate-200" x-text="formatPrice(maxPriceVal)">10.000.000 ₫</span>
+                        <div class="flex items-center justify-between text-[11px] text-[#57454E] font-mono">
+                            <span class="px-2 py-1 bg-[#FFF7FA] rounded-lg border border-[#F1DCE4]" x-text="formatPrice(minPriceVal)">50.000 ₫</span>
+                            <span class="text-[#E4BFD0]">đến</span>
+                            <span class="px-2 py-1 bg-[#FFF7FA] rounded-lg border border-[#F1DCE4]" x-text="formatPrice(maxPriceVal)">10.000.000 ₫</span>
                         </div>
                     </div>
 
-                    <div class="border-t border-slate-100"></div>
+                    <div class="border-t border-[#F1DCE4]"></div>
 
-                    <!-- 3. LỌC THEO THƯƠNG HIỆU (Brand Checkboxes có ô tìm kiếm nhanh) -->
+                    <!-- 3. LOẠI DA (Skin Type) -->
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-[#23191E] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                            <i class="fa-solid fa-face-smile text-[#B8336A]"></i> Loại Da Phù Hợp
+                        </h4>
+
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <!-- All -->
+                            <label class="flex items-center gap-1.5 p-2 rounded-xl border border-[#F1DCE4] hover:border-[#B8336A] cursor-pointer transition text-[11px]"
+                                   :class="'@Model.SkinType' === 'all' ? 'bg-[#FBE8EE] font-bold text-[#B8336A] border-[#B8336A]' : 'bg-white text-[#23191E]'">
+                                <input type="radio" name="skinType" value="all" @(Model.SkinType == "all" ? "checked" : "") class="hidden" />
+                                <i class="fa-solid fa-sparkles text-[10px] text-[#C9A96E]"></i> Tất Cả
+                            </label>
+
+                            <!-- Oily -->
+                            <label class="flex items-center gap-1.5 p-2 rounded-xl border border-[#F1DCE4] hover:border-[#B8336A] cursor-pointer transition text-[11px]"
+                                   :class="'@Model.SkinType' === 'oily' ? 'bg-[#FBE8EE] font-bold text-[#B8336A] border-[#B8336A]' : 'bg-white text-[#23191E]'">
+                                <input type="radio" name="skinType" value="oily" @(Model.SkinType == "oily" ? "checked" : "") class="hidden" />
+                                <i class="fa-solid fa-droplet text-[10px] text-[#1E8E68]"></i> Da Dầu
+                            </label>
+
+                            <!-- Dry -->
+                            <label class="flex items-center gap-1.5 p-2 rounded-xl border border-[#F1DCE4] hover:border-[#B8336A] cursor-pointer transition text-[11px]"
+                                   :class="'@Model.SkinType' === 'dry' ? 'bg-[#FBE8EE] font-bold text-[#B8336A] border-[#B8336A]' : 'bg-white text-[#23191E]'">
+                                <input type="radio" name="skinType" value="dry" @(Model.SkinType == "dry" ? "checked" : "") class="hidden" />
+                                <i class="fa-solid fa-sun text-[10px] text-[#C9963B]"></i> Da Khô
+                            </label>
+
+                            <!-- Sensitive -->
+                            <label class="flex items-center gap-1.5 p-2 rounded-xl border border-[#F1DCE4] hover:border-[#B8336A] cursor-pointer transition text-[11px]"
+                                   :class="'@Model.SkinType' === 'sensitive' ? 'bg-[#FBE8EE] font-bold text-[#B8336A] border-[#B8336A]' : 'bg-white text-[#23191E]'">
+                                <input type="radio" name="skinType" value="sensitive" @(Model.SkinType == "sensitive" ? "checked" : "") class="hidden" />
+                                <i class="fa-solid fa-shield-heart text-[10px] text-[#D4386C]"></i> Nhạy Cảm
+                            </label>
+
+                            <!-- Combination -->
+                            <label class="col-span-2 flex items-center gap-1.5 p-2 rounded-xl border border-[#F1DCE4] hover:border-[#B8336A] cursor-pointer transition text-[11px]"
+                                   :class="'@Model.SkinType' === 'combination' ? 'bg-[#FBE8EE] font-bold text-[#B8336A] border-[#B8336A]' : 'bg-white text-[#23191E]'">
+                                <input type="radio" name="skinType" value="combination" @(Model.SkinType == "combination" ? "checked" : "") class="hidden" />
+                                <i class="fa-solid fa-circle-half-stroke text-[10px] text-[#7E5299]"></i> Da Hỗn Hợp Thiên Dầu / Khô
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-[#F1DCE4]"></div>
+
+                    <!-- 4. VẤN ĐỀ DA (Skin Concern) -->
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-[#23191E] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                            <i class="fa-solid fa-wand-magic-sparkles text-[#C9A96E]"></i> Vấn Đề Da Quan Tâm
+                        </h4>
+
+                        <div class="space-y-1.5">
+                            <label class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#FFF7FA] cursor-pointer transition">
+                                <input type="radio" name="skinConcern" value="all" @(Model.SkinConcern == "all" ? "checked" : "") class="text-[#B8336A] focus:ring-[#B8336A]" />
+                                <span class="text-[#23191E]">Tất cả nhu cầu</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#FFF7FA] cursor-pointer transition">
+                                <input type="radio" name="skinConcern" value="acne" @(Model.SkinConcern == "acne" ? "checked" : "") class="text-[#B8336A] focus:ring-[#B8336A]" />
+                                <span class="text-[#23191E]">Trị Mụn & Giảm Thâm</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#FFF7FA] cursor-pointer transition">
+                                <input type="radio" name="skinConcern" value="anti_aging" @(Model.SkinConcern == "anti_aging" ? "checked" : "") class="text-[#B8336A] focus:ring-[#B8336A]" />
+                                <span class="text-[#23191E]">Chống Lão Hóa & Nếp Nhăn</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#FFF7FA] cursor-pointer transition">
+                                <input type="radio" name="skinConcern" value="hydration" @(Model.SkinConcern == "hydration" ? "checked" : "") class="text-[#B8336A] focus:ring-[#B8336A]" />
+                                <span class="text-[#23191E]">Cấp Nước & Khóa Ẩm Sâu</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#FFF7FA] cursor-pointer transition">
+                                <input type="radio" name="skinConcern" value="brightening" @(Model.SkinConcern == "brightening" ? "checked" : "") class="text-[#B8336A] focus:ring-[#B8336A]" />
+                                <span class="text-[#23191E]">Dưỡng Trắng & Mờ Nám</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-[#F1DCE4]"></div>
+
+                    <!-- 5. THÀNH PHẦN HOẠT CHẤT (Active Ingredients) -->
+                    <div class="space-y-3">
+                        <h4 class="font-bold text-[#23191E] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                            <i class="fa-solid fa-flask-vial text-[#B8336A]"></i> Thành Phần Hoạt Chất
+                        </h4>
+
+                        <div class="flex flex-wrap gap-1.5">
+                            @foreach (var ing in new[] {
+                                new { Key = "all", Label = "Tất cả" },
+                                new { Key = "niacinamide", Label = "Niacinamide" },
+                                new { Key = "ha", Label = "Hyaluronic Acid" },
+                                new { Key = "b5", Label = "Vitamin B5" },
+                                new { Key = "bha", Label = "BHA / Salicylic" },
+                                new { Key = "retinol", Label = "Retinol" },
+                                new { Key = "vitc", Label = "Vitamin C" },
+                                new { Key = "ceramide", Label = "Ceramide" }
+                            })
+                            {
+                                <label class="px-2.5 py-1 rounded-lg border text-[11px] cursor-pointer transition font-medium @(Model.Ingredient == ing.Key ? "bg-[#B8336A] text-white border-[#B8336A] font-bold" : "bg-white text-[#57454E] border-[#F1DCE4] hover:border-[#B8336A]")">
+                                    <input type="radio" name="ingredient" value="@ing.Key" @(Model.Ingredient == ing.Key ? "checked" : "") class="hidden" />
+                                    <span>@ing.Label</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="border-t border-[#F1DCE4]"></div>
+
+                    <!-- 6. THƯƠNG HIỆU (Brand Checkboxes có ô tìm kiếm nhanh) -->
                     <div class="space-y-3">
                         <div class="flex items-center justify-between">
-                            <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                                <i class="fa-solid fa-tag text-slate-400"></i> Thương Hiệu
+                            <h4 class="font-bold text-[#23191E] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                                <i class="fa-solid fa-tag text-[#C9A96E]"></i> Thương Hiệu
                             </h4>
-                            <span class="text-[10px] text-slate-400 font-mono">(@Model.Brands.Count)</span>
+                            <span class="text-[10px] text-[#8A7580] font-mono">(@Model.Brands.Count)</span>
                         </div>
 
                         <!-- Brand Search Input -->
                         <div class="relative">
-                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-[10px]"></i>
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-[#8A7580] text-[10px]"></i>
                             <input type="text" 
-                                   x-model.debounce.300ms="brandSearchQuery" 
+                                   x-model.debounce.250ms="brandSearchQuery" 
                                    placeholder="Tìm thương hiệu..." 
-                                   class="w-full pl-8 pr-3 py-1.5 rounded-xl border border-soft-border text-xs focus:outline-none focus:border-magenta-accent focus:ring-1 focus:ring-magenta-accent/20 bg-slate-50/50" />
+                                   class="w-full pl-8 pr-3 py-1.5 rounded-xl border border-[#F1DCE4] text-xs focus:outline-none focus:border-[#B8336A] focus:ring-1 focus:ring-[#B8336A]/20 bg-[#FFF7FA]" />
                         </div>
 
                         <!-- Brand Checkbox List -->
-                        <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                        <div class="space-y-1 max-h-48 overflow-y-auto pr-1">
                             @foreach (var b in Model.Brands)
                             {
                                 <div data-brand="@b.Name.ToLowerInvariant()" x-show="!brandSearchQuery || $el.dataset.brand.includes(brandSearchQuery.toLowerCase())">
-                                    <label class="flex items-center justify-between p-1.5 rounded-xl hover:bg-slate-50 cursor-pointer transition group">
+                                    <label class="flex items-center justify-between p-1.5 rounded-xl hover:bg-[#FFF7FA] cursor-pointer transition group">
                                         <div class="flex items-center gap-2">
                                             <input type="checkbox" 
                                                    name="brand" 
                                                    value="@b.Name" 
                                                    @(Model.SelectedBrands.Contains(b.Name) ? "checked" : "")
-                                                   class="rounded text-magenta-accent focus:ring-magenta-accent border-slate-300" />
-                                            <span class="text-slate-600 group-hover:text-charcoal truncate max-w-[130px]" title="@b.Name">@b.Name</span>
+                                                   class="rounded text-[#B8336A] focus:ring-[#B8336A] border-[#F1DCE4]" />
+                                            <span class="text-[#57454E] group-hover:text-[#23191E] truncate max-w-[130px]" title="@b.Name">@b.Name</span>
                                         </div>
-                                        <span class="text-[10px] text-slate-400 font-mono">(@b.Count)</span>
+                                        <span class="text-[10px] text-[#8A7580] font-mono">(@b.Count)</span>
                                     </label>
                                 </div>
                             }
                         </div>
                     </div>
 
-                    <div class="border-t border-slate-100"></div>
+                    <div class="border-t border-[#F1DCE4]"></div>
 
-                    <!-- 4. LỌC THEO LOẠI DA (Oily, Dry, Sensitive, Combination, All) -->
+                    <!-- 7. ĐÁNH GIÁ (Rating Filter) -->
                     <div class="space-y-3">
-                        <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                            <i class="fa-solid fa-face-smile text-slate-400"></i> Loại Da Phù Hợp
+                        <h4 class="font-bold text-[#23191E] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                            <i class="fa-solid fa-star text-[#C9A96E]"></i> Đánh Giá Từ Khách Hàng
                         </h4>
 
-                        <div class="grid grid-cols-2 gap-2">
-                            <!-- All -->
-                            <label class="flex items-center gap-2 p-2 rounded-xl border border-soft-border hover:border-magenta-accent cursor-pointer transition text-[11px]"
-                                   :class="'@Model.SkinType' === 'all' ? 'bg-pastel-rose font-bold text-magenta-accent border-magenta-accent' : 'bg-white text-slate-700'">
-                                <input type="radio" name="skinType" value="all" @(Model.SkinType == "all" ? "checked" : "") class="hidden" />
-                                <i class="fa-solid fa-sparkles text-[10px]"></i> Tất Cả
+                        <div class="space-y-1.5">
+                            <label class="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-[#FFF7FA] cursor-pointer transition">
+                                <input type="radio" name="minRating" value="" @(!Model.MinRating.HasValue ? "checked" : "") class="text-[#B8336A] focus:ring-[#B8336A]" />
+                                <span class="text-[#57454E]">Tất cả đánh giá</span>
                             </label>
 
-                            <!-- Oily (Da Dầu Mụn) -->
-                            <label class="flex items-center gap-2 p-2 rounded-xl border border-soft-border hover:border-magenta-accent cursor-pointer transition text-[11px]"
-                                   :class="'@Model.SkinType' === 'oily' ? 'bg-pastel-rose font-bold text-magenta-accent border-magenta-accent' : 'bg-white text-slate-700'">
-                                <input type="radio" name="skinType" value="oily" @(Model.SkinType == "oily" ? "checked" : "") class="hidden" />
-                                <i class="fa-solid fa-droplet text-emerald-500 text-[10px]"></i> Da Dầu
-                            </label>
-
-                            <!-- Dry (Da Khô) -->
-                            <label class="flex items-center gap-2 p-2 rounded-xl border border-soft-border hover:border-magenta-accent cursor-pointer transition text-[11px]"
-                                   :class="'@Model.SkinType' === 'dry' ? 'bg-pastel-rose font-bold text-magenta-accent border-magenta-accent' : 'bg-white text-slate-700'">
-                                <input type="radio" name="skinType" value="dry" @(Model.SkinType == "dry" ? "checked" : "") class="hidden" />
-                                <i class="fa-solid fa-sun text-amber-500 text-[10px]"></i> Da Khô
-                            </label>
-
-                            <!-- Sensitive (Da Nhạy Cảm) -->
-                            <label class="flex items-center gap-2 p-2 rounded-xl border border-soft-border hover:border-magenta-accent cursor-pointer transition text-[11px]"
-                                   :class="'@Model.SkinType' === 'sensitive' ? 'bg-pastel-rose font-bold text-magenta-accent border-magenta-accent' : 'bg-white text-slate-700'">
-                                <input type="radio" name="skinType" value="sensitive" @(Model.SkinType == "sensitive" ? "checked" : "") class="hidden" />
-                                <i class="fa-solid fa-shield-heart text-sky-500 text-[10px]"></i> Nhạy Cảm
-                            </label>
-
-                            <!-- Combination (Da Hỗn Hợp) -->
-                            <label class="col-span-2 flex items-center gap-2 p-2 rounded-xl border border-soft-border hover:border-magenta-accent cursor-pointer transition text-[11px]"
-                                   :class="'@Model.SkinType' === 'combination' ? 'bg-pastel-rose font-bold text-magenta-accent border-magenta-accent' : 'bg-white text-slate-700'">
-                                <input type="radio" name="skinType" value="combination" @(Model.SkinType == "combination" ? "checked" : "") class="hidden" />
-                                <i class="fa-solid fa-circle-half-stroke text-purple-500 text-[10px]"></i> Da Hỗn Hợp Dầu/Khô
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="border-t border-slate-100"></div>
-
-                    <!-- 5. LỌC THEO ĐÁNH GIÁ (Rating Filter: 4 sao trở lên, 5 sao) -->
-                    <div class="space-y-3">
-                        <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                            <i class="fa-solid fa-star text-amber-400"></i> Đánh Giá
-                        </h4>
-
-                        <div class="space-y-2">
-                            <!-- Tất cả -->
-                            <label class="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-50 cursor-pointer transition">
-                                <input type="radio" name="minRating" value="" @(!Model.MinRating.HasValue ? "checked" : "") class="text-magenta-accent focus:ring-magenta-accent" />
-                                <span class="text-slate-600">Tất cả đánh giá</span>
-                            </label>
-
-                            <!-- 5 sao -->
-                            <label class="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-50 cursor-pointer transition">
+                            <label class="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-[#FFF7FA] cursor-pointer transition">
                                 <input type="radio" name="minRating" value="5" @(Model.MinRating == 5 ? "checked" : "") class="text-amber-400 focus:ring-amber-400" />
                                 <div class="flex items-center gap-1 text-amber-400 text-xs">
                                     <i class="fa-solid fa-star"></i>
@@ -358,12 +575,11 @@
                                     <i class="fa-solid fa-star"></i>
                                     <i class="fa-solid fa-star"></i>
                                     <i class="fa-solid fa-star"></i>
-                                    <span class="text-charcoal font-bold ml-1">5.0</span>
+                                    <span class="text-[#23191E] font-bold ml-1">5.0 sao</span>
                                 </div>
                             </label>
 
-                            <!-- Từ 4 sao trở lên -->
-                            <label class="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-50 cursor-pointer transition">
+                            <label class="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-[#FFF7FA] cursor-pointer transition">
                                 <input type="radio" name="minRating" value="4" @(Model.MinRating == 4 ? "checked" : "") class="text-amber-400 focus:ring-amber-400" />
                                 <div class="flex items-center gap-1 text-amber-400 text-xs">
                                     <i class="fa-solid fa-star"></i>
@@ -371,71 +587,56 @@
                                     <i class="fa-solid fa-star"></i>
                                     <i class="fa-solid fa-star"></i>
                                     <i class="fa-regular fa-star"></i>
-                                    <span class="text-charcoal font-bold ml-1">Từ 4.0 trở lên</span>
+                                    <span class="text-[#23191E] font-bold ml-1">Từ 4.0 trở lên</span>
                                 </div>
                             </label>
                         </div>
                     </div>
 
-                    <div class="border-t border-slate-100"></div>
+                    <div class="border-t border-[#F1DCE4]"></div>
 
-                    <!-- 6. LỌC CLEAN BEAUTY & AN TOÀN LÀN DA (Huy hiệu an toàn quốc tế) -->
+                    <!-- 8. TIÊU CHUẨN CLEAN BEAUTY -->
                     <div class="space-y-3">
                         <div class="flex items-center justify-between">
-                            <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] flex items-center gap-1.5">
-                                <i class="fa-solid fa-leaf text-emerald-600"></i> Tiêu Chuẩn Clean Beauty
+                            <h4 class="font-bold text-[#23191E] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                                <i class="fa-solid fa-leaf text-[#1E8E68]"></i> Clean Beauty Chuẩn Nhật
                             </h4>
-                            <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold">100% Thuần Khiết</span>
+                            <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-[#EDF8F4] text-[#135D43] font-bold">100% Thuần Khiết</span>
                         </div>
 
                         <div class="space-y-2">
-                            <!-- Không cồn khô -->
-                            <label class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-emerald-50/50 cursor-pointer transition">
+                            <label class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#EDF8F4] cursor-pointer transition">
                                 <input type="checkbox" 
                                        name="isAlcoholFree" 
                                        value="true" 
                                        @(Model.IsAlcoholFree ? "checked" : "")
-                                       @@change="submitFacetedFilter()"
-                                       class="rounded text-emerald-600 focus:ring-emerald-500 border-slate-300" />
-                                <span class="text-slate-700 font-medium text-xs flex items-center gap-1.5">
-                                    <i class="fa-solid fa-shield-check text-emerald-600 text-xs"></i>
-                                    <span>Không Cồn Khô (Alcohol-Free)</span>
-                                </span>
+                                       class="rounded text-[#1E8E68] focus:ring-[#1E8E68] border-[#F1DCE4]" />
+                                <span class="text-[#23191E] font-medium text-xs">Không cồn khô (Alcohol-Free)</span>
                             </label>
 
-                            <!-- Không hương liệu -->
-                            <label class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-pink-50/50 cursor-pointer transition">
+                            <label class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#FDF0F4] cursor-pointer transition">
                                 <input type="checkbox" 
                                        name="isFragranceFree" 
                                        value="true" 
                                        @(Model.IsFragranceFree ? "checked" : "")
-                                       @@change="submitFacetedFilter()"
-                                       class="rounded text-magenta-accent focus:ring-magenta-accent border-slate-300" />
-                                <span class="text-slate-700 font-medium text-xs flex items-center gap-1.5">
-                                    <i class="fa-solid fa-feather text-pink-500 text-xs"></i>
-                                    <span>Không Hương Liệu (Fragrance-Free)</span>
-                                </span>
+                                       class="rounded text-[#B8336A] focus:ring-[#B8336A] border-[#F1DCE4]" />
+                                <span class="text-[#23191E] font-medium text-xs">Không hương liệu (Fragrance-Free)</span>
                             </label>
 
-                            <!-- An toàn mẹ bầu -->
-                            <label class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-purple-50/50 cursor-pointer transition">
+                            <label class="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#F6F1F8] cursor-pointer transition">
                                 <input type="checkbox" 
                                        name="isPregnancySafe" 
                                        value="true" 
                                        @(Model.IsPregnancySafe ? "checked" : "")
-                                       @@change="submitFacetedFilter()"
-                                       class="rounded text-purple-600 focus:ring-purple-500 border-slate-300" />
-                                <span class="text-slate-700 font-medium text-xs flex items-center gap-1.5">
-                                    <i class="fa-solid fa-baby text-purple-500 text-xs"></i>
-                                    <span>An Toàn Mẹ Bầu (Pregnancy-Safe)</span>
-                                </span>
+                                       class="rounded text-[#7E5299] focus:ring-[#7E5299] border-[#F1DCE4]" />
+                                <span class="text-[#23191E] font-medium text-xs">An toàn mẹ bầu (Pregnancy-Safe)</span>
                             </label>
                         </div>
                     </div>
 
                     <!-- Nút Áp Dụng Lọc -->
                     <button type="submit" 
-                            class="w-full py-3 rounded-2xl bg-gradient-to-r from-magenta-accent to-rose-600 text-white font-extrabold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition">
+                            class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#B8336A] to-[#8E1F4F] text-white font-extrabold text-xs uppercase tracking-widest shadow-md hover:shadow-lg transition cursor-pointer active:scale-98">
                         Áp Dụng Bộ Lọc
                     </button>
                 </form>
@@ -444,33 +645,20 @@
             <!-- =================== RIGHT COLUMN: TOOLBAR & PRODUCT LIST =================== -->
             <main class="lg:col-span-9 space-y-6">
 
-                <!-- TOOLBAR: SORTING & VIEW MODE TOGGLE -->
-                <div class="bg-white p-4 sm:p-5 rounded-3xl border border-soft-border/90 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
-                    
-                    <!-- Mobile Filter Drawer Trigger & Info -->
-                    <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
-                        <button type="button" 
-                                @@click="mobileFilterOpen = true"
-                                class="lg:hidden px-4 py-2.5 rounded-2xl bg-pastel-rose text-charcoal font-bold text-xs flex items-center gap-2 border border-pink-200">
-                            <i class="fa-solid fa-sliders text-magenta-accent"></i>
-                            <span>Bộ Lọc</span>
-                        </button>
-
-                        <div class="text-xs font-semibold text-charcoal">
-                            Danh Mục: <strong class="text-magenta-accent font-bold">@catName</strong>
-                        </div>
+                <!-- DESKTOP TOOLBAR: SORTING & VIEW MODE TOGGLE -->
+                <div class="hidden lg:flex items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-[#F1DCE4] shadow-xs">
+                    <div class="text-xs font-semibold text-[#57454E]">
+                        Bộ sưu tập: <strong class="text-[#B8336A] font-bold">@catName</strong>
                     </div>
 
-                    <!-- Right Controls: Sorting Dropdown & View Mode -->
-                    <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-                        
-                        <!-- 1. Tùy Chọn Sắp Xếp (Sorting Dropdown) -->
+                    <div class="flex items-center gap-4">
+                        <!-- Tùy Chọn Sắp Xếp -->
                         <div class="flex items-center gap-2">
-                            <label for="categorySortSelect" class="text-xs text-slate-500 font-medium hidden md:inline-block">Sắp xếp:</label>
+                            <label for="categorySortSelect" class="text-xs text-[#8A7580] font-medium">Sắp xếp theo:</label>
                             <select id="categorySortSelect" 
                                     name="sort" 
                                     onchange="changeCategorySort(this.value)" 
-                                    class="py-2.5 pl-3.5 pr-8 rounded-2xl border border-soft-border text-xs font-bold text-charcoal bg-white focus:outline-none focus:border-magenta-accent shadow-2xs cursor-pointer">
+                                    class="py-2 pl-3 pr-8 rounded-xl border border-[#F1DCE4] text-xs font-bold text-[#23191E] bg-[#FFF7FA] focus:outline-none focus:border-[#B8336A] cursor-pointer">
                                 <option value="newest" selected="@(Model.Sort == "newest")">Mới nhất</option>
                                 <option value="bestseller" selected="@(Model.Sort == "bestseller")">Bán chạy nhất</option>
                                 <option value="price-asc" selected="@(Model.Sort == "price-asc")">Giá tăng dần</option>
@@ -480,22 +668,20 @@
                             </select>
                         </div>
 
-                        <!-- 2. Chuyển Đổi Chế Độ Xem (Grid vs List View Toggle) -->
-                        <div class="flex items-center p-1 rounded-2xl bg-slate-100 border border-slate-200">
-                            <!-- Grid Button -->
+                        <!-- Chuyển Đổi Chế Độ Xem (Grid vs List Toggle) -->
+                        <div class="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200">
                             <button type="button" 
                                     @@click="currentViewMode = 'grid'; document.getElementById('hiddenViewMode').value = 'grid'; submitFacetedFilter();"
-                                    :class="currentViewMode === 'grid' ? 'bg-white text-magenta-accent shadow-xs' : 'text-slate-400 hover:text-charcoal'"
-                                    class="w-9 h-8 rounded-xl flex items-center justify-center text-xs font-bold transition"
+                                    :class="currentViewMode === 'grid' ? 'bg-white text-[#B8336A] shadow-xs' : 'text-slate-400 hover:text-[#23191E]'"
+                                    class="w-9 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition cursor-pointer"
                                     title="Xem dạng lưới 3-4 cột">
                                 <i class="fa-solid fa-table-cells-large"></i>
                             </button>
 
-                            <!-- List Button -->
                             <button type="button" 
                                     @@click="currentViewMode = 'list'; document.getElementById('hiddenViewMode').value = 'list'; submitFacetedFilter();"
-                                    :class="currentViewMode === 'list' ? 'bg-white text-magenta-accent shadow-xs' : 'text-slate-400 hover:text-charcoal'"
-                                    class="w-9 h-8 rounded-xl flex items-center justify-center text-xs font-bold transition"
+                                    :class="currentViewMode === 'list' ? 'bg-white text-[#B8336A] shadow-xs' : 'text-slate-400 hover:text-[#23191E]'"
+                                    class="w-9 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition cursor-pointer"
                                     title="Xem dạng danh sách chi tiết thành phần">
                                 <i class="fa-solid fa-bars"></i>
                             </button>
@@ -503,13 +689,21 @@
                     </div>
                 </div>
 
-                <!-- RELATIVE CONTAINER FOR PRODUCTS & HTMX SKELETON LOADER -->
-                <div class="relative min-h-[500px]">
-                    <!-- Skeleton Indicator during filter changes -->
-                    <div id="filterSkeletonLoader" class="htmx-indicator pointer-events-none absolute inset-0 z-20 bg-white/80 backdrop-blur-2xs flex items-center justify-center rounded-3xl" style="display: none;">
-                        <div class="flex flex-col items-center gap-3">
-                            <i class="fa-solid fa-circle-notch fa-spin text-magenta-accent text-3xl"></i>
-                            <span class="text-xs font-bold text-charcoal uppercase tracking-wider">Đang cập nhật sản phẩm theo tiêu chí...</span>
+                <!-- RELATIVE CONTAINER FOR PRODUCTS & SKELETON SHIMMER LOADER -->
+                <div class="relative min-h-[450px]">
+                    
+                    <!-- Shimmer Grid Skeleton Indicator during HTMX fetch -->
+                    <div id="filterSkeletonLoader" class="htmx-indicator pointer-events-none absolute inset-0 z-20 bg-white/80 backdrop-blur-xs rounded-3xl p-6 transition-all" style="display: none;">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-6 animate-pulse">
+                            @for (int s = 0; s < 8; s++)
+                            {
+                                <div class="bg-[#FBE8EE]/40 rounded-3xl p-4 border border-[#F1DCE4] space-y-3">
+                                    <div class="aspect-square bg-[#F6D2DF]/50 rounded-2xl"></div>
+                                    <div class="h-3 bg-[#EEB1C8]/40 rounded-full w-2/3"></div>
+                                    <div class="h-4 bg-[#EEB1C8]/60 rounded-full w-full"></div>
+                                    <div class="h-4 bg-[#B8336A]/20 rounded-full w-1/2"></div>
+                                </div>
+                            }
                         </div>
                     </div>
 
@@ -523,7 +717,7 @@
         </div>
     </div>
 
-    <!-- =================== MOBILE FILTER DRAWER =================== -->
+    <!-- =================== MOBILE DRAGGABLE BOTTOM SHEET FILTER =================== -->
     <div x-show="mobileFilterOpen" 
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0"
@@ -534,87 +728,143 @@
          class="fixed inset-0 z-50 lg:hidden overflow-hidden" 
          style="display: none;">
         
-        <!-- Backdrop -->
-        <div class="absolute inset-0 bg-charcoal/50 backdrop-blur-xs" @@click="mobileFilterOpen = false"></div>
+        <!-- Backdrop Blur -->
+        <div class="absolute inset-0 bg-[#23191E]/60 backdrop-blur-xs" @@click="mobileFilterOpen = false"></div>
 
-        <!-- Drawer Content -->
-        <div class="absolute inset-y-0 left-0 max-w-xs w-full bg-white shadow-2xl p-6 overflow-y-auto">
-            <div class="flex items-center justify-between pb-4 border-b border-soft-border mb-6">
-                <h3 class="font-serif font-bold text-charcoal text-base">Bộ Lọc Đa Tiêu Chí</h3>
-                <button type="button" @@click="mobileFilterOpen = false" class="text-slate-400 hover:text-charcoal p-1 text-lg">
+        <!-- Draggable Bottom Sheet Drawer -->
+        <div class="mobile-filter-sheet-drawer absolute inset-x-0 bottom-0 bg-white shadow-2xl flex flex-col"
+             x-transition:enter="transition ease-out duration-300 transform"
+             x-transition:enter-start="translate-y-full"
+             x-transition:enter-end="translate-y-0"
+             x-transition:leave="transition ease-in duration-200 transform"
+             x-transition:leave-start="translate-y-0"
+             x-transition:leave-end="translate-y-full">
+            
+            <!-- Drag Handle Pill -->
+            <div class="w-12 h-1.5 bg-[#E4BFD0] rounded-full mx-auto my-3 shrink-0 cursor-grab"></div>
+
+            <!-- Sheet Header -->
+            <div class="flex items-center justify-between px-6 pb-3 border-b border-[#F1DCE4] shrink-0">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-[#B8336A]"></i>
+                    <h3 class="font-serif font-extrabold text-[#23191E] text-base">Bộ Lọc Đa Tiêu Chí</h3>
+                </div>
+                <button type="button" 
+                        @@click="mobileFilterOpen = false" 
+                        class="w-8 h-8 rounded-full bg-[#FFF7FA] text-[#8A7580] hover:text-[#23191E] flex items-center justify-center text-sm border border-[#F1DCE4]">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <!-- Mobile Filter Form duplicate -->
-            <form action="/category/@Model.CategorySlug" method="get" class="space-y-6 text-xs">
-                <!-- FEFO -->
+            <!-- Scrollable Body with Filter Controls -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-6 text-xs">
+                
+                <!-- Lọc Theo Hạn Dùng -->
                 <div>
-                    <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] mb-2">Hạn Dùng FEFO</h4>
-                    <select name="fefo" class="w-full p-2.5 rounded-xl border border-soft-border text-xs">
-                        <option value="all" selected="@(Model.FefoOption == "all")">Tất cả date</option>
-                        <option value="fresh" selected="@(Model.FefoOption == "fresh")">Date mới >18 tháng</option>
-                        <option value="good" selected="@(Model.FefoOption == "good")">Date 6-12 tháng (Giá tốt)</option>
-                        <option value="clearance" selected="@(Model.FefoOption == "clearance")">Cận date xả kho &lt;6 tháng</option>
-                    </select>
+                    <h4 class="font-bold text-[#23191E] uppercase tracking-wider text-[11px] mb-2 flex items-center gap-1.5">
+                        <i class="fa-solid fa-clock-rotate-left text-[#C9A96E]"></i> Lọc Theo Hạn Dùng
+                    </h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="p-2.5 rounded-xl border border-[#F1DCE4] text-center font-bold text-xs cursor-pointer"
+                               :class="document.querySelector('#facetedFilterForm input[name=fefo]:checked')?.value === 'all' ? 'bg-[#FBE8EE] text-[#B8336A] border-[#B8336A]' : 'bg-white text-[#23191E]'"
+                               @@click="setRadioAndSubmit('fefo', 'all')">
+                            Tất cả date
+                        </label>
+                        <label class="p-2.5 rounded-xl border border-[#F1DCE4] text-center font-bold text-xs cursor-pointer"
+                               :class="document.querySelector('#facetedFilterForm input[name=fefo]:checked')?.value === 'fresh' ? 'bg-[#EDF8F4] text-[#135D43] border-[#1E8E68]' : 'bg-white text-[#23191E]'"
+                               @@click="setRadioAndSubmit('fefo', 'fresh')">
+                            Mới &gt;18 tháng
+                        </label>
+                        <label class="p-2.5 rounded-xl border border-[#F1DCE4] text-center font-bold text-xs cursor-pointer"
+                               :class="document.querySelector('#facetedFilterForm input[name=fefo]:checked')?.value === 'good' ? 'bg-[#FBF5E8] text-[#7A5413] border-[#C9963B]' : 'bg-white text-[#23191E]'"
+                               @@click="setRadioAndSubmit('fefo', 'good')">
+                            Date 6-12 tháng
+                        </label>
+                        <label class="p-2.5 rounded-xl border border-[#F1DCE4] text-center font-bold text-xs cursor-pointer"
+                               :class="document.querySelector('#facetedFilterForm input[name=fefo]:checked')?.value === 'clearance' ? 'bg-[#FDF0F4] text-[#931942] border-[#D4386C]' : 'bg-white text-[#23191E]'"
+                               @@click="setRadioAndSubmit('fefo', 'clearance')">
+                            Xả kho &lt;6th (-70%)
+                        </label>
+                    </div>
                 </div>
 
-                <!-- Price -->
+                <!-- Price Dual Slider Mobile -->
                 <div>
-                    <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] mb-2">Khoảng Giá</h4>
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="number" name="minPrice" value="@Model.MinPrice" placeholder="Từ..." class="p-2 border rounded-xl" />
-                        <input type="number" name="maxPrice" value="@Model.MaxPrice" placeholder="Đến..." class="p-2 border rounded-xl" />
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="font-bold text-[#23191E] uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                            <i class="fa-solid fa-coins text-[#C9A96E]"></i> Khoảng Giá
+                        </h4>
+                        <span class="text-[10px] text-[#B8336A] font-bold font-mono" x-text="formatPrice(minPriceVal) + ' - ' + formatPrice(maxPriceVal)"></span>
+                    </div>
+                    <div class="relative py-2">
+                        <div class="dual-slider-track">
+                            <div class="dual-slider-fill" :style="`left: ${minPercent}%; width: ${maxPercent - minPercent}%;`"></div>
+                        </div>
+                        <input type="range" min="50000" max="10000000" step="50000" x-model.number.debounce.250ms="minPriceVal" @@change="onPriceSliderChange()" class="dual-range-input" />
+                        <input type="range" min="50000" max="10000000" step="50000" x-model.number.debounce.250ms="maxPriceVal" @@change="onPriceSliderChange()" class="dual-range-input" />
                     </div>
                 </div>
 
                 <!-- Skin Type -->
                 <div>
-                    <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] mb-2">Loại Da</h4>
-                    <select name="skinType" class="w-full p-2.5 rounded-xl border border-soft-border text-xs">
-                        <option value="all" selected="@(Model.SkinType == "all")">Tất cả</option>
-                        <option value="oily" selected="@(Model.SkinType == "oily")">Da Dầu</option>
-                        <option value="dry" selected="@(Model.SkinType == "dry")">Da Khô</option>
-                        <option value="sensitive" selected="@(Model.SkinType == "sensitive")">Da Nhạy Cảm</option>
-                        <option value="combination" selected="@(Model.SkinType == "combination")">Da Hỗn Hợp</option>
-                    </select>
-                </div>
-
-                <!-- Rating -->
-                <div>
-                    <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] mb-2">Đánh Giá</h4>
-                    <select name="minRating" class="w-full p-2.5 rounded-xl border border-soft-border text-xs">
-                        <option value="" selected="@(!Model.MinRating.HasValue)">Mọi đánh giá</option>
-                        <option value="4" selected="@(Model.MinRating == 4)">Từ 4 sao trở lên</option>
-                        <option value="5" selected="@(Model.MinRating == 5)">5 sao tuyệt đối</option>
-                    </select>
-                </div>
-
-                <!-- Clean Beauty Standards -->
-                <div>
-                    <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] mb-2 flex items-center gap-1.5">
-                        <i class="fa-solid fa-leaf text-emerald-600"></i> Clean Beauty
+                    <h4 class="font-bold text-[#23191E] uppercase tracking-wider text-[11px] mb-2 flex items-center gap-1.5">
+                        <i class="fa-solid fa-face-smile text-[#B8336A]"></i> Loại Da
                     </h4>
-                    <div class="space-y-2">
-                        <label class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-50">
-                            <input type="checkbox" name="isAlcoholFree" value="true" @(Model.IsAlcoholFree ? "checked" : "") class="rounded text-emerald-600" />
-                            <span class="text-xs text-slate-700">Không cồn khô (Alcohol-Free)</span>
-                        </label>
-                        <label class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-50">
-                            <input type="checkbox" name="isFragranceFree" value="true" @(Model.IsFragranceFree ? "checked" : "") class="rounded text-magenta-accent" />
-                            <span class="text-xs text-slate-700">Không hương liệu (Fragrance-Free)</span>
-                        </label>
-                        <label class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-50">
-                            <input type="checkbox" name="isPregnancySafe" value="true" @(Model.IsPregnancySafe ? "checked" : "") class="rounded text-purple-600" />
-                            <span class="text-xs text-slate-700">An toàn mẹ bầu (Pregnancy-Safe)</span>
-                        </label>
+                    <div class="grid grid-cols-2 gap-2">
+                        @foreach (var st in new[] {
+                            new { Value = "all", Label = "Tất Cả" },
+                            new { Value = "oily", Label = "Da Dầu" },
+                            new { Value = "dry", Label = "Da Khô" },
+                            new { Value = "sensitive", Label = "Nhạy Cảm" }
+                        })
+                        {
+                            <label class="p-2 rounded-xl border border-[#F1DCE4] text-center font-bold text-xs cursor-pointer"
+                                   :class="document.querySelector('#facetedFilterForm input[name=skinType]:checked')?.value === '@st.Value' ? 'bg-[#FBE8EE] text-[#B8336A] border-[#B8336A]' : 'bg-white text-[#23191E]'"
+                                   @@click="setRadioAndSubmit('skinType', '@st.Value')">
+                                @st.Label
+                            </label>
+                        }
                     </div>
                 </div>
 
-                <button type="submit" class="w-full py-3 bg-magenta-accent text-white font-bold text-xs uppercase rounded-xl shadow-md">
-                    Áp Dụng
+                <!-- Skin Concern -->
+                <div>
+                    <h4 class="font-bold text-[#23191E] uppercase tracking-wider text-[11px] mb-2 flex items-center gap-1.5">
+                        <i class="fa-solid fa-wand-magic-sparkles text-[#C9A96E]"></i> Vấn Đề Da
+                    </h4>
+                    <div class="flex flex-wrap gap-1.5">
+                        @foreach (var c in new[] {
+                            new { Value = "all", Label = "Tất cả" },
+                            new { Value = "acne", Label = "Trị Mụn" },
+                            new { Value = "anti_aging", Label = "Chống Lão Hóa" },
+                            new { Value = "hydration", Label = "Cấp Nước" },
+                            new { Value = "brightening", Label = "Dưỡng Trắng" }
+                        })
+                        {
+                            <label class="px-3 py-1.5 rounded-full border border-[#F1DCE4] text-xs font-bold cursor-pointer"
+                                   :class="document.querySelector('#facetedFilterForm input[name=skinConcern]:checked')?.value === '@c.Value' ? 'bg-[#B8336A] text-white border-[#B8336A]' : 'bg-white text-[#23191E]'"
+                                   @@click="setRadioAndSubmit('skinConcern', '@c.Value')">
+                                @c.Label
+                            </label>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sticky Bottom Action Footer -->
+            <div class="p-4 border-t border-[#F1DCE4] bg-white flex items-center gap-3 shrink-0 pb-[calc(1rem+env(safe-area-inset-bottom,0px))]">
+                <button type="button" 
+                        onclick="resetFacetedFilter()" 
+                        class="py-3 px-4 rounded-full border border-[#F1DCE4] text-[#23191E] font-bold text-xs uppercase tracking-wider hover:bg-[#FFF7FA]">
+                    Đặt lại
                 </button>
-            </form>
+                <button type="button" 
+                        @@click="mobileFilterOpen = false" 
+                        class="flex-1 py-3 px-6 rounded-full bg-gradient-to-r from-[#B8336A] to-[#8E1F4F] text-white font-extrabold text-xs uppercase tracking-wider shadow-md flex items-center justify-center gap-2">
+                    <span>Xem @Model.TotalProducts kết quả</span>
+                    <i class="fa-solid fa-arrow-right text-[11px]"></i>
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -631,15 +881,20 @@
     function changeCategorySort(sortVal) {
         const form = document.getElementById('facetedFilterForm');
         if (form) {
-            let sortInput = form.querySelector('input[name="sort"]');
-            if (!sortInput) {
-                sortInput = document.createElement('input');
-                sortInput.type = 'hidden';
-                sortInput.name = 'sort';
-                form.appendChild(sortInput);
-            }
-            sortInput.value = sortVal;
+            const hiddenSort = document.getElementById('hiddenSortInput');
+            if (hiddenSort) hiddenSort.value = sortVal;
             submitFacetedFilter();
+        }
+    }
+
+    function setRadioAndSubmit(name, val) {
+        const form = document.getElementById('facetedFilterForm');
+        if (form) {
+            const radio = form.querySelector(`input[name="${name}"][value="${val}"]`);
+            if (radio) {
+                radio.checked = true;
+                submitFacetedFilter();
+            }
         }
     }
 
@@ -652,7 +907,7 @@
             } else {
                 form.submit();
             }
-            window.scrollTo({ top: 400, behavior: 'smooth' });
+            window.scrollTo({ top: 380, behavior: 'smooth' });
         }
     }
 
@@ -671,7 +926,16 @@
                 headers: { 'HX-Request': 'true' }
             });
             const html = await resp.text();
-            document.getElementById('categoryProductsContainer').innerHTML = html;
+            
+            if (document.startViewTransition) {
+                document.startViewTransition(() => {
+                    document.getElementById('categoryProductsContainer').innerHTML = html;
+                    if (window.Alpine) Alpine.initTree(document.getElementById('categoryProductsContainer'));
+                });
+            } else {
+                document.getElementById('categoryProductsContainer').innerHTML = html;
+                if (window.Alpine) Alpine.initTree(document.getElementById('categoryProductsContainer'));
+            }
         } catch (e) {
             console.error('Lỗi khi tải thêm sản phẩm:', e);
         }

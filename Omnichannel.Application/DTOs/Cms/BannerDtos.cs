@@ -23,7 +23,7 @@ namespace Omnichannel.Application.DTOs.Cms
         public string BadgeText { get; set; } = "Bộ Sưu Tập Mới 2026";
 
         [StringLength(60)]
-        public string SecondaryButtonText { get; set; } = "Deal FEFO -50%";
+        public string SecondaryButtonText { get; set; } = "Săn Deal Cận Date -50%";
 
         [StringLength(255)]
         public string SecondaryButtonUrl { get; set; } = "/clearance-fefo";

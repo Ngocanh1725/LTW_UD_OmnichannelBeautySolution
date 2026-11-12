@@ -2,15 +2,22 @@
 
 @if (Model == null || !Model.Any())
 {
-    <div class="col-span-full py-16 text-center text-slate-500 font-sans">
-        <i class="fa-solid fa-box-open text-4xl text-rose-gold/50 mb-3 block"></i>
-        <span>Không tìm thấy sản phẩm nào trong danh mục này.</span>
+    <div class="col-span-full py-16 px-4 text-center rounded-[1.75rem] bg-[#FBE8EE]/45 border border-[#23191E]/8">
+        <div class="w-14 h-14 mx-auto mb-3 rounded-full bg-white text-[#B8336A] flex items-center justify-center shadow-xs">
+            <i class="fa-solid fa-box-open text-xl"></i>
+        </div>
+        <p class="font-display font-bold text-base text-[#23191E]">Chưa có sản phẩm trong danh mục này</p>
+        <p class="text-xs text-[#57454E] mt-1">Vui lòng chọn ngành hàng khác hoặc khám phá toàn bộ bộ sưu tập.</p>
     </div>
 }
 else
 {
+    int idx = 0;
     @foreach (var item in Model)
     {
-        <partial name="_ProductCard" model="item" />
+        <div class="card-stagger-enter h-full" style="--stagger-idx: @idx;">
+            <partial name="_ProductCard" model="item" />
+        </div>
+        idx++;
     }
 }

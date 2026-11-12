@@ -127,6 +127,8 @@ namespace Omnichannel.Web.Controllers
                 .Include(p => p.Batches)
                 .Include(p => p.ProductSkinTypes)
                     .ThenInclude(pst => pst.SkinType)
+                .Include(p => p.ProductConcerns)
+                    .ThenInclude(pc => pc.SkinConcern)
                 .Include(p => p.ProductIngredients)
                     .ThenInclude(pi => pi.ActiveIngredient)
                 .Include(p => p.Variants.Where(v => v.IsActive))
@@ -299,6 +301,8 @@ namespace Omnichannel.Web.Controllers
             decimal? maxPrice,
             string fefo = "all",
             string skinType = "all",
+            string skinConcern = "all",
+            string ingredient = "all",
             int? minRating = null,
             string sort = "newest",
             string viewMode = "grid",
@@ -334,6 +338,8 @@ namespace Omnichannel.Web.Controllers
                 .Include(p => p.Batches)
                 .Include(p => p.ProductSkinTypes)
                     .ThenInclude(pst => pst.SkinType)
+                .Include(p => p.ProductConcerns)
+                    .ThenInclude(pc => pc.SkinConcern)
                 .Include(p => p.ProductIngredients)
                     .ThenInclude(pi => pi.ActiveIngredient)
                 .Include(p => p.Reviews)
@@ -413,6 +419,24 @@ namespace Omnichannel.Web.Controllers
                 };
 
                 query = query.Where(p => p.ProductSkinTypes.Any(pst => pst.SkinType.Slug.Contains(slugKey) || pst.SkinType.Name.Contains(skinType)));
+            }
+
+            // Filter: Skin Concern (all, acne, anti_aging, hydration, brightening, pore_minimizing)
+            if (!string.IsNullOrWhiteSpace(skinConcern) && skinConcern != "all")
+            {
+                string concernKey = skinConcern.ToLowerInvariant();
+                query = query.Where(p => p.ProductConcerns.Any(pc => pc.SkinConcern.Slug.Contains(concernKey) || pc.SkinConcern.Name.Contains(concernKey))
+                                      || p.Name.ToLower().Contains(concernKey)
+                                      || (p.Description != null && p.Description.ToLower().Contains(concernKey)));
+            }
+
+            // Filter: Active Ingredients (all, niacinamide, ha, b5, bha, retinol, vitc...)
+            if (!string.IsNullOrWhiteSpace(ingredient) && ingredient != "all")
+            {
+                string ingKey = ingredient.ToLowerInvariant();
+                query = query.Where(p => p.ProductIngredients.Any(pi => pi.ActiveIngredient.Slug.Contains(ingKey) || pi.ActiveIngredient.Name.ToLower().Contains(ingKey))
+                                      || p.Name.ToLower().Contains(ingKey)
+                                      || (p.Description != null && p.Description.ToLower().Contains(ingKey)));
             }
 
             // Filter: Rating (4, 5)
@@ -609,6 +633,8 @@ namespace Omnichannel.Web.Controllers
                 MaxPrice = effectiveMaxPrice,
                 SelectedBrands = selectedBrandsList,
                 SkinType = skinType,
+                SkinConcern = skinConcern,
+                Ingredient = ingredient,
                 MinRating = minRating,
                 IsAlcoholFree = isAlcoholFree,
                 IsFragranceFree = isFragranceFree,

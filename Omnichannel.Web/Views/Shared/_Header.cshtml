@@ -1,930 +1,1015 @@
-@using Microsoft.AspNetCore.Authentication
-@using System.Security.Claims
-@using Omnichannel.Application.Common
-@inject Omnichannel.Application.Interfaces.Cms.IThemeService ThemeService
+@*
+    Canmake Beauty Suite - Rosé Luxe Shared Header (_Header.cshtml)
+    Phiên 2:
+    - DESKTOP (>= 1024px):
+      + Top bar mảnh (--rl-ink / --rl-rose-deep) chạy marquee thông điệp ưu đãi, tạm dừng khi hover/focus-within.
+      + Header dạng "Floating Pill" bo tròn (cảm hứng Bloom Room): Logo trái | Menu giữa (_MegaNav) | Cụm icon phải
+        (Tìm kiếm, Yêu thích, Thông báo, Tài khoản, Giỏ hàng có badge số).
+      + Khi cuộn xuống: thu gọn nhẹ bằng transform (CLS = 0), nền glass, bóng hồng nhẹ; cuộn xuống nhanh tự ẩn, cuộn lên hiện lại.
+      + Ô tìm kiếm mở rộng thành Fullscreen Search Overlay: gợi ý từ khoá hot, danh mục, sản phẩm xem gần đây.
+    - MOBILE (< 768px):
+      + Header gọn: Hamburger (trái, >=44x44px) | Logo (giữa) | Giỏ hàng (phải, >=44x44px).
+      + Thanh tìm kiếm dạng pill ngay dưới header (sticky).
+*@
+@inject Omnichannel.Application.Interfaces.Sales.ICartService CartService
 @{
-    var theme = await ThemeService.GetCurrentThemeAsync();
-    var adminAuthResult = Context.RequestServices?.GetService(typeof(IAuthenticationService)) != null
-        ? await Context.AuthenticateAsync(AuthConstants.AdminCookieScheme)
-        : null;
-    var adminPrincipal = (adminAuthResult?.Succeeded == true && adminAuthResult.Principal?.Identity?.IsAuthenticated == true)
-        ? adminAuthResult.Principal
-        : null;
+    string? headerCartId = Context.Request.Cookies["CanmakeBeauty_CartId"];
+    string? headerUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
-    bool isStaffLogged = adminPrincipal != null ||
-        (User?.Identity?.IsAuthenticated == true &&
-         (User.HasClaim("IsStaff", "true") || User.IsInRole("SuperAdmin") || User.IsInRole("SUPER_ADMIN") || User.IsInRole("StoreManager") || User.IsInRole("STORE_MANAGER") || User.IsInRole("Cashier") || User.IsInRole("WarehouseStaff") || User.IsInRole("ContentEditor")));
-    bool isCustomerLogged = !isStaffLogged && User?.Identity?.IsAuthenticated == true;
-    var activePrincipal = adminPrincipal ?? User;
-    string displayUserName = activePrincipal?.FindFirst(ClaimTypes.GivenName)?.Value
-        ?? activePrincipal?.Identity?.Name
-        ?? "Tài Khoản";
-}
-@* Canmake Beauty - Storefront Header Partial *@
-<header class="w-full relative z-40" x-data="instantSearch()" x-init="init()">
-    <style>
-        @@keyframes tickerMarquee {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-        .animate-ticker-marquee {
-            display: inline-flex;
-            white-space: nowrap;
-            animation: tickerMarquee 30s linear infinite;
-        }
-        .animate-ticker-marquee:hover {
-            animation-play-state: paused;
-        }
-
-        /* Luxury Mega Menu Display on Hover */
-        .group:hover > .mega-menu-content,
-        .has-mega-menu:hover .mega-menu-content {
-            display: block !important;
-            opacity: 1 !important;
-            visibility: visible !important;
-            pointer-events: auto !important;
-            transform: translateY(0) scale(1) !important;
-        }
-    </style>
-
-    <!-- Top Announcement Bar with Smooth Ticker & VIP Hotline -->
-    @if (theme.AnnouncementBarActive && !string.IsNullOrWhiteSpace(theme.AnnouncementBarText))
+    int initialCartCount = 0;
+    decimal initialCartSubTotal = 0m;
+    if (!string.IsNullOrEmpty(headerCartId) || !string.IsNullOrEmpty(headerUserId))
     {
-        <aside aria-label="Thông báo ưu đãi" class="text-white flex items-center justify-between px-3 sm:px-6 py-1.5 text-xs border-b border-white/5 relative overflow-hidden select-none" style="background-color: @theme.AnnouncementBarBgColor;">
-            <!-- Left Luxury Badge (Desktop) -->
-            <div class="hidden xl:flex items-center gap-3 text-slate-300 text-[11px] shrink-0 font-medium">
-                <span class="inline-flex items-center gap-1.5"><i class="fa-solid fa-gem text-rose-gold"></i> Haute Parfumerie</span>
-                <span class="text-slate-600">•</span>
-                <span class="inline-flex items-center gap-1.5"><i class="fa-solid fa-clock-rotate-left text-amber-400"></i> FEFO Minh Bạch 100%</span>
-            </div>
-
-            <!-- Center Smooth Marquee Ticker -->
-            <div class="overflow-hidden whitespace-nowrap flex-1 mx-2 sm:mx-6 cursor-pointer">
-                <div class="animate-ticker-marquee items-center text-slate-200 text-xs font-medium tracking-wide">
-                    <span class="inline-block px-4">
-                        ✦ <span class="font-bold text-amber-300">@theme.AnnouncementBarText</span> ✦
-                    </span>
-                    <span class="inline-block px-4">
-                        ✦ <span class="font-bold text-amber-300">@theme.AnnouncementBarText</span> ✦
-                    </span>
-                </div>
-            </div>
-
-            <!-- Right VIP Hotline & Utilities -->
-            <div class="flex items-center gap-2 sm:gap-4 shrink-0">
-                @if (!string.IsNullOrWhiteSpace(theme.Hotline))
-                {
-                    <!-- VIP Hotline CTA Button -->
-                    <a href="tel:@theme.Hotline.Replace(" ", "")" 
-                       class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 via-pink-500/20 to-purple-500/20 hover:from-amber-500/30 hover:to-pink-500/30 border border-amber-400/40 text-amber-300 hover:text-white transition-all font-bold text-[11px] shadow-2xs group"
-                       title="Hotline tư vấn VIP @theme.Hotline">
-                        <span class="relative flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                        </span>
-                        <i class="fa-solid fa-headset text-rose-gold group-hover:scale-110 transition-transform"></i>
-                        <span>Hotline VIP: @theme.Hotline <span class="text-[10px] font-normal text-slate-300 hidden md:inline">(08:00 - 22:00)</span></span>
-                    </a>
-                }
-
-                <div class="hidden lg:flex items-center gap-3 text-[11px] font-semibold text-slate-300">
-                    <span class="text-slate-600">|</span>
-                    <a href="/tra-cuu-don-hang" class="hover:text-magenta-accent transition flex items-center gap-1">
-                        <i class="fa-solid fa-truck-fast text-amber-400"></i> Tra cứu đơn hàng
-                    </a>
-                    <span class="text-slate-600">|</span>
-                    <a href="/stores" class="hover:text-magenta-accent transition flex items-center gap-1">
-                        <i class="fa-solid fa-location-dot text-rose-gold"></i> Showroom
-                    </a>
-                    <span class="text-slate-600">|</span>
-                    <span class="text-white font-bold tracking-wider">VNĐ (₫)</span>
-                </div>
-            </div>
-        </aside>
+        try
+        {
+            var currentCart = await CartService.GetCartAsync(headerCartId ?? string.Empty, headerUserId);
+            if (currentCart != null)
+            {
+                initialCartCount = currentCart.TotalItems;
+                initialCartSubTotal = currentCart.SubTotal;
+            }
+        }
+        catch { }
     }
+    string initialCartTotalFormatted = initialCartSubTotal > 0
+        ? string.Format(new System.Globalization.CultureInfo("vi-VN"), "{0:N0} ₫", initialCartSubTotal)
+        : "0 ₫";
+}
 
-    <!-- Main Navigation Bar with Glassmorphism -->
-    <div class="header-glass sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-soft-border/70 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="h-20 flex items-center justify-between gap-4">
+<!-- 1. TOP BAR MẢNH (INK / ROSE DEEP) CHẠY MARQUEE ƯU ĐÃI, TẠM DỪNG KHI HOVER -->
+<aside aria-label="Thông báo ưu đãi và cam kết dịch vụ"
+       class="bg-[var(--rl-ink)] text-[var(--rl-bg)] text-[11px] font-medium py-2 px-4 border-b border-white/10 relative z-[var(--rl-z-sticky)] overflow-hidden">
+    <div class="max-w-[1440px] mx-auto flex items-center justify-between gap-6">
+        <div class="rl-marquee-container flex-1 overflow-hidden">
+            <div class="rl-topbar-marquee flex items-center gap-10 whitespace-nowrap">
+                <span class="inline-flex items-center gap-2 tracking-wide">
+                    <i class="fa-solid fa-shield-heart text-[var(--rl-champagne)]" aria-hidden="true"></i>
+                    <span><strong class="text-[var(--rl-bg-petal)]">CAM KẾT DATE MỚI:</strong> 100% mỹ phẩm chính hãng hạn dùng &gt; 18 tháng minh bạch</span>
+                </span>
+                <span class="text-white/25" aria-hidden="true">✦</span>
+                <span class="inline-flex items-center gap-2 tracking-wide">
+                    <i class="fa-solid fa-bolt text-[var(--rl-champagne)]" aria-hidden="true"></i>
+                    <span><strong class="text-[var(--rl-bg-petal)]">GIAO NHANH 2H:</strong> Nhận hàng siêu tốc nội thành Hà Nội &amp; TP.HCM — Freeship đơn từ 499K</span>
+                </span>
+                <span class="text-white/25" aria-hidden="true">✦</span>
+                <span class="inline-flex items-center gap-2 tracking-wide">
+                    <i class="fa-solid fa-gift text-[var(--rl-champagne)]" aria-hidden="true"></i>
+                    <span><strong class="text-[var(--rl-bg-petal)]">ROSÉ LUXE PRIVILEGE:</strong> Nhập mã <strong class="underline decoration-[var(--rl-champagne)]">ROSELUXE50</strong> giảm ngay 50.000₫ cho đơn đầu tiên</span>
+                </span>
+                <span class="text-white/25" aria-hidden="true">✦</span>
+                <!-- Nhân bản nội dung để chạy marquee vô tận mượt mà -->
+                <span class="inline-flex items-center gap-2 tracking-wide" aria-hidden="true">
+                    <i class="fa-solid fa-shield-heart text-[var(--rl-champagne)]"></i>
+                    <span><strong class="text-[var(--rl-bg-petal)]">CAM KẾT DATE MỚI:</strong> 100% mỹ phẩm chính hãng hạn dùng &gt; 18 tháng minh bạch</span>
+                </span>
+                <span class="text-white/25" aria-hidden="true">✦</span>
+                <span class="inline-flex items-center gap-2 tracking-wide" aria-hidden="true">
+                    <i class="fa-solid fa-bolt text-[var(--rl-champagne)]"></i>
+                    <span><strong class="text-[var(--rl-bg-petal)]">GIAO NHANH 2H:</strong> Nhận hàng siêu tốc nội thành Hà Nội &amp; TP.HCM — Freeship đơn từ 499K</span>
+                </span>
+            </div>
+        </div>
 
-                <!-- Mobile Menu Hamburger Button -->
-                <button type="button" 
-                        class="lg:hidden p-2.5 rounded-xl text-slate-700 hover:text-magenta-accent hover:bg-pastel-rose transition" 
-                        @@click="mobileMenuOpen = true" 
-                        aria-label="Mở danh mục menu">
-                    <i class="fa-solid fa-bars-staggered text-xl"></i>
-                </button>
+        <div class="hidden lg:flex items-center gap-4 text-[11px] shrink-0 pl-4 border-l border-white/15">
+            <a href="/tu-van-da" class="text-[var(--rl-bg-petal)] hover:text-white transition inline-flex items-center gap-1.5 font-semibold">
+                <i class="fa-solid fa-wand-magic-sparkles text-[10px] text-[var(--rl-champagne)]" aria-hidden="true"></i>
+                <span>Trắc Nghiệm Da</span>
+            </a>
+            <span class="text-white/20" aria-hidden="true">|</span>
+            <a href="tel:1900888999" class="text-white/80 hover:text-white transition inline-flex items-center gap-1.5">
+                <i class="fa-solid fa-phone-volume text-[10px] text-[var(--rl-champagne)]" aria-hidden="true"></i>
+                <span>VIP: <strong class="text-white font-mono-numeric">1900 888 999</strong></span>
+            </a>
+        </div>
+    </div>
+</aside>
 
-                <!-- Brand Logo (Canmake Beauty - Horizontal SVG Identity) -->
-                <a href="/" class="brand-logo-wrapper flex items-center gap-2.5 sm:gap-3 group shrink-0" title="@theme.BrandName - @(theme.Slogan ?? Brand.Slogan)">
-                    <img src="@Brand.LogoUrl" 
-                         alt="@theme.BrandName Logo" 
-                         class="h-10 sm:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]" 
-                         onerror="this.onerror=null; this.src='/images/branding/canmake-logo-horizontal.svg'" />
-                    <span class="sr-only">@theme.BrandName</span>
-                </a>
+<!-- 2. STICKY HEADER WRAPPER (CỐ ĐỊNH CHIỀU CAO FLOW ĐỂ ĐẢM BẢO CLS = 0 KHI CUỘN) -->
+<header id="siteMainHeader"
+        x-data="instantSearch()"
+        x-init="initSearch()"
+        @@keydown.window.slash="if (!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) { $event.preventDefault(); openSearchOverlay(); }"
+        @@keydown.window.ctrl.k.prevent="openSearchOverlay()"
+        style="overflow-anchor: none;"
+        class="sticky top-0 z-50 h-[112px] md:h-[84px] select-none pointer-events-none">
 
-                <!-- Live Sephora/Hasaki Instant Search Bar with Luxury Popover -->
-                <div class="search-input-wrapper hidden md:block relative z-50 flex-1 max-w-lg mx-4"
-                     @@click.outside="close()"
-                     @@keydown.escape.window="close()">
-                    
-                    <!form action="/tim-kiem" method="GET" x-on:submit="handleSubmit($event)" class="relative">
-                        <i class="fa-solid absolute left-4 top-1/2 -translate-y-1/2 text-sm transition-colors"
-                           :class="isLoading ? 'fa-spinner fa-spin text-magenta-accent' : 'fa-magnifying-glass text-slate-400'"></i>
-                        
-                        <input type="text" 
-                               name="q" 
-                               id="storefrontSearchInput"
-                               x-ref="searchInput"
-                               x-model="query"
-                               @@focus="onFocus()"
-                               @@input="onInput()"
-                               @@keydown.arrow-down.prevent="selectNext()"
-                               @@keydown.arrow-up.prevent="selectPrev()"
-                               @@keydown.enter="handleEnter($event)"
-                               placeholder="Tìm son lì, kem chống nắng, serum HA & B5, nước hoa..." 
-                               class="search-input-beauty w-full pl-11 pr-16 py-2.5 rounded-full border border-slate-200 focus:border-magenta-accent focus:ring-2 focus:ring-magenta-accent/20 bg-slate-50/70 hover:bg-white text-sm outline-none transition-all placeholder:text-slate-400 font-sans shadow-2xs" 
-                               autocomplete="off" />
+    <!-- Khối chuyển động bằng GPU Transform (Không làm thay đổi chiều cao DOM flow -> CLS = 0) -->
+    <div class="w-full h-full flex flex-col justify-center transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] pointer-events-auto"
+         :class="headerHidden && !searchOverlayOpen ? '-translate-y-[115%]' : 'translate-y-0'">
 
-                        <!-- Quick Clear Button -->
-                        <button type="button" 
-                                x-show="query && query.length > 0"
-                                @@click="clearQuery()"
-                                class="absolute right-10 top-1/2 -translate-y-1/2 h-5 w-5 flex items-center justify-center text-slate-400 hover:text-charcoal hover:bg-slate-200/60 rounded-full text-xs transition"
-                                style="display: none;"
-                                aria-label="Xóa từ khóa">
-                            <i class="fa-solid fa-xmark text-[11px]"></i>
-                        </button>
+        <div class="max-w-[1440px] w-full mx-auto px-3 sm:px-6 lg:px-8">
 
-                        <!-- Submit Arrow Button -->
-                        <button type="submit" 
-                                class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-magenta-accent transition" 
-                                aria-label="Tìm kiếm">
-                            <i class="fa-solid fa-arrow-right text-xs"></i>
-                        </button>
-                    </!form>
+            <!-- =========================================================================
+                 A. DESKTOP & TABLET FLOATING PILL HEADER (>= 768px)
+                 Lấy cảm hứng từ Bloom Room: Khung viên thuốc nổi bo tròn, thu gọn khi cuộn
+                 ========================================================================= -->
+            <div class="hidden md:flex items-center justify-between gap-3 lg:gap-4 rounded-full transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                 :class="isScrolled
+                    ? 'glass-surface bg-[var(--rl-surface)]/90 backdrop-blur-xl shadow-[var(--rl-shadow-md)] border border-[var(--rl-border-strong)] px-5 py-2 scale-[0.985]'
+                    : 'bg-[var(--rl-surface)]/95 backdrop-blur-md shadow-[var(--rl-shadow-sm)] border border-[var(--rl-border-subtle)] px-6 py-2.5'">
 
-                    <!-- Instant Search Results Dropdown Popover -->
-                    <div id="liveSearchResultsPopover" 
-                         x-show="isOpen"
-                         @@click.stop
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 translate-y-2 scale-98"
-                         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                         x-transition:leave="transition ease-in duration-150"
-                         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-                         x-transition:leave-end="opacity-0 translate-y-2 scale-98"
-                         style="display: none;"
-                         class="search-results-dropdown absolute top-full left-0 right-0 mt-2 bg-white/98 backdrop-blur-xl rounded-2xl shadow-2xl border border-rose-100/90 p-3.5 z-50 max-h-[520px] overflow-y-auto">
-                        
-                        <!-- STATE 1: RECENT SEARCHES & TRENDING (Khi chưa nhập hoặc < 2 ký tự) -->
-                        <template x-if="!query || query.trim().length < 2">
-                            <div class="space-y-4">
-                                <!-- Recent Searches -->
-                                <template x-if="recentSearches.length > 0">
-                                    <div>
-                                        <div class="flex items-center justify-between px-1 mb-2">
-                                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                                                <i class="fa-regular fa-clock text-magenta-accent"></i>
-                                                <span>Tìm Kiếm Gần Đây</span>
-                                            </span>
-                                            <button type="button" 
-                                                    @@click="clearRecentSearches()"
-                                                    class="text-[10px] font-semibold text-magenta-accent hover:underline">
-                                                Xóa tất cả
-                                            </button>
-                                        </div>
-                                        <div class="flex flex-wrap gap-1.5 px-1">
-                                            <template x-for="(term, rIdx) in recentSearches" :key="'recent-' + rIdx">
-                                                <div class="group inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 hover:bg-pastel-rose text-slate-700 hover:text-magenta-accent border border-slate-200/80 text-xs font-medium transition cursor-pointer"
-                                                     :class="isItemActive('recent', term) ? 'bg-pastel-rose text-magenta-accent ring-1 ring-magenta-accent' : ''"
-                                                     @@click="selectTerm(term)">
-                                                    <i class="fa-solid fa-magnifying-glass text-[10px] text-slate-400 group-hover:text-magenta-accent"></i>
-                                                    <span x-text="term"></span>
-                                                    <button type="button" 
-                                                            @@click.stop="removeRecentSearch(term)"
-                                                            class="ml-0.5 text-slate-400 hover:text-rose-600 transition p-0.5"
-                                                            title="Xóa mục này">
-                                                        <i class="fa-solid fa-xmark text-[10px]"></i>
-                                                    </button>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </template>
-
-                                <!-- Trending Keywords -->
-                                <div>
-                                    <div class="px-1 mb-2">
-                                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-                                            <i class="fa-solid fa-fire text-amber-500"></i>
-                                            <span>Xu Hướng Tìm Kiếm Hôm Nay</span>
-                                            <span class="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-rose-100 text-rose-700">HOT</span>
-                                        </span>
-                                    </div>
-                                    <div class="flex flex-wrap gap-1.5 px-1">
-                                        <template x-for="(kw, kIdx) in suggestions.hotKeywords" :key="'hot-' + kIdx">
-                                            <button type="button"
-                                                    @@click="selectTerm(kw)"
-                                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 hover:bg-pastel-rose text-slate-700 hover:text-magenta-accent border border-slate-200/70 text-xs font-semibold transition group"
-                                                    :class="isItemActive('keyword', kw) ? 'bg-pastel-rose text-magenta-accent ring-1 ring-magenta-accent' : ''">
-                                                <i class="fa-solid fa-magnifying-glass text-[10px] text-slate-400 group-hover:text-magenta-accent"></i>
-                                                <span x-text="kw"></span>
-                                            </button>
-                                        </template>
-                                    </div>
-                                </div>
-
-                                <!-- Featured Categories Quick Jump -->
-                                <template x-if="suggestions.categories && suggestions.categories.length > 0">
-                                    <div class="pt-2 border-t border-slate-100">
-                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2 px-1">
-                                            Khám Phá Danh Mục Nổi Bật
-                                        </span>
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <template x-for="cat in suggestions.categories.slice(0, 4)" :key="'cat-feat-' + cat.id">
-                                                <a :href="'/tim-kiem?categorySlug=' + cat.slug"
-                                                   class="flex items-center gap-2 p-2 rounded-xl bg-pastel-rose/40 hover:bg-pastel-rose border border-rose-100/60 transition group">
-                                                    <div class="w-7 h-7 rounded-lg bg-white flex items-center justify-center text-magenta-accent shadow-2xs group-hover:scale-105 transition shrink-0">
-                                                        <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
-                                                    </div>
-                                                    <div class="min-w-0">
-                                                        <div class="text-xs font-bold text-charcoal group-hover:text-magenta-accent truncate" x-text="cat.name"></div>
-                                                        <div class="text-[10px] text-slate-400" x-text="cat.productCount + ' sản phẩm'"></div>
-                                                    </div>
-                                                </a>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
-
-                        <!-- STATE 2: ACTIVE SEARCH SUGGESTIONS (Khi đã nhập >= 2 ký tự) -->
-                        <template x-if="query && query.trim().length >= 2">
-                            <div>
-                                <!-- Loading indicator -->
-                                <template x-if="isLoading">
-                                    <div class="py-5 text-center text-slate-400 text-xs">
-                                        <i class="fa-solid fa-spinner fa-spin text-magenta-accent text-base mb-1.5"></i>
-                                        <div>Đang tải gợi ý làm đẹp cao cấp...</div>
-                                    </div>
-                                </template>
-
-                                <!-- Search Results Content -->
-                                <template x-if="!isLoading">
-                                    <div>
-                                        <!-- Brands & Categories Badges -->
-                                        <template x-if="(suggestions.brands && suggestions.brands.length > 0) || (suggestions.categories && suggestions.categories.length > 0)">
-                                            <div class="mb-3 space-y-2 border-b border-slate-100 pb-2.5">
-                                                <!-- Brands -->
-                                                <template x-if="suggestions.brands && suggestions.brands.length > 0">
-                                                    <div class="flex items-center gap-1.5 flex-wrap px-1">
-                                                        <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider mr-1">Thương hiệu:</span>
-                                                        <template x-for="b in suggestions.brands" :key="'b-' + b.id">
-                                                            <a :href="'/tim-kiem?brand=' + encodeURIComponent(b.name)"
-                                                               class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 hover:bg-magenta-accent hover:text-white text-slate-700 text-xs font-semibold transition"
-                                                               :class="isItemActive('brand', b.name) ? 'bg-magenta-accent text-white ring-1 ring-magenta-accent' : ''">
-                                                                <i class="fa-solid fa-certificate text-[9px] text-amber-500"></i>
-                                                                <span x-html="highlightMatch(b.name, query)"></span>
-                                                                <span class="text-[10px] opacity-75" x-text="'(' + b.productCount + ')'"></span>
-                                                            </a>
-                                                        </template>
-                                                    </div>
-                                                </template>
-
-                                                <!-- Categories -->
-                                                <template x-if="suggestions.categories && suggestions.categories.length > 0">
-                                                    <div class="flex items-center gap-1.5 flex-wrap px-1">
-                                                        <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider mr-1">Danh mục:</span>
-                                                        <template x-for="c in suggestions.categories" :key="'c-' + c.id">
-                                                            <a :href="'/tim-kiem?categorySlug=' + c.slug"
-                                                               class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 hover:bg-magenta-accent hover:text-white text-magenta-accent text-xs font-semibold transition"
-                                                               :class="isItemActive('category', c.slug) ? 'bg-magenta-accent text-white ring-1 ring-magenta-accent' : ''">
-                                                                <span x-html="highlightMatch(c.name, query)"></span>
-                                                            </a>
-                                                        </template>
-                                                    </div>
-                                                </template>
-                                            </div>
-                                        </template>
-
-                                        <!-- Products List -->
-                                        <template x-if="suggestions.products && suggestions.products.length > 0">
-                                            <div>
-                                                <div class="px-1 mb-2 flex items-center justify-between">
-                                                    <span class="text-[10px] font-bold uppercase text-slate-400 tracking-wider">
-                                                        Sản Phẩm Gợi Ý (<span x-text="suggestions.totalMatches"></span>)
-                                                    </span>
-                                                    <span class="text-[10px] text-slate-400 hidden sm:inline">
-                                                        Dùng phím <kbd class="px-1 py-0.5 bg-slate-100 rounded text-[9px] font-mono">↑</kbd> <kbd class="px-1 py-0.5 bg-slate-100 rounded text-[9px] font-mono">↓</kbd> để chọn
-                                                    </span>
-                                                </div>
-                                                
-                                                <div class="space-y-1.5 max-h-[320px] overflow-y-auto pr-1 divide-y divide-slate-100/70">
-                                                    <template x-for="p in suggestions.products" :key="'p-' + p.id">
-                                                        <a :href="'/san-pham/' + p.slug" 
-                                                           class="flex items-center gap-3 p-2 rounded-xl hover:bg-pastel-rose/80 transition border border-transparent hover:border-pink-100 group"
-                                                           :class="isItemActive('product', p.name) ? 'bg-pastel-rose border-pink-200 ring-1 ring-magenta-accent/30' : ''">
-                                                            
-                                                            <!-- Product Thumbnail -->
-                                                            <div class="relative shrink-0">
-                                                                <img :src="p.imageUrl" 
-                                                                     :alt="p.name" 
-                                                                     class="w-12 h-12 rounded-xl object-cover border border-slate-200/80 group-hover:border-magenta-accent/40 shadow-2xs group-hover:scale-105 transition duration-200" 
-                                                                     loading="lazy" />
-                                                                <template x-if="p.isFeatured">
-                                                                    <span class="absolute -top-1 -left-1 text-[8px] bg-charcoal text-white font-bold px-1 rounded-sm shadow-2xs">HOT</span>
-                                                                </template>
-                                                            </div>
-
-                                                            <!-- Product Info -->
-                                                            <div class="flex-1 min-w-0">
-                                                                <div class="flex items-center gap-1.5 mb-0.5">
-                                                                    <span class="text-[9px] font-bold text-rose-gold uppercase tracking-wider truncate" x-text="p.brandName"></span>
-                                                                    <span class="text-slate-300">•</span>
-                                                                    <span class="text-[9px] text-slate-500 truncate" x-text="p.categoryName"></span>
-                                                                </div>
-
-                                                                <h4 class="text-xs font-bold text-slate-800 truncate group-hover:text-magenta-accent transition leading-tight" 
-                                                                    x-html="highlightMatch(p.name, query)"></h4>
-
-                                                                <div class="flex items-baseline gap-2 mt-1">
-                                                                    <span class="text-xs font-bold text-charcoal font-mono-numeric" 
-                                                                          x-text="formatPrice(p.salePrice || p.price)"></span>
-                                                                    <template x-if="p.salePrice && p.salePrice < p.price">
-                                                                        <span class="text-[10px] text-slate-400 line-through font-mono-numeric" 
-                                                                              x-text="formatPrice(p.price)"></span>
-                                                                    </template>
-                                                                </div>
-                                                            </div>
-                                                        </a>
-                                                    </template>
-                                                </div>
-
-                                                <!-- View All Footer Button -->
-                                                <a :href="'/tim-kiem?q=' + encodeURIComponent(query)"
-                                                   @@click="saveRecentSearch(query)"
-                                                   class="w-full flex items-center justify-center gap-2 mt-2.5 py-2 px-4 rounded-xl bg-pastel-rose text-magenta-accent hover:bg-magenta-accent hover:text-white font-bold text-xs transition duration-200 shadow-2xs"
-                                                   :class="isItemActive('view_all', query) ? 'bg-magenta-accent text-white' : ''">
-                                                    <span>Xem tất cả <span x-text="suggestions.totalMatches"></span> kết quả cho "<span x-text="query"></span>"</span>
-                                                    <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                                                </a>
-                                            </div>
-                                        </template>
-
-                                        <!-- Fallback Empty State -->
-                                        <template x-if="(!suggestions.products || suggestions.products.length === 0) && (!suggestions.brands || suggestions.brands.length === 0) && (!suggestions.categories || suggestions.categories.length === 0)">
-                                            <div class="py-6 px-4 text-center">
-                                                <div class="h-10 w-10 rounded-full bg-pastel-rose text-magenta-accent flex items-center justify-center mx-auto mb-2 text-base">
-                                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
-                                                </div>
-                                                <h5 class="text-xs font-bold text-slate-800 mb-1">Không tìm thấy sản phẩm phù hợp</h5>
-                                                <p class="text-[11px] text-slate-500 max-w-xs mx-auto mb-3">
-                                                    Rất tiếc không có sản phẩm nào khớp với "<span class="font-bold text-charcoal" x-text="query"></span>".
-                                                </p>
-                                                <div>
-                                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-2">Từ khóa gợi ý:</span>
-                                                    <div class="flex flex-wrap gap-1.5 justify-center">
-                                                        <template x-for="kw in suggestions.hotKeywords" :key="'empty-kw-' + kw">
-                                                            <button type="button"
-                                                                    @@click="selectTerm(kw)"
-                                                                    class="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-pastel-rose text-slate-700 hover:text-magenta-accent text-xs font-semibold transition">
-                                                                <i class="fa-solid fa-magnifying-glass text-[9px] text-slate-400 mr-1"></i>
-                                                                <span x-text="kw"></span>
-                                                            </button>
-                                                        </template>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-
-                <!-- Utilities: Wishlist, Account, Mini-Cart Drawer Trigger -->
-                <div class="flex items-center gap-2 sm:gap-4 shrink-0">
-                    <!-- Mobile Search Trigger Button -->
-                    <button type="button" 
-                            @@click="toggleMobileSearch()" 
-                            class="md:hidden p-2.5 text-slate-700 hover:text-magenta-accent transition rounded-full hover:bg-pastel-rose focus:outline-none" 
-                            aria-label="Mở tìm kiếm nhanh"
-                            title="Tìm kiếm">
-                        <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                <!-- Trái: Logo Thương Hiệu -->
+                <div class="flex items-center gap-2 shrink-0">
+                    <!-- Nút Hamburger chỉ hiện ở Tablet (768px - 1023px) khi chưa có MegaNav -->
+                    <button type="button"
+                            @@click="mobileMenuOpen = true"
+                            aria-label="Mở danh mục điều hướng"
+                            :aria-expanded="mobileMenuOpen ? 'true' : 'false'"
+                            aria-controls="mobileNavigationDrawer"
+                            class="lg:hidden inline-flex items-center justify-center w-11 h-11 rounded-full text-[var(--rl-ink)] hover:text-[var(--rl-rose)] hover:bg-[var(--rl-bg-blush)] transition">
+                        <i class="fa-solid fa-bars-staggered text-base" aria-hidden="true"></i>
                     </button>
 
-                    <!-- Wishlist Link -->
-                    <a href="/wishlist" class="relative p-2.5 text-slate-700 hover:text-magenta-accent transition rounded-full hover:bg-pastel-rose" title="Sản phẩm yêu thích">
-                        <i class="fa-regular fa-heart text-lg"></i>
-                        <span id="wishlistCountBadge" class="absolute top-1 right-1 h-4 w-4 rounded-full bg-magenta-accent text-white text-[10px] font-bold flex items-center justify-center">0</span>
+                    <a href="/"
+                       aria-label="@Brand.Name - Trang chủ"
+                       class="flex items-center gap-2 group focus-visible:outline-2 focus-visible:outline-[var(--rl-rose)] rounded-full py-1 pr-2">
+                        <img src="@Brand.LogoUrl"
+                             alt="@Brand.Name Logo"
+                             class="h-9 xl:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+                             onerror="this.onerror=null; this.src='/images/branding/canmake-logo-horizontal.svg';" />
+                        <span class="sr-only">@Brand.Name</span>
+                    </a>
+                </div>
+
+                <!-- Giữa: Menu Điều Hướng Trung Tâm + Mega Menu (_MegaNav.cshtml) -->
+                <partial name="_MegaNav" />
+
+                <!-- Phải: Cụm Icon Tiện Ích (Tìm kiếm, Yêu thích, Thông báo, Tài khoản, Giỏ hàng) -->
+                <div class="flex items-center gap-2 shrink-0">
+
+                    <!-- 1. Nút mở Fullscreen Search Overlay (Dạng Pill thanh lịch) -->
+                    <button type="button"
+                            id="btnOpenDesktopSearchOverlay"
+                            @@click="openSearchOverlay()"
+                            aria-label="Mở khung tìm kiếm toàn màn hình"
+                            aria-haspopup="dialog"
+                            :aria-expanded="searchOverlayOpen.toString()"
+                            aria-controls="fullscreenSearchOverlay"
+                            class="inline-flex items-center gap-2.5 min-h-[44px] px-3.5 xl:px-4 py-2 rounded-full bg-[var(--rl-bg-blush)]/75 hover:bg-[var(--rl-bg-petal)]/80 text-[var(--rl-mauve)] hover:text-[var(--rl-ink)] border border-[var(--rl-border-strong)]/60 transition group">
+                        <i class="fa-solid fa-magnifying-glass text-xs text-[var(--rl-rose)] group-hover:scale-110 transition-transform" aria-hidden="true"></i>
+                        <span class="text-xs font-medium hidden xl:inline max-w-[140px] truncate"
+                              x-text="query ? query : 'Tìm kiếm mỹ phẩm...'">Tìm kiếm mỹ phẩm...</span>
+                        <kbd class="hidden 2xl:inline-flex items-center px-1.5 py-0.5 text-[9px] font-bold text-[var(--rl-muted)] bg-white/80 rounded border border-[var(--rl-border-subtle)]">
+                            /
+                        </kbd>
+                    </button>
+
+                    <!-- 2. Yêu thích (Wishlist) -->
+                    <a href="/wishlist"
+                       aria-label="Danh sách sản phẩm yêu thích"
+                       class="relative inline-flex items-center justify-center w-11 h-11 rounded-full text-[var(--rl-ink)] hover:text-[var(--rl-rose)] hover:bg-[var(--rl-bg-blush)] transition">
+                        <i class="fa-regular fa-heart text-base" aria-hidden="true"></i>
+                        <span id="wishlistCountBadge"
+                              data-wishlist-count
+                              class="absolute top-1 right-1 bg-[var(--rl-rose)] text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center shadow-2xs font-mono-numeric">0</span>
                     </a>
 
-                    <!-- Storefront Realtime Notification Center Dropdown -->
-                    <div class="relative" x-data="storefrontNotificationCenter()" x-init="init()">
-                        <button @@click="toggleOpen()"
-                                type="button" 
-                                class="relative p-2.5 text-slate-700 hover:text-magenta-accent transition rounded-full hover:bg-pastel-rose focus:outline-none" 
-                                title="Thông báo đơn hàng & Ưu đãi">
-                            <i class="fa-regular fa-bell text-lg" :class="unreadCount > 0 ? 'text-magenta-accent' : ''"></i>
-                            <span x-show="unreadCount > 0" 
-                                  x-text="unreadCount > 9 ? '9+' : unreadCount" 
-                                  class="absolute top-1 right-1 h-4 w-4 rounded-full bg-magenta-accent text-white text-[10px] font-bold flex items-center justify-center animate-pulse shadow-sm">0</span>
+                    <!-- 3. Trung Tâm Thông Báo (Notification Bell) -->
+                    <div class="relative"
+                         x-data="storefrontNotificationCenter()"
+                         x-init="initNotifications()"
+                         @@click.away="notifOpen = false"
+                         @@keydown.escape.window="notifOpen = false">
+                        <button type="button"
+                                @@click="toggleDropdown()"
+                                aria-label="Thông báo của bạn"
+                                :aria-expanded="notifOpen.toString()"
+                                class="relative inline-flex items-center justify-center w-11 h-11 rounded-full text-[var(--rl-ink)] hover:text-[var(--rl-rose)] hover:bg-[var(--rl-bg-blush)] transition">
+                            <i class="fa-regular fa-bell text-base" :class="unreadCount > 0 ? 'animate-swing text-[var(--rl-rose)]' : ''" aria-hidden="true"></i>
+                            <span x-cloak
+                                  x-show="unreadCount > 0"
+                                  x-text="unreadCount > 99 ? '99+' : unreadCount"
+                                  class="absolute top-1 right-1 bg-[var(--rl-rose)] text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center shadow-2xs font-mono-numeric"></span>
                         </button>
 
-                        <!-- Notification Dropdown Popover -->
-                        <div x-show="isOpen"
-                             @@click.outside="isOpen = false"
+                        <!-- Dropdown Thông báo -->
+                        <div x-cloak
+                             x-show="notifOpen"
                              x-transition:enter="transition ease-out duration-200"
                              x-transition:enter-start="opacity-0 translate-y-2 scale-95"
                              x-transition:enter-end="opacity-100 translate-y-0 scale-100"
                              x-transition:leave="transition ease-in duration-150"
                              x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                              x-transition:leave-end="opacity-0 translate-y-2 scale-95"
-                             style="display: none;"
-                             class="absolute right-0 top-full mt-2 w-80 sm:w-96 rounded-2xl bg-white/98 backdrop-blur-xl border border-rose-100 shadow-2xl z-50 overflow-hidden font-sans">
-                            
-                            <!-- Header -->
-                            <div class="p-3.5 border-b border-rose-100 flex items-center justify-between bg-gradient-to-r from-pastel-rose via-white to-pink-50/50">
+                             class="absolute right-0 mt-3 w-80 sm:w-96 rounded-[24px] bg-[var(--rl-surface)] shadow-[var(--rl-shadow-xl)] border border-[var(--rl-border-strong)] overflow-hidden z-[var(--rl-z-popover)]">
+                            <div class="px-4 py-3 bg-[var(--rl-bg-blush)] border-b border-[var(--rl-border-subtle)] flex items-center justify-between">
                                 <div class="flex items-center gap-2">
-                                    <div class="h-6 w-6 rounded-lg bg-pink-100 text-magenta-accent flex items-center justify-center text-xs">
-                                        <i class="fa-solid fa-bell"></i>
-                                    </div>
-                                    <span class="text-xs font-bold text-charcoal">Trung Tâm Thông Báo</span>
-                                    <template x-if="unreadCount > 0">
-                                        <span class="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-magenta-accent text-white" x-text="unreadCount + ' mới'"></span>
-                                    </template>
+                                    <i class="fa-solid fa-bell text-[var(--rl-rose)] text-xs" aria-hidden="true"></i>
+                                    <span class="text-xs font-bold text-[var(--rl-ink)] uppercase tracking-wider">Thông Báo Của Bạn</span>
+                                    <span x-show="unreadCount > 0"
+                                          x-text="unreadCount + ' mới'"
+                                          class="px-2 py-0.5 text-[10px] font-bold bg-[var(--rl-rose)] text-white rounded-full"></span>
                                 </div>
-                                <button @@click="markAllAsRead()" 
-                                        type="button"
-                                        class="text-[11px] font-semibold text-magenta-accent hover:underline">
-                                    Đọc tất cả
+                                <button type="button"
+                                        x-show="unreadCount > 0"
+                                        @@click="markAllAsRead()"
+                                        class="text-[11px] font-semibold text-[var(--rl-rose)] hover:underline">
+                                    Đánh dấu đã đọc
                                 </button>
                             </div>
 
-                            <!-- Items List -->
-                            <div class="max-h-80 overflow-y-auto divide-y divide-rose-50">
-                                <template x-if="loading && notifications.length === 0">
-                                    <div class="p-6 text-center text-xs text-slate-400">
-                                        <i class="fa-solid fa-spinner fa-spin text-base text-magenta-accent mb-2"></i>
-                                        <div>Đang tải thông báo...</div>
+                            <div class="max-h-80 overflow-y-auto divide-y divide-[var(--rl-border-subtle)]">
+                                <template x-if="loading">
+                                    <div class="p-6 text-center text-xs text-[var(--rl-muted)]">
+                                        <i class="fa-solid fa-circle-notch fa-spin text-[var(--rl-rose)] text-base mb-1.5" aria-hidden="true"></i>
+                                        <p>Đang tải thông báo...</p>
                                     </div>
                                 </template>
 
-                                <template x-if="!loading && notifications.length === 0">
-                                    <div class="p-6 text-center">
-                                        <i class="fa-regular fa-bell-slash text-2xl text-slate-300 mb-2"></i>
-                                        <div class="text-xs font-medium text-slate-600">Không có thông báo mới</div>
-                                        <div class="text-[10px] text-slate-400 mt-0.5">Bạn sẽ nhận được ưu đãi và cập nhật đơn hàng tại đây</div>
+                                <template x-if="!loading && items.length === 0">
+                                    <div class="p-8 text-center">
+                                        <div class="w-11 h-11 rounded-full bg-[var(--rl-bg-blush)] text-[var(--rl-rose)] mx-auto flex items-center justify-center mb-2">
+                                            <i class="fa-regular fa-bell-slash text-base" aria-hidden="true"></i>
+                                        </div>
+                                        <p class="text-xs font-semibold text-[var(--rl-ink)]">Chưa có thông báo mới</p>
+                                        <p class="text-[11px] text-[var(--rl-muted)] mt-0.5">Ưu đãi độc quyền &amp; trạng thái đơn hàng sẽ hiển thị tại đây.</p>
                                     </div>
                                 </template>
 
-                                <template x-for="item in notifications" :key="item.id">
-                                    <div @@click="handleClick(item)"
-                                         class="p-3 hover:bg-pastel-rose/50 cursor-pointer transition flex items-start gap-3 relative"
-                                         :class="!item.isRead ? 'bg-pink-50/40' : ''">
-                                        <div class="h-8 w-8 rounded-xl flex items-center justify-center text-sm shrink-0"
-                                             :class="item.severity === 'SUCCESS' ? 'bg-emerald-50 text-emerald-600' : (item.severity === 'DANGER' ? 'bg-rose-50 text-rose-600' : 'bg-pink-50 text-magenta-accent')">
-                                            <i :class="item.severity === 'SUCCESS' ? 'fa-solid fa-circle-check' : (item.type === 'ORDER' ? 'fa-solid fa-box' : 'fa-solid fa-bell')"></i>
+                                <template x-for="item in items" :key="item.id">
+                                    <div @@click="openNotificationItem(item)"
+                                         class="px-4 py-3 hover:bg-[var(--rl-bg-blush)]/60 transition cursor-pointer flex items-start gap-3"
+                                         :class="!item.isRead ? 'bg-[var(--rl-bg-blush)]/35' : ''">
+                                        <div class="w-8 h-8 rounded-full bg-[var(--rl-bg-petal)] text-[var(--rl-rose)] flex items-center justify-center shrink-0 mt-0.5">
+                                            <i class="text-xs" :class="getIconClass(item.type)" aria-hidden="true"></i>
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <div class="flex items-center justify-between gap-1">
-                                                <h5 class="text-xs font-bold text-slate-800 truncate" x-text="item.title"></h5>
-                                                <span class="text-[10px] text-slate-400 shrink-0" x-text="item.timeAgo"></span>
-                                            </div>
-                                            <p class="text-[11px] text-slate-600 line-clamp-2 mt-0.5" x-text="item.message"></p>
+                                            <p class="text-xs font-bold text-[var(--rl-ink)] line-clamp-1" x-text="item.title"></p>
+                                            <p class="text-[11px] text-[var(--rl-mauve)] line-clamp-2 mt-0.5" x-text="item.message"></p>
+                                            <span class="text-[10px] text-[var(--rl-muted)] mt-1 block" x-text="item.timeAgo"></span>
                                         </div>
-                                        <template x-if="!item.isRead">
-                                            <span class="h-2 w-2 rounded-full bg-magenta-accent shrink-0 mt-1.5"></span>
-                                        </template>
                                     </div>
                                 </template>
-                            </div>
-
-                            <!-- Footer -->
-                            <div class="p-2 border-t border-rose-100 bg-slate-50 text-center">
-                                <a href="/Customer/Orders" class="text-[11px] font-bold text-magenta-accent hover:underline block py-1">
-                                    Xem lịch sử đơn hàng & thông báo <i class="fa-solid fa-arrow-right text-[9px] ml-1"></i>
-                                </a>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Account Menu Dropdown -->
-                    <div class="relative group" x-data="{ userMenuOpen: false }">
-                        @if (isStaffLogged)
-                        {
-                            <a href="/Admin/Dashboard" class="p-2.5 text-magenta-accent hover:text-charcoal transition rounded-full bg-pastel-rose/80 hover:bg-pastel-rose flex items-center gap-1.5" title="Tài khoản vận hành: @displayUserName">
-                                <i class="fa-solid fa-user-shield text-base"></i>
-                                <span class="hidden xl:inline text-xs font-bold max-w-[120px] truncate">@displayUserName</span>
-                            </a>
-                            <div class="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-rose-100 p-2 hidden group-hover:block hover:block transition animate-in fade-in z-50">
-                                <div class="px-3 py-2 border-b border-slate-100 mb-1">
-                                    <div class="text-xs font-bold text-charcoal truncate">@displayUserName</div>
-                                    <div class="text-[10px] font-semibold text-magenta-accent">Nhân sự & Quản trị viên</div>
-                                </div>
-                                <a href="/Admin/Dashboard" class="block px-3 py-2 text-xs font-bold text-magenta-accent hover:bg-pastel-rose rounded-xl transition flex items-center gap-2">
-                                    <i class="fa-solid fa-gauge-high w-4 text-magenta-accent"></i> Bảng Điều Khiển Quản Trị
-                                </a>
-                                <a href="/Admin/Pos" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
-                                    <i class="fa-solid fa-cash-register w-4 text-emerald-600"></i> Quầy Thu Ngân POS
-                                </a>
-                                <a href="/Admin/Warehouse" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
-                                    <i class="fa-solid fa-boxes-stacked w-4 text-amber-500"></i> Quản Trị Kho & FEFO
-                                </a>
-                                <a href="/Admin/Banner" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
-                                    <i class="fa-regular fa-images w-4 text-blue-500"></i> Quản Lý Banner & CMS
-                                </a>
-                                <div class="border-t border-slate-100 my-1"></div>
-                                <a href="/Account/Logout" class="block px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition flex items-center gap-2">
-                                    <i class="fa-solid fa-right-from-bracket w-4"></i> Đăng Xuất
-                                </a>
-                            </div>
-                        }
-                        else if (isCustomerLogged)
-                        {
-                            <a href="/Customer/Dashboard" class="p-2.5 text-slate-700 hover:text-magenta-accent transition rounded-full hover:bg-pastel-rose flex items-center gap-1.5" title="Tài khoản: @displayUserName">
-                                <i class="fa-solid fa-circle-user text-lg text-magenta-accent"></i>
-                                <span class="hidden xl:inline text-xs font-bold max-w-[120px] truncate">@displayUserName</span>
-                            </a>
-                            <div class="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 hidden group-hover:block hover:block transition animate-in fade-in z-50">
-                                <div class="px-3 py-2 border-b border-slate-100 mb-1">
-                                    <div class="text-xs font-bold text-charcoal truncate">@displayUserName</div>
-                                    <div class="text-[10px] text-slate-400">Thành viên thân thiết Canmake</div>
-                                </div>
-                                <a href="/Customer/Dashboard" class="block px-3 py-2 text-xs font-bold text-amber-800 hover:bg-amber-50/70 rounded-xl transition flex items-center gap-2">
-                                    <i class="fa-solid fa-crown w-4 text-amber-500"></i> Thẻ VIP & Điểm Thưởng
-                                </a>
-                                <a href="/Customer/Orders" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
-                                    <i class="fa-solid fa-bag-shopping w-4 text-blue-500"></i> Đơn Hàng Của Tôi
-                                </a>
-                                <a href="/Customer/Addresses" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
-                                    <i class="fa-solid fa-location-dot w-4 text-rose-gold"></i> Sổ Địa Chỉ Nhận Hàng
-                                </a>
-                                <a href="/orders/tracking" class="block px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition flex items-center gap-2">
-                                    <i class="fa-solid fa-truck-fast w-4 text-slate-400"></i> Tra cứu đơn hàng
-                                </a>
-                                <a href="/Account/ChangePassword" class="block px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition flex items-center gap-2">
-                                    <i class="fa-solid fa-key w-4 text-slate-400"></i> Đổi Mật Khẩu
-                                </a>
-                                <div class="border-t border-slate-100 my-1"></div>
-                                <a href="/Account/Logout" class="block px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition flex items-center gap-2">
-                                    <i class="fa-solid fa-right-from-bracket w-4"></i> Đăng Xuất
-                                </a>
-                            </div>
-                        }
-                        else
-                        {
-                            <a href="/Account/Login" class="p-2.5 text-slate-700 hover:text-magenta-accent transition rounded-full hover:bg-pastel-rose flex items-center gap-1.5" title="Tài khoản">
-                                <i class="fa-regular fa-user text-lg"></i>
-                                <span class="hidden xl:inline text-xs font-semibold">Tài Khoản</span>
-                            </a>
-                            <div class="absolute right-0 top-full mt-2 w-52 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 hidden group-hover:block hover:block transition animate-in fade-in z-50">
-                                <div class="px-3 py-2 border-b border-slate-100 mb-1">
-                                    <div class="text-xs font-bold text-charcoal">Khách Hàng Thân Thiết</div>
-                                    <div class="text-[10px] text-slate-400">Đăng nhập để tích điểm Loyalty</div>
-                                </div>
-                                <a href="/Account/Login" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition">
-                                    <i class="fa-solid fa-arrow-right-to-bracket mr-2 text-slate-400"></i> Đăng Nhập
-                                </a>
-                                <a href="/Account/Register" class="block px-3 py-2 text-xs font-bold text-magenta-accent hover:bg-pastel-rose rounded-xl transition">
-                                    <i class="fa-solid fa-gift mr-2 text-warning"></i> Đăng Ký (+50 Điểm)
-                                </a>
-                                <a href="/Customer/Dashboard" class="block px-3 py-2 text-xs font-bold text-amber-800 hover:bg-amber-50/70 rounded-xl transition flex items-center gap-2">
-                                    <i class="fa-solid fa-crown text-amber-500"></i> Thẻ VIP & Điểm Thưởng
-                                </a>
-                                <a href="/Customer/Orders" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
-                                    <i class="fa-solid fa-bag-shopping text-blue-500"></i> Đơn Hàng Của Tôi
-                                </a>
-                                <a href="/Customer/Addresses" class="block px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-pastel-rose hover:text-magenta-accent rounded-xl transition flex items-center gap-2">
-                                    <i class="fa-solid fa-location-dot text-rose-gold"></i> Sổ Địa Chỉ Nhận Hàng
-                                </a>
-                                <a href="/orders/tracking" class="block px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition">
-                                    <i class="fa-solid fa-truck-fast mr-2 text-slate-400"></i> Tra cứu đơn hàng
-                                </a>
-                            </div>
-                        }
-                    </div>
+                    <!-- 4. Tài Khoản (Account Dropdown / Login) -->
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="relative" x-data="{ userMenuOpen: false }" @@click.away="userMenuOpen = false" @@keydown.escape.window="userMenuOpen = false">
+                            <button type="button"
+                                    @@click="userMenuOpen = !userMenuOpen"
+                                    aria-label="Tài khoản cá nhân"
+                                    :aria-expanded="userMenuOpen.toString()"
+                                    class="inline-flex items-center gap-2 min-h-[44px] min-w-[44px] px-2.5 py-1.5 rounded-full hover:bg-[var(--rl-bg-blush)] border border-transparent hover:border-[var(--rl-border-strong)] transition">
+                                <span class="w-8 h-8 rounded-full bg-[var(--rl-rose)] text-white flex items-center justify-center text-xs font-bold shadow-2xs">
+                                    @(User.Identity.Name?.Substring(0, 1).ToUpper() ?? "U")
+                                </span>
+                                <i class="fa-solid fa-chevron-down text-[10px] text-[var(--rl-muted)] hidden xl:inline" aria-hidden="true"></i>
+                            </button>
 
-                    <!-- Mini Cart Trigger Button -->
-                    <button type="button" 
-                            @@click="cartOpen = true" 
-                            id="btnOpenMiniCart" 
-                            class="relative inline-flex items-center gap-2.5 px-4 sm:px-5 py-2.5 rounded-full bg-charcoal text-white hover:bg-charcoal/90 shadow-md transition-all group"
-                            aria-label="Xem giỏ hàng">
-                        <i class="fa-solid fa-bag-shopping text-sm text-rose-gold group-hover:scale-110 transition-transform"></i>
-                        <span class="text-xs font-bold font-mono-numeric tracking-wide" id="miniCartHeaderTotal">0 ₫</span>
-                        <span id="miniCartCountBadge" class="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-magenta-accent text-white text-[10px] font-bold flex items-center justify-center border-2 border-white shadow-sm">0</span>
+                            <div x-cloak
+                                 x-show="userMenuOpen"
+                                 x-transition
+                                 class="absolute right-0 mt-3 w-64 rounded-[24px] bg-[var(--rl-surface)] shadow-[var(--rl-shadow-xl)] border border-[var(--rl-border-strong)] py-2.5 z-[var(--rl-z-popover)]">
+                                <div class="px-4 py-2.5 border-b border-[var(--rl-border-subtle)]">
+                                    <p class="text-xs font-bold text-[var(--rl-ink)] truncate">@User.Identity.Name</p>
+                                    <p class="text-[10px] font-bold text-[var(--rl-rose)] uppercase tracking-wider mt-0.5">✦ Hội Viên Rosé VIP</p>
+                                </div>
+
+                                @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Pharmacist") || User.IsInRole("Staff"))
+                                {
+                                    <div class="p-2 border-b border-[var(--rl-border-subtle)] bg-[var(--rl-bg-blush)]/40">
+                                        <a href="/Admin/Dashboard" class="flex items-center gap-2.5 px-3 py-2 text-xs font-bold text-white bg-[var(--rl-rose)] rounded-xl hover:bg-[var(--rl-rose-deep)] transition">
+                                            <i class="fa-solid fa-gauge-high w-4 text-center" aria-hidden="true"></i>
+                                            <span>Vào Trang Quản Trị</span>
+                                        </a>
+                                    </div>
+                                }
+
+                                <a href="/Customer/Dashboard" class="flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-[var(--rl-ink)] hover:bg-[var(--rl-bg-blush)] hover:text-[var(--rl-rose)] transition">
+                                    <i class="fa-solid fa-id-card-clip w-4 text-center text-[var(--rl-rose)]" aria-hidden="true"></i>
+                                    <span>Hồ Sơ &amp; Sổ Địa Chỉ</span>
+                                </a>
+                                <a href="/Order/History" class="flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-[var(--rl-ink)] hover:bg-[var(--rl-bg-blush)] hover:text-[var(--rl-rose)] transition">
+                                    <i class="fa-solid fa-box-open w-4 text-center text-[var(--rl-rose)]" aria-hidden="true"></i>
+                                    <span>Lịch Sử Đơn Hàng</span>
+                                </a>
+                                <div class="border-t border-[var(--rl-border-subtle)] mt-1 pt-1">
+                                    <form asp-controller="Account" asp-action="Logout" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="w-full text-left flex items-center gap-2.5 px-4 py-2.5 text-xs text-[var(--rl-error)] hover:bg-rose-50 transition font-semibold">
+                                            <i class="fa-solid fa-right-from-bracket w-4 text-center" aria-hidden="true"></i>
+                                            <span>Đăng Xuất</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <a href="/Account/Login"
+                           aria-label="Đăng nhập tài khoản"
+                           class="inline-flex items-center justify-center w-11 h-11 rounded-full text-[var(--rl-ink)] hover:text-[var(--rl-rose)] hover:bg-[var(--rl-bg-blush)] transition">
+                            <i class="fa-regular fa-user text-base" aria-hidden="true"></i>
+                        </a>
+                    }
+
+                    <!-- 5. Giỏ Hàng Có Badge Số & Tổng Tiền (#btnOpenMiniCart) -->
+                    <button type="button"
+                            id="btnOpenMiniCart"
+                            data-action="open-mini-cart"
+                            aria-label="Mở giỏ hàng"
+                            class="inline-flex items-center gap-2.5 min-h-[44px] pl-3.5 pr-2 py-1.5 rounded-full bg-[var(--rl-ink)] hover:bg-[var(--rl-rose)] text-white transition-colors duration-200 shadow-[var(--rl-shadow-xs)] group">
+                        <i class="fa-solid fa-bag-shopping text-sm text-[var(--rl-bg-petal)] group-hover:text-white transition-colors" aria-hidden="true"></i>
+                        <span id="miniCartHeaderTotal"
+                              data-cart-total
+                              class="hidden 2xl:inline text-xs font-bold font-mono-numeric tracking-tight">@initialCartTotalFormatted</span>
+                        <span id="miniCartCountBadge"
+                              data-cart-count
+                              class="min-w-[26px] h-[26px] px-1.5 rounded-full bg-[var(--rl-rose)] group-hover:bg-white group-hover:text-[var(--rl-rose)] text-white text-xs font-extrabold font-mono-numeric flex items-center justify-center transition-colors">
+                            @initialCartCount
+                        </span>
                     </button>
                 </div>
             </div>
-        </div>
 
-        <!-- Mobile Instant Search Drawer (Shown on small screens) -->
-        <div x-show="mobileSearchOpen"
-             x-transition:enter="transition ease-out duration-200"
-             x-transition:enter-start="opacity-0 -translate-y-2"
-             x-transition:enter-end="opacity-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-150"
-             x-transition:leave-start="opacity-100 translate-y-0"
-             x-transition:leave-end="opacity-0 -translate-y-2"
-             style="display: none;"
-             class="md:hidden border-t border-rose-100/90 bg-white/98 backdrop-blur-xl px-4 py-3 shadow-xl">
-            
-            <!form action="/tim-kiem" method="GET" x-on:submit="handleSubmit($event)" class="relative mb-2">
-                <i class="fa-solid absolute left-3.5 top-1/2 -translate-y-1/2 text-xs transition-colors"
-                   :class="isLoading ? 'fa-spinner fa-spin text-magenta-accent' : 'fa-magnifying-glass text-slate-400'"></i>
-                
-                <input type="text" 
-                       name="q" 
-                       x-ref="mobileSearchInput"
-                       x-model="query"
-                       @@focus="onFocus()"
-                       @@input="onInput()"
-                       @@keydown.arrow-down.prevent="selectNext()"
-                       @@keydown.arrow-up.prevent="selectPrev()"
-                       @@keydown.enter="handleEnter($event)"
-                       placeholder="Tìm son lì, kem chống nắng, serum..." 
-                       class="w-full pl-9 pr-16 py-2 rounded-full border border-slate-200 focus:border-magenta-accent text-xs focus:outline-none bg-slate-50 focus:bg-white transition" 
-                       autocomplete="off" />
-
-                <!-- Mobile Clear Button -->
-                <button type="button" 
-                        x-show="query && query.length > 0"
-                        @@click="clearQuery()"
-                        class="absolute right-12 top-1/2 -translate-y-1/2 h-5 w-5 flex items-center justify-center text-slate-400 hover:text-charcoal rounded-full text-xs"
-                        style="display: none;"
-                        aria-label="Xóa từ khóa">
-                    <i class="fa-solid fa-xmark text-[11px]"></i>
-                </button>
-
-                <!-- Mobile Close Drawer Button -->
-                <button type="button" 
-                        @@click="toggleMobileSearch()"
-                        class="absolute right-2.5 top-1/2 -translate-y-1/2 px-2 py-1 text-[11px] font-bold text-slate-500 hover:text-magenta-accent transition">
-                    Đóng
-                </button>
-            </!form>
-
-            <!-- Mobile Suggestions Content -->
-            <div x-show="isOpen" class="max-h-[380px] overflow-y-auto space-y-3 pt-1">
-                <!-- Mobile State 1: Recents & Trending when query < 2 chars -->
-                <template x-if="!query || query.trim().length < 2">
-                    <div class="space-y-3">
-                        <!-- Recent Searches -->
-                        <template x-if="recentSearches.length > 0">
-                            <div>
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                                        <i class="fa-regular fa-clock text-magenta-accent"></i>
-                                        <span>Tìm kiếm gần đây</span>
-                                    </span>
-                                    <button type="button" @@click="clearRecentSearches()" class="text-[9px] font-semibold text-magenta-accent hover:underline">
-                                        Xóa tất cả
-                                    </button>
-                                </div>
-                                <div class="flex flex-wrap gap-1">
-                                    <template x-for="(term, rIdx) in recentSearches" :key="'m-recent-' + rIdx">
-                                        <div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-medium cursor-pointer"
-                                             @@click="selectTerm(term)">
-                                            <span x-text="term"></span>
-                                            <button type="button" @@click.stop="removeRecentSearch(term)" class="text-slate-400 hover:text-rose-600 p-0.5">
-                                                <i class="fa-solid fa-xmark text-[9px]"></i>
-                                            </button>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
-                        </template>
-
-                        <!-- Trending Keywords -->
-                        <div>
-                            <div class="mb-1.5">
-                                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                                    <i class="fa-solid fa-fire text-amber-500"></i>
-                                    <span>Từ khóa thịnh hành</span>
-                                </span>
-                            </div>
-                            <div class="flex flex-wrap gap-1">
-                                <template x-for="(kw, kIdx) in suggestions.hotKeywords" :key="'m-hot-' + kIdx">
-                                    <button type="button" @@click="selectTerm(kw)"
-                                            class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 text-magenta-accent text-[11px] font-semibold">
-                                        <i class="fa-solid fa-magnifying-glass text-[9px] text-magenta-accent/60"></i>
-                                        <span x-text="kw"></span>
-                                    </button>
-                                </template>
-                            </div>
-                        </div>
+            <!-- =========================================================================
+                 B. MOBILE HEADER (< 768px):
+                 - Hàng 1: Hamburger (trái, >=44x44px) | Logo (giữa) | Giỏ hàng (phải, >=44x44px)
+                 - Hàng 2: Thanh tìm kiếm dạng pill ngay dưới header (sticky)
+                 ========================================================================= -->
+            <div class="md:hidden flex flex-col gap-1.5 py-1.5 px-2.5 rounded-[24px] bg-[var(--rl-surface)]/95 backdrop-blur-xl border border-[var(--rl-border-strong)]/80 shadow-[var(--rl-shadow-sm)]">
+                <!-- Hàng 1: Hamburger | Logo Giữa | Giỏ Hàng -->
+                <div class="grid grid-cols-3 items-center h-[46px]">
+                    <!-- Trái: Hamburger (>= 44x44px) -->
+                    <div class="flex items-center justify-start">
+                        <button type="button"
+                                id="btnOpenMobileDrawer"
+                                @@click="mobileMenuOpen = true"
+                                aria-label="Mở menu danh mục"
+                                :aria-expanded="mobileMenuOpen ? 'true' : 'false'"
+                                aria-controls="mobileNavigationDrawer"
+                                class="inline-flex items-center justify-center w-11 h-11 rounded-full text-[var(--rl-ink)] hover:text-[var(--rl-rose)] active:bg-[var(--rl-bg-blush)] transition">
+                            <i class="fa-solid fa-bars-staggered text-lg" aria-hidden="true"></i>
+                        </button>
                     </div>
-                </template>
 
-                <!-- Mobile State 2: Active Results when query >= 2 chars -->
-                <template x-if="query && query.trim().length >= 2">
-                    <div>
-                        <!-- Loading spinner -->
-                        <template x-if="isLoading">
-                            <div class="py-4 text-center text-slate-400 text-xs">
-                                <i class="fa-solid fa-spinner fa-spin text-magenta-accent text-base mb-1"></i>
-                                <div>Đang tìm kiếm...</div>
-                            </div>
-                        </template>
-
-                        <!-- Results -->
-                        <template x-if="!isLoading">
-                            <div class="space-y-2">
-                                <!-- Brands & Categories Chips -->
-                                <template x-if="(suggestions.brands && suggestions.brands.length > 0) || (suggestions.categories && suggestions.categories.length > 0)">
-                                    <div class="flex items-center gap-1 flex-wrap pb-1.5 border-b border-slate-100">
-                                        <template x-for="b in suggestions.brands" :key="'m-b-' + b.id">
-                                            <a :href="'/tim-kiem?brand=' + encodeURIComponent(b.name)"
-                                               class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold">
-                                                <span x-html="highlightMatch(b.name, query)"></span>
-                                            </a>
-                                        </template>
-                                        <template x-for="c in suggestions.categories" :key="'m-c-' + c.id">
-                                            <a :href="'/tim-kiem?categorySlug=' + c.slug"
-                                               class="px-2 py-0.5 rounded-full bg-rose-50 text-magenta-accent text-[10px] font-bold">
-                                                <span x-html="highlightMatch(c.name, query)"></span>
-                                            </a>
-                                        </template>
-                                    </div>
-                                </template>
-
-                                <!-- Products -->
-                                <template x-if="suggestions.products && suggestions.products.length > 0">
-                                    <div class="space-y-1.5 divide-y divide-slate-100/70">
-                                        <template x-for="p in suggestions.products" :key="'m-p-' + p.id">
-                                            <a :href="'/san-pham/' + p.slug" class="flex items-center gap-2.5 pt-1.5 group">
-                                                <img :src="p.imageUrl" :alt="p.name" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shrink-0" loading="lazy" />
-                                                <div class="flex-1 min-w-0">
-                                                    <div class="text-[9px] font-bold text-rose-gold uppercase truncate" x-text="p.brandName"></div>
-                                                    <h4 class="text-xs font-bold text-slate-800 truncate" x-html="highlightMatch(p.name, query)"></h4>
-                                                    <div class="text-xs font-bold text-charcoal font-mono-numeric" x-text="formatPrice(p.salePrice || p.price)"></div>
-                                                </div>
-                                            </a>
-                                        </template>
-
-                                        <!-- View all on mobile -->
-                                        <div class="pt-2">
-                                            <a :href="'/tim-kiem?q=' + encodeURIComponent(query)"
-                                               @@click="saveRecentSearch(query)"
-                                               class="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-xl bg-pastel-rose text-magenta-accent font-bold text-xs">
-                                                <span>Xem tất cả kết quả</span>
-                                                <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </template>
-
-                                <!-- Mobile Empty State -->
-                                <template x-if="(!suggestions.products || suggestions.products.length === 0) && (!suggestions.brands || suggestions.brands.length === 0)">
-                                    <div class="py-4 text-center">
-                                        <p class="text-xs text-slate-500 mb-2">Không tìm thấy sản phẩm cho "<span class="font-bold" x-text="query"></span>"</p>
-                                        <div class="flex flex-wrap gap-1 justify-center">
-                                            <template x-for="kw in suggestions.hotKeywords.slice(0, 4)" :key="'m-empty-kw-' + kw">
-                                                <button type="button" @@click="selectTerm(kw)" class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-semibold">
-                                                    <span x-text="kw"></span>
-                                                </button>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </template>
+                    <!-- Giữa: Logo Thương Hiệu Căn Giữa Tuyệt Đối -->
+                    <div class="flex items-center justify-center">
+                        <a href="/"
+                           aria-label="@Brand.Name - Trang chủ"
+                           class="inline-flex items-center justify-center min-h-[44px] px-2 group">
+                            <img src="@Brand.LogoUrl"
+                                 alt="@Brand.Name Logo"
+                                 class="h-7 w-auto max-w-[125px] object-contain"
+                                 onerror="this.onerror=null; this.src='/images/branding/canmake-logo-horizontal.svg';" />
+                            <span class="sr-only">@Brand.Name</span>
+                        </a>
                     </div>
-                </template>
+
+                    <!-- Phải: Giỏ hàng có badge số (>= 44x44px) -->
+                    <div class="flex items-center justify-end">
+                        <button type="button"
+                                data-action="open-mini-cart"
+                                aria-label="Mở giỏ hàng"
+                                class="relative inline-flex items-center justify-center w-11 h-11 rounded-full bg-[var(--rl-bg-blush)] text-[var(--rl-ink)] active:bg-[var(--rl-bg-petal)] transition">
+                            <i class="fa-solid fa-bag-shopping text-base text-[var(--rl-rose)]" aria-hidden="true"></i>
+                            <span data-cart-count
+                                  class="cart-badge-count absolute top-0.5 right-0.5 min-w-[19px] h-[19px] px-1 rounded-full bg-[var(--rl-rose)] text-white text-[10px] font-extrabold font-mono-numeric flex items-center justify-center shadow-2xs">
+                                @initialCartCount
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hàng 2: Thanh tìm kiếm dạng Pill ngay dưới header (Sticky) -->
+                <button type="button"
+                        id="btnMobileStickySearchPill"
+                        @@click="openSearchOverlay()"
+                        aria-label="Mở tìm kiếm sản phẩm"
+                        aria-haspopup="dialog"
+                        :aria-expanded="searchOverlayOpen.toString()"
+                        aria-controls="fullscreenSearchOverlay"
+                        class="w-full min-h-[44px] px-4 py-2 rounded-full bg-[var(--rl-bg-blush)]/85 hover:bg-[var(--rl-bg-petal)]/70 border border-[var(--rl-border-strong)] flex items-center justify-between gap-2.5 text-left transition">
+                    <span class="flex items-center gap-2.5 min-w-0">
+                        <i class="fa-solid fa-magnifying-glass text-xs text-[var(--rl-rose)] shrink-0" aria-hidden="true"></i>
+                        <span class="text-xs text-[var(--rl-mauve)] truncate"
+                              x-text="query ? query : 'Tìm serum B5, son lì Rosé, chống nắng...'">
+                            Tìm serum B5, son lì Rosé, chống nắng...
+                        </span>
+                    </span>
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/90 text-[9px] font-bold text-[var(--rl-rose)] uppercase tracking-wider shrink-0 border border-[var(--rl-border-subtle)]">
+                        <i class="fa-solid fa-wand-magic-sparkles text-[9px]" aria-hidden="true"></i>
+                        <span>Date Mới</span>
+                    </span>
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Mega Navigation Bar (Desktop) - Extracted & Lazy Loaded Component -->
-    <partial name="_MegaNav" />
+    <!-- =========================================================================
+         3. FULLSCREEN SEARCH OVERLAY (DÙNG CHUNG CHO CẢ DESKTOP & MOBILE)
+         Hiển thị:
+         1. Từ khoá xu hướng (Hot Keywords) & Tìm kiếm gần đây
+         2. Danh mục nổi bật (Categories) có thumbnail tròn
+         3. Sản phẩm xem gần đây (Recently Viewed Products) + Gợi ý trực tiếp khi gõ
+         ========================================================================= -->
+    <div id="fullscreenSearchOverlay"
+         x-cloak
+         x-show="searchOverlayOpen"
+         x-transition:enter="transition ease-[cubic-bezier(0.22,1,0.36,1)] duration-300"
+         x-transition:enter-start="opacity-0 -translate-y-3"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-2"
+         @@keydown.escape.window="if (searchOverlayOpen) closeSearchOverlay()"
+         role="dialog"
+         aria-modal="true"
+         aria-label="Tìm kiếm mỹ phẩm Canmake Beauty"
+         class="fixed inset-0 z-[1080] h-[100svh] bg-[#FFFDFB]/98 backdrop-blur-2xl flex flex-col pointer-events-auto overflow-hidden">
 
+        <!-- Đầu Overlay: Thanh Input Tìm Kiếm Cỡ Lớn + Nút Đóng (>= 44x44px) -->
+        <div class="border-b border-[var(--rl-border-subtle)] bg-[var(--rl-surface)]/90 px-4 sm:px-8 py-4 sm:py-5 shrink-0">
+            <div class="max-w-5xl mx-auto flex items-center gap-3 sm:gap-4">
+                <form action="/tim-kiem"
+                      method="get"
+                      role="search"
+                      x-on:submit="handleSubmit($event)"
+                      class="flex-1 relative flex items-center">
+                    <label for="storefrontSearchInput" class="sr-only">Tìm kiếm sản phẩm, thương hiệu, hoạt chất</label>
+                    <i class="fa-solid fa-magnifying-glass text-base text-[var(--rl-rose)] absolute left-5 pointer-events-none" aria-hidden="true"></i>
+                    <input type="search"
+                           id="storefrontSearchInput"
+                           x-ref="searchInput"
+                           name="q"
+                           x-model="query"
+                           @@input="onInput()"
+                           @@keydown.arrow-down.prevent="selectNext()"
+                           @@keydown.arrow-up.prevent="selectPrev()"
+                           @@keydown.enter="handleEnter($event)"
+                           autocomplete="off"
+                           autocorrect="off"
+                           autocapitalize="off"
+                           spellcheck="false"
+                           enterkeyhint="search"
+                           placeholder="Tìm sản phẩm, thương hiệu (Dior, La Roche-Posay) hoặc hoạt chất (B5, Retinol)..."
+                           class="w-full min-h-[52px] pl-12 pr-28 py-3 rounded-full bg-[var(--rl-bg-blush)]/65 focus:bg-white border-2 border-[var(--rl-border-strong)] focus:border-[var(--rl-rose)] text-base text-[var(--rl-ink)] placeholder:text-[var(--rl-muted)] focus:outline-none shadow-[var(--rl-shadow-xs)] transition" />
+
+                    <!-- Nút Xoá nhanh chữ đang gõ -->
+                    <button type="button"
+                            id="btnClearSearch"
+                            x-cloak
+                            x-show="query.length > 0"
+                            @@click="clearQuery()"
+                            aria-label="Xóa từ khóa tìm kiếm"
+                            class="absolute right-14 w-9 h-9 rounded-full text-[var(--rl-muted)] hover:text-[var(--rl-rose)] hover:bg-[var(--rl-bg-blush)] flex items-center justify-center transition">
+                        <i class="fa-solid fa-circle-xmark text-sm" aria-hidden="true"></i>
+                    </button>
+
+                    <!-- Nút Submit Tìm kiếm -->
+                    <button type="submit"
+                            aria-label="Thực hiện tìm kiếm"
+                            class="absolute right-2 w-10 h-10 rounded-full bg-[var(--rl-rose)] hover:bg-[var(--rl-rose-deep)] text-white flex items-center justify-center shadow-2xs transition">
+                        <i class="fa-solid fa-arrow-right text-xs" aria-hidden="true"></i>
+                    </button>
+                </form>
+
+                <!-- Nút Đóng Overlay (>= 44x44px) -->
+                <button type="button"
+                        id="btnCloseSearchOverlay"
+                        @@click="closeSearchOverlay()"
+                        aria-label="Đóng khung tìm kiếm"
+                        class="inline-flex items-center justify-center gap-2 min-w-[44px] min-h-[44px] px-4 rounded-full bg-[var(--rl-bg-blush)] hover:bg-[var(--rl-bg-petal)] text-[var(--rl-ink)] hover:text-[var(--rl-rose)] text-xs font-bold transition shrink-0">
+                    <span class="hidden sm:inline">Đóng</span>
+                    <i class="fa-solid fa-xmark text-base" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Thân Overlay: Gợi Ý Mặc Định (< 2 ký tự) HOẶC Kết Quả Tức Thì (>= 2 ký tự) -->
+        <div id="liveSearchResultsPopover"
+             class="flex-1 overflow-y-auto px-4 sm:px-8 py-6 sm:py-8">
+            <div class="max-w-5xl mx-auto">
+
+                <!-- TRẠNG THÁI 1: CHƯA GÕ TỪ KHOÁ (< 2 ký tự) -> HIỂN THỊ TỪ KHOÁ HOT, DANH MỤC, SẢN PHẨM XEM GẦN ĐÂY -->
+                <div x-show="query.trim().length < 2" class="space-y-8">
+
+                    <!-- Lịch sử tìm kiếm gần đây (nếu có) -->
+                    <div x-cloak x-show="recentSearches.length > 0">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[var(--rl-muted)] flex items-center gap-2">
+                                <i class="fa-solid fa-clock-rotate-left text-[var(--rl-rose)]" aria-hidden="true"></i>
+                                <span>Tìm Kiếm Gần Đây</span>
+                            </span>
+                            <button type="button"
+                                    @@click="clearRecentSearches()"
+                                    class="text-xs font-semibold text-[var(--rl-rose)] hover:underline">
+                                Xóa lịch sử
+                            </button>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <template x-for="term in recentSearches" :key="term">
+                                <div class="inline-flex items-center rounded-full bg-white border border-[var(--rl-border-strong)] hover:border-[var(--rl-rose)] transition overflow-hidden">
+                                    <button type="button"
+                                            @@click="selectTerm(term)"
+                                            class="min-h-[38px] pl-3.5 pr-2 py-1.5 text-xs font-medium text-[var(--rl-ink)] hover:text-[var(--rl-rose)]">
+                                        <span x-text="term"></span>
+                                    </button>
+                                    <button type="button"
+                                            @@click.stop="removeRecentSearch(term)"
+                                            aria-label="Xóa từ khóa này"
+                                            class="min-h-[38px] px-2.5 text-[var(--rl-muted)] hover:text-[var(--rl-error)]">
+                                        <i class="fa-solid fa-xmark text-[10px]" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Khối 1: Từ Khoá Xu Hướng (Hot Keywords) -->
+                    <div>
+                        <div class="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[var(--rl-rose)] mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-fire-flame-curved" aria-hidden="true"></i>
+                            <span>Từ Khoá Xu Hướng Hôm Nay</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2.5">
+                            <template x-for="(kw, idx) in (suggestions.hotKeywords && suggestions.hotKeywords.length ? suggestions.hotKeywords : defaultHotKeywords)" :key="kw">
+                                <button type="button"
+                                        @@click="selectTerm(kw)"
+                                        class="chip min-h-[44px] !px-4 !py-2 text-xs font-semibold">
+                                    <span class="text-[10px] font-extrabold text-[var(--rl-rose)] font-mono-numeric" x-text="'#' + (idx + 1)"></span>
+                                    <span x-text="kw"></span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Khối 2: Danh Mục Nổi Bật (Categories) -->
+                    <div>
+                        <div class="flex items-center justify-between mb-3.5">
+                            <span class="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[var(--rl-mauve)] flex items-center gap-2">
+                                <i class="fa-solid fa-layer-group text-[var(--rl-champagne)]" aria-hidden="true"></i>
+                                <span>Danh Mục Nổi Bật</span>
+                            </span>
+                            <a href="/tim-kiem" class="text-xs font-bold text-[var(--rl-rose)] hover:underline">Xem tất cả</a>
+                        </div>
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+                            <a href="/tim-kiem?categorySlug=cham-soc-da"
+                               class="flex items-center gap-3 p-3 rounded-2xl bg-white hover:bg-[var(--rl-bg-blush)] border border-[var(--rl-border-subtle)] hover:border-[var(--rl-border-strong)] shadow-[var(--rl-shadow-xs)] transition group">
+                                <img src="@ProductImageResolver.GetPrimaryImageUrl(sku: "SKU-SKIN-LRP-002")"
+                                     alt=""
+                                     aria-hidden="true"
+                                     width="44"
+                                     height="44"
+                                     loading="lazy"
+                                     class="w-11 h-11 rounded-full object-cover border border-[var(--rl-border-strong)] shrink-0" />
+                                <div class="min-w-0">
+                                    <div class="text-xs font-bold text-[var(--rl-ink)] group-hover:text-[var(--rl-rose)] truncate">Chăm Sóc Da</div>
+                                    <div class="text-[10px] text-[var(--rl-muted)]">Serum B5, Rửa mặt</div>
+                                </div>
+                            </a>
+
+                            <a href="/tim-kiem?categorySlug=trang-diem"
+                               class="flex items-center gap-3 p-3 rounded-2xl bg-white hover:bg-[var(--rl-bg-blush)] border border-[var(--rl-border-subtle)] hover:border-[var(--rl-border-strong)] shadow-[var(--rl-shadow-xs)] transition group">
+                                <img src="@ProductImageResolver.GetPrimaryImageUrl(sku: "SKU-LIP-DIO-037")"
+                                     alt=""
+                                     aria-hidden="true"
+                                     width="44"
+                                     height="44"
+                                     loading="lazy"
+                                     class="w-11 h-11 rounded-full object-cover border border-[var(--rl-border-strong)] shrink-0" />
+                                <div class="min-w-0">
+                                    <div class="text-xs font-bold text-[var(--rl-ink)] group-hover:text-[var(--rl-rose)] truncate">Trang Điểm</div>
+                                    <div class="text-[10px] text-[var(--rl-muted)]">Son Rosé, Cushion</div>
+                                </div>
+                            </a>
+
+                            <a href="/tim-kiem?categorySlug=kem-chong-nang"
+                               class="flex items-center gap-3 p-3 rounded-2xl bg-white hover:bg-[var(--rl-bg-blush)] border border-[var(--rl-border-subtle)] hover:border-[var(--rl-border-strong)] shadow-[var(--rl-shadow-xs)] transition group">
+                                <img src="@ProductImageResolver.GetPrimaryImageUrl(sku: "SKU-SKIN-ANE-001")"
+                                     alt=""
+                                     aria-hidden="true"
+                                     width="44"
+                                     height="44"
+                                     loading="lazy"
+                                     class="w-11 h-11 rounded-full object-cover border border-[var(--rl-border-strong)] shrink-0" />
+                                <div class="min-w-0">
+                                    <div class="text-xs font-bold text-[var(--rl-ink)] group-hover:text-[var(--rl-rose)] truncate">Chống Nắng UV</div>
+                                    <div class="text-[10px] text-[var(--rl-muted)]">SPF50+ PA++++</div>
+                                </div>
+                            </a>
+
+                            <a href="/tim-kiem?categorySlug=nuoc-hoa"
+                               class="flex items-center gap-3 p-3 rounded-2xl bg-white hover:bg-[var(--rl-bg-blush)] border border-[var(--rl-border-subtle)] hover:border-[var(--rl-border-strong)] shadow-[var(--rl-shadow-xs)] transition group">
+                                <img src="/images/banners/banner-luxury-fragrance.jpg"
+                                     alt=""
+                                     aria-hidden="true"
+                                     width="44"
+                                     height="44"
+                                     loading="lazy"
+                                     class="w-11 h-11 rounded-full object-cover border border-[var(--rl-border-strong)] shrink-0" />
+                                <div class="min-w-0">
+                                    <div class="text-xs font-bold text-[var(--rl-ink)] group-hover:text-[var(--rl-rose)] truncate">Nước Hoa &amp; Quà</div>
+                                    <div class="text-[10px] text-[var(--rl-muted)]">Haute Parfumerie</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Khối 3: Sản Phẩm Xem Gần Đây (Recently Viewed Products / Curated Fallback) -->
+                    <div>
+                        <div class="flex items-center justify-between mb-3.5">
+                            <span class="text-[11px] font-extrabold uppercase tracking-[0.16em] text-[var(--rl-mauve)] flex items-center gap-2">
+                                <i class="fa-solid fa-eye text-[var(--rl-rose)]" aria-hidden="true"></i>
+                                <span x-text="recentlyViewedProducts.length > 0 ? 'Sản Phẩm Xem Gần Đây' : 'Sản Phẩm Xem Gần Đây &amp; Đề Xuất Cho Bạn'">
+                                    Sản Phẩm Xem Gần Đây
+                                </span>
+                            </span>
+                            <a href="/tim-kiem?sort=bestseller" class="text-xs font-bold text-[var(--rl-rose)] hover:underline">Khám phá thêm</a>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                            <template x-for="prod in getOverlayShowcaseProducts()" :key="prod.id || prod.slug">
+                                <a :href="'/san-pham/' + prod.slug"
+                                   @@click="recordProductView(prod)"
+                                   class="flex sm:flex-col gap-3 p-3 rounded-2xl bg-white hover:bg-[var(--rl-bg-blush)]/55 border border-[var(--rl-border-subtle)] hover:border-[var(--rl-border-strong)] shadow-[var(--rl-shadow-xs)] transition group">
+                                    <div class="w-16 h-16 sm:w-full sm:aspect-square rounded-xl bg-[var(--rl-bg)] overflow-hidden shrink-0 border border-[var(--rl-border-subtle)]">
+                                        <img :src="prod.imageUrl || '/images/product-placeholder.svg'"
+                                             :alt="prod.name"
+                                             loading="lazy"
+                                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                    </div>
+                                    <div class="min-w-0 flex-1 flex flex-col justify-between">
+                                        <div>
+                                            <div class="text-[10px] font-bold uppercase tracking-wider text-[var(--rl-rose)] truncate" x-text="prod.brandName || 'CANMAKE'"></div>
+                                            <div class="text-xs font-bold text-[var(--rl-ink)] group-hover:text-[var(--rl-rose)] line-clamp-2 mt-0.5" x-text="prod.name"></div>
+                                        </div>
+                                        <div class="flex items-center justify-between gap-2 mt-2">
+                                            <span class="text-xs font-extrabold text-[var(--rl-rose)] font-mono-numeric" x-text="formatPrice(prod.salePrice || prod.price)"></span>
+                                            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-[var(--rl-emerald)] border border-emerald-200/70">Date Mới</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TRẠNG THÁI 2: ĐANG GÕ TỪ KHOÁ (>= 2 ký tự) -> GỢI Ý TỨC THÌ -->
+                <div x-cloak x-show="query.trim().length >= 2" class="space-y-6">
+                    <!-- Loading -->
+                    <div x-show="isLoading" class="py-12 text-center">
+                        <div class="w-8 h-8 border-2 border-[var(--rl-rose)] border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                        <p class="text-xs font-medium text-[var(--rl-mauve)]">Đang tìm kiếm sản phẩm chính hãng date mới...</p>
+                    </div>
+
+                    <!-- Có kết quả -->
+                    <div x-show="!isLoading && hasAnyMatch()" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <!-- Cột trái (4 cols): Thương hiệu & Danh mục khớp -->
+                        <div class="lg:col-span-4 space-y-5">
+                            <div x-show="suggestions.brands && suggestions.brands.length > 0"
+                                 class="p-4 rounded-2xl bg-white border border-[var(--rl-border-subtle)]">
+                                <div class="text-[10px] font-extrabold uppercase tracking-wider text-[var(--rl-muted)] mb-2.5">Thương Hiệu</div>
+                                <div class="flex flex-wrap gap-2">
+                                    <template x-for="b in suggestions.brands" :key="b.name">
+                                        <a :href="'/tim-kiem?brand=' + encodeURIComponent(b.name)"
+                                           class="px-3 py-1.5 rounded-full bg-[var(--rl-bg-blush)] hover:bg-[var(--rl-rose)] text-xs font-bold text-[var(--rl-ink)] hover:text-white transition">
+                                            <span x-html="highlightMatch(b.name, query)"></span>
+                                            <span class="text-[10px] opacity-70 ml-1" x-text="'(' + b.productCount + ')'"></span>
+                                        </a>
+                                    </template>
+                                </div>
+                            </div>
+
+                            <div x-show="suggestions.categories && suggestions.categories.length > 0"
+                                 class="p-4 rounded-2xl bg-white border border-[var(--rl-border-subtle)]">
+                                <div class="text-[10px] font-extrabold uppercase tracking-wider text-[var(--rl-muted)] mb-2.5">Danh Mục</div>
+                                <div class="space-y-1.5">
+                                    <template x-for="c in suggestions.categories" :key="c.slug">
+                                        <a :href="'/tim-kiem?categorySlug=' + encodeURIComponent(c.slug)"
+                                           class="flex items-center justify-between p-2 rounded-xl hover:bg-[var(--rl-bg-blush)] text-xs font-semibold text-[var(--rl-ink)] transition">
+                                            <span x-html="highlightMatch(c.name, query)"></span>
+                                            <span class="text-[10px] text-[var(--rl-muted)]" x-text="c.productCount + ' SP'"></span>
+                                        </a>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cột phải (8 cols): Sản phẩm gợi ý -->
+                        <div class="lg:col-span-8">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-[11px] font-extrabold uppercase tracking-wider text-[var(--rl-mauve)]">Sản Phẩm Phù Hợp Nhất</span>
+                                <span class="text-xs font-bold text-[var(--rl-rose)]" x-text="(suggestions.totalMatches || 0) + ' kết quả'"></span>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <template x-for="prod in suggestions.products" :key="prod.id">
+                                    <a :href="'/san-pham/' + prod.slug"
+                                       @@click="recordProductView(prod); saveRecentSearch(query);"
+                                       class="flex items-center gap-3.5 p-3 rounded-2xl bg-white hover:bg-[var(--rl-bg-blush)]/60 border border-[var(--rl-border-subtle)] hover:border-[var(--rl-rose)] shadow-[var(--rl-shadow-xs)] transition group">
+                                        <img :src="prod.imageUrl || '/images/product-placeholder.svg'"
+                                             :alt="prod.name"
+                                             width="60"
+                                             height="60"
+                                             loading="lazy"
+                                             class="w-15 h-15 rounded-xl object-cover border border-[var(--rl-border-subtle)] shrink-0" />
+                                        <div class="min-w-0 flex-1">
+                                            <div class="text-[10px] font-bold uppercase tracking-wider text-[var(--rl-rose)] truncate" x-text="prod.brandName"></div>
+                                            <div class="text-xs font-bold text-[var(--rl-ink)] group-hover:text-[var(--rl-rose)] line-clamp-1 mt-0.5"
+                                                 x-html="highlightMatch(prod.name, query)"></div>
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <span class="text-xs font-extrabold text-[var(--rl-rose)] font-mono-numeric" x-text="formatPrice(prod.salePrice || prod.price)"></span>
+                                                <template x-if="prod.salePrice && prod.salePrice < prod.price">
+                                                    <span class="text-[10px] text-[var(--rl-muted)] line-through font-mono-numeric" x-text="formatPrice(prod.price)"></span>
+                                                </template>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </template>
+                            </div>
+
+                            <div class="mt-5">
+                                <a :href="'/tim-kiem?q=' + encodeURIComponent(query.trim())"
+                                   @@click="saveRecentSearch(query)"
+                                   class="btn-primary w-full justify-center">
+                                    <span>Xem tất cả kết quả cho "<span x-text="query.trim()"></span>"</span>
+                                    <i class="fa-solid fa-arrow-right text-xs" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Không tìm thấy -->
+                    <div x-show="!isLoading && !hasAnyMatch()" class="py-12 text-center bg-white rounded-3xl border border-[var(--rl-border-subtle)] p-8">
+                        <div class="w-12 h-12 rounded-full bg-[var(--rl-bg-blush)] text-[var(--rl-rose)] mx-auto flex items-center justify-center mb-3">
+                            <i class="fa-solid fa-magnifying-glass text-lg" aria-hidden="true"></i>
+                        </div>
+                        <p class="text-sm font-bold text-[var(--rl-ink)]">Không tìm thấy sản phẩm khớp với "<span class="text-[var(--rl-rose)]" x-text="query"></span>"</p>
+                        <p class="text-xs text-[var(--rl-muted)] mt-1">Hãy thử tìm theo tên hoạt chất (B5, HA, Retinol) hoặc thương hiệu (Dior, Anessa, CeraVe).</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </header>
 
 <script>
-    function storefrontNotificationCenter() {
+    // Bộ điều khiển Mega Menu Desktop: Hover Delay 120ms + Điều hướng bàn phím 100%
+    function megaMenuController() {
         return {
-            isOpen: false,
-            loading: false,
-            unreadCount: 0,
-            notifications: [],
+            megaOpen: false,
+            hoverTimer: null,
+            closeTimer: null,
 
-            init() {
-                this.fetchCount();
-                this.fetchLatest();
+            onMouseEnter() {
+                if (this.closeTimer) {
+                    clearTimeout(this.closeTimer);
+                    this.closeTimer = null;
+                }
+                if (this.megaOpen) return;
+                this.hoverTimer = setTimeout(() => {
+                    this.megaOpen = true;
+                }, 120);
+            },
 
-                // Nghe sự kiện SignalR từ _Layout
-                window.addEventListener('storefront-notification-received', (e) => {
-                    const d = e.detail;
-                    this.unreadCount++;
-                    this.notifications.unshift({
-                        id: d.id,
-                        title: d.title,
-                        message: d.message,
-                        severity: d.severity,
-                        type: d.type || 'ORDER',
-                        url: d.url,
-                        timeAgo: d.timeAgo || 'Vừa xong',
-                        isRead: false
-                    });
-                    if (this.notifications.length > 10) this.notifications.pop();
+            onMouseLeave() {
+                if (this.hoverTimer) {
+                    clearTimeout(this.hoverTimer);
+                    this.hoverTimer = null;
+                }
+                this.closeTimer = setTimeout(() => {
+                    this.megaOpen = false;
+                }, 160);
+            },
+
+            toggleMega() {
+                if (this.hoverTimer) clearTimeout(this.hoverTimer);
+                if (this.closeTimer) clearTimeout(this.closeTimer);
+                this.megaOpen = !this.megaOpen;
+            },
+
+            openAndFocusFirst() {
+                if (this.hoverTimer) clearTimeout(this.hoverTimer);
+                this.megaOpen = true;
+                this.$nextTick(() => {
+                    const firstLink = this.$refs.megaPanel?.querySelector('a, button');
+                    if (firstLink) firstLink.focus();
                 });
             },
 
-            toggleOpen() {
-                this.isOpen = !this.isOpen;
-                if (this.isOpen) {
-                    this.fetchLatest();
+            handleEscape() {
+                if (this.megaOpen) {
+                    this.megaOpen = false;
+                    this.$nextTick(() => {
+                        this.$refs.megaTrigger?.focus();
+                    });
                 }
             },
 
-            async fetchCount() {
+            onFocusOut(event) {
+                const container = event.currentTarget;
+                const nextFocused = event.relatedTarget;
+                if (container && nextFocused && !container.contains(nextFocused)) {
+                    this.megaOpen = false;
+                }
+            }
+        };
+    }
+
+    // Trung tâm thông báo Storefront
+    function storefrontNotificationCenter() {
+        return {
+            notifOpen: false,
+            loading: false,
+            unreadCount: 0,
+            items: [],
+
+            async initNotifications() {
+                await this.fetchUnreadSummary();
+                window.addEventListener('storefront-notification-received', () => {
+                    this.fetchUnreadSummary();
+                });
+            },
+
+            async toggleDropdown() {
+                this.notifOpen = !this.notifOpen;
+                if (this.notifOpen) {
+                    await this.fetchLatestNotifications();
+                }
+            },
+
+            async fetchUnreadSummary() {
                 try {
-                    const res = await fetch('/api/notifications/unread-count');
+                    const res = await fetch('/api/notifications/summary', { headers: { 'Accept': 'application/json' } });
                     if (res.ok) {
                         const data = await res.json();
-                        this.unreadCount = data.count || 0;
+                        this.unreadCount = data.unreadCount || 0;
                     }
                 } catch (e) { }
             },
 
-            async fetchLatest() {
+            async fetchLatestNotifications() {
                 this.loading = true;
                 try {
-                    const res = await fetch('/api/notifications/latest?take=10');
+                    const res = await fetch('/api/notifications/latest?limit=8', { headers: { 'Accept': 'application/json' } });
                     if (res.ok) {
                         const data = await res.json();
-                        this.notifications = data.notifications || [];
-                        this.unreadCount = data.unreadCount || 0;
+                        this.items = data.items || [];
+                        this.unreadCount = data.unreadCount ?? this.unreadCount;
                     }
-                } catch (e) { }
-                finally {
+                } catch (e) {
+                } finally {
                     this.loading = false;
                 }
             },
 
             async markAllAsRead() {
                 try {
-                    const res = await fetch('/api/notifications/mark-all-read', { method: 'POST' });
+                    const res = await fetch('/api/notifications/read-all', { method: 'POST' });
                     if (res.ok) {
                         this.unreadCount = 0;
-                        this.notifications.forEach(n => n.isRead = true);
+                        this.items = this.items.map(i => ({ ...i, isRead: true }));
                     }
                 } catch (e) { }
             },
 
-            async handleClick(item) {
-                if (!item.isRead && item.id) {
+            async openNotificationItem(item) {
+                if (!item.isRead) {
                     try {
-                        await fetch(`/api/notifications/mark-read/${item.id}`, { method: 'POST' });
+                        await fetch('/api/notifications/' + item.id + '/read', { method: 'POST' });
                         item.isRead = true;
-                        if (this.unreadCount > 0) this.unreadCount--;
+                        this.unreadCount = Math.max(0, this.unreadCount - 1);
                     } catch (e) { }
                 }
-                if (item.url) {
-                    window.location.href = item.url;
+                if (item.targetUrl) {
+                    window.location.href = item.targetUrl;
+                }
+            },
+
+            getIconClass(type) {
+                switch ((type || '').toUpperCase()) {
+                    case 'ORDER': return 'fa-solid fa-box-open';
+                    case 'PROMO': return 'fa-solid fa-gift';
+                    case 'FEFO': return 'fa-solid fa-shield-heart';
+                    default: return 'fa-solid fa-bell';
                 }
             }
         };
     }
 
+    // Bộ điều khiển Header Floating Pill + Fullscreen Search Overlay
     function instantSearch() {
         return {
             query: '',
             isOpen: false,
-            isLoading: false,
+            searchOverlayOpen: false,
             mobileSearchOpen: false,
+            isScrolled: false,
+            headerHidden: false,
+            lastScrollY: 0,
+            isLoading: false,
+            selectedIndex: -1,
+            debounceTimer: null,
+            recentSearches: [],
+            recentlyViewedProducts: [],
+            defaultHotKeywords: [
+                'Serum B5 phục hồi',
+                'Kem chống nắng kiềm dầu',
+                'Son lì Rosé đỏ gạch',
+                'Nước tẩy trang Micellar',
+                'Cushion mỏng nhẹ tự nhiên',
+                'Retinol tái tạo da'
+            ],
             suggestions: {
-                query: '',
-                normalizedQuery: '',
                 products: [],
                 brands: [],
                 categories: [],
                 hotKeywords: [],
                 totalMatches: 0
             },
-            recentSearches: [],
-            selectedIndex: -1,
             flatItems: [],
-            debounceTimer: null,
+            storageKey: 'canmake_recent_searches_v1',
+            recentlyViewedKey: 'canmake_recently_viewed_v1',
 
-            init() {
+            initSearch() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const qParam = urlParams.get('q');
+                if (qParam) {
+                    this.query = qParam;
+                }
                 this.loadRecentSearches();
+                this.loadRecentlyViewedProducts();
                 this.fetchDefaultSuggestions();
+
+                // Theo dõi cuộn trang 60fps: Không đổi chiều cao DOM flow (CLS = 0)
+                this.lastScrollY = window.scrollY || 0;
+                this.isScrolled = this.lastScrollY > 56;
+
+                let scrollTicking = false;
+                window.addEventListener('scroll', () => {
+                    if (!scrollTicking) {
+                        window.requestAnimationFrame(() => {
+                            const currentY = Math.max(0, window.scrollY || 0);
+                            const delta = currentY - this.lastScrollY;
+
+                            if (!this.isScrolled && currentY > 56) {
+                                this.isScrolled = true;
+                            } else if (this.isScrolled && currentY < 24) {
+                                this.isScrolled = false;
+                            }
+
+                            // Cuộn xuống nhanh -> ẩn header; cuộn lên -> hiện lại ngay
+                            if (currentY <= 120 || this.searchOverlayOpen) {
+                                this.headerHidden = false;
+                            } else if (delta > 12 && currentY > 220) {
+                                this.headerHidden = true;
+                            } else if (delta < -6) {
+                                this.headerHidden = false;
+                            }
+
+                            this.lastScrollY = currentY;
+                            scrollTicking = false;
+                        });
+                        scrollTicking = true;
+                    }
+                }, { passive: true });
+            },
+
+            openSearchOverlay() {
+                this.searchOverlayOpen = true;
+                this.mobileSearchOpen = true;
+                this.isOpen = true;
+                this.headerHidden = false;
+                document.body.classList.add('overflow-hidden');
+                if (this.suggestions.products.length === 0) {
+                    this.fetchDefaultSuggestions();
+                }
+                this.$nextTick(() => {
+                    if (this.$refs.searchInput) {
+                        this.$refs.searchInput.focus();
+                    }
+                });
+            },
+
+            closeSearchOverlay() {
+                this.searchOverlayOpen = false;
+                this.mobileSearchOpen = false;
+                this.isOpen = false;
+                this.selectedIndex = -1;
+                document.body.classList.remove('overflow-hidden');
+            },
+
+            openMobileSearch() {
+                this.openSearchOverlay();
+            },
+
+            closeMobileSearch() {
+                this.closeSearchOverlay();
             },
 
             loadRecentSearches() {
                 try {
-                    const stored = localStorage.getItem('omni_recent_searches');
-                    if (stored) {
-                        const parsed = JSON.parse(stored);
+                    const raw = localStorage.getItem(this.storageKey);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
                         if (Array.isArray(parsed)) {
-                            this.recentSearches = parsed.slice(0, 5);
+                            this.recentSearches = parsed.slice(0, 6);
                         }
                     }
                 } catch (e) {
@@ -932,75 +1017,108 @@
                 }
             },
 
-            saveRecentSearch(term) {
-                if (!term || !term.trim()) return;
-                const clean = term.trim();
-                this.recentSearches = [clean, ...this.recentSearches.filter(t => t.toLowerCase() !== clean.toLowerCase())].slice(0, 5);
+            loadRecentlyViewedProducts() {
                 try {
-                    localStorage.setItem('omni_recent_searches', JSON.stringify(this.recentSearches));
-                } catch (e) { }
-                this.updateFlatItems();
-            },
-
-            removeRecentSearch(term) {
-                this.recentSearches = this.recentSearches.filter(t => t.toLowerCase() !== term.toLowerCase());
-                try {
-                    localStorage.setItem('omni_recent_searches', JSON.stringify(this.recentSearches));
-                } catch (e) { }
-                this.updateFlatItems();
-            },
-
-            clearRecentSearches() {
-                this.recentSearches = [];
-                try {
-                    localStorage.removeItem('omni_recent_searches');
-                } catch (e) { }
-                this.updateFlatItems();
-            },
-
-            onFocus() {
-                this.isOpen = true;
-                this.selectedIndex = -1;
-                if (!this.query || this.query.trim().length < 2) {
-                    if (!this.suggestions.hotKeywords || this.suggestions.hotKeywords.length === 0) {
-                        this.fetchDefaultSuggestions();
-                    } else {
-                        this.updateFlatItems();
+                    const raw = localStorage.getItem(this.recentlyViewedKey);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            this.recentlyViewedProducts = parsed.slice(0, 4);
+                        }
                     }
-                } else {
-                    this.updateFlatItems();
+                } catch (e) {
+                    this.recentlyViewedProducts = [];
                 }
             },
 
-            onInput() {
-                if (this.debounceTimer) clearTimeout(this.debounceTimer);
-                this.selectedIndex = -1;
-                const q = this.query ? this.query.trim() : '';
+            recordProductView(prod) {
+                if (!prod || !prod.slug) return;
+                try {
+                    const cleaned = this.recentlyViewedProducts.filter(
+                        p => p.slug !== prod.slug
+                    );
+                    cleaned.unshift({
+                        id: prod.id,
+                        name: prod.name,
+                        slug: prod.slug,
+                        imageUrl: prod.imageUrl,
+                        price: prod.price,
+                        salePrice: prod.salePrice,
+                        brandName: prod.brandName
+                    });
+                    this.recentlyViewedProducts = cleaned.slice(0, 4);
+                    localStorage.setItem(this.recentlyViewedKey, JSON.stringify(this.recentlyViewedProducts));
+                } catch (e) { }
+            },
 
+            getOverlayShowcaseProducts() {
+                if (this.recentlyViewedProducts && this.recentlyViewedProducts.length > 0) {
+                    return this.recentlyViewedProducts;
+                }
+                return (this.suggestions.products || []).slice(0, 4);
+            },
+
+            saveRecentSearch(term) {
+                if (!term) return;
+                const clean = term.trim();
+                if (clean.length < 2) return;
+                try {
+                    let list = this.recentSearches.filter(item => item.toLowerCase() !== clean.toLowerCase());
+                    list.unshift(clean);
+                    this.recentSearches = list.slice(0, 6);
+                    localStorage.setItem(this.storageKey, JSON.stringify(this.recentSearches));
+                } catch (e) { }
+            },
+
+            removeRecentSearch(term) {
+                try {
+                    this.recentSearches = this.recentSearches.filter(item => item !== term);
+                    localStorage.setItem(this.storageKey, JSON.stringify(this.recentSearches));
+                    this.updateFlatItems();
+                } catch (e) { }
+            },
+
+            clearRecentSearches() {
+                try {
+                    this.recentSearches = [];
+                    localStorage.removeItem(this.storageKey);
+                    this.updateFlatItems();
+                } catch (e) { }
+            },
+
+            hasAnyMatch() {
+                return (this.suggestions.products && this.suggestions.products.length > 0) ||
+                       (this.suggestions.brands && this.suggestions.brands.length > 0) ||
+                       (this.suggestions.categories && this.suggestions.categories.length > 0);
+            },
+
+            onInput() {
+                this.isOpen = true;
+                this.selectedIndex = -1;
+                if (this.debounceTimer) clearTimeout(this.debounceTimer);
+
+                const q = this.query.trim();
                 if (q.length < 2) {
                     this.isLoading = false;
-                    this.isOpen = true;
                     this.fetchDefaultSuggestions();
                     return;
                 }
 
-                this.isOpen = true;
                 this.isLoading = true;
                 this.debounceTimer = setTimeout(() => {
                     this.fetchSuggestions(q);
-                }, 250);
+                }, 220);
             },
 
             async fetchSuggestions(q) {
                 try {
-                    const res = await fetch('/api/search/suggest?q=' + encodeURIComponent(q));
+                    const res = await fetch('/api/search/suggest?q=' + encodeURIComponent(q) + '&maxProducts=6&maxBrands=4&maxCategories=4');
                     if (res.ok) {
                         const data = await res.json();
                         this.suggestions = data;
                         this.updateFlatItems();
                     }
                 } catch (e) {
-                    console.error('Lỗi tìm kiếm gợi ý:', e);
                 } finally {
                     this.isLoading = false;
                 }
@@ -1020,6 +1138,7 @@
             selectTerm(term) {
                 this.query = term;
                 this.saveRecentSearch(term);
+                document.body.classList.remove('overflow-hidden');
                 window.location.href = '/tim-kiem?q=' + encodeURIComponent(term);
             },
 
@@ -1027,25 +1146,11 @@
                 this.query = '';
                 this.selectedIndex = -1;
                 this.fetchDefaultSuggestions();
-                this.isOpen = true;
                 if (this.$refs.searchInput) this.$refs.searchInput.focus();
             },
 
             close() {
-                this.isOpen = false;
-                this.selectedIndex = -1;
-            },
-
-            toggleMobileSearch() {
-                this.mobileSearchOpen = !this.mobileSearchOpen;
-                if (this.mobileSearchOpen) {
-                    this.isOpen = true;
-                    this.$nextTick(() => {
-                        if (this.$refs.mobileSearchInput) this.$refs.mobileSearchInput.focus();
-                    });
-                } else {
-                    this.isOpen = false;
-                }
+                this.closeSearchOverlay();
             },
 
             updateFlatItems() {
@@ -1086,38 +1191,27 @@
                 this.flatItems = items;
             },
 
-            isItemActive(type, id) {
-                if (this.selectedIndex < 0 || this.selectedIndex >= this.flatItems.length) return false;
-                const current = this.flatItems[this.selectedIndex];
-                return current.type === type && current.id === id;
-            },
-
             selectNext() {
-                if (!this.isOpen) {
-                    this.isOpen = true;
-                    return;
-                }
                 if (this.flatItems.length === 0) return;
                 this.selectedIndex = (this.selectedIndex + 1) % this.flatItems.length;
             },
 
             selectPrev() {
-                if (!this.isOpen) {
-                    this.isOpen = true;
-                    return;
-                }
                 if (this.flatItems.length === 0) return;
                 this.selectedIndex = (this.selectedIndex - 1 + this.flatItems.length) % this.flatItems.length;
             },
 
             handleEnter(event) {
+                if (event.isComposing) return;
                 if (this.selectedIndex >= 0 && this.selectedIndex < this.flatItems.length) {
                     event.preventDefault();
                     const item = this.flatItems[this.selectedIndex];
                     this.saveRecentSearch(item.title);
+                    document.body.classList.remove('overflow-hidden');
                     window.location.href = item.url;
                 } else if (this.query && this.query.trim().length > 0) {
                     this.saveRecentSearch(this.query.trim());
+                    document.body.classList.remove('overflow-hidden');
                 }
             },
 
@@ -1126,9 +1220,11 @@
                     event.preventDefault();
                     const item = this.flatItems[this.selectedIndex];
                     this.saveRecentSearch(item.title);
+                    document.body.classList.remove('overflow-hidden');
                     window.location.href = item.url;
                 } else if (this.query && this.query.trim().length > 0) {
                     this.saveRecentSearch(this.query.trim());
+                    document.body.classList.remove('overflow-hidden');
                 }
             },
 
@@ -1148,11 +1244,10 @@
                 if (!text) return '';
                 const safe = this.escapeHtml(text);
                 if (!query || !query.trim()) return safe;
-
                 try {
                     const qClean = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                     const regex = new RegExp(`(${qClean})`, 'gi');
-                    return safe.replace(regex, '<mark class="bg-pink-100 text-magenta-accent font-bold px-0.5 rounded">$1</mark>');
+                    return safe.replace(regex, '<mark class="bg-[var(--rl-bg-petal)] text-[var(--rl-rose-deep)] font-bold px-1 rounded">$1</mark>');
                 } catch (e) {
                     return safe;
                 }

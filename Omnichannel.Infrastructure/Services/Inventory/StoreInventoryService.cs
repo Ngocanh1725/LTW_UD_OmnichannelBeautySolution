@@ -250,7 +250,7 @@ namespace Omnichannel.Infrastructure.Services.Inventory
                 Id = promo?.Id ?? 1,
                 CampaignCode = promo?.PromotionCode ?? "PROMO-FLASH20",
                 Title = promo?.Name ?? "Flash Sale Deal Sốc Giờ Vàng",
-                Subtitle = promo?.Description ?? "Cơ hội săn mỹ phẩm cao cấp chuẩn hạn dùng FEFO với giá ưu đãi cực lớn",
+                Subtitle = promo?.Description ?? "Cơ hội săn mỹ phẩm cao cấp cam kết date mới với giá ưu đãi cực lớn",
                 StartTime = promo?.ValidFrom ?? now.AddHours(-2),
                 EndTime = endTime,
                 IsActive = true,

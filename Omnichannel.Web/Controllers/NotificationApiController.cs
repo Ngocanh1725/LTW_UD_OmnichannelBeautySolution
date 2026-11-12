@@ -22,8 +22,20 @@ namespace Omnichannel.Web.Controllers
         }
 
         [HttpGet("unread-count")]
+        [HttpGet("summary")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetUnreadCount()
         {
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return Ok(new
+                {
+                    success = true,
+                    count = 0,
+                    unreadCount = 0
+                });
+            }
+
             int? userId = User.GetUserId();
             string? role = User.FindFirst(ClaimTypes.Role)?.Value;
             int? storeId = User.GetStoreId();
@@ -32,13 +44,26 @@ namespace Omnichannel.Web.Controllers
             return Ok(new
             {
                 success = true,
-                count
+                count,
+                unreadCount = count
             });
         }
 
         [HttpGet("latest")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetLatest([FromQuery] int take = 10)
         {
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return Ok(new
+                {
+                    success = true,
+                    unreadCount = 0,
+                    items = Array.Empty<object>(),
+                    notifications = Array.Empty<object>()
+                });
+            }
+
             take = Math.Clamp(take, 1, 50);
             int? userId = User.GetUserId();
             string? role = User.FindFirst(ClaimTypes.Role)?.Value;
@@ -51,6 +76,7 @@ namespace Omnichannel.Web.Controllers
             {
                 success = true,
                 unreadCount,
+                items = notifications,
                 notifications
             });
         }

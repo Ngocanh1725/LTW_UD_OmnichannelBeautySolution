@@ -89,11 +89,12 @@
 
         <div class="border-t border-slate-100"></div>
 
-        <!-- 2. LỌC THEO HẠN DÙNG FEFO -->
+        <!-- 2. LỌC THEO HẠN DÙNG & ĐỘ TƯƠI MỚI -->
         <div class="space-y-3">
             <h4 class="font-bold text-charcoal uppercase tracking-wider text-[11px] flex items-center justify-between">
-                <span class="flex items-center gap-1.5">
-                    <i class="fa-solid fa-clock-rotate-left text-magenta-accent"></i> Hạn Dùng FEFO
+                <span class="flex items-center gap-1.5 cursor-pointer" onclick="window.dispatchEvent(new CustomEvent('open-fefo-modal'))" title="Click để xem cam kết hạn dùng minh bạch">
+                    <i class="fa-solid fa-clock-rotate-left text-magenta-accent"></i> Hạn Dùng &amp; Độ Tươi Mới
+                    <i class="fa-regular fa-circle-question text-[10px] text-slate-400"></i>
                 </span>
                 <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">GSP Chuẩn Y Khoa</span>
             </h4>

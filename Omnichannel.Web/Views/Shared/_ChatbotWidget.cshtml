@@ -87,19 +87,19 @@
 </style>
 
 <div id="beautyChatWidget" class="relative z-50">
-    <!-- 1. FLOATING LAUNCHER BUTTON PHONG CÁCH CANMAKE BEAUTY (Góc phải dưới) -->
-    <div id="chatLauncherContainer" class="fixed bottom-20 sm:bottom-6 right-6 z-50 flex items-center gap-3">
+    <!-- 1. FLOATING LAUNCHER BUTTON PHONG CÁCH CANMAKE BEAUTY (Góc phải dưới, tự nâng cao trên Mobile < 768px để không đè Bottom Tab Bar) -->
+    <div id="chatLauncherContainer" class="fixed bottom-[4.75rem] md:bottom-6 right-3.5 sm:right-6 z-50 flex items-center gap-3">
         <!-- Floating Teaser Tooltip -->
         <div id="chatTeaserBubble" 
              onclick="toggleChatPanel(true)"
-             class="hidden md:flex items-center gap-2.5 bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-2xl shadow-xl border border-pink-100 text-xs font-medium text-slate-700 cursor-pointer hover:shadow-2xl hover:border-pink-300 transition-all duration-300 -translate-y-1">
+             class="hidden lg:flex items-center gap-2.5 bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-2xl shadow-xl border border-pink-100 text-xs font-medium text-slate-700 cursor-pointer hover:shadow-2xl hover:border-pink-300 transition-all duration-300 -translate-y-1">
             <span class="flex h-2.5 w-2.5 relative">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </span>
             <span class="font-semibold text-slate-800">CANMAKE BEAUTY AI:</span>
-            <span class="text-slate-600">Hỏi đáp thành phần & tra cứu HSD FEFO ngay!</span>
-            <button type="button" onclick="event.stopPropagation(); dismissChatTeaser();" class="text-slate-400 hover:text-slate-600 ml-1" aria-label="Đóng gợi ý">
+            <span class="text-slate-600">Hỏi đáp thành phần & tra cứu hạn dùng theo lô ngay!</span>
+            <button type="button" onclick="event.stopPropagation(); dismissChatTeaser();" class="w-6 h-6 rounded-full hover:bg-rose-50 flex items-center justify-center text-slate-400 hover:text-slate-600 ml-1" aria-label="Đóng gợi ý">
                 <i class="fa-solid fa-xmark text-[11px]"></i>
             </button>
         </div>
@@ -108,19 +108,19 @@
         <button id="chatLauncherBtn" 
                 type="button" 
                 onclick="toggleChatPanel()"
-                class="relative h-15 w-15 sm:h-16 sm:w-16 rounded-full bg-gradient-to-tr from-rose-500 via-pink-600 to-purple-700 text-white shadow-[0_10px_30px_rgba(225,29,72,0.4)] hover:shadow-[0_14px_36px_rgba(225,29,72,0.55)] hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center group focus:outline-none focus:ring-4 focus:ring-pink-300/50 p-1"
+                class="relative h-13 w-13 sm:h-15 sm:w-15 rounded-full bg-gradient-to-tr from-rose-500 via-pink-600 to-purple-700 text-white shadow-[0_10px_30px_rgba(225,29,72,0.4)] hover:shadow-[0_14px_36px_rgba(225,29,72,0.55)] hover:scale-105 active:scale-95 transition-all duration-300 flex items-center justify-center group focus:outline-none focus:ring-4 focus:ring-pink-300/50 p-1"
                 aria-label="Mở CANMAKE BEAUTY AI Chatbot">
             
             <!-- Avatar Logo Tròn Nội Bộ -->
             <div class="w-full h-full rounded-full bg-gradient-to-tr from-rose-600 via-pink-500 to-purple-600 flex items-center justify-center overflow-hidden border-2 border-white/80 shadow-inner">
-                <i id="chatOpenIcon" class="fa-solid fa-wand-magic-sparkles text-2xl group-hover:rotate-12 transition-transform text-white drop-shadow"></i>
-                <i id="chatCloseIcon" class="fa-solid fa-xmark text-2xl hidden"></i>
+                <i id="chatOpenIcon" class="fa-solid fa-wand-magic-sparkles text-xl sm:text-2xl group-hover:rotate-12 transition-transform text-white drop-shadow"></i>
+                <i id="chatCloseIcon" class="fa-solid fa-xmark text-xl sm:text-2xl hidden"></i>
             </div>
 
             <!-- ĐÈN XANH ONLINE PHÁT SÁNG (GLOWING GREEN ONLINE INDICATOR) -->
-            <span class="absolute top-0 right-0 flex h-4 w-4">
+            <span class="absolute top-0 right-0 flex h-3.5 w-3.5 sm:h-4 sm:w-4">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-white omni-online-glow shadow-[0_0_10px_#10b981]"></span>
+                <span class="relative inline-flex rounded-full h-3.5 w-3.5 sm:h-4 sm:w-4 bg-emerald-500 border-2 border-white omni-online-glow shadow-[0_0_10px_#10b981]"></span>
             </span>
 
             <!-- AI Floating Badge -->
@@ -137,18 +137,20 @@
 
     <!-- 2. CHAT PANEL DIALOG (BO GÓC 24PX MƯỢT MÀ) -->
     <div id="chatPanel" 
-         class="hidden fixed inset-0 sm:inset-auto sm:bottom-24 sm:right-6 z-50 w-full sm:w-[420px] h-full sm:h-[620px] sm:max-h-[85vh] bg-white omni-chat-panel shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-pink-100 flex-col overflow-hidden transition-all duration-300">
+         role="dialog"
+         aria-label="Trợ lý AI CANMAKE BEAUTY"
+         class="hidden fixed inset-0 sm:inset-auto sm:bottom-24 sm:right-6 z-[1065] w-full sm:w-[420px] h-full sm:h-[620px] sm:max-h-[85vh] bg-white omni-chat-panel shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-pink-100 flex-col overflow-hidden transition-all duration-300">
         
         <!-- HEADER SANG TRỌNG CANMAKE BEAUTY -->
-        <div class="px-5 py-4 bg-gradient-to-r from-rose-600 via-pink-600 to-purple-700 text-white flex items-center justify-between shadow-sm flex-shrink-0">
+        <div class="px-5 py-3.5 bg-gradient-to-r from-rose-600 via-pink-600 to-purple-700 text-white flex items-center justify-between shadow-sm flex-shrink-0">
             <div class="flex items-center gap-3">
                 <!-- Avatar Logo Tròn Trong Header Có Đèn Xanh Online -->
                 <div class="relative">
-                    <div class="h-11 w-11 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/50 flex items-center justify-center text-white text-lg shadow-inner">
+                    <div class="h-10 w-10 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/50 flex items-center justify-center text-white text-lg shadow-inner">
                         <i class="fa-solid fa-sparkles text-amber-300"></i>
                     </div>
                     <!-- Đèn xanh phát sáng -->
-                    <span class="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full bg-emerald-400 border-2 border-white omni-online-glow shadow-[0_0_8px_#34d399]"></span>
+                    <span class="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-emerald-400 border-2 border-white omni-online-glow shadow-[0_0_8px_#34d399]"></span>
                 </div>
                 <div>
                     <div class="flex items-center gap-1.5">
@@ -159,25 +161,25 @@
                             ONLINE
                         </span>
                     </div>
-                    <p class="text-[11px] text-pink-100 font-normal">Chuyên gia dược mỹ phẩm • Chuẩn FEFO & Y khoa</p>
+                    <p class="text-[11px] text-pink-100 font-normal">Chuyên gia dược mỹ phẩm • Tư vấn tận tâm &amp; Date mới</p>
                 </div>
             </div>
 
-            <!-- Header Action Controls -->
+            <!-- Header Action Controls (Chuẩn vùng chạm >= 40px) -->
             <div class="flex items-center gap-1 text-white/90">
                 <button type="button" 
                         onclick="resetChatHistory()" 
-                        class="h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition" 
+                        class="h-10 w-10 rounded-full hover:bg-white/20 flex items-center justify-center transition" 
                         title="Làm mới cuộc trò chuyện"
                         aria-label="Làm mới đoạn chat">
                     <i class="fa-solid fa-rotate-right text-xs"></i>
                 </button>
                 <button type="button" 
                         onclick="toggleChatPanel(false)" 
-                        class="h-8 w-8 rounded-full hover:bg-white/20 flex items-center justify-center transition" 
+                        class="h-10 w-10 rounded-full hover:bg-white/20 flex items-center justify-center transition" 
                         title="Thu nhỏ cửa sổ"
                         aria-label="Đóng khung chat">
-                    <i class="fa-solid fa-xmark text-sm"></i>
+                    <i class="fa-solid fa-xmark text-base"></i>
                 </button>
             </div>
         </div>
@@ -186,7 +188,7 @@
         <div class="bg-gradient-to-r from-pink-50 via-rose-50 to-purple-50 px-4 py-2 border-b border-pink-100 flex items-center justify-between text-[11px] text-slate-700 flex-shrink-0">
             <div class="flex items-center gap-1.5 truncate">
                 <i class="fa-solid fa-shield-halved text-rose-500"></i>
-                <span>Cam kết 100% chính hãng chuẩn FEFO • Đổi trả 14 ngày</span>
+                <span>Cam kết 100% chính hãng date mới • Đổi trả 14 ngày</span>
             </div>
             <a href="/Promotion" class="text-rose-600 font-bold hover:underline text-[10px] whitespace-nowrap ml-2">Flash Sale</a>
         </div>
@@ -215,20 +217,22 @@
         </div>
 
         <!-- INPUT BOX & ACTIONS -->
-        <div class="p-3 bg-white border-t border-slate-100 flex items-center gap-2 flex-shrink-0">
+        <div class="p-3 bg-white border-t border-slate-100 flex items-center gap-2 flex-shrink-0" style="padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));">
             <div class="relative flex-1">
+                <label for="chatInputMessage" class="sr-only">Nhập câu hỏi cho trợ lý AI</label>
                 <textarea id="chatInputMessage" 
                           rows="1" 
-                          placeholder="Hỏi về BHA, Retinol, kem chống nắng, date FEFO..." 
-                          class="w-full text-xs text-slate-800 bg-slate-50 border border-slate-200 rounded-2xl pl-3.5 pr-10 py-2.5 focus:outline-none focus:border-rose-400 focus:bg-white resize-none transition leading-normal placeholder:text-slate-400 max-h-24 overflow-y-auto"
+                          placeholder="Hỏi về BHA, Retinol, kem chống nắng, hạn sử dụng..." 
+                          aria-label="Nhập câu hỏi cho trợ lý AI"
+                          class="w-full text-base sm:text-xs text-slate-800 bg-slate-50 border border-slate-200 rounded-2xl pl-3.5 pr-10 py-2.5 focus:outline-none focus:border-rose-400 focus:bg-white resize-none transition leading-normal placeholder:text-slate-400 max-h-24 overflow-y-auto"
                           onkeydown="handleChatInputKeyDown(event)"></textarea>
             </div>
 
-            <!-- Send Button -->
+            <!-- Send Button (Chuẩn 44x44px) -->
             <button id="chatSendBtn" 
                     type="button" 
                     onclick="handleUserSendMessage()"
-                    class="h-10 w-10 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-600 to-purple-600 text-white flex items-center justify-center hover:opacity-95 active:scale-95 shadow-md shadow-pink-500/25 transition flex-shrink-0"
+                    class="h-11 w-11 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-600 to-purple-600 text-white flex items-center justify-center hover:opacity-95 active:scale-95 shadow-md shadow-pink-500/25 transition flex-shrink-0"
                     aria-label="Gửi tin nhắn">
                 <i class="fa-solid fa-paper-plane text-xs"></i>
             </button>
@@ -291,8 +295,8 @@
             ]
         },
         {
-            keywords: ['flash sale cận date', 'cận date giảm sâu', 'cận date', 'sale cận date', 'xả hàng cận date', 'fefo'],
-            reply: `⚡ **CHƯƠNG TRÌNH FLASH SALE CẬN DATE - GIẢM SÂU 40% - 70%**\n\nCanmake Beauty tiên phong áp dụng quản trị kho **FEFO (First Expired, First Out)**:\n- 🏷️ Giảm sâu 40% - 70% cho sản phẩm có hạn dùng 3-6 tháng.\n- ❄️ 100% lưu kho chuẩn phòng mát 22°C - 25°C, chất lượng hoàn hảo.\n- 🔍 Minh bạch số lô và hạn dùng trên từng sản phẩm.\n\n👇 **Các deal cận date FEFO nổi bật:**`,
+            keywords: ['flash sale cận date', 'cận date giảm sâu', 'cận date', 'sale cận date', 'xả hàng cận date', 'xả kho', 'date mới'],
+            reply: `⚡ **CHƯƠNG TRÌNH FLASH SALE CẬN DATE - GIẢM SÂU 40% - 70%**\n\nCanmake Beauty cam kết chính sách **Minh Bạch Hạn Dùng**:\n- 🏷️ Giảm sâu 40% - 70% cho sản phẩm có hạn dùng 3-6 tháng.\n- ❄️ 100% lưu kho chuẩn phòng mát 22°C - 25°C, chất lượng hoàn hảo.\n- 🔍 Minh bạch số lô và hạn dùng trên từng sản phẩm.\n\n👇 **Các deal xả kho cận date nổi bật:**`,
             actionUrl: '/Promotion',
             actionText: 'Khám Phá Flash Sale Cận Date',
             chips: DEFAULT_PROMPT_CHIPS,
@@ -303,7 +307,7 @@
                     price: 245000,
                     originalPrice: 490000,
                     imageUrl: "https://images.unsplash.com/photo-1608248597359-002162604212?w=500&h=500&fit=crop",
-                    badge: "🔥 Giảm 50% FEFO",
+                    badge: "🔥 Giảm 50% Cận Date",
                     url: "/Product/Detail/3"
                 }
             ]
@@ -321,7 +325,7 @@
                     price: 2950000,
                     originalPrice: 3500000,
                     imageUrl: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=500&h=500&fit=crop",
-                    badge: "Chuẩn FEFO 100% Chính Hãng",
+                    badge: "Date Mới 100% Chính Hãng",
                     url: "/Product/Detail/4"
                 }
             ]
@@ -488,7 +492,7 @@
 
         const greetingText = `
             Xin chào bạn! 👋 Mình là <strong>AI Beauty Advisor</strong> - chuyên viên tư vấn sắc đẹp trí tuệ nhân tạo của <strong>CANMAKE BEAUTY</strong>.<br/><br/>
-            Mình có thể hỗ trợ bạn phân tích thành phần dược mỹ phẩm chuyên sâu (BHA, Retinol, Niacinamide, B5...), tra cứu hạn dùng chuẩn FEFO và chính sách đổi trả hàng.<br/><br/>
+            Mình có thể hỗ trợ bạn phân tích thành phần dược mỹ phẩm chuyên sâu (BHA, Retinol, Niacinamide, B5...), tra cứu hạn dùng theo lô sản xuất và chính sách đổi trả hàng.<br/><br/>
             ✨ <em>Mời bạn chọn một trong các câu hỏi nhanh bên dưới để nhận câu trả lời ngay lập tức:</em>
         `;
 
@@ -789,7 +793,7 @@
         }
 
         return {
-            reply: `Cảm ơn bạn đã nhắn tin cho CANMAKE BEAUTY AI! 💖\n\nMình có thể hỗ trợ tốt nhất về **Thành phần dược mỹ phẩm**, **Tra cứu HSD lô hàng FEFO**, **Kem chống nắng da dầu mụn** hoặc **Chính sách đổi trả hàng**.\n\nMời bạn chọn một trong các câu hỏi nhanh bên dưới để mình giải đáp ngay nhé!`,
+            reply: `Cảm ơn bạn đã nhắn tin cho CANMAKE BEAUTY AI! 💖\n\nMình có thể hỗ trợ tốt nhất về **Thành phần dược mỹ phẩm**, **Tra cứu hạn dùng theo lô**, **Kem chống nắng da dầu mụn** hoặc **Chính sách đổi trả hàng**.\n\nMời bạn chọn một trong các câu hỏi nhanh bên dưới để mình giải đáp ngay nhé!`,
             actionUrl: '/Shop',
             actionText: 'Khám Phá Cửa Hàng',
             chips: DEFAULT_PROMPT_CHIPS

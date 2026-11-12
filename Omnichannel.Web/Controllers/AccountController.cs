@@ -325,47 +325,74 @@ namespace Omnichannel.Web.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-        // GET: /Account/Logout
+        // GET & POST: /Account/Logout
         [HttpGet]
+        [HttpPost]
+        [ActionName("Logout")]
+        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await RecordLogoutAuditAsync();
-            await HttpContext.SignOutAsync(AuthConstants.CustomerCookieScheme);
-            await HttpContext.SignOutAsync(AuthConstants.AdminCookieScheme);
-            return RedirectToAction("Login", "Account");
-        }
+            try
+            {
+                await RecordLogoutAuditAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Không thể ghi nhật ký audit đăng xuất.");
+            }
 
-        // POST: /Account/Logout
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> LogoutPost()
-        {
-            await RecordLogoutAuditAsync();
-            await HttpContext.SignOutAsync(AuthConstants.CustomerCookieScheme);
-            await HttpContext.SignOutAsync(AuthConstants.AdminCookieScheme);
+            try
+            {
+                await HttpContext.SignOutAsync(AuthConstants.CustomerCookieScheme);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Lỗi SignOutAsync CustomerCookieScheme.");
+            }
+
+            try
+            {
+                await HttpContext.SignOutAsync(AuthConstants.AdminCookieScheme);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Lỗi SignOutAsync AdminCookieScheme.");
+            }
+
+            // Xóa triệt để các session cookies
+            Response.Cookies.Delete(AuthConstants.CustomerCookieName, new CookieOptions { Path = "/" });
+            Response.Cookies.Delete(AuthConstants.AdminCookieName, new CookieOptions { Path = "/" });
+
             return RedirectToAction("Login", "Account");
         }
 
         private async Task RecordLogoutAuditAsync()
         {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            int.TryParse(userIdStr, out var userId);
-            var userName = User.Identity?.Name;
-            if (!string.IsNullOrEmpty(userName))
+            try
             {
-                string ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
-                string userAgent = Request.Headers["User-Agent"].ToString();
-                await _auditLogService.LogAsync(
-                    action: "LOGOUT",
-                    entityType: "User",
-                    entityId: userIdStr ?? "0",
-                    oldValues: null,
-                    newValues: $"Người dùng {userName} đã đăng xuất khỏi hệ thống.",
-                    userId: userId > 0 ? userId : null,
-                    userName: userName,
-                    ipAddress: ipAddress,
-                    userAgent: userAgent
-                );
+                var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                int.TryParse(userIdStr, out var userId);
+                var userName = User.Identity?.Name;
+                if (!string.IsNullOrEmpty(userName))
+                {
+                    string ipAddress = HttpContext.Connection?.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+                    string userAgent = Request.Headers.TryGetValue("User-Agent", out var ua) ? ua.ToString() : "Unknown";
+                    await _auditLogService.LogAsync(
+                        action: "LOGOUT",
+                        entityType: "User",
+                        entityId: userIdStr ?? "0",
+                        oldValues: null,
+                        newValues: $"Người dùng {userName} đã đăng xuất khỏi hệ thống.",
+                        userId: userId > 0 ? userId : null,
+                        userName: userName,
+                        ipAddress: ipAddress,
+                        userAgent: userAgent
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Ghi nhận audit logout thất bại nhưng bỏ qua để hoàn tất đăng xuất.");
             }
         }
 

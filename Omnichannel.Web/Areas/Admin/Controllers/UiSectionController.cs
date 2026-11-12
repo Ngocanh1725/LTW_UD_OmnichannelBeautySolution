@@ -55,7 +55,7 @@ namespace Omnichannel.Web.Areas.Admin.Controllers
                 {
                     new() { SectionCode = "HERO_SLIDER", Title = "Banner Slider", Subtitle = "Bộ sưu tập mỹ phẩm dẫn đầu xu hướng làm đẹp 2026", DisplayOrder = 1, IsVisible = true, LayoutType = "CAROUSEL" },
                     new() { SectionCode = "FEATURED_CATEGORIES", Title = "Danh Mục Nổi Bật", Subtitle = "Khám phá vẻ đẹp thuần khiết theo từng phân nhóm da liễu", DisplayOrder = 2, IsVisible = true, LayoutType = "GRID_6" },
-                    new() { SectionCode = "FLASH_SALE", Title = "Deal Chớp Nhoáng (Flash Sale)", Subtitle = "Cơ hội săn mỹ phẩm cao cấp chuẩn hạn dùng FEFO với giá ưu đãi cực lớn", DisplayOrder = 3, IsVisible = true, LayoutType = "GRID_4" },
+                    new() { SectionCode = "FLASH_SALE", Title = "Deal Chớp Nhoáng (Flash Sale)", Subtitle = "Cơ hội săn mỹ phẩm cao cấp cam kết date mới với giá ưu đãi cực lớn", DisplayOrder = 3, IsVisible = true, LayoutType = "GRID_4" },
                     new() { SectionCode = "BEST_SELLERS", Title = "Sản Phẩm Bán Chạy", Subtitle = "Top mỹ phẩm được các tín đồ làm đẹp tin chọn nhiều nhất", DisplayOrder = 4, IsVisible = true, LayoutType = "GRID_4" },
                     new() { SectionCode = "MID_BANNER", Title = "Banner Giữa Trang", Subtitle = "Chiến dịch ưu đãi nổi bật giữa trang", DisplayOrder = 5, IsVisible = true, LayoutType = "BANNER_FULL" },
                     new() { SectionCode = "BEAUTY_BLOG", Title = "Bài Viết Làm Đẹp", Subtitle = "Cẩm nang làm đẹp khoa học và xu hướng mỹ phẩm mới nhất", DisplayOrder = 6, IsVisible = true, LayoutType = "GRID_3" }

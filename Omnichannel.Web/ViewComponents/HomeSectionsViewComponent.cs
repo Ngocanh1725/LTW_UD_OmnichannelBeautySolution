@@ -57,7 +57,7 @@ namespace Omnichannel.Web.ViewComponents
                 {
                     new() { Id = 1, SectionCode = "HERO_SLIDER", Title = "Hero Banner Slider", Subtitle = "Bộ sưu tập mỹ phẩm dẫn đầu xu hướng làm đẹp 2026", DisplayOrder = 1, IsVisible = true, LayoutType = "CAROUSEL" },
                     new() { Id = 2, SectionCode = "FEATURED_CATEGORIES", Title = "Danh Mục Nổi Bật", Subtitle = "Khám phá vẻ đẹp thuần khiết theo từng phân nhóm da liễu", DisplayOrder = 2, IsVisible = true, LayoutType = "GRID_6" },
-                    new() { Id = 3, SectionCode = "FLASH_SALE", Title = "Flash Sale Deal Sốc", Subtitle = "Cơ hội săn mỹ phẩm cao cấp chuẩn hạn dùng FEFO với giá ưu đãi cực lớn", DisplayOrder = 3, IsVisible = true, LayoutType = "GRID_4" },
+                    new() { Id = 3, SectionCode = "FLASH_SALE", Title = "Flash Sale Deal Sốc", Subtitle = "Cơ hội săn mỹ phẩm cao cấp cam kết date mới với giá ưu đãi cực lớn", DisplayOrder = 3, IsVisible = true, LayoutType = "GRID_4" },
                     new() { Id = 4, SectionCode = "BEST_SELLERS", Title = "Sản Phẩm Bán Chạy Nhất", Subtitle = "Top mỹ phẩm được các tín đồ làm đẹp tin chọn nhiều nhất", DisplayOrder = 4, IsVisible = true, LayoutType = "GRID_4" }
                 };
             }
